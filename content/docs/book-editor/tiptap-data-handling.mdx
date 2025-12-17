@@ -1,0 +1,510 @@
+---
+title: "Book Editor - TipTap Data Handling & Display"
+description: "How TipTap data is stored, structured, and rendered in the book editor"
+date: "2025-01-27"
+updated: "2025-01-27"
+---
+
+# TipTap Data Handling & Display
+
+## Overview
+
+TipTap uses a JSON-based document structure that's stored in our database and rendered both in the editor and reader views.
+
+## Data Structure
+
+### TipTap Document Format
+
+TipTap stores content as a JSON document with a specific structure:
+
+```typescript
+interface TipTapDocument {
+  type: 'doc';
+  content: TipTapNode[];
+}
+
+interface TipTapNode {
+  type: string;
+  attrs?: Record<string, any>;
+  content?: TipTapNode[];
+  marks?: TipTapMark[];
+  text?: string;
+}
+```
+
+### Example Document
+
+```json
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "heading",
+      "attrs": { "level": 1 },
+      "content": [
+        { "type": "text", "text": "Chapter 1: Introduction" }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        { "type": "text", "text": "This is a paragraph with " },
+        {
+          "type": "text",
+          "marks": [{ "type": "bold" }],
+          "text": "bold text"
+        },
+        { "type": "text", "text": " and " },
+        {
+          "type": "text",
+          "marks": [{ "type": "italic" }],
+          "text": "italic text"
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "attrs": {
+        "src": "/books/123/image.png",
+        "alt": "Diagram",
+        "title": "Architecture Diagram"
+      }
+    }
+  ]
+}
+```
+
+## Storage in Database
+
+### Section Content Schema
+
+```typescript
+// lib/db/schema/books.ts
+export const sections = sqliteTable('sections', {
+  id: text('id').primaryKey(),
+  chapterId: text('chapter_id').references(() => chapters.id),
+  order: integer('order').notNull(),
+  contentType: text('content_type').notNull(), // 'text' | 'image' | 'media' | 'code' | 'quote' | 'heading'
+  content: text('content').notNull(), // JSON string of TipTap document
+  metadata: text('metadata'), // JSON string for additional data
+  createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+});
+```
+
+### Saving Content
+
+```typescript
+// When user edits in TipTap editor
+const editor = useEditor({
+  extensions: [...],
+  onUpdate: ({ editor }) => {
+    // Get TipTap JSON
+    const json = editor.getJSON();
+    
+    // Save to database
+    await saveSection(sectionId, {
+      content: JSON.stringify(json), // Store as JSON string
+      contentType: 'text',
+      updatedAt: new Date(),
+    });
+  },
+});
+```
+
+## Rendering in Editor
+
+### Editor Component
+
+```typescript
+// components/book-editor/components/BookEditor/RichTextEditor.tsx
+'use client';
+
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Image from '@tiptap/extension-image';
+import { useEffect } from 'react';
+
+interface RichTextEditorProps {
+  sectionId: string;
+  initialContent?: string; // JSON string from database
+  onUpdate?: (json: any) => void;
+}
+
+export function RichTextEditor({ 
+  sectionId, 
+  initialContent,
+  onUpdate 
+}: RichTextEditorProps) {
+  // Parse JSON string to TipTap document
+  const initialDoc = initialContent 
+    ? JSON.parse(initialContent) 
+    : { type: 'doc', content: [] };
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Image.configure({
+        inline: true,
+        allowBase64: true,
+      }),
+    ],
+    content: initialDoc, // TipTap document object
+    onUpdate: ({ editor }) => {
+      const json = editor.getJSON();
+      onUpdate?.(json);
+    },
+  });
+
+  // Update editor when content changes externally
+  useEffect(() => {
+    if (editor && initialContent) {
+      const doc = JSON.parse(initialContent);
+      editor.commands.setContent(doc);
+    }
+  }, [editor, initialContent]);
+
+  return <EditorContent editor={editor} />;
+}
+```
+
+## Rendering in Reader
+
+### Reader Component (No Editor)
+
+```typescript
+// components/book-editor/components/BookReader/SectionView.tsx
+'use client';
+
+import { generateHTML } from '@tiptap/html';
+import StarterKit from '@tiptap/starter-kit';
+import Image from '@tiptap/extension-image';
+import { useMemo } from 'react';
+
+interface SectionViewProps {
+  content: string; // JSON string from database
+}
+
+export function SectionView({ content }: SectionViewProps) {
+  // Convert TipTap JSON to HTML
+  const html = useMemo(() => {
+    const doc = JSON.parse(content);
+    
+    return generateHTML(doc, [
+      StarterKit,
+      Image.configure({
+        inline: true,
+      }),
+    ]);
+  }, [content]);
+
+  return (
+    <div 
+      className="prose prose-lg max-w-none"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
+```
+
+### Alternative: Render TipTap Document Directly
+
+```typescript
+// Using TipTap's React renderer
+import { NodeViewRenderer } from '@tiptap/react';
+import { Node } from '@tiptap/core';
+
+// Custom renderer for reader mode
+export function TipTapRenderer({ content }: { content: string }) {
+  const doc = JSON.parse(content);
+
+  function renderNode(node: TipTapNode): React.ReactNode {
+    switch (node.type) {
+      case 'paragraph':
+        return (
+          <p>{node.content?.map(renderNode)}</p>
+        );
+      
+      case 'heading':
+        const HeadingTag = `h${node.attrs?.level || 1}` as keyof JSX.IntrinsicElements;
+        return (
+          <HeadingTag>{node.content?.map(renderNode)}</HeadingTag>
+        );
+      
+      case 'text':
+        let text = node.text || '';
+        
+        // Apply marks
+        if (node.marks) {
+          node.marks.forEach(mark => {
+            switch (mark.type) {
+              case 'bold':
+                text = <strong>{text}</strong>;
+                break;
+              case 'italic':
+                text = <em>{text}</em>;
+                break;
+              case 'code':
+                text = <code>{text}</code>;
+                break;
+            }
+          });
+        }
+        
+        return text;
+      
+      case 'image':
+        return (
+          <img
+            src={node.attrs?.src}
+            alt={node.attrs?.alt}
+            title={node.attrs?.title}
+            className="max-w-full h-auto rounded-lg"
+          />
+        );
+      
+      default:
+        return null;
+    }
+  }
+
+  return (
+    <div className="section-content">
+      {doc.content?.map(renderNode)}
+    </div>
+  );
+}
+```
+
+## Handling Media References
+
+### Image Storage
+
+When user inserts image in editor:
+
+```typescript
+// In editor
+async function handleImageUpload(file: File) {
+  // Upload file
+  const { url, id } = await uploadMedia(bookId, file);
+  
+  // Insert into TipTap
+  editor.chain()
+    .focus()
+    .setImage({ 
+      src: url,
+      alt: file.name,
+    })
+    .run();
+  
+  // TipTap automatically updates JSON with image node
+  // When saved, JSON includes:
+  // {
+  //   "type": "image",
+  //   "attrs": {
+  //     "src": "/books/123/image.png",
+  //     "alt": "image.png"
+  //   }
+  // }
+}
+```
+
+### Media Reference in Database
+
+```typescript
+// When saving section, also link to media table
+await db.insert(sections).values({
+  id: sectionId,
+  content: JSON.stringify(tipTapJson),
+  // ... other fields
+});
+
+// Link media to section
+await db.insert(sectionMedia).values({
+  sectionId,
+  mediaId: imageMediaId, // From uploadMedia
+});
+```
+
+## Content Types
+
+### Text Content
+
+```typescript
+{
+  contentType: 'text',
+  content: JSON.stringify(tipTapDocument),
+}
+```
+
+### Code Blocks
+
+```typescript
+// TipTap JSON for code block
+{
+  "type": "codeBlock",
+  "attrs": { "language": "typescript" },
+  "content": [
+    { "type": "text", "text": "const x = 1;" }
+  ]
+}
+```
+
+### Quotes
+
+```typescript
+{
+  "type": "blockquote",
+  "content": [
+    {
+      "type": "paragraph",
+      "content": [
+        { "type": "text", "text": "This is a quote" }
+      ]
+    }
+  ]
+}
+```
+
+## Data Flow
+
+```
+User Types in Editor
+    ↓
+TipTap Editor (in-memory JSON)
+    ↓
+onUpdate callback
+    ↓
+JSON.stringify(tipTapDocument)
+    ↓
+Save to Database (sections.content column)
+    ↓
+[Later: User opens reader]
+    ↓
+Load from Database (JSON string)
+    ↓
+JSON.parse(content)
+    ↓
+generateHTML(doc, extensions)
+    ↓
+Render HTML in Reader
+```
+
+## Migration & Versioning
+
+### Version Snapshots
+
+```typescript
+// When creating version snapshot
+const version = {
+  sections: sections.map(section => ({
+    id: section.id,
+    content: section.content, // Full JSON string
+    contentType: section.contentType,
+  })),
+  createdAt: new Date(),
+};
+```
+
+### Comparing Versions
+
+```typescript
+// Compare two versions
+function compareVersions(v1: Version, v2: Version) {
+  const changes = [];
+  
+  v1.sections.forEach(section1 => {
+    const section2 = v2.sections.find(s => s.id === section1.id);
+    
+    if (!section2) {
+      changes.push({ type: 'deleted', section: section1 });
+    } else if (section1.content !== section2.content) {
+      // Parse JSON and compare
+      const doc1 = JSON.parse(section1.content);
+      const doc2 = JSON.parse(section2.content);
+      
+      changes.push({
+        type: 'modified',
+        section: section1,
+        diff: computeDiff(doc1, doc2),
+      });
+    }
+  });
+  
+  return changes;
+}
+```
+
+## Best Practices
+
+### 1. Always Validate JSON
+
+```typescript
+function parseTipTapContent(content: string): TipTapDocument | null {
+  try {
+    const doc = JSON.parse(content);
+    
+    // Validate structure
+    if (doc.type !== 'doc' || !Array.isArray(doc.content)) {
+      throw new Error('Invalid TipTap document');
+    }
+    
+    return doc;
+  } catch (error) {
+    console.error('Failed to parse TipTap content:', error);
+    return null;
+  }
+}
+```
+
+### 2. Sanitize on Save
+
+```typescript
+import { sanitize } from 'isomorphic-dompurify';
+
+// Before saving
+const sanitized = sanitize(JSON.stringify(tipTapDoc));
+```
+
+### 3. Handle Empty Content
+
+```typescript
+// Default empty document
+const emptyDoc = {
+  type: 'doc',
+  content: [
+    {
+      type: 'paragraph',
+      content: [],
+    },
+  ],
+};
+```
+
+### 4. Optimize Large Documents
+
+```typescript
+// For very large documents, consider chunking
+function chunkDocument(doc: TipTapDocument, maxSize: number = 10000) {
+  // Split into multiple sections if too large
+  if (JSON.stringify(doc).length > maxSize) {
+    // Split logic
+  }
+}
+```
+
+## Summary
+
+- **Storage**: TipTap JSON stored as string in `sections.content`
+- **Editor**: Parse JSON → TipTap editor → Edit → JSON.stringify → Save
+- **Reader**: Load JSON → generateHTML → Render
+- **Media**: Images stored separately, referenced in TipTap JSON
+- **Versioning**: Full JSON snapshots for comparison
+
+This approach gives us:
+- ✅ Rich text editing with TipTap
+- ✅ Structured data (JSON)
+- ✅ Easy to version and diff
+- ✅ Flexible content types
+- ✅ Media integration
+

@@ -1,0 +1,76 @@
+---
+title: "Book Editor - Final Tech Stack & Library Decisions"
+description: "Complete tech stack with 3rd party library recommendations"
+date: "2025-01-20"
+---
+
+# Final Tech Stack & Library Decisions
+
+## Core Libraries (3rd Party - Battle-Tested)
+
+### Authentication
+- **NextAuth.js (Auth.js v5)** ✅
+  - Industry standard for Next.js
+  - Works with SQLite via Drizzle adapter
+  - Handles sessions, middleware, security
+  - We still use our own password hashing (Node.js crypto)
+
+### Rich Text Editor
+- **TipTap** ✅
+  - ProseMirror-based, extensible
+  - Built-in collaboration support
+  - HTML output (what we need)
+
+### Collaboration
+- **Y.js** ✅ (via TipTap)
+  - CRDT for conflict-free editing
+  - WebSocket provider included
+
+### EPUB
+- **epub-gen** ✅ - Generate EPUB files
+- **epub.js** ✅ - Read EPUB files
+
+### Database
+- **Drizzle ORM** ✅ (already in project)
+- **better-sqlite3** ✅ (already in project)
+
+### Validation
+- **Zod** ✅ - Schema validation
+
+### Utilities
+- **date-fns** ✅ (already in project) - Date formatting
+- **react-dropzone** ✅ - File upload UI
+
+### Styling
+- **Tailwind CSS** ✅ (already in project)
+- **styled-components** ✅ - Component styling
+- **Framer Motion** ✅ (already in project) - Animations
+
+### Testing
+- **Vite** ✅ - Build tool
+- **Vitest** ✅ - Test runner
+- **React Testing Library** ✅ - Component testing
+
+### WebSocket
+- **ws** ✅ - WebSocket server library
+- **y-websocket** ✅ - Y.js WebSocket provider
+
+## What We Build Ourselves
+
+- Password hashing (Node.js crypto - no library needed)
+- Service interfaces (abstraction layer)
+- Version merging algorithm (git-like)
+- Grimoire theme (custom styling)
+- Content chunking logic
+
+## Why These Choices?
+
+1. **NextAuth.js**: Industry standard, saves weeks of work
+2. **TipTap**: Best React editor, collaboration built-in
+3. **Y.js**: Battle-tested CRDT, handles conflicts automatically
+4. **epub-gen/epub.js**: Standard libraries for EPUB
+5. **Zod**: Type-safe validation, works great with TypeScript
+6. **Drizzle**: Already using it, great SQLite support
+
+**Philosophy**: Use proven libraries for complex problems (auth, collaboration, EPUB), build custom for unique needs (theme, versioning UI).
+

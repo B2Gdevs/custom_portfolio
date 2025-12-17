@@ -1,65 +1,49 @@
-import Image from "next/image";
+import { getAllContent } from '@/lib/content';
+import Hero from '@/components/home/Hero';
+import FeaturedProjectsHeader from '@/components/home/FeaturedProjectsHeader';
+import FeaturedProjects from '@/components/home/FeaturedProjects';
+import LatestBlogPost from '@/components/home/LatestBlogPost';
+import { getPCBPattern, getPCBPatternPath } from '@/lib/pcb-patterns';
 
-export default function Home() {
+export default async function Home() {
+  const projects = getAllContent('projects');
+  const blogPosts = getAllContent('blog');
+  
+  // Get featured projects (first 2)
+  const featuredProjects = projects.slice(0, 2);
+  
+  // Get latest blog post
+  const latestBlogPost = blogPosts[0] || null;
+
+  // Alternate PCB patterns per row (0 = Featured Projects, 1 = Latest Blog Post)
+  const featuredProjectsPattern = getPCBPattern(0); // 'grid'
+  const blogPostPattern = getPCBPattern(1); // 'curves'
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="w-full bg-dark">
+      <Hero />
+
+      {/* Featured Projects - Modern Card Layout */}
+      <section className="w-full relative overflow-hidden">
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `url("${getPCBPatternPath(featuredProjectsPattern)}")`,
+            backgroundPosition: 'right center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: '500px 400px',
+            opacity: 0.5,
+          }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+        <div className="max-w-7xl mx-auto px-6 py-10 md:py-14 relative z-10">
+          <div className="max-w-5xl mx-auto">
+            <FeaturedProjectsHeader />
+            <FeaturedProjects projects={featuredProjects} />
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </section>
+
+      <LatestBlogPost post={latestBlogPost} pattern={blogPostPattern} />
     </div>
   );
 }

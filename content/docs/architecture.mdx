@@ -1,0 +1,559 @@
+---
+title: "Architecture & Project Organization"
+description: "Complete architecture plan, project structure, file organization, and coding conventions"
+date: "2025-01-20"
+updated: "2025-01-20"
+---
+
+# Architecture & Project Organization
+
+## Table of Contents
+
+1. [Project Overview](#project-overview)
+2. [Architecture Principles](#architecture-principles)
+3. [Directory Structure](#directory-structure)
+4. [File Organization](#file-organization)
+5. [Naming Conventions](#naming-conventions)
+6. [Code Conventions](#code-conventions)
+7. [Component Architecture](#component-architecture)
+8. [Data Flow](#data-flow)
+9. [Module Boundaries](#module-boundaries)
+
+## Project Overview
+
+This is a **Next.js 16** portfolio site with a modular book editor component. The architecture emphasizes:
+
+- **Modularity**: Components can be transplanted to other apps
+- **Separation of Concerns**: Clear boundaries between UI, logic, and data
+- **Type Safety**: Full TypeScript coverage
+- **Testability**: Components and utilities are easily testable
+- **Scalability**: Structure supports growth
+
+## Architecture Principles
+
+### 1. Modular Design
+- Components are self-contained
+- Services are interfaces (implementations separate)
+- No tight coupling between modules
+
+### 2. Service Injection Pattern
+- Components receive services via props/context
+- No direct database access in components
+- Easy to swap implementations
+
+### 3. File-Based Content
+- MDX files for portfolio content (docs, projects, blog)
+- SQLite for dynamic content (books, users, sessions)
+- Clear separation between static and dynamic
+
+### 4. Progressive Enhancement
+- Start simple, add complexity as needed
+- Core functionality first, polish later
+- Desktop-first, mobile later
+
+## Directory Structure
+
+```
+portfolio-v2/
+├── app/                          # Next.js App Router
+│   ├── (routes)/                 # Public routes
+│   │   ├── page.tsx              # Home page
+│   │   ├── projects/             # Project showcase
+│   │   ├── blog/                 # Blog posts
+│   │   └── docs/                 # Documentation viewer
+│   ├── api/                      # API routes
+│   │   ├── auth/                 # Authentication endpoints
+│   │   ├── admin/                # Admin endpoints (dev only)
+│   │   └── books/                # Book editor API
+│   ├── actions/                  # Server Actions
+│   │   └── media.ts              # File upload actions
+│   ├── books/                    # Book editor routes
+│   │   ├── page.tsx              # Book library
+│   │   └── [id]/
+│   │       ├── page.tsx          # Book reader
+│   │       └── edit/
+│   │           └── page.tsx      # Book editor
+│   ├── layout.tsx                # Root layout
+│   └── globals.css               # Global styles
+│
+├── components/                    # React components
+│   ├── layout/                   # Layout components
+│   │   ├── Nav.tsx               # Navigation bar
+│   │   └── Footer.tsx            # Footer
+│   ├── docs/                     # Documentation components
+│   │   ├── DocsHeader.tsx
+│   │   ├── DocsGrid.tsx
+│   │   ├── DocsLayout.tsx
+│   │   └── TableOfContents.tsx
+│   ├── projects/                 # Project components
+│   │   ├── ProjectsHeader.tsx
+│   │   └── ProjectsGrid.tsx
+│   ├── home/                     # Home page components
+│   │   ├── Hero.tsx
+│   │   ├── FeaturedProjects.tsx
+│   │   └── LatestBlogPost.tsx
+│   └── book-editor/              # Book editor component library
+│       ├── components/           # UI components
+│       │   ├── BookReader/       # Reader components
+│       │   ├── BookEditor/       # Editor components
+│       │   ├── BookList/         # Library components
+│       │   └── shared/          # Shared components
+│       ├── hooks/                # Custom hooks
+│       ├── services/             # Service interfaces (no impl)
+│       ├── types/                # TypeScript types
+│       ├── utils/                # Utility functions
+│       ├── styles/               # Theme and animations
+│       └── index.ts              # Public API exports
+│
+├── lib/                          # Library code
+│   ├── db/                       # Database
+│   │   ├── index.ts              # Database connection
+│   │   └── schema/               # Drizzle schemas
+│   │       ├── index.ts
+│   │       ├── users.ts
+│   │       ├── books.ts
+│   │       └── ...
+│   ├── content.ts                # File-based content utilities
+│   ├── mdx.tsx                   # MDX component configuration
+│   └── book-editor/              # Book editor implementations
+│       ├── services/             # Service implementations
+│       │   ├── book.service.ts
+│       │   ├── version.service.ts
+│       │   └── ...
+│       └── websocket/            # WebSocket server/client
+│
+├── content/                      # MDX content files
+│   ├── docs/                     # Documentation
+│   ├── projects/                 # Project descriptions
+│   └── blog/                     # Blog posts
+│
+├── public/                       # Static assets
+│   ├── images/                   # Images
+│   │   ├── my_avatar.jpeg
+│   │   └── projects/             # Project images
+│   ├── books/                    # Book media storage
+│   │   └── [bookId]/             # Per-book folders
+│   ├── logo.svg                  # Logo
+│   └── favicon.svg               # Favicon
+│
+├── tests/                        # Test files
+│   ├── setup.ts                  # Test setup
+│   ├── components/               # Component tests
+│   ├── hooks/                    # Hook tests
+│   ├── utils/                    # Utility tests
+│   └── integration/              # Integration tests
+│
+├── misc/                         # Miscellaneous files
+│   └── html_resumes/            # HTML resume files
+│
+├── server.js                     # Custom Next.js server (dev)
+├── next.config.ts                # Next.js configuration
+├── tailwind.config.ts            # Tailwind configuration
+├── vitest.config.ts              # Vitest configuration
+├── drizzle.config.ts             # Drizzle configuration
+└── package.json                  # Dependencies
+```
+
+## File Organization
+
+### Component Files
+
+**Pattern**: One component per file, co-locate related files
+
+```
+ComponentName/
+├── ComponentName.tsx          # Main component
+├── ComponentName.test.tsx    # Tests (optional, can be in tests/)
+├── ComponentName.styles.ts   # Styled components (if needed)
+└── types.ts                  # Component-specific types (if needed)
+```
+
+**Example**:
+```
+BookReader/
+├── BookReader.tsx
+├── BookReader.test.tsx
+└── types.ts
+```
+
+### Service Files
+
+**Pattern**: Interface in component library, implementation in lib
+
+```
+# Interface (modular, no deps)
+components/book-editor/services/BookService.ts
+
+# Implementation (has DB deps)
+lib/book-editor/services/book.service.ts
+```
+
+### Hook Files
+
+**Pattern**: One hook per file, descriptive names
+
+```
+hooks/
+├── useBook.ts
+├── useAutoSave.ts
+├── useVersioning.ts
+└── useCollaboration.ts
+```
+
+### Utility Files
+
+**Pattern**: Grouped by domain, pure functions preferred
+
+```
+utils/
+├── epub-generator.ts
+├── html-exporter.ts
+├── version-merge.ts
+└── content-parser.ts
+```
+
+## Naming Conventions
+
+### Files & Directories
+
+- **Components**: `PascalCase.tsx` (e.g., `BookReader.tsx`)
+- **Hooks**: `camelCase.ts` with `use` prefix (e.g., `useBook.ts`)
+- **Services**: `camelCase.service.ts` (e.g., `book.service.ts`)
+- **Utils**: `kebab-case.ts` (e.g., `epub-generator.ts`)
+- **Types**: `kebab-case.types.ts` (e.g., `book.types.ts`)
+- **Tests**: `ComponentName.test.tsx` or `hookName.test.ts`
+- **Directories**: `kebab-case` (e.g., `book-editor/`)
+
+### Code
+
+- **Components**: `PascalCase` (e.g., `BookReader`)
+- **Functions**: `camelCase` (e.g., `generateEpub`)
+- **Constants**: `UPPER_SNAKE_CASE` (e.g., `MAX_RETRIES`)
+- **Types/Interfaces**: `PascalCase` (e.g., `Book`, `BookService`)
+- **Enums**: `PascalCase` with `PascalCase` values (e.g., `BookStatus.Draft`)
+
+### Database
+
+- **Tables**: `snake_case` (e.g., `user_presence`)
+- **Columns**: `snake_case` (e.g., `created_at`)
+- **Drizzle Schema**: `camelCase` (e.g., `createdAt`)
+
+## Code Conventions
+
+### TypeScript
+
+```typescript
+// Always use explicit types for function parameters and returns
+export function createBook(data: CreateBookInput): Promise<Book> {
+  // ...
+}
+
+// Use interfaces for object shapes
+interface BookService {
+  getBook(id: string): Promise<Book>;
+  saveBook(book: Book): Promise<Book>;
+}
+
+// Use type aliases for unions/primitives
+type BookStatus = 'draft' | 'published';
+type UserId = string;
+```
+
+### React Components
+
+```typescript
+// Server Components (default)
+export default async function BookPage({ params }: { params: { id: string } }) {
+  // Data fetching
+  const book = await getBook(params.id);
+  return <BookReader book={book} />;
+}
+
+// Client Components (when needed)
+'use client';
+
+import { useState } from 'react';
+
+export function BookEditor({ bookId }: { bookId: string }) {
+  const [book, setBook] = useState<Book | null>(null);
+  // ...
+}
+```
+
+### Imports
+
+```typescript
+// External libraries first
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+// Internal absolute imports (use @ alias)
+import { BookService } from '@/components/book-editor/services/BookService';
+import { useBook } from '@/components/book-editor/hooks/useBook';
+
+// Relative imports last (only for same directory)
+import { BookCard } from './BookCard';
+```
+
+### Error Handling
+
+```typescript
+// Always handle errors explicitly
+try {
+  const book = await bookService.getBook(id);
+  return book;
+} catch (error) {
+  console.error('Failed to load book:', error);
+  throw new Error('Book not found');
+}
+
+// Use Result types for operations that can fail
+type Result<T, E = Error> = { ok: true; data: T } | { ok: false; error: E };
+```
+
+### Async/Await
+
+```typescript
+// Prefer async/await over promises
+// Good
+const book = await bookService.getBook(id);
+
+// Avoid
+bookService.getBook(id).then(book => { ... });
+```
+
+## Component Architecture
+
+### Component Hierarchy
+
+```
+App Layout
+├── Nav (layout component)
+├── Main Content
+│   ├── Page Component (server)
+│   │   └── Feature Components (client)
+│   │       └── UI Components
+│   └── Book Editor (if applicable)
+│       ├── BookProvider (context)
+│       ├── BookEditor/BookReader
+│       └── Sub-components
+└── Footer (layout component)
+```
+
+### Component Types
+
+1. **Layout Components**: Structure (Nav, Footer, DocsLayout)
+2. **Page Components**: Route handlers (server components)
+3. **Feature Components**: Business logic (BookEditor, BookReader)
+4. **UI Components**: Reusable UI (Button, Card, Modal)
+5. **Shared Components**: Common across features (StatusBadge, LoadingSpinner)
+
+### Props Pattern
+
+```typescript
+// Explicit props interface
+interface BookReaderProps {
+  bookId: string;
+  initialChapter?: string;
+  onChapterChange?: (chapterId: string) => void;
+}
+
+export function BookReader({ bookId, initialChapter, onChapterChange }: BookReaderProps) {
+  // ...
+}
+```
+
+## Data Flow
+
+### Server → Client
+
+```
+Server Component (app/books/[id]/page.tsx)
+  ↓ fetches data
+Service Implementation (lib/book-editor/services/)
+  ↓ queries database
+Database (SQLite via Drizzle)
+  ↓ returns data
+Server Component
+  ↓ passes as props
+Client Component (BookReader)
+  ↓ renders
+UI
+```
+
+### Client → Server
+
+```
+User Action (Client Component)
+  ↓ calls hook
+Custom Hook (useBook)
+  ↓ calls service
+Service Interface (BookService)
+  ↓ implemented by
+Service Implementation (lib/book-editor/services/)
+  ↓ Server Action or API Route
+Database Update
+```
+
+### Real-Time (Collaboration)
+
+```
+User Types (TipTap Editor)
+  ↓ updates
+Y.js Document (CRDT)
+  ↓ syncs via
+WebSocket (useWebSocket hook)
+  ↓ broadcasts to
+WebSocket Server
+  ↓ updates other clients
+Y.js Merge (automatic)
+  ↓ updates
+TipTap Editor (other users)
+```
+
+## Module Boundaries
+
+### Clear Separation
+
+1. **Components** (`components/`)
+   - UI only
+   - No database access
+   - No business logic (delegate to hooks/services)
+
+2. **Hooks** (`components/book-editor/hooks/`)
+   - State management
+   - Side effects
+   - Call services, not database directly
+
+3. **Services** (`components/book-editor/services/` + `lib/book-editor/services/`)
+   - Business logic
+   - Database operations
+   - External API calls
+
+4. **Utils** (`components/book-editor/utils/`)
+   - Pure functions
+   - No side effects
+   - Easily testable
+
+5. **Types** (`components/book-editor/types/`)
+   - TypeScript definitions
+   - Shared across modules
+
+### Import Rules
+
+- ✅ Components can import: hooks, types, utils, other components
+- ✅ Hooks can import: services (interface), types, utils
+- ✅ Services can import: types, database, external APIs
+- ✅ Utils can import: types only
+- ❌ Components cannot import: services (implementation), database
+- ❌ Hooks cannot import: database directly
+- ❌ Utils cannot import: anything with side effects
+
+## Testing Organization
+
+### Test Structure Mirrors Source
+
+```
+components/book-editor/
+├── components/
+│   └── BookReader/
+│       └── BookReader.tsx
+└── ...
+
+tests/
+├── components/
+│   └── BookReader/
+│       └── BookReader.test.tsx
+└── ...
+```
+
+### Test Naming
+
+- Component tests: `ComponentName.test.tsx`
+- Hook tests: `useHookName.test.ts`
+- Utility tests: `utility-name.test.ts`
+- Integration tests: `feature-name.integration.test.ts`
+
+## Documentation Organization
+
+### Docs Structure
+
+```
+content/docs/
+├── getting-started.mdx          # Entry point
+├── architecture.mdx             # This file
+├── book-editor/                 # Book editor docs
+│   ├── overview.mdx
+│   ├── architecture.mdx
+│   ├── database-schema.mdx
+│   ├── tech-stack-final.mdx
+│   ├── task-plan.mdx
+│   ├── auth-options.mdx
+│   ├── file-uploads.mdx
+│   ├── nextjs-architecture.mdx
+│   └── conflict-resolution.mdx
+└── ...                          # Other feature docs
+```
+
+### Documentation Principles
+
+1. **Start with Overview**: High-level understanding first
+2. **Progressive Detail**: Overview → Architecture → Implementation
+3. **Code Examples**: Every concept has working examples
+4. **Cross-References**: Link related docs
+5. **Keep Updated**: Docs are part of the codebase
+
+## Best Practices
+
+### Do's ✅
+
+- Use TypeScript strictly (no `any`)
+- Write self-documenting code (good names)
+- Keep components small and focused
+- Extract reusable logic to hooks/utils
+- Use Server Components by default
+- Add 'use client' only when needed
+- Handle errors explicitly
+- Write tests for complex logic
+- Document complex algorithms
+
+### Don'ts ❌
+
+- Don't mix server and client code
+- Don't access database from components
+- Don't use `any` type
+- Don't create circular dependencies
+- Don't put business logic in components
+- Don't skip error handling
+- Don't ignore TypeScript errors
+- Don't commit console.logs
+- Don't hardcode values (use constants/env)
+
+## Migration Strategy
+
+When transplanting the book editor to another app:
+
+1. **Copy** `components/book-editor/` (entire directory)
+2. **Copy** `lib/book-editor/services/` (implementations)
+3. **Copy** `lib/book-editor/websocket/` (WebSocket code)
+4. **Copy** database schema files
+5. **Implement** service interfaces in new app
+6. **Set up** WebSocket server in new app
+7. **Configure** NextAuth (if using)
+8. **Update** imports/paths as needed
+
+The component library is designed to be **completely portable**.
+
+## Summary
+
+This architecture provides:
+
+- ✅ **Clear Structure**: Easy to find files
+- ✅ **Modularity**: Components are portable
+- ✅ **Type Safety**: Full TypeScript coverage
+- ✅ **Testability**: Clear boundaries for testing
+- ✅ **Scalability**: Structure supports growth
+- ✅ **Maintainability**: Consistent patterns
+
+Follow these conventions and the codebase will remain clean and organized as it grows.
+

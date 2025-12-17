@@ -1,0 +1,322 @@
+---
+title: "MDX Parser & Code Block System"
+description: "How the MDX parser handles code blocks, syntax highlighting, and custom components"
+date: "2025-01-27"
+updated: "2025-01-27"
+---
+
+# MDX Parser & Code Block System
+
+## Overview
+
+Our documentation uses a custom MDX parsing system that extends standard Markdown with enhanced code blocks, custom components, and developer-friendly styling.
+
+## Architecture
+
+### Parser Stack
+
+```
+MDX File
+  ↓
+next-mdx-remote (RSC)
+  ↓
+Remark Plugins (markdown parsing)
+  ↓
+Rehype Plugins (HTML transformation)
+  ↓
+MDX Components (React rendering)
+```
+
+### Plugin Chain
+
+```typescript
+// next.config.ts
+remarkPlugins: [
+  remarkGfm,        // GitHub Flavored Markdown
+]
+
+rehypePlugins: [
+  rehypeSlug,       // Add IDs to headings
+  rehypeAutolinkHeadings,  // Auto-link headings
+  rehypeHighlight,  // Syntax highlighting
+]
+```
+
+## Code Block Parsing
+
+### Syntax
+
+Code blocks use standard Markdown syntax with language specification:
+
+````markdown
+```bash
+npx create-docus my-docs
+```
+````
+
+**Format**: ` ```language`
+
+- `language`: Code language for syntax highlighting (e.g., `bash`, `typescript`, `json`)
+
+### Parsing Flow
+
+1. **MDX Parsing**: The code block is parsed by remark/rehype
+2. **Language Extraction**: Language is extracted from the className
+3. **Component Rendering**: `CodeBlock` component receives the parsed data
+4. **Display**: Component renders with header bar showing language name and icon
+
+### Implementation
+
+```typescript
+// lib/mdx.tsx - pre component handler
+pre: (props: any) => {
+  const codeElement = props.children;
+  const codeProps = codeElement.props || {};
+  const className = codeProps.className || '';
+  
+  // Extract language: "language-bash" -> "bash"
+  const langMatch = className.match(/language-(\w+)/);
+  const language = langMatch ? langMatch[1] : '';
+  
+  return (
+    <CodeBlock
+      className={className}
+      data-language={language}
+    >
+      {codeElement}
+    </CodeBlock>
+  );
+}
+```
+
+### CodeBlock Component
+
+```typescript
+// components/docs/CodeBlock.tsx
+export function CodeBlock({ children, className, ...props }) {
+  // Extract language from className
+  const language = className
+    .split(' ')
+    .find(cls => cls.startsWith('language-'))
+    ?.replace('language-', '') || '';
+
+  // Use capitalized language name as label
+  const label = language 
+    ? language.charAt(0).toUpperCase() + language.slice(1) 
+    : 'Code';
+  
+  // Render with header bar and copy button
+  return (
+    <div className="relative group">
+      <div className="header-bar">
+        <Icon />
+        <span>{label}</span>
+        <CopyButton />
+      </div>
+      <pre className="px-6 py-4">{children}</pre>
+    </div>
+  );
+}
+```
+
+## Supported Languages & Icons
+
+### Language Icons
+
+```typescript
+const languageIcons = {
+  bash: Terminal,
+  sh: Terminal,
+  shell: Terminal,
+  terminal: Terminal,
+  typescript: Code,
+  javascript: Code,
+  ts: Code,
+  js: Code,
+  tsx: Code,
+  jsx: Code,
+  json: FileCode,
+  yaml: FileCode,
+  yml: FileCode,
+};
+```
+
+### Default Behavior
+
+- **Language specified**: Uses capitalized language name (e.g., `bash` → "Bash")
+- **No language specified**: Shows "Code"
+
+## Examples
+
+### Basic Code Block
+
+````markdown
+```typescript
+const x = 1;
+```
+````
+
+**Result**: Header shows "Typescript" with Code icon
+
+### Bash Example
+
+````markdown
+```bash
+npm install
+```
+````
+
+**Result**: Header shows "Bash" with Terminal icon
+
+### JSON Example
+
+````markdown
+```json
+{
+  "key": "value"
+}
+```
+````
+
+**Result**: Header shows "Json" with FileCode icon
+
+## Copy to Clipboard
+
+The `CodeBlock` component includes a copy button that:
+
+1. **Appears on hover** (desktop) or always visible (mobile)
+2. **Copies code** to clipboard using `navigator.clipboard`
+3. **Shows feedback** with checkmark icon for 2 seconds
+4. **Accessible** with proper ARIA labels
+
+```typescript
+const copyToClipboard = async () => {
+  const code = codeRef.current.textContent || '';
+  await navigator.clipboard.writeText(code);
+  setCopied(true);
+  setTimeout(() => setCopied(false), 2000);
+};
+```
+
+## Custom Components
+
+### Image Component
+
+Images are automatically wrapped with Next.js `Image` component:
+
+```markdown
+![Alt text](/path/to/image.png)
+```
+
+**Rendered as**:
+- Optimized Next.js Image
+- Rounded corners
+- Shadow effects
+- Caption support
+
+### Heading Components
+
+All headings get:
+- Auto-generated IDs for anchor links
+- Scroll margin for smooth scrolling
+- Proper spacing and typography
+
+```markdown
+# Heading 1
+## Heading 2
+### Heading 3
+```
+
+## Styling System
+
+### Dark Theme
+
+Documentation uses a dark theme optimized for code reading:
+
+- **Background**: `#0f172a` (slate-900)
+- **Text**: `#e5e7eb` (slate-200)
+- **Code blocks**: `#1e293b` (slate-800)
+- **Borders**: `#334155` (slate-700)
+
+### Typography
+
+- **Font**: System font stack (SF Pro, Inter, Segoe UI)
+- **Line height**: 1.75 for readability
+- **Max width**: 70ch for optimal reading
+- **Code font**: SF Mono, Monaco, Fira Code
+
+## Extending the Parser
+
+### Adding New Language Icons
+
+```typescript
+// components/docs/CodeBlock.tsx
+const languageIcons = {
+  // ... existing icons
+  python: PythonIcon,
+  rust: RustIcon,
+};
+```
+
+### Adding New Plugins
+
+```typescript
+// next.config.ts
+import customPlugin from './lib/custom-plugin';
+
+const withMDX = createMDX({
+  options: {
+    remarkPlugins: [remarkGfm, customPlugin],
+    rehypePlugins: [/* ... */],
+  },
+});
+```
+
+## Best Practices
+
+### Language Specification
+
+- Always specify language for syntax highlighting
+- Use standard language names: `typescript` not `ts` (though both work)
+- Use `bash` for shell commands, not `sh`
+
+### Code Content
+
+- Keep code blocks focused and readable
+- Remove unnecessary code
+- Add comments for clarity
+- Use proper indentation
+
+## Troubleshooting
+
+### Syntax Highlighting Not Working
+
+**Problem**: Code isn't highlighted
+
+**Solution**:
+- Verify language is specified: ` ```typescript`
+- Check language is supported by rehype-highlight
+- Ensure `rehypeHighlight` is in plugin list
+
+### Copy Button Not Working
+
+**Problem**: Copy button doesn't copy code
+
+**Solution**:
+- Check browser supports `navigator.clipboard`
+- Verify HTTPS (clipboard API requires secure context)
+- Check console for errors
+
+## Summary
+
+The MDX parser system provides:
+
+- ✅ **Enhanced code blocks** with language icons
+- ✅ **Copy to clipboard** functionality
+- ✅ **Syntax highlighting** via rehype-pretty-code
+- ✅ **Custom components** for images, headings, etc.
+- ✅ **Dark theme** optimized for developers
+- ✅ **Extensible** architecture for adding features
+
+This system makes documentation more readable and developer-friendly while maintaining the simplicity of Markdown.
+

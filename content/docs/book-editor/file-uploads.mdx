@@ -1,0 +1,205 @@
+---
+title: "Book Editor - File Upload Strategy"
+description: "How to handle file uploads in Next.js with Drizzle ORM - comparing approaches"
+date: "2025-01-20"
+---
+
+# File Upload Strategy
+
+## The Question
+
+In Django, you can do:
+```python
+class Book(models.Model):
+    cover_image = models.ImageField(upload_to='books/covers/')
+```
+
+Can we do something similar with Drizzle + Next.js?
+
+## The Reality
+
+**Drizzle ORM doesn't have file fields** like Django. But we have better options in Next.js!
+
+## Option 1: Next.js Server Actions (Recommended)
+
+**Modern Approach**: Use Next.js 15 Server Actions - handles files natively.
+
+### Pros
+- ✅ **Built-in**: Part of Next.js, no extra setup
+- ✅ **Type-Safe**: Full TypeScript support
+- ✅ **Simple**: Just like Django's form handling
+- ✅ **Streaming**: Handles large files efficiently
+- ✅ **Validation**: Built-in with Zod
+
+### Implementation
+
+```typescript
+// app/actions/media.ts
+'use server';
+
+import { writeFile } from 'fs/promises';
+import { join } from 'path';
+import { db } from '@/lib/db';
+import { media } from '@/lib/db/schema';
+
+export async function uploadMedia(
+  bookId: string,
+  formData: FormData
+) {
+  const file = formData.get('file') as File;
+  
+  if (!file) {
+    throw new Error('No file provided');
+  }
+
+  // Save file
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+  const filename = `${Date.now()}-${file.name}`;
+  const path = join(process.cwd(), 'public', 'books', bookId, filename);
+  
+  await writeFile(path, buffer);
+
+  // Save to database (like Django!)
+  const [mediaRecord] = await db.insert(media).values({
+    bookId,
+    fileUrl: `/books/${bookId}/${filename}`,
+    fileName: file.name,
+    fileType: file.type,
+    fileSize: file.size,
+  }).returning();
+
+  return mediaRecord;
+}
+```
+
+```typescript
+// components/book-editor/MediaUpload.tsx
+'use client';
+
+import { uploadMedia } from '@/app/actions/media';
+
+export function MediaUpload({ bookId }: { bookId: string }) {
+  async function handleUpload(formData: FormData) {
+    const result = await uploadMedia(bookId, formData);
+    // Handle result
+  }
+
+  return (
+    <form action={handleUpload}>
+      <input type="file" name="file" />
+      <button type="submit">Upload</button>
+    </form>
+  );
+}
+```
+
+**Verdict**: ✅ **Best choice** - Native Next.js, simple, type-safe.
+
+## Option 2: API Route (Traditional)
+
+**Classic Approach**: Separate API endpoint.
+
+### Pros
+- ✅ Familiar pattern
+- ✅ Works with any client
+- ✅ Easy to add middleware
+
+### Cons
+- ⚠️ More boilerplate
+- ⚠️ Need to handle FormData manually
+- ⚠️ Less type-safe
+
+### Implementation
+
+```typescript
+// app/api/books/[id]/media/route.ts
+export async function POST(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const formData = await req.formData();
+  const file = formData.get('file') as File;
+  // ... save file and database record
+}
+```
+
+**Verdict**: ⚠️ **Works but unnecessary** - Server Actions are better.
+
+## Option 3: Third-Party Upload Service
+
+**Cloud Storage**: Upload to S3, Cloudinary, etc.
+
+### Pros
+- ✅ Scalable
+- ✅ CDN delivery
+- ✅ Image optimization
+- ✅ No server storage
+
+### Cons
+- ⚠️ External dependency
+- ⚠️ Costs money
+- ⚠️ More complex
+
+**Verdict**: ⚠️ **Future consideration** - Start with local, migrate later if needed.
+
+## Recommendation
+
+**Use Next.js Server Actions**:
+- Native to Next.js (like Django forms)
+- Type-safe
+- Simple API
+- Handles files + database in one function
+- No separate API route needed
+
+The pattern is:
+1. Server Action receives FormData
+2. Saves file to disk
+3. Saves record to database (Drizzle)
+4. Returns result
+
+Just like Django, but with Next.js Server Actions!
+
+## Database Schema
+
+The `media` table stores the file metadata:
+
+```typescript
+export const media = sqliteTable('media', {
+  id: text('id').primaryKey(),
+  bookId: text('book_id').references(() => books.id),
+  fileUrl: text('file_url').notNull(), // Path in public/
+  fileName: text('file_name').notNull(),
+  fileType: text('file_type').notNull(),
+  fileSize: integer('file_size').notNull(),
+  // ... metadata
+});
+```
+
+The file itself lives in `public/books/[bookId]/[filename]` and is accessible via URL.
+
+## Why We Need the Media Table
+
+Even with Server Actions, the `media` table is essential:
+
+1. **Metadata Storage**: File name, type, size, dimensions
+2. **Relationships**: Link media to books/chapters/sections
+3. **Querying**: Find all media for a book, filter by type
+4. **Deletion**: Track what files exist to clean up
+5. **Permissions**: Track who uploaded what
+
+**Server Action** = Upload process (file + database insert)  
+**Media Table** = Metadata and relationships storage
+
+Both work together - Server Action handles the upload, database stores the info.
+
+## Summary
+
+- ✅ **Server Actions** - Handle file upload and save to disk
+- ✅ **Media Table** - Store metadata and relationships (required!)
+- ✅ **Similar to Django** - One function handles file + database
+- ✅ **Type-safe** - Full TypeScript support
+- ✅ **Simple** - Less code than API routes
+
+See [File Uploads Implementation](./file-uploads-detailed) for complete code examples.
+

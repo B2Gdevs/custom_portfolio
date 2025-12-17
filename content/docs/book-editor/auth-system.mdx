@@ -1,0 +1,433 @@
+---
+title: "Book Editor - Authentication System"
+description: "Simple SQLite-based authentication for the book editor"
+date: "2025-01-20"
+---
+
+# Authentication System
+
+## Overview
+
+Simple, SQLite-based authentication system built into the book editor. **No external dependencies** - uses only Node.js built-in modules (`crypto` for password hashing). No 3rd party auth libraries required.
+
+## Database Schema
+
+### Users Table
+
+```typescript
+// schema/users.schema.ts
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+
+export const users = sqliteTable('users', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  username: text('username').notNull().unique(),
+  email: text('email').notNull().unique(),
+  passwordHash: text('password_hash').notNull(), // PBKDF2 hash (Node.js crypto)
+  displayName: text('display_name'),
+  avatarUrl: text('avatar_url'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  lastLogin: integer('last_login', { mode: 'timestamp' }),
+});
+```
+
+### Sessions Table
+
+```typescript
+// schema/sessions.schema.ts
+export const sessions = sqliteTable('sessions', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  token: text('token').notNull().unique(),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+```
+
+## Password Hashing (Node.js Built-in)
+
+We use Node.js's built-in `crypto` module with PBKDF2 for password hashing - no external dependencies needed.
+
+```typescript
+// lib/auth/password.ts
+import { pbkdf2Sync, randomBytes, timingSafeEqual } from 'crypto';
+
+const SALT_LENGTH = 32;
+const KEY_LENGTH = 64;
+const ITERATIONS = 100000; // High iteration count for security
+const DIGEST = 'sha256';
+
+export function hashPassword(password: string): string {
+  const salt = randomBytes(SALT_LENGTH).toString('hex');
+  const hash = pbkdf2Sync(password, salt, ITERATIONS, KEY_LENGTH, DIGEST).toString('hex');
+  // Store as: salt:hash
+  return `${salt}:${hash}`;
+}
+
+export function verifyPassword(password: string, storedHash: string): boolean {
+  const [salt, hash] = storedHash.split(':');
+  if (!salt || !hash) return false;
+
+  const hashToVerify = pbkdf2Sync(password, salt, ITERATIONS, KEY_LENGTH, DIGEST);
+  const storedHashBuffer = Buffer.from(hash, 'hex');
+
+  // Use timing-safe comparison to prevent timing attacks
+  return hashToVerify.length === storedHashBuffer.length &&
+         timingSafeEqual(hashToVerify, storedHashBuffer);
+}
+```
+
+## Authentication Flow
+
+### 1. Registration
+
+```typescript
+// lib/auth/register.ts
+import { hashPassword } from '@/lib/auth/password';
+import { db } from '@/lib/db';
+import { users } from '@/lib/db/schema';
+
+export async function register(
+  username: string,
+  email: string,
+  password: string,
+  displayName?: string
+) {
+  // Check if user exists
+  const existing = await db.select()
+    .from(users)
+    .where(or(eq(users.username, username), eq(users.email, email)))
+    .limit(1);
+
+  if (existing.length > 0) {
+    throw new Error('Username or email already exists');
+  }
+
+  // Hash password using Node.js crypto
+  const passwordHash = hashPassword(password);
+
+  // Create user
+  const [user] = await db.insert(users).values({
+    username,
+    email,
+    passwordHash,
+    displayName: displayName || username,
+  }).returning();
+
+  return user;
+}
+```
+
+### 2. Login
+
+```typescript
+// lib/auth/login.ts
+import { verifyPassword } from '@/lib/auth/password';
+import { db } from '@/lib/db';
+import { users, sessions } from '@/lib/db/schema';
+import { cookies } from 'next/headers';
+
+export async function login(username: string, password: string) {
+  // Find user
+  const [user] = await db.select()
+    .from(users)
+    .where(eq(users.username, username))
+    .limit(1);
+
+  if (!user) {
+    throw new Error('Invalid credentials');
+  }
+
+  // Verify password using Node.js crypto
+  const isValid = verifyPassword(password, user.passwordHash);
+  if (!isValid) {
+    throw new Error('Invalid credentials');
+  }
+
+  // Create session
+  const token = crypto.randomUUID();
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+  await db.insert(sessions).values({
+    userId: user.id,
+    token,
+    expiresAt,
+  });
+
+  // Update last login
+  await db.update(users)
+    .set({ lastLogin: new Date() })
+    .where(eq(users.id, user.id));
+
+  // Set cookie
+  cookies().set('session_token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    expires: expiresAt,
+  });
+
+  return { user: { id: user.id, username: user.username, displayName: user.displayName }, token };
+}
+```
+
+### 3. Verify Session
+
+```typescript
+// lib/auth/verify.ts
+import { db } from '@/lib/db';
+import { sessions, users } from '@/lib/db/schema';
+import { cookies } from 'next/headers';
+
+export async function getCurrentUser() {
+  const token = cookies().get('session_token')?.value;
+  
+  if (!token) {
+    return null;
+  }
+
+  const [session] = await db.select({
+    user: users,
+    session: sessions,
+  })
+    .from(sessions)
+    .innerJoin(users, eq(sessions.userId, users.id))
+    .where(and(
+      eq(sessions.token, token),
+      gt(sessions.expiresAt, new Date())
+    ))
+    .limit(1);
+
+  if (!session) {
+    return null;
+  }
+
+  return session.user;
+}
+```
+
+### 4. Logout
+
+```typescript
+// lib/auth/logout.ts
+import { db } from '@/lib/db';
+import { sessions } from '@/lib/db/schema';
+import { cookies } from 'next/headers';
+
+export async function logout() {
+  const token = cookies().get('session_token')?.value;
+  
+  if (token) {
+    await db.delete(sessions).where(eq(sessions.token, token));
+  }
+
+  cookies().delete('session_token');
+}
+```
+
+## Next.js Middleware
+
+```typescript
+// middleware.ts
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { getCurrentUser } from '@/lib/auth/verify';
+
+export async function middleware(request: NextRequest) {
+  // Protected routes
+  if (request.nextUrl.pathname.startsWith('/books/edit')) {
+    const user = await getCurrentUser();
+    
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ['/books/edit/:path*', '/api/books/:path*'],
+};
+```
+
+## React Context
+
+```typescript
+// components/book-editor/contexts/AuthContext.tsx
+'use client';
+
+import { createContext, useContext, useEffect, useState } from 'react';
+
+interface User {
+  id: string;
+  username: string;
+  displayName: string;
+}
+
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  login: (username: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch current user on mount
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        setUser(data.user);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  const login = async (username: string, password: string) => {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (!res.ok) throw new Error('Login failed');
+
+    const data = await res.json();
+    setUser(data.user);
+  };
+
+  const logout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+}
+```
+
+## API Routes
+
+### Login
+
+```typescript
+// app/api/auth/login/route.ts
+import { login } from '@/lib/auth/login';
+import { NextResponse } from 'next/server';
+
+export async function POST(req: Request) {
+  try {
+    const { username, password } = await req.json();
+    const result = await login(username, password);
+    return NextResponse.json(result);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Login failed' },
+      { status: 401 }
+    );
+  }
+}
+```
+
+### Register
+
+```typescript
+// app/api/auth/register/route.ts
+import { register } from '@/lib/auth/register';
+import { NextResponse } from 'next/server';
+
+export async function POST(req: Request) {
+  try {
+    const { username, email, password, displayName } = await req.json();
+    const user = await register(username, email, password, displayName);
+    return NextResponse.json({ user });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Registration failed' },
+      { status: 400 }
+    );
+  }
+}
+```
+
+### Current User
+
+```typescript
+// app/api/auth/me/route.ts
+import { getCurrentUser } from '@/lib/auth/verify';
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  const user = await getCurrentUser();
+  return NextResponse.json({ user });
+}
+```
+
+## Session Cleanup
+
+```typescript
+// lib/auth/cleanup.ts
+// Run this periodically (cron job or on server start)
+export async function cleanupExpiredSessions() {
+  await db.delete(sessions)
+    .where(lt(sessions.expiresAt, new Date()));
+}
+```
+
+## Security Considerations
+
+1. **Password Hashing**: PBKDF2 with 100,000 iterations (Node.js built-in crypto)
+2. **Timing-Safe Comparison**: Prevents timing attacks
+3. **Salt**: Random 32-byte salt per password
+4. **HTTPS**: Use in production (secure cookies)
+5. **Token Expiration**: 7 days default, configurable
+6. **Session Cleanup**: Regularly delete expired sessions
+7. **Rate Limiting**: Add to login/register endpoints (prevent brute force)
+8. **Input Validation**: Validate all inputs (use Zod)
+
+### Why PBKDF2?
+
+- ✅ **Built into Node.js**: No external dependencies
+- ✅ **Secure**: NIST recommended, used by many systems
+- ✅ **Configurable**: Can adjust iterations for security vs performance
+- ✅ **Timing-Safe**: Built-in timing-safe comparison prevents attacks
+
+## Usage in Components
+
+```typescript
+// components/book-editor/BookEditor.tsx
+'use client';
+
+import { useAuth } from '@/components/book-editor/contexts/AuthContext';
+
+export function BookEditor({ bookId }: { bookId: string }) {
+  const { user, loading } = useAuth();
+
+  if (loading) return <Loading />;
+  if (!user) return <Redirect to="/login" />;
+
+  // User is authenticated, show editor
+  return <Editor bookId={bookId} userId={user.id} />;
+}
+```
+
+This provides a simple, self-contained authentication system using only SQLite.
+

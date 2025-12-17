@@ -1,0 +1,129 @@
+---
+title: "Book Editor - Authentication Library Options"
+description: "Review of auth libraries that work with SQLite, recommendations, and trade-offs"
+date: "2025-01-20"
+---
+
+# Authentication Library Options
+
+## Overview
+
+We want a battle-tested auth library that works with SQLite, not a fully custom solution. Here are the best options:
+
+## Option 1: NextAuth.js / Auth.js (Recommended)
+
+**The Standard**: Most popular Next.js auth library, works with any database.
+
+### Pros
+- ✅ **Battle-tested**: Used by thousands of projects
+- ✅ **SQLite Support**: Official adapter available
+- ✅ **Session Management**: Built-in, secure
+- ✅ **Multiple Providers**: Email/password, OAuth (if needed later)
+- ✅ **TypeScript**: Full type safety
+- ✅ **Middleware**: Built-in Next.js middleware support
+- ✅ **Zero Config**: Works out of the box
+
+### Cons
+- ⚠️ Slight learning curve
+- ⚠️ More features than we need (but that's fine)
+
+### Implementation
+
+```typescript
+// app/api/auth/[...nextauth]/route.ts
+import NextAuth from 'next-auth';
+import { DrizzleAdapter } from '@auth/drizzle-adapter';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { db } from '@/lib/db';
+import { users } from '@/lib/db/schema';
+import { verifyPassword } from '@/lib/auth/password';
+
+export const authOptions = {
+  adapter: DrizzleAdapter(db),
+  providers: [
+    CredentialsProvider({
+      credentials: {
+        username: { label: "Username", type: "text" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        const user = await db.select().from(users)
+          .where(eq(users.username, credentials.username))
+          .limit(1);
+        
+        if (!user || !verifyPassword(credentials.password, user.passwordHash)) {
+          return null;
+        }
+        
+        return { id: user.id, name: user.displayName, email: user.email };
+      }
+    })
+  ],
+  session: { strategy: 'jwt' }, // or 'database' for SQLite sessions
+};
+
+export const handler = NextAuth(authOptions);
+```
+
+**Verdict**: ✅ **Best choice** - Industry standard, minimal code, works perfectly with SQLite.
+
+## Option 2: Lucia Auth
+
+**Lightweight Alternative**: Modern, type-safe auth library.
+
+### Pros
+- ✅ **Lightweight**: Smaller than NextAuth
+- ✅ **Type-Safe**: Excellent TypeScript support
+- ✅ **SQLite Support**: Works with any SQL database
+- ✅ **Flexible**: More control than NextAuth
+- ✅ **Modern**: Built for modern frameworks
+
+### Cons
+- ⚠️ Less popular (smaller community)
+- ⚠️ More setup required
+- ⚠️ Newer (less battle-tested)
+
+### Implementation
+
+```typescript
+import { lucia } from 'lucia';
+import { nextjs } from 'lucia/middleware';
+import { drizzle } from 'lucia-adapter-drizzle';
+
+export const auth = lucia({
+  adapter: drizzle(db),
+  middleware: nextjs(),
+  env: process.env.NODE_ENV === 'production' ? 'PROD' : 'DEV',
+});
+```
+
+**Verdict**: ⚠️ **Good alternative** if you want more control, but NextAuth is safer choice.
+
+## Option 3: Custom (What We Had)
+
+**Full Control**: Build everything ourselves.
+
+### Pros
+- ✅ Complete control
+- ✅ No dependencies
+- ✅ Understand every line
+
+### Cons
+- ❌ Reinventing the wheel
+- ❌ Security risks (easy to make mistakes)
+- ❌ More code to maintain
+- ❌ No battle-testing
+
+**Verdict**: ❌ **Not recommended** - Too much work, too many risks.
+
+## Recommendation
+
+**Use NextAuth.js (Auth.js v5)**:
+- Industry standard
+- Works perfectly with SQLite via Drizzle adapter
+- Minimal code required
+- Secure by default
+- Easy to extend later (OAuth, etc.)
+
+We'll still use our own password hashing (Node.js crypto) but let NextAuth handle sessions, middleware, and all the security edge cases.
+

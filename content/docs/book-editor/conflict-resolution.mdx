@@ -1,0 +1,218 @@
+---
+title: "Book Editor - Conflict Resolution Strategies"
+description: "Understanding conflict resolution for real-time collaboration and version merging"
+date: "2025-01-20"
+---
+
+# Conflict Resolution Strategies
+
+## Overview
+
+The book editor uses different conflict resolution strategies for different scenarios:
+
+1. **Real-Time Editing**: CRDT (Y.js) - Automatic, no conflicts
+2. **Version Merging**: Three-way merge (Git-like) - Manual resolution when needed
+
+## Real-Time Collaboration: CRDT
+
+### What is CRDT?
+
+**Conflict-Free Replicated Data Types** (CRDT) are data structures that automatically merge changes from multiple users without conflicts.
+
+### How It Works
+
+1. **Y.js Document**: Each book has a Y.js document (CRDT)
+2. **Local Changes**: User edits update local Y.js document
+3. **Sync**: Changes broadcast via WebSocket to other users
+4. **Automatic Merge**: Y.js automatically merges incoming changes
+5. **No Conflicts**: CRDT guarantees eventual consistency
+
+### Example
+
+```
+User A types: "Hello"
+User B types: "World" (at same time)
+
+Result: "HelloWorld" (automatic merge, no conflict!)
+```
+
+### Benefits
+
+- ✅ **No Conflicts**: Changes always merge automatically
+- ✅ **Offline Support**: Works offline, syncs when online
+- ✅ **Decentralized**: No central authority needed
+- ✅ **Real-Time**: Instant updates for all users
+
+### Limitations
+
+- Character-level merging (not semantic)
+- Can produce unexpected results with complex edits
+- Requires Y.js integration (already in TipTap)
+
+## Version Merging: Three-Way Merge
+
+### What is Three-Way Merge?
+
+Like Git, we compare three versions:
+- **Base**: Common ancestor
+- **Local**: Your branch
+- **Remote**: Branch being merged
+
+### Merge Process
+
+1. **Identify Changes**: Compare base → local and base → remote
+2. **Find Conflicts**: Where both branches modified same content
+3. **Auto-Merge**: Non-conflicting changes merge automatically
+4. **Manual Resolution**: User resolves conflicts manually
+5. **Create Merge Commit**: New version with merged state
+
+### Conflict Types
+
+#### 1. Text Conflicts
+
+```
+Base:     "The quick brown fox"
+Local:    "The quick red fox"
+Remote:   "The quick brown dog"
+
+Conflict: Both changed "brown fox" differently
+```
+
+#### 2. Structural Conflicts
+
+```
+Base:     Chapter 1: [Section A, Section B]
+Local:    Chapter 1: [Section A, Section C, Section B]
+Remote:   Chapter 1: [Section A, Section B, Section D]
+
+Conflict: Different section orders/insertions
+```
+
+#### 3. Metadata Conflicts
+
+```
+Base:     title: "My Book"
+Local:    title: "My Amazing Book"
+Remote:   title: "My Great Book"
+
+Conflict: Both changed title differently
+```
+
+### Merge Interface
+
+The `MergeInterface.tsx` component provides:
+
+- **Side-by-Side View**: Local vs Remote changes
+- **Conflict Markers**: Highlight conflicting sections
+- **Resolution Options**:
+  - Accept Local
+  - Accept Remote
+  - Accept Both (manual edit)
+  - Custom Resolution
+
+### Example Merge Flow
+
+```
+1. User creates branch from version 5
+2. Edits on branch: adds Chapter 3
+3. Main branch also edited: modifies Chapter 1
+4. User initiates merge
+5. System detects:
+   - ✅ Chapter 3 (new) - auto-merge
+   - ⚠️ Chapter 1 (both changed) - conflict
+6. User resolves Chapter 1 conflict
+7. Merge commit created (version 10)
+```
+
+## Conflict Resolution UI
+
+### Visual Indicators
+
+- **Green**: Auto-merged (no conflict)
+- **Yellow**: Potential conflict (needs review)
+- **Red**: Conflicting changes (requires resolution)
+
+### Resolution Actions
+
+1. **Accept Local**: Keep your changes
+2. **Accept Remote**: Take their changes
+3. **Edit Manually**: Combine both manually
+4. **Skip Section**: Leave as-is (creates note)
+
+## Best Practices
+
+### For Real-Time Editing
+
+- **Small Edits**: CRDT handles well
+- **Large Refactors**: Consider creating branch first
+- **Coordination**: Communicate major changes with team
+
+### For Version Merging
+
+- **Frequent Merges**: Merge often to avoid large conflicts
+- **Clear Branches**: Use descriptive branch names
+- **Review Changes**: Review before merging
+- **Test Merges**: Test merged version before publishing
+
+## Implementation Details
+
+### Y.js Integration
+
+```typescript
+// TipTap automatically uses Y.js for collaboration
+const editor = useEditor({
+  extensions: [
+    Collaboration.configure({
+      document: yDoc, // Y.js document
+    }),
+    CollaborationCursor.configure({
+      provider: websocketProvider, // WebSocket provider
+    }),
+  ],
+});
+```
+
+### Merge Algorithm
+
+```typescript
+// Three-way merge implementation
+function threeWayMerge(
+  base: BookSnapshot,
+  local: BookSnapshot,
+  remote: BookSnapshot
+): MergeResult {
+  const conflicts: Conflict[] = [];
+  const merged: BookSnapshot = { ...base };
+
+  // Compare chapters
+  for (const chapter of base.chapters) {
+    const localChapter = local.chapters.find(c => c.id === chapter.id);
+    const remoteChapter = remote.chapters.find(c => c.id === chapter.id);
+
+    if (localChapter && remoteChapter) {
+      // Both modified - check for conflicts
+      if (hasConflict(chapter, localChapter, remoteChapter)) {
+        conflicts.push({
+          type: 'chapter',
+          chapterId: chapter.id,
+          base: chapter,
+          local: localChapter,
+          remote: remoteChapter,
+        });
+      } else {
+        // Auto-merge possible
+        merged.chapters = mergeChapters(chapter, localChapter, remoteChapter);
+      }
+    }
+  }
+
+  return { merged, conflicts };
+}
+```
+
+## Summary
+
+- **Real-Time**: CRDT (Y.js) - automatic, no conflicts
+- **Versioning**: Three-way merge - manual resolution when needed
+- **Best of Both**: Smooth collaboration + powerful version control
+

@@ -1,0 +1,209 @@
+---
+title: "Book Editor - Quick Reference"
+description: "Quick reference guide for common patterns, APIs, and code snippets"
+date: "2025-01-20"
+updated: "2025-01-20"
+---
+
+# Book Editor Quick Reference
+
+## Common Patterns
+
+### Using the Book Reader
+
+```typescript
+import { BookReader } from '@/components/book-editor/components/BookReader/BookReader';
+import { BookServiceProvider } from '@/components/book-editor/contexts/BookServiceContext';
+import { BookServiceImpl } from '@/lib/book-editor/services/book.service';
+
+export default function BookPage({ params }: { params: { id: string } }) {
+  const bookService = new BookServiceImpl();
+  
+  return (
+    <BookServiceProvider service={bookService}>
+      <BookReader bookId={params.id} />
+    </BookServiceProvider>
+  );
+}
+```
+
+### Using the Book Editor
+
+```typescript
+import { BookEditor } from '@/components/book-editor/components/BookEditor/BookEditor';
+
+<BookServiceProvider service={bookService}>
+  <BookEditor bookId={bookId} mode="edit" />
+</BookServiceProvider>
+```
+
+### Hooks Quick Reference
+
+```typescript
+// Get book data
+const { book, loading, error } = useBook(bookId);
+
+// Auto-save with retry
+const { isSaving, lastError } = useAutoSave(bookId, content);
+
+// Version operations
+const { versions, createVersion, restoreVersion } = useVersioning(bookId);
+
+// Collaboration
+const { users, highlights } = useCollaboration(bookId);
+
+// Lazy load chapter
+const { chapter, loadChapter } = useLazyChapter(chapterId);
+
+// Permissions
+const { canEdit, canDelete } = usePermissions(bookId);
+```
+
+### Service Methods
+
+```typescript
+// Book operations
+await bookService.getBook(id);
+await bookService.saveBook(book);
+await bookService.createBook(data);
+await bookService.deleteBook(id);
+
+// Version operations
+await versionService.createVersion(bookId, snapshot);
+await versionService.getVersions(bookId);
+await versionService.createBranch(bookId, baseVersionId, name);
+await versionService.mergeBranches(bookId, branchId1, branchId2);
+
+// Media operations
+await mediaService.uploadMedia(bookId, file);
+await mediaService.getMedia(bookId);
+await mediaService.deleteMedia(mediaId);
+```
+
+## Type Definitions
+
+### Core Types
+
+```typescript
+interface Book {
+  id: string;
+  title: string;
+  description: string | null;
+  coverImageUrl: string | null;
+  metadata: BookMetadata;
+  status: 'draft' | 'published';
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy: string;
+}
+
+interface Chapter {
+  id: string;
+  bookId: string;
+  title: string;
+  order: number;
+  metadata: ChapterMetadata;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface Section {
+  id: string;
+  chapterId: string;
+  order: number;
+  contentType: 'text' | 'image' | 'media' | 'code' | 'quote' | 'heading';
+  content: SectionContent;
+  metadata: SectionMetadata;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+## File Locations
+
+### Components
+- Reader: `components/book-editor/components/BookReader/`
+- Editor: `components/book-editor/components/BookEditor/`
+- Shared: `components/book-editor/components/shared/`
+
+### Hooks
+- All hooks: `components/book-editor/hooks/`
+
+### Services
+- Interfaces: `components/book-editor/services/`
+- Implementations: `lib/book-editor/services/`
+
+### Utils
+- All utils: `components/book-editor/utils/`
+
+## File Uploads
+
+### Upload Media
+```typescript
+import { uploadMedia } from '@/app/actions/media';
+
+const formData = new FormData();
+formData.append('file', file);
+const { id, url } = await uploadMedia(bookId, formData);
+```
+
+### Get Media
+```typescript
+const media = await mediaService.getMedia(bookId);
+```
+
+## Collaboration
+
+### Setup WebSocket
+```typescript
+const yDoc = getYDoc(bookId);
+const { connected } = useWebSocket(bookId, yDoc);
+```
+
+### Get Collaborators
+```typescript
+const { collaborators } = useCollaboration(bookId);
+```
+
+### Get Highlights
+```typescript
+const { highlights, addHighlight } = useHighlights(bookId);
+```
+
+## Common Tasks
+
+### Add a New Section Type
+
+1. Update `SectionContent` type in `types/book.types.ts`
+2. Add handler in `SectionEditor.tsx`
+3. Add renderer in `ChapterView.tsx`
+
+### Add a New Service Method
+
+1. Add to interface in `services/BookService.ts`
+2. Implement in `lib/book-editor/services/book.service.ts`
+3. Add tests in `tests/services/`
+
+### Create a New Hook
+
+1. Create file in `hooks/useNewHook.ts`
+2. Follow hook pattern (use state, call service)
+3. Add tests in `tests/hooks/`
+
+## Troubleshooting
+
+### Book Not Loading
+- Check `useBookService` is within `BookServiceProvider`
+- Verify service implementation is correct
+- Check database connection
+
+### Auto-Save Not Working
+- Check `useAutoSave` is called with correct bookId
+- Verify debounce time (default 5 seconds)
+- Check retry logic if save fails
+
+### Collaboration Not Syncing
+- Verify WebSocket connection
+- Check Y.js document is initialized
+- Ensure TipTap collaboration extension is enabled
+

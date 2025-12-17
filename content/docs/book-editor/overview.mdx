@@ -1,0 +1,75 @@
+---
+title: "Book Editor & Reader - Overview"
+description: "A modular, reusable book editor and reader component with real-time collaboration, versioning, and grimoire aesthetics"
+date: "2025-01-20"
+---
+
+# Book Editor & Reader Component
+
+A fully-featured, modular book editor and reader component designed to be transplanted into any React application with SQLite support. Features real-time collaboration, git-like versioning, rich text editing, and a stunning grimoire aesthetic.
+
+## Features
+
+- **Rich Text Editing**: TipTap-based editor with HTML output
+- **Real-Time Collaboration**: WebSocket-based with user presence and highlights
+- **Version Control**: Automatic snapshots with git-like branching and merging
+- **Export**: EPUB and HTML export capabilities
+- **Media Support**: Images and media with server-side storage
+- **Role-Based Access**: Owner, editor, and viewer permissions
+- **Grimoire Aesthetic**: Dark, mystical book-like interface with heavy animations
+- **Auto-Save**: Automatic saving with configurable intervals
+- **Lazy Loading**: Chapters loaded on-demand for performance
+
+## Tech Stack
+
+### Core Libraries
+- **TipTap**: Rich text editor with collaboration extensions
+- **Y.js**: CRDT for conflict-free collaborative editing
+- **epub-gen**: EPUB file generation
+- **epub.js**: EPUB file reading
+- **Drizzle ORM**: Database abstraction (already in project)
+- **Zod**: Schema validation
+- **date-fns**: Date formatting
+- **react-dropzone**: File uploads
+
+### Styling
+- **Tailwind CSS**: Utility-first styling
+- **styled-components**: Component-level styling
+- **Framer Motion**: Advanced animations
+
+### Testing
+- **Vite**: Build tool and test runner
+- **Vitest**: Unit and integration tests
+- **React Testing Library**: Component testing
+
+### Collaboration
+- **WebSockets**: Real-time communication
+- **Y.js**: Conflict-free replicated data types
+
+## Architecture Overview
+
+The component is designed to be completely modular and database-agnostic. It uses a service injection pattern where the host application provides database operations through a service interface.
+
+```
+book-component/
+├── components/          # React components
+├── hooks/              # Custom React hooks
+├── services/            # Service interfaces (no implementations)
+├── types/               # TypeScript definitions
+├── schema/              # Database schema definitions
+├── utils/               # Utility functions
+├── styles/              # Theme and animations
+└── tests/               # Test files
+```
+
+## Integration Pattern
+
+The component expects the host application to:
+
+1. Implement the `BookService` interface
+2. Provide database connection through Drizzle
+3. Set up WebSocket server for collaboration
+4. Handle file uploads for media
+
+The component itself has **zero database dependencies** and communicates entirely through the service interface.
+

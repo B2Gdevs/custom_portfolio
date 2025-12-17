@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Benjamin Garrard – Resume</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --text-dark: #222222;
+      --text-light: #e0e0e0;
+      --muted-dark: #555555;
+      --muted-light: #b0b0b0;
+      --accent: #4a9eff;
+      --border-dark: #333333;
+      --border-light: #dddddd;
+      --heading-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --body-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--body-font);
+      color: var(--text-dark);
+      background-color: var(--white);
+      line-height: 1.6;
+    }
+
+    .resume-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header-section {
+      background-color: var(--black);
+      color: var(--white);
+      padding: 48px 40px;
+      border-bottom: 4px solid var(--white);
+    }
+
+    .header-section h1 {
+      font-family: var(--heading-font);
+      font-size: 42px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .header-section .subtitle {
+      font-size: 18px;
+      color: var(--muted-light);
+      margin-bottom: 24px;
+      font-weight: 500;
+    }
+
+    .header-contact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 24px;
+      font-size: 14px;
+      margin-top: 20px;
+    }
+
+    .header-contact-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-contact-item .icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      fill: currentColor;
+      color: var(--text-light);
+    }
+
+    .header-contact-item a {
+      color: var(--white);
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .header-contact-item a:hover {
+      opacity: 0.7;
+    }
+
+    .summary-section {
+      background-color: var(--white);
+      color: var(--text-dark);
+      padding: 48px 40px;
+      border-bottom: 2px solid var(--black);
+    }
+
+    .summary-section h2 {
+      font-family: var(--heading-font);
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .summary-section p {
+      font-size: 15px;
+      line-height: 1.7;
+      max-width: 900px;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 100vh;
+    }
+
+    .column-left {
+      background-color: var(--black);
+      color: var(--white);
+      padding: 48px 40px;
+    }
+
+    .column-right {
+      background-color: var(--white);
+      color: var(--text-dark);
+      padding: 48px 40px;
+    }
+
+    section {
+      margin-bottom: 32px;
+    }
+
+    h2 {
+      font-family: var(--heading-font);
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 20px;
+      font-weight: 600;
+      padding-bottom: 8px;
+      border-bottom: 2px solid;
+    }
+
+    .column-left h2 {
+      border-color: var(--border-dark);
+    }
+
+    .column-right h2 {
+      border-color: var(--border-light);
+    }
+
+    h3 {
+      font-size: 15px;
+      margin: 16px 0 4px;
+      font-weight: 600;
+    }
+
+    .role-header {
+      margin-bottom: 8px;
+    }
+
+    .role-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .role-title {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .role-dates {
+      font-size: 13px;
+      white-space: nowrap;
+      font-weight: 400;
+    }
+
+    .column-left .role-dates {
+      color: var(--muted-light);
+    }
+
+    .column-right .role-dates {
+      color: var(--muted-dark);
+    }
+
+    .location-line {
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .column-left .location-line {
+      color: var(--muted-light);
+    }
+
+    .column-right .location-line {
+      color: var(--muted-dark);
+    }
+
+    p {
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 8px 0;
+    }
+
+    ul {
+      padding-left: 20px;
+      margin: 8px 0;
+    }
+
+    li {
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 6px;
+    }
+
+    .label {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .text-small {
+      font-size: 13px;
+    }
+
+    .column-left .text-small {
+      color: var(--muted-light);
+    }
+
+    .column-right .text-small {
+      color: var(--muted-dark);
+    }
+
+    .skills-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .skill-category {
+      margin-bottom: 4px;
+    }
+
+    .skill-category .label {
+      margin-bottom: 6px;
+    }
+
+    .skill-category p {
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .condensed-experience {
+      margin-top: 0;
+      padding: 0;
+    }
+
+    .condensed-experience h2 {
+      border-color: var(--border-dark);
+      color: var(--white);
+    }
+
+    .condensed-experience .role-line .role-title {
+      color: var(--white);
+    }
+
+    .condensed-experience .role-dates {
+      color: var(--muted-light);
+    }
+
+    .condensed-experience-intro {
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      color: var(--muted-light);
+      font-style: italic;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-dark);
+    }
+
+    .condensed-role {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px dashed var(--border-dark);
+    }
+
+    .condensed-role:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .condensed-experience ul {
+      color: var(--white);
+    }
+
+    .condensed-experience li {
+      color: var(--white);
+    }
+
+    @media print {
+      @page {
+        size: letter;
+        margin: 0;
+      }
+
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+
+      body {
+        background: white;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .resume-container {
+        max-width: 100%;
+        margin: 0;
+      }
+
+      .header-section {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        padding: 32px 24px !important;
+        border-bottom: 4px solid #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        page-break-inside: avoid;
+      }
+
+      .header-section h1 {
+        color: #ffffff !important;
+        font-size: 42px !important;
+        margin-bottom: 8px !important;
+      }
+
+      .header-section .subtitle {
+        color: #b0b0b0 !important;
+        font-size: 18px !important;
+        margin-bottom: 24px !important;
+      }
+
+      .header-contact {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 12px 16px !important;
+        font-size: 12px !important;
+        margin-top: 20px !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+      }
+
+      .header-contact-item {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        color: #ffffff !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+      }
+
+      .header-contact-item .icon {
+        width: 14px !important;
+        height: 14px !important;
+        fill: currentColor !important;
+        color: #e0e0e0 !important;
+        flex-shrink: 0 !important;
+      }
+
+      .header-contact-item a {
+        color: #ffffff !important;
+        text-decoration: none !important;
+      }
+
+      .header-contact-item span {
+        color: #ffffff !important;
+      }
+
+      .summary-section {
+        padding: 32px 24px;
+        page-break-inside: avoid;
+      }
+
+      .content-grid {
+        display: table !important;
+        width: 100% !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+      }
+
+      .column-left {
+        display: table-cell !important;
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        padding: 32px 24px !important;
+        width: 50% !important;
+        vertical-align: top !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .column-right {
+        display: table-cell !important;
+        background-color: #ffffff !important;
+        color: #222222 !important;
+        padding: 32px 24px !important;
+        width: 50% !important;
+        vertical-align: top !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .condensed-experience {
+        background-color: transparent !important;
+        color: #ffffff !important;
+        padding: 0;
+      }
+
+      h2 {
+        page-break-after: avoid;
+      }
+
+      .role-header,
+      .condensed-role {
+        page-break-inside: avoid;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .column-left h2 {
+        border-color: #333333 !important;
+      }
+
+      .column-right h2 {
+        border-color: #dddddd !important;
+      }
+
+      .condensed-experience-intro {
+        border-color: #333333 !important;
+      }
+
+      .condensed-role {
+        border-color: #333333 !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+      .header-section,
+      .column-left,
+      .column-right,
+      .summary-section {
+        padding: 32px 24px;
+      }
+      .header-contact {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="resume-container">
+    <div class="header-section">
+      <h1>Benjamin Garrard</h1>
+      <div class="subtitle">AI Engineer • Founding Engineer • Systems Builder</div>
+      <div class="header-contact">
+        <div class="header-contact-item">
+          <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+          </svg>
+          <span>Austin, TX</span>
+        </div>
+        <div class="header-contact-item">
+          <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+          </svg>
+          <a href="tel:9038302348">903-830-2348</a>
+        </div>
+        <div class="header-contact-item">
+          <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+          </svg>
+          <a href="mailto:benjamingarrard5279@gmail.com">benjamingarrard5279@gmail.com</a>
+        </div>
+        <div class="header-contact-item">
+          <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+          <a href="https://github.com/B2Gdevs" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </div>
+        <div class="header-contact-item">
+          <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.27-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+          </svg>
+          <a href="https://www.linkedin.com/in/benjamin-garrard/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </div>
+        <div class="header-contact-item">
+          <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+          </svg>
+          <a href="https://bengarrard.com" target="_blank" rel="noopener noreferrer">bengarrard.com</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-section">
+      <h2>Summary</h2>
+      <p>
+        AI-focused full-stack engineer and founder with a track record of architecting and shipping complex systems end-to-end. I’ve built document-processing pipelines, vector-search infrastructure, RAG workflows, and intelligent agents using Whisper, Pinecone, Qdrant, OpenWebUI/Ollama, and n8n. As a founder, I’ve owned full product lifecycles—from ingestion and data modeling to real-time interfaces and internal tooling—and delivered production systems where reliability and correctness were non-negotiable. I work best in high-ownership environments where speed, clarity of execution, and deep technical problem-solving matter, and where AI is treated as an engineering multiplier rather than an afterthought.
+      </p>
+    </div>
+
+    <div class="content-grid">
+      <div class="column-left">
+        <section>
+          <h2>Core Skills</h2>
+          <div class="skills-grid">
+            <div class="skill-category">
+              <div class="label">AI & Knowledge Systems</div>
+              <p>
+                LLM workflows, prompt chaining, early agent systems<br />
+                Retrieval-Augmented Generation (RAG), embeddings<br />
+                Vector stores: Pinecone, Qdrant, OpenWebUI VectorStore<br />
+                Whisper-based transcription, document & transcript ingestion<br />
+                Local AI stacks: OpenWebUI, Ollama, n8n AI workflows
+              </p>
+            </div>
+            <div class="skill-category">
+              <div class="label">Languages & Systems</div>
+              <p>
+                TypeScript, Python, Go, C#, SQL (Postgres & SQL Server), C++<br />
+                React/Next.js, Node.js, WebSockets, sockets, async workers<br />
+                Event-driven design, concurrency, streaming responses, real-time workflows
+              </p>
+            </div>
+            <div class="skill-category">
+              <div class="label">Architecture & Infrastructure</div>
+              <p>
+                Cloud Run, Cloud Tasks, microservices, worker queues<br />
+                SSR/SSG architectures, caching layers, performance tuning<br />
+                Reporting, auditing, and reliability for revenue & revenue share
+              </p>
+            </div>
+            <div class="skill-category">
+              <div class="label">Founder-Level Capabilities</div>
+              <p>
+                Zero-to-one product delivery, ultra-fast iteration, customer-driven development<br />
+                Operational awareness, field debugging, on-site troubleshooting<br />
+                Comfort with long hours, shifting priorities, and continuous deployment
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Selected Projects</h2>
+          <ul>
+            <li>
+              <strong>Meeting Transcription RAG Pipeline</strong> — Used Whisper to transcribe meetings, stored them in a vector database, and built LLM chains to query past discussions and decisions.
+            </li>
+            <li>
+              <strong>n8n + Qdrant Ingestion Workflows</strong> — Built ingestion pipelines that embed documents and connect LLM nodes to vector search, enabling document-aware automation and chat.
+            </li>
+            <li>
+              <strong>Cross-Machine Mouse Sharing (Go + Sockets)</strong> — Built a concurrency-driven socket system for real-time mouse transfer between machines.
+            </li>
+            <li>
+              <strong>AI Streaming Interfaces</strong> — Built streaming-response chat systems for local and remote LLMs to support responsive, iterative workflows.
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Education</h2>
+          <div class="role-header">
+            <div class="role-line">
+              <div class="role-title">B.S. Computer Science</div>
+            </div>
+            <div class="location-line">Texas State University</div>
+          </div>
+          <p class="text-small">
+            GPA 3.7
+          </p>
+        </section>
+
+        <section class="condensed-experience">
+          <h2>Additional Work History</h2>
+          <p class="condensed-experience-intro">
+            Earlier technical roles demonstrating long-term engineering depth, problem-solving, and systems-level thinking — relevant to designing robust AI and tooling.
+          </p>
+          
+          <div class="condensed-role">
+            <div class="role-header">
+              <div class="role-line">
+                <div class="role-title" style="font-size: 14px;">Python Developer — Charter Communications</div>
+                <div class="role-dates">2019</div>
+              </div>
+            </div>
+            <ul>
+              <li>Migrated APIs from MuleSoft → Python microservices, reducing response time from ~3 minutes to 11 seconds.</li>
+              <li>Built optimized REST patterns and improved reliability for high-volume traffic.</li>
+            </ul>
+          </div>
+
+          <div class="condensed-role">
+            <div class="role-header">
+              <div class="role-line">
+                <div class="role-title" style="font-size: 14px;">Doctoral Assistant — Texas State University</div>
+                <div class="role-dates">2018</div>
+              </div>
+            </div>
+            <ul>
+              <li>Built PyTorch models achieving ~85% accuracy with fewer than 200 samples.</li>
+              <li>Applied genetic algorithms for performance tuning and hyperparameter search.</li>
+            </ul>
+          </div>
+
+          <div class="condensed-role">
+            <div class="role-header">
+              <div class="role-line">
+                <div class="role-title" style="font-size: 14px;">Software Developer — Mayachitra, Inc.</div>
+                <div class="role-dates">2018</div>
+              </div>
+            </div>
+            <ul>
+              <li>Authored a Python library (CVJSON) for computer vision data pipelines and dataset management.</li>
+              <li>Built data augmentation + Detectron inference workflows for maritime detection tasks.</li>
+            </ul>
+          </div>
+
+          <div class="condensed-role">
+            <div class="role-header">
+              <div class="role-line">
+                <div class="role-title" style="font-size: 14px;">VR Lab Software Developer — Texas State University</div>
+                <div class="role-dates">2017–2018</div>
+              </div>
+            </div>
+            <ul>
+              <li>Led a team building VR simulations in Unity3D/C#, including PTSD exposure therapy research tools.</li>
+              <li>Practiced agile development, rapid prototyping, and multi-device testing.</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+
+      <div class="column-right">
+        <section>
+          <h2>Professional Experience</h2>
+
+          <div>
+            <div class="role-header">
+              <div class="role-line">
+                <div class="role-title">Founder & CTO — Colorfull</div>
+                <div class="role-dates">Oct 2023 – Jul 2025</div>
+              </div>
+              <div class="location-line">Austin, TX</div>
+            </div>
+            <p>
+              Built a real-time logistics and ordering platform integrating CloudKitchens' event system, Stripe onboarding, and multi-city operations. Responsible
+              for designing the architecture, maintaining data correctness, and building internal tools for operations and reporting.
+            </p>
+            <ul>
+              <li>Designed and operated an async event-driven system (Cloud Run + Cloud Tasks) to process external events reliably and in order.</li>
+              <li>Implemented reporting pipelines to calculate earnings and revenue share for partners and restaurant owners, with automated invoicing.</li>
+              <li>Built internal admin tools for monitoring orders, resolving issues, and managing partner configurations.</li>
+              <li>Used Pinecone for sparse and dense vector workloads around recommendations and search, experimenting with natural language retrieval across internal data.</li>
+              <li>Rebuilt authentication, onboarding, and menu-sync flows days before a critical onboarding event after crashes surfaced, then debugged on-site with restaurant owners.</li>
+              <li>Acted as driver and on-the-ground operator to understand workflows and bottlenecks, then translated those insights into product and backend changes.</li>
+            </ul>
+          </div>
+
+          <div>
+            <div class="role-header">
+              <div class="role-line">
+                <div class="role-title">Founder — Bashful.ai</div>
+                <div class="role-dates">Jan 2023 – Oct 2023</div>
+              </div>
+              <div class="location-line">Austin, TX</div>
+            </div>
+            <p>
+              Built a Photoshop plugin in a constrained React/TypeScript environment, integrating AI image generation into creative workflows.
+            </p>
+            <ul>
+              <li>Created Python/Flask backend pipelines on GCP for Stable Diffusion jobs, connecting UI actions to AI generation.</li>
+              <li>Designed high-performance UI/animation systems using GSAP + Zustand for responsive creative feedback.</li>
+            </ul>
+          </div>
+
+          <div>
+            <div class="role-header">
+              <div class="role-line">
+                <div class="role-title">Customer Success Engineer — Moveworks</div>
+                <div class="role-dates">Sep 2021 – Dec 2022</div>
+              </div>
+              <div class="location-line">Enterprise AI Platform</div>
+            </div>
+            <p>
+              Delivered and optimized AI-powered workflows for enterprise customers; integrated Moveworks' AI platform with their IT systems and data.
+            </p>
+            <ul>
+              <li>Shipped frequent updates to customer AI workflows and automations in code, with tight feedback loops from live environments.</li>
+              <li>Integrated with Slack, Teams, Active Directory, ServiceNow, FreshDesk, and NetSuite, connecting AI to real enterprise data.</li>
+              <li>Built an internal Python CLI used by 30+ technical staff that reduced debugging time from hours/days to minutes, saving an estimated $200k.</li>
+              <li>Performed analysis and troubleshooting using ELK, Grafana, and Airflow DAGs, ensuring correctness and reliability of automations.</li>
+            </ul>
+          </div>
+
+          <div>
+            <div class="role-header">
+              <div class="role-line">
+                <div class="role-title">Software Engineering Consultant — CGI</div>
+                <div class="role-dates">Jan 2020 – Sep 2021</div>
+              </div>
+              <div class="location-line">Consulting / Healthcare Clients</div>
+            </div>
+            <p>
+              Worked on high-stakes .NET and SQL Server systems for healthcare and enterprise clients where correctness and performance were critical.
+            </p>
+            <ul>
+              <li>Normalized large SQL Server datasets and implemented indexing strategies to improve performance and maintain data integrity.</li>
+              <li>Fixed a mission-critical queue system that was incorrectly implemented as LIFO, restoring correct processing order.</li>
+              <li>Architected modernization solutions using .NET, SQL Server, and Azure DevOps for CI/CD.</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

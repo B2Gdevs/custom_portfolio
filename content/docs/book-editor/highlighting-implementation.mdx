@@ -1,0 +1,594 @@
+---
+title: "Book Editor - Highlighting System Implementation"
+description: "Complete implementation guide for the highlighting and annotation system"
+date: "2025-01-27"
+updated: "2025-01-27"
+---
+
+# Highlighting System Implementation
+
+## Overview
+
+The highlighting system allows users to select text in the book reader and add colored highlights with optional notes. Highlights are stored in the database and displayed in real-time during collaboration.
+
+## Data Structure
+
+### Highlight Schema
+
+```typescript
+// lib/db/schema/books.ts
+export const highlights = sqliteTable('highlights', {
+  id: text('id').primaryKey(),
+  bookId: text('book_id').references(() => books.id).notNull(),
+  sectionId: text('section_id').references(() => sections.id).notNull(),
+  userId: text('user_id').references(() => users.id).notNull(),
+  
+  // Text selection coordinates
+  startOffset: integer('start_offset').notNull(), // Character offset in section
+  endOffset: integer('end_offset').notNull(),
+  
+  // Visual properties
+  color: text('color').notNull(), // Hex color code
+  note: text('note'), // Optional annotation
+  
+  // Metadata
+  selectedText: text('selected_text').notNull(), // The actual text highlighted
+  createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+});
+```
+
+### Highlight TypeScript Interface
+
+```typescript
+interface Highlight {
+  id: string;
+  bookId: string;
+  sectionId: string;
+  userId: string;
+  startOffset: number;
+  endOffset: number;
+  color: string;
+  note?: string;
+  selectedText: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+## How Highlights Are Applied
+
+### Step 1: User Selects Text
+
+```typescript
+// components/book-editor/components/BookReader/SectionView.tsx
+'use client';
+
+import { useState, useRef } from 'react';
+
+export function SectionView({ sectionId, content }: SectionViewProps) {
+  const [selection, setSelection] = useState<Selection | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const handleTextSelection = () => {
+    const selection = window.getSelection();
+    
+    if (!selection || selection.rangeCount === 0) return;
+    
+    const range = selection.getRangeAt(0);
+    
+    // Check if selection is within this section
+    if (!contentRef.current?.contains(range.commonAncestorContainer)) {
+      return;
+    }
+
+    // Get selected text
+    const selectedText = selection.toString().trim();
+    
+    if (selectedText.length === 0) return;
+
+    // Calculate character offsets
+    const startOffset = getTextOffset(contentRef.current, range.startContainer, range.startOffset);
+    const endOffset = getTextOffset(contentRef.current, range.endContainer, range.endOffset);
+
+    setSelection({
+      text: selectedText,
+      startOffset,
+      endOffset,
+      range,
+    });
+  };
+
+  return (
+    <div
+      ref={contentRef}
+      onMouseUp={handleTextSelection}
+      className="section-content"
+    >
+      {/* Render content */}
+    </div>
+  );
+}
+```
+
+### Step 2: Calculate Character Offsets
+
+```typescript
+// Utility function to calculate character offset
+function getTextOffset(
+  container: HTMLElement,
+  node: Node,
+  nodeOffset: number
+): number {
+  let offset = 0;
+  const walker = document.createTreeWalker(
+    container,
+    NodeFilter.SHOW_TEXT,
+    null
+  );
+
+  let currentNode;
+  while (currentNode = walker.nextNode()) {
+    if (currentNode === node) {
+      return offset + nodeOffset;
+    }
+    offset += currentNode.textContent?.length || 0;
+  }
+
+  return offset;
+}
+```
+
+### Step 3: Show Highlight Menu
+
+```typescript
+// components/book-editor/components/BookReader/HighlightMenu.tsx
+'use client';
+
+import { useState } from 'react';
+import { Palette, X, MessageSquare } from 'lucide-react';
+
+const HIGHLIGHT_COLORS = [
+  { name: 'Yellow', value: '#fef08a' },
+  { name: 'Green', value: '#bbf7d0' },
+  { name: 'Blue', value: '#bfdbfe' },
+  { name: 'Pink', value: '#fce7f3' },
+  { name: 'Orange', value: '#fed7aa' },
+];
+
+export function HighlightMenu({
+  selection,
+  onHighlight,
+  onClose,
+}: {
+  selection: Selection;
+  onHighlight: (color: string, note?: string) => void;
+  onClose: () => void;
+}) {
+  const [selectedColor, setSelectedColor] = useState(HIGHLIGHT_COLORS[0].value);
+  const [note, setNote] = useState('');
+  const [showNoteInput, setShowNoteInput] = useState(false);
+
+  const handleHighlight = () => {
+    onHighlight(selectedColor, note || undefined);
+    onClose();
+  };
+
+  // Position menu near selection
+  const position = getSelectionPosition(selection.range);
+
+  return (
+    <div
+      className="highlight-menu"
+      style={{
+        position: 'absolute',
+        left: `${position.x}px`,
+        top: `${position.y - 50}px`,
+      }}
+    >
+      <div className="color-picker">
+        {HIGHLIGHT_COLORS.map(color => (
+          <button
+            key={color.value}
+            onClick={() => setSelectedColor(color.value)}
+            className={selectedColor === color.value ? 'active' : ''}
+            style={{ backgroundColor: color.value }}
+            aria-label={color.name}
+          />
+        ))}
+      </div>
+      
+      <div className="actions">
+        <button onClick={() => setShowNoteInput(!showNoteInput)}>
+          <MessageSquare size={16} />
+          Add Note
+        </button>
+        <button onClick={handleHighlight}>
+          Highlight
+        </button>
+        <button onClick={onClose}>
+          <X size={16} />
+        </button>
+      </div>
+
+      {showNoteInput && (
+        <textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Add a note..."
+          rows={3}
+        />
+      )}
+    </div>
+  );
+}
+```
+
+### Step 4: Create Highlight in Database
+
+```typescript
+// components/book-editor/hooks/useHighlights.ts
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useHighlights as useHighlightsService } from '@/components/book-editor/services/HighlightService';
+
+export function useHighlights(bookId: string, sectionId: string) {
+  const highlightService = useHighlightsService();
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
+
+  useEffect(() => {
+    loadHighlights();
+  }, [bookId, sectionId]);
+
+  const loadHighlights = async () => {
+    const sectionHighlights = await highlightService.getHighlightsBySection(sectionId);
+    setHighlights(sectionHighlights);
+  };
+
+  const createHighlight = async (
+    startOffset: number,
+    endOffset: number,
+    selectedText: string,
+    color: string,
+    note?: string
+  ) => {
+    const highlight = await highlightService.createHighlight({
+      bookId,
+      sectionId,
+      startOffset,
+      endOffset,
+      selectedText,
+      color,
+      note,
+    });
+
+    setHighlights([...highlights, highlight]);
+    return highlight;
+  };
+
+  const deleteHighlight = async (id: string) => {
+    await highlightService.deleteHighlight(id);
+    setHighlights(highlights.filter(h => h.id !== id));
+  };
+
+  return {
+    highlights,
+    createHighlight,
+    deleteHighlight,
+    loadHighlights,
+  };
+}
+```
+
+### Step 5: Render Highlights in Content
+
+```typescript
+// components/book-editor/components/BookReader/HighlightedContent.tsx
+'use client';
+
+import { useMemo } from 'react';
+import { Highlight } from '@/components/book-editor/types';
+
+interface HighlightedContentProps {
+  content: string; // HTML string from TipTap
+  highlights: Highlight[];
+  currentUserId: string;
+}
+
+export function HighlightedContent({
+  content,
+  highlights,
+  currentUserId,
+}: HighlightedContentProps) {
+  // Sort highlights by start offset
+  const sortedHighlights = useMemo(() => {
+    return [...highlights].sort((a, b) => a.startOffset - b.startOffset);
+  }, [highlights]);
+
+  // Convert HTML string to DOM nodes and apply highlights
+  const highlightedHTML = useMemo(() => {
+    // Parse HTML
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, 'text/html');
+    const body = doc.body;
+
+    // Get all text nodes
+    const textNodes = getTextNodes(body);
+    let currentOffset = 0;
+
+    // Apply highlights in reverse order to maintain offsets
+    for (let i = sortedHighlights.length - 1; i >= 0; i--) {
+      const highlight = sortedHighlights[i];
+      
+      // Find text nodes that contain this highlight
+      let offset = 0;
+      for (const textNode of textNodes) {
+        const nodeLength = textNode.textContent?.length || 0;
+        
+        if (offset + nodeLength >= highlight.startOffset && offset <= highlight.endOffset) {
+          // This text node contains part of the highlight
+          const startInNode = Math.max(0, highlight.startOffset - offset);
+          const endInNode = Math.min(nodeLength, highlight.endOffset - offset);
+          
+          // Split text node and wrap highlight
+          const before = textNode.textContent?.substring(0, startInNode) || '';
+          const highlighted = textNode.textContent?.substring(startInNode, endInNode) || '';
+          const after = textNode.textContent?.substring(endInNode) || '';
+
+          // Create new nodes
+          if (before) {
+            textNode.parentNode?.insertBefore(
+              document.createTextNode(before),
+              textNode
+            );
+          }
+
+          const highlightSpan = document.createElement('span');
+          highlightSpan.className = 'highlight';
+          highlightSpan.setAttribute('data-highlight-id', highlight.id);
+          highlightSpan.style.backgroundColor = highlight.color;
+          highlightSpan.style.opacity = '0.3';
+          highlightSpan.textContent = highlighted;
+          
+          if (highlight.userId === currentUserId) {
+            highlightSpan.classList.add('own-highlight');
+          }
+
+          textNode.parentNode?.insertBefore(highlightSpan, textNode);
+
+          if (after) {
+            textNode.parentNode?.insertBefore(
+              document.createTextNode(after),
+              textNode
+            );
+          }
+
+          textNode.remove();
+          break;
+        }
+
+        offset += nodeLength;
+      }
+    }
+
+    return body.innerHTML;
+  }, [content, sortedHighlights, currentUserId]);
+
+  return (
+    <div
+      className="highlighted-content"
+      dangerouslySetInnerHTML={{ __html: highlightedHTML }}
+    />
+  );
+}
+
+// Helper to get all text nodes
+function getTextNodes(element: Node): Text[] {
+  const textNodes: Text[] = [];
+  const walker = document.createTreeWalker(
+    element,
+    NodeFilter.SHOW_TEXT,
+    null
+  );
+
+  let node;
+  while (node = walker.nextNode()) {
+    textNodes.push(node as Text);
+  }
+
+  return textNodes;
+}
+```
+
+## Real-Time Collaboration
+
+### Sync Highlights via Y.js
+
+```typescript
+// In collaboration setup
+const yHighlights = yDoc.getArray<Highlight>(`highlights-${bookId}`);
+
+// Listen for changes
+yHighlights.observe((event) => {
+  // Update local highlights state
+  const highlights = yHighlights.toArray();
+  setHighlights(highlights);
+});
+
+// When user creates highlight
+const newHighlight: Highlight = {
+  id: crypto.randomUUID(),
+  bookId,
+  sectionId,
+  userId: currentUser.id,
+  startOffset,
+  endOffset,
+  selectedText,
+  color,
+  note,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+// Add to Y.js array (syncs automatically)
+yHighlights.push([newHighlight]);
+
+// Also save to database (debounced)
+await highlightService.createHighlight(newHighlight);
+```
+
+## Displaying Highlights
+
+### Highlight Styles
+
+```css
+/* app/globals.css or component styles */
+.highlight {
+  position: relative;
+  padding: 2px 0;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.highlight:hover {
+  opacity: 0.5 !important;
+}
+
+.highlight.own-highlight {
+  opacity: 0.4;
+}
+
+.highlight[data-highlight-id]::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: inherit;
+  opacity: 0.6;
+}
+```
+
+### Show Highlight Notes on Hover
+
+```typescript
+// components/book-editor/components/BookReader/HighlightTooltip.tsx
+'use client';
+
+import { useState } from 'react';
+
+export function HighlightTooltip({ highlight }: { highlight: Highlight }) {
+  const [show, setShow] = useState(false);
+
+  if (!highlight.note) return null;
+
+  return (
+    <div
+      className="highlight-tooltip-container"
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+    >
+      {show && (
+        <div className="highlight-tooltip">
+          <div className="highlight-tooltip-header">
+            <span style={{ color: highlight.color }}>
+              {highlight.selectedText}
+            </span>
+          </div>
+          <div className="highlight-tooltip-note">
+            {highlight.note}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+## Managing Highlights
+
+### Delete Highlight
+
+```typescript
+const handleDeleteHighlight = async (highlightId: string) => {
+  // Remove from Y.js
+  const index = yHighlights.toArray().findIndex(h => h.id === highlightId);
+  if (index !== -1) {
+    yHighlights.delete(index);
+  }
+
+  // Delete from database
+  await highlightService.deleteHighlight(highlightId);
+};
+```
+
+### Edit Highlight Note
+
+```typescript
+const handleEditNote = async (highlightId: string, newNote: string) => {
+  // Update in Y.js
+  const index = yHighlights.toArray().findIndex(h => h.id === highlightId);
+  if (index !== -1) {
+    const highlight = yHighlights.get(index);
+    yHighlights.delete(index);
+    yHighlights.insert(index, [{ ...highlight, note: newNote }]);
+  }
+
+  // Update in database
+  await highlightService.updateHighlight(highlightId, { note: newNote });
+};
+```
+
+## Performance Considerations
+
+### Lazy Load Highlights
+
+```typescript
+// Only load highlights for visible sections
+const visibleSections = useVisibleSections();
+
+useEffect(() => {
+  const sectionIds = visibleSections.map(s => s.id);
+  loadHighlightsForSections(sectionIds);
+}, [visibleSections]);
+```
+
+### Debounce Database Saves
+
+```typescript
+// Save highlights to database with debounce
+const debouncedSave = useMemo(
+  () => debounce(async (highlights: Highlight[]) => {
+    await highlightService.syncHighlights(bookId, highlights);
+  }, 2000),
+  [bookId]
+);
+
+// When highlights change in Y.js
+yHighlights.observe(() => {
+  const highlights = yHighlights.toArray();
+  debouncedSave(highlights);
+});
+```
+
+## Summary
+
+**How Highlights Work:**
+
+1. **Selection**: User selects text → Calculate character offsets
+2. **Menu**: Show color picker and note input
+3. **Create**: Save highlight to database + Y.js
+4. **Render**: Parse HTML → Apply highlights as spans → Display
+5. **Sync**: Y.js syncs changes in real-time
+6. **Display**: Show colored backgrounds, tooltips for notes
+
+**Key Points:**
+- Highlights stored by character offset (not DOM position)
+- Applied by parsing HTML and wrapping text in spans
+- Real-time sync via Y.js for collaboration
+- Database stores persistent highlights
+- Performance optimized with lazy loading and debouncing
+
