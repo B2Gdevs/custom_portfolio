@@ -1,0 +1,76 @@
+---
+title: "Implementation Plan"
+description: "Development roadmap for Dialogue Forge"
+date: "2024-12-18"
+order: 4
+---
+
+# Implementation Plan
+
+## Phase 1: Core Chat Interface
+
+**Goal**: Basic chat UI with hardcoded dialogue
+
+- [ ] Create `/app/dialogue-forge/page.tsx` route
+- [ ] Build `ChatInterface` component with message list
+- [ ] Build `MessageBubble` component (AI vs player styling)
+- [ ] Build `ChoiceSelector` component for displaying options
+- [ ] Implement basic playthrough state (current node, history)
+
+## Phase 2: Dialogue Engine
+
+**Goal**: Dynamic dialogue from data structure
+
+- [ ] Define TypeScript types for dialogue nodes
+- [ ] Create dialogue engine to traverse tree
+- [ ] Implement memory flag system
+- [ ] Add conditional logic for choices
+- [ ] Create sample dialogue tree for testing
+
+## Phase 3: Live Editing
+
+**Goal**: Create and modify dialogue while playing
+
+- [ ] Add "Edit Mode" toggle
+- [ ] Build `NodeEditor` for modifying AI messages
+- [ ] Build `ChoiceEditor` for adding/editing choices
+- [ ] Implement "Add Choice" flow at choice points
+- [ ] Add condition editor for flags
+
+## Phase 4: Persistence
+
+**Goal**: Save and load dialogue trees
+
+- [ ] Implement localStorage save/load
+- [ ] Add auto-save on changes
+- [ ] Create "New Dialogue" and "Load Dialogue" UI
+- [ ] Add export to JSON file
+- [ ] Add import from JSON file
+
+## Phase 5: Polish
+
+**Goal**: Refined UX and additional features
+
+- [ ] Add typing indicator animation
+- [ ] Implement "Restart" playthrough
+- [ ] Add "Rewind" to previous choice
+- [ ] Create memory flags panel
+- [ ] Add dialogue tree overview/map view
+
+## Technical Decisions
+
+### Why Not a Visual Graph Editor?
+
+The core insight is that dialogue *feels* different when you read it vs when you draw it. By forcing the creator to experience the dialogue, we ensure better pacing and more natural conversations.
+
+### Why localStorage?
+
+Simplicity. This is a side project meant for rapid prototyping. Cloud storage can come later if needed.
+
+### Why in the Portfolio Codebase?
+
+- Shared styling and components
+- Easy to showcase as a project
+- No separate deployment needed
+- Demonstrates iterative development
+

@@ -1,0 +1,119 @@
+---
+title: "Dialogue Forge: Interactive Narrative Builder"
+description: "A chat-based dialogue system with branching choices and persistent memory, designed for creating and testing narrative experiences in real-time."
+date: "2024-12-18"
+tags: ["Interactive Fiction", "Dialogue System", "React", "State Management", "Side Project"]
+images:
+  - "/images/projects/dialogue-forge/featured.svg"
+featuredImage: "/images/projects/dialogue-forge/featured.svg"
+liveUrl: "/dialogue-forge"
+media:
+  - type: "documentation"
+    url: "/docs/dialogue-forge/getting-started"
+    title: "Dialogue Forge Documentation"
+---
+
+## Overview
+
+Dialogue Forge is an experimental tool for building and testing branching dialogue systems. It presents a ChatGPT-like interface where you converse with an AI character, but your responses are pre-defined choices that you craft as you play. The system remembers your choices and adapts the narrative accordingly.
+
+## Core Concept
+
+Unlike traditional dialogue editors where you build trees in a visual graph, Dialogue Forge lets you **experience the dialogue as you create it**. You play through the conversation, and when you reach a point that needs a response, you define what options should be available. This iterative approach makes it easy to:
+
+- Feel the pacing and tone of conversations
+- Test how choices affect narrative flow
+- Refine dialogue through repeated playthroughs
+- Build complex branching without losing track of context
+
+## Key Features
+
+- **Chat Interface**: Familiar messaging UI for natural dialogue flow
+- **Choice System**: Define multiple response options at any point
+- **Memory System**: Track player choices and use them to gate future options
+- **Conditional Dialogue**: Show/hide options based on previous decisions
+- **Live Editing**: Modify dialogue nodes while playing through
+- **Export/Import**: Save dialogue trees for reuse or sharing
+
+## Technical Approach Evaluation
+
+The goal is a **portable, easy-to-build** dialogue system that can be integrated into other projects later (with characters, game logic, etc). Here's the tradeoff analysis:
+
+### Option A: Custom React Implementation
+
+**Pros:**
+- Full control over data format and features
+- No dependencies to manage
+- Tailored exactly to the "play as you build" workflow
+
+**Cons:**
+- More upfront work
+- Have to build all UI from scratch
+- May reinvent wheels
+
+### Option B: Ink (Inkle's Narrative Scripting Language)
+
+**Pros:**
+- Industry-proven (used in 80 Days, Sorcery!, Heaven's Vault)
+- Simple text-based syntax—extremely fast to write
+- Built-in variables, conditionals, and branching
+- `inkjs` runtime is lightweight and portable
+- Export to JSON for any platform
+- Huge community and tooling (Inky editor)
+
+**Cons:**
+- Learning a new syntax (though it's simple)
+- Less control over exact data structure
+
+### Option C: Yarn Spinner
+
+**Pros:**
+- Text-based, easy syntax with powerful features
+- **Official Unreal Engine plugin**
+- Built-in variables, visited node tracking, custom commands
+- Can query game state (inventory, stats, achievements) via functions
+- Active development and strong community
+- JSON/compiled format works for web prototyping
+
+**Cons:**
+- Slightly more complex than Ink
+- Requires Yarn Spinner runtime
+
+### ✅ Recommendation: Yarn Spinner + Custom UI
+
+**Use Yarn Spinner** for dialogue authoring. It's the clear winner for Unreal integration with game systems:
+
+1. **Unreal-Ready**: Official plugin, seamless Blueprint/C++ integration
+2. **Game Systems**: Query stats, inventory, achievements directly in dialogue conditions
+3. **Easy Branching**: Simple `<<if>>` syntax with variables and visited tracking
+4. **Prototype First**: Build/test in web UI, then move to Unreal unchanged
+5. **Rich Conditions**: `<<if $has_item("key") and $charisma >= 15>>` unlocks options
+
+Example dialogue with game integration:
+```
+<<if $quest_complete("dragon_slayer") and $reputation >= 50>>
+    * [Show the Dragon Slayer badge]
+        Guard: "A hero! Right this way."
+        -> vip_entrance
+<<endif>>
+<<if $gold >= 100>>
+    * [Bribe the guard] 
+        <<set $gold -= 100>>
+        -> sneak_entrance  
+<<endif>>
+```
+
+We'll use `yarnspinner-js` for the web prototype, then the same `.yarn` files work directly in Unreal.
+
+## Try It
+
+🎮 **[Launch Dialogue Forge →](/dialogue-forge)** — Play through the sample dialogue and explore the editor panel.
+
+## Status
+
+🚧 **In Development** - This is an active side project being built and documented in real-time.
+
+## Documentation
+
+Full technical documentation, architecture decisions, and implementation details are available in the [Dialogue Forge Docs](/docs/dialogue-forge).
+

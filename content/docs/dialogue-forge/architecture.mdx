@@ -1,0 +1,121 @@
+---
+title: "Architecture"
+description: "Technical design and data structures for Dialogue Forge"
+date: "2024-12-18"
+order: 3
+---
+
+# Architecture
+
+## Data Model
+
+### Dialogue Node
+
+```typescript
+interface DialogueNode {
+  id: string;
+  type: 'ai_message' | 'choice_point';
+  content: string;
+  
+  // For choice_point type
+  choices?: Choice[];
+  
+  // Next node (for ai_message without choices)
+  nextNodeId?: string;
+  
+  // Conditions for this node to appear
+  conditions?: Condition[];
+  
+  // Memory flags to set when this node is reached
+  setFlags?: string[];
+}
+```
+
+### Choice
+
+```typescript
+interface Choice {
+  id: string;
+  text: string;
+  nextNodeId: string;
+  
+  // Conditions to show this choice
+  conditions?: Condition[];
+  
+  // Flags to set when chosen
+  setFlags?: string[];
+}
+```
+
+### Condition
+
+```typescript
+interface Condition {
+  flag: string;
+  operator: 'is_set' | 'is_not_set';
+}
+```
+
+### Dialogue Tree
+
+```typescript
+interface DialogueTree {
+  id: string;
+  title: string;
+  startNodeId: string;
+  nodes: Record<string, DialogueNode>;
+}
+```
+
+### Playthrough State
+
+```typescript
+interface PlaythroughState {
+  treeId: string;
+  currentNodeId: string;
+  memoryFlags: Set<string>;
+  history: HistoryEntry[];
+}
+
+interface HistoryEntry {
+  nodeId: string;
+  type: 'ai' | 'player';
+  content: string;
+  timestamp: number;
+}
+```
+
+## Component Architecture
+
+```
+DialogueForge/
+├── components/
+│   ├── ChatInterface.tsx      # Main chat display
+│   ├── MessageBubble.tsx      # Individual messages
+│   ├── ChoiceSelector.tsx     # Choice buttons
+│   ├── ChoiceEditor.tsx       # Create/edit choices
+│   ├── MemoryPanel.tsx        # View active flags
+│   └── NodeEditor.tsx         # Edit current node
+├── hooks/
+│   ├── useDialogueTree.ts     # Tree management
+│   ├── usePlaythrough.ts      # Playthrough state
+│   └── useMemory.ts           # Flag management
+├── lib/
+│   ├── dialogue-engine.ts     # Core logic
+│   └── storage.ts             # Persistence
+└── types/
+    └── dialogue.ts            # Type definitions
+```
+
+## State Management
+
+Using React state with localStorage persistence:
+
+1. **Dialogue Tree**: The complete dialogue structure
+2. **Playthrough State**: Current position, flags, history
+3. **Edit Mode**: Whether the editor panel is open
+
+## Storage
+
+Dialogue trees are stored in localStorage as JSON. Future enhancement could add cloud sync or file export/import.
+

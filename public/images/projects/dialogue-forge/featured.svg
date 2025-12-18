@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#e94560"/>
+      <stop offset="100%" style="stop-color:#ff6b6b"/>
+    </linearGradient>
+    <linearGradient id="chat1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0f3460"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#bg)"/>
+  
+  <!-- Grid pattern -->
+  <g opacity="0.1" stroke="#e94560" stroke-width="0.5">
+    <line x1="0" y1="50" x2="400" y2="50"/>
+    <line x1="0" y1="100" x2="400" y2="100"/>
+    <line x1="0" y1="150" x2="400" y2="150"/>
+    <line x1="0" y1="200" x2="400" y2="200"/>
+    <line x1="0" y1="250" x2="400" y2="250"/>
+    <line x1="80" y1="0" x2="80" y2="300"/>
+    <line x1="160" y1="0" x2="160" y2="300"/>
+    <line x1="240" y1="0" x2="240" y2="300"/>
+    <line x1="320" y1="0" x2="320" y2="300"/>
+  </g>
+  
+  <!-- Chat window frame -->
+  <rect x="50" y="40" width="300" height="220" rx="8" fill="#0f3460" stroke="#e94560" stroke-width="2"/>
+  
+  <!-- Window header -->
+  <rect x="50" y="40" width="300" height="30" rx="8" fill="#16213e"/>
+  <rect x="50" y="62" width="300" height="8" fill="#16213e"/>
+  <circle cx="70" cy="55" r="5" fill="#e94560"/>
+  <circle cx="88" cy="55" r="5" fill="#ff6b6b" opacity="0.6"/>
+  <circle cx="106" cy="55" r="5" fill="#533483" opacity="0.4"/>
+  
+  <!-- AI message bubble -->
+  <rect x="70" y="85" width="180" height="45" rx="12" fill="url(#chat1)" stroke="#e94560" stroke-width="1"/>
+  <rect x="78" y="95" width="100" height="6" rx="3" fill="#e94560" opacity="0.7"/>
+  <rect x="78" y="107" width="140" height="6" rx="3" fill="#e94560" opacity="0.4"/>
+  <rect x="78" y="119" width="80" height="6" rx="3" fill="#e94560" opacity="0.4"/>
+  
+  <!-- Choice buttons -->
+  <rect x="70" y="145" width="120" height="28" rx="6" fill="transparent" stroke="url(#accent)" stroke-width="1.5"/>
+  <rect x="78" y="155" width="60" height="5" rx="2" fill="#e94560" opacity="0.8"/>
+  
+  <rect x="200" y="145" width="120" height="28" rx="6" fill="transparent" stroke="#533483" stroke-width="1.5"/>
+  <rect x="208" y="155" width="70" height="5" rx="2" fill="#533483" opacity="0.6"/>
+  
+  <rect x="70" y="180" width="120" height="28" rx="6" fill="transparent" stroke="#533483" stroke-width="1.5"/>
+  <rect x="78" y="190" width="50" height="5" rx="2" fill="#533483" opacity="0.6"/>
+  
+  <!-- Memory indicator -->
+  <g transform="translate(310, 85)">
+    <circle cx="15" cy="15" r="12" fill="#16213e" stroke="#e94560" stroke-width="1"/>
+    <path d="M10 15 L15 10 L20 15 L15 20 Z" fill="#e94560" opacity="0.8"/>
+  </g>
+  
+  <!-- Branch indicator lines -->
+  <g stroke="#e94560" stroke-width="1" opacity="0.5">
+    <path d="M330 100 Q 340 100 340 120 L 340 140" fill="none"/>
+    <path d="M330 100 Q 350 100 350 130 L 350 160" fill="none"/>
+    <circle cx="340" cy="145" r="3" fill="#e94560"/>
+    <circle cx="350" cy="165" r="3" fill="#533483"/>
+  </g>
+  
+  <!-- Typing indicator -->
+  <g transform="translate(70, 220)">
+    <circle cx="8" cy="8" r="4" fill="#e94560" opacity="0.4"/>
+    <circle cx="22" cy="8" r="4" fill="#e94560" opacity="0.6"/>
+    <circle cx="36" cy="8" r="4" fill="#e94560" opacity="0.8"/>
+  </g>
+</svg>
+
