@@ -18,6 +18,11 @@ export default function Nav() {
   const pathname = usePathname();
   const [copied, setCopied] = useState(false);
 
+  // Hide Nav on dialogue-forge route (it has its own full-screen layout)
+  if (pathname?.startsWith('/dialogue-forge')) {
+    return null;
+  }
+
   const handleCopyEmail = async () => {
     try {
       await navigator.clipboard.writeText(EMAIL);

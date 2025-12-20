@@ -1,0 +1,34 @@
+{
+  "name": "@portfolio/dialogue-forge",
+  "version": "0.1.0",
+  "description": "Visual node-based dialogue editor with Yarn Spinner support",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc && tsc --module esnext --outDir dist/esm",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "dialogue",
+    "editor",
+    "yarn-spinner",
+    "node-graph",
+    "interactive-fiction"
+  ],
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^5.0.0"
+  }
+}
+
+

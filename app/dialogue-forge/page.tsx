@@ -2,35 +2,17 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, RotateCcw, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code } from 'lucide-react';
-
-// Types
-interface Choice {
-  id: string;
-  text: string;
-  nextNodeId: string;
-  conditions?: { flag: string; operator: 'is_set' | 'is_not_set' }[];
-  setFlags?: string[];
-}
-
-interface DialogueNode {
-  id: string;
-  type: 'npc' | 'player';
-  speaker?: string;
-  content: string;
-  choices?: Choice[];
-  nextNodeId?: string;
-  setFlags?: string[];
-  x: number;
-  y: number;
-}
-
-interface DialogueTree {
-  id: string;
-  title: string;
-  startNodeId: string;
-  nodes: Record<string, DialogueNode>;
-}
+import { ArrowLeft, BookOpen, RotateCcw, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+import { YarnView } from '../../packages/dialogue-forge/src/components/YarnView';
+import { PlayView } from '../../packages/dialogue-forge/src/components/PlayView';
+import { NodeEditor } from '../../packages/dialogue-forge/src/components/NodeEditor';
+import { GuidePanel } from '../../packages/dialogue-forge/src/components/GuidePanel';
+import { FlagManager } from '../../packages/dialogue-forge/src/components/FlagManager';
+import { ZoomControls } from '../../packages/dialogue-forge/src/components/ZoomControls';
+import { ExampleLoader } from '../../packages/dialogue-forge/src/components/ExampleLoader';
+import { exportToYarn, importFromYarn } from '../../packages/dialogue-forge/src/lib/yarn-converter';
+import { FlagSchema, exampleFlagSchema } from '../../packages/dialogue-forge/src/types/flags';
+import { DialogueTree, DialogueNode, Choice } from '../../packages/dialogue-forge/src/types';
 
 interface HistoryEntry {
   nodeId: string;
@@ -56,149 +38,150 @@ interface DraggingEdge {
 }
 
 const STORAGE_KEY = 'dialogue-forge-tree-v2';
+const FLAG_SCHEMA_KEY = 'dialogue-forge-flag-schema';
 const NODE_WIDTH = 200;
 const NODE_HEIGHT = 100;
 
 const defaultDialogue: DialogueTree = {
-  id: 'new-dialogue',
-  title: 'New Dialogue',
+  id: 'example-dialogue',
+  title: 'Example: The Mysterious Stranger',
   startNodeId: 'start',
   nodes: {
     'start': {
-      id: 'start', type: 'npc', speaker: 'Character', x: 300, y: 100,
-      content: "Hello! This is the start of your dialogue."
+      id: 'start', type: 'npc', speaker: 'Stranger', x: 300, y: 100,
+      content: "You find yourself at a crossroads. A cloaked figure emerges from the shadows.",
+      nextNodeId: 'greeting',
+      setFlags: ['dialogue_met_stranger'] // Dialogue flag - temporary
+    },
+    'greeting': {
+      id: 'greeting', type: 'npc', speaker: 'Stranger', x: 300, y: 200,
+      content: "\"Traveler... I've been waiting for you. What brings you to these lands?\"",
+      nextNodeId: 'first_choice'
+    },
+    'first_choice': {
+      id: 'first_choice', type: 'player', content: '', x: 300, y: 300,
+      choices: [
+        {
+          id: 'choice_treasure',
+          text: "I seek the legendary treasure.",
+          nextNodeId: 'treasure_response',
+          setFlags: ['quest_dragon_slayer'] // Quest flag - persistent
+        },
+        {
+          id: 'choice_knowledge',
+          text: "I'm searching for ancient knowledge.",
+          nextNodeId: 'knowledge_response',
+          setFlags: ['dialogue_seeks_knowledge'] // Dialogue flag - temporary
+        },
+        {
+          id: 'choice_hostile',
+          text: "That's none of your business.",
+          nextNodeId: 'hostile_response',
+          setFlags: ['dialogue_hostile'] // Dialogue flag - temporary
+        }
+      ]
+    },
+    'treasure_response': {
+      id: 'treasure_response', type: 'npc', speaker: 'Stranger', x: 100, y: 450,
+      content: "\"Many have sought the same. Take this map—it shows the entrance to the catacombs.\"",
+      setFlags: ['item_ancient_key'], // Item flag - persistent
+      nextNodeId: 'second_choice'
+    },
+    'knowledge_response': {
+      id: 'knowledge_response', type: 'npc', speaker: 'Stranger', x: 300, y: 450,
+      content: "\"A seeker of truth... Take this tome. It contains the riddles you must solve.\"",
+      setFlags: ['item_ancient_key'], // Item flag - persistent
+      nextNodeId: 'second_choice'
+    },
+    'hostile_response': {
+      id: 'hostile_response', type: 'npc', speaker: 'Stranger', x: 500, y: 450,
+      content: "\"Very well. Walk your path alone.\"",
+      nextNodeId: 'hostile_choice'
+    },
+    'hostile_choice': {
+      id: 'hostile_choice', type: 'player', content: '', x: 500, y: 600,
+      choices: [
+        {
+          id: 'apologize',
+          text: "Wait—I apologize. These roads have made me wary.",
+          nextNodeId: 'apology_response'
+        },
+        {
+          id: 'leave',
+          text: "I don't need your help. *walk away*",
+          nextNodeId: 'leave_ending'
+        }
+      ]
+    },
+    'apology_response': {
+      id: 'apology_response', type: 'npc', speaker: 'Stranger', x: 400, y: 750,
+      content: "\"Humility... perhaps there is hope for you yet. Tell me, what do you truly seek?\"",
+      nextNodeId: 'first_choice'
+    },
+    'leave_ending': {
+      id: 'leave_ending', type: 'npc', speaker: 'Narrator', x: 600, y: 750,
+      content: "You turn and walk away into the mist. Whatever secrets they held are lost to you now.\n\n— END —"
+    },
+    'second_choice': {
+      id: 'second_choice', type: 'player', content: '', x: 200, y: 600,
+      choices: [
+        {
+          id: 'ask_danger',
+          text: "What dangers await me on this path?",
+          nextNodeId: 'danger_info'
+        },
+        {
+          id: 'ask_stranger',
+          text: "Who are you? Why do you help travelers?",
+          nextNodeId: 'stranger_reveal'
+        },
+        {
+          id: 'thank_leave',
+          text: "Thank you. I should be on my way.",
+          nextNodeId: 'depart_response'
+        }
+      ]
+    },
+    'danger_info': {
+      id: 'danger_info', type: 'npc', speaker: 'Stranger', x: 50, y: 800,
+      content: "\"The forest is home to creatures that fear no blade. Beyond it, the ruins are patrolled by the Hollow.\"",
+      nextNodeId: 'final_choice'
+    },
+    'stranger_reveal': {
+      id: 'stranger_reveal', type: 'npc', speaker: 'Stranger', x: 200, y: 800,
+      content: "The stranger pulls back their hood, revealing an ageless face marked with glowing runes. \"I am the last of the Keepers.\"",
+      setFlags: ['achievement_first_quest', 'stat_reputation'], // Achievement + stat flags
+      nextNodeId: 'final_choice'
+    },
+    'depart_response': {
+      id: 'depart_response', type: 'npc', speaker: 'Stranger', x: 300, y: 800,
+      content: "\"May the old gods watch over you, traveler.\"\n\n— TO BE CONTINUED —"
+    },
+    'final_choice': {
+      id: 'final_choice', type: 'player', content: '', x: 125, y: 950,
+      choices: [
+        {
+          id: 'ready',
+          text: "I'm ready. Point me to the path.",
+          nextNodeId: 'depart_response'
+        },
+        {
+          id: 'more_questions',
+          text: "I have more questions...",
+          nextNodeId: 'second_choice'
+        }
+      ]
     }
   }
 };
 
-// Convert to Yarn Spinner format
-function exportToYarn(tree: DialogueTree): string {
-  let yarn = '';
-  
-  Object.values(tree.nodes).forEach(node => {
-    yarn += `title: ${node.id}\n`;
-    yarn += `---\n`;
-    
-    if (node.type === 'npc') {
-      if (node.speaker) {
-        yarn += `${node.speaker}: ${node.content.replace(/\n/g, '\n' + node.speaker + ': ')}\n`;
-      } else {
-        yarn += `${node.content}\n`;
-      }
-      
-      if (node.setFlags?.length) {
-        node.setFlags.forEach(flag => {
-          yarn += `<<set $${flag} = true>>\n`;
-        });
-      }
-      
-      if (node.nextNodeId) {
-        yarn += `<<jump ${node.nextNodeId}>>\n`;
-      }
-    } else if (node.type === 'player' && node.choices) {
-      node.choices.forEach(choice => {
-        yarn += `-> ${choice.text}\n`;
-        if (choice.setFlags?.length) {
-          choice.setFlags.forEach(flag => {
-            yarn += `    <<set $${flag} = true>>\n`;
-          });
-        }
-        if (choice.nextNodeId) {
-          yarn += `    <<jump ${choice.nextNodeId}>>\n`;
-        }
-      });
-    }
-    
-    yarn += `===\n\n`;
-  });
-  
-  return yarn;
-}
-
-// Parse Yarn Spinner format (basic)
-function importFromYarn(yarnContent: string): DialogueTree {
-  const nodes: Record<string, DialogueNode> = {};
-  const nodeBlocks = yarnContent.split('===').filter(b => b.trim());
-  
-  let y = 50;
-  nodeBlocks.forEach((block, idx) => {
-    const titleMatch = block.match(/title:\s*(\S+)/);
-    if (!titleMatch) return;
-    
-    const nodeId = titleMatch[1];
-    const contentStart = block.indexOf('---');
-    if (contentStart === -1) return;
-    
-    const content = block.slice(contentStart + 3).trim();
-    const lines = content.split('\n').filter(l => l.trim());
-    
-    const choices: Choice[] = [];
-    let dialogueContent = '';
-    let speaker = '';
-    const setFlags: string[] = [];
-    let nextNodeId = '';
-    
-    lines.forEach(line => {
-      const trimmed = line.trim();
-      if (trimmed.startsWith('->')) {
-        const choiceText = trimmed.slice(2).trim();
-        choices.push({ id: `c_${Date.now()}_${choices.length}`, text: choiceText, nextNodeId: '' });
-      } else if (trimmed.startsWith('<<jump')) {
-        const jumpMatch = trimmed.match(/<<jump\s+(\S+)>>/);
-        if (jumpMatch) {
-          if (choices.length > 0) {
-            choices[choices.length - 1].nextNodeId = jumpMatch[1];
-          } else {
-            nextNodeId = jumpMatch[1];
-          }
-        }
-      } else if (trimmed.startsWith('<<set')) {
-        const setMatch = trimmed.match(/<<set\s+\$(\w+)/);
-        if (setMatch) {
-          if (choices.length > 0) {
-            choices[choices.length - 1].setFlags = [...(choices[choices.length - 1].setFlags || []), setMatch[1]];
-          } else {
-            setFlags.push(setMatch[1]);
-          }
-        }
-      } else if (trimmed.includes(':') && !trimmed.startsWith('<<')) {
-        const [spk, ...rest] = trimmed.split(':');
-        speaker = spk.trim();
-        dialogueContent += rest.join(':').trim() + '\n';
-      } else if (!trimmed.startsWith('<<')) {
-        dialogueContent += trimmed + '\n';
-      }
-    });
-    
-    nodes[nodeId] = {
-      id: nodeId,
-      type: choices.length > 0 ? 'player' : 'npc',
-      speaker: speaker || undefined,
-      content: dialogueContent.trim(),
-      choices: choices.length > 0 ? choices : undefined,
-      nextNodeId: nextNodeId || undefined,
-      setFlags: setFlags.length > 0 ? setFlags : undefined,
-      x: (idx % 3) * 250,
-      y: y + Math.floor(idx / 3) * 180
-    };
-  });
-  
-  const startNodeId = Object.keys(nodes)[0] || 'start';
-  
-  return {
-    id: 'imported',
-    title: 'Imported Dialogue',
-    startNodeId,
-    nodes
-  };
-}
+// importFromYarn is now imported from the package
 
 export default function DialogueForgePage() {
   const [dialogueTree, setDialogueTree] = useState<DialogueTree>(defaultDialogue);
+  const [flagSchema, setFlagSchema] = useState<FlagSchema>(exampleFlagSchema);
+  const [showFlagManager, setShowFlagManager] = useState(false);
   const [currentNodeId, setCurrentNodeId] = useState<string>(defaultDialogue.startNodeId);
-  const [memoryFlags, setMemoryFlags] = useState<Set<string>>(new Set());
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [isTyping, setIsTyping] = useState(false);
   const [viewMode, setViewMode] = useState<'graph' | 'play' | 'yarn'>('graph');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -207,15 +190,17 @@ export default function DialogueForgePage() {
   const [graphScale, setGraphScale] = useState(0.85);
   const [isPanning, setIsPanning] = useState(false);
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
+  const [nodeContextMenu, setNodeContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
   const [draggingEdge, setDraggingEdge] = useState<DraggingEdge | null>(null);
   const [edgeDropMenu, setEdgeDropMenu] = useState<{ x: number; y: number; graphX: number; graphY: number; fromNodeId: string; fromChoiceIdx?: number } | null>(null);
   const skipNextClick = useRef(false);
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
+  const [showGuide, setShowGuide] = useState(false);
   const panStart = useRef({ x: 0, y: 0 });
   const dragStart = useRef({ x: 0, y: 0, nodeX: 0, nodeY: 0 });
-  const chatEndRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const flagFileInputRef = useRef<HTMLInputElement>(null);
 
   // Load from localStorage
   useEffect(() => {
@@ -227,33 +212,18 @@ export default function DialogueForgePage() {
         console.error('Failed to load:', e);
       }
     }
+    
+    const storedFlags = localStorage.getItem(FLAG_SCHEMA_KEY);
+    if (storedFlags) {
+      try {
+        setFlagSchema(JSON.parse(storedFlags));
+      } catch (e) {
+        console.error('Failed to load flags:', e);
+      }
+    }
   }, []);
 
-  // Chat playback
-  useEffect(() => {
-    if (viewMode !== 'play') return;
-    const node = dialogueTree.nodes[currentNodeId];
-    if (!node || node.type !== 'npc') return;
-
-    setIsTyping(true);
-    const timer = setTimeout(() => {
-      if (node.setFlags) {
-        setMemoryFlags(prev => {
-          const next = new Set(prev);
-          node.setFlags!.forEach(f => next.add(f));
-          return next;
-        });
-      }
-      setHistory(prev => [...prev, { nodeId: node.id, type: 'npc', speaker: node.speaker, content: node.content }]);
-      setIsTyping(false);
-      if (node.nextNodeId) setTimeout(() => setCurrentNodeId(node.nextNodeId!), 300);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [currentNodeId, dialogueTree, viewMode]);
-
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [history, isTyping]);
+  // PlayView now handles its own state
 
   useEffect(() => {
     console.log('edgeDropMenu state changed:', edgeDropMenu);
@@ -285,6 +255,7 @@ export default function DialogueForgePage() {
     // Clear menus on click
     setEdgeDropMenu(null);
     setContextMenu(null);
+    setNodeContextMenu(null);
     setSelectedNodeId(null);
   };
 
@@ -438,38 +409,51 @@ export default function DialogueForgePage() {
     e.preventDefault();
     setGraphScale(s => Math.min(2, Math.max(0.3, s * (e.deltaY > 0 ? 0.9 : 1.1))));
   };
-
-  const currentNode = dialogueTree.nodes[currentNodeId];
-  const selectedNode = selectedNodeId ? dialogueTree.nodes[selectedNodeId] : null;
-
-  const availableChoices = currentNode?.choices?.filter(choice => {
-    if (!choice.conditions) return true;
-    return choice.conditions.every(cond => {
-      const hasFlag = memoryFlags.has(cond.flag);
-      return cond.operator === 'is_set' ? hasFlag : !hasFlag;
-    });
-  }) || [];
-
-  const handleChoice = (choice: Choice) => {
-    setHistory(prev => [...prev, { nodeId: choice.id, type: 'player', content: choice.text }]);
-    if (choice.setFlags) {
-      setMemoryFlags(prev => {
-        const next = new Set(prev);
-        choice.setFlags!.forEach(f => next.add(f));
-        return next;
-      });
+  
+  const handleZoomIn = () => {
+    setGraphScale(s => Math.min(2, s * 1.2));
+  };
+  
+  const handleZoomOut = () => {
+    setGraphScale(s => Math.max(0.3, s * 0.8));
+  };
+  
+  const handleZoomFit = () => {
+    const nodes = Object.values(dialogueTree.nodes);
+    if (nodes.length === 0) {
+      setGraphOffset({ x: 150, y: 30 });
+      setGraphScale(0.85);
+      return;
     }
-    setCurrentNodeId(choice.nextNodeId);
+    
+    const xs = nodes.map(n => n.x);
+    const ys = nodes.map(n => n.y);
+    const minX = Math.min(...xs);
+    const minY = Math.min(...ys);
+    const maxX = Math.max(...xs.map(x => x + NODE_WIDTH));
+    const maxY = Math.max(...ys.map(y => y + NODE_HEIGHT));
+    
+    const width = maxX - minX;
+    const height = maxY - minY;
+    const graphRect = graphRef.current?.getBoundingClientRect();
+    if (!graphRect) return;
+    
+    const scaleX = (graphRect.width - 100) / width;
+    const scaleY = (graphRect.height - 100) / height;
+    const scale = Math.min(scaleX, scaleY, 1.5) * 0.9;
+    
+    setGraphScale(scale);
+    setGraphOffset({
+      x: -minX * scale + 50,
+      y: -minY * scale + 50
+    });
   };
-
-  const handleRestart = () => {
-    setHistory([]);
-    setMemoryFlags(new Set());
-    setCurrentNodeId(dialogueTree.startNodeId);
-  };
+  
+  const selectedNode = selectedNodeId ? dialogueTree.nodes[selectedNodeId] : null;
 
   const handleSave = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dialogueTree));
+    localStorage.setItem(FLAG_SCHEMA_KEY, JSON.stringify(flagSchema));
     setSaved(true);
     setHasChanges(false);
     setTimeout(() => setSaved(false), 2000);
@@ -597,6 +581,36 @@ export default function DialogueForgePage() {
     a.click();
     URL.revokeObjectURL(url);
   };
+  
+  const handleExportFlags = () => {
+    const json = JSON.stringify(flagSchema, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `flag-schema.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  
+  const handleImportFlags = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const content = ev.target?.result as string;
+      try {
+        const imported = JSON.parse(content) as FlagSchema;
+        setFlagSchema(imported);
+        setHasChanges(true);
+      } catch (err) {
+        alert('Failed to import flag schema');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -607,15 +621,20 @@ export default function DialogueForgePage() {
       const content = ev.target?.result as string;
       try {
         if (file.name.endsWith('.yarn')) {
-          setDialogueTree(importFromYarn(content));
+          const dialogue = importFromYarn(content);
+          setDialogueTree(dialogue);
         } else {
           setDialogueTree(JSON.parse(content));
         }
         setHasChanges(true);
-        handleRestart();
       } catch (err) {
-        alert('Failed to import file');
+        console.error('Import error:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        alert(`Failed to import file: ${errorMessage}`);
       }
+    };
+    reader.onerror = () => {
+      alert('Failed to read file');
     };
     reader.readAsText(file);
     e.target.value = '';
@@ -638,7 +657,7 @@ export default function DialogueForgePage() {
 
   // Render connections
   const renderConnections = () => {
-    const lines: JSX.Element[] = [];
+    const lines: React.ReactElement[] = [];
     
     Object.values(dialogueTree.nodes).forEach(node => {
       const fromX = node.x + NODE_WIDTH / 2;
@@ -722,7 +741,7 @@ export default function DialogueForgePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex flex-col">
+    <div className="w-full h-full bg-[#0a0a0f] flex flex-col overflow-hidden">
       {/* Header */}
       <header className="border-b border-[#1a1a2e] bg-[#0d0d14]/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="px-4 py-2 flex items-center justify-between">
@@ -752,30 +771,49 @@ export default function DialogueForgePage() {
           </div>
 
           <div className="flex items-center gap-1">
-            <Link href="/docs/dialogue-forge/getting-started" className="p-2 text-gray-400 hover:text-white" title="Docs">
-              <BookOpen size={16} />
-            </Link>
-            <button onClick={() => fileInputRef.current?.click()} className="p-2 text-gray-400 hover:text-white" title="Import">
+            {/* Examples & Flags */}
+            <ExampleLoader
+              onLoadDialogue={(dialogue) => {
+                setDialogueTree(dialogue);
+                setHasChanges(true);
+              }}
+              onLoadFlags={(flags) => {
+                setFlagSchema(flags);
+                setHasChanges(true);
+              }}
+            />
+            <button onClick={() => setShowFlagManager(true)} className="p-2 text-gray-400 hover:text-white" title="Manage Flags">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M9 9h6M9 15h6M9 12h6" />
+              </svg>
+            </button>
+            
+            <div className="h-6 w-px bg-[#2a2a3e] mx-1" />
+            
+            {/* Import/Export */}
+            <button onClick={() => fileInputRef.current?.click()} className="p-2 text-gray-400 hover:text-white" title="Import Dialogue (.yarn or .json)">
               <Upload size={16} />
             </button>
             <input ref={fileInputRef} type="file" accept=".json,.yarn" onChange={handleImport} className="hidden" />
-            <button onClick={handleExportJSON} className="p-2 text-gray-400 hover:text-white" title="Export JSON">
-              <Download size={16} />
-            </button>
-            <button onClick={handleExportYarn} className="p-2 text-gray-400 hover:text-white" title="Export Yarn">
+            <button onClick={handleExportYarn} className="p-2 text-gray-400 hover:text-white" title="Export to Yarn (.yarn)">
               <FileText size={16} />
             </button>
-            <button onClick={handleRestart} className="p-2 text-gray-400 hover:text-white" title="Restart">
-              <RotateCcw size={16} />
+            
+            <div className="h-6 w-px bg-[#2a2a3e] mx-1" />
+            
+            {/* Guide & Save */}
+            <button onClick={() => setShowGuide(true)} className="p-2 text-gray-400 hover:text-white" title="Guide & Documentation">
+              <BookOpen size={16} />
             </button>
-            <button onClick={handleSave} className={`p-2 rounded ${saved ? 'text-green-400' : hasChanges ? 'text-yellow-400' : 'text-gray-400 hover:text-white'}`}>
+            <button onClick={handleSave} className={`p-2 rounded ${saved ? 'text-green-400' : hasChanges ? 'text-yellow-400' : 'text-gray-400 hover:text-white'}`} title="Save">
               {saved ? <Check size={16} /> : <Save size={16} />}
             </button>
           </div>
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 60px)' }}>
         {/* Graph View */}
         {viewMode === 'graph' && (
           <>
@@ -797,7 +835,13 @@ export default function DialogueForgePage() {
                     className={`graph-node absolute select-none cursor-move`}
                     style={{ left: node.x, top: node.y, width: NODE_WIDTH }}
                     onMouseDown={(e) => { e.stopPropagation(); startNodeDrag(node.id, e); }}
-                    onClick={(e) => { e.stopPropagation(); setSelectedNodeId(node.id); setContextMenu(null); }}
+                    onClick={(e) => { e.stopPropagation(); setSelectedNodeId(node.id); setContextMenu(null); setNodeContextMenu(null); }}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setNodeContextMenu({ x: e.clientX, y: e.clientY, nodeId: node.id });
+                      setContextMenu(null);
+                    }}
                   >
                     <div className={`rounded-lg border-2 transition-all ${
                       selectedNodeId === node.id ? 'border-[#e94560] shadow-lg shadow-[#e94560]/20' :
@@ -819,6 +863,27 @@ export default function DialogueForgePage() {
                         <div className="text-xs text-gray-400 line-clamp-2">
                           {node.type === 'npc' ? node.content.slice(0, 60) + (node.content.length > 60 ? '...' : '') : `${node.choices?.length || 0} choices`}
                         </div>
+                        {/* Flag indicators */}
+                        {node.setFlags && node.setFlags.length > 0 && (
+                          <div className="mt-1.5 flex flex-wrap gap-1">
+                            {node.setFlags.map(flagId => {
+                              const flag = flagSchema.flags.find(f => f.id === flagId);
+                              if (!flag) return null;
+                              const colorClass = flag.type === 'quest' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
+                                flag.type === 'achievement' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' :
+                                flag.type === 'item' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                                flag.type === 'stat' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' :
+                                flag.type === 'title' ? 'bg-pink-500/20 text-pink-400 border-pink-500/30' :
+                                flag.type === 'global' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' :
+                                'bg-gray-500/20 text-gray-400 border-gray-500/30';
+                              return (
+                                <span key={flagId} className={`text-[8px] px-1 py-0.5 rounded border ${colorClass}`} title={flag.name}>
+                                  {flag.type === 'dialogue' ? 'temp' : flag.type[0]}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
                       {/* Output port */}
                       {node.type === 'npc' && (
@@ -832,7 +897,30 @@ export default function DialogueForgePage() {
                         <div className="border-t border-[#2a2a3e]">
                           {node.choices.map((choice, idx) => (
                             <div key={choice.id} className="px-3 py-1 text-[10px] text-gray-400 flex items-center gap-2 border-b border-[#2a2a3e] last:border-0 relative">
-                              <span className="truncate flex-1">{choice.text.slice(0, 25)}...</span>
+                              <div className="flex-1 min-w-0">
+                                <span className="truncate block">{choice.text.slice(0, 25)}...</span>
+                                {/* Choice flag indicators */}
+                                {choice.setFlags && choice.setFlags.length > 0 && (
+                                  <div className="mt-0.5 flex flex-wrap gap-0.5">
+                                    {choice.setFlags.map(flagId => {
+                                      const flag = flagSchema.flags.find(f => f.id === flagId);
+                                      if (!flag) return null;
+                                      const colorClass = flag.type === 'quest' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
+                                        flag.type === 'achievement' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' :
+                                        flag.type === 'item' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                                        flag.type === 'stat' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' :
+                                        flag.type === 'title' ? 'bg-pink-500/20 text-pink-400 border-pink-500/30' :
+                                        flag.type === 'global' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' :
+                                        'bg-gray-500/20 text-gray-400 border-gray-500/30';
+                                      return (
+                                        <span key={flagId} className={`text-[7px] px-0.5 py-0 rounded border ${colorClass}`} title={flag.name}>
+                                          {flag.type === 'dialogue' ? 't' : flag.type[0]}
+                                        </span>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </div>
                               <div
                                 className="absolute -right-2 top-1/2 -translate-y-1/2 w-3 h-3 bg-[#2a2a3e] border-2 border-purple-400 rounded-full cursor-crosshair hover:border-[#e94560] hover:bg-[#e94560]/20"
                                 onMouseDown={(e) => { e.stopPropagation(); startEdgeDrag(node.id, idx); }}
@@ -849,8 +937,18 @@ export default function DialogueForgePage() {
               </div>
 
               {/* Help text */}
-              <div className="absolute bottom-3 right-3 text-[10px] text-gray-600">
+              <div className="absolute bottom-3 left-3 text-[10px] text-gray-600">
                 Right-click to add nodes • Drag ports to connect • Scroll to zoom
+              </div>
+              
+              {/* Zoom Controls */}
+              <div className="absolute top-4 right-4">
+                <ZoomControls
+                  scale={graphScale}
+                  onZoomIn={handleZoomIn}
+                  onZoomOut={handleZoomOut}
+                  onZoomFit={handleZoomFit}
+                />
               </div>
             </div>
 
@@ -941,195 +1039,144 @@ export default function DialogueForgePage() {
               </div>
             )}
 
+            {/* Node Context Menu */}
+            {nodeContextMenu && (
+              <div
+                className="context-menu fixed bg-[#1a1a2e] border border-purple-500 rounded-lg shadow-xl py-1"
+                style={{ left: nodeContextMenu.x, top: nodeContextMenu.y, zIndex: 9999 }}
+              >
+                {(() => {
+                  const node = dialogueTree.nodes[nodeContextMenu.nodeId];
+                  if (!node) return null;
+                  
+                  return (
+                    <>
+                      <div className="px-3 py-1 text-[10px] text-gray-500 uppercase border-b border-[#2a2a3e]">
+                        {node.id}
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSelectedNodeId(nodeContextMenu.nodeId);
+                          setNodeContextMenu(null);
+                        }}
+                        className="w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-[#2a2a3e] flex items-center gap-2"
+                      >
+                        <Edit3 size={14} className="text-[#e94560]" /> Edit Node
+                      </button>
+                      {node.type === 'player' && (
+                        <button
+                          onClick={() => {
+                            addChoice(nodeContextMenu.nodeId);
+                            setNodeContextMenu(null);
+                          }}
+                          className="w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-[#2a2a3e] flex items-center gap-2"
+                        >
+                          <Plus size={14} className="text-purple-400" /> Add Choice
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          const newNode = { ...node, id: `${node.id}_copy_${Date.now()}`, x: node.x + 50, y: node.y + 50 };
+                          setDialogueTree(prev => ({
+                            ...prev,
+                            nodes: { ...prev.nodes, [newNode.id]: newNode }
+                          }));
+                          setHasChanges(true);
+                          setNodeContextMenu(null);
+                        }}
+                        className="w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-[#2a2a3e] flex items-center gap-2"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                        Duplicate
+                      </button>
+                      {nodeContextMenu.nodeId !== dialogueTree.startNodeId && (
+                        <button
+                          onClick={() => {
+                            deleteNode(nodeContextMenu.nodeId);
+                            setNodeContextMenu(null);
+                          }}
+                          className="w-full px-4 py-2 text-sm text-left text-red-400 hover:bg-[#2a2a3e] flex items-center gap-2"
+                        >
+                          <Trash2 size={14} /> Delete
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          setCurrentNodeId(nodeContextMenu.nodeId);
+                          setViewMode('play');
+                          setNodeContextMenu(null);
+                        }}
+                        className="w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-[#2a2a3e] flex items-center gap-2 border-t border-[#2a2a3e] mt-1"
+                      >
+                        <Play size={14} className="text-green-400" /> Play from Here
+                      </button>
+                    </>
+                  );
+                })()}
+                <button
+                  onClick={() => setNodeContextMenu(null)}
+                  className="w-full px-4 py-1.5 text-xs text-gray-500 hover:text-gray-300 border-t border-[#2a2a3e] mt-1"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
             {/* Node Editor Panel */}
             {selectedNode && (
-              <aside className="w-80 border-l border-[#1a1a2e] bg-[#0d0d14] overflow-y-auto">
-                <div className="p-4 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs px-2 py-0.5 rounded ${selectedNode.type === 'npc' ? 'bg-[#e94560]/20 text-[#e94560]' : 'bg-purple-500/20 text-purple-400'}`}>
-                      {selectedNode.type === 'npc' ? 'NPC' : 'PLAYER'}
-                    </span>
-                    <div className="flex gap-1">
-                      <button onClick={() => deleteNode(selectedNode.id)} className="p-1 text-gray-500 hover:text-red-400"><Trash2 size={14} /></button>
-                      <button onClick={() => setSelectedNodeId(null)} className="p-1 text-gray-500 hover:text-white"><X size={14} /></button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-[10px] text-gray-500 uppercase">ID</label>
-                    <input value={selectedNode.id} disabled className="w-full bg-[#12121a] border border-[#2a2a3e] rounded px-2 py-1 text-xs text-gray-500 font-mono" />
-                  </div>
-
-                  {selectedNode.type === 'npc' && (
-                    <>
-                      <div>
-                        <label className="text-[10px] text-gray-500 uppercase">Speaker</label>
-                        <input
-                          value={selectedNode.speaker || ''}
-                          onChange={(e) => updateNode(selectedNode.id, { speaker: e.target.value })}
-                          className="w-full bg-[#12121a] border border-[#2a2a3e] rounded px-2 py-1 text-sm text-gray-200 focus:border-[#e94560] outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-gray-500 uppercase">Content</label>
-                        <textarea
-                          value={selectedNode.content}
-                          onChange={(e) => updateNode(selectedNode.id, { content: e.target.value })}
-                          className="w-full bg-[#12121a] border border-[#2a2a3e] rounded px-2 py-1 text-sm text-gray-200 focus:border-[#e94560] outline-none min-h-[100px] resize-y"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-gray-500 uppercase">Next Node</label>
-                        <select
-                          value={selectedNode.nextNodeId || ''}
-                          onChange={(e) => updateNode(selectedNode.id, { nextNodeId: e.target.value || undefined })}
-                          className="w-full bg-[#12121a] border border-[#2a2a3e] rounded px-2 py-1 text-sm text-gray-200 outline-none"
-                        >
-                          <option value="">— End —</option>
-                          {Object.keys(dialogueTree.nodes).filter(id => id !== selectedNode.id).map(id => (
-                            <option key={id} value={id}>{id}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </>
-                  )}
-
-                  {selectedNode.type === 'player' && (
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <label className="text-[10px] text-gray-500 uppercase">Choices</label>
-                        <button onClick={() => addChoice(selectedNode.id)} className="text-[10px] text-[#e94560]">+ Add</button>
-                      </div>
-                      <div className="space-y-2">
-                        {selectedNode.choices?.map((choice, idx) => (
-                          <div key={choice.id} className="bg-[#12121a] border border-[#2a2a3e] rounded p-2 space-y-2">
-                            <div className="flex items-center gap-2">
-                              <input
-                                value={choice.text}
-                                onChange={(e) => updateChoice(selectedNode.id, idx, { text: e.target.value })}
-                                className="flex-1 bg-transparent text-sm text-gray-200 outline-none"
-                                placeholder="Choice text..."
-                              />
-                              <button onClick={() => deleteChoice(selectedNode.id, idx)} className="text-gray-600 hover:text-red-400">
-                                <Trash2 size={12} />
-                              </button>
-                            </div>
-                            <select
-                              value={choice.nextNodeId}
-                              onChange={(e) => updateChoice(selectedNode.id, idx, { nextNodeId: e.target.value })}
-                              className="w-full bg-[#0d0d14] border border-[#2a2a3e] rounded px-2 py-1 text-xs text-gray-300 outline-none"
-                            >
-                              <option value="">— Select target —</option>
-                              {Object.keys(dialogueTree.nodes).map(id => <option key={id} value={id}>{id}</option>)}
-                            </select>
-                            <input
-                              value={choice.setFlags?.join(', ') || ''}
-                              onChange={(e) => updateChoice(selectedNode.id, idx, { setFlags: e.target.value ? e.target.value.split(',').map(s => s.trim()) : undefined })}
-                              className="w-full bg-[#0d0d14] border border-[#2a2a3e] rounded px-2 py-1 text-[10px] text-gray-400 outline-none font-mono"
-                              placeholder="Set flags..."
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <div>
-                    <label className="text-[10px] text-gray-500 uppercase">Set Flags (on enter)</label>
-                    <input
-                      value={selectedNode.setFlags?.join(', ') || ''}
-                      onChange={(e) => updateNode(selectedNode.id, { setFlags: e.target.value ? e.target.value.split(',').map(s => s.trim()) : undefined })}
-                      className="w-full bg-[#12121a] border border-[#2a2a3e] rounded px-2 py-1 text-sm text-gray-200 outline-none font-mono"
-                      placeholder="flag1, flag2"
-                    />
-                  </div>
-
-                  <button
-                    onClick={() => { setCurrentNodeId(selectedNode.id); setViewMode('play'); handleRestart(); }}
-                    className="w-full py-2 bg-[#e94560] hover:bg-[#d63850] text-white rounded text-sm flex items-center justify-center gap-2"
-                  >
-                    <Play size={14} /> Play from Here
-                  </button>
-                </div>
-              </aside>
+              <NodeEditor
+                node={selectedNode}
+                dialogue={dialogueTree}
+                onUpdate={(updates) => updateNode(selectedNode.id, updates)}
+                onDelete={() => deleteNode(selectedNode.id)}
+                onAddChoice={() => addChoice(selectedNode.id)}
+                onUpdateChoice={(idx, updates) => updateChoice(selectedNode.id, idx, updates)}
+                onRemoveChoice={(idx) => deleteChoice(selectedNode.id, idx)}
+                onClose={() => setSelectedNodeId(null)}
+                onPlayFromHere={(nodeId) => {
+                  setCurrentNodeId(nodeId);
+                  setViewMode('play');
+                }}
+                flagSchema={flagSchema}
+              />
             )}
           </>
         )}
 
         {/* Yarn View */}
         {viewMode === 'yarn' && (
-          <main className="flex-1 flex flex-col bg-[#0d0d14]">
-            <div className="border-b border-[#1a1a2e] px-4 py-2 flex items-center justify-between">
-              <span className="text-sm text-gray-400">Yarn Spinner Output</span>
-              <button
-                onClick={handleExportYarn}
-                className="px-3 py-1.5 bg-[#e94560] hover:bg-[#d63850] text-white text-sm rounded flex items-center gap-2"
-              >
-                <Download size={14} /> Download .yarn
-              </button>
-            </div>
-            <div className="flex-1 overflow-auto p-4">
-              <pre className="font-mono text-sm text-gray-300 whitespace-pre-wrap bg-[#08080c] rounded-lg p-4 border border-[#1a1a2e]">
-                {exportToYarn(dialogueTree)}
-              </pre>
-            </div>
-          </main>
+          <YarnView dialogue={dialogueTree} onExport={handleExportYarn} />
         )}
 
         {/* Play View */}
         {viewMode === 'play' && (
-          <main className="flex-1 flex flex-col">
-            <div className="flex-1 overflow-y-auto p-4">
-              <div className="max-w-2xl mx-auto space-y-4">
-                {history.map((entry, idx) => (
-                  <div key={idx} className={`flex ${entry.type === 'player' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                      entry.type === 'player' ? 'bg-[#e94560] text-white rounded-br-md' : 'bg-[#1a1a2e] text-gray-100 rounded-bl-md'
-                    }`}>
-                      {entry.type === 'npc' && entry.speaker && <div className="text-xs text-[#e94560] font-medium mb-1">{entry.speaker}</div>}
-                      <div className="whitespace-pre-wrap">{entry.content}</div>
-                    </div>
-                  </div>
-                ))}
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="bg-[#1a1a2e] rounded-2xl rounded-bl-md px-4 py-3 flex gap-1">
-                      <span className="w-2 h-2 bg-[#e94560] rounded-full animate-bounce" />
-                      <span className="w-2 h-2 bg-[#e94560] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-2 h-2 bg-[#e94560] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                    </div>
-                  </div>
-                )}
-                <div ref={chatEndRef} />
-              </div>
-            </div>
-
-            {currentNode?.type === 'player' && !isTyping && availableChoices.length > 0 && (
-              <div className="border-t border-[#1a1a2e] bg-[#0d0d14]/80 p-4">
-                <div className="max-w-2xl mx-auto space-y-2">
-                  {availableChoices.map(choice => (
-                    <button
-                      key={choice.id}
-                      onClick={() => handleChoice(choice)}
-                      className="w-full text-left px-4 py-3 rounded-lg border border-[#2a2a3e] hover:border-[#e94560] bg-[#12121a] text-gray-200 flex items-center justify-between"
-                    >
-                      <span>{choice.text}</span>
-                      <ChevronRight size={18} className="text-gray-600" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {currentNode?.type === 'npc' && !currentNode.nextNodeId && !isTyping && (
-              <div className="border-t border-[#1a1a2e] p-4 text-center">
-                <p className="text-gray-500 mb-3">End of dialogue</p>
-                <button onClick={handleRestart} className="px-4 py-2 bg-[#e94560] text-white rounded-lg">Play Again</button>
-              </div>
-            )}
-          </main>
+          <PlayView 
+            dialogue={dialogueTree} 
+            startNodeId={currentNodeId}
+            flagSchema={flagSchema}
+            initialFlags={{}}
+          />
         )}
       </div>
+
+      {/* Guide Panel */}
+      <GuidePanel isOpen={showGuide} onClose={() => setShowGuide(false)} />
+      
+      {/* Flag Manager */}
+      {showFlagManager && (
+        <FlagManager 
+          flagSchema={flagSchema}
+          dialogue={dialogueTree}
+          onUpdate={(updated) => {
+            setFlagSchema(updated);
+            setHasChanges(true);
+          }}
+          onClose={() => setShowFlagManager(false)}
+        />
+      )}
     </div>
   );
 }

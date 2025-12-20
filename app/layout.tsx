@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-  import './globals.css';
-import Nav from '@/components/layout/Nav';
+import './globals.css';
+import { ConditionalLayout } from '@/components/layout/ConditionalLayout';
 
 export const metadata: Metadata = {
   title: 'Portfolio - Software Architecture & Documentation',
@@ -20,15 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Nav />
-        <main className="min-h-screen">
+        <ConditionalLayout>
           {children}
-        </main>
-        <footer className="border-t-4 border-primary bg-dark-alt py-8 mt-16">
-          <div className="max-w-7xl mx-auto px-6 text-center text-green-300">
-            <p>© {new Date().getFullYear()} Portfolio. Built with Next.js, MDX, and SQLite.</p>
-          </div>
-        </footer>
+        </ConditionalLayout>
       </body>
     </html>
   );
