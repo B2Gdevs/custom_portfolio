@@ -1,15 +1,32 @@
 # Enhancement Roadmap
 
+## ✅ Recently Completed (V2 Migration)
+
+- [x] **React Flow Migration** - Complete rewrite using React Flow
+  - Custom NPC and Player node components
+  - Color-coded choice edges
+  - Node dragging, pan, zoom (React Flow built-in)
+  - Context menus (pane and node)
+  - NodeEditor sidebar integration
+  - Flag indicators on nodes with color coding
+  - Fixed all critical bugs (flag duplication, PlayView freeze, handle positioning)
+
+- [x] **Minimap** - React Flow built-in minimap
+- [x] **Zoom Controls** - React Flow built-in controls
+- [x] **Node Context Menu** - Right-click on nodes for quick actions
+- [x] **Flag System** - Full flag support with color coding (quest, achievement, item, stat, title, global, dialogue)
+
 ## Yarn Spinner Feature Support
 
 ### Phase 1: Core Conditionals & Variables (High Priority)
-- [ ] **Conditional Blocks** (`<<if>>`, `<<elseif>>`, `<<else>>`, `<<endif>>`)
-  - Visual conditional nodes in graph editor
-  - Support flag checks with operators (==, !=, >, <, >=, <=)
-  - Nested conditionals
-  - Export/import conditional blocks
+- [x] **Conditional Blocks** (`<<if>>`, `<<elseif>>`, `<<else>>`, `<<endif>>`) - Basic support exists
+  - [x] Basic conditional blocks in NodeEditor
+  - [x] Export/import conditional blocks
+  - [ ] Visual conditional nodes in graph editor (enhancement)
+  - [x] Support flag checks with operators (==, !=, >, <, >=, <=)
+  - [ ] Nested conditionals (enhancement)
 
-- [ ] **Variables** (`$variable`)
+- [ ] **Variables** (`$variable`) - **NEXT PRIORITY**
   - Variable management UI
   - Variable types (string, number, boolean)
   - Variable operations (set, increment, decrement, multiply, divide)
@@ -59,51 +76,54 @@
 ## Graph Editor Enhancements
 
 ### Phase 1: Core UX Improvements (High Priority)
-- [ ] **Minimap**
-  - Overview of entire graph
-  - Click to navigate
-  - Current view indicator
+- [x] **Minimap** - ✅ React Flow built-in
+  - [x] Overview of entire graph
+  - [x] Click to navigate
+  - [x] Current view indicator
 
-- [ ] **Zoom Controls**
-  - Zoom in/out buttons
-  - Mouse wheel zoom
-  - Zoom to fit
-  - Zoom to selection
+- [x] **Zoom Controls** - ✅ React Flow built-in
+  - [x] Zoom in/out buttons
+  - [x] Mouse wheel zoom
+  - [x] Zoom to fit
+  - [ ] Zoom to selection (enhancement)
 
-- [ ] **Multi-Select**
-  - Click + drag to select multiple nodes
-  - Shift+click for multi-select
-  - Bulk operations (delete, move, copy)
+- [ ] **Multi-Select** - **HIGH PRIORITY** (React Flow supports, needs wiring)
+  - [ ] Click + drag to select multiple nodes
+  - [ ] Shift+click for multi-select
+  - [ ] Bulk operations (delete, move, copy)
+  - [ ] Selection box visual feedback
 
-- [ ] **Copy/Paste**
+- [ ] **Copy/Paste** - **HIGH PRIORITY**
   - Copy selected nodes
   - Paste with offset
   - Duplicate nodes
   - Copy connections
 
-- [ ] **Undo/Redo**
-  - Action history
-  - Keyboard shortcuts (Ctrl+Z, Ctrl+Y)
-  - Visual undo/redo buttons
+- [x] **Undo/Redo** - ✅ Basic implementation exists
+  - [x] Action history (partially working)
+  - [x] Keyboard shortcuts (Ctrl+Z, Ctrl+Y / Cmd+Z, Cmd+Y)
+  - [ ] Visual undo/redo buttons (enhancement)
+  - [ ] Fix undo behavior to be more granular (bug fix needed)
 
 ### Phase 2: Navigation & Organization (Medium Priority)
-- [ ] **Node Search/Filter**
+- [ ] **Node Search/Filter** - **MEDIUM PRIORITY**
   - Search by node ID, content, speaker
   - Filter by node type
   - Filter by flags used
   - Highlight search results
+  - Jump to node from search
 
-- [ ] **Node Grouping/Folders**
+- [ ] **Node Grouping/Folders** - **LOWER PRIORITY**
   - Group related nodes
   - Collapse/expand groups
   - Visual grouping indicators
   - Move groups together
 
-- [ ] **Better Edge Routing**
-  - Smart edge paths (avoid nodes)
-  - Curved edges
-  - Edge labels
-  - Edge colors by type
+- [x] **Better Edge Routing** - ✅ Partially complete
+  - [x] Curved edges (React Flow smoothstep)
+  - [x] Edge colors by type (choice edges color-coded)
+  - [ ] Smart edge paths (avoid nodes) - enhancement
+  - [ ] Edge labels - enhancement
 
 - [ ] **Node Alignment Tools**
   - Align left/right/center
@@ -135,33 +155,52 @@
 
 ## Implementation Priority
 
-### Immediate (Next Sprint)
-1. Conditional blocks support
-2. Variables system
-3. Minimap
-4. Zoom controls
-5. Multi-select
+### 🔥 Immediate (Next Sprint) - Critical for Production
+1. **Multi-select** - Wire up React Flow's built-in multi-select
+2. **Copy/paste** - Essential for workflow efficiency
+3. **Undo/redo fixes** - Make undo more granular and reliable
+4. **Variables system** - Core Yarn Spinner feature
+5. **Edge drop menu** - Create nodes when dropping edge on empty space
 
-### Short Term (Next Month)
-1. Copy/paste
-2. Undo/redo
-3. Advanced set operations
-4. Node search/filter
-5. Better edge routing
+### 📅 Short Term (Next Month) - High Value Features
+1. **Advanced set operations** - Increment, decrement, multiply, divide
+2. **Node search/filter** - Essential for large dialogues
+3. **Visual undo/redo buttons** - Better UX
+4. **Zoom to selection** - Quality of life improvement
+5. **Better error handling** - Validation and user feedback
 
-### Medium Term (Next Quarter)
-1. Commands support
-2. Shortcuts
-3. Tags system
-4. Node grouping
-5. Node alignment tools
+### 🎯 Medium Term (Next Quarter) - Feature Enhancements
+1. **Commands support** (`<<command>>`)
+2. **Shortcuts** (`[[text|node]]`)
+3. **Tags system** (`#tag`)
+4. **Node alignment tools** - Align, distribute, snap to grid
+5. **Nested conditionals** - Enhanced conditional support
 
-### Long Term (Future)
-1. Functions
-2. Localization
-3. Node templates
-4. Performance optimizations
-5. Advanced visual features
+### 🚀 Long Term (Future) - Nice to Have
+1. **Functions** - Built-in and custom functions
+2. **Localization** - Multi-language support
+3. **Node templates** - Reusable node patterns
+4. **Node grouping/folders** - Organization for large projects
+5. **Performance optimizations** - Virtual scrolling, lazy rendering
+6. **Advanced visual features** - Animations, custom colors, icons
+
+## Known Issues & Bugs
+
+### Critical Bugs (Fix Immediately)
+- [ ] Undo/redo sometimes reverts to initial state instead of last action
+- [ ] Flag display in NodeEditor can be stale until tab switch (partially fixed, monitor)
+
+### Minor Issues
+- [ ] Edge drop menu not implemented (when dragging edge to empty space)
+- [ ] Some React Flow features not fully utilized (selection box, etc.)
+
+## Technical Debt
+
+- [ ] Clean up V1 components (keep for backward compatibility but mark as deprecated)
+- [ ] Improve type safety in reactflow-converter
+- [ ] Add comprehensive error boundaries
+- [ ] Improve test coverage
+- [ ] Performance profiling for large graphs (100+ nodes)
 
 ## Technical Considerations
 
