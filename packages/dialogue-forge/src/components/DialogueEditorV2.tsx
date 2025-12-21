@@ -29,7 +29,7 @@ import 'reactflow/dist/style.css';
 
 import { DialogueEditorProps, DialogueTree, DialogueNode, Choice } from '../types';
 import { exportToYarn } from '../lib/yarn-converter';
-import { convertDialogueTreeToReactFlow, updateDialogueTreeFromReactFlow } from '../utils/reactflow-converter';
+import { convertDialogueTreeToReactFlow, updateDialogueTreeFromReactFlow, CHOICE_COLORS } from '../utils/reactflow-converter';
 import { createNode, deleteNodeFromTree, addChoiceToNode, removeChoiceFromNode, updateChoiceInNode } from '../utils/node-helpers';
 import { NodeEditor } from './NodeEditor';
 import { YarnView } from './YarnView';
@@ -71,9 +71,9 @@ function DialogueEditorV2Internal({
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; graphX: number; graphY: number } | null>(null);
   const [nodeContextMenu, setNodeContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
-  const [edgeDropMenu, setEdgeDropMenu] = useState<{ x: number; y: number; graphX: number; graphY: number; fromNodeId: string; fromChoiceIdx?: number } | null>(null);
+  const [edgeDropMenu, setEdgeDropMenu] = useState<{ x: number; y: number; graphX: number; graphY: number; fromNodeId: string; fromChoiceIdx?: number; sourceHandle?: string } | null>(null);
   const reactFlowInstance = useReactFlow();
-  const connectingRef = useRef<{ fromNodeId: string; fromChoiceIdx?: number } | null>(null);
+  const connectingRef = useRef<{ fromNodeId: string; fromChoiceIdx?: number; sourceHandle?: string } | null>(null);
 
   // Convert DialogueTree to React Flow format
   const { nodes: initialNodes, edges: initialEdges } = useMemo(
@@ -129,9 +129,48 @@ function DialogueEditorV2Internal({
     };
   }, [selectedNodeId, dialogue]);
 
+  // Handle node deletion (multi-delete support)
+  const onNodesDelete = useCallback((deleted: Node[]) => {
+    let updatedNodes = { ...dialogue.nodes };
+    let shouldClearSelection = false;
+    
+    deleted.forEach(node => {
+      delete updatedNodes[node.id];
+      if (selectedNodeId === node.id) {
+        shouldClearSelection = true;
+      }
+    });
+    
+    onChange({ ...dialogue, nodes: updatedNodes });
+    if (shouldClearSelection) {
+      setSelectedNodeId(null);
+    }
+  }, [dialogue, onChange, selectedNodeId]);
+
   // Handle node changes (drag, delete, etc.)
   const onNodesChange = useCallback((changes: NodeChange[]) => {
     setNodes((nds) => applyNodeChanges(changes, nds));
+    
+    // Handle deletions (backup in case onNodesDelete doesn't fire)
+    const deletions = changes.filter(c => c.type === 'remove');
+    if (deletions.length > 0) {
+      let updatedNodes = { ...dialogue.nodes };
+      let shouldClearSelection = false;
+      
+      deletions.forEach(change => {
+        if (change.type === 'remove') {
+          delete updatedNodes[change.id];
+          if (selectedNodeId === change.id) {
+            shouldClearSelection = true;
+          }
+        }
+      });
+      
+      onChange({ ...dialogue, nodes: updatedNodes });
+      if (shouldClearSelection) {
+        setSelectedNodeId(null);
+      }
+    }
     
     // Sync position changes back to DialogueTree
     changes.forEach(change => {
@@ -151,15 +190,6 @@ function DialogueEditorV2Internal({
               [change.id]: updatedNode,
             },
           });
-        }
-      }
-      
-      if (change.type === 'remove') {
-        // Node was deleted
-        const { [change.id]: _, ...rest } = dialogue.nodes;
-        onChange({ ...dialogue, nodes: rest });
-        if (selectedNodeId === change.id) {
-          setSelectedNodeId(null);
         }
       }
     });
@@ -208,12 +238,53 @@ function DialogueEditorV2Internal({
     });
   }, [dialogue, onChange, edges]);
 
+  // Handle connection start (track what we're connecting from)
+  const onConnectStart = useCallback((_event: React.MouseEvent | React.TouchEvent, { nodeId, handleId }: { nodeId: string | null; handleId: string | null }) => {
+    if (!nodeId) return;
+    const sourceNode = dialogue.nodes[nodeId];
+    if (!sourceNode) return;
+    
+    if (handleId === 'next' && sourceNode.type === 'npc') {
+      connectingRef.current = { fromNodeId: nodeId, sourceHandle: 'next' };
+    } else if (handleId?.startsWith('choice-')) {
+      const choiceIdx = parseInt(handleId.replace('choice-', ''));
+      connectingRef.current = { fromNodeId: nodeId, fromChoiceIdx: choiceIdx, sourceHandle: handleId };
+    }
+  }, [dialogue]);
+
+  // Handle connection end (check if dropped on empty space)
+  const onConnectEnd = useCallback((event: MouseEvent | TouchEvent) => {
+    if (!connectingRef.current) return;
+    
+    const targetIsNode = (event.target as HTMLElement).closest('.react-flow__node');
+    if (!targetIsNode) {
+      // Dropped on empty space - show edge drop menu
+      const clientX = 'clientX' in event ? event.clientX : (event.touches?.[0]?.clientX || 0);
+      const clientY = 'clientY' in event ? event.clientY : (event.touches?.[0]?.clientY || 0);
+      const point = reactFlowInstance.screenToFlowPosition({
+        x: clientX,
+        y: clientY,
+      });
+      setEdgeDropMenu({
+        x: clientX,
+        y: clientY,
+        graphX: point.x,
+        graphY: point.y,
+        fromNodeId: connectingRef.current.fromNodeId,
+        fromChoiceIdx: connectingRef.current.fromChoiceIdx,
+        sourceHandle: connectingRef.current.sourceHandle,
+      });
+    }
+    connectingRef.current = null;
+  }, [reactFlowInstance]);
+
   // Handle new connections
   const onConnect = useCallback((connection: Connection) => {
     if (!connection.source || !connection.target) return;
     
     const newEdge = addEdge(connection, edges);
     setEdges(newEdge);
+    setEdgeDropMenu(null); // Close edge drop menu if open
     
     // Update DialogueTree
     const sourceNode = dialogue.nodes[connection.source];
@@ -245,6 +316,7 @@ function DialogueEditorV2Internal({
         });
       }
     }
+    connectingRef.current = null;
   }, [dialogue, onChange, edges]);
 
   // Handle node selection
@@ -279,16 +351,61 @@ function DialogueEditorV2Internal({
     setContextMenu(null);
   }, []);
 
-  // Add node from context menu
-  const handleAddNode = useCallback((type: 'npc' | 'player', x: number, y: number) => {
+  // Add node from context menu or edge drop
+  const handleAddNode = useCallback((type: 'npc' | 'player', x: number, y: number, autoConnect?: { fromNodeId: string; fromChoiceIdx?: number; sourceHandle?: string }) => {
     const newId = `${type}_${Date.now()}`;
     const newNode = createNode(type, newId, x, y);
+    
+    // First, create the new node
     onChange({
       ...dialogue,
       nodes: { ...dialogue.nodes, [newId]: newNode }
     });
+    
+    // Then, if auto-connecting, update the source node's connection
+    // Do this in a separate call to ensure the new node exists first (like V1 did)
+    if (autoConnect) {
+      const sourceNode = dialogue.nodes[autoConnect.fromNodeId];
+      if (sourceNode) {
+        if (autoConnect.sourceHandle === 'next' && sourceNode.type === 'npc') {
+          // Update NPC node's nextNodeId
+          onChange({
+            ...dialogue,
+            nodes: {
+              ...dialogue.nodes,
+              [newId]: newNode, // Ensure new node is included
+              [autoConnect.fromNodeId]: {
+                ...sourceNode,
+                nextNodeId: newId,
+              },
+            },
+          });
+        } else if (autoConnect.fromChoiceIdx !== undefined && sourceNode.choices) {
+          // Update player choice's nextNodeId
+          const newChoices = [...sourceNode.choices];
+          newChoices[autoConnect.fromChoiceIdx] = {
+            ...newChoices[autoConnect.fromChoiceIdx],
+            nextNodeId: newId,
+          };
+          onChange({
+            ...dialogue,
+            nodes: {
+              ...dialogue.nodes,
+              [newId]: newNode, // Ensure new node is included
+              [autoConnect.fromNodeId]: {
+                ...sourceNode,
+                choices: newChoices,
+              },
+            },
+          });
+        }
+      }
+    }
+    
     setSelectedNodeId(newId);
     setContextMenu(null);
+    setEdgeDropMenu(null);
+    connectingRef.current = null;
   }, [dialogue, onChange]);
 
   // Handle node updates
@@ -340,7 +457,10 @@ function DialogueEditorV2Internal({
               edgeTypes={edgeTypes}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
+              onNodesDelete={onNodesDelete}
               onConnect={onConnect}
+              onConnectStart={onConnectStart}
+              onConnectEnd={onConnectEnd}
               onNodeClick={onNodeClick}
               onPaneContextMenu={onPaneContextMenu}
               onNodeContextMenu={onNodeContextMenu}
@@ -359,10 +479,13 @@ function DialogueEditorV2Internal({
               nodesDraggable={true}
               nodesConnectable={true}
               elementsSelectable={true}
+              selectionOnDrag={true}
               panOnDrag={[1, 2]} // Middle mouse button or space
               zoomOnScroll={true}
               zoomOnPinch={true}
               preventScrolling={false}
+              deleteKeyCode={['Delete', 'Backspace']}
+              tabIndex={0}
             >
               <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#1a1a2e" />
               <Controls className="bg-[#0d0d14] border-[#1a1a2e]" />
@@ -373,7 +496,10 @@ function DialogueEditorV2Internal({
               
               {/* Pane Context Menu */}
               {contextMenu && (
-                <Panel position="top-left" style={{ left: contextMenu.x, top: contextMenu.y }}>
+                <div 
+                  className="fixed z-50"
+                  style={{ left: contextMenu.x, top: contextMenu.y }}
+                >
                   <div className="bg-[#0d0d14] border border-[#1a1a2e] rounded-lg shadow-lg p-1 min-w-[150px]">
                     <button
                       onClick={() => {
@@ -398,12 +524,62 @@ function DialogueEditorV2Internal({
                       Cancel
                     </button>
                   </div>
-                </Panel>
+                </div>
+              )}
+
+              {/* Edge Drop Menu */}
+              {edgeDropMenu && (
+                <div 
+                  className="fixed z-50"
+                  style={{ left: edgeDropMenu.x, top: edgeDropMenu.y }}
+                >
+                  <div className="bg-[#0d0d14] border border-[#1a1a2e] rounded-lg shadow-lg p-1 min-w-[150px]">
+                    <div className="px-3 py-1 text-[10px] text-gray-500 uppercase border-b border-[#1a1a2e]">
+                      Create Node
+                    </div>
+                    <button
+                      onClick={() => {
+                        handleAddNode('npc', edgeDropMenu.graphX, edgeDropMenu.graphY, {
+                          fromNodeId: edgeDropMenu.fromNodeId,
+                          fromChoiceIdx: edgeDropMenu.fromChoiceIdx,
+                          sourceHandle: edgeDropMenu.sourceHandle,
+                        });
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[#1a1a2e] rounded"
+                    >
+                      Add NPC Node
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleAddNode('player', edgeDropMenu.graphX, edgeDropMenu.graphY, {
+                          fromNodeId: edgeDropMenu.fromNodeId,
+                          fromChoiceIdx: edgeDropMenu.fromChoiceIdx,
+                          sourceHandle: edgeDropMenu.sourceHandle,
+                        });
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[#1a1a2e] rounded"
+                    >
+                      Add Player Node
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEdgeDropMenu(null);
+                        connectingRef.current = null;
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-gray-500 hover:bg-[#1a1a2e] rounded"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
               )}
 
               {/* Node Context Menu */}
               {nodeContextMenu && (
-                <Panel position="top-left" style={{ left: nodeContextMenu.x, top: nodeContextMenu.y }}>
+                <div 
+                  className="fixed z-50"
+                  style={{ left: nodeContextMenu.x, top: nodeContextMenu.y }}
+                >
                   <div className="bg-[#1a1a2e] border border-purple-500 rounded-lg shadow-xl py-1 min-w-[180px]">
                     {(() => {
                       const node = dialogue.nodes[nodeContextMenu.nodeId];
@@ -455,7 +631,7 @@ function DialogueEditorV2Internal({
                       Cancel
                     </button>
                   </div>
-                </Panel>
+                </div>
               )}
             </ReactFlow>
           </div>
