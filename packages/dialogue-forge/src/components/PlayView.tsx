@@ -3,7 +3,7 @@ import { DialogueTree, Choice } from '../types';
 import { FlagSchema, FlagType } from '../types/flags';
 import { GameFlagState } from '../types/game-state';
 import { mergeFlagUpdates, initializeFlags } from '../lib/flag-manager';
-import { CONDITION_OPERATOR } from '../types/constants';
+import { VariableManager, processNode, isValidNextNode } from '../lib/yarn-runner';
 
 interface HistoryEntry {
   nodeId: string;
@@ -21,7 +21,6 @@ interface PlayViewProps {
 
 export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: PlayViewProps) {
   const [currentNodeId, setCurrentNodeId] = useState<string>(startNodeId || dialogue.startNodeId);
-  const [memoryFlags, setMemoryFlags] = useState<Set<string>>(new Set());
   
   // Initialize game flags with defaults from schema, then merge with initialFlags
   const initialGameFlags = useMemo(() => {
@@ -32,6 +31,11 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
     return initialFlags || {};
   }, [flagSchema, initialFlags]);
   
+  // Initialize variable manager
+  const variableManager = useMemo(() => {
+    return new VariableManager(initialGameFlags, new Set());
+  }, [initialGameFlags]);
+  
   const [gameFlags, setGameFlags] = useState<GameFlagState>(initialGameFlags);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -41,71 +45,15 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
   // Track which flags were set during this run
   const [flagsSetDuringRun, setFlagsSetDuringRun] = useState<Set<string>>(new Set());
 
-  // Helper to evaluate conditions
-  const evaluateCondition = (cond: any): boolean => {
-    let flagValue: boolean | number | string | undefined = gameFlags[cond.flag];
-    
-    // If not in gameFlags, check memoryFlags (dialogue flags)
-    if (flagValue === undefined) {
-      flagValue = memoryFlags.has(cond.flag) ? true : undefined;
-    }
-    
-    // If still undefined and we have a flag schema, use default value
-    if (flagValue === undefined && flagSchema) {
-      const flagDef = flagSchema.flags.find(f => f.id === cond.flag);
-      if (flagDef?.defaultValue !== undefined) {
-        flagValue = flagDef.defaultValue;
-      } else if (flagDef?.valueType === 'number') {
-        flagValue = 0;
-      }
-    }
-    
-    // For numeric comparisons, treat undefined as 0
-    const isNumericComparison = [
-      CONDITION_OPERATOR.GREATER_THAN,
-      CONDITION_OPERATOR.LESS_THAN,
-      CONDITION_OPERATOR.GREATER_EQUAL,
-      CONDITION_OPERATOR.LESS_EQUAL
-    ].includes(cond.operator);
-    
-    if (isNumericComparison && flagValue === undefined) {
-      flagValue = 0;
-    }
-    
-    switch (cond.operator) {
-      case CONDITION_OPERATOR.IS_SET:
-        return flagValue !== undefined && flagValue !== false && flagValue !== 0 && flagValue !== '';
-      case CONDITION_OPERATOR.IS_NOT_SET:
-        return flagValue === undefined || flagValue === false || flagValue === 0 || flagValue === '';
-      case CONDITION_OPERATOR.EQUALS:
-        return flagValue === cond.value;
-      case CONDITION_OPERATOR.NOT_EQUALS:
-        return flagValue !== cond.value;
-      case CONDITION_OPERATOR.GREATER_THAN:
-        const numValue = typeof flagValue === 'number' ? flagValue : (typeof flagValue === 'string' ? parseFloat(flagValue) : 0);
-        const numCond = typeof cond.value === 'number' ? cond.value : parseFloat(String(cond.value));
-        return !isNaN(numValue) && !isNaN(numCond) && numValue > numCond;
-      case CONDITION_OPERATOR.LESS_THAN:
-        const numValueLT = typeof flagValue === 'number' ? flagValue : (typeof flagValue === 'string' ? parseFloat(flagValue) : 0);
-        const numCondLT = typeof cond.value === 'number' ? cond.value : parseFloat(String(cond.value));
-        return !isNaN(numValueLT) && !isNaN(numCondLT) && numValueLT < numCondLT;
-      case CONDITION_OPERATOR.GREATER_EQUAL:
-        const numValueGE = typeof flagValue === 'number' ? flagValue : (typeof flagValue === 'string' ? parseFloat(flagValue) : 0);
-        const numCondGE = typeof cond.value === 'number' ? cond.value : parseFloat(String(cond.value));
-        return !isNaN(numValueGE) && !isNaN(numCondGE) && numValueGE >= numCondGE;
-      case CONDITION_OPERATOR.LESS_EQUAL:
-        const numValueLE = typeof flagValue === 'number' ? flagValue : (typeof flagValue === 'string' ? parseFloat(flagValue) : 0);
-        const numCondLE = typeof cond.value === 'number' ? cond.value : parseFloat(String(cond.value));
-        return !isNaN(numValueLE) && !isNaN(numCondLE) && numValueLE <= numCondLE;
-      default:
-        return true;
-    }
-  };
-
   // Process current node
   useEffect(() => {
     const node = dialogue.nodes[currentNodeId];
     if (!node) return;
+    
+    // Update variable manager with current game flags
+    Object.entries(gameFlags).forEach(([key, value]) => {
+      variableManager.set(key, value);
+    });
     
     // If it's a player node, just ensure typing is false and show choices
     if (node.type === 'player') {
@@ -113,138 +61,65 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
       return;
     }
 
-    // Handle conditional nodes
-    if (node.type === 'conditional') {
-      setIsTyping(true);
-      const timer = setTimeout(() => {
-        // Find the first matching block (if/elseif/else logic)
-        let matchedBlock = null;
-        if (node.conditionalBlocks && node.conditionalBlocks.length > 0) {
-          for (const block of node.conditionalBlocks) {
-            if (block.type === 'else') {
-              // Only match else if no previous block matched
-              if (!matchedBlock) {
-                matchedBlock = block;
-              }
-              // Don't break - continue to check if there are more blocks
-            } else if (block.condition && block.condition.length > 0) {
-              // Check if all conditions in this block are true
-              const allMatch = block.condition.every(cond => evaluateCondition(cond));
-              if (allMatch) {
-                matchedBlock = block;
-                break; // Found a match, stop checking (if/elseif matched)
-              }
-            }
-          }
-        }
+    // Process the node using the modular runner
+    setIsTyping(true);
+    const timer = setTimeout(() => {
+      // Update flags before processing
+      if (node.setFlags) {
+        // Update dialogue flags (temporary)
+        node.setFlags.forEach(flagId => {
+          variableManager.addMemoryFlag(flagId);
+        });
         
-        if (matchedBlock) {
-          const displayContent = matchedBlock.content;
-          const displaySpeaker = matchedBlock.speaker;
-          
-          setHistory(prev => [...prev, {
-            nodeId: node.id,
-            type: 'npc',
-            speaker: displaySpeaker,
-            content: displayContent
-          }]);
-          
-          // Navigate to the matched block's nextNodeId, or the node's nextNodeId as fallback
-          const nextId = matchedBlock.nextNodeId || node.nextNodeId;
-          if (nextId) {
-            setTimeout(() => setCurrentNodeId(nextId), 300);
-          } else {
-            setIsTyping(false);
-          }
-        } else {
-          // No block matched - this shouldn't happen, but handle gracefully
-          setIsTyping(false);
-        }
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    }
-
-    // Handle NPC nodes
-    if (node.type === 'npc') {
-      setIsTyping(true);
-      const timer = setTimeout(() => {
-        if (node.setFlags) {
-          // Update dialogue flags (temporary)
-          setMemoryFlags(prev => {
-            const next = new Set(prev);
-            node.setFlags!.forEach(f => next.add(f));
-            return next;
+        // Update game flags (persistent)
+        if (flagSchema) {
+          const gameFlagIds = node.setFlags.filter(flagId => {
+            const flag = flagSchema.flags.find(f => f.id === flagId);
+            return flag && flag.type !== 'dialogue';
           });
           
-          // Update game flags (persistent)
-          if (flagSchema) {
-            const gameFlagIds = node.setFlags.filter(flagId => {
+          if (gameFlagIds.length > 0) {
+            const updated = mergeFlagUpdates(gameFlags, gameFlagIds, flagSchema);
+            setGameFlags(updated);
+            // Update variable manager
+            gameFlagIds.forEach(flagId => {
               const flag = flagSchema.flags.find(f => f.id === flagId);
-              return flag && flag.type !== 'dialogue';
+              if (flag) {
+                variableManager.set(flagId, flag.defaultValue ?? true);
+              }
             });
-            
-            if (gameFlagIds.length > 0) {
-              setGameFlags(prev => {
-                const updated = mergeFlagUpdates(prev, gameFlagIds, flagSchema);
-                return updated;
-              });
-              setFlagsSetDuringRun(prev => {
-                const next = new Set(prev);
-                gameFlagIds.forEach(f => next.add(f));
-                return next;
-              });
-            }
+            setFlagsSetDuringRun(prev => {
+              const next = new Set(prev);
+              gameFlagIds.forEach(f => next.add(f));
+              return next;
+            });
           }
         }
-        
-        // Handle conditional blocks on NPC nodes
-        let displayContent = node.content;
-        let displaySpeaker = node.speaker;
-        
-        if (node.conditionalBlocks && node.conditionalBlocks.length > 0) {
-          // Find the first matching block (if/elseif/else logic)
-          let matchedBlock = null;
-          for (const block of node.conditionalBlocks) {
-            if (block.type === 'else') {
-              // Only match else if no previous block matched
-              if (!matchedBlock) {
-                matchedBlock = block;
-              }
-              // Don't break - continue to check if there are more blocks
-            } else if (block.condition && block.condition.length > 0) {
-              // Check if all conditions in this block are true
-              const allMatch = block.condition.every(cond => evaluateCondition(cond));
-              if (allMatch) {
-                matchedBlock = block;
-                break; // Found a match, stop checking (if/elseif matched)
-              }
-            }
-          }
-          
-          if (matchedBlock) {
-            displayContent = matchedBlock.content;
-            displaySpeaker = matchedBlock.speaker || node.speaker;
-          }
-        }
-        
+      }
+      
+      // Process the node
+      const result = processNode(node, variableManager);
+      
+      // Add to history if there's content
+      if (result.content) {
         setHistory(prev => [...prev, {
           nodeId: node.id,
           type: 'npc',
-          speaker: displaySpeaker,
-          content: displayContent
+          speaker: result.speaker,
+          content: result.content
         }]);
-        
-        setIsTyping(false);
-        
-        if (node.nextNodeId) {
-          setTimeout(() => setCurrentNodeId(node.nextNodeId!), 300);
-        }
-      }, 500);
+      }
       
-      return () => clearTimeout(timer);
-    }
-  }, [currentNodeId, dialogue, gameFlags, memoryFlags, flagSchema, evaluateCondition]);
+      setIsTyping(false);
+      
+      // Navigate to next node if valid
+      if (result.nextNodeId && isValidNextNode(result.nextNodeId, dialogue.nodes)) {
+        setTimeout(() => setCurrentNodeId(result.nextNodeId!), 300);
+      }
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [currentNodeId, dialogue, gameFlags, flagSchema, variableManager]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -252,11 +127,9 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
 
   const currentNode = dialogue.nodes[currentNodeId];
   
-  // Filter choices based on conditions
-  const availableChoices = currentNode?.choices?.filter(choice => {
-    if (!choice.conditions) return true;
-    return choice.conditions.every(cond => evaluateCondition(cond));
-  }) || [];
+  // Get available choices from processed node result
+  const processedResult = currentNode ? processNode(currentNode, variableManager) : null;
+  const availableChoices = processedResult?.choices || [];
 
   const handleChoice = (choice: Choice) => {
     setHistory(prev => [...prev, {
@@ -267,10 +140,8 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
     
     if (choice.setFlags) {
       // Update dialogue flags (temporary)
-      setMemoryFlags(prev => {
-        const next = new Set(prev);
-        choice.setFlags!.forEach(f => next.add(f));
-        return next;
+      choice.setFlags.forEach(flagId => {
+        variableManager.addMemoryFlag(flagId);
       });
       
       // Update game flags (persistent)
@@ -281,9 +152,14 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
         });
         
         if (gameFlagIds.length > 0) {
-          setGameFlags(prev => {
-            const updated = mergeFlagUpdates(prev, gameFlagIds, flagSchema);
-            return updated;
+          const updated = mergeFlagUpdates(gameFlags, gameFlagIds, flagSchema);
+          setGameFlags(updated);
+          // Update variable manager
+          gameFlagIds.forEach(flagId => {
+            const flag = flagSchema.flags.find(f => f.id === flagId);
+            if (flag) {
+              variableManager.set(flagId, flag.defaultValue ?? true);
+            }
           });
           setFlagsSetDuringRun(prev => {
             const next = new Set(prev);
@@ -294,8 +170,8 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
       }
     }
     
-    // Only move to next node if it exists
-    if (choice.nextNodeId) {
+    // Only move to next node if it exists and is valid
+    if (isValidNextNode(choice.nextNodeId, dialogue.nodes)) {
       setCurrentNodeId(choice.nextNodeId);
     } else {
       // Choice leads nowhere - dialogue complete
@@ -305,8 +181,8 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
 
   const handleRestart = () => {
     setHistory([]);
-    setMemoryFlags(new Set());
-    setGameFlags(initialFlags || {});
+    variableManager.reset(initialGameFlags, new Set());
+    setGameFlags(initialGameFlags);
     setFlagsSetDuringRun(new Set());
     setCurrentNodeId(startNodeId || dialogue.startNodeId);
   };
