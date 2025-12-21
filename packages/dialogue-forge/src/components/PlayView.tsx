@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { DialogueTree, Choice } from '../types';
 import { FlagSchema, FlagType } from '../types/flags';
 import { GameFlagState } from '../types/game-state';
-import { mergeFlagUpdates } from '../lib/flag-manager';
+import { mergeFlagUpdates, initializeFlags } from '../lib/flag-manager';
 import { CONDITION_OPERATOR } from '../types/constants';
 
 interface HistoryEntry {
@@ -22,7 +22,17 @@ interface PlayViewProps {
 export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: PlayViewProps) {
   const [currentNodeId, setCurrentNodeId] = useState<string>(startNodeId || dialogue.startNodeId);
   const [memoryFlags, setMemoryFlags] = useState<Set<string>>(new Set());
-  const [gameFlags, setGameFlags] = useState<GameFlagState>(initialFlags || {});
+  
+  // Initialize game flags with defaults from schema, then merge with initialFlags
+  const initialGameFlags = useMemo(() => {
+    if (flagSchema) {
+      const defaults = initializeFlags(flagSchema);
+      return { ...defaults, ...initialFlags };
+    }
+    return initialFlags || {};
+  }, [flagSchema, initialFlags]);
+  
+  const [gameFlags, setGameFlags] = useState<GameFlagState>(initialGameFlags);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [showDebugPanel, setShowDebugPanel] = useState(false);
@@ -31,10 +41,77 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
   // Track which flags were set during this run
   const [flagsSetDuringRun, setFlagsSetDuringRun] = useState<Set<string>>(new Set());
 
+  // Helper to evaluate conditions
+  const evaluateCondition = (cond: any): boolean => {
+    let flagValue: boolean | number | string | undefined = gameFlags[cond.flag];
+    
+    // If not in gameFlags, check memoryFlags (dialogue flags)
+    if (flagValue === undefined) {
+      flagValue = memoryFlags.has(cond.flag) ? true : undefined;
+    }
+    
+    // If still undefined and we have a flag schema, use default value
+    if (flagValue === undefined && flagSchema) {
+      const flagDef = flagSchema.flags.find(f => f.id === cond.flag);
+      if (flagDef?.defaultValue !== undefined) {
+        flagValue = flagDef.defaultValue;
+      } else if (flagDef?.valueType === 'number') {
+        flagValue = 0;
+      }
+    }
+    
+    // For numeric comparisons, treat undefined as 0
+    const isNumericComparison = [
+      CONDITION_OPERATOR.GREATER_THAN,
+      CONDITION_OPERATOR.LESS_THAN,
+      CONDITION_OPERATOR.GREATER_EQUAL,
+      CONDITION_OPERATOR.LESS_EQUAL
+    ].includes(cond.operator);
+    
+    if (isNumericComparison && flagValue === undefined) {
+      flagValue = 0;
+    }
+    
+    switch (cond.operator) {
+      case CONDITION_OPERATOR.IS_SET:
+        return flagValue !== undefined && flagValue !== false && flagValue !== 0 && flagValue !== '';
+      case CONDITION_OPERATOR.IS_NOT_SET:
+        return flagValue === undefined || flagValue === false || flagValue === 0 || flagValue === '';
+      case CONDITION_OPERATOR.EQUALS:
+        return flagValue === cond.value;
+      case CONDITION_OPERATOR.NOT_EQUALS:
+        return flagValue !== cond.value;
+      case CONDITION_OPERATOR.GREATER_THAN:
+        const numValue = typeof flagValue === 'number' ? flagValue : (typeof flagValue === 'string' ? parseFloat(flagValue) : 0);
+        const numCond = typeof cond.value === 'number' ? cond.value : parseFloat(String(cond.value));
+        return !isNaN(numValue) && !isNaN(numCond) && numValue > numCond;
+      case CONDITION_OPERATOR.LESS_THAN:
+        const numValueLT = typeof flagValue === 'number' ? flagValue : (typeof flagValue === 'string' ? parseFloat(flagValue) : 0);
+        const numCondLT = typeof cond.value === 'number' ? cond.value : parseFloat(String(cond.value));
+        return !isNaN(numValueLT) && !isNaN(numCondLT) && numValueLT < numCondLT;
+      case CONDITION_OPERATOR.GREATER_EQUAL:
+        const numValueGE = typeof flagValue === 'number' ? flagValue : (typeof flagValue === 'string' ? parseFloat(flagValue) : 0);
+        const numCondGE = typeof cond.value === 'number' ? cond.value : parseFloat(String(cond.value));
+        return !isNaN(numValueGE) && !isNaN(numCondGE) && numValueGE >= numCondGE;
+      case CONDITION_OPERATOR.LESS_EQUAL:
+        const numValueLE = typeof flagValue === 'number' ? flagValue : (typeof flagValue === 'string' ? parseFloat(flagValue) : 0);
+        const numCondLE = typeof cond.value === 'number' ? cond.value : parseFloat(String(cond.value));
+        return !isNaN(numValueLE) && !isNaN(numCondLE) && numValueLE <= numCondLE;
+      default:
+        return true;
+    }
+  };
+
   // Process current node
   useEffect(() => {
     const node = dialogue.nodes[currentNodeId];
-    if (!node || node.type !== 'npc') return;
+    if (!node) return;
+    
+    // If it's a player node, just ensure typing is false and show choices
+    if (node.type !== 'npc') {
+      setIsTyping(false);
+      return;
+    }
 
     setIsTyping(true);
     const timer = setTimeout(() => {
@@ -67,11 +144,38 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
         }
       }
       
+      // Handle conditional blocks
+      let displayContent = node.content;
+      let displaySpeaker = node.speaker;
+      
+      if (node.conditionalBlocks && node.conditionalBlocks.length > 0) {
+        // Find the first matching block
+        let matchedBlock = null;
+        for (const block of node.conditionalBlocks) {
+          if (block.type === 'else') {
+            matchedBlock = block;
+            break;
+          } else if (block.condition && block.condition.length > 0) {
+            // Check if all conditions in this block are true
+            const allMatch = block.condition.every(cond => evaluateCondition(cond));
+            if (allMatch) {
+              matchedBlock = block;
+              break;
+            }
+          }
+        }
+        
+        if (matchedBlock) {
+          displayContent = matchedBlock.content;
+          displaySpeaker = matchedBlock.speaker || node.speaker;
+        }
+      }
+      
       setHistory(prev => [...prev, {
         nodeId: node.id,
         type: 'npc',
-        speaker: node.speaker,
-        content: node.content
+        speaker: displaySpeaker,
+        content: displayContent
       }]);
       
       setIsTyping(false);
@@ -82,7 +186,7 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [currentNodeId, dialogue]);
+  }, [currentNodeId, dialogue, gameFlags, memoryFlags, flagSchema]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -93,30 +197,7 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
   // Filter choices based on conditions
   const availableChoices = currentNode?.choices?.filter(choice => {
     if (!choice.conditions) return true;
-    return choice.conditions.every(cond => {
-      const flagValue = gameFlags[cond.flag] ?? (memoryFlags.has(cond.flag) ? true : undefined);
-      
-      switch (cond.operator) {
-        case CONDITION_OPERATOR.IS_SET:
-          return flagValue !== undefined && flagValue !== false && flagValue !== 0 && flagValue !== '';
-        case CONDITION_OPERATOR.IS_NOT_SET:
-          return flagValue === undefined || flagValue === false || flagValue === 0 || flagValue === '';
-        case CONDITION_OPERATOR.EQUALS:
-          return flagValue === cond.value;
-        case CONDITION_OPERATOR.NOT_EQUALS:
-          return flagValue !== cond.value;
-        case CONDITION_OPERATOR.GREATER_THAN:
-          return typeof flagValue === 'number' && typeof cond.value === 'number' && flagValue > cond.value;
-        case CONDITION_OPERATOR.LESS_THAN:
-          return typeof flagValue === 'number' && typeof cond.value === 'number' && flagValue < cond.value;
-        case CONDITION_OPERATOR.GREATER_EQUAL:
-          return typeof flagValue === 'number' && typeof cond.value === 'number' && flagValue >= cond.value;
-        case CONDITION_OPERATOR.LESS_EQUAL:
-          return typeof flagValue === 'number' && typeof cond.value === 'number' && flagValue <= cond.value;
-        default:
-          return true;
-      }
-    });
+    return choice.conditions.every(cond => evaluateCondition(cond));
   }) || [];
 
   const handleChoice = (choice: Choice) => {
@@ -155,7 +236,13 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
       }
     }
     
-    setCurrentNodeId(choice.nextNodeId);
+    // Only move to next node if it exists
+    if (choice.nextNodeId) {
+      setCurrentNodeId(choice.nextNodeId);
+    } else {
+      // Choice leads nowhere - dialogue complete
+      setIsTyping(false);
+    }
   };
 
   const handleRestart = () => {

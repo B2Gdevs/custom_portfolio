@@ -9,8 +9,8 @@ interface YarnViewProps {
 
 export function YarnView({ dialogue, onExport }: YarnViewProps) {
   return (
-    <main className="flex-1 flex flex-col bg-[#0d0d14]">
-      <div className="border-b border-[#1a1a2e] px-4 py-2 flex items-center justify-between">
+    <main className="flex-1 flex flex-col bg-[#0d0d14] overflow-hidden">
+      <div className="border-b border-[#1a1a2e] px-4 py-2 flex items-center justify-between flex-shrink-0">
         <span className="text-sm text-gray-400">Yarn Spinner Output</span>
         <button
           onClick={onExport}
@@ -24,7 +24,7 @@ export function YarnView({ dialogue, onExport }: YarnViewProps) {
           Download .yarn
         </button>
       </div>
-      <div className="flex-1 overflow-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 min-h-0">
         <pre className="font-mono text-sm text-gray-300 whitespace-pre-wrap bg-[#08080c] rounded-lg p-4 border border-[#1a1a2e]">
           {exportToYarn(dialogue)}
         </pre>

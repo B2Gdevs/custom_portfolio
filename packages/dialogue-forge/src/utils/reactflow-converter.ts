@@ -1,0 +1,180 @@
+/**
+ * React Flow Converter Utilities
+ * 
+ * Converts between DialogueTree format and React Flow format.
+ * 
+ * React Flow Format:
+ * - nodes: Array of { id, type, position: {x, y}, data }
+ * - edges: Array of { id, source, target, sourceHandle?, targetHandle?, type, data? }
+ */
+
+import { DialogueTree, DialogueNode } from '../types';
+import { NODE_TYPE } from '../types/constants';
+import { Node, Edge } from 'reactflow';
+
+// Color scheme for choice edges (same as current implementation)
+export const CHOICE_COLORS = ['#e94560', '#8b5cf6', '#06b6d4', '#22c55e', '#f59e0b'];
+
+export interface ReactFlowNodeData {
+  node: DialogueNode;
+  flagSchema?: any;
+}
+
+export type ReactFlowNode = Node<ReactFlowNodeData>;
+export type ReactFlowEdge = Edge;
+
+/**
+ * Convert DialogueTree to React Flow format
+ */
+export function convertDialogueTreeToReactFlow(dialogue: DialogueTree): {
+  nodes: ReactFlowNode[];
+  edges: ReactFlowEdge[];
+} {
+  const nodes: ReactFlowNode[] = [];
+  const edges: ReactFlowEdge[] = [];
+
+  // Convert nodes - create new node objects to avoid sharing references
+  Object.values(dialogue.nodes).forEach(node => {
+    // Deep copy node to avoid sharing references, especially for arrays
+    const nodeCopy: DialogueNode = {
+      ...node,
+      choices: node.choices ? node.choices.map(choice => ({ ...choice })) : undefined,
+      setFlags: node.setFlags ? [...node.setFlags] : undefined,
+      conditionalBlocks: node.conditionalBlocks ? node.conditionalBlocks.map(block => ({
+        ...block,
+        condition: block.condition ? [...block.condition] : undefined,
+      })) : undefined,
+    };
+    
+    nodes.push({
+      id: node.id,
+      type: node.type,
+      position: { x: node.x, y: node.y },
+      data: { 
+        node: nodeCopy,
+      },
+      selected: false,
+    });
+  });
+
+  // Convert edges
+  Object.values(dialogue.nodes).forEach(node => {
+    if (node.type === NODE_TYPE.NPC && node.nextNodeId) {
+      // NPC -> next node (single connection)
+      edges.push({
+        id: `${node.id}-next`,
+        source: node.id,
+        target: node.nextNodeId,
+        sourceHandle: 'next',
+        type: 'default',
+        style: { stroke: '#4a4a6a', strokeWidth: 2 },
+      } as Edge);
+    }
+
+    if (node.type === NODE_TYPE.PLAYER && node.choices) {
+      // Player -> multiple choices (one edge per choice)
+      node.choices.forEach((choice, idx) => {
+        if (choice.nextNodeId) {
+          const color = CHOICE_COLORS[idx % CHOICE_COLORS.length];
+          edges.push({
+            id: `${node.id}-choice-${idx}`,
+            source: node.id,
+            target: choice.nextNodeId,
+            sourceHandle: `choice-${idx}`, // Connect to specific choice handle
+            type: 'choice', // Use custom ChoiceEdge
+            data: {
+              choiceIndex: idx,
+              choiceId: choice.id,
+            },
+            style: {
+              stroke: color,
+              strokeWidth: 2,
+              opacity: 0.7,
+            },
+          } as Edge);
+        }
+      });
+    }
+  });
+
+  return { nodes, edges };
+}
+
+/**
+ * Convert React Flow format back to DialogueTree
+ * 
+ * This updates node positions and edge connections in the DialogueTree.
+ */
+export function updateDialogueTreeFromReactFlow(
+  dialogue: DialogueTree,
+  nodes: Node[],
+  edges: Edge[]
+): DialogueTree {
+  // Create a deep copy of all nodes to avoid mutations
+  const updatedNodes: Record<string, DialogueNode> = {};
+  
+  // First, create copies of all nodes with cleared connections
+  Object.values(dialogue.nodes).forEach(node => {
+    if (node.type === NODE_TYPE.NPC) {
+      updatedNodes[node.id] = {
+        ...node,
+        nextNodeId: undefined,
+      };
+    } else if (node.type === NODE_TYPE.PLAYER) {
+      updatedNodes[node.id] = {
+        ...node,
+        choices: node.choices ? node.choices.map(choice => ({
+          ...choice,
+          nextNodeId: '',
+        })) : [],
+      };
+    } else {
+      updatedNodes[node.id] = { ...node };
+    }
+  });
+
+  // Update node positions
+  nodes.forEach(rfNode => {
+    if (updatedNodes[rfNode.id]) {
+      updatedNodes[rfNode.id] = {
+        ...updatedNodes[rfNode.id],
+        x: rfNode.position.x,
+        y: rfNode.position.y,
+      };
+    }
+  });
+
+  // Apply edge connections
+  edges.forEach(edge => {
+    const sourceNode = updatedNodes[edge.source];
+    if (!sourceNode) return;
+
+    if (edge.sourceHandle === 'next' && sourceNode.type === NODE_TYPE.NPC) {
+      // NPC next connection - create new node object
+      updatedNodes[edge.source] = {
+        ...sourceNode,
+        nextNodeId: edge.target,
+      };
+    } else if (edge.sourceHandle?.startsWith('choice-') && sourceNode.type === NODE_TYPE.PLAYER) {
+      // Player choice connection - create new node and choice objects
+      const choiceIdx = parseInt(edge.sourceHandle.replace('choice-', ''));
+      if (sourceNode.choices && sourceNode.choices[choiceIdx]) {
+        const updatedChoices = [...sourceNode.choices];
+        updatedChoices[choiceIdx] = {
+          ...updatedChoices[choiceIdx],
+          nextNodeId: edge.target,
+        };
+        updatedNodes[edge.source] = {
+          ...sourceNode,
+          choices: updatedChoices,
+        };
+      }
+    }
+  });
+
+  return {
+    ...dialogue,
+    nodes: updatedNodes,
+  };
+}
+

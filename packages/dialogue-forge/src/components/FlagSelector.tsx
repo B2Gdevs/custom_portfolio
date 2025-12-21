@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FlagSchema, FlagDefinition } from '../types/flags';
 
 interface FlagSelectorProps {
@@ -11,6 +11,12 @@ interface FlagSelectorProps {
 export function FlagSelector({ value, onChange, flagSchema, placeholder = "flag1, flag2" }: FlagSelectorProps) {
   const [inputValue, setInputValue] = useState(value.join(', '));
   const [showDropdown, setShowDropdown] = useState(false);
+
+  // Sync inputValue when value prop changes
+  useEffect(() => {
+    const newInputValue = value.join(', ');
+    setInputValue(newInputValue);
+  }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;

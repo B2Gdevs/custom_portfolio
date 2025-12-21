@@ -3,14 +3,14 @@ import { DialogueEditorProps, DialogueTree, DialogueNode } from '../types';
 import { exportToYarn, importFromYarn } from '../lib/yarn-converter';
 import { createNode, deleteNodeFromTree, addChoiceToNode, removeChoiceFromNode, updateChoiceInNode } from '../utils/node-helpers';
 import { NODE_WIDTH, NODE_HEIGHT, DEFAULT_GRAPH_SCALE, MIN_SCALE, MAX_SCALE } from '../utils/constants';
-import { GraphView } from './GraphView';
+import { GraphViewV1 } from './GraphViewV1';
 import { NodeEditor } from './NodeEditor';
 import { YarnView } from './YarnView';
 import { PlayView } from './PlayView';
 
 type ViewMode = 'graph' | 'yarn' | 'play';
 
-export function DialogueEditor({
+export function DialogueEditorV1({
   dialogue,
   onChange,
   onExportYarn,
@@ -122,7 +122,7 @@ export function DialogueEditor({
 
   return (
     <div className={`dialogue-editor ${className}`}>
-      <GraphView
+      <GraphViewV1
         dialogue={dialogue}
         viewMode={viewMode}
         selectedNodeId={selectedNodeId}
