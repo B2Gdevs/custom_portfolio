@@ -194,6 +194,7 @@ export function FlagSelector({
                 <Tooltip
                   id={tooltipId}
                   place="top"
+                  border="2px solid rgba(255, 255, 255, 0.2)"
                   style={{
                     backgroundColor: '#000000',
                     color: '#ffffff',
@@ -201,7 +202,6 @@ export function FlagSelector({
                     fontSize: '11px',
                     padding: '10px',
                     borderRadius: '6px',
-                    border: '2px solid rgba(255, 255, 255, 0.2)',
                     boxShadow: '0 8px 20px rgba(0, 0, 0, 0.5)',
                     maxWidth: '280px',
                     zIndex: 10000,
@@ -254,6 +254,7 @@ export function FlagSelector({
       <Tooltip
         id="flags-tooltip"
         place="left"
+        border="2px solid rgba(255, 255, 255, 0.2)"
         style={{
           backgroundColor: '#000000',
           color: '#ffffff',
@@ -261,7 +262,6 @@ export function FlagSelector({
           fontSize: '12px',
           padding: '12px',
           borderRadius: '8px',
-          border: '2px solid rgba(255, 255, 255, 0.2)',
           boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)',
           maxWidth: '300px',
           zIndex: 9999,

@@ -287,7 +287,6 @@ const currentFlags = {
   }}
   onFlagUpdate={(flags) => {
     // Real-time updates as dialogue progresses
-    console.log('Flags updated:', flags);
   }}
 />`}
             </pre>
@@ -482,7 +481,7 @@ Speaker: Dialogue text here
                 <li>Basic variable setting (<code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;set $flag = true&gt;&gt;</code>) - Boolean only</li>
                 <li>String/number variables - Not yet supported</li>
                 <li>Variable operations (<code className="bg-[#0d0d14] px-1 rounded">+=</code>, <code className="bg-[#0d0d14] px-1 rounded">-=</code>, etc.) - Not yet supported</li>
-                <li>Variable references in text (<code className="bg-[#0d0d14] px-1 rounded">"Hello {$name}"</code>) - Not yet supported</li>
+                <li>Variable references in text (<code className="bg-[#0d0d14] px-1 rounded">"Hello {'{$name}'}"</code>) - Not yet supported</li>
               </ul>
             </div>
             
