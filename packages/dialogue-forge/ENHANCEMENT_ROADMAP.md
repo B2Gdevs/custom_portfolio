@@ -22,27 +22,193 @@
 
 ## Yarn Spinner Feature Support
 
-### Phase 1: Core Conditionals & Variables (High Priority)
-- [x] **Conditional Blocks** (`<<if>>`, `<<elseif>>`, `<<else>>`, `<<endif>>`) - Basic support exists
+### ✅ Currently Implemented (Core Features)
+- [x] **Nodes and Lines** - Basic dialogue structure with speakers
+- [x] **Options** - Player choices (`-> Choice text`)
+- [x] **Jump Command** - `<<jump node_id>>` for navigation
+- [x] **Conditional Blocks** (`<<if>>`, `<<elseif>>`, `<<else>>`, `<<endif>>`)
   - [x] Basic conditional blocks in NodeEditor
   - [x] Export/import conditional blocks
-  - [ ] Visual conditional nodes in graph editor (enhancement)
+  - [x] Visual conditional nodes in graph editor
   - [x] Support flag checks with operators (==, !=, >, <, >=, <=)
+  - [x] Conditional choices (choices wrapped in `<<if>>`)
   - [ ] Nested conditionals (enhancement)
+- [x] **Basic Set Command** - `<<set $flag = true>>` (boolean flags only)
+- [x] **Condition Operators** - is_set, is_not_set, ==, !=, >, <, >=, <=
+- [x] **Multiple Conditions** - AND logic (`$flag1 == 5 and $flag2 > 10`)
 
-- [ ] **Variables** (`$variable`) - **NEXT PRIORITY**
-  - Variable management UI
-  - Variable types (string, number, boolean)
-  - Variable operations (set, increment, decrement, multiply, divide)
-  - Variable references in dialogue text
+### 🔥 Phase 1: Core Variables & Operations (HIGH PRIORITY - Next Sprint)
+- [ ] **Full Variable System** (`$variable`) - **CRITICAL FOR YARN COMPATIBILITY**
+  - [ ] Variable types (string, number, boolean)
+  - [ ] Variable management UI (similar to FlagManager)
+  - [ ] Variable state tracking in PlayView
+  - [ ] Variable references in dialogue text (`"Hello {$playerName}"`)
+  - [ ] Variable initialization from schema/defaults
 
-- [ ] **Advanced Set Operations**
-  - `<<set $var += 10>>` (increment)
-  - `<<set $var -= 5>>` (decrement)
-  - `<<set $var *= 2>>` (multiply)
-  - `<<set $var /= 2>>` (divide)
-  - `<<set $var = "string">>` (string assignment)
-  - `<<set $var = 42>>` (number assignment)
+- [ ] **Advanced Set Operations** - **CRITICAL FOR YARN COMPATIBILITY**
+  - [ ] `<<set $var = "string">>` (string assignment)
+  - [ ] `<<set $var = 42>>` (number assignment)
+  - [ ] `<<set $var += 10>>` (increment)
+  - [ ] `<<set $var -= 5>>` (decrement)
+  - [ ] `<<set $var *= 2>>` (multiply)
+  - [ ] `<<set $var /= 2>>` (divide)
+  - [ ] Parse and execute in PlayView
+  - [ ] Export/import with correct syntax
+
+### 📅 Phase 2: Commands & Flow Control (MEDIUM PRIORITY)
+- [ ] **Detour Command** (`<<detour node_id>>`)
+  - Temporary jump that returns to original position
+  - Stack-based navigation
+  - Return mechanism
+
+- [ ] **Once Command** (`<<once>>`)
+  - Mark options to only appear once
+  - Track visited choices
+  - Visual indicator in editor
+
+- [ ] **Wait Command** (`<<wait 2>>`)
+  - Pause dialogue for specified seconds
+  - Timing controls in PlayView
+  - Visual timing indicator
+
+- [ ] **Stop Command** (`<<stop>>`)
+  - End dialogue immediately
+  - Handle in PlayView
+  - Visual indicator
+
+### 🎯 Phase 3: Shortcuts & Advanced Features (MEDIUM PRIORITY)
+- [ ] **Shortcuts** (`[[text|node]]`)
+  - Inline shortcuts in dialogue text
+  - Visual representation in editor (underlined/colored)
+  - Clickable shortcuts in PlayView
+  - Parse from Yarn format
+  - Export to Yarn format
+
+- [ ] **Tags** (`#tag`)
+  - Tag system for nodes
+  - Filter/search by tags
+  - Tag-based organization
+  - Export tags in node headers
+
+- [ ] **Node Headers** (metadata)
+  - `color:` header for node colors
+  - `group:` header for node grouping
+  - `style: note` for sticky notes
+  - Visual representation in editor
+
+### 🚀 Phase 4: Functions & Smart Features (LOWER PRIORITY)
+- [ ] **Built-in Functions**
+  - `visited("node_id")` - Check if node was visited
+  - `random(min, max)` - Random number generation
+  - `dice(sides)` - Dice roll
+  - Function calls in conditions
+  - Function execution in PlayView
+
+- [ ] **Custom Functions**
+  - User-defined function support
+  - Function registration system
+  - Function parameters
+  - Function return values
+
+- [ ] **Smart Variables**
+  - Auto-incrementing variables
+  - Variable dependencies
+  - Variable validation
+
+- [ ] **Enums**
+  - Enum type support
+  - Enum values in conditions
+  - Enum dropdowns in editor
+
+- [ ] **Line Groups**
+  - Group multiple lines together
+  - Random line selection
+  - Sequential line playback
+
+### 🔧 Phase 5: PlayView/Dialogue Runner Improvements (HIGH PRIORITY)
+
+#### Current State Analysis
+**What Works:**
+- Basic dialogue flow (NPC → Player → NPC)
+- Conditional blocks (if/elseif/else) evaluation
+- Conditional choices filtering
+- Flag setting (boolean only)
+- Basic jump navigation
+- History tracking
+- Debug panel for flags
+
+**What Needs Improvement:**
+- Variable system is limited to boolean flags
+- No support for string/number variables
+- No variable operations (+=, -=, *=, /=)
+- No variable references in dialogue text
+- No command processing (wait, stop, detour, once)
+- No function execution
+- No shortcuts support
+- Limited error handling
+- Not a true Yarn Spinner execution engine
+
+#### Rebuild Plan: PlayView as Yarn Runner
+
+- [ ] **Core Execution Engine**
+  - [ ] Line-by-line Yarn script execution
+  - [ ] Command processing pipeline
+  - [ ] Variable state management (string, number, boolean)
+  - [ ] Function execution system
+  - [ ] Error handling and validation
+  - [ ] Performance optimization
+
+- [ ] **Variable System**
+  - [ ] Variable storage (separate from flags)
+  - [ ] Variable types (string, number, boolean)
+  - [ ] Variable operations (set, +=, -=, *=, /=)
+  - [ ] Variable references in text (`"Hello {$name}"`)
+  - [ ] Variable initialization
+  - [ ] Variable persistence
+
+- [ ] **Command Processing**
+  - [ ] `<<set $var = value>>` - Full support
+  - [ ] `<<set $var += value>>` - Increment
+  - [ ] `<<set $var -= value>>` - Decrement
+  - [ ] `<<set $var *= value>>` - Multiply
+  - [ ] `<<set $var /= value>>` - Divide
+  - [ ] `<<jump node_id>>` - Navigation
+  - [ ] `<<detour node_id>>` - Temporary jump with return
+  - [ ] `<<wait seconds>>` - Pause dialogue
+  - [ ] `<<stop>>` - End dialogue
+  - [ ] `<<once>>` - Mark option to appear once
+  - [ ] `<<command param>>` - Custom commands
+
+- [ ] **Function System**
+  - [ ] `visited("node_id")` - Check if node visited
+  - [ ] `random(min, max)` - Random number
+  - [ ] `dice(sides)` - Dice roll
+  - [ ] Custom function registration
+  - [ ] Function calls in conditions
+  - [ ] Function return values
+
+- [ ] **Shortcuts & Tags**
+  - [ ] Parse `[[text|node]]` shortcuts
+  - [ ] Render shortcuts in PlayView
+  - [ ] Clickable shortcuts
+  - [ ] Parse `#tag` tags
+  - [ ] Tag-based filtering
+
+- [ ] **Yarn Parser Improvements**
+  - [ ] Full Yarn Spinner syntax support
+  - [ ] Better error messages
+  - [ ] Line-by-line parsing
+  - [ ] Command parsing
+  - [ ] Function parsing
+  - [ ] Tag parsing
+  - [ ] Node header parsing (color, group, style)
+
+- [ ] **Export/Import Improvements**
+  - [ ] Round-trip compatibility (import → edit → export)
+  - [ ] Preserve all Yarn features
+  - [ ] Handle edge cases
+  - [ ] Validation before export
+  - [ ] Support all Yarn Spinner features
 
 ### Phase 2: Commands & Shortcuts (Medium Priority)
 - [ ] **Commands** (`<<command>>`)
@@ -164,34 +330,38 @@
 
 ## Implementation Priority
 
-### 🔥 Immediate (Next Sprint) - Critical for Production
-1. **Copy/paste** - Essential for workflow efficiency
-2. **Variables system** - Core Yarn Spinner feature
-3. **Node search/filter** - Essential for large dialogues
-4. **Visual undo/redo buttons** - Better UX
-5. **Zoom to selection** - Quality of life improvement
+### 🔥 Immediate (Next Sprint) - Critical for Yarn Compatibility
+1. **Full Variable System** - Core Yarn Spinner feature (string, number, boolean)
+2. **Advanced Set Operations** - `+=`, `-=`, `*=`, `/=` operators
+3. **Rebuild PlayView as Yarn Runner** - Proper execution engine
+4. **Yarn Parser Improvements** - Full syntax support, better error handling
+5. **Export/Import Round-trip** - Ensure compatibility
 
 ### 📅 Short Term (Next Month) - High Value Features
-1. **Advanced set operations** - Increment, decrement, multiply, divide
-2. **Node search/filter** - Essential for large dialogues
-3. **Visual undo/redo buttons** - Better UX
-4. **Zoom to selection** - Quality of life improvement
-5. **Better error handling** - Validation and user feedback
+1. **Detour Command** - Temporary jumps with return
+2. **Once Command** - Mark options to appear only once
+3. **Shortcuts** (`[[text|node]]`) - Inline navigation
+4. **Wait/Stop Commands** - Timing and flow control
+5. **Node search/filter** - Essential for large dialogues
+6. **Copy/paste** - Essential for workflow efficiency
 
 ### 🎯 Medium Term (Next Quarter) - Feature Enhancements
-1. **Commands support** (`<<command>>`)
-2. **Shortcuts** (`[[text|node]]`)
-3. **Tags system** (`#tag`)
+1. **Tags system** (`#tag`) - Node organization
+2. **Node Headers** - color, group, style metadata
+3. **Built-in Functions** - visited(), random(), dice()
 4. **Node alignment tools** - Align, distribute, snap to grid
 5. **Nested conditionals** - Enhanced conditional support
+6. **Visual undo/redo buttons** - Better UX
 
 ### 🚀 Long Term (Future) - Nice to Have
-1. **Functions** - Built-in and custom functions
-2. **Localization** - Multi-language support
-3. **Node templates** - Reusable node patterns
-4. **Node grouping/folders** - Organization for large projects
-5. **Performance optimizations** - Virtual scrolling, lazy rendering
-6. **Advanced visual features** - Animations, custom colors, icons
+1. **Custom Functions** - User-defined function support
+2. **Smart Variables** - Auto-incrementing, dependencies
+3. **Enums** - Enum type support
+4. **Line Groups** - Random/sequential line selection
+5. **Localization** - Multi-language support
+6. **Node templates** - Reusable node patterns
+7. **Performance optimizations** - Virtual scrolling, lazy rendering
+8. **Advanced visual features** - Animations, custom colors, icons
 
 ## Known Issues & Bugs
 

@@ -476,16 +476,47 @@ Speaker: Dialogue text here
               </ul>
             </div>
             
-            <div className="bg-[#12121a] p-3 rounded border border-orange-500/30">
-              <strong className="text-orange-400 text-xs">⚠️ Not Yet Supported</strong>
-              <ul className="list-disc list-inside space-y-1 text-xs mt-2 ml-2 text-gray-500">
-                <li>Numeric variable operations (<code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;set $gold += 100&gt;&gt;</code>)</li>
-                <li>Commands (<code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;wait&gt;&gt;</code>, <code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;stop&gt;&gt;</code>, etc.)</li>
-                <li>Shortcuts (<code className="bg-[#0d0d14] px-1 rounded">[[text|node]]</code>)</li>
-                <li>Visited tracking (<code className="bg-[#0d0d14] px-1 rounded">visited("node_id")</code>)</li>
-                <li>Random selection (<code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;shuffle&gt;&gt;</code>)</li>
-                <li>Functions and tags</li>
+            <div className="bg-[#12121a] p-3 rounded border border-yellow-500/30">
+              <strong className="text-yellow-400 text-xs">⚠️ Partially Supported</strong>
+              <ul className="list-disc list-inside space-y-1 text-xs mt-2 ml-2 text-gray-400">
+                <li>Basic variable setting (<code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;set $flag = true&gt;&gt;</code>) - Boolean only</li>
+                <li>String/number variables - Not yet supported</li>
+                <li>Variable operations (<code className="bg-[#0d0d14] px-1 rounded">+=</code>, <code className="bg-[#0d0d14] px-1 rounded">-=</code>, etc.) - Not yet supported</li>
+                <li>Variable references in text (<code className="bg-[#0d0d14] px-1 rounded">"Hello {$name}"</code>) - Not yet supported</li>
               </ul>
+            </div>
+            
+            <div className="bg-[#12121a] p-3 rounded border border-orange-500/30">
+              <strong className="text-orange-400 text-xs">❌ Not Yet Supported</strong>
+              <ul className="list-disc list-inside space-y-1 text-xs mt-2 ml-2 text-gray-500">
+                <li><strong>Commands:</strong> <code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;wait 2&gt;&gt;</code>, <code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;stop&gt;&gt;</code>, <code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;command param&gt;&gt;</code></li>
+                <li><strong>Detour:</strong> <code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;detour node_id&gt;&gt;</code> (temporary jump with return)</li>
+                <li><strong>Once:</strong> <code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;once&gt;&gt;</code> (options appear only once)</li>
+                <li><strong>Shortcuts:</strong> <code className="bg-[#0d0d14] px-1 rounded">[[text|node]]</code> (inline navigation)</li>
+                <li><strong>Tags:</strong> <code className="bg-[#0d0d14] px-1 rounded">#tag</code> (node metadata)</li>
+                <li><strong>Node Headers:</strong> <code className="bg-[#0d0d14] px-1 rounded">color:</code>, <code className="bg-[#0d0d14] px-1 rounded">group:</code>, <code className="bg-[#0d0d14] px-1 rounded">style: note</code></li>
+                <li><strong>Functions:</strong> <code className="bg-[#0d0d14] px-1 rounded">visited("node_id")</code>, <code className="bg-[#0d0d14] px-1 rounded">random(min, max)</code>, <code className="bg-[#0d0d14] px-1 rounded">dice(sides)</code></li>
+                <li><strong>Line Groups:</strong> Random/sequential line selection</li>
+                <li><strong>Smart Variables:</strong> Auto-incrementing, dependencies</li>
+                <li><strong>Enums:</strong> Enum type support</li>
+              </ul>
+            </div>
+            
+            <div className="bg-[#12121a] p-3 rounded border border-blue-500/30 mt-3">
+              <strong className="text-blue-400 text-xs">📋 Yarn Spinner Feature Roadmap</strong>
+              <p className="text-xs text-gray-400 mt-2">
+                We're actively working on full Yarn Spinner compatibility. Next priorities:
+              </p>
+              <ol className="list-decimal list-inside space-y-1 text-xs mt-2 ml-2 text-gray-400">
+                <li><strong>Full Variable System</strong> - String, number, boolean variables with operations</li>
+                <li><strong>Advanced Set Operations</strong> - <code className="bg-[#0d0d14] px-1 rounded">+=</code>, <code className="bg-[#0d0d14] px-1 rounded">-=</code>, <code className="bg-[#0d0d14] px-1 rounded">*=</code>, <code className="bg-[#0d0d14] px-1 rounded">/=</code></li>
+                <li><strong>Rebuild PlayView</strong> - Proper Yarn Spinner execution engine</li>
+                <li><strong>Commands & Shortcuts</strong> - wait, stop, detour, once, [[text|node]]</li>
+                <li><strong>Functions & Tags</strong> - visited(), random(), #tags, node headers</li>
+              </ol>
+              <p className="text-xs text-gray-500 mt-2 italic">
+                See the Roadmap section for detailed implementation plans.
+              </p>
             </div>
           </div>
           
