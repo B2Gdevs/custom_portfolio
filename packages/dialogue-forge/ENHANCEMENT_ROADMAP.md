@@ -15,6 +15,10 @@
 - [x] **Zoom Controls** - React Flow built-in controls
 - [x] **Node Context Menu** - Right-click on nodes for quick actions
 - [x] **Flag System** - Full flag support with color coding (quest, achievement, item, stat, title, global, dialogue)
+- [x] **Edge Drop Menu** - Create nodes when dropping edge on empty space with auto-connect
+- [x] **Multi-Select** - Selection box (drag to select) and multi-delete
+- [x] **Delete Key** - Delete selected nodes with Delete/Backspace key
+- [x] **Undo/Redo** - React Flow built-in undo/redo system
 
 ## Yarn Spinner Feature Support
 
@@ -87,11 +91,13 @@
   - [x] Zoom to fit
   - [ ] Zoom to selection (enhancement)
 
-- [ ] **Multi-Select** - **HIGH PRIORITY** (React Flow supports, needs wiring)
-  - [ ] Click + drag to select multiple nodes
-  - [ ] Shift+click for multi-select
-  - [ ] Bulk operations (delete, move, copy)
-  - [ ] Selection box visual feedback
+- [x] **Multi-Select** - ✅ Complete
+  - [x] Click + drag to select multiple nodes (selection box)
+  - [x] Multi-select with selection box
+  - [x] Bulk operations (delete multiple nodes)
+  - [x] Selection box visual feedback
+  - [ ] Shift+click for multi-select (enhancement)
+  - [ ] Copy/paste for multi-selected nodes (next feature)
 
 - [ ] **Copy/Paste** - **HIGH PRIORITY**
   - Copy selected nodes
@@ -99,11 +105,11 @@
   - Duplicate nodes
   - Copy connections
 
-- [x] **Undo/Redo** - ✅ Basic implementation exists
-  - [x] Action history (partially working)
+- [x] **Undo/Redo** - ✅ Complete (React Flow built-in)
+  - [x] Action history (React Flow manages)
   - [x] Keyboard shortcuts (Ctrl+Z, Ctrl+Y / Cmd+Z, Cmd+Y)
+  - [x] Works for all node/edge operations
   - [ ] Visual undo/redo buttons (enhancement)
-  - [ ] Fix undo behavior to be more granular (bug fix needed)
 
 ### Phase 2: Navigation & Organization (Medium Priority)
 - [ ] **Node Search/Filter** - **MEDIUM PRIORITY**
@@ -156,11 +162,11 @@
 ## Implementation Priority
 
 ### 🔥 Immediate (Next Sprint) - Critical for Production
-1. **Multi-select** - Wire up React Flow's built-in multi-select
-2. **Copy/paste** - Essential for workflow efficiency
-3. **Undo/redo fixes** - Make undo more granular and reliable
-4. **Variables system** - Core Yarn Spinner feature
-5. **Edge drop menu** - Create nodes when dropping edge on empty space
+1. **Copy/paste** - Essential for workflow efficiency
+2. **Variables system** - Core Yarn Spinner feature
+3. **Node search/filter** - Essential for large dialogues
+4. **Visual undo/redo buttons** - Better UX
+5. **Zoom to selection** - Quality of life improvement
 
 ### 📅 Short Term (Next Month) - High Value Features
 1. **Advanced set operations** - Increment, decrement, multiply, divide
@@ -187,12 +193,11 @@
 ## Known Issues & Bugs
 
 ### Critical Bugs (Fix Immediately)
-- [ ] Undo/redo sometimes reverts to initial state instead of last action
-- [ ] Flag display in NodeEditor can be stale until tab switch (partially fixed, monitor)
+- [ ] None currently - all critical bugs resolved
 
 ### Minor Issues
-- [ ] Edge drop menu not implemented (when dragging edge to empty space)
-- [ ] Some React Flow features not fully utilized (selection box, etc.)
+- [ ] Flag display in NodeEditor can be stale until tab switch (monitoring - partially fixed)
+- [ ] Shift+click for multi-select not working (enhancement)
 
 ## Technical Debt
 
@@ -213,10 +218,10 @@
 ### UI Components Needed
 - ConditionalNodeEditor
 - VariableManager
-- Minimap component
-- ZoomControls component
-- MultiSelectHandler
-- UndoRedoManager
+- ~~Minimap component~~ ✅ (React Flow built-in)
+- ~~ZoomControls component~~ ✅ (React Flow built-in)
+- ~~MultiSelectHandler~~ ✅ (React Flow built-in)
+- ~~UndoRedoManager~~ ✅ (React Flow built-in)
 
 ### Yarn Converter Updates
 - Parse conditional blocks
