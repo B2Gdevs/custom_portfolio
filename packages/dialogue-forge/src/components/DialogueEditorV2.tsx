@@ -987,16 +987,30 @@ function DialogueEditorV2Internal({
               onFocusNode={(nodeId) => {
                 const targetNode = nodes.find(n => n.id === nodeId);
                 if (targetNode && reactFlowInstance) {
-                  // Focus on the target node with animation
-                  reactFlowInstance.fitView({ 
-                    nodes: [{ id: nodeId }], 
-                    padding: 0.2, 
-                    duration: 500,
-                    minZoom: 0.5,
-                    maxZoom: 2
-                  });
-                  // Also select it so it's highlighted
+                  // Set selectedNodeId first so NodeEditor updates
                   setSelectedNodeId(nodeId);
+                  
+                  // Update nodes using React Flow instance to ensure proper selection
+                  const allNodes = reactFlowInstance.getNodes();
+                  const updatedNodes = allNodes.map((n) => ({
+                    ...n,
+                    selected: n.id === nodeId
+                  }));
+                  reactFlowInstance.setNodes(updatedNodes);
+                  
+                  // Also update local state to keep in sync
+                  setNodes(updatedNodes);
+                  
+                  // Focus on the target node with animation
+                  setTimeout(() => {
+                    reactFlowInstance.fitView({ 
+                      nodes: [{ id: nodeId }], 
+                      padding: 0.2, 
+                      duration: 500,
+                      minZoom: 0.5,
+                      maxZoom: 2
+                    });
+                  }, 0);
                 }
               }}
               onDelete={() => handleDeleteNode(selectedNode.id)}
