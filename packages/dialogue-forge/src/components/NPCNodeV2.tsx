@@ -14,7 +14,7 @@ export function NPCNodeV2({ data, selected }: NodeProps<NPCNodeData>) {
 
   return (
     <div className={`rounded-lg border-2 transition-all ${
-      selected ? 'border-[#e94560] shadow-lg shadow-[#e94560]/20' : 'border-[#2a2a3e]'
+      selected ? 'border-[#e94560] shadow-lg shadow-[#e94560]/20' : 'border-[#4a1a1a]'
     } bg-[#1a1a2e] min-w-[200px]`}>
       {/* Input handle at top */}
       <Handle 
@@ -33,10 +33,10 @@ export function NPCNodeV2({ data, selected }: NodeProps<NPCNodeData>) {
       {/* Content */}
       <div className="px-3 py-2 min-h-[50px]">
         {node.speaker && (
-          <div className="text-[10px] text-[#e94560] font-medium">{node.speaker}</div>
+          <div className="text-[10px] text-[#e94560] font-medium mb-1">{node.speaker}</div>
         )}
-        <div className="text-xs text-gray-400 line-clamp-2">
-          {node.content.slice(0, 60) + (node.content.length > 60 ? '...' : '')}
+        <div className="text-xs text-gray-300 line-clamp-2 bg-[#0d0d14] border border-[#2a2a3e] rounded px-2 py-1">
+          &quot;{node.content.slice(0, 60) + (node.content.length > 60 ? '...' : '')}&quot;
         </div>
         
         {/* Flag indicators */}

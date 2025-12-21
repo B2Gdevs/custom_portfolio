@@ -7,12 +7,46 @@ export function createNode(
   x: number,
   y: number
 ): DialogueNode {
+  if (type === NODE_TYPE.NPC) {
+    return {
+      id,
+      type,
+      content: 'New dialogue...',
+      speaker: 'Character',
+      x,
+      y
+    };
+  } else if (type === NODE_TYPE.PLAYER) {
+    return {
+      id,
+      type,
+      content: '',
+      choices: [{ id: `c_${Date.now()}`, text: 'Choice 1', nextNodeId: '' }],
+      x,
+      y
+    };
+  } else if (type === NODE_TYPE.CONDITIONAL) {
+    return {
+      id,
+      type,
+      content: '',
+      conditionalBlocks: [{
+        id: `block_${Date.now()}`,
+        type: 'if',
+        condition: [],
+        content: 'New dialogue...',
+        speaker: undefined
+      }],
+      x,
+      y
+    };
+  }
+  
+  // Fallback
   return {
     id,
     type,
-    content: type === NODE_TYPE.NPC ? 'New dialogue...' : '',
-    speaker: type === NODE_TYPE.NPC ? 'Character' : undefined,
-    choices: type === NODE_TYPE.PLAYER ? [{ id: `c_${Date.now()}`, text: 'Choice 1', nextNodeId: '' }] : undefined,
+    content: '',
     x,
     y
   };

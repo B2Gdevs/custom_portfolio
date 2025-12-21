@@ -25,43 +25,43 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
           </div>
         );
       }
-      return <img {...props} />;
+      return <img {...(props as any)} />;
     },
     h1: (props) => (
       <h1 
         id={props.children?.toString().toLowerCase().replace(/\s+/g, '-')}
         className="scroll-mt-24" 
-        {...props} 
+        {...(props as any)} 
       />
     ),
     h2: (props) => (
       <h2 
         id={props.children?.toString().toLowerCase().replace(/\s+/g, '-')}
         className="scroll-mt-24" 
-        {...props} 
+        {...(props as any)} 
       />
     ),
     h3: (props) => (
       <h3 
         id={props.children?.toString().toLowerCase().replace(/\s+/g, '-')}
         className="scroll-mt-24" 
-        {...props} 
+        {...(props as any)} 
       />
     ),
     h4: (props) => (
       <h4 
         id={props.children?.toString().toLowerCase().replace(/\s+/g, '-')}
         className="scroll-mt-24" 
-        {...props} 
+        {...(props as any)} 
       />
     ),
     p: (props) => (
-      <p {...props} />
+      <p {...(props as any)} />
     ),
     a: (props) => (
       <a
         className="font-medium hover:underline underline-offset-2 transition-colors"
-        {...props}
+        {...(props as any)}
       />
     ),
     code: (props: any) => {
@@ -77,7 +77,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       }
       // Code block - rehype-pretty-code handles syntax highlighting
       // Just pass through to preserve the structure with spans
-      return <code {...props} />;
+      return <code {...(props as any)} />;
     },
     pre: (props: any) => {
       // rehype-pretty-code already transforms the code block into a <pre> element
@@ -88,7 +88,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         return (
           <pre
             className="bg-dark-alt border border-border rounded-lg p-4 overflow-x-auto mb-6 text-sm"
-            {...props}
+            {...(props as any)}
           />
         );
       }
@@ -115,33 +115,33 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       );
     },
     ul: (props) => (
-      <ul className="list-disc list-outside mb-6 space-y-2 ml-6 text-text" {...props} />
+      <ul className="list-disc list-outside mb-6 space-y-2 ml-6 text-text" {...(props as any)} />
     ),
     ol: (props) => (
-      <ol className="list-decimal list-outside mb-6 space-y-2 ml-6 text-text" {...props} />
+      <ol className="list-decimal list-outside mb-6 space-y-2 ml-6 text-text" {...(props as any)} />
     ),
     li: (props) => (
-      <li className="text-base leading-7 pl-2" {...props} />
+      <li className="text-base leading-7 pl-2" {...(props as any)} />
     ),
     blockquote: (props) => (
       <blockquote
         className="border-l-4 border-accent/30 pl-6 py-2 my-6 italic text-text-muted bg-dark-alt/50 rounded-r"
-        {...props}
+        {...(props as any)}
       />
     ),
     hr: (props) => (
-      <hr className="my-8 border-border" {...props} />
+      <hr className="my-8 border-border" {...(props as any)} />
     ),
     table: (props) => (
       <div className="overflow-x-auto my-6">
-        <table className="min-w-full border-collapse border border-border rounded-lg" {...props} />
+        <table className="min-w-full border-collapse border border-border rounded-lg" {...(props as any)} />
       </div>
     ),
     th: (props) => (
-      <th className="border border-border bg-dark-alt px-4 py-3 text-left font-semibold text-primary" {...props} />
+      <th className="border border-border bg-dark-alt px-4 py-3 text-left font-semibold text-primary" {...(props as any)} />
     ),
     td: (props) => (
-      <td className="border border-border px-4 py-3 text-text" {...props} />
+      <td className="border border-border px-4 py-3 text-text" {...(props as any)} />
     ),
     YouTube: (props: { url: string; title?: string }) => (
       <YouTubeEmbed url={props.url} title={props.title} />

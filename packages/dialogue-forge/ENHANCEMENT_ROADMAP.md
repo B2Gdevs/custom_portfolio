@@ -91,13 +91,14 @@
   - [x] Zoom to fit
   - [ ] Zoom to selection (enhancement)
 
-- [x] **Multi-Select** - ✅ Complete
+- [x] **Multi-Select** - ✅ Complete (with known issues - deprioritized)
   - [x] Click + drag to select multiple nodes (selection box)
   - [x] Multi-select with selection box
   - [x] Bulk operations (delete multiple nodes)
   - [x] Selection box visual feedback
-  - [ ] Shift+click for multi-select (enhancement)
+  - [ ] Shift+click for multi-select (enhancement - **DEPRIORITIZED**)
   - [ ] Copy/paste for multi-selected nodes (next feature)
+  - [ ] **Known Issue**: Square selection doesn't always capture all nodes in the selection box (deprioritized)
 
 - [ ] **Copy/Paste** - **HIGH PRIORITY**
   - Copy selected nodes
@@ -128,6 +129,8 @@
 - [x] **Better Edge Routing** - ✅ Partially complete
   - [x] Curved edges (React Flow smoothstep)
   - [x] Edge colors by type (choice edges color-coded)
+  - [x] Edge hover highlighting
+  - [x] Edge deletion (Delete key or click to select + delete)
   - [ ] Smart edge paths (avoid nodes) - enhancement
   - [ ] Edge labels - enhancement
 
@@ -197,11 +200,11 @@
 
 ### Minor Issues
 - [ ] Flag display in NodeEditor can be stale until tab switch (monitoring - partially fixed)
-- [ ] Shift+click for multi-select not working (enhancement)
+- [ ] Square selection doesn't always capture all nodes in the selection box (deprioritized)
 
 ## Technical Debt
 
-- [ ] Clean up V1 components (keep for backward compatibility but mark as deprecated)
+- [x] Clean up V1 components (removed DialogueEditorV1 and GraphViewV1)
 - [ ] Improve type safety in reactflow-converter
 - [ ] Add comprehensive error boundaries
 - [ ] Improve test coverage

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BaseEdge, EdgeProps, getBezierPath, MarkerType } from 'reactflow';
 import { CHOICE_COLORS } from '../utils/reactflow-converter';
 
@@ -9,8 +9,10 @@ export function ChoiceEdgeV2({
   targetX,
   targetY,
   data,
+  selected,
 }: EdgeProps) {
-  const [edgePath] = getBezierPath({
+  const [hovered, setHovered] = useState(false);
+  const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
     targetX,
@@ -19,16 +21,38 @@ export function ChoiceEdgeV2({
 
   const choiceIndex = data?.choiceIndex ?? 0;
   const color = CHOICE_COLORS[choiceIndex % CHOICE_COLORS.length];
+  const isSelected = selected || hovered;
+  
+  // Make edge thicker and more opaque when hovered or selected
+  const strokeWidth = isSelected ? 4 : 2;
+  const opacity = isSelected ? 1 : 0.7;
+  
+  // Add glow effect when hovered
+  const filter = hovered ? `drop-shadow(0 0 4px ${color}80)` : undefined;
 
   return (
     <>
+      {/* Invisible wider path for easier clicking and hover detection */}
+      <path
+        d={edgePath}
+        fill="none"
+        stroke="transparent"
+        strokeWidth={20}
+        style={{ cursor: 'pointer', pointerEvents: 'all' }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      />
       <BaseEdge 
         id={id} 
         path={edgePath}
         style={{ 
           stroke: color, 
-          strokeWidth: 2, 
-          opacity: 0.7 
+          strokeWidth, 
+          opacity,
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          pointerEvents: 'none', // Let the invisible path handle events
+          filter,
         }}
         markerEnd={`url(#react-flow__arrowclosed-${color.replace('#', '')})`}
       />

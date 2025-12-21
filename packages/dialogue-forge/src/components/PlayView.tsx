@@ -108,85 +108,143 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
     if (!node) return;
     
     // If it's a player node, just ensure typing is false and show choices
-    if (node.type !== 'npc') {
+    if (node.type === 'player') {
       setIsTyping(false);
       return;
     }
 
-    setIsTyping(true);
-    const timer = setTimeout(() => {
-      if (node.setFlags) {
-        // Update dialogue flags (temporary)
-        setMemoryFlags(prev => {
-          const next = new Set(prev);
-          node.setFlags!.forEach(f => next.add(f));
-          return next;
-        });
-        
-        // Update game flags (persistent)
-        if (flagSchema) {
-          const gameFlagIds = node.setFlags.filter(flagId => {
-            const flag = flagSchema.flags.find(f => f.id === flagId);
-            return flag && flag.type !== 'dialogue';
-          });
-          
-          if (gameFlagIds.length > 0) {
-            setGameFlags(prev => {
-              const updated = mergeFlagUpdates(prev, gameFlagIds, flagSchema);
-              return updated;
-            });
-            setFlagsSetDuringRun(prev => {
-              const next = new Set(prev);
-              gameFlagIds.forEach(f => next.add(f));
-              return next;
-            });
-          }
-        }
-      }
-      
-      // Handle conditional blocks
-      let displayContent = node.content;
-      let displaySpeaker = node.speaker;
-      
-      if (node.conditionalBlocks && node.conditionalBlocks.length > 0) {
-        // Find the first matching block
+    // Handle conditional nodes
+    if (node.type === 'conditional') {
+      setIsTyping(true);
+      const timer = setTimeout(() => {
+        // Find the first matching block (if/elseif/else logic)
         let matchedBlock = null;
-        for (const block of node.conditionalBlocks) {
-          if (block.type === 'else') {
-            matchedBlock = block;
-            break;
-          } else if (block.condition && block.condition.length > 0) {
-            // Check if all conditions in this block are true
-            const allMatch = block.condition.every(cond => evaluateCondition(cond));
-            if (allMatch) {
-              matchedBlock = block;
-              break;
+        if (node.conditionalBlocks && node.conditionalBlocks.length > 0) {
+          for (const block of node.conditionalBlocks) {
+            if (block.type === 'else') {
+              // Only match else if no previous block matched
+              if (!matchedBlock) {
+                matchedBlock = block;
+              }
+              // Don't break - continue to check if there are more blocks
+            } else if (block.condition && block.condition.length > 0) {
+              // Check if all conditions in this block are true
+              const allMatch = block.condition.every(cond => evaluateCondition(cond));
+              if (allMatch) {
+                matchedBlock = block;
+                break; // Found a match, stop checking (if/elseif matched)
+              }
             }
           }
         }
         
         if (matchedBlock) {
-          displayContent = matchedBlock.content;
-          displaySpeaker = matchedBlock.speaker || node.speaker;
+          const displayContent = matchedBlock.content;
+          const displaySpeaker = matchedBlock.speaker;
+          
+          setHistory(prev => [...prev, {
+            nodeId: node.id,
+            type: 'npc',
+            speaker: displaySpeaker,
+            content: displayContent
+          }]);
+          
+          // Navigate to the matched block's nextNodeId, or the node's nextNodeId as fallback
+          const nextId = matchedBlock.nextNodeId || node.nextNodeId;
+          if (nextId) {
+            setTimeout(() => setCurrentNodeId(nextId), 300);
+          } else {
+            setIsTyping(false);
+          }
+        } else {
+          // No block matched - this shouldn't happen, but handle gracefully
+          setIsTyping(false);
         }
-      }
+      }, 500);
       
-      setHistory(prev => [...prev, {
-        nodeId: node.id,
-        type: 'npc',
-        speaker: displaySpeaker,
-        content: displayContent
-      }]);
+      return () => clearTimeout(timer);
+    }
+
+    // Handle NPC nodes
+    if (node.type === 'npc') {
+      setIsTyping(true);
+      const timer = setTimeout(() => {
+        if (node.setFlags) {
+          // Update dialogue flags (temporary)
+          setMemoryFlags(prev => {
+            const next = new Set(prev);
+            node.setFlags!.forEach(f => next.add(f));
+            return next;
+          });
+          
+          // Update game flags (persistent)
+          if (flagSchema) {
+            const gameFlagIds = node.setFlags.filter(flagId => {
+              const flag = flagSchema.flags.find(f => f.id === flagId);
+              return flag && flag.type !== 'dialogue';
+            });
+            
+            if (gameFlagIds.length > 0) {
+              setGameFlags(prev => {
+                const updated = mergeFlagUpdates(prev, gameFlagIds, flagSchema);
+                return updated;
+              });
+              setFlagsSetDuringRun(prev => {
+                const next = new Set(prev);
+                gameFlagIds.forEach(f => next.add(f));
+                return next;
+              });
+            }
+          }
+        }
+        
+        // Handle conditional blocks on NPC nodes
+        let displayContent = node.content;
+        let displaySpeaker = node.speaker;
+        
+        if (node.conditionalBlocks && node.conditionalBlocks.length > 0) {
+          // Find the first matching block (if/elseif/else logic)
+          let matchedBlock = null;
+          for (const block of node.conditionalBlocks) {
+            if (block.type === 'else') {
+              // Only match else if no previous block matched
+              if (!matchedBlock) {
+                matchedBlock = block;
+              }
+              // Don't break - continue to check if there are more blocks
+            } else if (block.condition && block.condition.length > 0) {
+              // Check if all conditions in this block are true
+              const allMatch = block.condition.every(cond => evaluateCondition(cond));
+              if (allMatch) {
+                matchedBlock = block;
+                break; // Found a match, stop checking (if/elseif matched)
+              }
+            }
+          }
+          
+          if (matchedBlock) {
+            displayContent = matchedBlock.content;
+            displaySpeaker = matchedBlock.speaker || node.speaker;
+          }
+        }
+        
+        setHistory(prev => [...prev, {
+          nodeId: node.id,
+          type: 'npc',
+          speaker: displaySpeaker,
+          content: displayContent
+        }]);
+        
+        setIsTyping(false);
+        
+        if (node.nextNodeId) {
+          setTimeout(() => setCurrentNodeId(node.nextNodeId!), 300);
+        }
+      }, 500);
       
-      setIsTyping(false);
-      
-      if (node.nextNodeId) {
-        setTimeout(() => setCurrentNodeId(node.nextNodeId!), 300);
-      }
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [currentNodeId, dialogue, gameFlags, memoryFlags, flagSchema]);
+      return () => clearTimeout(timer);
+    }
+  }, [currentNodeId, dialogue, gameFlags, memoryFlags, flagSchema, evaluateCondition]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });

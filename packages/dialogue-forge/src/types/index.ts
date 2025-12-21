@@ -14,14 +14,27 @@ export interface Condition {
   value?: boolean | number | string; // Required for comparison operators
 }
 
+/**
+ * Conditional content block for if/elseif/else statements
+ */
+export interface ConditionalBlock {
+  id: string;
+  type: 'if' | 'elseif' | 'else';
+  condition?: Condition[]; // Required for 'if' and 'elseif', undefined for 'else'
+  content: string;
+  speaker?: string;
+  nextNodeId?: string; // Optional: where to go after this block's content
+}
+
 export interface DialogueNode {
   id: string;
   type: NodeType;
   speaker?: string;
   content: string;
-  choices?: Choice[];
+  choices?: Choice[]; // For player nodes
   nextNodeId?: string;
   setFlags?: string[];
+  conditionalBlocks?: ConditionalBlock[]; // For conditional nodes (if/elseif/else/endif)
   x: number;
   y: number;
 }

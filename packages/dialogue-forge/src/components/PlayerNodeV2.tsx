@@ -58,7 +58,7 @@ export function PlayerNodeV2({ data, selected }: NodeProps<PlayerNodeData>) {
 
   return (
     <div className={`rounded-lg border-2 transition-all ${
-      selected ? 'border-[#e94560] shadow-lg shadow-[#e94560]/20' : 'border-[#2a2a3e]'
+      selected ? 'border-[#8b5cf6] shadow-lg shadow-[#8b5cf6]/20' : 'border-[#2a1a3a]'
     } bg-[#1e1e3a] min-w-[200px]`}>
       {/* Input handle at top */}
       <Handle 
@@ -91,7 +91,9 @@ export function PlayerNodeV2({ data, selected }: NodeProps<PlayerNodeData>) {
               className="px-3 py-1.5 text-[10px] text-gray-400 flex items-center gap-2 border-b border-[#2a2a3e] last:border-0 relative"
             >
               <div className="flex-1 min-w-0">
-                <span className="truncate block">{choice.text || 'Empty choice'}</span>
+                <span className="truncate block bg-[#0d0d14] border border-[#2a2a3e] rounded px-2 py-1 text-gray-300">
+                  &quot;{choice.text || 'Empty choice'}&quot;
+                </span>
                 
                 {/* Choice flag indicators */}
                 {choice.setFlags && choice.setFlags.length > 0 && (

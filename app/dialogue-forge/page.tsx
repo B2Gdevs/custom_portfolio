@@ -3,12 +3,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, BookOpen, RotateCcw, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
-import { YarnView } from '../../packages/dialogue-forge/src/components/YarnView';
-import { PlayView } from '../../packages/dialogue-forge/src/components/PlayView';
-import { NodeEditor } from '../../packages/dialogue-forge/src/components/NodeEditor';
+import { DialogueEditorV2 } from '../../packages/dialogue-forge/src/components/DialogueEditorV2';
 import { GuidePanel } from '../../packages/dialogue-forge/src/components/GuidePanel';
 import { FlagManager } from '../../packages/dialogue-forge/src/components/FlagManager';
-import { ZoomControls } from '../../packages/dialogue-forge/src/components/ZoomControls';
 import { ExampleLoader } from '../../packages/dialogue-forge/src/components/ExampleLoader';
 import { exportToYarn, importFromYarn } from '../../packages/dialogue-forge/src/lib/yarn-converter';
 import { FlagSchema, exampleFlagSchema } from '../../packages/dialogue-forge/src/types/flags';
@@ -184,6 +181,88 @@ export default function DialogueForgePage() {
   const [currentNodeId, setCurrentNodeId] = useState<string>(defaultDialogue.startNodeId);
   const [viewMode, setViewMode] = useState<'graph' | 'play' | 'yarn'>('graph');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set());
+  const [selectionBox, setSelectionBox] = useState<{ startX: number; startY: number; endX: number; endY: number } | null>(null);
+  const [isSelecting, setIsSelecting] = useState(false);
+  
+  // Undo/Redo system - simple snapshot-based approach
+  const [history, setHistory] = useState<DialogueTree[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const maxHistorySize = 50;
+  const isUndoRedoRef = useRef(false);
+  
+  // Reset history when dialogue tree changes externally (e.g., loading example)
+  const resetHistory = useCallback((newState: DialogueTree) => {
+    const snapshot = JSON.parse(JSON.stringify(newState));
+    setHistory([snapshot]);
+    setHistoryIndex(0);
+    isUndoRedoRef.current = false;
+  }, []);
+  
+  // Save snapshot before making changes
+  const saveSnapshot = useCallback((state: DialogueTree) => {
+    if (isUndoRedoRef.current) {
+      isUndoRedoRef.current = false;
+      return;
+    }
+    
+    setHistory(prev => {
+      const currentIndex = historyIndex;
+      // Remove any "future" history if we're not at the end
+      const trimmedHistory = prev.slice(0, currentIndex + 1);
+      // Add new snapshot
+      const snapshot = JSON.parse(JSON.stringify(state));
+      const newHistory = [...trimmedHistory, snapshot];
+      
+      // Limit history size
+      if (newHistory.length > maxHistorySize) {
+        const limited = newHistory.slice(-maxHistorySize);
+        setHistoryIndex(maxHistorySize - 1);
+        return limited;
+      }
+      setHistoryIndex(newHistory.length - 1);
+      return newHistory;
+    });
+  }, [historyIndex, maxHistorySize]);
+  
+  // Wrapper for setDialogueTree that tracks history
+  const updateDialogueTree = useCallback((updater: (prev: DialogueTree) => DialogueTree) => {
+    setDialogueTree(prev => {
+      // Save snapshot BEFORE making changes
+      saveSnapshot(prev);
+      // Apply the update
+      return updater(prev);
+    });
+    setHasChanges(true);
+  }, [saveSnapshot]);
+  
+  // Undo function
+  const handleUndo = useCallback(() => {
+    if (history.length === 0 || historyIndex <= 0) {
+      return;
+    }
+    
+    isUndoRedoRef.current = true;
+    const newIndex = historyIndex - 1;
+    const snapshot = JSON.parse(JSON.stringify(history[newIndex]));
+    setHistoryIndex(newIndex);
+    setDialogueTree(snapshot);
+    setHasChanges(true);
+  }, [history, historyIndex]);
+  
+  // Redo function
+  const handleRedo = useCallback(() => {
+    if (history.length === 0 || historyIndex >= history.length - 1) {
+      return;
+    }
+    
+    isUndoRedoRef.current = true;
+    const newIndex = historyIndex + 1;
+    const snapshot = JSON.parse(JSON.stringify(history[newIndex]));
+    setHistoryIndex(newIndex);
+    setDialogueTree(snapshot);
+    setHasChanges(true);
+  }, [history, historyIndex]);
   const [saved, setSaved] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [graphOffset, setGraphOffset] = useState({ x: 150, y: 30 });
@@ -207,7 +286,9 @@ export default function DialogueForgePage() {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        setDialogueTree(JSON.parse(stored));
+        const loadedDialogue = JSON.parse(stored);
+        resetHistory(loadedDialogue);
+        setDialogueTree(loadedDialogue);
       } catch (e) {
         console.error('Failed to load:', e);
       }
@@ -229,6 +310,64 @@ export default function DialogueForgePage() {
     console.log('edgeDropMenu state changed:', edgeDropMenu);
   }, [edgeDropMenu]);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Delete selected nodes
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNodeIds.size > 0 && viewMode === 'graph') {
+        e.preventDefault();
+        updateDialogueTree(prev => {
+          const newNodes = { ...prev.nodes };
+          selectedNodeIds.forEach(id => {
+            if (id !== prev.startNodeId) {
+              delete newNodes[id];
+              // Remove references
+              Object.keys(newNodes).forEach(nodeId => {
+                const node = newNodes[nodeId];
+                if (node.nextNodeId === id) {
+                  newNodes[nodeId] = { ...node, nextNodeId: undefined };
+                }
+                if (node.choices) {
+                  newNodes[nodeId] = {
+                    ...node,
+                    choices: node.choices.map(c => c.nextNodeId === id ? { ...c, nextNodeId: '' } : c)
+                  };
+                }
+              });
+            }
+          });
+          return { ...prev, nodes: newNodes };
+        });
+        setSelectedNodeIds(new Set());
+        setSelectedNodeId(null);
+      }
+      
+      // Select all
+      if ((e.ctrlKey || e.metaKey) && e.key === 'a' && viewMode === 'graph') {
+        e.preventDefault();
+        setSelectedNodeIds(new Set(Object.keys(dialogueTree.nodes)));
+      }
+      
+      // Undo - Platform specific: Cmd+Z on Mac, Ctrl+Z on Windows/Linux
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const modKey = isMac ? e.metaKey : e.ctrlKey;
+      
+      if (modKey && e.key === 'z' && !e.shiftKey && viewMode === 'graph') {
+        e.preventDefault();
+        handleUndo();
+      }
+      
+      // Redo - Platform specific: Cmd+Shift+Z on Mac, Ctrl+Y or Ctrl+Shift+Z on Windows/Linux
+      if (modKey && (e.key === 'y' || (e.key === 'z' && e.shiftKey)) && viewMode === 'graph') {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedNodeIds, viewMode, dialogueTree, handleUndo, handleRedo]);
+
   // Mouse handlers for graph
   const handleGraphMouseDown = (e: React.MouseEvent) => {
     if (e.button === 2) return; // Right click handled separately
@@ -237,6 +376,22 @@ export default function DialogueForgePage() {
     // Don't start panning if we're dragging an edge
     if (draggingEdge) return;
     setContextMenu(null);
+    
+    // Start selection box if holding Ctrl/Cmd (not Shift, as Shift is for adding to selection)
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+      const rect = graphRef.current?.getBoundingClientRect();
+      if (rect) {
+        const graphX = (e.clientX - rect.left - graphOffset.x) / graphScale;
+        const graphY = (e.clientY - rect.top - graphOffset.y) / graphScale;
+        setIsSelecting(true);
+        setSelectionBox({ startX: graphX, startY: graphY, endX: graphX, endY: graphY });
+        // Clear current selection when starting new selection box
+        setSelectedNodeIds(new Set());
+        setSelectedNodeId(null);
+      }
+      return;
+    }
+    
     // Only clear edge drop menu on explicit clicks, not on mousedown during edge drag release
     if (!edgeDropMenu) {
       setIsPanning(true);
@@ -276,6 +431,7 @@ export default function DialogueForgePage() {
       if (draggingNodeId) {
         const dx = (e.clientX - dragStart.current.x) / graphScale;
         const dy = (e.clientY - dragStart.current.y) / graphScale;
+        // Update position without saving to history (will save on mouseup)
         setDialogueTree(prev => ({
           ...prev,
           nodes: {
@@ -287,7 +443,6 @@ export default function DialogueForgePage() {
             }
           }
         }));
-        setHasChanges(true);
       }
       if (draggingEdge) {
         const rect = graphRef.current?.getBoundingClientRect();
@@ -299,10 +454,55 @@ export default function DialogueForgePage() {
           } : null);
         }
       }
+      
+      // Update selection box
+      if (isSelecting && selectionBox) {
+        const rect = graphRef.current?.getBoundingClientRect();
+        if (rect) {
+          const graphX = (e.clientX - rect.left - graphOffset.x) / graphScale;
+          const graphY = (e.clientY - rect.top - graphOffset.y) / graphScale;
+          setSelectionBox(prev => prev ? { ...prev, endX: graphX, endY: graphY } : null);
+          
+          // Update selected nodes based on selection box
+          const minX = Math.min(selectionBox.startX, graphX);
+          const maxX = Math.max(selectionBox.startX, graphX);
+          const minY = Math.min(selectionBox.startY, graphY);
+          const maxY = Math.max(selectionBox.startY, graphY);
+          
+          const nodesInBox = Object.values(dialogueTree.nodes).filter(node => {
+            const nodeRight = node.x + NODE_WIDTH;
+            const nodeBottom = node.y + NODE_HEIGHT;
+            return node.x < maxX && nodeRight > minX && node.y < maxY && nodeBottom > minY;
+          });
+          
+          setSelectedNodeIds(new Set(nodesInBox.map(n => n.id)));
+        }
+      }
     };
     
     const handleMouseUp = (e: MouseEvent) => {
       console.log('mouseup', { draggingEdge, isPanning, draggingNodeId });
+      
+      // Save node position to history when drag ends (only if position changed)
+      if (draggingNodeId) {
+        const node = dialogueTree.nodes[draggingNodeId];
+        if (node) {
+          // Check if position actually changed from initial
+          const initialX = dragStart.current.nodeX;
+          const initialY = dragStart.current.nodeY;
+          if (node.x !== initialX || node.y !== initialY) {
+            // Position changed, save current state to history
+            saveSnapshot(dialogueTree);
+          }
+        }
+        setDraggingNodeId(null);
+      }
+      
+      // End selection box
+      if (isSelecting) {
+        setIsSelecting(false);
+        setSelectionBox(null);
+      }
       
       // Handle edge drop first, before clearing other states
       if (draggingEdge) {
@@ -332,7 +532,7 @@ export default function DialogueForgePage() {
                   ...newChoices[draggingEdge.fromChoiceIdx],
                   nextNodeId: targetNode.id
                 };
-                setDialogueTree(prev => ({
+                updateDialogueTree(prev => ({
                   ...prev,
                   nodes: {
                     ...prev.nodes,
@@ -341,7 +541,7 @@ export default function DialogueForgePage() {
                 }));
               }
             } else {
-              setDialogueTree(prev => ({
+              updateDialogueTree(prev => ({
                 ...prev,
                 nodes: {
                   ...prev.nodes,
@@ -460,12 +660,12 @@ export default function DialogueForgePage() {
   };
 
   const updateNode = useCallback((nodeId: string, updates: Partial<DialogueNode>) => {
-    setDialogueTree(prev => ({
+    console.log('[UpdateNode] Updating node:', nodeId, 'Updates:', Object.keys(updates));
+    updateDialogueTree(prev => ({
       ...prev,
       nodes: { ...prev.nodes, [nodeId]: { ...prev.nodes[nodeId], ...updates } }
     }));
-    setHasChanges(true);
-  }, []);
+  }, [updateDialogueTree]);
 
   const addNode = (type: 'npc' | 'player', x: number, y: number) => {
     const newId = `${type}_${Date.now()}`;
@@ -477,8 +677,7 @@ export default function DialogueForgePage() {
       choices: type === 'player' ? [{ id: `c_${Date.now()}`, text: 'Choice 1', nextNodeId: '' }] : undefined,
       x, y
     };
-    setDialogueTree(prev => ({ ...prev, nodes: { ...prev.nodes, [newId]: newNode } }));
-    setHasChanges(true);
+    updateDialogueTree(prev => ({ ...prev, nodes: { ...prev.nodes, [newId]: newNode } }));
     setSelectedNodeId(newId);
     setContextMenu(null);
     return newId;
@@ -493,7 +692,7 @@ export default function DialogueForgePage() {
       if (fromNode?.choices) {
         const newChoices = [...fromNode.choices];
         newChoices[fromChoiceIdx] = { ...newChoices[fromChoiceIdx], nextNodeId: newId };
-        setDialogueTree(prev => ({
+        updateDialogueTree(prev => ({
           ...prev,
           nodes: {
             ...prev.nodes,
@@ -503,7 +702,7 @@ export default function DialogueForgePage() {
         }));
       }
     } else {
-      setDialogueTree(prev => ({
+      updateDialogueTree(prev => ({
         ...prev,
         nodes: {
           ...prev.nodes,
@@ -519,8 +718,10 @@ export default function DialogueForgePage() {
       alert("Can't delete the start node!");
       return;
     }
-    setDialogueTree(prev => {
+    console.log('[DeleteNode] Deleting node:', nodeId, 'Current nodes:', Object.keys(dialogueTree.nodes));
+    updateDialogueTree(prev => {
       const { [nodeId]: _, ...rest } = prev.nodes;
+      console.log('[DeleteNode] After delete, nodes:', Object.keys(rest));
       // Also remove references to this node
       Object.keys(rest).forEach(id => {
         if (rest[id].nextNodeId === nodeId) {
@@ -536,7 +737,6 @@ export default function DialogueForgePage() {
       return { ...prev, nodes: rest };
     });
     setSelectedNodeId(null);
-    setHasChanges(true);
   };
 
   const addChoice = (nodeId: string) => {
@@ -622,9 +822,12 @@ export default function DialogueForgePage() {
       try {
         if (file.name.endsWith('.yarn')) {
           const dialogue = importFromYarn(content);
+          resetHistory(dialogue);
           setDialogueTree(dialogue);
         } else {
-          setDialogueTree(JSON.parse(content));
+          const dialogue = JSON.parse(content);
+          resetHistory(dialogue);
+          setDialogueTree(dialogue);
         }
         setHasChanges(true);
       } catch (err) {
@@ -752,7 +955,7 @@ export default function DialogueForgePage() {
             <input
               type="text"
               value={dialogueTree.title}
-              onChange={(e) => { setDialogueTree(prev => ({ ...prev, title: e.target.value })); setHasChanges(true); }}
+              onChange={(e) => { updateDialogueTree(prev => ({ ...prev, title: e.target.value })); }}
               className="bg-transparent text-white font-semibold text-lg outline-none border-b border-transparent hover:border-[#2a2a3e] focus:border-[#e94560]"
             />
             {hasChanges && <span className="text-xs text-yellow-500">•</span>}
@@ -774,6 +977,7 @@ export default function DialogueForgePage() {
             {/* Examples & Flags */}
             <ExampleLoader
               onLoadDialogue={(dialogue) => {
+                resetHistory(dialogue);
                 setDialogueTree(dialogue);
                 setHasChanges(true);
               }}
@@ -802,6 +1006,32 @@ export default function DialogueForgePage() {
             
             <div className="h-6 w-px bg-[#2a2a3e] mx-1" />
             
+            {/* Undo/Redo */}
+            <button 
+              onClick={handleUndo} 
+              disabled={historyIndex <= 0}
+              className={`p-2 ${historyIndex <= 0 ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 hover:text-white'}`} 
+              title="Undo (Ctrl+Z)"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 7v6h6" />
+                <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
+              </svg>
+            </button>
+            <button 
+              onClick={handleRedo} 
+              disabled={historyIndex >= history.length - 1}
+              className={`p-2 ${historyIndex >= history.length - 1 ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 hover:text-white'}`} 
+              title="Redo (Ctrl+Y or Ctrl+Shift+Z)"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 7v6h-6" />
+                <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13" />
+              </svg>
+            </button>
+            
+            <div className="h-6 w-px bg-[#2a2a3e] mx-1" />
+            
             {/* Guide & Save */}
             <button onClick={() => setShowGuide(true)} className="p-2 text-gray-400 hover:text-white" title="Guide & Documentation">
               <BookOpen size={16} />
@@ -814,350 +1044,45 @@ export default function DialogueForgePage() {
       </header>
 
       <div className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 60px)' }}>
-        {/* Graph View */}
+        {/* React Flow V2 Editor - Graph View */}
         {viewMode === 'graph' && (
-          <>
-            <div
-              ref={graphRef}
-              className="flex-1 overflow-hidden cursor-grab active:cursor-grabbing relative"
-              style={{ background: 'radial-gradient(circle, #1a1a2e 1px, #08080c 1px)', backgroundSize: '20px 20px' }}
-              onMouseDown={handleGraphMouseDown}
-              onContextMenu={handleGraphContextMenu}
-              onWheel={handleWheel}
-              onClick={handleGraphClick}
-            >
-              <div style={{ transform: `translate(${graphOffset.x}px, ${graphOffset.y}px) scale(${graphScale})`, transformOrigin: '0 0' }} className="relative">
-                {renderConnections()}
-                
-                {Object.values(dialogueTree.nodes).map(node => (
-                  <div
-                    key={node.id}
-                    className={`graph-node absolute select-none cursor-move`}
-                    style={{ left: node.x, top: node.y, width: NODE_WIDTH }}
-                    onMouseDown={(e) => { e.stopPropagation(); startNodeDrag(node.id, e); }}
-                    onClick={(e) => { e.stopPropagation(); setSelectedNodeId(node.id); setContextMenu(null); setNodeContextMenu(null); }}
-                    onContextMenu={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setNodeContextMenu({ x: e.clientX, y: e.clientY, nodeId: node.id });
-                      setContextMenu(null);
-                    }}
-                  >
-                    <div className={`rounded-lg border-2 transition-all ${
-                      selectedNodeId === node.id ? 'border-[#e94560] shadow-lg shadow-[#e94560]/20' :
-                      currentNodeId === node.id ? 'border-green-500' : 'border-[#2a2a3e]'
-                    } ${node.type === 'npc' ? 'bg-[#1a1a2e]' : 'bg-[#1e1e3a]'}`}>
-                      {/* Header */}
-                      <div className={`px-3 py-1.5 border-b border-[#2a2a3e] flex items-center gap-2 rounded-t-lg ${
-                        node.type === 'npc' ? 'bg-[#12121a]' : 'bg-[#16162a]'
-                      }`}>
-                        {node.type === 'npc' ? <MessageSquare size={12} className="text-[#e94560]" /> : <GitBranch size={12} className="text-purple-400" />}
-                        <span className="text-[10px] font-mono text-gray-500 truncate flex-1">{node.id}</span>
-                        <span className="text-[10px] text-gray-600">{node.type === 'npc' ? 'NPC' : 'PLAYER'}</span>
-                      </div>
-                      {/* Content */}
-                      <div className="px-3 py-2 min-h-[50px]">
-                        {node.type === 'npc' && node.speaker && (
-                          <div className="text-[10px] text-[#e94560] font-medium">{node.speaker}</div>
-                        )}
-                        <div className="text-xs text-gray-400 line-clamp-2">
-                          {node.type === 'npc' ? node.content.slice(0, 60) + (node.content.length > 60 ? '...' : '') : `${node.choices?.length || 0} choices`}
-                        </div>
-                        {/* Flag indicators */}
-                        {node.setFlags && node.setFlags.length > 0 && (
-                          <div className="mt-1.5 flex flex-wrap gap-1">
-                            {node.setFlags.map(flagId => {
-                              const flag = flagSchema.flags.find(f => f.id === flagId);
-                              if (!flag) return null;
-                              const colorClass = flag.type === 'quest' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
-                                flag.type === 'achievement' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' :
-                                flag.type === 'item' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
-                                flag.type === 'stat' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' :
-                                flag.type === 'title' ? 'bg-pink-500/20 text-pink-400 border-pink-500/30' :
-                                flag.type === 'global' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' :
-                                'bg-gray-500/20 text-gray-400 border-gray-500/30';
-                              return (
-                                <span key={flagId} className={`text-[8px] px-1 py-0.5 rounded border ${colorClass}`} title={flag.name}>
-                                  {flag.type === 'dialogue' ? 'temp' : flag.type[0]}
-                                </span>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                      {/* Output port */}
-                      {node.type === 'npc' && (
-                        <div
-                          className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-[#2a2a3e] border-2 border-[#4a4a6a] rounded-full cursor-crosshair hover:border-[#e94560] hover:bg-[#e94560]/20"
-                          onMouseDown={(e) => { e.stopPropagation(); startEdgeDrag(node.id); }}
-                        />
-                      )}
-                      {/* Choice outputs */}
-                      {node.type === 'player' && node.choices && (
-                        <div className="border-t border-[#2a2a3e]">
-                          {node.choices.map((choice, idx) => (
-                            <div key={choice.id} className="px-3 py-1 text-[10px] text-gray-400 flex items-center gap-2 border-b border-[#2a2a3e] last:border-0 relative">
-                              <div className="flex-1 min-w-0">
-                                <span className="truncate block">{choice.text.slice(0, 25)}...</span>
-                                {/* Choice flag indicators */}
-                                {choice.setFlags && choice.setFlags.length > 0 && (
-                                  <div className="mt-0.5 flex flex-wrap gap-0.5">
-                                    {choice.setFlags.map(flagId => {
-                                      const flag = flagSchema.flags.find(f => f.id === flagId);
-                                      if (!flag) return null;
-                                      const colorClass = flag.type === 'quest' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
-                                        flag.type === 'achievement' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' :
-                                        flag.type === 'item' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
-                                        flag.type === 'stat' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' :
-                                        flag.type === 'title' ? 'bg-pink-500/20 text-pink-400 border-pink-500/30' :
-                                        flag.type === 'global' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' :
-                                        'bg-gray-500/20 text-gray-400 border-gray-500/30';
-                                      return (
-                                        <span key={flagId} className={`text-[7px] px-0.5 py-0 rounded border ${colorClass}`} title={flag.name}>
-                                          {flag.type === 'dialogue' ? 't' : flag.type[0]}
-                                        </span>
-                                      );
-                                    })}
-                                  </div>
-                                )}
-                              </div>
-                              <div
-                                className="absolute -right-2 top-1/2 -translate-y-1/2 w-3 h-3 bg-[#2a2a3e] border-2 border-purple-400 rounded-full cursor-crosshair hover:border-[#e94560] hover:bg-[#e94560]/20"
-                                onMouseDown={(e) => { e.stopPropagation(); startEdgeDrag(node.id, idx); }}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    {/* Input port */}
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-[#2a2a3e] border-2 border-[#4a4a6a] rounded-full" />
-                  </div>
-                ))}
-              </div>
-
-              {/* Help text */}
-              <div className="absolute bottom-3 left-3 text-[10px] text-gray-600">
-                Right-click to add nodes • Drag ports to connect • Scroll to zoom
-              </div>
-              
-              {/* Zoom Controls */}
-              <div className="absolute top-4 right-4">
-                <ZoomControls
-                  scale={graphScale}
-                  onZoomIn={handleZoomIn}
-                  onZoomOut={handleZoomOut}
-                  onZoomFit={handleZoomFit}
-                />
-              </div>
-            </div>
-
-            {/* Context Menu */}
-            {contextMenu && (
-              <div
-                className="context-menu fixed bg-[#1a1a2e] border border-[#2a2a3e] rounded-lg shadow-xl py-1 z-50"
-                style={{ left: contextMenu.x, top: contextMenu.y }}
-              >
-                <button
-                  onClick={() => addNode('npc', contextMenu.graphX, contextMenu.graphY)}
-                  className="w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-[#2a2a3e] flex items-center gap-2"
-                >
-                  <MessageSquare size={14} className="text-[#e94560]" /> Add NPC Node
-                </button>
-                <button
-                  onClick={() => addNode('player', contextMenu.graphX, contextMenu.graphY)}
-                  className="w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-[#2a2a3e] flex items-center gap-2"
-                >
-                  <GitBranch size={14} className="text-purple-400" /> Add Player Node
-                </button>
-              </div>
-            )}
-
-            {/* Edge Drop Menu - appears when dragging edge to empty space */}
-            {edgeDropMenu && (
-              <div
-                className="context-menu fixed bg-[#1a1a2e] border-2 border-[#e94560] rounded-lg shadow-xl py-1"
-                style={{ left: edgeDropMenu.x, top: edgeDropMenu.y, zIndex: 9999 }}
-              >
-                <div className="px-3 py-1 text-[10px] text-gray-500 uppercase border-b border-[#2a2a3e]">Create & Connect</div>
-                <button
-                  onClick={() => addNodeAndConnect('npc', edgeDropMenu.graphX, edgeDropMenu.graphY, edgeDropMenu.fromNodeId, edgeDropMenu.fromChoiceIdx)}
-                  className="w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-[#2a2a3e] flex items-center gap-2"
-                >
-                  <MessageSquare size={14} className="text-[#e94560]" /> NPC Node
-                </button>
-                <button
-                  onClick={() => addNodeAndConnect('player', edgeDropMenu.graphX, edgeDropMenu.graphY, edgeDropMenu.fromNodeId, edgeDropMenu.fromChoiceIdx)}
-                  className="w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-[#2a2a3e] flex items-center gap-2"
-                >
-                  <GitBranch size={14} className="text-purple-400" /> Player Node
-                </button>
-                {Object.keys(dialogueTree.nodes).length > 1 && (
-                  <>
-                    <div className="px-3 py-1 text-[10px] text-gray-500 uppercase border-t border-b border-[#2a2a3e] mt-1">Connect to Existing</div>
-                    <div className="max-h-32 overflow-y-auto">
-                      {Object.values(dialogueTree.nodes)
-                        .filter(n => n.id !== edgeDropMenu.fromNodeId)
-                        .map(node => (
-                          <button
-                            key={node.id}
-                            onClick={() => {
-                              if (edgeDropMenu.fromChoiceIdx !== undefined) {
-                                const fromNode = dialogueTree.nodes[edgeDropMenu.fromNodeId];
-                                if (fromNode?.choices) {
-                                  const newChoices = [...fromNode.choices];
-                                  newChoices[edgeDropMenu.fromChoiceIdx] = { ...newChoices[edgeDropMenu.fromChoiceIdx], nextNodeId: node.id };
-                                  setDialogueTree(prev => ({
-                                    ...prev,
-                                    nodes: { ...prev.nodes, [edgeDropMenu.fromNodeId]: { ...fromNode, choices: newChoices } }
-                                  }));
-                                }
-                              } else {
-                                setDialogueTree(prev => ({
-                                  ...prev,
-                                  nodes: { ...prev.nodes, [edgeDropMenu.fromNodeId]: { ...prev.nodes[edgeDropMenu.fromNodeId], nextNodeId: node.id } }
-                                }));
-                              }
-                              setHasChanges(true);
-                              setEdgeDropMenu(null);
-                            }}
-                            className="w-full px-4 py-1.5 text-xs text-left text-gray-400 hover:bg-[#2a2a3e] hover:text-white flex items-center gap-2"
-                          >
-                            {node.type === 'npc' ? <MessageSquare size={12} className="text-[#e94560]" /> : <GitBranch size={12} className="text-purple-400" />}
-                            <span className="font-mono truncate">{node.id}</span>
-                          </button>
-                        ))}
-                    </div>
-                  </>
-                )}
-                <button
-                  onClick={() => setEdgeDropMenu(null)}
-                  className="w-full px-4 py-1.5 text-xs text-gray-500 hover:text-gray-300 border-t border-[#2a2a3e] mt-1"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-
-            {/* Node Context Menu */}
-            {nodeContextMenu && (
-              <div
-                className="context-menu fixed bg-[#1a1a2e] border border-purple-500 rounded-lg shadow-xl py-1"
-                style={{ left: nodeContextMenu.x, top: nodeContextMenu.y, zIndex: 9999 }}
-              >
-                {(() => {
-                  const node = dialogueTree.nodes[nodeContextMenu.nodeId];
-                  if (!node) return null;
-                  
-                  return (
-                    <>
-                      <div className="px-3 py-1 text-[10px] text-gray-500 uppercase border-b border-[#2a2a3e]">
-                        {node.id}
-                      </div>
-                      <button
-                        onClick={() => {
-                          setSelectedNodeId(nodeContextMenu.nodeId);
-                          setNodeContextMenu(null);
-                        }}
-                        className="w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-[#2a2a3e] flex items-center gap-2"
-                      >
-                        <Edit3 size={14} className="text-[#e94560]" /> Edit Node
-                      </button>
-                      {node.type === 'player' && (
-                        <button
-                          onClick={() => {
-                            addChoice(nodeContextMenu.nodeId);
-                            setNodeContextMenu(null);
-                          }}
-                          className="w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-[#2a2a3e] flex items-center gap-2"
-                        >
-                          <Plus size={14} className="text-purple-400" /> Add Choice
-                        </button>
-                      )}
-                      <button
-                        onClick={() => {
-                          const newNode = { ...node, id: `${node.id}_copy_${Date.now()}`, x: node.x + 50, y: node.y + 50 };
-                          setDialogueTree(prev => ({
-                            ...prev,
-                            nodes: { ...prev.nodes, [newNode.id]: newNode }
-                          }));
-                          setHasChanges(true);
-                          setNodeContextMenu(null);
-                        }}
-                        className="w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-[#2a2a3e] flex items-center gap-2"
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                        </svg>
-                        Duplicate
-                      </button>
-                      {nodeContextMenu.nodeId !== dialogueTree.startNodeId && (
-                        <button
-                          onClick={() => {
-                            deleteNode(nodeContextMenu.nodeId);
-                            setNodeContextMenu(null);
-                          }}
-                          className="w-full px-4 py-2 text-sm text-left text-red-400 hover:bg-[#2a2a3e] flex items-center gap-2"
-                        >
-                          <Trash2 size={14} /> Delete
-                        </button>
-                      )}
-                      <button
-                        onClick={() => {
-                          setCurrentNodeId(nodeContextMenu.nodeId);
-                          setViewMode('play');
-                          setNodeContextMenu(null);
-                        }}
-                        className="w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-[#2a2a3e] flex items-center gap-2 border-t border-[#2a2a3e] mt-1"
-                      >
-                        <Play size={14} className="text-green-400" /> Play from Here
-                      </button>
-                    </>
-                  );
-                })()}
-                <button
-                  onClick={() => setNodeContextMenu(null)}
-                  className="w-full px-4 py-1.5 text-xs text-gray-500 hover:text-gray-300 border-t border-[#2a2a3e] mt-1"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-
-            {/* Node Editor Panel */}
-            {selectedNode && (
-              <NodeEditor
-                node={selectedNode}
-                dialogue={dialogueTree}
-                onUpdate={(updates) => updateNode(selectedNode.id, updates)}
-                onDelete={() => deleteNode(selectedNode.id)}
-                onAddChoice={() => addChoice(selectedNode.id)}
-                onUpdateChoice={(idx, updates) => updateChoice(selectedNode.id, idx, updates)}
-                onRemoveChoice={(idx) => deleteChoice(selectedNode.id, idx)}
-                onClose={() => setSelectedNodeId(null)}
-                onPlayFromHere={(nodeId) => {
-                  setCurrentNodeId(nodeId);
-                  setViewMode('play');
-                }}
-                flagSchema={flagSchema}
-              />
-            )}
-          </>
-        )}
-
-        {/* Yarn View */}
-        {viewMode === 'yarn' && (
-          <YarnView dialogue={dialogueTree} onExport={handleExportYarn} />
-        )}
-
-        {/* Play View */}
-        {viewMode === 'play' && (
-          <PlayView 
-            dialogue={dialogueTree} 
-            startNodeId={currentNodeId}
+          <DialogueEditorV2
+            dialogue={dialogueTree}
+            onChange={(updated) => {
+              updateDialogueTree(() => updated);
+            }}
+            onExportYarn={handleExportYarn}
             flagSchema={flagSchema}
-            initialFlags={{}}
+            initialViewMode="graph"
+            className="w-full h-full"
+          />
+        )}
+
+        {/* Legacy Graph View removed - using DialogueEditorV2 */}
+        {/* React Flow V2 Editor - Yarn View */}
+        {viewMode === 'yarn' && (
+          <DialogueEditorV2
+            dialogue={dialogueTree}
+            onChange={(updated) => {
+              updateDialogueTree(() => updated);
+            }}
+            onExportYarn={handleExportYarn}
+            flagSchema={flagSchema}
+            initialViewMode="yarn"
+            className="w-full h-full"
+          />
+        )}
+
+        {/* React Flow V2 Editor - Play View */}
+        {viewMode === 'play' && (
+          <DialogueEditorV2
+            dialogue={dialogueTree}
+            onChange={(updated) => {
+              updateDialogueTree(() => updated);
+            }}
+            flagSchema={flagSchema}
+            initialViewMode="play"
+            className="w-full h-full"
           />
         )}
       </div>

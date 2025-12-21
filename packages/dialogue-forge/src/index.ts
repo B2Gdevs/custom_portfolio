@@ -1,4 +1,3 @@
-export { DialogueEditorV1 } from './components/DialogueEditorV1';
 export { DialogueEditorV2 } from './components/DialogueEditorV2';
 export { DialogueSimulator } from './components/DialogueSimulator';
 export { GuidePanel } from './components/GuidePanel';

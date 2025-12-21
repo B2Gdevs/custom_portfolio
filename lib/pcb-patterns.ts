@@ -15,3 +15,4 @@ export function getPCBPatternPath(pattern: PCBPattern): string {
   return `/images/decorative/pcb-${pattern}.svg`;
 }
 
+

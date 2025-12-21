@@ -423,13 +423,137 @@ Speaker: Dialogue text here
             <strong>Note:</strong> Flags are managed separately. Import/export flag schemas using the Flag Manager.
           </p>
 
-          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Yarn Features Supported</h3>
-          <ul className="list-disc list-inside space-y-1 text-sm ml-2">
-            <li>Dialogue text with speakers</li>
-            <li>Choices (<code className="bg-[#12121a] px-1 rounded">-&gt; Choice text</code>)</li>
-            <li>Flag setting (<code className="bg-[#12121a] px-1 rounded">&lt;&lt;set $flag = true&gt;&gt;</code>)</li>
-            <li>Jumps (<code className="bg-[#12121a] px-1 rounded">&lt;&lt;jump node_id&gt;&gt;</code>)</li>
-          </ul>
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">✅ Yarn Features Supported</h3>
+          <div className="space-y-3">
+            <div className="bg-[#12121a] p-3 rounded border border-[#2a2a3e]">
+              <strong className="text-green-400 text-xs">Core Features</strong>
+              <ul className="list-disc list-inside space-y-1 text-xs mt-2 ml-2 text-gray-400">
+                <li>Dialogue text with speakers (<code className="bg-[#0d0d14] px-1 rounded">Speaker: Text</code>)</li>
+                <li>Player choices (<code className="bg-[#0d0d14] px-1 rounded">-&gt; Choice text</code>)</li>
+                <li>Node structure (<code className="bg-[#0d0d14] px-1 rounded">title:</code>, <code className="bg-[#0d0d14] px-1 rounded">---</code>, <code className="bg-[#0d0d14] px-1 rounded">===</code>)</li>
+              </ul>
+            </div>
+            
+            <div className="bg-[#12121a] p-3 rounded border border-[#2a2a3e]">
+              <strong className="text-green-400 text-xs">Commands</strong>
+              <ul className="list-disc list-inside space-y-1 text-xs mt-2 ml-2 text-gray-400">
+                <li>Flag setting (<code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;set $flag = true&gt;&gt;</code>)</li>
+                <li>Jumps (<code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;jump node_id&gt;&gt;</code>)</li>
+              </ul>
+            </div>
+            
+            <div className="bg-[#12121a] p-3 rounded border border-green-500/30">
+              <strong className="text-green-400 text-xs">✅ Conditional Blocks (Full Support)</strong>
+              <ul className="list-disc list-inside space-y-1 text-xs mt-2 ml-2 text-gray-400">
+                <li><code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;if condition&gt;&gt;</code> - Conditional dialogue blocks</li>
+                <li><code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;elseif condition&gt;&gt;</code> - Alternative conditions</li>
+                <li><code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;else&gt;&gt;</code> - Default fallback</li>
+                <li><code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;endif&gt;&gt;</code> - End conditional block</li>
+              </ul>
+              <p className="text-gray-500 text-xs mt-2">Supports nested conditionals in NPC nodes with multiple blocks</p>
+            </div>
+            
+            <div className="bg-[#12121a] p-3 rounded border border-green-500/30">
+              <strong className="text-green-400 text-xs">✅ Conditional Choices</strong>
+              <ul className="list-disc list-inside space-y-1 text-xs mt-2 ml-2 text-gray-400">
+                <li>Choices can have conditions that wrap them in <code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;if&gt;&gt;</code> blocks</li>
+                <li>Choices only appear when conditions are met</li>
+                <li>Supports multiple conditions with AND logic</li>
+              </ul>
+            </div>
+            
+            <div className="bg-[#12121a] p-3 rounded border border-green-500/30">
+              <strong className="text-green-400 text-xs">✅ Condition Operators</strong>
+              <ul className="list-disc list-inside space-y-1 text-xs mt-2 ml-2 text-gray-400">
+                <li><code className="bg-[#0d0d14] px-1 rounded">is_set</code> - Check if flag exists</li>
+                <li><code className="bg-[#0d0d14] px-1 rounded">is_not_set</code> - Check if flag doesn't exist</li>
+                <li><code className="bg-[#0d0d14] px-1 rounded">==</code> - Equals</li>
+                <li><code className="bg-[#0d0d14] px-1 rounded">!=</code> - Not equals</li>
+                <li><code className="bg-[#0d0d14] px-1 rounded">&gt;</code> - Greater than</li>
+                <li><code className="bg-[#0d0d14] px-1 rounded">&lt;</code> - Less than</li>
+                <li><code className="bg-[#0d0d14] px-1 rounded">&gt;=</code> - Greater or equal</li>
+                <li><code className="bg-[#0d0d14] px-1 rounded">&lt;=</code> - Less or equal</li>
+              </ul>
+            </div>
+            
+            <div className="bg-[#12121a] p-3 rounded border border-orange-500/30">
+              <strong className="text-orange-400 text-xs">⚠️ Not Yet Supported</strong>
+              <ul className="list-disc list-inside space-y-1 text-xs mt-2 ml-2 text-gray-500">
+                <li>Numeric variable operations (<code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;set $gold += 100&gt;&gt;</code>)</li>
+                <li>Commands (<code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;wait&gt;&gt;</code>, <code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;stop&gt;&gt;</code>, etc.)</li>
+                <li>Shortcuts (<code className="bg-[#0d0d14] px-1 rounded">[[text|node]]</code>)</li>
+                <li>Visited tracking (<code className="bg-[#0d0d14] px-1 rounded">visited("node_id")</code>)</li>
+                <li>Random selection (<code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;shuffle&gt;&gt;</code>)</li>
+                <li>Functions and tags</li>
+              </ul>
+            </div>
+          </div>
+          
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Example: Conditional Dialogue with If/Elseif/Else</h3>
+          <div className="bg-[#12121a] p-4 rounded border border-[#2a2a3e]">
+            <pre className="text-xs font-mono text-gray-300 whitespace-pre-wrap">
+{`title: merchant_greeting
+---
+<<if $quest_dragon_slayer == "complete">>
+    Merchant: "Thank you for slaying the dragon! Here's your reward."
+    <<set $stat_gold += 500>>
+    <<set $achievement_dragon_slayer = true>>
+<<elseif $quest_dragon_slayer == "started">>
+    Merchant: "How goes the quest? I heard the dragon is still alive."
+<<elseif $stat_reputation >= 50>>
+    Merchant: "Welcome, honored traveler. I've heard good things about you."
+<<else>>
+    Merchant: "Welcome, traveler. What can I do for you?"
+<<endif>>
+<<jump merchant_shop>>
+===`}
+            </pre>
+            <p className="text-xs text-gray-400 mt-2">
+              This example shows multiple conditions: first checks if quest is complete, then if started, then if reputation is high enough, otherwise shows default greeting.
+            </p>
+          </div>
+          
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Example: Conditional Choices</h3>
+          <div className="bg-[#12121a] p-4 rounded border border-[#2a2a3e]">
+            <pre className="text-xs font-mono text-gray-300 whitespace-pre-wrap">
+{`title: guard_checkpoint
+---
+Guard: You're not allowed in!
+-> Sure I am! The boss knows me! <<if $reputation > 10>>
+    <<jump allowed_in>>
+-> Please?
+    <<jump begging>>
+-> I'll come back later.
+    <<jump leave>>
+===`}
+            </pre>
+            <p className="text-xs text-gray-400 mt-2">
+              The first choice only appears if <code className="text-xs">$reputation &gt; 10</code>. Other choices always show.
+            </p>
+          </div>
+          
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Example: Conditional Choices with Multiple Conditions</h3>
+          <div className="bg-[#12121a] p-4 rounded border border-[#2a2a3e]">
+            <pre className="text-xs font-mono text-gray-300 whitespace-pre-wrap">
+{`title: merchant_shop
+---
+Merchant: What would you like to buy?
+-> "Buy the sword" <<if $stat_gold >= 100 and $reputation >= 20>>
+    <<set $item_sword = true>>
+    <<set $stat_gold -= 100>>
+    <<jump purchase_complete>>
+-> "Buy the potion" <<if $stat_gold >= 50>>
+    <<set $item_potion = true>>
+    <<set $stat_gold -= 50>>
+    <<jump purchase_complete>>
+-> "I'll come back later"
+    <<jump leave>>
+===`}
+            </pre>
+            <p className="text-xs text-gray-400 mt-2">
+              Use <code className="text-xs">and</code> to combine multiple conditions. Choices only appear when all conditions are met.
+            </p>
+          </div>
 
           <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Code Example</h3>
           <div className="bg-[#12121a] p-4 rounded border border-[#2a2a3e]">
@@ -456,8 +580,16 @@ await saveFile('dialogue.yarn', newYarn);`}
         <div className="space-y-4 text-sm">
           <ul className="space-y-2">
             <li className="flex items-start gap-2">
+              <kbd className="bg-[#12121a] px-2 py-1 rounded text-xs font-mono border border-[#2a2a3e]">Ctrl+Z</kbd>
+              <span className="text-gray-400">Undo last action (Cmd+Z on Mac)</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <kbd className="bg-[#12121a] px-2 py-1 rounded text-xs font-mono border border-[#2a2a3e]">Ctrl+Y</kbd>
+              <span className="text-gray-400">Redo last action (Cmd+Y on Mac)</span>
+            </li>
+            <li className="flex items-start gap-2">
               <kbd className="bg-[#12121a] px-2 py-1 rounded text-xs font-mono border border-[#2a2a3e]">Delete</kbd>
-              <span className="text-gray-400">Delete selected node (except start node)</span>
+              <span className="text-gray-400">Delete selected node(s) or edge(s)</span>
             </li>
             <li className="flex items-start gap-2">
               <kbd className="bg-[#12121a] px-2 py-1 rounded text-xs font-mono border border-[#2a2a3e]">Escape</kbd>
@@ -473,7 +605,7 @@ await saveFile('dialogue.yarn', newYarn);`}
             </li>
             <li className="flex items-start gap-2">
               <kbd className="bg-[#12121a] px-2 py-1 rounded text-xs font-mono border border-[#2a2a3e]">Drag</kbd>
-              <span className="text-gray-400">Pan the graph view</span>
+              <span className="text-gray-400">Pan the graph view (middle mouse or space + drag)</span>
             </li>
             <li className="flex items-start gap-2">
               <kbd className="bg-[#12121a] px-2 py-1 rounded text-xs font-mono border border-[#2a2a3e]">Drag node</kbd>
@@ -482,6 +614,10 @@ await saveFile('dialogue.yarn', newYarn);`}
             <li className="flex items-start gap-2">
               <kbd className="bg-[#12121a] px-2 py-1 rounded text-xs font-mono border border-[#2a2a3e]">Drag port</kbd>
               <span className="text-gray-400">Create connection to another node</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <kbd className="bg-[#12121a] px-2 py-1 rounded text-xs font-mono border border-[#2a2a3e]">Click + Drag</kbd>
+              <span className="text-gray-400">Select multiple nodes (selection box)</span>
             </li>
           </ul>
         </div>
@@ -498,6 +634,55 @@ await saveFile('dialogue.yarn', newYarn);`}
             <p className="text-gray-400 text-xs">
               <strong>Note:</strong> For best experience, consider using the editor and simulator as separate pages in your application. The current embedded view may have scroll limitations.
             </p>
+          </div>
+          
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">✅ Recently Completed</h3>
+          <div className="space-y-2">
+            <div className="bg-[#12121a] p-3 rounded border border-green-500/30">
+              <div className="flex items-start gap-2">
+                <span className="text-green-500 text-xs">✅</span>
+                <div>
+                  <strong className="text-white text-xs">React Flow Migration</strong>
+                  <p className="text-gray-400 text-xs mt-1">Complete rewrite using React Flow with custom nodes, edges, and improved UX</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-[#12121a] p-3 rounded border border-green-500/30">
+              <div className="flex items-start gap-2">
+                <span className="text-green-500 text-xs">✅</span>
+                <div>
+                  <strong className="text-white text-xs">Undo/Redo System</strong>
+                  <p className="text-gray-400 text-xs mt-1">Action history with Ctrl+Z / Cmd+Z and Ctrl+Y / Cmd+Y (React Flow built-in)</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-[#12121a] p-3 rounded border border-green-500/30">
+              <div className="flex items-start gap-2">
+                <span className="text-green-500 text-xs">✅</span>
+                <div>
+                  <strong className="text-white text-xs">Multi-Select & Delete</strong>
+                  <p className="text-gray-400 text-xs mt-1">Selection box to select multiple nodes, bulk delete with Delete key (known issue: square selection doesn't always capture all nodes - deprioritized)</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-[#12121a] p-3 rounded border border-green-500/30">
+              <div className="flex items-start gap-2">
+                <span className="text-green-500 text-xs">✅</span>
+                <div>
+                  <strong className="text-white text-xs">Minimap</strong>
+                  <p className="text-gray-400 text-xs mt-1">Graph overview with navigation (React Flow built-in)</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-[#12121a] p-3 rounded border border-green-500/30">
+              <div className="flex items-start gap-2">
+                <span className="text-green-500 text-xs">✅</span>
+                <div>
+                  <strong className="text-white text-xs">Edge Hover & Deletion</strong>
+                  <p className="text-gray-400 text-xs mt-1">Edges highlight on hover and can be deleted by selecting and pressing Delete</p>
+                </div>
+              </div>
+            </div>
           </div>
           
           <h3 className="text-lg font-semibold mt-6 mb-2 text-white">In Progress</h3>
@@ -519,48 +704,8 @@ await saveFile('dialogue.yarn', newYarn);`}
               <div className="flex items-start gap-2">
                 <span className="text-blue-500 text-xs">📋</span>
                 <div>
-                  <strong className="text-white text-xs">Conditional Blocks Support</strong>
-                  <p className="text-gray-400 text-xs mt-1">Full Yarn Spinner if/elseif/else/endif support</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-[#12121a] p-3 rounded border border-[#2a2a3e]">
-              <div className="flex items-start gap-2">
-                <span className="text-blue-500 text-xs">📋</span>
-                <div>
-                  <strong className="text-white text-xs">Multi-Select & Copy/Paste</strong>
-                  <p className="text-gray-400 text-xs mt-1">Select multiple nodes, copy, and paste with connections</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-[#12121a] p-3 rounded border border-[#2a2a3e]">
-              <div className="flex items-start gap-2">
-                <span className="text-blue-500 text-xs">📋</span>
-                <div>
-                  <strong className="text-white text-xs">Undo/Redo System</strong>
-                  <p className="text-gray-400 text-xs mt-1">Action history with Ctrl+Z / Ctrl+Y</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Planned (Medium Priority)</h3>
-          <div className="space-y-2">
-            <div className="bg-[#12121a] p-3 rounded border border-[#2a2a3e]">
-              <div className="flex items-start gap-2">
-                <span className="text-blue-500 text-xs">📋</span>
-                <div>
-                  <strong className="text-white text-xs">Multi-Select & Copy/Paste</strong>
-                  <p className="text-gray-400 text-xs mt-1">Select multiple nodes, copy, and paste with connections</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-[#12121a] p-3 rounded border border-[#2a2a3e]">
-              <div className="flex items-start gap-2">
-                <span className="text-blue-500 text-xs">📋</span>
-                <div>
-                  <strong className="text-white text-xs">Undo/Redo System</strong>
-                  <p className="text-gray-400 text-xs mt-1">Action history with Ctrl+Z / Ctrl+Y</p>
+                  <strong className="text-white text-xs">Copy/Paste</strong>
+                  <p className="text-gray-400 text-xs mt-1">Copy selected nodes and paste with offset, duplicate nodes with connections</p>
                 </div>
               </div>
             </div>
@@ -569,7 +714,7 @@ await saveFile('dialogue.yarn', newYarn);`}
                 <span className="text-blue-500 text-xs">📋</span>
                 <div>
                   <strong className="text-white text-xs">Variables System</strong>
-                  <p className="text-gray-400 text-xs mt-1">Full Yarn variable support with UI</p>
+                  <p className="text-gray-400 text-xs mt-1">Full Yarn variable support with UI for variable management</p>
                 </div>
               </div>
             </div>
@@ -582,25 +727,47 @@ await saveFile('dialogue.yarn', newYarn);`}
                 </div>
               </div>
             </div>
+          </div>
+          
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Planned (Medium Priority)</h3>
+          <div className="space-y-2">
             <div className="bg-[#12121a] p-3 rounded border border-[#2a2a3e]">
               <div className="flex items-start gap-2">
                 <span className="text-blue-500 text-xs">📋</span>
                 <div>
-                  <strong className="text-white text-xs">Better Edge Routing</strong>
-                  <p className="text-gray-400 text-xs mt-1">Smart paths and curved edges</p>
+                  <strong className="text-white text-xs">Advanced Set Operations</strong>
+                  <p className="text-gray-400 text-xs mt-1">Increment, decrement, multiply, divide for variables</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-[#12121a] p-3 rounded border border-[#2a2a3e]">
+              <div className="flex items-start gap-2">
+                <span className="text-blue-500 text-xs">📋</span>
+                <div>
+                  <strong className="text-white text-xs">Commands Support</strong>
+                  <p className="text-gray-400 text-xs mt-1">Yarn Spinner command nodes with parameters</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-[#12121a] p-3 rounded border border-[#2a2a3e]">
+              <div className="flex items-start gap-2">
+                <span className="text-blue-500 text-xs">📋</span>
+                <div>
+                  <strong className="text-white text-xs">Node Alignment Tools</strong>
+                  <p className="text-gray-400 text-xs mt-1">Align, distribute, and snap to grid</p>
                 </div>
               </div>
             </div>
           </div>
           
-          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Low Priority (Future)</h3>
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Known Issues</h3>
           <div className="space-y-2">
-            <div className="bg-[#12121a] p-3 rounded border border-[#2a2a3e]">
+            <div className="bg-[#12121a] p-3 rounded border border-orange-500/30">
               <div className="flex items-start gap-2">
-                <span className="text-gray-500 text-xs">📋</span>
+                <span className="text-orange-500 text-xs">⚠️</span>
                 <div>
-                  <strong className="text-white text-xs">Minimap</strong>
-                  <p className="text-gray-400 text-xs mt-1">Graph overview with navigation (removed due to issues, will revisit later)</p>
+                  <strong className="text-white text-xs">Square Selection</strong>
+                  <p className="text-gray-400 text-xs mt-1">Selection box doesn't always capture all nodes within the selection area (deprioritized)</p>
                 </div>
               </div>
             </div>

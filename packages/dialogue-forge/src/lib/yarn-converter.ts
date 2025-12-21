@@ -19,10 +19,50 @@ export function exportToYarn(tree: DialogueTree): string {
     yarn += `---\n`;
     
     if (node.type === 'npc') {
-      if (node.speaker) {
-        yarn += `${node.speaker}: ${node.content.replace(/\n/g, '\n' + node.speaker + ': ')}\n`;
+      // Export conditional blocks if present
+      if (node.conditionalBlocks && node.conditionalBlocks.length > 0) {
+        node.conditionalBlocks.forEach(block => {
+          if (block.type === 'if' || block.type === 'elseif') {
+            // Build condition string
+            const conditions = block.condition?.map(cond => {
+              const varName = `$${cond.flag}`;
+              if (cond.operator === 'is_set') {
+                return varName;
+              } else if (cond.operator === 'is_not_set') {
+                return `not ${varName}`;
+              } else if (cond.value !== undefined) {
+                const op = cond.operator === 'equals' ? '==' :
+                          cond.operator === 'not_equals' ? '!=' :
+                          cond.operator === 'greater_than' ? '>' :
+                          cond.operator === 'less_than' ? '<' :
+                          cond.operator === 'greater_equal' ? '>=' :
+                          cond.operator === 'less_equal' ? '<=' : '==';
+                const value = typeof cond.value === 'string' ? `"${cond.value}"` : cond.value;
+                return `${varName} ${op} ${value}`;
+              }
+              return '';
+            }).filter(c => c).join(' and ') || '';
+            
+            yarn += `<<${block.type} ${conditions}>>\n`;
+          } else if (block.type === 'else') {
+            yarn += `<<else>>\n`;
+          }
+          
+          // Export block content
+          if (block.speaker) {
+            yarn += `${block.speaker}: ${block.content.replace(/\n/g, '\n' + block.speaker + ': ')}\n`;
+          } else {
+            yarn += `${block.content}\n`;
+          }
+        });
+        yarn += `<<endif>>\n`;
       } else {
-        yarn += `${node.content}\n`;
+        // Regular content (no conditionals)
+        if (node.speaker) {
+          yarn += `${node.speaker}: ${node.content.replace(/\n/g, '\n' + node.speaker + ': ')}\n`;
+        } else {
+          yarn += `${node.content}\n`;
+        }
       }
       
       // Export flags as Yarn variable commands
@@ -36,6 +76,57 @@ export function exportToYarn(tree: DialogueTree): string {
       if (node.nextNodeId) {
         yarn += `<<jump ${node.nextNodeId}>>\n`;
       }
+    } else if (node.type === 'conditional' && node.conditionalBlocks) {
+      // Export conditional node blocks
+      node.conditionalBlocks.forEach(block => {
+        if (block.type === 'if' || block.type === 'elseif') {
+          // Build condition string
+          const conditions = block.condition?.map(cond => {
+            const varName = `$${cond.flag}`;
+            if (cond.operator === 'is_set') {
+              return varName;
+            } else if (cond.operator === 'is_not_set') {
+              return `not ${varName}`;
+            } else if (cond.value !== undefined) {
+              const op = cond.operator === 'equals' ? '==' :
+                        cond.operator === 'not_equals' ? '!=' :
+                        cond.operator === 'greater_than' ? '>' :
+                        cond.operator === 'less_than' ? '<' :
+                        cond.operator === 'greater_equal' ? '>=' :
+                        cond.operator === 'less_equal' ? '<=' : '==';
+              const value = typeof cond.value === 'string' ? `"${cond.value}"` : cond.value;
+              return `${varName} ${op} ${value}`;
+            }
+            return '';
+          }).filter(c => c).join(' and ') || '';
+          
+          yarn += `<<${block.type} ${conditions}>>\n`;
+        } else if (block.type === 'else') {
+          yarn += `<<else>>\n`;
+        }
+        
+        // Export block content
+        if (block.speaker) {
+          yarn += `${block.speaker}: ${block.content.replace(/\n/g, '\n' + block.speaker + ': ')}\n`;
+        } else {
+          yarn += `${block.content}\n`;
+        }
+        
+        // Export block's nextNodeId if present
+        if (block.nextNodeId) {
+          yarn += `<<jump ${block.nextNodeId}>>\n`;
+        }
+      });
+      yarn += `<<endif>>\n`;
+      
+      // Export flags as Yarn variable commands
+      if (node.setFlags?.length) {
+        node.setFlags.forEach(flag => {
+          yarn += `<<set $${flag} = true>>\n`;
+        });
+      }
+      
+      // Conditional nodes don't have a main nextNodeId (each block has its own)
     } else if (node.type === 'player' && node.choices) {
       node.choices.forEach(choice => {
         // Export conditions as Yarn if statements (wrap the choice)
@@ -114,6 +205,71 @@ export function importFromYarn(yarnContent: string, title: string = 'Imported Di
     let speaker = '';
     const setFlags: string[] = [];
     let nextNodeId = '';
+    const conditionalBlocks: any[] = [];
+    
+    // Track conditional block state
+    let inConditionalBlock = false;
+    let currentBlock: any = null;
+    let blockContent: string[] = [];
+    let blockSpeaker: string = '';
+    
+    const parseCondition = (conditionStr: string): any[] => {
+      // Parse condition string like "$flag", "not $flag", "$flag == 5", etc.
+      const conditions: any[] = [];
+      
+      // Split by 'and' for multiple conditions
+      const parts = conditionStr.split(/\s+and\s+/i);
+      
+      parts.forEach(part => {
+        part = part.trim();
+        if (part.startsWith('not ')) {
+          const varMatch = part.match(/not\s+\$(\w+)/);
+          if (varMatch) {
+            conditions.push({ flag: varMatch[1], operator: 'is_not_set' });
+          }
+        } else if (part.includes('==')) {
+          const match = part.match(/\$(\w+)\s*==\s*(.+)/);
+          if (match) {
+            const value = match[2].trim().replace(/^["']|["']$/g, '');
+            conditions.push({ flag: match[1], operator: 'equals', value });
+          }
+        } else if (part.includes('!=')) {
+          const match = part.match(/\$(\w+)\s*!=\s*(.+)/);
+          if (match) {
+            const value = match[2].trim().replace(/^["']|["']$/g, '');
+            conditions.push({ flag: match[1], operator: 'not_equals', value });
+          }
+        } else if (part.includes('>=')) {
+          const match = part.match(/\$(\w+)\s*>=\s*(.+)/);
+          if (match) {
+            conditions.push({ flag: match[1], operator: 'greater_equal', value: parseFloat(match[2]) });
+          }
+        } else if (part.includes('<=')) {
+          const match = part.match(/\$(\w+)\s*<=\s*(.+)/);
+          if (match) {
+            conditions.push({ flag: match[1], operator: 'less_equal', value: parseFloat(match[2]) });
+          }
+        } else if (part.includes('>')) {
+          const match = part.match(/\$(\w+)\s*>\s*(.+)/);
+          if (match) {
+            conditions.push({ flag: match[1], operator: 'greater_than', value: parseFloat(match[2]) });
+          }
+        } else if (part.includes('<')) {
+          const match = part.match(/\$(\w+)\s*<\s*(.+)/);
+          if (match) {
+            conditions.push({ flag: match[1], operator: 'less_than', value: parseFloat(match[2]) });
+          }
+        } else {
+          // Simple flag check
+          const varMatch = part.match(/\$(\w+)/);
+          if (varMatch) {
+            conditions.push({ flag: varMatch[1], operator: 'is_set' });
+          }
+        }
+      });
+      
+      return conditions;
+    };
     
     lines.forEach(line => {
       const trimmed = line.trim();
@@ -134,7 +290,6 @@ export function importFromYarn(yarnContent: string, title: string = 'Imported Di
         }
       } else if (trimmed.startsWith('<<set')) {
         // Match: <<set $var = value>> or <<set $var += value>>
-        // More flexible regex to handle various formats
         const setMatch = trimmed.match(/<<set\s+\$(\w+)\s*(?:[=+\-*/]|==|!=|<=|>=)?\s*([^>]*?)>>/);
         if (setMatch) {
           const varName = setMatch[1];
@@ -148,19 +303,79 @@ export function importFromYarn(yarnContent: string, title: string = 'Imported Di
           }
         }
       } else if (trimmed.startsWith('<<if')) {
-        // Parse conditions - extract variable names for flag extraction
-        // This is handled by extractVariablesFromYarn, but we still need to parse for dialogue structure
-        const ifMatch = trimmed.match(/<<if\s+(?:not\s+)?\$(\w+)/);
-        if (ifMatch && choices.length > 0) {
-          // Add condition to last choice
-          const lastChoice = choices[choices.length - 1];
-          if (!lastChoice.conditions) {
-            lastChoice.conditions = [];
-          }
-          lastChoice.conditions.push({
-            flag: ifMatch[1],
-            operator: trimmed.includes('not') ? 'is_not_set' : 'is_set'
-          });
+        // Start of conditional block
+        if (inConditionalBlock && currentBlock) {
+          // Save previous block
+          currentBlock.content = blockContent.join('\n').trim();
+          currentBlock.speaker = blockSpeaker || undefined;
+          conditionalBlocks.push(currentBlock);
+        }
+        
+        inConditionalBlock = true;
+        const conditionStr = trimmed.replace(/<<if\s+/, '').replace(/>>/, '').trim();
+        currentBlock = {
+          id: `block_${Date.now()}_${conditionalBlocks.length}`,
+          type: 'if',
+          condition: parseCondition(conditionStr),
+          content: '',
+          speaker: undefined
+        };
+        blockContent = [];
+        blockSpeaker = '';
+      } else if (trimmed.startsWith('<<elseif')) {
+        // Elseif block
+        if (currentBlock) {
+          currentBlock.content = blockContent.join('\n').trim();
+          currentBlock.speaker = blockSpeaker || undefined;
+          conditionalBlocks.push(currentBlock);
+        }
+        
+        const conditionStr = trimmed.replace(/<<elseif\s+/, '').replace(/>>/, '').trim();
+        currentBlock = {
+          id: `block_${Date.now()}_${conditionalBlocks.length}`,
+          type: 'elseif',
+          condition: parseCondition(conditionStr),
+          content: '',
+          speaker: undefined
+        };
+        blockContent = [];
+        blockSpeaker = '';
+      } else if (trimmed.startsWith('<<else')) {
+        // Else block
+        if (currentBlock) {
+          currentBlock.content = blockContent.join('\n').trim();
+          currentBlock.speaker = blockSpeaker || undefined;
+          conditionalBlocks.push(currentBlock);
+        }
+        
+        currentBlock = {
+          id: `block_${Date.now()}_${conditionalBlocks.length}`,
+          type: 'else',
+          condition: undefined,
+          content: '',
+          speaker: undefined
+        };
+        blockContent = [];
+        blockSpeaker = '';
+      } else if (trimmed.startsWith('<<endif')) {
+        // End of conditional block
+        if (currentBlock) {
+          currentBlock.content = blockContent.join('\n').trim();
+          currentBlock.speaker = blockSpeaker || undefined;
+          conditionalBlocks.push(currentBlock);
+        }
+        inConditionalBlock = false;
+        currentBlock = null;
+        blockContent = [];
+        blockSpeaker = '';
+      } else if (inConditionalBlock) {
+        // Content within conditional block
+        if (trimmed.includes(':') && !trimmed.startsWith('<<')) {
+          const [spk, ...rest] = trimmed.split(':');
+          blockSpeaker = spk.trim();
+          blockContent.push(rest.join(':').trim());
+        } else if (!trimmed.startsWith('<<')) {
+          blockContent.push(trimmed);
         }
       } else if (trimmed.includes(':') && !trimmed.startsWith('<<')) {
         const [spk, ...rest] = trimmed.split(':');
@@ -179,6 +394,7 @@ export function importFromYarn(yarnContent: string, title: string = 'Imported Di
       choices: choices.length > 0 ? choices : undefined,
       nextNodeId: nextNodeId || undefined,
       setFlags: setFlags.length > 0 ? setFlags : undefined,
+      conditionalBlocks: conditionalBlocks.length > 0 ? conditionalBlocks : undefined,
       x: (idx % 3) * 250,
       y: y + Math.floor(idx / 3) * 180
     };

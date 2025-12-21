@@ -9,6 +9,7 @@
 export const NODE_TYPE = {
   NPC: 'npc',
   PLAYER: 'player',
+  CONDITIONAL: 'conditional',
 } as const;
 
 export type NodeType = typeof NODE_TYPE[keyof typeof NODE_TYPE];

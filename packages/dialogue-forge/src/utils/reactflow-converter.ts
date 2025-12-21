@@ -66,8 +66,7 @@ export function convertDialogueTreeToReactFlow(dialogue: DialogueTree): {
         source: node.id,
         target: node.nextNodeId,
         sourceHandle: 'next',
-        type: 'default',
-        style: { stroke: '#4a4a6a', strokeWidth: 2 },
+        type: 'default', // Uses NPCEdgeV2 component
       } as Edge);
     }
 
@@ -85,6 +84,33 @@ export function convertDialogueTreeToReactFlow(dialogue: DialogueTree): {
             data: {
               choiceIndex: idx,
               choiceId: choice.id,
+            },
+            style: {
+              stroke: color,
+              strokeWidth: 2,
+              opacity: 0.7,
+            },
+          } as Edge);
+        }
+      });
+    }
+
+    if (node.type === NODE_TYPE.CONDITIONAL && node.conditionalBlocks) {
+      // Conditional -> multiple blocks (one edge per block)
+      node.conditionalBlocks.forEach((block, idx) => {
+        // Each block can have its own nextNodeId (though typically only one path is taken)
+        // For now, we'll treat it like choices - each block can connect to a node
+        if (block.nextNodeId) {
+          const color = CHOICE_COLORS[idx % CHOICE_COLORS.length];
+          edges.push({
+            id: `${node.id}-block-${idx}`,
+            source: node.id,
+            target: block.nextNodeId,
+            sourceHandle: `block-${idx}`, // Connect to specific block handle
+            type: 'choice', // Use same edge type as choices
+            data: {
+              choiceIndex: idx,
+              blockId: block.id,
             },
             style: {
               stroke: color,
@@ -128,6 +154,14 @@ export function updateDialogueTreeFromReactFlow(
           nextNodeId: '',
         })) : [],
       };
+    } else if (node.type === NODE_TYPE.CONDITIONAL) {
+      updatedNodes[node.id] = {
+        ...node,
+        conditionalBlocks: node.conditionalBlocks ? node.conditionalBlocks.map(block => ({
+          ...block,
+          nextNodeId: undefined,
+        })) : [],
+      };
     } else {
       updatedNodes[node.id] = { ...node };
     }
@@ -167,6 +201,20 @@ export function updateDialogueTreeFromReactFlow(
         updatedNodes[edge.source] = {
           ...sourceNode,
           choices: updatedChoices,
+        };
+      }
+    } else if (edge.sourceHandle?.startsWith('block-') && sourceNode.type === NODE_TYPE.CONDITIONAL) {
+      // Conditional block connection
+      const blockIdx = parseInt(edge.sourceHandle.replace('block-', ''));
+      if (sourceNode.conditionalBlocks && sourceNode.conditionalBlocks[blockIdx]) {
+        const updatedBlocks = [...sourceNode.conditionalBlocks];
+        updatedBlocks[blockIdx] = {
+          ...updatedBlocks[blockIdx],
+          nextNodeId: edge.target,
+        };
+        updatedNodes[edge.source] = {
+          ...sourceNode,
+          conditionalBlocks: updatedBlocks,
         };
       }
     }
