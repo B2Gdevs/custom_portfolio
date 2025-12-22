@@ -1,0 +1,114 @@
+---
+title: "Building a Game CMS Enterprise Narrative Platform: Rediscovering BlockNote"
+description: "I've been building a game CMS enterprise narrative and storytelling platform, and when I needed a powerful editor, I rediscovered BlockNote—and remembered I had made one of my first contributions to a major open source project."
+date: "2025-01-28"
+tags: ["Game Development", "CMS", "BlockNote", "Open Source", "Editor", "Narrative Design"]
+featuredImage: "/images/blog/2025-12-21-21-10-14.png"
+images:
+  - "/images/blog/2025-12-21-21-10-14.png"
+  - "/images/blog/2025-12-21-21-10-45.png"
+---
+
+I've been deep in the trenches building a game CMS enterprise narrative and storytelling platform. It's a complex system designed to help game developers and narrative designers create, manage, and deploy interactive stories at scale. Think of it as a content management system specifically tailored for branching narratives, dialogue trees, and story-driven game experiences.
+
+## The Challenge: Finding the Right Editor
+
+One of the core challenges in building this platform was finding the right editor component. I needed something that could handle:
+
+- **Rich text editing** with formatting capabilities
+- **Structured content** that could represent narrative nodes and dialogue
+- **Extensibility** to add custom blocks for game-specific content
+- **Modern UX** that feels intuitive for writers and designers
+- **Type safety** and developer-friendly APIs
+
+After evaluating several options, I found myself coming back to [BlockNote](https://www.blocknotejs.org/). It's a block-based editor built on ProseMirror that provides exactly the kind of flexibility I needed.
+
+## A Surprising Discovery
+
+As I was diving into BlockNote's documentation and exploring the codebase, I had a moment of recognition. I remembered that I had actually contributed to this project before—and it was one of my first contributions to a major open source project.
+
+**[PR #268: TypeCellOS/BlockNote](https://github.com/TypeCellOS/BlockNote/pull/268)**
+
+Looking back at that contribution, it was a simple fix—just removing an unnecessary log from the `useBlockNote` hook—but it was meaningful. It was one of those moments where you're using a library, you find a small issue or missing feature, and you think "I can fix this." So you fork the repo, make the change, submit a PR, and suddenly you're part of the project's history.
+
+![PR #268 - Removing unnecessary log from useBlockNote hook](/images/blog/2025-12-21-21-10-14.png)
+
+What's funny is that I had completely forgotten about this contribution until I came back to BlockNote for this new project. It's a nice reminder of how the open source ecosystem works—you contribute where you can, and sometimes those contributions come back to help you in unexpected ways.
+
+## The Reality of Open Source Contributions
+
+One thing that really struck me when looking back at this PR is how open source projects operate. Even for a simple change like removing a log statement, the PR took about **2 months** to get merged. This isn't a criticism—it's just the reality of maintaining an open source project.
+
+![Community interaction on BlockNote PRs](/images/blog/2025-12-21-21-10-45.png)
+
+The BlockNote community is fantastic. You can see from the interactions that maintainers like [matthewlipski](https://github.com/matthewlipski) are actively engaged, responding to issues, and working through PRs. But they're also juggling many priorities, and sometimes even the smallest contributions need to wait their turn.
+
+This is what makes the open source community so cool—everyone is volunteering their time, and even simple fixes matter. The fact that a maintainer took the time to review and merge a PR that just removed a console.log shows the care they put into the project. It's a reminder that patience and understanding are part of contributing to open source.
+
+## Why BlockNote for a Game CMS?
+
+BlockNote is particularly well-suited for a narrative platform because:
+
+### 1. Block-Based Architecture
+
+The block-based model maps perfectly to how narrative content is structured. Each dialogue node, choice, or story beat can be represented as a block, making it easy to:
+
+- Rearrange narrative flow
+- Add metadata to specific blocks
+- Create custom block types for game-specific content (like condition checks, variable assignments, etc.)
+
+### 2. Extensibility
+
+BlockNote's plugin system allows me to create custom blocks that are specific to game narrative systems:
+
+- **Dialogue blocks** with speaker attribution
+- **Choice blocks** that link to other narrative nodes
+- **Condition blocks** that reference game state variables
+- **Action blocks** that trigger game events
+
+### 3. Modern Developer Experience
+
+The TypeScript-first approach, React integration, and clear API make it easy to integrate into a larger system. The documentation is solid, and the community is active.
+
+### 4. Content as Data
+
+BlockNote stores content in a structured format (JSON), which is perfect for:
+- Version control
+- Collaborative editing (with additional tooling)
+- Exporting to game engines
+- Building preview systems
+
+## Building the Platform
+
+The game CMS I'm building uses BlockNote as the core editing experience, but it's just one piece of a larger system:
+
+- **Narrative Graph Editor**: Visual representation of branching stories
+- **Character Management**: Define characters, their attributes, and relationships
+- **Variable System**: Track game state and player choices
+- **Export System**: Generate content for various game engines (Unity, Unreal, custom formats)
+- **Collaboration Tools**: Multiple writers working on the same narrative
+
+BlockNote handles the "writing" part beautifully, while the rest of the system handles the "game" part.
+
+## The Open Source Connection
+
+Coming back to BlockNote and remembering my contribution has been a nice full-circle moment. It's a reminder that:
+
+1. **Open source contributions matter**—even small ones
+2. **The projects you contribute to can become tools you rely on**
+3. **The ecosystem is interconnected**—your work helps others, and others' work helps you
+
+I've always loved what the BlockNote team is doing. They're building something that makes rich text editing accessible and powerful, and they're doing it with great developer experience in mind. It's the kind of project that makes you want to contribute.
+
+## What's Next?
+
+The platform is still in active development, but BlockNote has proven to be the right choice for the editor component. The extensibility and block-based model align perfectly with how narrative content needs to be structured and managed.
+
+As I continue building, I'm sure I'll find more opportunities to contribute back to BlockNote—whether that's bug fixes, feature requests, or documentation improvements. That's the beauty of open source: it's a two-way street.
+
+---
+
+**Interested in BlockNote?** Check out the [project on GitHub](https://github.com/TypeCellOS/BlockNote) and the [documentation](https://www.blocknotejs.org/).
+
+**Building something similar?** I'd love to hear about your approach to narrative content management in games.
+

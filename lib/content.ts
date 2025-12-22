@@ -76,6 +76,16 @@ export function getContentBySlug(
   };
 }
 
+/**
+ * Safely parse a date string and return timestamp, or 0 if invalid
+ */
+function getDateTimestamp(dateString: string | undefined): number {
+  if (!dateString) return 0;
+  const timestamp = new Date(dateString).getTime();
+  // If date is invalid, getTime() returns NaN
+  return isNaN(timestamp) ? 0 : timestamp;
+}
+
 export function getAllContent(type: 'docs' | 'projects' | 'blog'): Array<{
   meta: ContentMeta;
   slug: string;
@@ -96,12 +106,16 @@ export function getAllContent(type: 'docs' | 'projects' | 'blog'): Array<{
     .filter((item): item is { meta: ContentMeta; slug: string } => item !== null)
     .sort((a, b) => {
       // Sort by updated date if available, otherwise by date
+      // Prefer updated over date, and ensure we handle invalid dates
       const dateA = a.meta.updated 
-        ? new Date(a.meta.updated).getTime() 
-        : (a.meta.date ? new Date(a.meta.date).getTime() : 0);
+        ? getDateTimestamp(a.meta.updated)
+        : getDateTimestamp(a.meta.date);
       const dateB = b.meta.updated 
-        ? new Date(b.meta.updated).getTime() 
-        : (b.meta.date ? new Date(b.meta.date).getTime() : 0);
+        ? getDateTimestamp(b.meta.updated)
+        : getDateTimestamp(b.meta.date);
+      
+      // Sort descending (newest first)
+      // If dates are equal or both 0, maintain stable sort order
       return dateB - dateA;
     });
 }
