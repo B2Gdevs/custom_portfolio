@@ -73,3 +73,4 @@ export function evaluateConditions(
   return conditions.every(cond => evaluateCondition(cond, variables, memoryFlags));
 }
 
+

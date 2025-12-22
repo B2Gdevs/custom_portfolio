@@ -481,8 +481,6 @@ export default function DialogueForgePage() {
     };
     
     const handleMouseUp = (e: MouseEvent) => {
-      console.log('mouseup', { draggingEdge, isPanning, draggingNodeId });
-      
       // Save node position to history when drag ends (only if position changed)
       if (draggingNodeId) {
         const node = dialogueTree.nodes[draggingNodeId];
@@ -506,12 +504,10 @@ export default function DialogueForgePage() {
       
       // Handle edge drop first, before clearing other states
       if (draggingEdge) {
-        console.log('has draggingEdge', draggingEdge);
         const rect = graphRef.current?.getBoundingClientRect();
         if (rect) {
           const dropX = (e.clientX - rect.left - graphOffset.x) / graphScale;
           const dropY = (e.clientY - rect.top - graphOffset.y) / graphScale;
-          console.log('drop position', { dropX, dropY, clientX: e.clientX, clientY: e.clientY });
           
           // Find node at drop position
           const targetNode = Object.values(dialogueTree.nodes).find(n => 
@@ -519,10 +515,7 @@ export default function DialogueForgePage() {
             dropY >= n.y && dropY <= n.y + NODE_HEIGHT
           );
           
-          console.log('targetNode', targetNode);
-          
           if (targetNode && targetNode.id !== draggingEdge.fromNodeId) {
-            console.log('connecting to existing node');
             // Connect to existing node
             if (draggingEdge.fromChoiceIdx !== undefined) {
               const fromNode = dialogueTree.nodes[draggingEdge.fromNodeId];

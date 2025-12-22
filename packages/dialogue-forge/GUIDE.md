@@ -97,6 +97,25 @@ When a player makes a choice or reaches a node, you can set flags:
 
 These will export as: `<<set $flag_name = value>>`
 
+#### Advanced Variable Operations
+
+You can also perform operations on variables:
+
+- **Increment**: `<<set $stat_gold += 100>>` - Add 100 to gold
+- **Decrement**: `<<set $stat_gold -= 50>>` - Subtract 50 from gold
+- **Multiply**: `<<set $stat_gold *= 2>>` - Double the gold
+- **Divide**: `<<set $stat_gold /= 2>>` - Halve the gold
+
+#### Variable Interpolation
+
+You can display variable values in dialogue text using `{$variable}`:
+
+```yarn
+Merchant: "You currently have {$stat_gold} gold pieces."
+```
+
+This will show the actual value of `$stat_gold` when the dialogue runs.
+
 ### Step 4: Use Conditions
 
 Make choices appear only when certain conditions are met:
@@ -106,6 +125,15 @@ Make choices appear only when certain conditions are met:
 - **Flag not set**: Hide choice if flag exists
 
 These export as: `<<if $flag_name>>` or `<<if $stat_gold >= 100>>`
+
+#### Editing Conditions
+
+When editing conditions, you'll see a helpful 2-column editor:
+
+- **Left Sidebar**: Quick reference with operators (`==`, `!=`, `>=`, etc.), keywords (`and`, `not`), and templates
+- **Right Panel**: Main condition editor with autocomplete
+- **Pro Tip**: Type `$` to see all available variables and flags from your schema
+- **Autocomplete**: Shows suggestions as you type, with tag-based styling for easy identification
 
 ## Working with Unreal Engine
 

@@ -3,7 +3,7 @@ import { DialogueTree, Choice } from '../types';
 import { FlagSchema, FlagType } from '../types/flags';
 import { GameFlagState } from '../types/game-state';
 import { mergeFlagUpdates, initializeFlags } from '../lib/flag-manager';
-import { VariableManager, processNode, isValidNextNode } from '../lib/yarn-runner';
+import { VariableManager, processNode, isValidNextNode, processVariableOperationsInContent } from '../lib/yarn-runner';
 
 interface HistoryEntry {
   nodeId: string;
@@ -44,14 +44,20 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
   
   // Track which flags were set during this run
   const [flagsSetDuringRun, setFlagsSetDuringRun] = useState<Set<string>>(new Set());
+  
+  // Use ref to track latest gameFlags to avoid stale closures
+  const gameFlagsRef = useRef<GameFlagState>(gameFlags);
+  useEffect(() => {
+    gameFlagsRef.current = gameFlags;
+  }, [gameFlags]);
 
   // Process current node
   useEffect(() => {
     const node = dialogue.nodes[currentNodeId];
     if (!node) return;
     
-    // Update variable manager with current game flags
-    Object.entries(gameFlags).forEach(([key, value]) => {
+    // Update variable manager with current game flags (use ref to get latest)
+    Object.entries(gameFlagsRef.current).forEach(([key, value]) => {
       variableManager.set(key, value);
     });
     
@@ -79,7 +85,7 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
           });
           
           if (gameFlagIds.length > 0) {
-            const updated = mergeFlagUpdates(gameFlags, gameFlagIds, flagSchema);
+            const updated = mergeFlagUpdates(gameFlagsRef.current, gameFlagIds, flagSchema);
             setGameFlags(updated);
             // Update variable manager
             gameFlagIds.forEach(flagId => {
@@ -97,6 +103,9 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
         }
       }
       
+      // Process variable operations in content (e.g., <<set $var += 10>>)
+      processVariableOperationsInContent(node.content, variableManager);
+      
       // Process the node
       const result = processNode(node, variableManager);
       
@@ -110,6 +119,15 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
         }]);
       }
       
+      // Update game flags from variable manager after operations
+      // Use functional update to avoid dependency issues
+      setGameFlags(prev => {
+        const updatedVars = variableManager.getAllVariables();
+        // Only update if there are actual changes to avoid infinite loops
+        const hasChanges = Object.keys(updatedVars).some(key => prev[key] !== updatedVars[key]);
+        return hasChanges ? { ...prev, ...updatedVars } : prev;
+      });
+      
       setIsTyping(false);
       
       // Navigate to next node if valid
@@ -119,7 +137,7 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [currentNodeId, dialogue, gameFlags, flagSchema, variableManager]);
+  }, [currentNodeId, dialogue.startNodeId, flagSchema]); // Removed gameFlags and variableManager from deps
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -138,6 +156,13 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
       content: choice.text
     }]);
     
+    // Process variable operations in choice text
+    processVariableOperationsInContent(choice.text, variableManager);
+    
+    // Update game flags from variable manager after operations
+    const updatedVars = variableManager.getAllVariables();
+    setGameFlags(prev => ({ ...prev, ...updatedVars }));
+    
     if (choice.setFlags) {
       // Update dialogue flags (temporary)
       choice.setFlags.forEach(flagId => {
@@ -152,8 +177,7 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
         });
         
         if (gameFlagIds.length > 0) {
-          const updated = mergeFlagUpdates(gameFlags, gameFlagIds, flagSchema);
-          setGameFlags(updated);
+          setGameFlags(prev => mergeFlagUpdates(prev, gameFlagIds, flagSchema));
           // Update variable manager
           gameFlagIds.forEach(flagId => {
             const flag = flagSchema.flags.find(f => f.id === flagId);

@@ -44,8 +44,11 @@ export function processNode(
     const matchedBlock = findMatchingConditionalBlock(node.conditionalBlocks, variableManager);
     
     if (matchedBlock) {
+      // Interpolate variables in content
+      const interpolatedContent = interpolateVariables(matchedBlock.content, variableManager);
+      
       return {
-        content: matchedBlock.content,
+        content: interpolatedContent,
         speaker: matchedBlock.speaker,
         nextNodeId: matchedBlock.nextNodeId || node.nextNodeId,
         isEnd: !matchedBlock.nextNodeId && !node.nextNodeId,
@@ -83,6 +86,9 @@ export function processNode(
         }
       }
     }
+    
+    // Interpolate variables in content (e.g., "Hello {$name}")
+    content = interpolateVariables(content, variableManager);
     
     return {
       content,
@@ -138,6 +144,20 @@ function findMatchingConditionalBlock(
 }
 
 /**
+ * Interpolates variables in text (e.g., "Hello {$name}" becomes "Hello John")
+ */
+function interpolateVariables(text: string, variableManager: VariableManager): string {
+  // Match {$variable} patterns
+  return text.replace(/\{\$(\w+)\}/g, (match, varName) => {
+    const value = variableManager.get(varName);
+    if (value === undefined) {
+      return match; // Keep original if variable not found
+    }
+    return String(value);
+  });
+}
+
+/**
  * Validates that a nextNodeId exists and is valid
  */
 export function isValidNextNode(nextNodeId: string | undefined, availableNodes: Record<string, DialogueNode>): boolean {
@@ -146,4 +166,5 @@ export function isValidNextNode(nextNodeId: string | undefined, availableNodes: 
   }
   return !!availableNodes[nextNodeId];
 }
+
 

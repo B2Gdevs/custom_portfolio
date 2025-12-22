@@ -45,7 +45,7 @@ import { NODE_WIDTH } from '../utils/constants';
 
 type ViewMode = 'graph' | 'yarn' | 'play';
 
-// Define node and edge types
+// Define node and edge types outside component for stability
 const nodeTypes = {
   npc: NPCNodeV2,
   player: PlayerNodeV2,
@@ -73,6 +73,10 @@ function DialogueEditorV2Internal({
   initialViewMode = 'graph',
 }: DialogueEditorV2InternalProps) {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
+  
+  // Memoize nodeTypes and edgeTypes to prevent React Flow warnings
+  const memoizedNodeTypes = useMemo(() => nodeTypes, []);
+  const memoizedEdgeTypes = useMemo(() => edgeTypes, []);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; graphX: number; graphY: number } | null>(null);
   const [nodeContextMenu, setNodeContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
@@ -694,8 +698,8 @@ function DialogueEditorV2Internal({
             <ReactFlow
               nodes={nodesWithFlags}
               edges={edges}
-              nodeTypes={nodeTypes}
-              edgeTypes={edgeTypes}
+              nodeTypes={memoizedNodeTypes}
+              edgeTypes={memoizedEdgeTypes}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onNodesDelete={onNodesDelete}

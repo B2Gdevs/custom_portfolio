@@ -1,7 +1,13 @@
 import React from 'react';
 import { DialogueTree } from '../types';
 import { FlagSchema } from '../types/flags';
-import { exampleDialogues, demoFlagSchemas, listExamples, listDemoFlagSchemas } from '../examples';
+import { 
+  exampleFlagSchemas,
+  listExamples,
+  listDemoFlagSchemas,
+  getExampleDialogue,
+  getDemoFlagSchema
+} from '../examples';
 
 interface ExampleLoaderProps {
   onLoadDialogue: (dialogue: DialogueTree) => void;
@@ -13,17 +19,23 @@ interface ExampleLoaderProps {
 export function ExampleLoader({ onLoadDialogue, onLoadFlags }: ExampleLoaderProps) {
   const handleDialogueChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const name = e.target.value;
-    if (name && exampleDialogues[name]) {
-      onLoadDialogue(exampleDialogues[name]);
+    if (name) {
+      const dialogue = getExampleDialogue(name);
+      if (dialogue) {
+        onLoadDialogue(dialogue);
+      }
     }
   };
 
   const handleFlagsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const name = e.target.value;
-    if (name && demoFlagSchemas[name]) {
-      onLoadFlags(demoFlagSchemas[name]);
+    if (name) {
+      const flags = getDemoFlagSchema(name);
+      if (flags) {
+        onLoadFlags(flags);
+      }
     }
-  };
+  }
 
   return (
     <div className="flex items-center gap-3">
@@ -36,13 +48,15 @@ export function ExampleLoader({ onLoadDialogue, onLoadFlags }: ExampleLoaderProp
       >
         <option value="" disabled>Dialogue Example...</option>
         {listExamples().map(name => {
-          const dialogue = exampleDialogues[name];
+          const dialogue = getExampleDialogue(name);
+          if (!dialogue) return null;
+          const nodeCount = Object.keys(dialogue.nodes).length;
           return (
             <option key={name} value={name}>
-              {dialogue.title} ({Object.keys(dialogue.nodes).length} nodes)
+              {dialogue.title} ({nodeCount} nodes)
             </option>
           );
-        })}
+        }).filter(Boolean)}
       </select>
 
       {/* Flag Schemas Dropdown */}
@@ -54,10 +68,10 @@ export function ExampleLoader({ onLoadDialogue, onLoadFlags }: ExampleLoaderProp
       >
         <option value="" disabled>Flag Schema...</option>
         {listDemoFlagSchemas().map(name => {
-          const flags = demoFlagSchemas[name];
+          const flags = getDemoFlagSchema(name);
           return (
             <option key={name} value={name}>
-              {name.charAt(0).toUpperCase() + name.slice(1)} ({flags.flags.length} flags)
+              {name.charAt(0).toUpperCase() + name.slice(1)} ({flags?.flags.length || 0} flags)
             </option>
           );
         })}

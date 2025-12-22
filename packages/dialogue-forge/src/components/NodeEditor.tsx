@@ -6,6 +6,7 @@ import { CONDITION_OPERATOR } from '../types/constants';
 import { AlertCircle, CheckCircle, Info, GitBranch, X, User, Maximize2 } from 'lucide-react';
 import { CHOICE_COLORS } from '../utils/reactflow-converter';
 import { EdgeIcon } from './EdgeIcon';
+import { ConditionAutocomplete } from './ConditionAutocomplete';
 
 interface NodeEditorProps {
   node: DialogueNode;
@@ -638,8 +639,12 @@ export function NodeEditor({
                             style={{ animation: 'slideUp 0.2s ease-out' }}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <div className="p-3 border-b border-[#2a2a3e] flex items-center justify-between">
-                              <h3 className="text-xs font-semibold text-white">Edit Condition</h3>
+                            {/* Header */}
+                            <div className="p-3 border-b border-[#2a2a3e] flex items-center justify-between bg-gradient-to-r from-[#0d0d14] to-[#1a1a2e]">
+                              <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                                <span className="text-blue-400">⚡</span>
+                                Condition Editor
+                              </h3>
                               <button
                                 onClick={() => {
                                   setExpandedConditions(prev => {
@@ -649,132 +654,191 @@ export function NodeEditor({
                                   });
                                 }}
                                 className="p-1 text-gray-400 hover:text-white transition-colors"
-                                title="Close"
+                                title="Close (Esc)"
                               >
                                 <X size={16} />
                               </button>
                             </div>
-                            <div className="p-4">
-                              <textarea
-                                value={conditionValue}
-                                onChange={(e) => {
-                                  setConditionInputs(prev => ({ ...prev, [block.id]: e.target.value }));
-                                  const parseCondition = (conditionStr: string): any[] => {
-                                    const conditions: any[] = [];
-                                    if (!conditionStr.trim()) return conditions;
-                                    const parts = conditionStr.split(/\s+and\s+/i);
-                                    parts.forEach(part => {
-                                      part = part.trim();
-                                      if (part.startsWith('not ')) {
-                                        const varMatch = part.match(/not\s+\$(\w+)/);
-                                        if (varMatch) {
-                                          conditions.push({ flag: varMatch[1], operator: CONDITION_OPERATOR.IS_NOT_SET });
-                                        }
-                                      } else if (part.includes('>=')) {
-                                        const match = part.match(/\$(\w+)\s*>=\s*(.+)/);
-                                        if (match) {
-                                          const value = match[2].trim().replace(/^["']|["']$/g, '');
-                                          conditions.push({ flag: match[1], operator: CONDITION_OPERATOR.GREATER_EQUAL, value: isNaN(Number(value)) ? value : Number(value) });
-                                        }
-                                      } else if (part.includes('<=')) {
-                                        const match = part.match(/\$(\w+)\s*<=\s*(.+)/);
-                                        if (match) {
-                                          const value = match[2].trim().replace(/^["']|["']$/g, '');
-                                          conditions.push({ flag: match[1], operator: CONDITION_OPERATOR.LESS_EQUAL, value: isNaN(Number(value)) ? value : Number(value) });
-                                        }
-                                      } else if (part.includes('!=')) {
-                                        const match = part.match(/\$(\w+)\s*!=\s*(.+)/);
-                                        if (match) {
-                                          const value = match[2].trim().replace(/^["']|["']$/g, '');
-                                          conditions.push({ flag: match[1], operator: CONDITION_OPERATOR.NOT_EQUALS, value: isNaN(Number(value)) ? value : Number(value) });
-                                        }
-                                      } else if (part.includes('==')) {
-                                        const match = part.match(/\$(\w+)\s*==\s*(.+)/);
-                                        if (match) {
-                                          const value = match[2].trim().replace(/^["']|["']$/g, '');
-                                          conditions.push({ flag: match[1], operator: CONDITION_OPERATOR.EQUALS, value: isNaN(Number(value)) ? value : Number(value) });
-                                        }
-                                      } else if (part.includes('>') && !part.includes('>=')) {
-                                        const match = part.match(/\$(\w+)\s*>\s*(.+)/);
-                                        if (match) {
-                                          const value = match[2].trim().replace(/^["']|["']$/g, '');
-                                          conditions.push({ flag: match[1], operator: CONDITION_OPERATOR.GREATER_THAN, value: isNaN(Number(value)) ? value : Number(value) });
-                                        }
-                                      } else if (part.includes('<') && !part.includes('<=')) {
-                                        const match = part.match(/\$(\w+)\s*<\s*(.+)/);
-                                        if (match) {
-                                          const value = match[2].trim().replace(/^["']|["']$/g, '');
-                                          conditions.push({ flag: match[1], operator: CONDITION_OPERATOR.LESS_THAN, value: isNaN(Number(value)) ? value : Number(value) });
-                                        }
-                                      } else {
-                                        const varMatch = part.match(/\$(\w+)/);
-                                        if (varMatch) {
-                                          conditions.push({ flag: varMatch[1], operator: CONDITION_OPERATOR.IS_SET });
-                                        }
-                                      }
-                                    });
-                                    return conditions;
-                                  };
-                                  const newBlocks = [...node.conditionalBlocks!];
-                                  newBlocks[idx] = {
-                                    ...block,
-                                    condition: parseCondition(e.target.value)
-                                  };
-                                  onUpdate({ conditionalBlocks: newBlocks });
-                                }}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Escape') {
-                                    setExpandedConditions(prev => {
-                                      const next = new Set(prev);
-                                      next.delete(block.id);
-                                      return next;
-                                    });
-                                    e.preventDefault();
-                                  }
-                                }}
-                                className="w-full bg-[#12121a] border border-[#2a2a3e] rounded px-3 py-2 text-sm text-gray-200 font-mono outline-none focus:border-blue-500 min-h-[150px] resize-y"
-                                placeholder='e.g., $flag == "value" or $stat >= 100'
-                                ref={(textarea) => {
-                                  if (textarea && shouldExpand) {
-                                    setTimeout(() => {
-                                      const length = conditionValue.length;
-                                      textarea.setSelectionRange(length, length);
-                                      textarea.focus();
-                                    }, 0);
-                                  }
-                                }}
-                              />
-                              {showValidation && (
-                                <div className={`mt-3 p-2 rounded text-xs ${
-                                  hasError ? 'bg-red-500/10 border border-red-500/30 text-red-400' :
-                                  hasWarning ? 'bg-yellow-500/10 border border-yellow-500/30 text-yellow-400' :
-                                  'bg-green-500/10 border border-green-500/30 text-green-400'
-                                }`}>
-                                  {hasError && (
-                                    <div>
-                                      <strong>Errors:</strong>
-                                      <ul className="list-disc list-inside mt-1 ml-2">
-                                        {validation.errors.map((error: string, i: number) => (
-                                          <li key={i}>{error}</li>
-                                        ))}
-                                      </ul>
-                                    </div>
-                                  )}
-                                  {hasWarning && (
-                                    <div className={hasError ? 'mt-2' : ''}>
-                                      <strong>Warnings:</strong>
-                                      <ul className="list-disc list-inside mt-1 ml-2">
-                                        {validation.warnings.map((warning: string, i: number) => (
-                                          <li key={i}>{warning}</li>
-                                        ))}
-                                      </ul>
-                                    </div>
-                                  )}
-                                  {!hasError && !hasWarning && (
-                                    <div>✓ Valid condition expression</div>
-                                  )}
+                            
+                            {/* Two-column layout */}
+                            <div className="flex flex-1 overflow-hidden">
+                              {/* Left sidebar - Tools */}
+                              <div className="w-44 bg-[#0a0a0f] border-r border-[#2a2a3e] p-3 overflow-y-auto flex flex-col gap-4">
+                                {/* Pro tip */}
+                                <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-lg p-2.5">
+                                  <div className="flex items-center gap-1.5 mb-1.5">
+                                    <span className="text-sm">💡</span>
+                                    <span className="text-[10px] font-semibold text-blue-400 uppercase tracking-wide">Pro Tip</span>
+                                  </div>
+                                  <p className="text-[10px] text-gray-400 leading-relaxed">
+                                    Type <code className="text-purple-400 bg-purple-500/20 px-1 rounded font-bold">$</code> to access variables & flags.
+                                  </p>
                                 </div>
-                              )}
+
+                                {/* Operators */}
+                                <div>
+                                  <label className="text-[9px] text-gray-500 uppercase mb-1.5 block font-semibold tracking-wider">Operators</label>
+                                  <div className="grid grid-cols-3 gap-1">
+                                    {['==', '!=', '>=', '<=', '>', '<'].map((op) => (
+                                      <button
+                                        key={op}
+                                        type="button"
+                                        onClick={() => {
+                                          const val = conditionValue;
+                                          const space = val.length > 0 && !val.endsWith(' ') ? ' ' : '';
+                                          setConditionInputs(prev => ({ ...prev, [block.id]: val + space + op + ' ' }));
+                                        }}
+                                        className="px-1.5 py-1 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded text-xs font-mono hover:bg-purple-500/40 transition-all"
+                                      >
+                                        {op}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Keywords */}
+                                <div>
+                                  <label className="text-[9px] text-gray-500 uppercase mb-1.5 block font-semibold tracking-wider">Keywords</label>
+                                  <div className="grid grid-cols-2 gap-1">
+                                    {['and', 'not'].map((kw) => (
+                                      <button
+                                        key={kw}
+                                        type="button"
+                                        onClick={() => {
+                                          const val = conditionValue;
+                                          const space = val.length > 0 && !val.endsWith(' ') ? ' ' : '';
+                                          setConditionInputs(prev => ({ ...prev, [block.id]: val + space + kw + ' ' }));
+                                        }}
+                                        className="px-1.5 py-1 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded text-xs font-mono hover:bg-blue-500/40 transition-all"
+                                      >
+                                        {kw}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Templates */}
+                                <div>
+                                  <label className="text-[9px] text-gray-500 uppercase mb-1.5 block font-semibold tracking-wider">Templates</label>
+                                  <div className="flex flex-col gap-1">
+                                    {[
+                                      { p: '$flag == true', l: 'Boolean' },
+                                      { p: '$stat >= 100', l: 'Compare' },
+                                      { p: '$a and $b', l: 'Multiple' },
+                                    ].map(({ p, l }) => (
+                                      <button
+                                        key={p}
+                                        type="button"
+                                        onClick={() => setConditionInputs(prev => ({ ...prev, [block.id]: p }))}
+                                        className="text-left px-2 py-1 bg-gray-500/10 text-gray-400 border border-gray-500/20 rounded text-[10px] font-mono hover:bg-gray-500/20 transition-all"
+                                      >
+                                        <div className="text-gray-300">{p}</div>
+                                        <div className="text-[8px] text-gray-600">{l}</div>
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Right panel - Editor */}
+                              <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-3">
+                                <ConditionAutocomplete
+                                  value={conditionValue}
+                                  onChange={(newValue) => {
+                                    setConditionInputs(prev => ({ ...prev, [block.id]: newValue }));
+                                    const parseCondition = (conditionStr: string): any[] => {
+                                      const conditions: any[] = [];
+                                      if (!conditionStr.trim()) return conditions;
+                                      const parts = conditionStr.split(/\s+and\s+/i);
+                                      parts.forEach(part => {
+                                        part = part.trim();
+                                        if (part.startsWith('not ')) {
+                                          const varMatch = part.match(/not\s+\$(\w+)/);
+                                          if (varMatch) conditions.push({ flag: varMatch[1], operator: CONDITION_OPERATOR.IS_NOT_SET });
+                                        } else if (part.includes('>=')) {
+                                          const match = part.match(/\$(\w+)\s*>=\s*(.+)/);
+                                          if (match) {
+                                            const value = match[2].trim().replace(/^["']|["']$/g, '');
+                                            conditions.push({ flag: match[1], operator: CONDITION_OPERATOR.GREATER_EQUAL, value: isNaN(Number(value)) ? value : Number(value) });
+                                          }
+                                        } else if (part.includes('<=')) {
+                                          const match = part.match(/\$(\w+)\s*<=\s*(.+)/);
+                                          if (match) {
+                                            const value = match[2].trim().replace(/^["']|["']$/g, '');
+                                            conditions.push({ flag: match[1], operator: CONDITION_OPERATOR.LESS_EQUAL, value: isNaN(Number(value)) ? value : Number(value) });
+                                          }
+                                        } else if (part.includes('!=')) {
+                                          const match = part.match(/\$(\w+)\s*!=\s*(.+)/);
+                                          if (match) {
+                                            const value = match[2].trim().replace(/^["']|["']$/g, '');
+                                            conditions.push({ flag: match[1], operator: CONDITION_OPERATOR.NOT_EQUALS, value: isNaN(Number(value)) ? value : Number(value) });
+                                          }
+                                        } else if (part.includes('==')) {
+                                          const match = part.match(/\$(\w+)\s*==\s*(.+)/);
+                                          if (match) {
+                                            const value = match[2].trim().replace(/^["']|["']$/g, '');
+                                            conditions.push({ flag: match[1], operator: CONDITION_OPERATOR.EQUALS, value: isNaN(Number(value)) ? value : Number(value) });
+                                          }
+                                        } else if (part.includes('>') && !part.includes('>=')) {
+                                          const match = part.match(/\$(\w+)\s*>\s*(.+)/);
+                                          if (match) {
+                                            const value = match[2].trim().replace(/^["']|["']$/g, '');
+                                            conditions.push({ flag: match[1], operator: CONDITION_OPERATOR.GREATER_THAN, value: isNaN(Number(value)) ? value : Number(value) });
+                                          }
+                                        } else if (part.includes('<') && !part.includes('<=')) {
+                                          const match = part.match(/\$(\w+)\s*<\s*(.+)/);
+                                          if (match) {
+                                            const value = match[2].trim().replace(/^["']|["']$/g, '');
+                                            conditions.push({ flag: match[1], operator: CONDITION_OPERATOR.LESS_THAN, value: isNaN(Number(value)) ? value : Number(value) });
+                                          }
+                                        } else {
+                                          const varMatch = part.match(/\$(\w+)/);
+                                          if (varMatch) conditions.push({ flag: varMatch[1], operator: CONDITION_OPERATOR.IS_SET });
+                                        }
+                                      });
+                                      return conditions;
+                                    };
+                                    const newBlocks = [...node.conditionalBlocks!];
+                                    newBlocks[idx] = { ...block, condition: parseCondition(newValue) };
+                                    onUpdate({ conditionalBlocks: newBlocks });
+                                  }}
+                                  flagSchema={flagSchema}
+                                  textarea={true}
+                                  placeholder='e.g., $flag == "value" or $stat >= 100'
+                                  className="w-full bg-[#12121a] border border-[#2a2a3e] rounded px-3 py-2 text-sm text-gray-200 font-mono outline-none focus:border-blue-500 min-h-[180px] resize-y"
+                                />
+                                {showValidation && (
+                                  <div className={`p-2 rounded text-xs ${
+                                    hasError ? 'bg-red-500/10 border border-red-500/30 text-red-400' :
+                                    hasWarning ? 'bg-yellow-500/10 border border-yellow-500/30 text-yellow-400' :
+                                    'bg-green-500/10 border border-green-500/30 text-green-400'
+                                  }`}>
+                                    {hasError && (
+                                      <div>
+                                        <strong>Errors:</strong>
+                                        <ul className="list-disc list-inside mt-1 ml-2">
+                                          {validation.errors.map((error: string, i: number) => (
+                                            <li key={i}>{error}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                    {hasWarning && (
+                                      <div className={hasError ? 'mt-2' : ''}>
+                                        <strong>Warnings:</strong>
+                                        <ul className="list-disc list-inside mt-1 ml-2">
+                                          {validation.warnings.map((warning: string, i: number) => (
+                                            <li key={i}>{warning}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                    {!hasError && !hasWarning && (
+                                      <div>✓ Valid condition expression</div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>

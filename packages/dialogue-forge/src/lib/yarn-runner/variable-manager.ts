@@ -38,6 +38,48 @@ export class VariableManager {
   set(name: string, value: boolean | number | string): void {
     this.variables[name] = value;
   }
+
+  /**
+   * Apply an operation to a variable (e.g., +=, -=, *=, /=)
+   * If the variable doesn't exist, it's initialized to 0 for numeric operations
+   */
+  applyOperation(name: string, operator: '+' | '-' | '*' | '/', value: number): void {
+    const current = this.get(name);
+    let currentNum: number;
+    
+    if (current === undefined) {
+      currentNum = 0;
+    } else if (typeof current === 'number') {
+      currentNum = current;
+    } else if (typeof current === 'string') {
+      // Try to parse string as number
+      const parsed = parseFloat(current);
+      currentNum = isNaN(parsed) ? 0 : parsed;
+    } else {
+      // Boolean: treat true as 1, false as 0
+      currentNum = current ? 1 : 0;
+    }
+    
+    let result: number;
+    switch (operator) {
+      case '+':
+        result = currentNum + value;
+        break;
+      case '-':
+        result = currentNum - value;
+        break;
+      case '*':
+        result = currentNum * value;
+        break;
+      case '/':
+        result = value !== 0 ? currentNum / value : currentNum;
+        break;
+      default:
+        result = currentNum;
+    }
+    
+    this.variables[name] = result;
+  }
   
   /**
    * Add a memory flag (dialogue flag - temporary)
@@ -89,4 +131,5 @@ export class VariableManager {
     this.memoryFlags = initialMemoryFlags ? new Set(initialMemoryFlags) : new Set();
   }
 }
+
 

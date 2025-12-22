@@ -48,26 +48,58 @@ export function exportToYarn(tree: DialogueTree): string {
             yarn += `<<else>>\n`;
           }
           
-          // Export block content
+          // Export block content (remove set commands from content, they'll be exported separately)
+          let blockContent = block.content;
+          const setCommandsInBlock = blockContent.match(/<<set\s+\$(\w+)\s*([+\-*/=]+)\s*(.+?)>>/g);
+          if (setCommandsInBlock) {
+            // Remove set commands from content
+            setCommandsInBlock.forEach(cmd => {
+              blockContent = blockContent.replace(cmd, '').trim();
+            });
+          }
+          
           if (block.speaker) {
-            yarn += `${block.speaker}: ${block.content.replace(/\n/g, '\n' + block.speaker + ': ')}\n`;
+            yarn += `${block.speaker}: ${blockContent.replace(/\n/g, '\n' + block.speaker + ': ')}\n`;
           } else {
-            yarn += `${block.content}\n`;
+            yarn += `${blockContent}\n`;
+          }
+          
+          // Export variable operations from this block
+          if (setCommandsInBlock) {
+            setCommandsInBlock.forEach(cmd => {
+              yarn += `${cmd}\n`;
+            });
           }
         });
         yarn += `<<endif>>\n`;
       } else {
         // Regular content (no conditionals)
+        let content = node.content;
+        const setCommandsInContent = content.match(/<<set\s+\$(\w+)\s*([+\-*/=]+)\s*(.+?)>>/g);
+        if (setCommandsInContent) {
+          // Remove set commands from content
+          setCommandsInContent.forEach(cmd => {
+            content = content.replace(cmd, '').trim();
+          });
+        }
+        
         if (node.speaker) {
-          yarn += `${node.speaker}: ${node.content.replace(/\n/g, '\n' + node.speaker + ': ')}\n`;
+          yarn += `${node.speaker}: ${content.replace(/\n/g, '\n' + node.speaker + ': ')}\n`;
         } else {
-          yarn += `${node.content}\n`;
+          yarn += `${content}\n`;
         }
       }
       
       // Export flags as Yarn variable commands
-      // These commands tell Yarn Spinner to update Variable Storage at runtime
-      if (node.setFlags?.length) {
+      // Check if content contains variable operations first
+      const setCommandsInContent = node.content.match(/<<set\s+\$(\w+)\s*([+\-*/=]+)\s*(.+?)>>/g);
+      if (setCommandsInContent) {
+        // Export the operations found in content
+        setCommandsInContent.forEach(cmd => {
+          yarn += `${cmd}\n`;
+        });
+      } else if (node.setFlags?.length) {
+        // Fallback: export as boolean flags
         node.setFlags.forEach(flag => {
           yarn += `<<set $${flag} = true>>\n`;
         });
@@ -105,11 +137,27 @@ export function exportToYarn(tree: DialogueTree): string {
           yarn += `<<else>>\n`;
         }
         
-        // Export block content
+        // Export block content (remove set commands from content)
+        let blockContent = block.content;
+        const setCommandsInBlock = blockContent.match(/<<set\s+\$(\w+)\s*([+\-*/=]+)\s*(.+?)>>/g);
+        if (setCommandsInBlock) {
+          // Remove set commands from content
+          setCommandsInBlock.forEach(cmd => {
+            blockContent = blockContent.replace(cmd, '').trim();
+          });
+        }
+        
         if (block.speaker) {
-          yarn += `${block.speaker}: ${block.content.replace(/\n/g, '\n' + block.speaker + ': ')}\n`;
+          yarn += `${block.speaker}: ${blockContent.replace(/\n/g, '\n' + block.speaker + ': ')}\n`;
         } else {
-          yarn += `${block.content}\n`;
+          yarn += `${blockContent}\n`;
+        }
+        
+        // Export variable operations from this block
+        if (setCommandsInBlock) {
+          setCommandsInBlock.forEach(cmd => {
+            yarn += `${cmd}\n`;
+          });
         }
         
         // Export block's nextNodeId if present
@@ -120,7 +168,12 @@ export function exportToYarn(tree: DialogueTree): string {
       yarn += `<<endif>>\n`;
       
       // Export flags as Yarn variable commands
-      if (node.setFlags?.length) {
+      const setCommandsInNode = node.content?.match(/<<set\s+\$(\w+)\s*([+\-*/=]+)\s*(.+?)>>/g);
+      if (setCommandsInNode) {
+        setCommandsInNode.forEach(cmd => {
+          yarn += `${cmd}\n`;
+        });
+      } else if (node.setFlags?.length) {
         node.setFlags.forEach(flag => {
           yarn += `<<set $${flag} = true>>\n`;
         });
@@ -157,10 +210,26 @@ export function exportToYarn(tree: DialogueTree): string {
           }
         }
         
-        yarn += `-> ${choice.text}\n`;
+        // Remove set commands from choice text before exporting
+        let choiceText = choice.text;
+        const setCommandsInText = choiceText.match(/<<set\s+\$(\w+)\s*([+\-*/=]+)\s*(.+?)>>/g);
+        if (setCommandsInText) {
+          // Remove set commands from text
+          setCommandsInText.forEach(cmd => {
+            choiceText = choiceText.replace(cmd, '').trim();
+          });
+        }
+        
+        yarn += `-> ${choiceText}\n`;
         
         // Export flags set by this choice
-        if (choice.setFlags?.length) {
+        if (setCommandsInText) {
+          // Export the operations found in text
+          setCommandsInText.forEach(cmd => {
+            yarn += `    ${cmd}\n`;
+          });
+        } else if (choice.setFlags?.length) {
+          // Fallback: export as boolean flags
           choice.setFlags.forEach(flag => {
             yarn += `    <<set $${flag} = true>>\n`;
           });
@@ -212,6 +281,10 @@ export function importFromYarn(yarnContent: string, title: string = 'Imported Di
     let currentBlock: any = null;
     let blockContent: string[] = [];
     let blockSpeaker: string = '';
+    
+    // Track conditional choice state (for <<if>> blocks that wrap choices)
+    let inConditionalChoice = false;
+    let currentChoiceCondition: any[] = [];
     
     const parseCondition = (conditionStr: string): any[] => {
       // Parse condition string like "$flag", "not $flag", "$flag == 5", etc.
@@ -278,7 +351,21 @@ export function importFromYarn(yarnContent: string, title: string = 'Imported Di
       
       if (trimmed.startsWith('->')) {
         const choiceText = trimmed.slice(2).trim();
-        choices.push({ id: `c_${Date.now()}_${choices.length}`, text: choiceText, nextNodeId: '' });
+        const choice: any = { 
+          id: `c_${Date.now()}_${choices.length}`, 
+          text: choiceText, 
+          nextNodeId: '' 
+        };
+        
+        // If we're in a conditional choice context, apply the condition
+        if (inConditionalChoice && currentChoiceCondition.length > 0) {
+          choice.conditions = currentChoiceCondition;
+          // Reset for next choice (if any)
+          inConditionalChoice = false;
+          currentChoiceCondition = [];
+        }
+        
+        choices.push(choice);
       } else if (trimmed.startsWith('<<jump')) {
         const jumpMatch = trimmed.match(/<<jump\s+(\S+)>>/);
         if (jumpMatch) {
@@ -289,39 +376,64 @@ export function importFromYarn(yarnContent: string, title: string = 'Imported Di
           }
         }
       } else if (trimmed.startsWith('<<set')) {
-        // Match: <<set $var = value>> or <<set $var += value>>
-        const setMatch = trimmed.match(/<<set\s+\$(\w+)\s*(?:[=+\-*/]|==|!=|<=|>=)?\s*([^>]*?)>>/);
+        // Match: <<set $var = value>>, <<set $var += value>>, etc.
+        // Full regex to capture variable name, operator, and value
+        const setMatch = trimmed.match(/<<set\s+\$(\w+)\s*([+\-*/=]+)\s*(.+?)>>/);
         if (setMatch) {
           const varName = setMatch[1];
+          const operator = setMatch[2].trim();
+          const valueStr = setMatch[3].trim();
+          
+          // For now, we store the flag name. The operation will be preserved in content
+          // when we re-export. In the future, we could extend types to store operations.
           if (choices.length > 0) {
             if (!choices[choices.length - 1].setFlags) {
               choices[choices.length - 1].setFlags = [];
             }
             choices[choices.length - 1].setFlags.push(varName);
+            // Store the full command in content for re-export
+            if (!choices[choices.length - 1].text.includes('<<set')) {
+              choices[choices.length - 1].text += ` ${trimmed}`;
+            }
           } else {
             setFlags.push(varName);
+            // Store the full command in content for re-export
+            if (!dialogueContent.includes(trimmed)) {
+              dialogueContent += trimmed + '\n';
+            }
           }
         }
       } else if (trimmed.startsWith('<<if')) {
-        // Start of conditional block
-        if (inConditionalBlock && currentBlock) {
-          // Save previous block
-          currentBlock.content = blockContent.join('\n').trim();
-          currentBlock.speaker = blockSpeaker || undefined;
-          conditionalBlocks.push(currentBlock);
-        }
-        
-        inConditionalBlock = true;
+        // Check if this is a conditional choice (appears before a -> choice)
+        // or a conditional block (appears before dialogue content)
         const conditionStr = trimmed.replace(/<<if\s+/, '').replace(/>>/, '').trim();
-        currentBlock = {
-          id: `block_${Date.now()}_${conditionalBlocks.length}`,
-          type: 'if',
-          condition: parseCondition(conditionStr),
-          content: '',
-          speaker: undefined
-        };
-        blockContent = [];
-        blockSpeaker = '';
+        const parsedConditions = parseCondition(conditionStr);
+        
+        // If we're in a player node context (have choices) or this looks like it's before a choice,
+        // treat it as a conditional choice
+        if (choices.length > 0 || trimmed.match(/<<if.*>>\s*$/)) {
+          inConditionalChoice = true;
+          currentChoiceCondition = parsedConditions;
+        } else {
+          // Otherwise, treat it as a conditional block for NPC nodes
+          if (inConditionalBlock && currentBlock) {
+            // Save previous block
+            currentBlock.content = blockContent.join('\n').trim();
+            currentBlock.speaker = blockSpeaker || undefined;
+            conditionalBlocks.push(currentBlock);
+          }
+          
+          inConditionalBlock = true;
+          currentBlock = {
+            id: `block_${Date.now()}_${conditionalBlocks.length}`,
+            type: 'if',
+            condition: parsedConditions,
+            content: '',
+            speaker: undefined
+          };
+          blockContent = [];
+          blockSpeaker = '';
+        }
       } else if (trimmed.startsWith('<<elseif')) {
         // Elseif block
         if (currentBlock) {
@@ -358,16 +470,21 @@ export function importFromYarn(yarnContent: string, title: string = 'Imported Di
         blockContent = [];
         blockSpeaker = '';
       } else if (trimmed.startsWith('<<endif')) {
-        // End of conditional block
-        if (currentBlock) {
+        // End of conditional block or conditional choice
+        if (inConditionalChoice) {
+          // End of conditional choice - the condition is already applied to the last choice
+          inConditionalChoice = false;
+          currentChoiceCondition = [];
+        } else if (currentBlock) {
+          // End of conditional block
           currentBlock.content = blockContent.join('\n').trim();
           currentBlock.speaker = blockSpeaker || undefined;
           conditionalBlocks.push(currentBlock);
+          inConditionalBlock = false;
+          currentBlock = null;
+          blockContent = [];
+          blockSpeaker = '';
         }
-        inConditionalBlock = false;
-        currentBlock = null;
-        blockContent = [];
-        blockSpeaker = '';
       } else if (inConditionalBlock) {
         // Content within conditional block
         if (trimmed.includes(':') && !trimmed.startsWith('<<')) {

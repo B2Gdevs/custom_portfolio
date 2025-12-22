@@ -6,6 +6,9 @@ export { FlagManager } from './components/FlagManager';
 export { ZoomControls } from './components/ZoomControls';
 export { ExampleLoader } from './components/ExampleLoader';
 
+// Export styles
+import './styles/scrollbar.css';
+
 // Export examples
 export { exampleDialogues, demoFlagSchemas, getExampleDialogue, getDemoFlagSchema, listExamples, listDemoFlagSchemas } from './examples';
 

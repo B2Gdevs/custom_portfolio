@@ -71,3 +71,4 @@ If needed, V1 components are preserved and can be used by:
 - Importing `DialogueEditorV1` instead of `DialogueEditorV2`
 - All existing functionality remains intact
 
+

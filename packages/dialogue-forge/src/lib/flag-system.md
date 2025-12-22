@@ -165,3 +165,4 @@ interface GameState {
 The dialogue editor doesn't manage game state directly - it only references flags. Your game engine handles the actual state management.
 
 
+

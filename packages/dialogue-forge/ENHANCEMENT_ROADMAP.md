@@ -34,26 +34,32 @@
   - [x] Conditional choices (choices wrapped in `<<if>>`)
   - [ ] Nested conditionals (enhancement)
 - [x] **Basic Set Command** - `<<set $flag = true>>` (boolean flags only)
+- [x] **Advanced Set Operations** - `<<set $var += value>>`, `<<set $var -= value>>`, `<<set $var *= value>>`, `<<set $var /= value>>`
+- [x] **Variable Interpolation** - `{$variable}` in dialogue text
 - [x] **Condition Operators** - is_set, is_not_set, ==, !=, >, <, >=, <=
 - [x] **Multiple Conditions** - AND logic (`$flag1 == 5 and $flag2 > 10`)
+- [x] **Condition Editor UX** - 2-column layout with operator/keyword quick reference, pro tips, and improved autocomplete
 
 ### 🔥 Phase 1: Core Variables & Operations (HIGH PRIORITY - Next Sprint)
-- [ ] **Full Variable System** (`$variable`) - **CRITICAL FOR YARN COMPATIBILITY**
-  - [ ] Variable types (string, number, boolean)
-  - [ ] Variable management UI (similar to FlagManager)
-  - [ ] Variable state tracking in PlayView
-  - [ ] Variable references in dialogue text (`"Hello {$playerName}"`)
-  - [ ] Variable initialization from schema/defaults
+- [x] **Advanced Set Operations** - ✅ **COMPLETED**
+  - [x] `<<set $var += 10>>` (increment)
+  - [x] `<<set $var -= 5>>` (decrement)
+  - [x] `<<set $var *= 2>>` (multiply)
+  - [x] `<<set $var /= 2>>` (divide)
+  - [x] Parse and execute in PlayView
+  - [x] Export/import with correct syntax
+- [x] **Variable Interpolation** - ✅ **COMPLETED**
+  - [x] `{$variable}` syntax in dialogue text
+  - [x] Runtime variable replacement
+  - [x] Export/import support
 
-- [ ] **Advanced Set Operations** - **CRITICAL FOR YARN COMPATIBILITY**
-  - [ ] `<<set $var = "string">>` (string assignment)
-  - [ ] `<<set $var = 42>>` (number assignment)
-  - [ ] `<<set $var += 10>>` (increment)
-  - [ ] `<<set $var -= 5>>` (decrement)
-  - [ ] `<<set $var *= 2>>` (multiply)
-  - [ ] `<<set $var /= 2>>` (divide)
-  - [ ] Parse and execute in PlayView
-  - [ ] Export/import with correct syntax
+- [ ] **Full Variable System** (`$variable`) - **IN PROGRESS**
+  - [x] Variable operations (+=, -=, *=, /=)
+  - [x] Variable interpolation in text
+  - [ ] Variable types (string, number, boolean) - partial (works but needs UI)
+  - [ ] Variable management UI (similar to FlagManager)
+  - [x] Variable state tracking in PlayView
+  - [ ] Variable initialization from schema/defaults
 
 ### 📅 Phase 2: Commands & Flow Control (MEDIUM PRIORITY)
 - [ ] **Detour Command** (`<<detour node_id>>`)
@@ -242,6 +248,22 @@
   - Multi-language support
   - String table integration
   - Language switching
+
+## UI/UX Enhancements
+
+### ✅ Recently Completed
+- [x] **Condition Editor Redesign** - 2-column layout with quick reference sidebar
+  - [x] Left sidebar with operators, keywords, and templates
+  - [x] Pro tip about `$` for accessing variables/flags
+  - [x] Improved autocomplete with tag styling
+  - [x] Debounced suggestions (300ms) for smoother experience
+  - [x] Drag-and-drop support for operators/keywords
+- [x] **Custom Scrollbars** - Purple gradient scrollbars for dialogue-forge package
+- [x] **ConditionAutocomplete Improvements**
+  - [x] Tag-based styling for variables, operators, and keywords
+  - [x] Shows `$` prefix in variable suggestions
+  - [x] Only shows suggestions when actively typing (not on focus)
+  - [x] Better visual feedback and hover states
 
 ## Graph Editor Enhancements
 
