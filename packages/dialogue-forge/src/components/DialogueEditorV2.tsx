@@ -10,7 +10,6 @@ import ReactFlow, {
   ReactFlowProvider,
   Background,
   Controls,
-  MiniMap,
   Node,
   Edge,
   NodeChange,
@@ -943,37 +942,6 @@ function DialogueEditorV2Internal({
                 showFitView={true}
                 showInteractive={false}
               />
-              
-              {/* Enhanced MiniMap with title */}
-              <Panel position="bottom-right" className="!p-0 !m-2">
-                <div className="bg-[#0d0d14] border border-[#2a2a3e] rounded-lg overflow-hidden shadow-xl">
-                  <div className="px-3 py-1.5 border-b border-[#2a2a3e] flex items-center justify-between bg-[#12121a]">
-                    <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Overview</span>
-                    <div className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-[#e94560]" title="NPC Node" />
-                      <span className="w-2 h-2 rounded-full bg-[#8b5cf6]" title="Player Node" />
-                      <span className="w-2 h-2 rounded-full bg-blue-500" title="Conditional" />
-                    </div>
-                  </div>
-                  <MiniMap 
-                    style={{ 
-                      width: 180, 
-                      height: 120,
-                      backgroundColor: '#08080c',
-                    }}
-                    maskColor="rgba(0, 0, 0, 0.7)"
-                    nodeColor={(node) => {
-                      if (node.type === 'npc') return '#e94560';
-                      if (node.type === 'player') return '#8b5cf6';
-                      if (node.type === 'conditional') return '#3b82f6';
-                      return '#4a4a6a';
-                    }}
-                    nodeStrokeWidth={2}
-                    pannable
-                    zoomable
-                  />
-                </div>
-              </Panel>
               
               {/* Left Toolbar - Layout, Flags, Guide */}
               <Panel position="top-left" className="!bg-transparent !border-0 !p-0 !m-2">

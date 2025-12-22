@@ -5,7 +5,7 @@
  * See V2_MIGRATION_PLAN.md for implementation details.
  */
 import React, { useState, useCallback, useMemo, useRef } from 'react';
-import ReactFlow, { ReactFlowProvider, Background, Controls, MiniMap, addEdge, applyNodeChanges, applyEdgeChanges, useReactFlow, Panel, ConnectionLineType, BackgroundVariant, } from 'reactflow';
+import ReactFlow, { ReactFlowProvider, Background, Controls, addEdge, applyNodeChanges, applyEdgeChanges, useReactFlow, Panel, ConnectionLineType, BackgroundVariant, } from 'reactflow';
 import { Edit3, Plus, Trash2, Layout, ArrowDown, ArrowRight, Magnet, Sparkles, Undo2, Flag, Home, BookOpen, Settings, Grid3x3 } from 'lucide-react';
 import 'reactflow/dist/style.css';
 import { exportToYarn, importFromYarn } from '../lib/yarn-converter';
@@ -778,27 +778,6 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, }) {
                             gap: '2px',
                             padding: '4px',
                         }, showZoom: true, showFitView: true, showInteractive: false }),
-                    React.createElement(Panel, { position: "bottom-right", className: "!p-0 !m-2" },
-                        React.createElement("div", { className: "bg-[#0d0d14] border border-[#2a2a3e] rounded-lg overflow-hidden shadow-xl" },
-                            React.createElement("div", { className: "px-3 py-1.5 border-b border-[#2a2a3e] flex items-center justify-between bg-[#12121a]" },
-                                React.createElement("span", { className: "text-[10px] font-medium text-gray-400 uppercase tracking-wider" }, "Overview"),
-                                React.createElement("div", { className: "flex items-center gap-1" },
-                                    React.createElement("span", { className: "w-2 h-2 rounded-full bg-[#e94560]", title: "NPC Node" }),
-                                    React.createElement("span", { className: "w-2 h-2 rounded-full bg-[#8b5cf6]", title: "Player Node" }),
-                                    React.createElement("span", { className: "w-2 h-2 rounded-full bg-blue-500", title: "Conditional" }))),
-                            React.createElement(MiniMap, { style: {
-                                    width: 180,
-                                    height: 120,
-                                    backgroundColor: '#08080c',
-                                }, maskColor: "rgba(0, 0, 0, 0.7)", nodeColor: (node) => {
-                                    if (node.type === 'npc')
-                                        return '#e94560';
-                                    if (node.type === 'player')
-                                        return '#8b5cf6';
-                                    if (node.type === 'conditional')
-                                        return '#3b82f6';
-                                    return '#4a4a6a';
-                                }, nodeStrokeWidth: 2, pannable: true, zoomable: true }))),
                     React.createElement(Panel, { position: "top-left", className: "!bg-transparent !border-0 !p-0 !m-2" },
                         React.createElement("div", { className: "flex flex-col gap-1.5 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg p-1.5 shadow-lg" },
                             React.createElement("div", { className: "relative" },
