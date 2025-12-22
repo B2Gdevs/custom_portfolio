@@ -31,7 +31,7 @@ import { DialogueEditorProps, DialogueTree, DialogueNode, Choice } from '../type
 import { exportToYarn } from '../lib/yarn-converter';
 import { convertDialogueTreeToReactFlow, updateDialogueTreeFromReactFlow, CHOICE_COLORS } from '../utils/reactflow-converter';
 import { createNode, deleteNodeFromTree, addChoiceToNode, removeChoiceFromNode, updateChoiceInNode } from '../utils/node-helpers';
-import { applyDagreLayout, resolveNodeCollisions, LayoutDirection } from '../utils/layout';
+import { applyLayout, listLayouts, resolveNodeCollisions, LayoutDirection, type LayoutStrategy } from '../utils/layout';
 import { NodeEditor } from './NodeEditor';
 import { YarnView } from './YarnView';
 import { PlayView } from './PlayView';
@@ -74,9 +74,13 @@ function DialogueEditorV2Internal({
 }: DialogueEditorV2InternalProps) {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>('TB');
+  const [layoutStrategy, setLayoutStrategy] = useState<string>('dagre'); // Current layout strategy
   const [autoOrganize, setAutoOrganize] = useState<boolean>(false); // Auto-layout on changes
   const [showPathHighlight, setShowPathHighlight] = useState<boolean>(true); // Toggle path highlighting
   const [showBackEdges, setShowBackEdges] = useState<boolean>(true); // Toggle back-edge styling
+  
+  // Get available layout strategies
+  const availableLayouts = useMemo(() => listLayouts(), []);
   
   // Memoize nodeTypes and edgeTypes to prevent React Flow warnings
   const memoizedNodeTypes = useMemo(() => nodeTypes, []);
@@ -278,7 +282,8 @@ function DialogueEditorV2Internal({
     
     // Auto-organize if enabled
     if (autoOrganize) {
-      newDialogue = applyDagreLayout(newDialogue, layoutDirection);
+      const result = applyLayout(newDialogue, layoutStrategy, { direction: layoutDirection });
+      newDialogue = result.dialogue;
       setTimeout(() => {
         if (reactFlowInstance) {
           reactFlowInstance.fitView({ padding: 0.2, duration: 300 });
@@ -731,7 +736,8 @@ function DialogueEditorV2Internal({
     
     // Apply layout if auto-organize is enabled
     if (autoOrganize) {
-      newDialogue = applyDagreLayout(newDialogue, layoutDirection);
+      const result = applyLayout(newDialogue, layoutStrategy, { direction: layoutDirection });
+      newDialogue = result.dialogue;
     }
     
     // Single onChange call with all updates
@@ -785,7 +791,8 @@ function DialogueEditorV2Internal({
       
       // Auto-organize if enabled
       if (autoOrganize) {
-        newDialogue = applyDagreLayout(newDialogue, layoutDirection);
+        const result = applyLayout(newDialogue, layoutStrategy, { direction: layoutDirection });
+        newDialogue = result.dialogue;
         setTimeout(() => {
           if (reactFlowInstance) {
             reactFlowInstance.fitView({ padding: 0.2, duration: 300 });
@@ -823,14 +830,18 @@ function DialogueEditorV2Internal({
     }
   }, [dialogue, onChange, autoOrganize]);
 
-  // Handle auto-layout with direction using dagre
-  const handleAutoLayout = useCallback((direction?: LayoutDirection) => {
+  // Handle auto-layout with direction and strategy
+  const handleAutoLayout = useCallback((direction?: LayoutDirection, strategy?: string) => {
     const dir = direction || layoutDirection;
+    const strat = strategy || layoutStrategy;
     if (direction) {
       setLayoutDirection(direction);
     }
-    const layoutedDialogue = applyDagreLayout(dialogue, dir);
-    onChange(layoutedDialogue);
+    if (strategy) {
+      setLayoutStrategy(strategy);
+    }
+    const result = applyLayout(dialogue, strat, { direction: dir });
+    onChange(result.dialogue);
     
     // Fit view after a short delay to allow React Flow to update
     setTimeout(() => {
@@ -838,7 +849,7 @@ function DialogueEditorV2Internal({
         reactFlowInstance.fitView({ padding: 0.2, duration: 500 });
       }
     }, 100);
-  }, [dialogue, onChange, reactFlowInstance, layoutDirection]);
+  }, [dialogue, onChange, reactFlowInstance, layoutDirection, layoutStrategy]);
 
   return (
     <div className={`dialogue-editor-v2 ${className} w-full h-full flex flex-col`}>
@@ -978,7 +989,7 @@ function DialogueEditorV2Internal({
                         ? 'bg-green-500/20 text-green-400 border border-green-500/50' 
                         : 'bg-[#12121a] text-gray-500 hover:text-gray-300 border border-[#2a2a3e]'
                     }`}
-                    title={autoOrganize ? "Dagre Layout ON - Nodes auto-arrange" : "Dagre Layout OFF - Free placement"}
+                    title={autoOrganize ? `Auto Layout ON (${availableLayouts.find(l => l.id === layoutStrategy)?.name || layoutStrategy}) - Nodes auto-arrange` : "Auto Layout OFF - Free placement"}
                   >
                     <Magnet size={14} />
                   </button>
@@ -1018,6 +1029,24 @@ function DialogueEditorV2Internal({
                   >
                     <Layout size={14} />
                   </button>
+                  
+                  {/* Layout strategy selector */}
+                  <select
+                    value={layoutStrategy}
+                    onChange={(e) => {
+                      const newStrategy = e.target.value;
+                      setLayoutStrategy(newStrategy);
+                      handleAutoLayout(undefined, newStrategy);
+                    }}
+                    className="px-2 py-1.5 text-xs bg-[#12121a] border border-[#2a2a3e] rounded text-gray-300 hover:border-[#3a3a4e] transition-colors cursor-pointer focus:outline-none focus:border-[#e94560]"
+                    title="Layout Algorithm"
+                  >
+                    {availableLayouts.map(layout => (
+                      <option key={layout.id} value={layout.id} className="bg-[#1a1a2e]">
+                        {layout.name} {layout.isDefault ? '(default)' : ''}
+                      </option>
+                    ))}
+                  </select>
                   
                   <div className="w-px h-5 bg-[#2a2a3e]" />
                   

@@ -11,7 +11,7 @@ import 'reactflow/dist/style.css';
 import { exportToYarn } from '../lib/yarn-converter';
 import { convertDialogueTreeToReactFlow } from '../utils/reactflow-converter';
 import { createNode, deleteNodeFromTree, addChoiceToNode, removeChoiceFromNode, updateChoiceInNode } from '../utils/node-helpers';
-import { applyDagreLayout, resolveNodeCollisions } from '../utils/layout';
+import { applyLayout, listLayouts, resolveNodeCollisions } from '../utils/layout';
 import { NodeEditor } from './NodeEditor';
 import { YarnView } from './YarnView';
 import { PlayView } from './PlayView';
@@ -33,9 +33,12 @@ const edgeTypes = {
 function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJSON, className = '', showTitleEditor = true, flagSchema, initialViewMode = 'graph', }) {
     const [viewMode, setViewMode] = useState(initialViewMode);
     const [layoutDirection, setLayoutDirection] = useState('TB');
+    const [layoutStrategy, setLayoutStrategy] = useState('dagre'); // Current layout strategy
     const [autoOrganize, setAutoOrganize] = useState(false); // Auto-layout on changes
     const [showPathHighlight, setShowPathHighlight] = useState(true); // Toggle path highlighting
     const [showBackEdges, setShowBackEdges] = useState(true); // Toggle back-edge styling
+    // Get available layout strategies
+    const availableLayouts = useMemo(() => listLayouts(), []);
     // Memoize nodeTypes and edgeTypes to prevent React Flow warnings
     const memoizedNodeTypes = useMemo(() => nodeTypes, []);
     const memoizedEdgeTypes = useMemo(() => edgeTypes, []);
@@ -204,7 +207,8 @@ function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJS
         let newDialogue = { ...dialogue, nodes: updatedNodes };
         // Auto-organize if enabled
         if (autoOrganize) {
-            newDialogue = applyDagreLayout(newDialogue, layoutDirection);
+            const result = applyLayout(newDialogue, layoutStrategy, { direction: layoutDirection });
+            newDialogue = result.dialogue;
             setTimeout(() => {
                 if (reactFlowInstance) {
                     reactFlowInstance.fitView({ padding: 0.2, duration: 300 });
@@ -640,7 +644,8 @@ function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJS
         }
         // Apply layout if auto-organize is enabled
         if (autoOrganize) {
-            newDialogue = applyDagreLayout(newDialogue, layoutDirection);
+            const result = applyLayout(newDialogue, layoutStrategy, { direction: layoutDirection });
+            newDialogue = result.dialogue;
         }
         // Single onChange call with all updates
         onChange(newDialogue);
@@ -685,7 +690,8 @@ function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJS
             let newDialogue = deleteNodeFromTree(dialogue, nodeId);
             // Auto-organize if enabled
             if (autoOrganize) {
-                newDialogue = applyDagreLayout(newDialogue, layoutDirection);
+                const result = applyLayout(newDialogue, layoutStrategy, { direction: layoutDirection });
+                newDialogue = result.dialogue;
                 setTimeout(() => {
                     if (reactFlowInstance) {
                         reactFlowInstance.fitView({ padding: 0.2, duration: 300 });
@@ -719,21 +725,25 @@ function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJS
             }
         }
     }, [dialogue, onChange, autoOrganize]);
-    // Handle auto-layout with direction using dagre
-    const handleAutoLayout = useCallback((direction) => {
+    // Handle auto-layout with direction and strategy
+    const handleAutoLayout = useCallback((direction, strategy) => {
         const dir = direction || layoutDirection;
+        const strat = strategy || layoutStrategy;
         if (direction) {
             setLayoutDirection(direction);
         }
-        const layoutedDialogue = applyDagreLayout(dialogue, dir);
-        onChange(layoutedDialogue);
+        if (strategy) {
+            setLayoutStrategy(strategy);
+        }
+        const result = applyLayout(dialogue, strat, { direction: dir });
+        onChange(result.dialogue);
         // Fit view after a short delay to allow React Flow to update
         setTimeout(() => {
             if (reactFlowInstance) {
                 reactFlowInstance.fitView({ padding: 0.2, duration: 500 });
             }
         }, 100);
-    }, [dialogue, onChange, reactFlowInstance, layoutDirection]);
+    }, [dialogue, onChange, reactFlowInstance, layoutDirection, layoutStrategy]);
     return (React.createElement("div", { className: `dialogue-editor-v2 ${className} w-full h-full flex flex-col` },
         viewMode === 'graph' && (React.createElement("div", { className: "flex-1 flex overflow-hidden" },
             React.createElement("div", { className: "flex-1 relative" },
@@ -803,7 +813,7 @@ function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJS
                                     }
                                 }, className: `p-1.5 rounded transition-colors ${autoOrganize
                                     ? 'bg-green-500/20 text-green-400 border border-green-500/50'
-                                    : 'bg-[#12121a] text-gray-500 hover:text-gray-300 border border-[#2a2a3e]'}`, title: autoOrganize ? "Dagre Layout ON - Nodes auto-arrange" : "Dagre Layout OFF - Free placement" },
+                                    : 'bg-[#12121a] text-gray-500 hover:text-gray-300 border border-[#2a2a3e]'}`, title: autoOrganize ? `Auto Layout ON (${availableLayouts.find(l => l.id === layoutStrategy)?.name || layoutStrategy}) - Nodes auto-arrange` : "Auto Layout OFF - Free placement" },
                                 React.createElement(Magnet, { size: 14 })),
                             React.createElement("div", { className: "w-px h-5 bg-[#2a2a3e]" }),
                             React.createElement("div", { className: "flex border border-[#2a2a3e] rounded overflow-hidden" },
@@ -817,6 +827,14 @@ function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJS
                                     React.createElement(ArrowRight, { size: 14 }))),
                             React.createElement("button", { onClick: () => handleAutoLayout(), className: "p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors", title: "Re-apply Layout" },
                                 React.createElement(Layout, { size: 14 })),
+                            React.createElement("select", { value: layoutStrategy, onChange: (e) => {
+                                    const newStrategy = e.target.value;
+                                    setLayoutStrategy(newStrategy);
+                                    handleAutoLayout(undefined, newStrategy);
+                                }, className: "px-2 py-1.5 text-xs bg-[#12121a] border border-[#2a2a3e] rounded text-gray-300 hover:border-[#3a3a4e] transition-colors cursor-pointer focus:outline-none focus:border-[#e94560]", title: "Layout Algorithm" }, availableLayouts.map(layout => (React.createElement("option", { key: layout.id, value: layout.id, className: "bg-[#1a1a2e]" },
+                                layout.name,
+                                " ",
+                                layout.isDefault ? '(default)' : '')))),
                             React.createElement("div", { className: "w-px h-5 bg-[#2a2a3e]" }),
                             React.createElement("button", { onClick: () => setShowPathHighlight(!showPathHighlight), className: `p-1.5 rounded transition-colors ${showPathHighlight
                                     ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/50'
