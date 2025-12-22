@@ -67,7 +67,7 @@ const edgeTypes = {
     default: NPCEdgeV2_1.NPCEdgeV2, // Use custom component for NPC edges instead of React Flow default
 };
 function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJSON, className = '', showTitleEditor = true, flagSchema, initialViewMode = 'graph', layoutStrategy: propLayoutStrategy = 'dagre', // Accept from parent
- }) {
+onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, }) {
     const [viewMode, setViewMode] = (0, react_1.useState)(initialViewMode);
     const [layoutDirection, setLayoutDirection] = (0, react_1.useState)('TB');
     const layoutStrategy = propLayoutStrategy; // Use prop instead of state
@@ -833,6 +833,31 @@ function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJS
                                         return '#3b82f6';
                                     return '#4a4a6a';
                                 }, nodeStrokeWidth: 2, pannable: true, zoomable: true }))),
+                    react_1.default.createElement(reactflow_1.Panel, { position: "top-left", className: "!bg-transparent !border-0 !p-0 !m-2" },
+                        react_1.default.createElement("div", { className: "flex flex-col gap-1.5 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg p-1.5 shadow-lg" },
+                            react_1.default.createElement("div", { className: "relative group" },
+                                react_1.default.createElement("button", { className: "p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors", title: `Layout: ${(0, layout_1.listLayouts)().find(l => l.id === layoutStrategy)?.name || layoutStrategy}` },
+                                    react_1.default.createElement(lucide_react_1.Grid3x3, { size: 14 })),
+                                react_1.default.createElement("div", { className: "absolute left-full ml-2 top-0 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg shadow-xl p-1 min-w-[200px]" },
+                                    react_1.default.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-wider px-2 py-1 border-b border-[#2a2a3e]" }, "Layout Algorithm"),
+                                    (0, layout_1.listLayouts)().map(layout => (react_1.default.createElement("button", { key: layout.id, onClick: () => {
+                                            if (onLayoutStrategyChange) {
+                                                onLayoutStrategyChange(layout.id);
+                                                // Trigger layout update with new strategy
+                                                setTimeout(() => handleAutoLayout(), 0);
+                                            }
+                                        }, className: `w-full text-left px-3 py-2 text-sm rounded transition-colors ${layoutStrategy === layout.id
+                                            ? 'bg-[#e94560]/20 text-[#e94560]'
+                                            : 'text-gray-300 hover:bg-[#1a1a2e]'}` },
+                                        react_1.default.createElement("div", { className: "font-medium" },
+                                            layout.name,
+                                            " ",
+                                            layout.isDefault && '(default)'),
+                                        react_1.default.createElement("div", { className: "text-[10px] text-gray-500 mt-0.5" }, layout.description)))))),
+                            onOpenFlagManager && (react_1.default.createElement("button", { onClick: onOpenFlagManager, className: "p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors", title: "Manage Flags" },
+                                react_1.default.createElement(lucide_react_1.Settings, { size: 14 }))),
+                            onOpenGuide && (react_1.default.createElement("button", { onClick: onOpenGuide, className: "p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors", title: "Guide & Documentation" },
+                                react_1.default.createElement(lucide_react_1.BookOpen, { size: 14 }))))),
                     react_1.default.createElement(reactflow_1.Panel, { position: "top-right", className: "!bg-transparent !border-0 !p-0 !m-2" },
                         react_1.default.createElement("div", { className: "flex items-center gap-1.5 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg p-1.5 shadow-lg" },
                             react_1.default.createElement("button", { onClick: () => {

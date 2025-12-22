@@ -13,5 +13,8 @@ export declare function DialogueEditorV2(props: DialogueEditorProps & {
     flagSchema?: FlagSchema;
     initialViewMode?: ViewMode;
     layoutStrategy?: string;
+    onLayoutStrategyChange?: (strategy: string) => void;
+    onOpenFlagManager?: () => void;
+    onOpenGuide?: () => void;
 }): React.JSX.Element;
 export {};

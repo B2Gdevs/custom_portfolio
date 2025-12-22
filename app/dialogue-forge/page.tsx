@@ -989,67 +989,11 @@ export default function DialogueForgePage() {
               </svg>
             </button>
             
-            <div className="h-6 w-px bg-[#2a2a3e] mx-1" />
-            
-            {/* Guide & Save */}
-            <button onClick={() => setShowGuide(true)} className="p-2 text-gray-400 hover:text-white" title="Guide & Documentation">
-              <BookOpen size={16} />
-            </button>
-            <button onClick={handleSave} className={`p-2 rounded ${saved ? 'text-green-400' : hasChanges ? 'text-yellow-400' : 'text-gray-400 hover:text-white'}`} title="Save">
-              {saved ? <Check size={16} /> : <Save size={16} />}
-            </button>
           </div>
         </div>
       </header>
 
       <div className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 60px)' }}>
-        {/* Left Sidebar - Only in graph view */}
-        {viewMode === 'graph' && (
-          <div className="w-64 bg-[#0d0d14] border-r border-[#1a1a2e] flex flex-col overflow-hidden">
-            <div className="p-4 space-y-4 border-b border-[#1a1a2e]">
-              {/* Layout Strategy Selector */}
-              <div>
-                <label className="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Layout Algorithm</label>
-                <select
-                  value={layoutStrategy}
-                  onChange={(e) => setLayoutStrategy(e.target.value)}
-                  className="w-full px-3 py-2 text-sm bg-[#12121a] border border-[#2a2a3e] rounded text-gray-300 hover:border-[#3a3a4e] transition-colors cursor-pointer focus:outline-none focus:border-[#e94560]"
-                >
-                  {availableLayouts.map(layout => (
-                    <option key={layout.id} value={layout.id} className="bg-[#1a1a2e]">
-                      {layout.name} {layout.isDefault ? '(default)' : ''}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-[10px] text-gray-600 mt-1">{availableLayouts.find(l => l.id === layoutStrategy)?.description}</p>
-              </div>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {/* Flag Manager Toggle */}
-              <button
-                onClick={() => setShowFlagManager(true)}
-                className="w-full px-3 py-2 text-sm bg-[#12121a] border border-[#2a2a3e] rounded text-gray-300 hover:border-[#3a3a4e] hover:text-white transition-colors flex items-center gap-2"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <path d="M9 9h6M9 15h6M9 12h6" />
-                </svg>
-                Manage Flags
-              </button>
-              
-              {/* Guide Toggle */}
-              <button
-                onClick={() => setShowGuide(true)}
-                className="w-full px-3 py-2 text-sm bg-[#12121a] border border-[#2a2a3e] rounded text-gray-300 hover:border-[#3a3a4e] hover:text-white transition-colors flex items-center gap-2"
-              >
-                <BookOpen size={14} />
-                Guide & Docs
-              </button>
-            </div>
-          </div>
-        )}
-        
         {/* React Flow V2 Editor - Graph View */}
         {viewMode === 'graph' && (
           <DialogueEditorV2
@@ -1061,6 +1005,9 @@ export default function DialogueForgePage() {
             flagSchema={flagSchema}
             initialViewMode="graph"
             layoutStrategy={layoutStrategy}
+            onLayoutStrategyChange={setLayoutStrategy}
+            onOpenFlagManager={() => setShowFlagManager(true)}
+            onOpenGuide={() => setShowGuide(true)}
             className="w-full h-full"
           />
         )}

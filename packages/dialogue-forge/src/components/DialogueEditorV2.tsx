@@ -24,7 +24,7 @@ import ReactFlow, {
   ConnectionLineType,
   BackgroundVariant,
 } from 'reactflow';
-import { Edit3, Plus, Trash2, Play, Layout, ArrowDown, ArrowRight, Magnet, Sparkles, Undo2, Flag, Home, Target } from 'lucide-react';
+import { Edit3, Plus, Trash2, Play, Layout, ArrowDown, ArrowRight, Magnet, Sparkles, Undo2, Flag, Home, Target, BookOpen, Settings, Grid3x3 } from 'lucide-react';
 import 'reactflow/dist/style.css';
 
 import { DialogueEditorProps, DialogueTree, DialogueNode, Choice } from '../types';
@@ -61,6 +61,9 @@ interface DialogueEditorV2InternalProps extends DialogueEditorProps {
   flagSchema?: FlagSchema;
   initialViewMode?: ViewMode;
   layoutStrategy?: string; // Layout strategy ID from parent
+  onLayoutStrategyChange?: (strategy: string) => void;
+  onOpenFlagManager?: () => void;
+  onOpenGuide?: () => void;
 }
 
 function DialogueEditorV2Internal({
@@ -73,6 +76,9 @@ function DialogueEditorV2Internal({
   flagSchema,
   initialViewMode = 'graph',
   layoutStrategy: propLayoutStrategy = 'dagre', // Accept from parent
+  onLayoutStrategyChange,
+  onOpenFlagManager,
+  onOpenGuide,
 }: DialogueEditorV2InternalProps) {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>('TB');
@@ -80,6 +86,7 @@ function DialogueEditorV2Internal({
   const [autoOrganize, setAutoOrganize] = useState<boolean>(false); // Auto-layout on changes
   const [showPathHighlight, setShowPathHighlight] = useState<boolean>(true); // Toggle path highlighting
   const [showBackEdges, setShowBackEdges] = useState<boolean>(true); // Toggle back-edge styling
+  const [showLayoutMenu, setShowLayoutMenu] = useState<boolean>(false);
   
   
   // Memoize nodeTypes and edgeTypes to prevent React Flow warnings
@@ -967,6 +974,74 @@ function DialogueEditorV2Internal({
                 </div>
               </Panel>
               
+              {/* Left Toolbar - Layout, Flags, Guide */}
+              <Panel position="top-left" className="!bg-transparent !border-0 !p-0 !m-2">
+                <div className="flex flex-col gap-1.5 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg p-1.5 shadow-lg">
+                  {/* Layout Strategy Dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowLayoutMenu(!showLayoutMenu)}
+                      className={`p-1.5 rounded transition-colors ${
+                        showLayoutMenu
+                          ? 'bg-[#e94560]/20 text-[#e94560] border border-[#e94560]/50'
+                          : 'bg-[#12121a] border border-[#2a2a3e] text-gray-400 hover:text-white hover:border-[#3a3a4e]'
+                      }`}
+                      title={`Layout: ${listLayouts().find(l => l.id === layoutStrategy)?.name || layoutStrategy}`}
+                    >
+                      <Grid3x3 size={14} />
+                    </button>
+                    {showLayoutMenu && (
+                      <div className="absolute left-full ml-2 top-0 z-50 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg shadow-xl p-1 min-w-[200px]">
+                        <div className="text-[10px] text-gray-500 uppercase tracking-wider px-2 py-1 border-b border-[#2a2a3e]">Layout Algorithm</div>
+                        {listLayouts().map(layout => (
+                          <button
+                            key={layout.id}
+                            onClick={() => {
+                              if (onLayoutStrategyChange) {
+                                onLayoutStrategyChange(layout.id);
+                                setShowLayoutMenu(false);
+                                // Trigger layout update with new strategy
+                                setTimeout(() => handleAutoLayout(), 0);
+                              }
+                            }}
+                            className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                              layoutStrategy === layout.id
+                                ? 'bg-[#e94560]/20 text-[#e94560]'
+                                : 'text-gray-300 hover:bg-[#1a1a2e]'
+                            }`}
+                          >
+                            <div className="font-medium">{layout.name} {layout.isDefault && '(default)'}</div>
+                            <div className="text-[10px] text-gray-500 mt-0.5">{layout.description}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Flag Manager */}
+                  {onOpenFlagManager && (
+                    <button
+                      onClick={onOpenFlagManager}
+                      className="p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors"
+                      title="Manage Flags"
+                    >
+                      <Settings size={14} />
+                    </button>
+                  )}
+                  
+                  {/* Guide */}
+                  {onOpenGuide && (
+                    <button
+                      onClick={onOpenGuide}
+                      className="p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors"
+                      title="Guide & Documentation"
+                    >
+                      <BookOpen size={14} />
+                    </button>
+                  )}
+                </div>
+              </Panel>
+              
               {/* Layout Controls */}
               <Panel position="top-right" className="!bg-transparent !border-0 !p-0 !m-2">
                 <div className="flex items-center gap-1.5 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg p-1.5 shadow-lg">
@@ -1422,7 +1497,14 @@ function DialogueEditorV2Internal({
   );
 }
 
-export function DialogueEditorV2(props: DialogueEditorProps & { flagSchema?: FlagSchema; initialViewMode?: ViewMode; layoutStrategy?: string }) {
+export function DialogueEditorV2(props: DialogueEditorProps & { 
+  flagSchema?: FlagSchema; 
+  initialViewMode?: ViewMode; 
+  layoutStrategy?: string;
+  onLayoutStrategyChange?: (strategy: string) => void;
+  onOpenFlagManager?: () => void;
+  onOpenGuide?: () => void;
+}) {
   return (
     <ReactFlowProvider>
       <DialogueEditorV2Internal {...props} />
