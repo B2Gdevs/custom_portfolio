@@ -6,7 +6,6 @@ import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, M
 import { DialogueEditorV2 } from '../../packages/dialogue-forge/src/components/DialogueEditorV2';
 import { GuidePanel } from '../../packages/dialogue-forge/src/components/GuidePanel';
 import { FlagManager } from '../../packages/dialogue-forge/src/components/FlagManager';
-import { ExampleLoader } from '../../packages/dialogue-forge/src/components/ExampleLoader';
 import { exportToYarn, importFromYarn } from '../../packages/dialogue-forge/src/lib/yarn-converter';
 import { listLayouts } from '../../packages/dialogue-forge/src/utils/layout';
 import { FlagSchema, exampleFlagSchema } from '../../packages/dialogue-forge/src/types/flags';
@@ -971,17 +970,6 @@ export default function DialogueForgePage() {
 
           <div className="flex items-center gap-1">
             {/* Examples & Flags */}
-            <ExampleLoader
-              onLoadDialogue={(dialogue) => {
-                resetHistory(dialogue);
-                setDialogueTree(dialogue);
-                setHasChanges(true);
-              }}
-              onLoadFlags={(flags) => {
-                setFlagSchema(flags);
-                setHasChanges(true);
-              }}
-            />
           </div>
         </div>
       </header>
@@ -1001,6 +989,15 @@ export default function DialogueForgePage() {
             onLayoutStrategyChange={setLayoutStrategy}
             onOpenFlagManager={() => setShowFlagManager(true)}
             onOpenGuide={() => setShowGuide(true)}
+            onLoadExampleDialogue={(dialogue) => {
+              resetHistory(dialogue);
+              setDialogueTree(dialogue);
+              setHasChanges(true);
+            }}
+            onLoadExampleFlags={(flags) => {
+              setFlagSchema(flags);
+              setHasChanges(true);
+            }}
             className="w-full h-full"
           />
         )}

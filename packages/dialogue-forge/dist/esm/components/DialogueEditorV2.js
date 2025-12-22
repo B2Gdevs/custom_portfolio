@@ -7,6 +7,8 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import ReactFlow, { ReactFlowProvider, Background, MiniMap, addEdge, applyNodeChanges, applyEdgeChanges, useReactFlow, Panel, ConnectionLineType, BackgroundVariant, } from 'reactflow';
 import { Edit3, Plus, Trash2, Layout, ArrowDown, ArrowRight, Magnet, Sparkles, Undo2, Flag, Home, BookOpen, Settings, Grid3x3 } from 'lucide-react';
+import { ExampleLoaderButton } from './ExampleLoaderButton';
+import { ENABLE_DEBUG_TOOLS } from '../utils/feature-flags';
 import 'reactflow/dist/style.css';
 import { exportToYarn, importFromYarn } from '../lib/yarn-converter';
 import { convertDialogueTreeToReactFlow } from '../utils/reactflow-converter';
@@ -31,7 +33,7 @@ const edgeTypes = {
     default: NPCEdgeV2, // Use custom component for NPC edges instead of React Flow default
 };
 function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJSON, className = '', showTitleEditor = true, flagSchema, initialViewMode = 'graph', layoutStrategy: propLayoutStrategy = 'dagre', // Accept from parent
-onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, }) {
+onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, onLoadExampleDialogue, onLoadExampleFlags, }) {
     const [viewMode, setViewMode] = useState(initialViewMode);
     const [layoutDirection, setLayoutDirection] = useState('TB');
     const layoutStrategy = propLayoutStrategy; // Use prop instead of state
@@ -878,7 +880,8 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, }) {
                             onOpenFlagManager && (React.createElement("button", { onClick: onOpenFlagManager, className: "p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors", title: "Manage Flags" },
                                 React.createElement(Settings, { size: 14 }))),
                             onOpenGuide && (React.createElement("button", { onClick: onOpenGuide, className: "p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors", title: "Guide & Documentation" },
-                                React.createElement(BookOpen, { size: 14 }))))),
+                                React.createElement(BookOpen, { size: 14 }))),
+                            ENABLE_DEBUG_TOOLS && onLoadExampleDialogue && onLoadExampleFlags && (React.createElement(ExampleLoaderButton, { onLoadDialogue: onLoadExampleDialogue, onLoadFlags: onLoadExampleFlags })))),
                     React.createElement(Panel, { position: "top-right", className: "!bg-transparent !border-0 !p-0 !m-2" },
                         React.createElement("div", { className: "flex items-center gap-1.5 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg p-1.5 shadow-lg" },
                             React.createElement("button", { onClick: () => {

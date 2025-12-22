@@ -43,6 +43,8 @@ exports.DialogueEditorV2 = DialogueEditorV2;
 const react_1 = __importStar(require("react"));
 const reactflow_1 = __importStar(require("reactflow"));
 const lucide_react_1 = require("lucide-react");
+const ExampleLoaderButton_1 = require("./ExampleLoaderButton");
+const feature_flags_1 = require("../utils/feature-flags");
 require("reactflow/dist/style.css");
 const yarn_converter_1 = require("../lib/yarn-converter");
 const reactflow_converter_1 = require("../utils/reactflow-converter");
@@ -67,7 +69,7 @@ const edgeTypes = {
     default: NPCEdgeV2_1.NPCEdgeV2, // Use custom component for NPC edges instead of React Flow default
 };
 function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJSON, className = '', showTitleEditor = true, flagSchema, initialViewMode = 'graph', layoutStrategy: propLayoutStrategy = 'dagre', // Accept from parent
-onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, }) {
+onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, onLoadExampleDialogue, onLoadExampleFlags, }) {
     const [viewMode, setViewMode] = (0, react_1.useState)(initialViewMode);
     const [layoutDirection, setLayoutDirection] = (0, react_1.useState)('TB');
     const layoutStrategy = propLayoutStrategy; // Use prop instead of state
@@ -914,7 +916,8 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, }) {
                             onOpenFlagManager && (react_1.default.createElement("button", { onClick: onOpenFlagManager, className: "p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors", title: "Manage Flags" },
                                 react_1.default.createElement(lucide_react_1.Settings, { size: 14 }))),
                             onOpenGuide && (react_1.default.createElement("button", { onClick: onOpenGuide, className: "p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors", title: "Guide & Documentation" },
-                                react_1.default.createElement(lucide_react_1.BookOpen, { size: 14 }))))),
+                                react_1.default.createElement(lucide_react_1.BookOpen, { size: 14 }))),
+                            feature_flags_1.ENABLE_DEBUG_TOOLS && onLoadExampleDialogue && onLoadExampleFlags && (react_1.default.createElement(ExampleLoaderButton_1.ExampleLoaderButton, { onLoadDialogue: onLoadExampleDialogue, onLoadFlags: onLoadExampleFlags })))),
                     react_1.default.createElement(reactflow_1.Panel, { position: "top-right", className: "!bg-transparent !border-0 !p-0 !m-2" },
                         react_1.default.createElement("div", { className: "flex items-center gap-1.5 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg p-1.5 shadow-lg" },
                             react_1.default.createElement("button", { onClick: () => {

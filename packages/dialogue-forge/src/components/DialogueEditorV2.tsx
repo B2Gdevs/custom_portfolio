@@ -25,6 +25,8 @@ import ReactFlow, {
   BackgroundVariant,
 } from 'reactflow';
 import { Edit3, Plus, Trash2, Play, Layout, ArrowDown, ArrowRight, Magnet, Sparkles, Undo2, Flag, Home, Target, BookOpen, Settings, Grid3x3 } from 'lucide-react';
+import { ExampleLoaderButton } from './ExampleLoaderButton';
+import { ENABLE_DEBUG_TOOLS } from '../utils/feature-flags';
 import 'reactflow/dist/style.css';
 
 import { DialogueEditorProps, DialogueTree, DialogueNode, Choice } from '../types';
@@ -64,6 +66,8 @@ interface DialogueEditorV2InternalProps extends DialogueEditorProps {
   onLayoutStrategyChange?: (strategy: string) => void;
   onOpenFlagManager?: () => void;
   onOpenGuide?: () => void;
+  onLoadExampleDialogue?: (dialogue: DialogueTree) => void;
+  onLoadExampleFlags?: (flags: FlagSchema) => void;
 }
 
 function DialogueEditorV2Internal({
@@ -79,6 +83,8 @@ function DialogueEditorV2Internal({
   onLayoutStrategyChange,
   onOpenFlagManager,
   onOpenGuide,
+  onLoadExampleDialogue,
+  onLoadExampleFlags,
 }: DialogueEditorV2InternalProps) {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>('TB');
@@ -1094,6 +1100,14 @@ function DialogueEditorV2Internal({
                     >
                       <BookOpen size={14} />
                     </button>
+                  )}
+
+                  {/* Example Loader (Debug Tool) */}
+                  {ENABLE_DEBUG_TOOLS && onLoadExampleDialogue && onLoadExampleFlags && (
+                    <ExampleLoaderButton
+                      onLoadDialogue={onLoadExampleDialogue}
+                      onLoadFlags={onLoadExampleFlags}
+                    />
                   )}
                 </div>
               </Panel>
