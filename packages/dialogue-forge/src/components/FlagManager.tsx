@@ -20,7 +20,7 @@ const flagTypeColors: Record<FlagType, string> = {
 };
 
 const flagTypeLabels: Record<FlagType, string> = {
-  dialogue: 'Dialogue (Temporary)',
+  dialogue: 'Dialogue',
   quest: 'Quest',
   achievement: 'Achievement',
   item: 'Item',
@@ -29,9 +29,20 @@ const flagTypeLabels: Record<FlagType, string> = {
   global: 'Global',
 };
 
+const flagTypeIcons: Record<FlagType, string> = {
+  dialogue: '💬',
+  quest: '📜',
+  achievement: '🏆',
+  item: '🎒',
+  stat: '📊',
+  title: '👑',
+  global: '🌐',
+};
+
 export function FlagManager({ flagSchema, dialogue, onUpdate, onClose }: FlagManagerProps) {
   const [editingFlag, setEditingFlag] = useState<FlagDefinition | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [selectedSection, setSelectedSection] = useState<string>('all');
 
   // Find all flags used in the dialogue tree
   const usedFlags = useMemo(() => {
@@ -39,11 +50,9 @@ export function FlagManager({ flagSchema, dialogue, onUpdate, onClose }: FlagMan
     const used = new Set<string>();
     
     Object.values(dialogue.nodes).forEach(node => {
-      // Check node setFlags
       if (node.setFlags) {
         node.setFlags.forEach(flagId => used.add(flagId));
       }
-      // Check choice setFlags and conditions
       if (node.choices) {
         node.choices.forEach(choice => {
           if (choice.setFlags) {
@@ -59,12 +68,26 @@ export function FlagManager({ flagSchema, dialogue, onUpdate, onClose }: FlagMan
     return used;
   }, [dialogue]);
 
-  const handleCreateFlag = (type?: FlagType, category?: string) => {
+  // Group flags by type
+  const flagsByType = useMemo(() => {
+    const grouped: Record<string, FlagDefinition[]> = {
+      all: flagSchema.flags,
+    };
+    
+    Object.keys(flagTypeLabels).forEach(type => {
+      grouped[type] = flagSchema.flags.filter(f => f.type === type);
+    });
+    
+    return grouped;
+  }, [flagSchema.flags]);
+
+  const currentFlags = flagsByType[selectedSection] || [];
+
+  const handleCreateFlag = (type?: FlagType) => {
     const newFlag: FlagDefinition = {
       id: 'new_flag',
       name: 'New Flag',
       type: type || 'dialogue',
-      category: category || (type === 'dialogue' ? 'dialogue' : undefined)
     };
     setEditingFlag(newFlag);
     setIsCreating(true);
@@ -72,14 +95,12 @@ export function FlagManager({ flagSchema, dialogue, onUpdate, onClose }: FlagMan
 
   const handleSaveFlag = (flag: FlagDefinition) => {
     if (isCreating) {
-      // Add new flag
       onUpdate({
         ...flagSchema,
         flags: [...flagSchema.flags, flag]
       });
       setIsCreating(false);
     } else {
-      // Update existing flag
       onUpdate({
         ...flagSchema,
         flags: flagSchema.flags.map(f => f.id === flag.id ? flag : f)
@@ -97,34 +118,46 @@ export function FlagManager({ flagSchema, dialogue, onUpdate, onClose }: FlagMan
     }
   };
 
-  // Group flags by category
-  const flagsByCategory = flagSchema.flags.reduce((acc, flag) => {
-    const cat = flag.category || flag.type || 'other';
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(flag);
-    return acc;
-  }, {} as Record<string, FlagDefinition[]>);
+  // Get counts for each section
+  const sectionCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: flagSchema.flags.length };
+    Object.keys(flagTypeLabels).forEach(type => {
+      counts[type] = flagsByType[type].length;
+    });
+    return counts;
+  }, [flagSchema.flags, flagsByType]);
 
   return (
     <div 
       className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" 
       onClick={(e) => {
-        // Only close if clicking the backdrop, not the modal content
         if (e.target === e.currentTarget) {
           onClose();
         }
       }}
     >
       <div 
-        className="bg-[#0d0d14] border border-[#1a1a2e] rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-[#0d0d14] border border-[#1a1a2e] rounded-xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 border-b border-[#1a1a2e] flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Flag Manager</h2>
+        <div className="p-4 border-b border-[#1a1a2e] flex items-center justify-between flex-shrink-0">
+          <div>
+            <h2 className="text-lg font-semibold text-white">Flag Manager</h2>
+            <p className="text-xs text-gray-500 mt-1">
+              {dialogue && (
+                <span>
+                  <span className="text-[#e94560] font-semibold">{usedFlags.size}</span>
+                  <span className="text-gray-500"> / </span>
+                  <span className="text-gray-400">{flagSchema.flags.length}</span>
+                  <span className="text-gray-500"> flags used in dialogue</span>
+                </span>
+              )}
+            </p>
+          </div>
           <div className="flex gap-2">
             <button
-              onClick={() => handleCreateFlag()}
+              onClick={() => handleCreateFlag(selectedSection !== 'all' ? selectedSection as FlagType : undefined)}
               className="px-3 py-1.5 bg-[#e94560] hover:bg-[#d63850] text-white text-sm rounded flex items-center gap-2"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -149,153 +182,154 @@ export function FlagManager({ flagSchema, dialogue, onUpdate, onClose }: FlagMan
           </div>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4">
-          {editingFlag ? (
-            <FlagEditor
-              flag={editingFlag}
-              categories={flagSchema.categories || []}
-              onSave={handleSaveFlag}
-              onCancel={() => { setEditingFlag(null); setIsCreating(false); }}
-            />
-          ) : (
-            <div className="space-y-4">
-              {/* Info */}
-              <div className="bg-[#12121a] border border-[#2a2a3e] rounded-lg p-4 text-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p className="text-gray-300 mb-2">
-                      <strong className="text-white">Dialogue flags</strong> (gray) are temporary and reset after dialogue ends.
-                    </p>
-                    <p className="text-gray-300">
-                      <strong className="text-white">Game flags</strong> (colored) persist and affect the entire game.
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-white">{flagSchema.flags.length}</div>
-                    <div className="text-xs text-gray-500">Total Flags</div>
-                    {dialogue && (
-                      <div className="mt-2 pt-2 border-t border-[#2a2a3e]">
-                        <div className="text-sm">
-                          <span className="text-[#e94560] font-semibold">{usedFlags.size}</span>
-                          <span className="text-gray-500"> / </span>
-                          <span className="text-gray-400">{flagSchema.flags.length}</span>
-                          <span className="text-xs text-gray-500 block mt-0.5">Used in dialogue</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="grid grid-cols-7 gap-2 pt-3 border-t border-[#2a2a3e]">
-                  {Object.entries(flagTypeLabels).map(([type, label]) => {
-                    const count = flagSchema.flags.filter(f => f.type === type).length;
-                    return (
-                      <div key={type} className="text-center">
-                        <div className={`text-lg font-bold ${flagTypeColors[type as FlagType].split(' ')[1]}`}>
-                          {count}
-                        </div>
-                        <div className="text-[10px] text-gray-500 mt-0.5">{label.split(' ')[0]}</div>
-                      </div>
-                    );
-                  })}
-                </div>
+        {/* 2-Column Layout */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Left Navigation */}
+          <div className="w-64 border-r border-[#1a1a2e] bg-[#12121a] flex flex-col flex-shrink-0">
+            <div className="p-4 border-b border-[#1a1a2e]">
+              <div className="text-xs text-gray-500 uppercase tracking-wider mb-3">Sections</div>
+              <nav className="space-y-1">
+                <button
+                  onClick={() => setSelectedSection('all')}
+                  className={`w-full text-left px-3 py-2 rounded text-sm transition-colors flex items-center justify-between ${
+                    selectedSection === 'all'
+                      ? 'bg-[#e94560]/20 text-[#e94560] border border-[#e94560]/30'
+                      : 'text-gray-400 hover:bg-[#1a1a2e] hover:text-white'
+                  }`}
+                >
+                  <span>All Flags</span>
+                  <span className="text-xs text-gray-500">{sectionCounts.all}</span>
+                </button>
+                {Object.entries(flagTypeLabels).map(([type, label]) => (
+                  <button
+                    key={type}
+                    onClick={() => setSelectedSection(type)}
+                    className={`w-full text-left px-3 py-2 rounded text-sm transition-colors flex items-center justify-between ${
+                      selectedSection === type
+                        ? `${flagTypeColors[type as FlagType]} border`
+                        : 'text-gray-400 hover:bg-[#1a1a2e] hover:text-white'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>{flagTypeIcons[type as FlagType]}</span>
+                      <span>{label}</span>
+                    </span>
+                    <span className="text-xs text-gray-500">{sectionCounts[type] || 0}</span>
+                  </button>
+                ))}
+              </nav>
+            </div>
+            
+            {/* Info Section */}
+            <div className="p-4 border-t border-[#1a1a2e] mt-auto">
+              <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">Info</div>
+              <div className="text-xs text-gray-400 space-y-1">
+                <p>
+                  <span className="text-gray-500">Dialogue flags</span> (gray) are temporary and reset after dialogue ends.
+                </p>
+                <p>
+                  <span className="text-white">Game flags</span> (colored) persist and affect the entire game.
+                </p>
               </div>
+            </div>
+          </div>
 
-              {/* Flags by Category */}
-              {Object.entries(flagsByCategory).map(([category, flags]) => {
-                // Determine the flag type for this category (use first flag's type)
-                const categoryType = flags[0]?.type || 'dialogue';
-                return (
-                <div key={category} className="border border-[#1a1a2e] rounded-lg overflow-hidden">
-                  <div className="bg-[#12121a] px-4 py-2 border-b border-[#1a1a2e] flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-white uppercase">{category}</h3>
+          {/* Right Content */}
+          <div className="flex-1 overflow-y-auto">
+            {editingFlag ? (
+              <div className="p-6">
+                <FlagEditor
+                  flag={editingFlag}
+                  categories={flagSchema.categories || []}
+                  onSave={handleSaveFlag}
+                  onCancel={() => { setEditingFlag(null); setIsCreating(false); }}
+                />
+              </div>
+            ) : (
+              <div className="p-6">
+                {currentFlags.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <p className="mb-4">No {selectedSection === 'all' ? '' : flagTypeLabels[selectedSection as FlagType]} flags defined yet.</p>
                     <button
-                      onClick={() => handleCreateFlag(categoryType, category)}
-                      className="p-1 text-gray-400 hover:text-white hover:bg-[#2a2a3e] rounded transition-colors"
-                      title={`Create new ${categoryType} flag`}
+                      onClick={() => handleCreateFlag(selectedSection !== 'all' ? selectedSection as FlagType : undefined)}
+                      className="px-4 py-2 bg-[#e94560] hover:bg-[#d63850] text-white rounded"
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                      </svg>
+                      Create {selectedSection === 'all' ? 'a' : flagTypeLabels[selectedSection as FlagType]} Flag
                     </button>
                   </div>
-                  <div className="divide-y divide-[#1a1a2e]">
-                    {flags.map(flag => {
+                ) : (
+                  <div className="space-y-2">
+                    {currentFlags.map(flag => {
                       const isUsed = usedFlags.has(flag.id);
                       return (
-                      <div key={flag.id} className={`bg-[#0d0d14] hover:bg-[#12121a] transition-colors ${isUsed ? 'border-l-2 border-[#e94560]' : ''}`}>
-                        <div className="px-4 py-3 flex items-center justify-between">
-                          <div className="flex items-center gap-3 flex-1">
-                            <span className={`px-2 py-1 rounded text-xs font-medium border ${flagTypeColors[flag.type]}`}>
-                              {flagTypeLabels[flag.type]}
-                            </span>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
+                        <div 
+                          key={flag.id} 
+                          className={`bg-[#12121a] border rounded-lg p-4 hover:bg-[#1a1a2e] transition-colors ${
+                            isUsed ? 'border-l-4 border-l-[#e94560]' : 'border-[#1a1a2e]'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className={`px-2 py-1 rounded text-xs font-medium border ${flagTypeColors[flag.type]}`}>
+                                  {flagTypeLabels[flag.type]}
+                                </span>
                                 <span className="font-mono text-sm text-white">{flag.id}</span>
                                 {isUsed && (
-                                  <span className="text-[10px] px-1.5 py-0.5 bg-[#e94560]/20 text-[#e94560] rounded border border-[#e94560]/30" title="Used in dialogue">
+                                  <span className="text-[10px] px-1.5 py-0.5 bg-[#e94560]/20 text-[#e94560] rounded border border-[#e94560]/30">
                                     Used
                                   </span>
                                 )}
                               </div>
                               {flag.name !== flag.id && (
-                                <div className="text-xs text-gray-400">{flag.name}</div>
+                                <div className="text-sm text-gray-300 mb-1">{flag.name}</div>
                               )}
                               {flag.description && (
                                 <div className="text-xs text-gray-500 mt-1">{flag.description}</div>
                               )}
+                              <div className="flex items-center gap-3 mt-2">
+                                {flag.category && (
+                                  <span className="text-xs text-gray-500">Category: {flag.category}</span>
+                                )}
+                                {flag.valueType && (
+                                  <span className="text-xs text-gray-500">Type: {flag.valueType}</span>
+                                )}
+                                {flag.defaultValue !== undefined && (
+                                  <span className="text-xs text-gray-500">Default: {String(flag.defaultValue)}</span>
+                                )}
+                              </div>
                             </div>
-                            {flag.valueType && (
-                              <span className="text-xs text-gray-500 px-2 py-1 bg-[#12121a] rounded">
-                {flag.valueType}
-              </span>
-                            )}
-                          </div>
-                          <div className="flex gap-1">
-                            <button
-                              onClick={() => setEditingFlag(flag)}
-                              className="p-1.5 text-gray-400 hover:text-white"
-                              title="Edit"
-                            >
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => handleDeleteFlag(flag.id)}
-                              className="p-1.5 text-gray-400 hover:text-red-400"
-                              title="Delete"
-                            >
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <polyline points="3 6 5 6 21 6" />
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                              </svg>
-                            </button>
+                            <div className="flex gap-1 flex-shrink-0">
+                              <button
+                                onClick={() => setEditingFlag(flag)}
+                                className="p-2 text-gray-400 hover:text-white hover:bg-[#2a2a3e] rounded transition-colors"
+                                title="Edit"
+                              >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => handleDeleteFlag(flag.id)}
+                                className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                                title="Delete"
+                              >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <polyline points="3 6 5 6 21 6" />
+                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                </svg>
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
+                      );
                     })}
                   </div>
-                </div>
-              );
-              })}
-
-              {flagSchema.flags.length === 0 && (
-                <div className="text-center py-12 text-gray-500">
-                  <p>No flags defined yet.</p>
-                  <button
-                    onClick={() => handleCreateFlag()}
-                    className="mt-4 px-4 py-2 bg-[#e94560] hover:bg-[#d63850] text-white rounded"
-                  >
-                    Create Your First Flag
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -315,7 +349,7 @@ function FlagEditor({ flag, categories, onSave, onCancel }: FlagEditorProps) {
   const flagTypes: FlagType[] = ['dialogue', 'quest', 'achievement', 'item', 'stat', 'title', 'global'];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-2xl">
       <div>
         <label className="text-xs text-gray-500 uppercase block mb-1">Flag ID</label>
         <input
@@ -441,4 +475,3 @@ function FlagEditor({ flag, categories, onSave, onCancel }: FlagEditorProps) {
     </div>
   );
 }
-

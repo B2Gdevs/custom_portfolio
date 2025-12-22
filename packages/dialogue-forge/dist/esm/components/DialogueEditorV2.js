@@ -38,6 +38,7 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, }) {
     const [autoOrganize, setAutoOrganize] = useState(false); // Auto-layout on changes
     const [showPathHighlight, setShowPathHighlight] = useState(true); // Toggle path highlighting
     const [showBackEdges, setShowBackEdges] = useState(true); // Toggle back-edge styling
+    const [showLayoutMenu, setShowLayoutMenu] = useState(false);
     // Memoize nodeTypes and edgeTypes to prevent React Flow warnings
     const memoizedNodeTypes = useMemo(() => nodeTypes, []);
     const memoizedEdgeTypes = useMemo(() => edgeTypes, []);
@@ -768,6 +769,7 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, }) {
                         setContextMenu(null);
                         setNodeContextMenu(null);
                         setSelectedNodeId(null);
+                        setShowLayoutMenu(false);
                     }, fitView: true, className: "bg-[#0a0a0f]", style: { background: 'radial-gradient(circle, #1a1a2e 1px, #08080c 1px)', backgroundSize: '20px 20px' }, defaultEdgeOptions: { type: 'default' }, connectionLineStyle: { stroke: '#e94560', strokeWidth: 2 }, connectionLineType: ConnectionLineType.SmoothStep, snapToGrid: false, nodesConnectable: true, elementsSelectable: true, selectionOnDrag: true, panOnDrag: [1, 2], zoomOnScroll: true, zoomOnPinch: true, preventScrolling: true, zoomOnDoubleClick: false, minZoom: 0.1, maxZoom: 3, deleteKeyCode: ['Delete', 'Backspace'], tabIndex: 0 },
                     React.createElement(Background, { variant: BackgroundVariant.Dots, gap: 20, size: 1, color: "#1a1a2e" }),
                     React.createElement(Controls, { className: "!bg-[#0d0d14] !border !border-[#2a2a3e] !rounded-lg !shadow-lg", style: {
@@ -799,14 +801,17 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, }) {
                                 }, nodeStrokeWidth: 2, pannable: true, zoomable: true }))),
                     React.createElement(Panel, { position: "top-left", className: "!bg-transparent !border-0 !p-0 !m-2" },
                         React.createElement("div", { className: "flex flex-col gap-1.5 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg p-1.5 shadow-lg" },
-                            React.createElement("div", { className: "relative group" },
-                                React.createElement("button", { className: "p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors", title: `Layout: ${listLayouts().find(l => l.id === layoutStrategy)?.name || layoutStrategy}` },
+                            React.createElement("div", { className: "relative" },
+                                React.createElement("button", { onClick: () => setShowLayoutMenu(!showLayoutMenu), className: `p-1.5 rounded transition-colors ${showLayoutMenu
+                                        ? 'bg-[#e94560]/20 text-[#e94560] border border-[#e94560]/50'
+                                        : 'bg-[#12121a] border border-[#2a2a3e] text-gray-400 hover:text-white hover:border-[#3a3a4e]'}`, title: `Layout: ${listLayouts().find(l => l.id === layoutStrategy)?.name || layoutStrategy}` },
                                     React.createElement(Grid3x3, { size: 14 })),
-                                React.createElement("div", { className: "absolute left-full ml-2 top-0 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg shadow-xl p-1 min-w-[200px]" },
+                                showLayoutMenu && (React.createElement("div", { className: "absolute left-full ml-2 top-0 z-50 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg shadow-xl p-1 min-w-[200px]" },
                                     React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-wider px-2 py-1 border-b border-[#2a2a3e]" }, "Layout Algorithm"),
                                     listLayouts().map(layout => (React.createElement("button", { key: layout.id, onClick: () => {
                                             if (onLayoutStrategyChange) {
                                                 onLayoutStrategyChange(layout.id);
+                                                setShowLayoutMenu(false);
                                                 // Trigger layout update with new strategy
                                                 setTimeout(() => handleAutoLayout(), 0);
                                             }
@@ -817,7 +822,7 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, }) {
                                             layout.name,
                                             " ",
                                             layout.isDefault && '(default)'),
-                                        React.createElement("div", { className: "text-[10px] text-gray-500 mt-0.5" }, layout.description)))))),
+                                        React.createElement("div", { className: "text-[10px] text-gray-500 mt-0.5" }, layout.description))))))),
                             onOpenFlagManager && (React.createElement("button", { onClick: onOpenFlagManager, className: "p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors", title: "Manage Flags" },
                                 React.createElement(Settings, { size: 14 }))),
                             onOpenGuide && (React.createElement("button", { onClick: onOpenGuide, className: "p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors", title: "Guide & Documentation" },
