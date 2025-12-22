@@ -56,6 +56,14 @@ export interface DialogueEditorProps {
   flagSchema?: FlagSchema;
   className?: string;
   showTitleEditor?: boolean;
+  // Event hooks
+  onNodeAdd?: (node: DialogueNode) => void;
+  onNodeDelete?: (nodeId: string) => void;
+  onNodeUpdate?: (nodeId: string, updates: Partial<DialogueNode>) => void;
+  onConnect?: (sourceId: string, targetId: string, sourceHandle?: string) => void;
+  onDisconnect?: (edgeId: string, sourceId: string, targetId: string) => void;
+  onNodeSelect?: (nodeId: string | null) => void;
+  onNodeDoubleClick?: (nodeId: string) => void;
 }
 
 export interface ContextMenu {

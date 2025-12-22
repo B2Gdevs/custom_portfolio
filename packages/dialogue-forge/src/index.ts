@@ -1,5 +1,8 @@
 export { DialogueEditorV2 } from './components/DialogueEditorV2';
-export { DialogueSimulator } from './components/DialogueSimulator';
+export { ScenePlayer } from './components/ScenePlayer';
+export type { ScenePlayerProps } from './components/ScenePlayer';
+// Legacy export for backward compatibility
+export { ScenePlayer as DialogueSimulator } from './components/ScenePlayer';
 export { GuidePanel } from './components/GuidePanel';
 export { FlagSelector } from './components/FlagSelector';
 export { FlagManager } from './components/FlagManager';

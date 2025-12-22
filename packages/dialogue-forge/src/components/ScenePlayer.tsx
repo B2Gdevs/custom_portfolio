@@ -3,12 +3,19 @@ import { DialogueTree, DialogueNode, Choice } from '../types';
 import { GameFlagState, DialogueResult } from '../types/game-state';
 import { mergeFlagUpdates } from '../lib/flag-manager';
 
-interface DialogueSimulatorProps {
+export interface ScenePlayerProps {
   dialogue: DialogueTree;
-  initialFlags: GameFlagState;
+  gameState?: Record<string, any>; // Any JSON game state
+  initialFlags?: GameFlagState; // Legacy: use gameState instead
   startNodeId?: string;
   onComplete: (result: DialogueResult) => void;
   onFlagUpdate?: (flags: GameFlagState) => void;
+  // Event hooks
+  onNodeEnter?: (nodeId: string, node: DialogueNode) => void;
+  onNodeExit?: (nodeId: string, node: DialogueNode) => void;
+  onChoiceSelect?: (nodeId: string, choice: Choice) => void;
+  onDialogueStart?: () => void;
+  onDialogueEnd?: () => void;
 }
 
 interface HistoryEntry {
@@ -18,62 +25,89 @@ interface HistoryEntry {
   content: string;
 }
 
-export function DialogueSimulator({
+export function ScenePlayer({
   dialogue,
+  gameState,
   initialFlags,
   startNodeId,
   onComplete,
-  onFlagUpdate
-}: DialogueSimulatorProps) {
+  onFlagUpdate,
+  onNodeEnter,
+  onNodeExit,
+  onChoiceSelect,
+  onDialogueStart,
+  onDialogueEnd,
+}: ScenePlayerProps) {
+  // Extract flags from gameState or use initialFlags (legacy)
+  const flagsFromState = gameState && typeof gameState === 'object' && 'flags' in gameState 
+    ? (gameState.flags as GameFlagState)
+    : initialFlags || {};
+  
   const [currentNodeId, setCurrentNodeId] = useState<string>(startNodeId || dialogue.startNodeId);
-  const [flags, setFlags] = useState<GameFlagState>(initialFlags);
+  const [flags, setFlags] = useState<GameFlagState>(flagsFromState);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [visitedNodes, setVisitedNodes] = useState<Set<string>>(new Set());
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  // Initialize dialogue
+  useEffect(() => {
+    if (currentNodeId === dialogue.startNodeId) {
+      onDialogueStart?.();
+    }
+  }, []); // Only on mount
+
   // Process current node
   useEffect(() => {
     const node = dialogue.nodes[currentNodeId];
-    if (!node || node.type !== 'npc') return;
+    if (!node) return;
 
-    setIsTyping(true);
-    const timer = setTimeout(() => {
-      // Mark as visited
-      setVisitedNodes(prev => new Set([...prev, node.id]));
+    // Call onNodeEnter hook
+    onNodeEnter?.(currentNodeId, node);
+
+    if (node.type === 'npc') {
+      setIsTyping(true);
+      const timer = setTimeout(() => {
+        // Mark as visited
+        setVisitedNodes(prev => new Set([...prev, node.id]));
+        
+        // Update flags
+        if (node.setFlags && node.setFlags.length > 0) {
+          const updated = mergeFlagUpdates(flags, node.setFlags);
+          setFlags(updated);
+          onFlagUpdate?.(updated);
+        }
+        
+        // Add to history
+        setHistory(prev => [...prev, {
+          nodeId: node.id,
+          type: 'npc',
+          speaker: node.speaker,
+          content: node.content
+        }]);
+        
+        setIsTyping(false);
+        
+        // Call onNodeExit before moving to next
+        onNodeExit?.(currentNodeId, node);
+        
+        // Auto-advance if there's a next node
+        if (node.nextNodeId) {
+          setTimeout(() => setCurrentNodeId(node.nextNodeId!), 300);
+        } else {
+          // Dialogue complete
+          onDialogueEnd?.();
+          onComplete({
+            updatedFlags: flags,
+            dialogueTree: dialogue,
+            completedNodeIds: Array.from(visitedNodes)
+          });
+        }
+      }, 500);
       
-      // Update flags
-      if (node.setFlags && node.setFlags.length > 0) {
-        const updated = mergeFlagUpdates(flags, node.setFlags);
-        setFlags(updated);
-        onFlagUpdate?.(updated);
-      }
-      
-      // Add to history
-      setHistory(prev => [...prev, {
-        nodeId: node.id,
-        type: 'npc',
-        speaker: node.speaker,
-        content: node.content
-      }]);
-      
-      setIsTyping(false);
-      
-      // Auto-advance if there's a next node
-      if (node.nextNodeId) {
-        setTimeout(() => setCurrentNodeId(node.nextNodeId!), 300);
-      } else {
-        // Dialogue complete
-        onComplete({
-          updatedFlags: flags,
-          dialogueTree: dialogue,
-          completedNodeIds: Array.from(visitedNodes)
-        });
-      }
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [currentNodeId, dialogue]);
+      return () => clearTimeout(timer);
+    }
+  }, [currentNodeId, dialogue, flags, onNodeEnter, onNodeExit, onDialogueEnd, onComplete, onFlagUpdate]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -93,6 +127,16 @@ export function DialogueSimulator({
   }) || [];
 
   const handleChoice = (choice: Choice) => {
+    const currentNode = dialogue.nodes[currentNodeId];
+    
+    // Call onChoiceSelect hook
+    onChoiceSelect?.(currentNodeId, choice);
+    
+    // Call onNodeExit for current player node
+    if (currentNode) {
+      onNodeExit?.(currentNodeId, currentNode);
+    }
+    
     // Add to history
     setHistory(prev => [...prev, {
       nodeId: choice.id,

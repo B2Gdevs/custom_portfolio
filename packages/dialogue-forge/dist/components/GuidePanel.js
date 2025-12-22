@@ -35,6 +35,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GuidePanel = GuidePanel;
 const react_1 = __importStar(require("react"));
+const CodeBlock_1 = require("./CodeBlock");
 function GuidePanel({ isOpen, onClose }) {
     const [activeSection, setActiveSection] = (0, react_1.useState)('overview');
     if (!isOpen)
@@ -133,18 +134,15 @@ function GuidePanel({ isOpen, onClose }) {
                         react_1.default.createElement("code", { className: "bg-[#12121a] px-1 rounded" }, "achievement_first_quest = true"))),
                 react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Setting Up Flags"),
                 react_1.default.createElement("p", { className: "text-gray-400 mb-3" }, "Define your flags in code and pass them to the editor:"),
-                react_1.default.createElement("div", { className: "bg-[#12121a] p-4 rounded border border-[#2a2a3e]" },
-                    react_1.default.createElement("pre", { className: "text-xs font-mono text-gray-300 whitespace-pre-wrap overflow-x-auto" }, `import { FlagSchema } from '@portfolio/dialogue-forge';
+                react_1.default.createElement(CodeBlock_1.CodeBlock, { code: `import { FlagSchema } from '@portfolio/dialogue-forge';
 
 const flagSchema: FlagSchema = {
-  categories: ['quests', 'items', 'stats', 'achievements'],
   flags: [
     // Quest flags
     {
       id: 'quest_dragon_slayer',
       name: 'Dragon Slayer Quest',
       type: 'quest',
-      category: 'quests',
       valueType: 'string',
       defaultValue: 'not_started'
     },
@@ -152,7 +150,6 @@ const flagSchema: FlagSchema = {
       id: 'quest_dragon_slayer_complete',
       name: 'Dragon Slayer Complete',
       type: 'quest',
-      category: 'quests'
     },
     
     // Item flags
@@ -160,7 +157,6 @@ const flagSchema: FlagSchema = {
       id: 'item_ancient_key',
       name: 'Ancient Key',
       type: 'item',
-      category: 'items'
     },
     
     // Stat flags
@@ -168,7 +164,6 @@ const flagSchema: FlagSchema = {
       id: 'stat_gold',
       name: 'Gold',
       type: 'stat',
-      category: 'stats',
       valueType: 'number',
       defaultValue: 0
     },
@@ -176,7 +171,6 @@ const flagSchema: FlagSchema = {
       id: 'stat_reputation',
       name: 'Reputation',
       type: 'stat',
-      category: 'stats',
       valueType: 'number',
       defaultValue: 0
     },
@@ -186,10 +180,9 @@ const flagSchema: FlagSchema = {
       id: 'achievement_first_quest',
       name: 'First Quest',
       type: 'achievement',
-      category: 'achievements'
     }
   ]
-};`)),
+};`, language: "typescript" }),
                 react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Flag Types"),
                 react_1.default.createElement("div", { className: "space-y-2 text-sm" },
                     react_1.default.createElement("div", { className: "bg-[#12121a] p-2 rounded border border-[#2a2a3e]" },
@@ -263,37 +256,57 @@ const flagSchema: FlagSchema = {
                 react_1.default.createElement("div", { className: "bg-[#12121a] p-4 rounded border border-[#2a2a3e]" },
                     react_1.default.createElement("pre", { className: "text-xs font-mono text-gray-300" }, "npm install @portfolio/dialogue-forge")),
                 react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "2. Define Flag Schema"),
-                react_1.default.createElement("div", { className: "bg-[#12121a] p-4 rounded border border-[#2a2a3e]" },
-                    react_1.default.createElement("pre", { className: "text-xs font-mono text-gray-300 whitespace-pre-wrap overflow-x-auto" }, `import { FlagSchema } from '@portfolio/dialogue-forge';
+                react_1.default.createElement(CodeBlock_1.CodeBlock, { code: `import { FlagSchema } from '@portfolio/dialogue-forge';
 
 const flagSchema: FlagSchema = {
   flags: [
-    { id: 'quest_dragon_slayer', type: 'quest', category: 'quests' },
-    { id: 'item_ancient_key', type: 'item', category: 'items' },
-    { id: 'stat_gold', type: 'stat', category: 'stats', valueType: 'number' },
+    { id: 'quest_dragon_slayer', type: 'quest', valueType: 'string' },
+    { id: 'item_ancient_key', type: 'item', valueType: 'boolean' },
+    { id: 'stat_gold', type: 'stat', valueType: 'number', defaultValue: 0 },
   ]
-};`)),
+};`, language: "typescript" }),
                 react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "3. Load Dialogue from Yarn"),
-                react_1.default.createElement("div", { className: "bg-[#12121a] p-4 rounded border border-[#2a2a3e]" },
-                    react_1.default.createElement("pre", { className: "text-xs font-mono text-gray-300 whitespace-pre-wrap overflow-x-auto" }, `import { importFromYarn } from '@portfolio/dialogue-forge';
+                react_1.default.createElement(CodeBlock_1.CodeBlock, { code: `import { importFromYarn } from '@portfolio/dialogue-forge';
 
 // Load Yarn file
 const yarnContent = await loadFile('merchant.yarn');
-const dialogue = importFromYarn(yarnContent, 'Merchant Dialogue');`)),
-                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "4. Get Current Game Flags"),
-                react_1.default.createElement("div", { className: "bg-[#12121a] p-4 rounded border border-[#2a2a3e]" },
-                    react_1.default.createElement("pre", { className: "text-xs font-mono text-gray-300 whitespace-pre-wrap overflow-x-auto" }, `// Get current player state
-const currentFlags = {
-  quest_dragon_slayer: 'complete',
-  item_ancient_key: true,
-  stat_gold: 1000,
-  stat_reputation: 50
-};`)),
-                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "5. Edit Dialogue"),
-                react_1.default.createElement("div", { className: "bg-[#12121a] p-4 rounded border border-[#2a2a3e]" },
-                    react_1.default.createElement("pre", { className: "text-xs font-mono text-gray-300 whitespace-pre-wrap overflow-x-auto" }, `import { DialogueEditor, exportToYarn } from '@portfolio/dialogue-forge';
+const dialogue = importFromYarn(yarnContent, 'Merchant Dialogue');`, language: "typescript" }),
+                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "4. Define Game State"),
+                react_1.default.createElement("p", { className: "text-gray-400 text-sm mb-2" }, "Game state can be any JSON structure. Flags represent the dialogue-relevant portion."),
+                react_1.default.createElement(CodeBlock_1.CodeBlock, { code: `// Define your game state structure
+interface GameState {
+  flags: {
+    quest_dragon_slayer: 'complete' | 'started' | 'not_started';
+    item_ancient_key: boolean;
+    stat_gold: number;
+    stat_reputation: number;
+  };
+  player: {
+    name: string;
+    level: number;
+    location: string;
+  };
+  // ... any other game data
+}
 
-<DialogueEditor
+// Initialize game state
+const [gameState, setGameState] = useState<GameState>({
+  flags: {
+    quest_dragon_slayer: 'not_started',
+    item_ancient_key: false,
+    stat_gold: 1000,
+    stat_reputation: 50,
+  },
+  player: {
+    name: 'Hero',
+    level: 5,
+    location: 'town',
+  },
+});`, language: "typescript" }),
+                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "5. Edit Dialogue"),
+                react_1.default.createElement(CodeBlock_1.CodeBlock, { code: `import { DialogueEditorV2, exportToYarn } from '@portfolio/dialogue-forge';
+
+<DialogueEditorV2
   dialogue={dialogue}
   onChange={(updated) => {
     // Save edited dialogue
@@ -301,76 +314,186 @@ const currentFlags = {
     saveYarnFile(yarn);
   }}
   flagSchema={flagSchema}
-  initialFlags={currentFlags}
-/>`)),
-                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "6. Run Dialogue (Simulation)"),
-                react_1.default.createElement("div", { className: "bg-[#12121a] p-4 rounded border border-[#2a2a3e]" },
-                    react_1.default.createElement("pre", { className: "text-xs font-mono text-gray-300 whitespace-pre-wrap overflow-x-auto" }, `import { DialogueSimulator } from '@portfolio/dialogue-forge';
+  // Event hooks
+  onNodeAdd={(node) => console.log('Node added:', node.id)}
+  onNodeDelete={(nodeId) => console.log('Node deleted:', nodeId)}
+  onConnect={(source, target) => console.log('Connected:', source, '->', target)}
+/>`, language: "typescript" }),
+                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "6. Define Game State"),
+                react_1.default.createElement("p", { className: "text-gray-400 text-sm mb-2" }, "Game state can be any JSON object. Flags should represent the dialogue-relevant portion of your game state."),
+                react_1.default.createElement(CodeBlock_1.CodeBlock, { code: `// Example game state structure
+interface GameState {
+  flags: {
+    quest_dragon_slayer: 'complete' | 'started' | 'not_started';
+    item_ancient_key: boolean;
+    stat_gold: number;
+    stat_reputation: number;
+  };
+  player: {
+    name: string;
+    level: number;
+    location: string;
+  };
+  inventory: string[];
+  // ... any other game data
+}
 
-<DialogueSimulator
+// Initialize game state
+const gameState: GameState = {
+  flags: {
+    quest_dragon_slayer: 'not_started',
+    item_ancient_key: false,
+    stat_gold: 1000,
+    stat_reputation: 50,
+  },
+  player: {
+    name: 'Hero',
+    level: 5,
+    location: 'town',
+  },
+  inventory: ['sword', 'potion'],
+};`, language: "typescript" }),
+                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "7. Run Dialogue (Scene Player)"),
+                react_1.default.createElement(CodeBlock_1.CodeBlock, { code: `import { ScenePlayer } from '@portfolio/dialogue-forge';
+
+<ScenePlayer
   dialogue={dialogue}
-  initialFlags={currentFlags}
+  gameState={gameState} // Pass full game state
   onComplete={(result) => {
     // Update game state with new flags
-    gameState.flags = {
-      ...gameState.flags,
-      ...result.updatedFlags
-    };
+    setGameState(prev => ({
+      ...prev,
+      flags: {
+        ...prev.flags,
+        ...result.updatedFlags
+      }
+    }));
     
     // Now certain dialogues are locked/unlocked
     // based on the updated flags
   }}
   onFlagUpdate={(flags) => {
     // Real-time updates as dialogue progresses
+    setGameState(prev => ({
+      ...prev,
+      flags: { ...prev.flags, ...flags }
+    }));
   }}
-/>`)),
+  // Event hooks
+  onNodeEnter={(nodeId, node) => {
+    console.log('Entered node:', nodeId, node);
+    // Trigger animations, sound effects, etc.
+  }}
+  onNodeExit={(nodeId, node) => {
+    console.log('Exited node:', nodeId, node);
+  }}
+  onChoiceSelect={(nodeId, choice) => {
+    console.log('Selected choice:', choice.text);
+    // Track player decisions
+  }}
+  onDialogueStart={() => {
+    console.log('Dialogue started');
+  }}
+  onDialogueEnd={() => {
+    console.log('Dialogue ended');
+  }}
+/>`, language: "typescript" }),
                 react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Complete Example"),
-                react_1.default.createElement("div", { className: "bg-[#12121a] p-4 rounded border border-[#2a2a3e]" },
-                    react_1.default.createElement("pre", { className: "text-xs font-mono text-gray-300 whitespace-pre-wrap overflow-x-auto" }, `import {
-  DialogueEditor,
-  DialogueSimulator,
+                react_1.default.createElement(CodeBlock_1.CodeBlock, { code: `import {
+  DialogueEditorV2,
+  ScenePlayer,
   importFromYarn,
   exportToYarn,
   FlagSchema
 } from '@portfolio/dialogue-forge';
 
-// 1. Define flags
+// 1. Define flag schema
 const flagSchema: FlagSchema = {
   flags: [
-    { id: 'quest_complete', type: 'quest' },
-    { id: 'item_key', type: 'item' },
+    { id: 'quest_complete', type: 'quest', valueType: 'boolean' },
+    { id: 'item_key', type: 'item', valueType: 'boolean' },
+    { id: 'stat_gold', type: 'stat', valueType: 'number', defaultValue: 0 },
   ]
 };
 
-// 2. Load dialogue
+// 2. Define game state
+interface GameState {
+  flags: {
+    quest_complete: boolean;
+    item_key: boolean;
+    stat_gold: number;
+  };
+  player: {
+    name: string;
+    level: number;
+  };
+}
+
+const [gameState, setGameState] = useState<GameState>({
+  flags: {
+    quest_complete: false,
+    item_key: false,
+    stat_gold: 1000,
+  },
+  player: {
+    name: 'Hero',
+    level: 5,
+  },
+});
+
+// 3. Load dialogue
 const dialogue = importFromYarn(yarnFile, 'Merchant');
 
-// 3. Get game state
-const gameFlags = {
-  quest_complete: true,
-  item_key: false
-};
-
-// 4. Edit or run dialogue
-<DialogueEditor
+// 4. Edit dialogue with event hooks
+<DialogueEditorV2
   dialogue={dialogue}
   onChange={(updated) => {
     const yarn = exportToYarn(updated);
     saveFile(yarn);
   }}
   flagSchema={flagSchema}
-  initialFlags={gameFlags}
+  // Event hooks
+  onNodeAdd={(node) => {
+    console.log('Node added:', node.id);
+    // Track node creation
+  }}
+  onNodeDelete={(nodeId) => {
+    console.log('Node deleted:', nodeId);
+  }}
+  onNodeUpdate={(nodeId, updates) => {
+    console.log('Node updated:', nodeId, updates);
+  }}
+  onConnect={(sourceId, targetId, sourceHandle) => {
+    console.log('Connected:', sourceId, '->', targetId);
+  }}
+  onDisconnect={(edgeId, sourceId, targetId) => {
+    console.log('Disconnected:', sourceId, '->', targetId);
+  }}
+  onNodeSelect={(nodeId) => {
+    console.log('Node selected:', nodeId);
+  }}
 />
 
-// OR run it:
-<DialogueSimulator
+// 5. Run dialogue with event hooks
+<ScenePlayer
   dialogue={dialogue}
-  initialFlags={gameFlags}
+  gameState={gameState}
   onComplete={(result) => {
-    // Update game with new flags
-    gameState.flags = result.updatedFlags;
+    // Update game state with new flags
+    setGameState(prev => ({
+      ...prev,
+      flags: { ...prev.flags, ...result.updatedFlags }
+    }));
   }}
-/>`)),
+  onNodeEnter={(nodeId, node) => {
+    console.log('Entered node:', nodeId);
+    // Play animations, sound effects
+  }}
+  onChoiceSelect={(nodeId, choice) => {
+    console.log('Selected:', choice.text);
+    // Track player decisions
+  }}
+/>`, language: "typescript" }),
                 react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "How Flags Work with Unreal"),
                 react_1.default.createElement("div", { className: "space-y-3 text-sm" },
                     react_1.default.createElement("div", { className: "bg-[#12121a] p-3 rounded border border-[#2a2a3e]" },

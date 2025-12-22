@@ -1,5 +1,7 @@
 export { DialogueEditorV2 } from './components/DialogueEditorV2';
-export { DialogueSimulator } from './components/DialogueSimulator';
+export { ScenePlayer } from './components/ScenePlayer';
+export type { ScenePlayerProps } from './components/ScenePlayer';
+export { ScenePlayer as DialogueSimulator } from './components/ScenePlayer';
 export { GuidePanel } from './components/GuidePanel';
 export { FlagSelector } from './components/FlagSelector';
 export { FlagManager } from './components/FlagManager';
@@ -14,3 +16,4 @@ export * from './types/constants';
 export { exportToYarn, importFromYarn } from './lib/yarn-converter';
 export { initializeFlags, mergeFlagUpdates, validateFlags, getFlagValue } from './lib/flag-manager';
 export * from './utils/node-helpers';
+export * from './utils/feature-flags';

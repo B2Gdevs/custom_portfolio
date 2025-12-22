@@ -68,6 +68,7 @@ interface DialogueEditorV2InternalProps extends DialogueEditorProps {
   onOpenGuide?: () => void;
   onLoadExampleDialogue?: (dialogue: DialogueTree) => void;
   onLoadExampleFlags?: (flags: FlagSchema) => void;
+  // Event hooks from DialogueEditorProps are already included
 }
 
 function DialogueEditorV2Internal({
@@ -85,6 +86,14 @@ function DialogueEditorV2Internal({
   onOpenGuide,
   onLoadExampleDialogue,
   onLoadExampleFlags,
+  // Event hooks
+  onNodeAdd,
+  onNodeDelete,
+  onNodeUpdate,
+  onConnect: onConnectHook,
+  onDisconnect,
+  onNodeSelect,
+  onNodeDoubleClick: onNodeDoubleClickHook,
 }: DialogueEditorV2InternalProps) {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>('TB');
@@ -286,10 +295,13 @@ function DialogueEditorV2Internal({
     let shouldClearSelection = false;
     
     deleted.forEach(node => {
+      const dialogueNode = dialogue.nodes[node.id];
       delete updatedNodes[node.id];
       if (selectedNodeId === node.id) {
         shouldClearSelection = true;
       }
+      // Call onNodeDelete hook
+      onNodeDelete?.(node.id);
     });
     
     let newDialogue = { ...dialogue, nodes: updatedNodes };
@@ -427,6 +439,9 @@ function DialogueEditorV2Internal({
   // Handle edge deletion (when Delete key is pressed on selected edges)
   const onEdgesDelete = useCallback((deletedEdges: Edge[]) => {
     deletedEdges.forEach(edge => {
+      // Call onDisconnect hook
+      onDisconnect?.(edge.id, edge.source, edge.target);
+      
       const sourceNode = dialogue.nodes[edge.source];
       if (sourceNode) {
         if (edge.sourceHandle === 'next' && sourceNode.type === 'npc') {
@@ -531,6 +546,9 @@ function DialogueEditorV2Internal({
     setEdges(newEdge);
     setEdgeDropMenu(null); // Close edge drop menu if open
     
+    // Call onConnect hook
+    onConnectHook?.(connection.source, connection.target, connection.sourceHandle || undefined);
+    
     // Update DialogueTree
     const sourceNode = dialogue.nodes[connection.source];
     if (!sourceNode) return;
@@ -588,7 +606,8 @@ function DialogueEditorV2Internal({
   const onNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
     setSelectedNodeId(node.id);
     setNodeContextMenu(null);
-  }, []);
+    onNodeSelect?.(node.id);
+  }, [onNodeSelect]);
 
   // Handle node double-click - zoom to node
   const onNodeDoubleClick = useCallback((_event: React.MouseEvent, node: Node) => {
@@ -599,7 +618,8 @@ function DialogueEditorV2Internal({
         { zoom: 1.5, duration: 500 }
       );
     }
-  }, [reactFlowInstance]);
+    onNodeDoubleClickHook?.(node.id);
+  }, [reactFlowInstance, onNodeDoubleClickHook]);
 
   // Handle pane double-click - fit view to all nodes (like default zoom)
   // We'll handle this via useEffect since React Flow doesn't have onPaneDoubleClick
@@ -789,6 +809,9 @@ function DialogueEditorV2Internal({
     const newId = `${type}_${Date.now()}`;
     const newNode = createNode(type, newId, x, y);
     
+    // Call onNodeAdd hook
+    onNodeAdd?.(newNode);
+    
     // Build the complete new dialogue state in one go
     let newDialogue = {
       ...dialogue,
@@ -839,14 +862,17 @@ function DialogueEditorV2Internal({
 
   // Handle node updates
   const handleUpdateNode = useCallback((nodeId: string, updates: Partial<DialogueNode>) => {
+    const updatedNode = { ...dialogue.nodes[nodeId], ...updates };
     onChange({
       ...dialogue,
       nodes: {
         ...dialogue.nodes,
-        [nodeId]: { ...dialogue.nodes[nodeId], ...updates }
+        [nodeId]: updatedNode
       }
     });
-  }, [dialogue, onChange]);
+    // Call onNodeUpdate hook
+    onNodeUpdate?.(nodeId, updates);
+  }, [dialogue, onChange, onNodeUpdate]);
 
   // Handle choice updates
   const handleAddChoice = useCallback((nodeId: string) => {

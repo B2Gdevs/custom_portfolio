@@ -14,11 +14,14 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getFlagValue = exports.validateFlags = exports.mergeFlagUpdates = exports.initializeFlags = exports.importFromYarn = exports.exportToYarn = exports.listDemoFlagSchemas = exports.listExamples = exports.getDemoFlagSchema = exports.getExampleDialogue = exports.demoFlagSchemas = exports.exampleDialogues = exports.ExampleLoader = exports.ZoomControls = exports.FlagManager = exports.FlagSelector = exports.GuidePanel = exports.DialogueSimulator = exports.DialogueEditorV2 = void 0;
+exports.getFlagValue = exports.validateFlags = exports.mergeFlagUpdates = exports.initializeFlags = exports.importFromYarn = exports.exportToYarn = exports.listDemoFlagSchemas = exports.listExamples = exports.getDemoFlagSchema = exports.getExampleDialogue = exports.demoFlagSchemas = exports.exampleDialogues = exports.ExampleLoader = exports.ZoomControls = exports.FlagManager = exports.FlagSelector = exports.GuidePanel = exports.DialogueSimulator = exports.ScenePlayer = exports.DialogueEditorV2 = void 0;
 var DialogueEditorV2_1 = require("./components/DialogueEditorV2");
 Object.defineProperty(exports, "DialogueEditorV2", { enumerable: true, get: function () { return DialogueEditorV2_1.DialogueEditorV2; } });
-var DialogueSimulator_1 = require("./components/DialogueSimulator");
-Object.defineProperty(exports, "DialogueSimulator", { enumerable: true, get: function () { return DialogueSimulator_1.DialogueSimulator; } });
+var ScenePlayer_1 = require("./components/ScenePlayer");
+Object.defineProperty(exports, "ScenePlayer", { enumerable: true, get: function () { return ScenePlayer_1.ScenePlayer; } });
+// Legacy export for backward compatibility
+var ScenePlayer_2 = require("./components/ScenePlayer");
+Object.defineProperty(exports, "DialogueSimulator", { enumerable: true, get: function () { return ScenePlayer_2.ScenePlayer; } });
 var GuidePanel_1 = require("./components/GuidePanel");
 Object.defineProperty(exports, "GuidePanel", { enumerable: true, get: function () { return GuidePanel_1.GuidePanel; } });
 var FlagSelector_1 = require("./components/FlagSelector");
@@ -54,3 +57,4 @@ Object.defineProperty(exports, "mergeFlagUpdates", { enumerable: true, get: func
 Object.defineProperty(exports, "validateFlags", { enumerable: true, get: function () { return flag_manager_1.validateFlags; } });
 Object.defineProperty(exports, "getFlagValue", { enumerable: true, get: function () { return flag_manager_1.getFlagValue; } });
 __exportStar(require("./utils/node-helpers"), exports);
+__exportStar(require("./utils/feature-flags"), exports);

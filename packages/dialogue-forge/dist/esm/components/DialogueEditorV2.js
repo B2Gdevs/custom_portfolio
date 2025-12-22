@@ -33,7 +33,9 @@ const edgeTypes = {
     default: NPCEdgeV2, // Use custom component for NPC edges instead of React Flow default
 };
 function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJSON, className = '', showTitleEditor = true, flagSchema, initialViewMode = 'graph', layoutStrategy: propLayoutStrategy = 'dagre', // Accept from parent
-onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, onLoadExampleDialogue, onLoadExampleFlags, }) {
+onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, onLoadExampleDialogue, onLoadExampleFlags, 
+// Event hooks
+onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, onNodeSelect, onNodeDoubleClick: onNodeDoubleClickHook, }) {
     const [viewMode, setViewMode] = useState(initialViewMode);
     const [layoutDirection, setLayoutDirection] = useState('TB');
     const layoutStrategy = propLayoutStrategy; // Use prop instead of state
@@ -202,10 +204,13 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, onLoadExampleDialogue, o
         let updatedNodes = { ...dialogue.nodes };
         let shouldClearSelection = false;
         deleted.forEach(node => {
+            const dialogueNode = dialogue.nodes[node.id];
             delete updatedNodes[node.id];
             if (selectedNodeId === node.id) {
                 shouldClearSelection = true;
             }
+            // Call onNodeDelete hook
+            onNodeDelete?.(node.id);
         });
         let newDialogue = { ...dialogue, nodes: updatedNodes };
         // Auto-organize if enabled
@@ -334,6 +339,8 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, onLoadExampleDialogue, o
     // Handle edge deletion (when Delete key is pressed on selected edges)
     const onEdgesDelete = useCallback((deletedEdges) => {
         deletedEdges.forEach(edge => {
+            // Call onDisconnect hook
+            onDisconnect?.(edge.id, edge.source, edge.target);
             const sourceNode = dialogue.nodes[edge.source];
             if (sourceNode) {
                 if (edge.sourceHandle === 'next' && sourceNode.type === 'npc') {
@@ -439,6 +446,8 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, onLoadExampleDialogue, o
         const newEdge = addEdge(connection, edges);
         setEdges(newEdge);
         setEdgeDropMenu(null); // Close edge drop menu if open
+        // Call onConnect hook
+        onConnectHook?.(connection.source, connection.target, connection.sourceHandle || undefined);
         // Update DialogueTree
         const sourceNode = dialogue.nodes[connection.source];
         if (!sourceNode)
@@ -497,7 +506,8 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, onLoadExampleDialogue, o
     const onNodeClick = useCallback((_event, node) => {
         setSelectedNodeId(node.id);
         setNodeContextMenu(null);
-    }, []);
+        onNodeSelect?.(node.id);
+    }, [onNodeSelect]);
     // Handle node double-click - zoom to node
     const onNodeDoubleClick = useCallback((_event, node) => {
         if (reactFlowInstance) {
@@ -505,7 +515,8 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, onLoadExampleDialogue, o
             node.position.y + 60, // Half of NODE_HEIGHT
             { zoom: 1.5, duration: 500 });
         }
-    }, [reactFlowInstance]);
+        onNodeDoubleClickHook?.(node.id);
+    }, [reactFlowInstance, onNodeDoubleClickHook]);
     // Handle pane double-click - fit view to all nodes (like default zoom)
     // We'll handle this via useEffect since React Flow doesn't have onPaneDoubleClick
     const reactFlowWrapperRef = useRef(null);
@@ -678,6 +689,8 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, onLoadExampleDialogue, o
     const handleAddNode = useCallback((type, x, y, autoConnect) => {
         const newId = `${type}_${Date.now()}`;
         const newNode = createNode(type, newId, x, y);
+        // Call onNodeAdd hook
+        onNodeAdd?.(newNode);
         // Build the complete new dialogue state in one go
         let newDialogue = {
             ...dialogue,
@@ -724,14 +737,17 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, onLoadExampleDialogue, o
     }, [dialogue, onChange, autoOrganize, layoutDirection, reactFlowInstance]);
     // Handle node updates
     const handleUpdateNode = useCallback((nodeId, updates) => {
+        const updatedNode = { ...dialogue.nodes[nodeId], ...updates };
         onChange({
             ...dialogue,
             nodes: {
                 ...dialogue.nodes,
-                [nodeId]: { ...dialogue.nodes[nodeId], ...updates }
+                [nodeId]: updatedNode
             }
         });
-    }, [dialogue, onChange]);
+        // Call onNodeUpdate hook
+        onNodeUpdate?.(nodeId, updates);
+    }, [dialogue, onChange, onNodeUpdate]);
     // Handle choice updates
     const handleAddChoice = useCallback((nodeId) => {
         const updated = addChoiceToNode(dialogue.nodes[nodeId]);

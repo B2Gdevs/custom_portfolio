@@ -323,6 +323,66 @@ const conditionalNode: DialogueNode = {
 };
 ```
 
+### Running Dialogues with ScenePlayer
+
+```tsx
+import { ScenePlayer, ScenePlayerProps } from '@portfolio/dialogue-forge';
+
+// Define game state (can be any JSON structure)
+interface GameState {
+  flags: {
+    quest_complete: boolean;
+    stat_gold: number;
+  };
+  player: {
+    name: string;
+    level: number;
+  };
+  // ... any other game data
+}
+
+const [gameState, setGameState] = useState<GameState>({
+  flags: {
+    quest_complete: false,
+    stat_gold: 1000,
+  },
+  player: {
+    name: 'Hero',
+    level: 5,
+  },
+});
+
+<ScenePlayer
+  dialogue={dialogue}
+  gameState={gameState} // Pass full game state
+  onComplete={(result) => {
+    // Update game state with new flags
+    setGameState(prev => ({
+      ...prev,
+      flags: { ...prev.flags, ...result.updatedFlags }
+    }));
+  }}
+  // Event hooks
+  onNodeEnter={(nodeId, node) => {
+    console.log('Entered node:', nodeId);
+    // Trigger animations, sound effects, etc.
+  }}
+  onNodeExit={(nodeId, node) => {
+    console.log('Exited node:', nodeId);
+  }}
+  onChoiceSelect={(nodeId, choice) => {
+    console.log('Selected choice:', choice.text);
+    // Track player decisions
+  }}
+  onDialogueStart={() => {
+    console.log('Dialogue started');
+  }}
+  onDialogueEnd={() => {
+    console.log('Dialogue ended');
+  }}
+/>
+```
+
 ### Running Dialogues Programmatically
 
 ```tsx
