@@ -65,3 +65,44 @@
   display: none;
 }
 
+/* React Flow Controls Styling */
+.react-flow__controls {
+  background: #0d0d14 !important;
+  border: 1px solid #2a2a3e !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  padding: 4px !important;
+  gap: 2px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.react-flow__controls-button {
+  background: #12121a !important;
+  border: 1px solid #2a2a3e !important;
+  border-radius: 4px !important;
+  width: 24px !important;
+  height: 24px !important;
+  padding: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.15s ease !important;
+}
+
+.react-flow__controls-button:hover {
+  background: #1a1a2e !important;
+  border-color: #3a3a4e !important;
+}
+
+.react-flow__controls-button svg {
+  fill: #6b7280 !important;
+  max-width: 14px !important;
+  max-height: 14px !important;
+}
+
+.react-flow__controls-button:hover svg {
+  fill: #e5e7eb !important;
+}
+
+

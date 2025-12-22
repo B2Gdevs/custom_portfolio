@@ -10,7 +10,8 @@
 
 import { DialogueTree, DialogueNode } from '../types';
 import { NODE_TYPE } from '../types/constants';
-import { Node, Edge } from 'reactflow';
+import { Node, Edge, Position } from 'reactflow';
+import { LayoutDirection } from './layout';
 
 // Color scheme for choice edges (same as current implementation)
 export const CHOICE_COLORS = ['#e94560', '#8b5cf6', '#06b6d4', '#22c55e', '#f59e0b'];
@@ -18,20 +19,41 @@ export const CHOICE_COLORS = ['#e94560', '#8b5cf6', '#06b6d4', '#22c55e', '#f59e
 export interface ReactFlowNodeData {
   node: DialogueNode;
   flagSchema?: any;
+  layoutDirection?: LayoutDirection;
 }
 
 export type ReactFlowNode = Node<ReactFlowNodeData>;
 export type ReactFlowEdge = Edge;
 
 /**
+ * Get handle positions based on layout direction
+ * For horizontal (LR): source on right, target on left
+ * For vertical (TB): source on bottom, target on top
+ */
+export function getHandlePositions(direction: LayoutDirection): {
+  sourcePosition: Position;
+  targetPosition: Position;
+} {
+  if (direction === 'LR') {
+    return { sourcePosition: Position.Right, targetPosition: Position.Left };
+  }
+  return { sourcePosition: Position.Bottom, targetPosition: Position.Top };
+}
+
+/**
  * Convert DialogueTree to React Flow format
  */
-export function convertDialogueTreeToReactFlow(dialogue: DialogueTree): {
+export function convertDialogueTreeToReactFlow(
+  dialogue: DialogueTree,
+  layoutDirection: LayoutDirection = 'TB'
+): {
   nodes: ReactFlowNode[];
   edges: ReactFlowEdge[];
 } {
   const nodes: ReactFlowNode[] = [];
   const edges: ReactFlowEdge[] = [];
+  
+  const { sourcePosition, targetPosition } = getHandlePositions(layoutDirection);
 
   // Convert nodes - create new node objects to avoid sharing references
   Object.values(dialogue.nodes).forEach(node => {
@@ -52,12 +74,15 @@ export function convertDialogueTreeToReactFlow(dialogue: DialogueTree): {
       position: { x: node.x, y: node.y },
       data: { 
         node: nodeCopy,
+        layoutDirection,
       },
+      sourcePosition,
+      targetPosition,
       selected: false,
     });
   });
 
-  // Convert edges
+  // Convert edges - using smoothstep type for cleaner angular look
   Object.values(dialogue.nodes).forEach(node => {
     if (node.type === NODE_TYPE.NPC && node.nextNodeId) {
       // NPC -> next node (single connection)
@@ -66,7 +91,7 @@ export function convertDialogueTreeToReactFlow(dialogue: DialogueTree): {
         source: node.id,
         target: node.nextNodeId,
         sourceHandle: 'next',
-        type: 'default', // Uses NPCEdgeV2 component
+        type: 'npc', // Uses NPCEdgeV2 component (smoothstep style)
       } as Edge);
     }
 
@@ -80,7 +105,7 @@ export function convertDialogueTreeToReactFlow(dialogue: DialogueTree): {
             source: node.id,
             target: choice.nextNodeId,
             sourceHandle: `choice-${idx}`, // Connect to specific choice handle
-            type: 'choice', // Use custom ChoiceEdge
+            type: 'choice', // Use custom ChoiceEdge (smoothstep style)
             data: {
               choiceIndex: idx,
               choiceId: choice.id,
@@ -107,7 +132,7 @@ export function convertDialogueTreeToReactFlow(dialogue: DialogueTree): {
             source: node.id,
             target: block.nextNodeId,
             sourceHandle: `block-${idx}`, // Connect to specific block handle
-            type: 'choice', // Use same edge type as choices
+            type: 'choice', // Use same edge type as choices (smoothstep style)
             data: {
               choiceIndex: idx,
               blockId: block.id,

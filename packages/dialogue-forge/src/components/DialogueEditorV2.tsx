@@ -24,14 +24,14 @@ import ReactFlow, {
   ConnectionLineType,
   BackgroundVariant,
 } from 'reactflow';
-import { Edit3, Plus, Trash2, Play, Layout } from 'lucide-react';
+import { Edit3, Plus, Trash2, Play, Layout, ArrowDown, ArrowRight, Magnet, Sparkles, Undo2, Flag, Home, Target } from 'lucide-react';
 import 'reactflow/dist/style.css';
 
 import { DialogueEditorProps, DialogueTree, DialogueNode, Choice } from '../types';
 import { exportToYarn } from '../lib/yarn-converter';
 import { convertDialogueTreeToReactFlow, updateDialogueTreeFromReactFlow, CHOICE_COLORS } from '../utils/reactflow-converter';
 import { createNode, deleteNodeFromTree, addChoiceToNode, removeChoiceFromNode, updateChoiceInNode } from '../utils/node-helpers';
-import { applyHierarchicalLayout } from '../utils/layout';
+import { applyDagreLayout, resolveNodeCollisions, LayoutDirection } from '../utils/layout';
 import { NodeEditor } from './NodeEditor';
 import { YarnView } from './YarnView';
 import { PlayView } from './PlayView';
@@ -73,6 +73,10 @@ function DialogueEditorV2Internal({
   initialViewMode = 'graph',
 }: DialogueEditorV2InternalProps) {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
+  const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>('TB');
+  const [autoOrganize, setAutoOrganize] = useState<boolean>(false); // Auto-layout on changes
+  const [showPathHighlight, setShowPathHighlight] = useState<boolean>(true); // Toggle path highlighting
+  const [showBackEdges, setShowBackEdges] = useState<boolean>(true); // Toggle back-edge styling
   
   // Memoize nodeTypes and edgeTypes to prevent React Flow warnings
   const memoizedNodeTypes = useMemo(() => nodeTypes, []);
@@ -87,32 +91,151 @@ function DialogueEditorV2Internal({
 
   // Convert DialogueTree to React Flow format
   const { nodes: initialNodes, edges: initialEdges } = useMemo(
-    () => dialogue ? convertDialogueTreeToReactFlow(dialogue) : { nodes: [], edges: [] },
-    [dialogue]
+    () => dialogue ? convertDialogueTreeToReactFlow(dialogue, layoutDirection) : { nodes: [], edges: [] },
+    [dialogue, layoutDirection]
   );
 
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
 
+  // Find all edges that lead to the selected node by tracing FORWARD from start
+  // This avoids including back-edges and only shows the actual forward path
+  const { edgesToSelectedNode, nodeDepths } = useMemo(() => {
+    if (!selectedNodeId || !dialogue || !dialogue.startNodeId) {
+      return { edgesToSelectedNode: new Set<string>(), nodeDepths: new Map<string, number>() };
+    }
+    
+    // Step 1: Find all forward paths from start that reach the selected node
+    // Use DFS to trace forward, tracking the path
+    const nodesOnPath = new Set<string>();
+    const edgesOnPath = new Set<string>();
+    const nodeDepthMap = new Map<string, number>();
+    
+    // DFS that returns true if this path leads to the selected node
+    const findPathToTarget = (
+      currentNodeId: string, 
+      visitedInPath: Set<string>,
+      depth: number
+    ): boolean => {
+      // Found the target!
+      if (currentNodeId === selectedNodeId) {
+        nodesOnPath.add(currentNodeId);
+        nodeDepthMap.set(currentNodeId, depth);
+        return true;
+      }
+      
+      // Avoid cycles in THIS path (back-edges)
+      if (visitedInPath.has(currentNodeId)) {
+        return false;
+      }
+      
+      const node = dialogue.nodes[currentNodeId];
+      if (!node) return false;
+      
+      visitedInPath.add(currentNodeId);
+      let foundPath = false;
+      
+      // Check NPC nextNodeId
+      if (node.nextNodeId && dialogue.nodes[node.nextNodeId]) {
+        if (findPathToTarget(node.nextNodeId, new Set(visitedInPath), depth + 1)) {
+          foundPath = true;
+          edgesOnPath.add(`${currentNodeId}-next`);
+        }
+      }
+      
+      // Check player choices
+      if (node.choices) {
+        node.choices.forEach((choice, idx) => {
+          if (choice.nextNodeId && dialogue.nodes[choice.nextNodeId]) {
+            if (findPathToTarget(choice.nextNodeId, new Set(visitedInPath), depth + 1)) {
+              foundPath = true;
+              edgesOnPath.add(`${currentNodeId}-choice-${idx}`);
+            }
+          }
+        });
+      }
+      
+      // Check conditional blocks
+      if (node.conditionalBlocks) {
+        node.conditionalBlocks.forEach((block, idx) => {
+          if (block.nextNodeId && dialogue.nodes[block.nextNodeId]) {
+            if (findPathToTarget(block.nextNodeId, new Set(visitedInPath), depth + 1)) {
+              foundPath = true;
+              edgesOnPath.add(`${currentNodeId}-block-${idx}`);
+            }
+          }
+        });
+      }
+      
+      // If any path from this node leads to target, include this node
+      if (foundPath) {
+        nodesOnPath.add(currentNodeId);
+        // Keep the minimum depth (closest to start)
+        if (!nodeDepthMap.has(currentNodeId) || nodeDepthMap.get(currentNodeId)! > depth) {
+          nodeDepthMap.set(currentNodeId, depth);
+        }
+      }
+      
+      return foundPath;
+    };
+    
+    // Start the search from the dialogue's start node
+    findPathToTarget(dialogue.startNodeId, new Set(), 0);
+    
+    return { edgesToSelectedNode: edgesOnPath, nodeDepths: nodeDepthMap };
+  }, [selectedNodeId, dialogue]);
+
   // Update nodes/edges when dialogue changes externally
   React.useEffect(() => {
     if (dialogue) {
-      const { nodes: newNodes, edges: newEdges } = convertDialogueTreeToReactFlow(dialogue);
+      const { nodes: newNodes, edges: newEdges } = convertDialogueTreeToReactFlow(dialogue, layoutDirection);
       setNodes(newNodes);
       setEdges(newEdges);
     }
   }, [dialogue]);
 
-  // Add flagSchema to node data
+  // Calculate end nodes (nodes with no outgoing connections)
+  const endNodeIds = useMemo(() => {
+    if (!dialogue) return new Set<string>();
+    const ends = new Set<string>();
+    Object.values(dialogue.nodes).forEach(node => {
+      const hasNextNode = !!node.nextNodeId;
+      const hasChoiceConnections = node.choices?.some(c => c.nextNodeId) || false;
+      const hasBlockConnections = node.conditionalBlocks?.some(b => b.nextNodeId) || false;
+      if (!hasNextNode && !hasChoiceConnections && !hasBlockConnections) {
+        ends.add(node.id);
+      }
+    });
+    return ends;
+  }, [dialogue]);
+
+  // Add flagSchema, dim state, and layout direction to node data
   const nodesWithFlags = useMemo(() => {
-    return nodes.map(node => ({
-      ...node,
-      data: {
-        ...node.data,
-        flagSchema,
-      },
-    }));
-  }, [nodes, flagSchema]);
+    const hasSelection = selectedNodeId !== null && showPathHighlight;
+    const startNodeId = dialogue?.startNodeId;
+    
+    return nodes.map(node => {
+      const isInPath = showPathHighlight && nodeDepths.has(node.id);
+      const isSelected = node.id === selectedNodeId;
+      // Dim nodes that aren't in the path when something is selected (only if path highlight is on)
+      const isDimmed = hasSelection && !isInPath && !isSelected;
+      const isStartNode = node.id === startNodeId;
+      const isEndNode = endNodeIds.has(node.id);
+      
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          flagSchema,
+          isDimmed,
+          isInPath,
+          layoutDirection,
+          isStartNode,
+          isEndNode,
+        },
+      };
+    });
+  }, [nodes, flagSchema, nodeDepths, selectedNodeId, layoutDirection, showPathHighlight, dialogue, endNodeIds]);
 
   if (!dialogue) {
     return (
@@ -151,11 +274,23 @@ function DialogueEditorV2Internal({
       }
     });
     
-    onChange({ ...dialogue, nodes: updatedNodes });
+    let newDialogue = { ...dialogue, nodes: updatedNodes };
+    
+    // Auto-organize if enabled
+    if (autoOrganize) {
+      newDialogue = applyDagreLayout(newDialogue, layoutDirection);
+      setTimeout(() => {
+        if (reactFlowInstance) {
+          reactFlowInstance.fitView({ padding: 0.2, duration: 300 });
+        }
+      }, 50);
+    }
+    
+    onChange(newDialogue);
     if (shouldClearSelection) {
       setSelectedNodeId(null);
     }
-  }, [dialogue, onChange, selectedNodeId]);
+  }, [dialogue, onChange, selectedNodeId, autoOrganize, layoutDirection, reactFlowInstance]);
 
   // Handle node changes (drag, delete, etc.)
   const onNodesChange = useCallback((changes: NodeChange[]) => {
@@ -570,75 +705,52 @@ function DialogueEditorV2Internal({
     const newId = `${type}_${Date.now()}`;
     const newNode = createNode(type, newId, x, y);
     
-    // First, create the new node
-    onChange({
+    // Build the complete new dialogue state in one go
+    let newDialogue = {
       ...dialogue,
       nodes: { ...dialogue.nodes, [newId]: newNode }
-    });
+    };
     
-    // Then, if auto-connecting, update the source node's connection
-    // Do this in a separate call to ensure the new node exists first (like V1 did)
+    // If auto-connecting, include that connection
     if (autoConnect) {
       const sourceNode = dialogue.nodes[autoConnect.fromNodeId];
       if (sourceNode) {
         if (autoConnect.sourceHandle === 'next' && sourceNode.type === 'npc') {
-          // Update NPC node's nextNodeId
-          onChange({
-            ...dialogue,
-            nodes: {
-              ...dialogue.nodes,
-              [newId]: newNode, // Ensure new node is included
-              [autoConnect.fromNodeId]: {
-                ...sourceNode,
-                nextNodeId: newId,
-              },
-            },
-          });
+          newDialogue.nodes[autoConnect.fromNodeId] = { ...sourceNode, nextNodeId: newId };
         } else if (autoConnect.fromChoiceIdx !== undefined && sourceNode.choices) {
-          // Update player choice's nextNodeId
           const newChoices = [...sourceNode.choices];
-          newChoices[autoConnect.fromChoiceIdx] = {
-            ...newChoices[autoConnect.fromChoiceIdx],
-            nextNodeId: newId,
-          };
-          onChange({
-            ...dialogue,
-            nodes: {
-              ...dialogue.nodes,
-              [newId]: newNode, // Ensure new node is included
-              [autoConnect.fromNodeId]: {
-                ...sourceNode,
-                choices: newChoices,
-              },
-            },
-          });
+          newChoices[autoConnect.fromChoiceIdx] = { ...newChoices[autoConnect.fromChoiceIdx], nextNodeId: newId };
+          newDialogue.nodes[autoConnect.fromNodeId] = { ...sourceNode, choices: newChoices };
         } else if (autoConnect.fromBlockIdx !== undefined && sourceNode.type === 'conditional' && sourceNode.conditionalBlocks) {
-          // Update Conditional block's nextNodeId
           const newBlocks = [...sourceNode.conditionalBlocks];
-          newBlocks[autoConnect.fromBlockIdx] = {
-            ...newBlocks[autoConnect.fromBlockIdx],
-            nextNodeId: newId,
-          };
-          onChange({
-            ...dialogue,
-            nodes: {
-              ...dialogue.nodes,
-              [newId]: newNode, // Ensure new node is included
-              [autoConnect.fromNodeId]: {
-                ...sourceNode,
-                conditionalBlocks: newBlocks,
-              },
-            },
-          });
+          newBlocks[autoConnect.fromBlockIdx] = { ...newBlocks[autoConnect.fromBlockIdx], nextNodeId: newId };
+          newDialogue.nodes[autoConnect.fromNodeId] = { ...sourceNode, conditionalBlocks: newBlocks };
         }
       }
     }
+    
+    // Apply layout if auto-organize is enabled
+    if (autoOrganize) {
+      newDialogue = applyDagreLayout(newDialogue, layoutDirection);
+    }
+    
+    // Single onChange call with all updates
+    onChange(newDialogue);
     
     setSelectedNodeId(newId);
     setContextMenu(null);
     setEdgeDropMenu(null);
     connectingRef.current = null;
-  }, [dialogue, onChange]);
+    
+    // Fit view after layout (only if auto-organize is on)
+    if (autoOrganize) {
+      setTimeout(() => {
+        if (reactFlowInstance) {
+          reactFlowInstance.fitView({ padding: 0.2, duration: 300 });
+        }
+      }, 50);
+    }
+  }, [dialogue, onChange, autoOrganize, layoutDirection, reactFlowInstance]);
 
   // Handle node updates
   const handleUpdateNode = useCallback((nodeId: string, updates: Partial<DialogueNode>) => {
@@ -669,16 +781,55 @@ function DialogueEditorV2Internal({
 
   const handleDeleteNode = useCallback((nodeId: string) => {
     try {
-      onChange(deleteNodeFromTree(dialogue, nodeId));
+      let newDialogue = deleteNodeFromTree(dialogue, nodeId);
+      
+      // Auto-organize if enabled
+      if (autoOrganize) {
+        newDialogue = applyDagreLayout(newDialogue, layoutDirection);
+        setTimeout(() => {
+          if (reactFlowInstance) {
+            reactFlowInstance.fitView({ padding: 0.2, duration: 300 });
+          }
+        }, 50);
+      }
+      
+      onChange(newDialogue);
       setSelectedNodeId(null);
     } catch (e: any) {
       alert(e.message);
     }
-  }, [dialogue, onChange]);
+  }, [dialogue, onChange, autoOrganize, layoutDirection, reactFlowInstance]);
 
-  // Handle auto-layout
-  const handleAutoLayout = useCallback(() => {
-    const layoutedDialogue = applyHierarchicalLayout(dialogue);
+  // Handle node drag stop - resolve collisions in freeform mode
+  const onNodeDragStop = useCallback((event: React.MouseEvent, node: Node) => {
+    // In freeform mode, resolve collisions after drag
+    if (!autoOrganize) {
+      const collisionResolved = resolveNodeCollisions(dialogue, {
+        maxIterations: 50,
+        overlapThreshold: 0.3,
+        margin: 20,
+      });
+      
+      // Only update if positions actually changed
+      const hasChanges = Object.keys(collisionResolved.nodes).some(id => {
+        const orig = dialogue.nodes[id];
+        const resolved = collisionResolved.nodes[id];
+        return orig && resolved && (orig.x !== resolved.x || orig.y !== resolved.y);
+      });
+      
+      if (hasChanges) {
+        onChange(collisionResolved);
+      }
+    }
+  }, [dialogue, onChange, autoOrganize]);
+
+  // Handle auto-layout with direction using dagre
+  const handleAutoLayout = useCallback((direction?: LayoutDirection) => {
+    const dir = direction || layoutDirection;
+    if (direction) {
+      setLayoutDirection(direction);
+    }
+    const layoutedDialogue = applyDagreLayout(dialogue, dir);
     onChange(layoutedDialogue);
     
     // Fit view after a short delay to allow React Flow to update
@@ -687,7 +838,7 @@ function DialogueEditorV2Internal({
         reactFlowInstance.fitView({ padding: 0.2, duration: 500 });
       }
     }, 100);
-  }, [dialogue, onChange, reactFlowInstance]);
+  }, [dialogue, onChange, reactFlowInstance, layoutDirection]);
 
   return (
     <div className={`dialogue-editor-v2 ${className} w-full h-full flex flex-col`}>
@@ -697,13 +848,40 @@ function DialogueEditorV2Internal({
           <div className="flex-1 relative">
             <ReactFlow
               nodes={nodesWithFlags}
-              edges={edges}
+              edges={edges.map(edge => {
+                // Detect back-edges (loops) based on layout direction
+                const sourceNode = nodes.find(n => n.id === edge.source);
+                const targetNode = nodes.find(n => n.id === edge.target);
+                // For TB layout: back-edge if target Y < source Y (going up)
+                // For LR layout: back-edge if target X < source X (going left)
+                const isBackEdge = showBackEdges && sourceNode && targetNode && (
+                  layoutDirection === 'TB' 
+                    ? targetNode.position.y < sourceNode.position.y
+                    : targetNode.position.x < sourceNode.position.x
+                );
+                
+                const isInPath = edgesToSelectedNode.has(edge.id);
+                // Dim edges not in the path when path highlighting is on and something is selected
+                const isDimmed = showPathHighlight && selectedNodeId !== null && !isInPath;
+                
+                return {
+                  ...edge,
+                  data: {
+                    ...edge.data,
+                    isInPathToSelected: showPathHighlight && isInPath,
+                    isBackEdge,
+                    isDimmed,
+                  },
+                };
+              })}
               nodeTypes={memoizedNodeTypes}
               edgeTypes={memoizedEdgeTypes}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onNodesDelete={onNodesDelete}
               onEdgesDelete={onEdgesDelete}
+              onNodeDragStop={onNodeDragStop}
+              nodesDraggable={!autoOrganize} // Disable dragging in auto-organize mode
               onConnect={onConnect}
               onConnectStart={onConnectStart}
               onConnectEnd={onConnectEnd}
@@ -711,10 +889,11 @@ function DialogueEditorV2Internal({
               onPaneContextMenu={onPaneContextMenu}
               onNodeContextMenu={onNodeContextMenu}
               onEdgeContextMenu={onEdgeContextMenu}
-              onClick={() => {
-                // Close context menus when clicking on pane
+              onPaneClick={() => {
+                // Close context menus and deselect node when clicking on pane (not nodes)
                 setContextMenu(null);
                 setNodeContextMenu(null);
+                setSelectedNodeId(null);
               }}
               fitView
               className="bg-[#0a0a0f]"
@@ -723,7 +902,6 @@ function DialogueEditorV2Internal({
               connectionLineStyle={{ stroke: '#e94560', strokeWidth: 2 }}
               connectionLineType={ConnectionLineType.SmoothStep}
               snapToGrid={false}
-              nodesDraggable={true}
               nodesConnectable={true}
               elementsSelectable={true}
               selectionOnDrag={true}
@@ -732,25 +910,194 @@ function DialogueEditorV2Internal({
               zoomOnPinch={true}
               preventScrolling={true}
               zoomOnDoubleClick={false}
+              minZoom={0.1}
+              maxZoom={3}
               deleteKeyCode={['Delete', 'Backspace']}
               tabIndex={0}
             >
               <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#1a1a2e" />
-              <Controls className="bg-[#0d0d14] border-[#1a1a2e]" />
-              <MiniMap 
-                className="bg-[#0d0d14] border-[#1a1a2e]"
-                nodeColor={(node) => node.type === 'npc' ? '#e94560' : '#8b5cf6'}
+              <Controls 
+                className="!bg-[#0d0d14] !border !border-[#2a2a3e] !rounded-lg !shadow-lg"
+                style={{ 
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2px',
+                  padding: '4px',
+                }}
+                showZoom={true}
+                showFitView={true}
+                showInteractive={false}
               />
-              {/* Auto Layout Button */}
-              <Panel position="top-right" className="!bg-transparent !border-0 !p-0">
-                <button
-                  onClick={handleAutoLayout}
-                  className="bg-[#0d0d14] border border-[#1a1a2e] hover:border-[#3a3a4e] text-white px-3 py-2 rounded flex items-center gap-2 text-sm transition-colors"
-                  title="Auto Layout - Arrange nodes hierarchically"
-                >
-                  <Layout size={16} />
-                  <span>Auto Layout</span>
-                </button>
+              
+              {/* Enhanced MiniMap with title */}
+              <Panel position="bottom-right" className="!p-0 !m-2">
+                <div className="bg-[#0d0d14] border border-[#2a2a3e] rounded-lg overflow-hidden shadow-xl">
+                  <div className="px-3 py-1.5 border-b border-[#2a2a3e] flex items-center justify-between bg-[#12121a]">
+                    <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Overview</span>
+                    <div className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#e94560]" title="NPC Node" />
+                      <span className="w-2 h-2 rounded-full bg-[#8b5cf6]" title="Player Node" />
+                      <span className="w-2 h-2 rounded-full bg-blue-500" title="Conditional" />
+                    </div>
+                  </div>
+                  <MiniMap 
+                    style={{ 
+                      width: 180, 
+                      height: 120,
+                      backgroundColor: '#08080c',
+                    }}
+                    maskColor="rgba(0, 0, 0, 0.7)"
+                    nodeColor={(node) => {
+                      if (node.type === 'npc') return '#e94560';
+                      if (node.type === 'player') return '#8b5cf6';
+                      if (node.type === 'conditional') return '#3b82f6';
+                      return '#4a4a6a';
+                    }}
+                    nodeStrokeWidth={2}
+                    pannable
+                    zoomable
+                  />
+                </div>
+              </Panel>
+              
+              {/* Layout Controls */}
+              <Panel position="top-right" className="!bg-transparent !border-0 !p-0 !m-2">
+                <div className="flex items-center gap-1.5 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg p-1.5 shadow-lg">
+                  {/* Auto-organize toggle */}
+                  <button
+                    onClick={() => {
+                      const newAutoOrganize = !autoOrganize;
+                      setAutoOrganize(newAutoOrganize);
+                      // If turning on, immediately apply layout
+                      if (newAutoOrganize) {
+                        handleAutoLayout();
+                      }
+                    }}
+                    className={`p-1.5 rounded transition-colors ${
+                      autoOrganize 
+                        ? 'bg-green-500/20 text-green-400 border border-green-500/50' 
+                        : 'bg-[#12121a] text-gray-500 hover:text-gray-300 border border-[#2a2a3e]'
+                    }`}
+                    title={autoOrganize ? "Dagre Layout ON - Nodes auto-arrange" : "Dagre Layout OFF - Free placement"}
+                  >
+                    <Magnet size={14} />
+                  </button>
+                  
+                  <div className="w-px h-5 bg-[#2a2a3e]" />
+                  
+                  {/* Layout direction buttons */}
+                  <div className="flex border border-[#2a2a3e] rounded overflow-hidden">
+                    <button
+                      onClick={() => handleAutoLayout('TB')}
+                      className={`p-1.5 transition-colors ${
+                        layoutDirection === 'TB' 
+                          ? 'bg-[#e94560]/20 text-[#e94560]' 
+                          : 'bg-[#12121a] text-gray-500 hover:text-gray-300'
+                      } border-r border-[#2a2a3e]`}
+                      title="Vertical Layout (Top to Bottom)"
+                    >
+                      <ArrowDown size={14} />
+                    </button>
+                    <button
+                      onClick={() => handleAutoLayout('LR')}
+                      className={`p-1.5 transition-colors ${
+                        layoutDirection === 'LR' 
+                          ? 'bg-[#8b5cf6]/20 text-[#8b5cf6]' 
+                          : 'bg-[#12121a] text-gray-500 hover:text-gray-300'
+                      }`}
+                      title="Horizontal Layout (Left to Right)"
+                    >
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+                  
+                  <button
+                    onClick={() => handleAutoLayout()}
+                    className="p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors"
+                    title="Re-apply Layout"
+                  >
+                    <Layout size={14} />
+                  </button>
+                  
+                  <div className="w-px h-5 bg-[#2a2a3e]" />
+                  
+                  {/* Path highlighting toggle */}
+                  <button
+                    onClick={() => setShowPathHighlight(!showPathHighlight)}
+                    className={`p-1.5 rounded transition-colors ${
+                      showPathHighlight 
+                        ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/50' 
+                        : 'bg-[#12121a] text-gray-500 hover:text-gray-300 border border-[#2a2a3e]'
+                    }`}
+                    title={showPathHighlight ? "Path Highlight ON" : "Path Highlight OFF"}
+                  >
+                    <Sparkles size={14} />
+                  </button>
+                  
+                  {/* Back-edge visualization toggle */}
+                  <button
+                    onClick={() => setShowBackEdges(!showBackEdges)}
+                    className={`p-1.5 rounded transition-colors ${
+                      showBackEdges 
+                        ? 'bg-orange-500/20 text-orange-400 border border-orange-500/50' 
+                        : 'bg-[#12121a] text-gray-500 hover:text-gray-300 border border-[#2a2a3e]'
+                    }`}
+                    title={showBackEdges ? "Loop Edges Styled" : "Loop Edges Normal"}
+                  >
+                    <Undo2 size={14} />
+                  </button>
+                  
+                  <div className="w-px h-5 bg-[#2a2a3e]" />
+                  
+                  {/* Quick select start node */}
+                  <button
+                    onClick={() => {
+                      if (dialogue?.startNodeId) {
+                        setSelectedNodeId(dialogue.startNodeId);
+                        // Center on start node
+                        const startNode = nodes.find(n => n.id === dialogue.startNodeId);
+                        if (startNode && reactFlowInstance) {
+                          reactFlowInstance.setCenter(
+                            startNode.position.x + 110, 
+                            startNode.position.y + 60, 
+                            { zoom: 1, duration: 500 }
+                          );
+                        }
+                      }
+                    }}
+                    className="p-1.5 bg-green-500/20 text-green-400 border border-green-500/50 rounded transition-colors hover:bg-green-500/30"
+                    title="Go to Start Node"
+                  >
+                    <Home size={14} />
+                  </button>
+                  
+                  {/* Quick select an end node */}
+                  <button
+                    onClick={() => {
+                      const endNodes = Array.from(endNodeIds);
+                      if (endNodes.length > 0) {
+                        // Cycle through end nodes or select first one
+                        const currentIdx = selectedNodeId ? endNodes.indexOf(selectedNodeId) : -1;
+                        const nextIdx = (currentIdx + 1) % endNodes.length;
+                        const nextEndNodeId = endNodes[nextIdx];
+                        setSelectedNodeId(nextEndNodeId);
+                        // Center on end node
+                        const endNode = nodes.find(n => n.id === nextEndNodeId);
+                        if (endNode && reactFlowInstance) {
+                          reactFlowInstance.setCenter(
+                            endNode.position.x + 110, 
+                            endNode.position.y + 60, 
+                            { zoom: 1, duration: 500 }
+                          );
+                        }
+                      }
+                    }}
+                    className="p-1.5 bg-amber-500/20 text-amber-400 border border-amber-500/50 rounded transition-colors hover:bg-amber-500/30"
+                    title={`Go to End Node (${endNodeIds.size} total)`}
+                  >
+                    <Flag size={14} />
+                  </button>
+                </div>
               </Panel>
               
               {/* Pane Context Menu */}

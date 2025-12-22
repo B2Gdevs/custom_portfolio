@@ -1,24 +1,35 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Handle, Position, NodeProps, useUpdateNodeInternals } from 'reactflow';
 import { DialogueNode } from '../types';
-import { GitBranch } from 'lucide-react';
+import { GitBranch, Play, Flag } from 'lucide-react';
 import { FlagSchema } from '../types/flags';
+import { LayoutDirection } from '../utils/layout';
 
 interface PlayerNodeData {
   node: DialogueNode;
   flagSchema?: FlagSchema;
+  isDimmed?: boolean;
+  isInPath?: boolean;
+  layoutDirection?: LayoutDirection;
+  isStartNode?: boolean;
+  isEndNode?: boolean;
 }
 
 // Color scheme for choice edges (same as current implementation)
 const CHOICE_COLORS = ['#e94560', '#8b5cf6', '#06b6d4', '#22c55e', '#f59e0b'];
 
 export function PlayerNodeV2({ data, selected }: NodeProps<PlayerNodeData>) {
-  const { node, flagSchema } = data;
+  const { node, flagSchema, isDimmed, isInPath, layoutDirection = 'TB', isStartNode, isEndNode } = data;
   const choices = node.choices || [];
   const updateNodeInternals = useUpdateNodeInternals();
   const headerRef = useRef<HTMLDivElement>(null);
   const choiceRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [handlePositions, setHandlePositions] = useState<number[]>([]);
+  
+  // Handle positions based on layout direction
+  const isHorizontal = layoutDirection === 'LR';
+  const targetPosition = isHorizontal ? Position.Left : Position.Top;
+  const sourcePosition = isHorizontal ? Position.Right : Position.Bottom;
 
   // Calculate handle positions based on actual rendered heights
   useEffect(() => {
@@ -56,14 +67,35 @@ export function PlayerNodeV2({ data, selected }: NodeProps<PlayerNodeData>) {
     updateNodeInternals(node.id);
   }, [choices.length, node.id, updateNodeInternals]);
 
+  // Check if this is an end node (player node with no choices that have nextNodeId)
+  const hasNoOutgoingConnections = !choices.some(c => c.nextNodeId);
+
   return (
-    <div className={`rounded-lg border-2 transition-all ${
-      selected ? 'border-[#8b5cf6] shadow-lg shadow-[#8b5cf6]/20' : 'border-[#2a1a3a]'
-    } bg-[#1e1e3a] min-w-[200px]`}>
-      {/* Input handle at top */}
+    <div 
+      className={`rounded-lg border-2 transition-all duration-300 ${
+        selected ? 'border-[#8b5cf6] shadow-lg shadow-[#8b5cf6]/20' : 
+        isStartNode ? 'border-green-500 shadow-md shadow-green-500/20' :
+        isEndNode ? 'border-amber-500 shadow-md shadow-amber-500/20' :
+        'border-[#2a1a3a]'
+      } ${isInPath ? 'border-[#8b5cf6]/70' : ''} bg-[#1e1e3a] min-w-[200px] relative`}
+      style={isDimmed ? { opacity: 0.35, filter: 'saturate(0.3)' } : undefined}
+    >
+      {/* Start/End badge */}
+      {isStartNode && (
+        <div className="absolute -top-2 -left-2 bg-green-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shadow-lg z-10">
+          <Play size={8} fill="currentColor" /> START
+        </div>
+      )}
+      {isEndNode && (
+        <div className="absolute -top-2 -right-2 bg-amber-500 text-black text-[8px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shadow-lg z-10">
+          <Flag size={8} /> END
+        </div>
+      )}
+      
+      {/* Input handle - position based on layout direction */}
       <Handle 
         type="target" 
-        position={Position.Top} 
+        position={targetPosition} 
         className="!bg-[#2a2a3e] !border-[#4a4a6a] !w-4 !h-4 !rounded-full"
       />
       
@@ -121,13 +153,13 @@ export function PlayerNodeV2({ data, selected }: NodeProps<PlayerNodeData>) {
                 )}
               </div>
               
-              {/* Dynamic handle for this choice */}
+              {/* Dynamic handle for this choice - always on right for clarity */}
               <Handle
                 type="source"
                 position={Position.Right}
                 id={`choice-${idx}`}
                 style={{ 
-                  top: `4px`,
+                  top: `50%`,
                   transform: `translateY(-50%)`,
                   right: '-6px',
                 }}

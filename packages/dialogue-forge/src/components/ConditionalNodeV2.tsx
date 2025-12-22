@@ -1,24 +1,34 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Handle, Position, NodeProps, useUpdateNodeInternals } from 'reactflow';
 import { DialogueNode } from '../types';
-import { GitBranch } from 'lucide-react';
+import { GitBranch, Play, Flag } from 'lucide-react';
 import { FlagSchema } from '../types/flags';
+import { LayoutDirection } from '../utils/layout';
 
 interface ConditionalNodeData {
   node: DialogueNode;
   flagSchema?: FlagSchema;
+  isDimmed?: boolean;
+  isInPath?: boolean;
+  layoutDirection?: LayoutDirection;
+  isStartNode?: boolean;
+  isEndNode?: boolean;
 }
 
 // Color scheme for conditional block edges
 const CONDITIONAL_COLORS = ['#3b82f6', '#8b5cf6', '#06b6d4', '#22c55e', '#f59e0b'];
 
 export function ConditionalNodeV2({ data, selected }: NodeProps<ConditionalNodeData>) {
-  const { node, flagSchema } = data;
+  const { node, flagSchema, isDimmed, isInPath, layoutDirection = 'TB', isStartNode, isEndNode } = data;
   const blocks = node.conditionalBlocks || [];
   const updateNodeInternals = useUpdateNodeInternals();
   const headerRef = useRef<HTMLDivElement>(null);
   const blockRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [handlePositions, setHandlePositions] = useState<number[]>([]);
+  
+  // Handle positions based on layout direction
+  const isHorizontal = layoutDirection === 'LR';
+  const targetPosition = isHorizontal ? Position.Left : Position.Top;
 
   // Calculate handle positions based on actual rendered heights
   useEffect(() => {
@@ -51,13 +61,31 @@ export function ConditionalNodeV2({ data, selected }: NodeProps<ConditionalNodeD
   }, [blocks.length, node.id, updateNodeInternals]);
 
   return (
-    <div className={`rounded-lg border-2 transition-all ${
-      selected ? 'border-blue-500 shadow-lg shadow-blue-500/20' : 'border-[#1a1a4a]'
-    } bg-[#1a1a2e] min-w-[200px]`}>
-      {/* Input handle at top */}
+    <div 
+      className={`rounded-lg border-2 transition-all duration-300 ${
+        selected ? 'border-blue-500 shadow-lg shadow-blue-500/20' : 
+        isStartNode ? 'border-green-500 shadow-md shadow-green-500/20' :
+        isEndNode ? 'border-amber-500 shadow-md shadow-amber-500/20' :
+        'border-[#1a1a4a]'
+      } ${isInPath ? 'border-blue-500/70' : ''} bg-[#1a1a2e] min-w-[200px] relative`}
+      style={isDimmed ? { opacity: 0.35, filter: 'saturate(0.3)' } : undefined}
+    >
+      {/* Start/End badge */}
+      {isStartNode && (
+        <div className="absolute -top-2 -left-2 bg-green-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shadow-lg z-10">
+          <Play size={8} fill="currentColor" /> START
+        </div>
+      )}
+      {isEndNode && (
+        <div className="absolute -top-2 -right-2 bg-amber-500 text-black text-[8px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shadow-lg z-10">
+          <Flag size={8} /> END
+        </div>
+      )}
+      
+      {/* Input handle - position based on layout direction */}
       <Handle 
         type="target" 
-        position={Position.Top} 
+        position={targetPosition} 
         className="!bg-[#2a2a3e] !border-[#4a4a6a] !w-4 !h-4 !rounded-full"
       />
       
