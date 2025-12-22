@@ -908,6 +908,7 @@ function DialogueEditorV2Internal({
                 setContextMenu(null);
                 setNodeContextMenu(null);
                 setSelectedNodeId(null);
+                setShowLayoutMenu(false);
               }}
               fitView
               className="bg-[#0a0a0f]"
