@@ -2,12 +2,13 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, RotateCcw, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
 import { DialogueEditorV2 } from '../../packages/dialogue-forge/src/components/DialogueEditorV2';
 import { GuidePanel } from '../../packages/dialogue-forge/src/components/GuidePanel';
 import { FlagManager } from '../../packages/dialogue-forge/src/components/FlagManager';
 import { ExampleLoader } from '../../packages/dialogue-forge/src/components/ExampleLoader';
 import { exportToYarn, importFromYarn } from '../../packages/dialogue-forge/src/lib/yarn-converter';
+import { listLayouts } from '../../packages/dialogue-forge/src/utils/layout';
 import { FlagSchema, exampleFlagSchema } from '../../packages/dialogue-forge/src/types/flags';
 import { DialogueTree, DialogueNode, Choice } from '../../packages/dialogue-forge/src/types';
 
@@ -275,6 +276,8 @@ export default function DialogueForgePage() {
   const skipNextClick = useRef(false);
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const [showGuide, setShowGuide] = useState(false);
+  const [layoutStrategy, setLayoutStrategy] = useState<string>('dagre');
+  const availableLayouts = listLayouts();
   const panStart = useRef({ x: 0, y: 0 });
   const dragStart = useRef({ x: 0, y: 0, nodeX: 0, nodeY: 0 });
   const graphRef = useRef<HTMLDivElement>(null);
@@ -988,43 +991,6 @@ export default function DialogueForgePage() {
             
             <div className="h-6 w-px bg-[#2a2a3e] mx-1" />
             
-            {/* Import/Export */}
-            <button onClick={() => fileInputRef.current?.click()} className="p-2 text-gray-400 hover:text-white" title="Import Dialogue (.yarn or .json)">
-              <Upload size={16} />
-            </button>
-            <input ref={fileInputRef} type="file" accept=".json,.yarn" onChange={handleImport} className="hidden" />
-            <button onClick={handleExportYarn} className="p-2 text-gray-400 hover:text-white" title="Export to Yarn (.yarn)">
-              <FileText size={16} />
-            </button>
-            
-            <div className="h-6 w-px bg-[#2a2a3e] mx-1" />
-            
-            {/* Undo/Redo */}
-            <button 
-              onClick={handleUndo} 
-              disabled={historyIndex <= 0}
-              className={`p-2 ${historyIndex <= 0 ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 hover:text-white'}`} 
-              title="Undo (Ctrl+Z)"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 7v6h6" />
-                <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
-              </svg>
-            </button>
-            <button 
-              onClick={handleRedo} 
-              disabled={historyIndex >= history.length - 1}
-              className={`p-2 ${historyIndex >= history.length - 1 ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 hover:text-white'}`} 
-              title="Redo (Ctrl+Y or Ctrl+Shift+Z)"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 7v6h-6" />
-                <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13" />
-              </svg>
-            </button>
-            
-            <div className="h-6 w-px bg-[#2a2a3e] mx-1" />
-            
             {/* Guide & Save */}
             <button onClick={() => setShowGuide(true)} className="p-2 text-gray-400 hover:text-white" title="Guide & Documentation">
               <BookOpen size={16} />
@@ -1037,6 +1003,53 @@ export default function DialogueForgePage() {
       </header>
 
       <div className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 60px)' }}>
+        {/* Left Sidebar - Only in graph view */}
+        {viewMode === 'graph' && (
+          <div className="w-64 bg-[#0d0d14] border-r border-[#1a1a2e] flex flex-col overflow-hidden">
+            <div className="p-4 space-y-4 border-b border-[#1a1a2e]">
+              {/* Layout Strategy Selector */}
+              <div>
+                <label className="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Layout Algorithm</label>
+                <select
+                  value={layoutStrategy}
+                  onChange={(e) => setLayoutStrategy(e.target.value)}
+                  className="w-full px-3 py-2 text-sm bg-[#12121a] border border-[#2a2a3e] rounded text-gray-300 hover:border-[#3a3a4e] transition-colors cursor-pointer focus:outline-none focus:border-[#e94560]"
+                >
+                  {availableLayouts.map(layout => (
+                    <option key={layout.id} value={layout.id} className="bg-[#1a1a2e]">
+                      {layout.name} {layout.isDefault ? '(default)' : ''}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-gray-600 mt-1">{availableLayouts.find(l => l.id === layoutStrategy)?.description}</p>
+              </div>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {/* Flag Manager Toggle */}
+              <button
+                onClick={() => setShowFlagManager(true)}
+                className="w-full px-3 py-2 text-sm bg-[#12121a] border border-[#2a2a3e] rounded text-gray-300 hover:border-[#3a3a4e] hover:text-white transition-colors flex items-center gap-2"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <path d="M9 9h6M9 15h6M9 12h6" />
+                </svg>
+                Manage Flags
+              </button>
+              
+              {/* Guide Toggle */}
+              <button
+                onClick={() => setShowGuide(true)}
+                className="w-full px-3 py-2 text-sm bg-[#12121a] border border-[#2a2a3e] rounded text-gray-300 hover:border-[#3a3a4e] hover:text-white transition-colors flex items-center gap-2"
+              >
+                <BookOpen size={14} />
+                Guide & Docs
+              </button>
+            </div>
+          </div>
+        )}
+        
         {/* React Flow V2 Editor - Graph View */}
         {viewMode === 'graph' && (
           <DialogueEditorV2
@@ -1047,6 +1060,7 @@ export default function DialogueForgePage() {
             onExportYarn={handleExportYarn}
             flagSchema={flagSchema}
             initialViewMode="graph"
+            layoutStrategy={layoutStrategy}
             className="w-full h-full"
           />
         )}

@@ -3,6 +3,7 @@ import { DialogueTree } from '../types';
 interface YarnViewProps {
     dialogue: DialogueTree;
     onExport: () => void;
+    onImport?: (yarn: string) => void;
 }
-export declare function YarnView({ dialogue, onExport }: YarnViewProps): React.JSX.Element;
+export declare function YarnView({ dialogue, onExport, onImport }: YarnViewProps): React.JSX.Element;
 export {};

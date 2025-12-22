@@ -28,7 +28,7 @@ import { Edit3, Plus, Trash2, Play, Layout, ArrowDown, ArrowRight, Magnet, Spark
 import 'reactflow/dist/style.css';
 
 import { DialogueEditorProps, DialogueTree, DialogueNode, Choice } from '../types';
-import { exportToYarn } from '../lib/yarn-converter';
+import { exportToYarn, importFromYarn } from '../lib/yarn-converter';
 import { convertDialogueTreeToReactFlow, updateDialogueTreeFromReactFlow, CHOICE_COLORS } from '../utils/reactflow-converter';
 import { createNode, deleteNodeFromTree, addChoiceToNode, removeChoiceFromNode, updateChoiceInNode } from '../utils/node-helpers';
 import { applyLayout, listLayouts, resolveNodeCollisions, LayoutDirection, type LayoutStrategy } from '../utils/layout';
@@ -60,6 +60,7 @@ const edgeTypes = {
 interface DialogueEditorV2InternalProps extends DialogueEditorProps {
   flagSchema?: FlagSchema;
   initialViewMode?: ViewMode;
+  layoutStrategy?: string; // Layout strategy ID from parent
 }
 
 function DialogueEditorV2Internal({
@@ -71,16 +72,15 @@ function DialogueEditorV2Internal({
   showTitleEditor = true,
   flagSchema,
   initialViewMode = 'graph',
+  layoutStrategy: propLayoutStrategy = 'dagre', // Accept from parent
 }: DialogueEditorV2InternalProps) {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>('TB');
-  const [layoutStrategy, setLayoutStrategy] = useState<string>('dagre'); // Current layout strategy
+  const layoutStrategy = propLayoutStrategy; // Use prop instead of state
   const [autoOrganize, setAutoOrganize] = useState<boolean>(false); // Auto-layout on changes
   const [showPathHighlight, setShowPathHighlight] = useState<boolean>(true); // Toggle path highlighting
   const [showBackEdges, setShowBackEdges] = useState<boolean>(true); // Toggle back-edge styling
   
-  // Get available layout strategies
-  const availableLayouts = useMemo(() => listLayouts(), []);
   
   // Memoize nodeTypes and edgeTypes to prevent React Flow warnings
   const memoizedNodeTypes = useMemo(() => nodeTypes, []);
@@ -830,17 +830,13 @@ function DialogueEditorV2Internal({
     }
   }, [dialogue, onChange, autoOrganize]);
 
-  // Handle auto-layout with direction and strategy
-  const handleAutoLayout = useCallback((direction?: LayoutDirection, strategy?: string) => {
+  // Handle auto-layout with direction (strategy comes from prop)
+  const handleAutoLayout = useCallback((direction?: LayoutDirection) => {
     const dir = direction || layoutDirection;
-    const strat = strategy || layoutStrategy;
     if (direction) {
       setLayoutDirection(direction);
     }
-    if (strategy) {
-      setLayoutStrategy(strategy);
-    }
-    const result = applyLayout(dialogue, strat, { direction: dir });
+    const result = applyLayout(dialogue, layoutStrategy, { direction: dir });
     onChange(result.dialogue);
     
     // Fit view after a short delay to allow React Flow to update
@@ -989,7 +985,7 @@ function DialogueEditorV2Internal({
                         ? 'bg-green-500/20 text-green-400 border border-green-500/50' 
                         : 'bg-[#12121a] text-gray-500 hover:text-gray-300 border border-[#2a2a3e]'
                     }`}
-                    title={autoOrganize ? `Auto Layout ON (${availableLayouts.find(l => l.id === layoutStrategy)?.name || layoutStrategy}) - Nodes auto-arrange` : "Auto Layout OFF - Free placement"}
+                    title={autoOrganize ? `Auto Layout ON - Nodes auto-arrange` : "Auto Layout OFF - Free placement"}
                   >
                     <Magnet size={14} />
                   </button>
@@ -1029,24 +1025,6 @@ function DialogueEditorV2Internal({
                   >
                     <Layout size={14} />
                   </button>
-                  
-                  {/* Layout strategy selector */}
-                  <select
-                    value={layoutStrategy}
-                    onChange={(e) => {
-                      const newStrategy = e.target.value;
-                      setLayoutStrategy(newStrategy);
-                      handleAutoLayout(undefined, newStrategy);
-                    }}
-                    className="px-2 py-1.5 text-xs bg-[#12121a] border border-[#2a2a3e] rounded text-gray-300 hover:border-[#3a3a4e] transition-colors cursor-pointer focus:outline-none focus:border-[#e94560]"
-                    title="Layout Algorithm"
-                  >
-                    {availableLayouts.map(layout => (
-                      <option key={layout.id} value={layout.id} className="bg-[#1a1a2e]">
-                        {layout.name} {layout.isDefault ? '(default)' : ''}
-                      </option>
-                    ))}
-                  </select>
                   
                   <div className="w-px h-5 bg-[#2a2a3e]" />
                   
@@ -1422,6 +1400,15 @@ function DialogueEditorV2Internal({
               URL.revokeObjectURL(url);
             }
           }}
+          onImport={(yarn) => {
+            try {
+              const importedDialogue = importFromYarn(yarn, dialogue.title);
+              onChange(importedDialogue);
+            } catch (err) {
+              console.error('Failed to import Yarn:', err);
+              alert('Failed to import Yarn file. Please check the format.');
+            }
+          }}
         />
       )}
 
@@ -1435,7 +1422,7 @@ function DialogueEditorV2Internal({
   );
 }
 
-export function DialogueEditorV2(props: DialogueEditorProps & { flagSchema?: FlagSchema; initialViewMode?: ViewMode }) {
+export function DialogueEditorV2(props: DialogueEditorProps & { flagSchema?: FlagSchema; initialViewMode?: ViewMode; layoutStrategy?: string }) {
   return (
     <ReactFlowProvider>
       <DialogueEditorV2Internal {...props} />

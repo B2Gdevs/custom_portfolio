@@ -66,15 +66,14 @@ const edgeTypes = {
     choice: ChoiceEdgeV2_1.ChoiceEdgeV2,
     default: NPCEdgeV2_1.NPCEdgeV2, // Use custom component for NPC edges instead of React Flow default
 };
-function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJSON, className = '', showTitleEditor = true, flagSchema, initialViewMode = 'graph', }) {
+function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJSON, className = '', showTitleEditor = true, flagSchema, initialViewMode = 'graph', layoutStrategy: propLayoutStrategy = 'dagre', // Accept from parent
+ }) {
     const [viewMode, setViewMode] = (0, react_1.useState)(initialViewMode);
     const [layoutDirection, setLayoutDirection] = (0, react_1.useState)('TB');
-    const [layoutStrategy, setLayoutStrategy] = (0, react_1.useState)('dagre'); // Current layout strategy
+    const layoutStrategy = propLayoutStrategy; // Use prop instead of state
     const [autoOrganize, setAutoOrganize] = (0, react_1.useState)(false); // Auto-layout on changes
     const [showPathHighlight, setShowPathHighlight] = (0, react_1.useState)(true); // Toggle path highlighting
     const [showBackEdges, setShowBackEdges] = (0, react_1.useState)(true); // Toggle back-edge styling
-    // Get available layout strategies
-    const availableLayouts = (0, react_1.useMemo)(() => (0, layout_1.listLayouts)(), []);
     // Memoize nodeTypes and edgeTypes to prevent React Flow warnings
     const memoizedNodeTypes = (0, react_1.useMemo)(() => nodeTypes, []);
     const memoizedEdgeTypes = (0, react_1.useMemo)(() => edgeTypes, []);
@@ -761,17 +760,13 @@ function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJS
             }
         }
     }, [dialogue, onChange, autoOrganize]);
-    // Handle auto-layout with direction and strategy
-    const handleAutoLayout = (0, react_1.useCallback)((direction, strategy) => {
+    // Handle auto-layout with direction (strategy comes from prop)
+    const handleAutoLayout = (0, react_1.useCallback)((direction) => {
         const dir = direction || layoutDirection;
-        const strat = strategy || layoutStrategy;
         if (direction) {
             setLayoutDirection(direction);
         }
-        if (strategy) {
-            setLayoutStrategy(strategy);
-        }
-        const result = (0, layout_1.applyLayout)(dialogue, strat, { direction: dir });
+        const result = (0, layout_1.applyLayout)(dialogue, layoutStrategy, { direction: dir });
         onChange(result.dialogue);
         // Fit view after a short delay to allow React Flow to update
         setTimeout(() => {
@@ -849,7 +844,7 @@ function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJS
                                     }
                                 }, className: `p-1.5 rounded transition-colors ${autoOrganize
                                     ? 'bg-green-500/20 text-green-400 border border-green-500/50'
-                                    : 'bg-[#12121a] text-gray-500 hover:text-gray-300 border border-[#2a2a3e]'}`, title: autoOrganize ? `Auto Layout ON (${availableLayouts.find(l => l.id === layoutStrategy)?.name || layoutStrategy}) - Nodes auto-arrange` : "Auto Layout OFF - Free placement" },
+                                    : 'bg-[#12121a] text-gray-500 hover:text-gray-300 border border-[#2a2a3e]'}`, title: autoOrganize ? `Auto Layout ON - Nodes auto-arrange` : "Auto Layout OFF - Free placement" },
                                 react_1.default.createElement(lucide_react_1.Magnet, { size: 14 })),
                             react_1.default.createElement("div", { className: "w-px h-5 bg-[#2a2a3e]" }),
                             react_1.default.createElement("div", { className: "flex border border-[#2a2a3e] rounded overflow-hidden" },
@@ -863,14 +858,6 @@ function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJS
                                     react_1.default.createElement(lucide_react_1.ArrowRight, { size: 14 }))),
                             react_1.default.createElement("button", { onClick: () => handleAutoLayout(), className: "p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors", title: "Re-apply Layout" },
                                 react_1.default.createElement(lucide_react_1.Layout, { size: 14 })),
-                            react_1.default.createElement("select", { value: layoutStrategy, onChange: (e) => {
-                                    const newStrategy = e.target.value;
-                                    setLayoutStrategy(newStrategy);
-                                    handleAutoLayout(undefined, newStrategy);
-                                }, className: "px-2 py-1.5 text-xs bg-[#12121a] border border-[#2a2a3e] rounded text-gray-300 hover:border-[#3a3a4e] transition-colors cursor-pointer focus:outline-none focus:border-[#e94560]", title: "Layout Algorithm" }, availableLayouts.map(layout => (react_1.default.createElement("option", { key: layout.id, value: layout.id, className: "bg-[#1a1a2e]" },
-                                layout.name,
-                                " ",
-                                layout.isDefault ? '(default)' : '')))),
                             react_1.default.createElement("div", { className: "w-px h-5 bg-[#2a2a3e]" }),
                             react_1.default.createElement("button", { onClick: () => setShowPathHighlight(!showPathHighlight), className: `p-1.5 rounded transition-colors ${showPathHighlight
                                     ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/50'
@@ -1047,6 +1034,15 @@ function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJS
                     a.download = `${dialogue.title.replace(/\s+/g, '_')}.yarn`;
                     a.click();
                     URL.revokeObjectURL(url);
+                }
+            }, onImport: (yarn) => {
+                try {
+                    const importedDialogue = (0, yarn_converter_1.importFromYarn)(yarn, dialogue.title);
+                    onChange(importedDialogue);
+                }
+                catch (err) {
+                    console.error('Failed to import Yarn:', err);
+                    alert('Failed to import Yarn file. Please check the format.');
                 }
             } })),
         viewMode === 'play' && (react_1.default.createElement(PlayView_1.PlayView, { dialogue: dialogue, flagSchema: flagSchema }))));

@@ -8,10 +8,10 @@ import React, { useState, useCallback, useMemo, useRef } from 'react';
 import ReactFlow, { ReactFlowProvider, Background, Controls, MiniMap, addEdge, applyNodeChanges, applyEdgeChanges, useReactFlow, Panel, ConnectionLineType, BackgroundVariant, } from 'reactflow';
 import { Edit3, Plus, Trash2, Layout, ArrowDown, ArrowRight, Magnet, Sparkles, Undo2, Flag, Home } from 'lucide-react';
 import 'reactflow/dist/style.css';
-import { exportToYarn } from '../lib/yarn-converter';
+import { exportToYarn, importFromYarn } from '../lib/yarn-converter';
 import { convertDialogueTreeToReactFlow } from '../utils/reactflow-converter';
 import { createNode, deleteNodeFromTree, addChoiceToNode, removeChoiceFromNode, updateChoiceInNode } from '../utils/node-helpers';
-import { applyLayout, listLayouts, resolveNodeCollisions } from '../utils/layout';
+import { applyLayout, resolveNodeCollisions } from '../utils/layout';
 import { NodeEditor } from './NodeEditor';
 import { YarnView } from './YarnView';
 import { PlayView } from './PlayView';
@@ -30,15 +30,14 @@ const edgeTypes = {
     choice: ChoiceEdgeV2,
     default: NPCEdgeV2, // Use custom component for NPC edges instead of React Flow default
 };
-function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJSON, className = '', showTitleEditor = true, flagSchema, initialViewMode = 'graph', }) {
+function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJSON, className = '', showTitleEditor = true, flagSchema, initialViewMode = 'graph', layoutStrategy: propLayoutStrategy = 'dagre', // Accept from parent
+ }) {
     const [viewMode, setViewMode] = useState(initialViewMode);
     const [layoutDirection, setLayoutDirection] = useState('TB');
-    const [layoutStrategy, setLayoutStrategy] = useState('dagre'); // Current layout strategy
+    const layoutStrategy = propLayoutStrategy; // Use prop instead of state
     const [autoOrganize, setAutoOrganize] = useState(false); // Auto-layout on changes
     const [showPathHighlight, setShowPathHighlight] = useState(true); // Toggle path highlighting
     const [showBackEdges, setShowBackEdges] = useState(true); // Toggle back-edge styling
-    // Get available layout strategies
-    const availableLayouts = useMemo(() => listLayouts(), []);
     // Memoize nodeTypes and edgeTypes to prevent React Flow warnings
     const memoizedNodeTypes = useMemo(() => nodeTypes, []);
     const memoizedEdgeTypes = useMemo(() => edgeTypes, []);
@@ -725,17 +724,13 @@ function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJS
             }
         }
     }, [dialogue, onChange, autoOrganize]);
-    // Handle auto-layout with direction and strategy
-    const handleAutoLayout = useCallback((direction, strategy) => {
+    // Handle auto-layout with direction (strategy comes from prop)
+    const handleAutoLayout = useCallback((direction) => {
         const dir = direction || layoutDirection;
-        const strat = strategy || layoutStrategy;
         if (direction) {
             setLayoutDirection(direction);
         }
-        if (strategy) {
-            setLayoutStrategy(strategy);
-        }
-        const result = applyLayout(dialogue, strat, { direction: dir });
+        const result = applyLayout(dialogue, layoutStrategy, { direction: dir });
         onChange(result.dialogue);
         // Fit view after a short delay to allow React Flow to update
         setTimeout(() => {
@@ -813,7 +808,7 @@ function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJS
                                     }
                                 }, className: `p-1.5 rounded transition-colors ${autoOrganize
                                     ? 'bg-green-500/20 text-green-400 border border-green-500/50'
-                                    : 'bg-[#12121a] text-gray-500 hover:text-gray-300 border border-[#2a2a3e]'}`, title: autoOrganize ? `Auto Layout ON (${availableLayouts.find(l => l.id === layoutStrategy)?.name || layoutStrategy}) - Nodes auto-arrange` : "Auto Layout OFF - Free placement" },
+                                    : 'bg-[#12121a] text-gray-500 hover:text-gray-300 border border-[#2a2a3e]'}`, title: autoOrganize ? `Auto Layout ON - Nodes auto-arrange` : "Auto Layout OFF - Free placement" },
                                 React.createElement(Magnet, { size: 14 })),
                             React.createElement("div", { className: "w-px h-5 bg-[#2a2a3e]" }),
                             React.createElement("div", { className: "flex border border-[#2a2a3e] rounded overflow-hidden" },
@@ -827,14 +822,6 @@ function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJS
                                     React.createElement(ArrowRight, { size: 14 }))),
                             React.createElement("button", { onClick: () => handleAutoLayout(), className: "p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors", title: "Re-apply Layout" },
                                 React.createElement(Layout, { size: 14 })),
-                            React.createElement("select", { value: layoutStrategy, onChange: (e) => {
-                                    const newStrategy = e.target.value;
-                                    setLayoutStrategy(newStrategy);
-                                    handleAutoLayout(undefined, newStrategy);
-                                }, className: "px-2 py-1.5 text-xs bg-[#12121a] border border-[#2a2a3e] rounded text-gray-300 hover:border-[#3a3a4e] transition-colors cursor-pointer focus:outline-none focus:border-[#e94560]", title: "Layout Algorithm" }, availableLayouts.map(layout => (React.createElement("option", { key: layout.id, value: layout.id, className: "bg-[#1a1a2e]" },
-                                layout.name,
-                                " ",
-                                layout.isDefault ? '(default)' : '')))),
                             React.createElement("div", { className: "w-px h-5 bg-[#2a2a3e]" }),
                             React.createElement("button", { onClick: () => setShowPathHighlight(!showPathHighlight), className: `p-1.5 rounded transition-colors ${showPathHighlight
                                     ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/50'
@@ -1011,6 +998,15 @@ function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJS
                     a.download = `${dialogue.title.replace(/\s+/g, '_')}.yarn`;
                     a.click();
                     URL.revokeObjectURL(url);
+                }
+            }, onImport: (yarn) => {
+                try {
+                    const importedDialogue = importFromYarn(yarn, dialogue.title);
+                    onChange(importedDialogue);
+                }
+                catch (err) {
+                    console.error('Failed to import Yarn:', err);
+                    alert('Failed to import Yarn file. Please check the format.');
                 }
             } })),
         viewMode === 'play' && (React.createElement(PlayView, { dialogue: dialogue, flagSchema: flagSchema }))));

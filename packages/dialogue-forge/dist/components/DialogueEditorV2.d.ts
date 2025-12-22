@@ -12,5 +12,6 @@ type ViewMode = 'graph' | 'yarn' | 'play';
 export declare function DialogueEditorV2(props: DialogueEditorProps & {
     flagSchema?: FlagSchema;
     initialViewMode?: ViewMode;
+    layoutStrategy?: string;
 }): React.JSX.Element;
 export {};
