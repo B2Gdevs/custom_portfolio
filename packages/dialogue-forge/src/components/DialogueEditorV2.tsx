@@ -5,11 +5,12 @@
  * See V2_MIGRATION_PLAN.md for implementation details.
  */
 
-import React, { useState, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import ReactFlow, { 
   ReactFlowProvider,
   Background,
   Controls,
+  MiniMap,
   Node,
   Edge,
   NodeChange,
@@ -86,6 +87,7 @@ function DialogueEditorV2Internal({
   const [showPathHighlight, setShowPathHighlight] = useState<boolean>(true); // Toggle path highlighting
   const [showBackEdges, setShowBackEdges] = useState<boolean>(true); // Toggle back-edge styling
   const [showLayoutMenu, setShowLayoutMenu] = useState<boolean>(false);
+  const lastWheelClickRef = useRef<number>(0);
   
   
   // Memoize nodeTypes and edgeTypes to prevent React Flow warnings
@@ -582,6 +584,71 @@ function DialogueEditorV2Internal({
     setNodeContextMenu(null);
   }, []);
 
+  // Handle node double-click - zoom to node
+  const onNodeDoubleClick = useCallback((_event: React.MouseEvent, node: Node) => {
+    if (reactFlowInstance) {
+      reactFlowInstance.setCenter(
+        node.position.x + 110, // Half of NODE_WIDTH
+        node.position.y + 60,  // Half of NODE_HEIGHT
+        { zoom: 1.5, duration: 500 }
+      );
+    }
+  }, [reactFlowInstance]);
+
+  // Handle pane double-click - fit view to all nodes (like default zoom)
+  // We'll handle this via useEffect since React Flow doesn't have onPaneDoubleClick
+  const reactFlowWrapperRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const handleDoubleClick = (event: MouseEvent) => {
+      // Check if clicking on the pane (not on a node or edge)
+      const target = event.target as HTMLElement;
+      if (target.closest('.react-flow__node') || target.closest('.react-flow__edge')) {
+        return; // Don't handle if clicking on node/edge
+      }
+      
+      if (reactFlowInstance) {
+        reactFlowInstance.fitView({ padding: 0.2, duration: 500 });
+      }
+    };
+
+    const container = reactFlowWrapperRef.current;
+    if (container) {
+      container.addEventListener('dblclick', handleDoubleClick);
+      return () => {
+        container.removeEventListener('dblclick', handleDoubleClick);
+      };
+    }
+  }, [reactFlowInstance]);
+
+  // Track mouse wheel clicks for double-click detection
+  useEffect(() => {
+    const handleMouseDown = (event: Event) => {
+      const mouseEvent = event as MouseEvent;
+      if (mouseEvent.button === 1) { // Middle mouse button (wheel)
+        const now = Date.now();
+        if (now - lastWheelClickRef.current < 300) {
+          // Double-click detected - fit view
+          mouseEvent.preventDefault();
+          if (reactFlowInstance) {
+            reactFlowInstance.fitView({ padding: 0.2, duration: 500 });
+          }
+          lastWheelClickRef.current = 0;
+        } else {
+          lastWheelClickRef.current = now;
+        }
+      }
+    };
+
+    const container = document.querySelector('.react-flow');
+    if (container) {
+      container.addEventListener('mousedown', handleMouseDown);
+      return () => {
+        container.removeEventListener('mousedown', handleMouseDown);
+      };
+    }
+  }, [reactFlowInstance]);
+
   // Handle pane context menu (right-click on empty space)
   const onPaneContextMenu = useCallback((event: React.MouseEvent) => {
     event.preventDefault();
@@ -858,7 +925,7 @@ function DialogueEditorV2Internal({
       {viewMode === 'graph' && (
         <div className="flex-1 flex overflow-hidden">
           {/* React Flow Graph */}
-          <div className="flex-1 relative">
+          <div className="flex-1 relative" ref={reactFlowWrapperRef}>
             <ReactFlow
               nodes={nodesWithFlags}
               edges={edges.map(edge => {
@@ -899,6 +966,7 @@ function DialogueEditorV2Internal({
               onConnectStart={onConnectStart}
               onConnectEnd={onConnectEnd}
               onNodeClick={onNodeClick}
+              onNodeDoubleClick={onNodeDoubleClick}
               onPaneContextMenu={onPaneContextMenu}
               onNodeContextMenu={onNodeContextMenu}
               onEdgeContextMenu={onEdgeContextMenu}
@@ -930,18 +998,37 @@ function DialogueEditorV2Internal({
               tabIndex={0}
             >
               <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#1a1a2e" />
-              <Controls 
-                className="!bg-[#0d0d14] !border !border-[#2a2a3e] !rounded-lg !shadow-lg"
-                style={{ 
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '2px',
-                  padding: '4px',
-                }}
-                showZoom={true}
-                showFitView={true}
-                showInteractive={false}
-              />
+              
+              {/* Enhanced MiniMap with title */}
+              <Panel position="bottom-right" className="!p-0 !m-2">
+                <div className="bg-[#0d0d14] border border-[#2a2a3e] rounded-lg overflow-hidden shadow-xl">
+                  <div className="px-3 py-1.5 border-b border-[#2a2a3e] flex items-center justify-between bg-[#12121a]">
+                    <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Overview</span>
+                    <div className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#e94560]" title="NPC Node" />
+                      <span className="w-2 h-2 rounded-full bg-[#8b5cf6]" title="Player Node" />
+                      <span className="w-2 h-2 rounded-full bg-blue-500" title="Conditional" />
+                    </div>
+                  </div>
+                  <MiniMap 
+                    style={{ 
+                      width: 180, 
+                      height: 120,
+                      backgroundColor: '#08080c',
+                    }}
+                    maskColor="rgba(0, 0, 0, 0.7)"
+                    nodeColor={(node) => {
+                      if (node.type === 'npc') return '#e94560';
+                      if (node.type === 'player') return '#8b5cf6';
+                      if (node.type === 'conditional') return '#3b82f6';
+                      return '#4a4a6a';
+                    }}
+                    nodeStrokeWidth={2}
+                    pannable
+                    zoomable
+                  />
+                </div>
+              </Panel>
               
               {/* Left Toolbar - Layout, Flags, Guide */}
               <Panel position="top-left" className="!bg-transparent !border-0 !p-0 !m-2">

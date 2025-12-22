@@ -4,8 +4,8 @@
  * This is the new version using React Flow for graph rendering.
  * See V2_MIGRATION_PLAN.md for implementation details.
  */
-import React, { useState, useCallback, useMemo, useRef } from 'react';
-import ReactFlow, { ReactFlowProvider, Background, Controls, addEdge, applyNodeChanges, applyEdgeChanges, useReactFlow, Panel, ConnectionLineType, BackgroundVariant, } from 'reactflow';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import ReactFlow, { ReactFlowProvider, Background, MiniMap, addEdge, applyNodeChanges, applyEdgeChanges, useReactFlow, Panel, ConnectionLineType, BackgroundVariant, } from 'reactflow';
 import { Edit3, Plus, Trash2, Layout, ArrowDown, ArrowRight, Magnet, Sparkles, Undo2, Flag, Home, BookOpen, Settings, Grid3x3 } from 'lucide-react';
 import 'reactflow/dist/style.css';
 import { exportToYarn, importFromYarn } from '../lib/yarn-converter';
@@ -39,6 +39,7 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, }) {
     const [showPathHighlight, setShowPathHighlight] = useState(true); // Toggle path highlighting
     const [showBackEdges, setShowBackEdges] = useState(true); // Toggle back-edge styling
     const [showLayoutMenu, setShowLayoutMenu] = useState(false);
+    const lastWheelClickRef = useRef(0);
     // Memoize nodeTypes and edgeTypes to prevent React Flow warnings
     const memoizedNodeTypes = useMemo(() => nodeTypes, []);
     const memoizedEdgeTypes = useMemo(() => edgeTypes, []);
@@ -495,6 +496,63 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, }) {
         setSelectedNodeId(node.id);
         setNodeContextMenu(null);
     }, []);
+    // Handle node double-click - zoom to node
+    const onNodeDoubleClick = useCallback((_event, node) => {
+        if (reactFlowInstance) {
+            reactFlowInstance.setCenter(node.position.x + 110, // Half of NODE_WIDTH
+            node.position.y + 60, // Half of NODE_HEIGHT
+            { zoom: 1.5, duration: 500 });
+        }
+    }, [reactFlowInstance]);
+    // Handle pane double-click - fit view to all nodes (like default zoom)
+    // We'll handle this via useEffect since React Flow doesn't have onPaneDoubleClick
+    const reactFlowWrapperRef = useRef(null);
+    useEffect(() => {
+        const handleDoubleClick = (event) => {
+            // Check if clicking on the pane (not on a node or edge)
+            const target = event.target;
+            if (target.closest('.react-flow__node') || target.closest('.react-flow__edge')) {
+                return; // Don't handle if clicking on node/edge
+            }
+            if (reactFlowInstance) {
+                reactFlowInstance.fitView({ padding: 0.2, duration: 500 });
+            }
+        };
+        const container = reactFlowWrapperRef.current;
+        if (container) {
+            container.addEventListener('dblclick', handleDoubleClick);
+            return () => {
+                container.removeEventListener('dblclick', handleDoubleClick);
+            };
+        }
+    }, [reactFlowInstance]);
+    // Track mouse wheel clicks for double-click detection
+    useEffect(() => {
+        const handleMouseDown = (event) => {
+            const mouseEvent = event;
+            if (mouseEvent.button === 1) { // Middle mouse button (wheel)
+                const now = Date.now();
+                if (now - lastWheelClickRef.current < 300) {
+                    // Double-click detected - fit view
+                    mouseEvent.preventDefault();
+                    if (reactFlowInstance) {
+                        reactFlowInstance.fitView({ padding: 0.2, duration: 500 });
+                    }
+                    lastWheelClickRef.current = 0;
+                }
+                else {
+                    lastWheelClickRef.current = now;
+                }
+            }
+        };
+        const container = document.querySelector('.react-flow');
+        if (container) {
+            container.addEventListener('mousedown', handleMouseDown);
+            return () => {
+                container.removeEventListener('mousedown', handleMouseDown);
+            };
+        }
+    }, [reactFlowInstance]);
     // Handle pane context menu (right-click on empty space)
     const onPaneContextMenu = useCallback((event) => {
         event.preventDefault();
@@ -742,7 +800,7 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, }) {
     }, [dialogue, onChange, reactFlowInstance, layoutDirection, layoutStrategy]);
     return (React.createElement("div", { className: `dialogue-editor-v2 ${className} w-full h-full flex flex-col` },
         viewMode === 'graph' && (React.createElement("div", { className: "flex-1 flex overflow-hidden" },
-            React.createElement("div", { className: "flex-1 relative" },
+            React.createElement("div", { className: "flex-1 relative", ref: reactFlowWrapperRef },
                 React.createElement(ReactFlow, { nodes: nodesWithFlags, edges: edges.map(edge => {
                         // Detect back-edges (loops) based on layout direction
                         const sourceNode = nodes.find(n => n.id === edge.source);
@@ -764,7 +822,7 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, }) {
                                 isDimmed,
                             },
                         };
-                    }), nodeTypes: memoizedNodeTypes, edgeTypes: memoizedEdgeTypes, onNodesChange: onNodesChange, onEdgesChange: onEdgesChange, onNodesDelete: onNodesDelete, onEdgesDelete: onEdgesDelete, onNodeDragStop: onNodeDragStop, nodesDraggable: !autoOrganize, onConnect: onConnect, onConnectStart: onConnectStart, onConnectEnd: onConnectEnd, onNodeClick: onNodeClick, onPaneContextMenu: onPaneContextMenu, onNodeContextMenu: onNodeContextMenu, onEdgeContextMenu: onEdgeContextMenu, onPaneClick: () => {
+                    }), nodeTypes: memoizedNodeTypes, edgeTypes: memoizedEdgeTypes, onNodesChange: onNodesChange, onEdgesChange: onEdgesChange, onNodesDelete: onNodesDelete, onEdgesDelete: onEdgesDelete, onNodeDragStop: onNodeDragStop, nodesDraggable: !autoOrganize, onConnect: onConnect, onConnectStart: onConnectStart, onConnectEnd: onConnectEnd, onNodeClick: onNodeClick, onNodeDoubleClick: onNodeDoubleClick, onPaneContextMenu: onPaneContextMenu, onNodeContextMenu: onNodeContextMenu, onEdgeContextMenu: onEdgeContextMenu, onPaneClick: () => {
                         // Close context menus and deselect node when clicking on pane (not nodes)
                         setContextMenu(null);
                         setNodeContextMenu(null);
@@ -772,12 +830,27 @@ onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, }) {
                         setShowLayoutMenu(false);
                     }, fitView: true, className: "bg-[#0a0a0f]", style: { background: 'radial-gradient(circle, #1a1a2e 1px, #08080c 1px)', backgroundSize: '20px 20px' }, defaultEdgeOptions: { type: 'default' }, connectionLineStyle: { stroke: '#e94560', strokeWidth: 2 }, connectionLineType: ConnectionLineType.SmoothStep, snapToGrid: false, nodesConnectable: true, elementsSelectable: true, selectionOnDrag: true, panOnDrag: [1, 2], zoomOnScroll: true, zoomOnPinch: true, preventScrolling: true, zoomOnDoubleClick: false, minZoom: 0.1, maxZoom: 3, deleteKeyCode: ['Delete', 'Backspace'], tabIndex: 0 },
                     React.createElement(Background, { variant: BackgroundVariant.Dots, gap: 20, size: 1, color: "#1a1a2e" }),
-                    React.createElement(Controls, { className: "!bg-[#0d0d14] !border !border-[#2a2a3e] !rounded-lg !shadow-lg", style: {
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '2px',
-                            padding: '4px',
-                        }, showZoom: true, showFitView: true, showInteractive: false }),
+                    React.createElement(Panel, { position: "bottom-right", className: "!p-0 !m-2" },
+                        React.createElement("div", { className: "bg-[#0d0d14] border border-[#2a2a3e] rounded-lg overflow-hidden shadow-xl" },
+                            React.createElement("div", { className: "px-3 py-1.5 border-b border-[#2a2a3e] flex items-center justify-between bg-[#12121a]" },
+                                React.createElement("span", { className: "text-[10px] font-medium text-gray-400 uppercase tracking-wider" }, "Overview"),
+                                React.createElement("div", { className: "flex items-center gap-1" },
+                                    React.createElement("span", { className: "w-2 h-2 rounded-full bg-[#e94560]", title: "NPC Node" }),
+                                    React.createElement("span", { className: "w-2 h-2 rounded-full bg-[#8b5cf6]", title: "Player Node" }),
+                                    React.createElement("span", { className: "w-2 h-2 rounded-full bg-blue-500", title: "Conditional" }))),
+                            React.createElement(MiniMap, { style: {
+                                    width: 180,
+                                    height: 120,
+                                    backgroundColor: '#08080c',
+                                }, maskColor: "rgba(0, 0, 0, 0.7)", nodeColor: (node) => {
+                                    if (node.type === 'npc')
+                                        return '#e94560';
+                                    if (node.type === 'player')
+                                        return '#8b5cf6';
+                                    if (node.type === 'conditional')
+                                        return '#3b82f6';
+                                    return '#4a4a6a';
+                                }, nodeStrokeWidth: 2, pannable: true, zoomable: true }))),
                     React.createElement(Panel, { position: "top-left", className: "!bg-transparent !border-0 !p-0 !m-2" },
                         React.createElement("div", { className: "flex flex-col gap-1.5 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg p-1.5 shadow-lg" },
                             React.createElement("div", { className: "relative" },
