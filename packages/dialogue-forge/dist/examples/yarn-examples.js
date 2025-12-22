@@ -1,0 +1,189 @@
+"use strict";
+/**
+ * Inline Yarn file contents for examples
+ * This allows examples to be bundled and loaded synchronously
+ *
+ * To add a new example:
+ * 1. Create a .yarn file in the examples directory
+ * 2. Copy its content here as a string literal
+ * 3. Add it to the yarnExamplesContent object
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.loadAllExamples = loadAllExamples;
+exports.getExampleDialogue = getExampleDialogue;
+exports.getAllExampleDialogues = getAllExampleDialogues;
+exports.getExampleFlagSchema = getExampleFlagSchema;
+exports.hasExampleContent = hasExampleContent;
+exports.getAvailableExampleIds = getAvailableExampleIds;
+const yarn_converter_1 = require("../lib/yarn-converter");
+const examples_registry_1 = require("./examples-registry");
+/**
+ * Map of example ID to Yarn file content
+ * All examples are stored as Yarn strings here for easy discovery and maintenance
+ */
+const yarnExamplesContent = {
+    'variable-operations': `title: merchant_shop
+---
+Merchant: Welcome to my shop, {$player_name}!
+Merchant: You currently have {$stat_gold} gold pieces.
+<<if $stat_gold >= 100>>
+    Merchant: You can afford the sword! It costs 100 gold.
+    -> Buy the sword
+        <<set $item_sword = true>>
+        <<set $stat_gold -= 100>>
+        Merchant: Thank you for your purchase! You now have {$stat_gold} gold.
+        <<jump after_purchase>>
+    -> Maybe later
+        Merchant: Come back anytime!
+        <<jump end>>
+<<elseif $stat_gold >= 50>>
+    Merchant: You can afford the potion! It costs 50 gold.
+    -> Buy the potion
+        <<set $item_potion = true>>
+        <<set $stat_gold -= 50>>
+        Merchant: Thank you! You now have {$stat_gold} gold.
+        <<jump after_purchase>>
+    -> Save up for the sword
+        Merchant: Wise choice! Come back when you have more gold.
+        <<jump end>>
+<<else>>
+    Merchant: I'm sorry, but you don't have enough gold for anything.
+    Merchant: Come back when you have at least 50 gold pieces.
+    <<jump end>>
+<<endif>>
+===
+
+title: after_purchase
+---
+Merchant: Is there anything else you'd like?
+<<set $stat_reputation += 5>>
+Merchant: Your reputation with me has increased! It's now {$stat_reputation}.
+-> Browse more
+    <<jump merchant_shop>>
+-> Leave
+    Merchant: Thanks for shopping!
+    <<jump end>>
+===
+
+title: quest_reward
+---
+QuestGiver: You've completed the quest! Here's your reward.
+<<set $stat_gold += 500>>
+<<set $stat_experience += 100>>
+<<set $quest_dragon_slayer = "complete">>
+QuestGiver: You received 500 gold and 100 experience!
+QuestGiver: You now have {$stat_gold} gold and {$stat_experience} experience points.
+<<jump end>>
+===
+
+title: stat_multiplier
+---
+Trainer: I can double your strength for a price.
+<<if $stat_gold >= 200>>
+    Trainer: For 200 gold, I'll double your strength stat.
+    -> Pay for training
+        <<set $stat_strength *= 2>>
+        <<set $stat_gold -= 200>>
+        Trainer: Your strength is now {$stat_strength}!
+        <<jump end>>
+    -> Not right now
+        Trainer: Come back when you're ready.
+        <<jump end>>
+<<else>>
+    Trainer: You need 200 gold for this training.
+    <<jump end>>
+<<endif>>
+===
+
+title: string_variables
+---
+NPC: Hello, {$player_name}! Welcome to {$location_name}.
+NPC: Your title is {$player_title}.
+<<set $greeting_count += 1>>
+NPC: I've greeted you {$greeting_count} times now.
+<<if $greeting_count >= 5>>
+    NPC: You're a regular here! Let me give you a discount.
+    <<set $stat_reputation += 10>>
+<<endif>>
+<<jump end>>
+===
+
+title: end
+---
+===
+`,
+    // Add more examples here as they're converted to Yarn format
+};
+/**
+ * Pre-loaded examples cache
+ */
+let examplesCache = {};
+/**
+ * Load all examples synchronously
+ * This should be called once at initialization
+ */
+function loadAllExamples() {
+    if (Object.keys(examplesCache).length > 0) {
+        return examplesCache;
+    }
+    const loaded = {};
+    for (const metadata of examples_registry_1.examplesRegistry) {
+        const yarnContent = yarnExamplesContent[metadata.id];
+        if (yarnContent) {
+            try {
+                const dialogue = (0, yarn_converter_1.importFromYarn)(yarnContent, metadata.title);
+                loaded[metadata.id] = dialogue;
+                metadata.nodeCount = Object.keys(dialogue.nodes).length;
+            }
+            catch (error) {
+                console.error(`Error loading example ${metadata.id}:`, error);
+            }
+        }
+    }
+    examplesCache = loaded;
+    return loaded;
+}
+// Pre-load examples when module is imported
+loadAllExamples();
+/**
+ * Get a loaded example dialogue
+ */
+function getExampleDialogue(exampleId) {
+    if (Object.keys(examplesCache).length === 0) {
+        loadAllExamples();
+    }
+    return examplesCache[exampleId] || null;
+}
+/**
+ * Get all loaded examples
+ */
+function getAllExampleDialogues() {
+    if (Object.keys(examplesCache).length === 0) {
+        loadAllExamples();
+    }
+    return examplesCache;
+}
+/**
+ * Get flag schema for an example
+ */
+function getExampleFlagSchema(exampleId) {
+    const metadata = examples_registry_1.examplesRegistry.find(ex => ex.id === exampleId);
+    if (!metadata) {
+        return null;
+    }
+    return examples_registry_1.exampleFlagSchemas[metadata.flagSchemaId] || null;
+}
+/**
+ * Check if an example has Yarn content available
+ */
+function hasExampleContent(exampleId) {
+    return exampleId in yarnExamplesContent;
+}
+/**
+ * Get list of example IDs that have content available
+ */
+function getAvailableExampleIds() {
+    return examples_registry_1.examplesRegistry
+        .filter(metadata => hasExampleContent(metadata.id))
+        .map(metadata => metadata.id);
+}

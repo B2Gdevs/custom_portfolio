@@ -123,9 +123,13 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
       // Use functional update to avoid dependency issues
       setGameFlags(prev => {
         const updatedVars = variableManager.getAllVariables();
-        // Only update if there are actual changes to avoid infinite loops
-        const hasChanges = Object.keys(updatedVars).some(key => prev[key] !== updatedVars[key]);
-        return hasChanges ? { ...prev, ...updatedVars } : prev;
+        // Filter out undefined values and only update if there are changes
+        const definedVars: GameFlagState = {};
+        for (const [key, value] of Object.entries(updatedVars)) {
+          if (value !== undefined) definedVars[key] = value;
+        }
+        const hasChanges = Object.keys(definedVars).some(key => prev[key] !== definedVars[key]);
+        return hasChanges ? { ...prev, ...definedVars } : prev;
       });
       
       setIsTyping(false);
@@ -161,7 +165,11 @@ export function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }: Pl
     
     // Update game flags from variable manager after operations
     const updatedVars = variableManager.getAllVariables();
-    setGameFlags(prev => ({ ...prev, ...updatedVars }));
+    const definedVars: GameFlagState = {};
+    for (const [key, value] of Object.entries(updatedVars)) {
+      if (value !== undefined) definedVars[key] = value;
+    }
+    setGameFlags(prev => ({ ...prev, ...definedVars }));
     
     if (choice.setFlags) {
       // Update dialogue flags (temporary)

@@ -21,12 +21,13 @@ export function evaluateCondition(
   }
   
   // For numeric comparisons, treat undefined as 0
-  const isNumericComparison = [
+  const numericOperators = [
     CONDITION_OPERATOR.GREATER_THAN,
     CONDITION_OPERATOR.LESS_THAN,
     CONDITION_OPERATOR.GREATER_EQUAL,
     CONDITION_OPERATOR.LESS_EQUAL
-  ].includes(condition.operator);
+  ] as const;
+  const isNumericComparison = (numericOperators as readonly string[]).includes(condition.operator);
   
   if (isNumericComparison && value === undefined) {
     value = 0;
