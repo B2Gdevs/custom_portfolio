@@ -58,10 +58,12 @@ echo "📝 Creating npm token..."
 echo "   This token will be used for all packages"
 echo "   Token will have publish permissions"
 echo ""
+echo "   ⏳ This may take a moment..."
+echo ""
 
-# Create token and capture it
-TOKEN_OUTPUT=$(npm token create --read-only=false 2>&1)
-NPM_TOKEN=$(echo "$TOKEN_OUTPUT" | grep -oP 'npm_\w+' | head -1)
+# Create token and capture it (with timeout handling)
+TOKEN_OUTPUT=$(npm token create --read-only=false 2>&1 || echo "ERROR")
+NPM_TOKEN=$(echo "$TOKEN_OUTPUT" | grep -oE 'npm_[a-zA-Z0-9]+' | head -1)
 
 if [ -z "$NPM_TOKEN" ]; then
   echo "❌ Failed to create npm token"
