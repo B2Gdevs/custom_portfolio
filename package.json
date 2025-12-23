@@ -25,7 +25,9 @@
     "package:workflows:all": "./scripts/setup-all-workflows.sh",
     "package:check": "./scripts/setup-env.sh",
     "package:verify": "./scripts/verify-auth.sh",
-    "package:token:check": "./scripts/check-token-setup.sh"
+    "package:token:check": "./scripts/check-token-setup.sh",
+    "package:org:setup": "./scripts/setup-org-secrets.sh",
+    "package:org:update": "./scripts/update-org-npm-token.sh"
   },
   "engines": {
     "node": ">=18.0.0"
