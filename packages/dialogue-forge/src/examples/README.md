@@ -54,3 +54,4 @@ Unit tests in `src/lib/yarn-converter/__tests__/round-trip.test.ts` ensure:
 - DialogueTree → Yarn conversion works  
 - Round-trip conversion preserves all data
 
+
