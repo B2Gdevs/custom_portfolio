@@ -71,8 +71,8 @@ export function NPCNodeV2({ data, selected }) {
                 "\"",
                 contentPreview,
                 "\""),
-            node.setFlags && node.setFlags.length > 0 && (React.createElement("div", { className: "mt-1.5 flex flex-wrap gap-1" }, node.setFlags.map(flagId => {
-                const flag = flagSchema?.flags.find(f => f.id === flagId);
+            node.setFlags && node.setFlags.length > 0 && (React.createElement("div", { className: "mt-1.5 flex flex-wrap gap-1" }, node.setFlags.map((flagId) => {
+                const flag = flagSchema?.flags.find((f) => f.id === flagId);
                 const flagType = flag?.type || 'dialogue';
                 return (React.createElement("span", { key: flagId, className: `text-[8px] px-1 py-0.5 rounded border ${getFlagColorClass(flagType)}`, title: flag?.name || flagId }, flagType === 'dialogue' ? 't' : flagType[0]));
             })))),

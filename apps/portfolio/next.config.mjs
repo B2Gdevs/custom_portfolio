@@ -3,7 +3,7 @@ const nextConfig = {
   experimental: {
     mdxRs: false,
   },
-  transpilePackages: ['@portfolio/dialogue-forge'],
+  transpilePackages: ['@magicborn/dialogue-forge'],
 };
 
 export default nextConfig;

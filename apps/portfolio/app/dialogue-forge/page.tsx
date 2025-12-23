@@ -3,13 +3,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
-import { DialogueEditorV2 } from '@portfolio/dialogue-forge/src/components/DialogueEditorV2';
-import { GuidePanel } from '@portfolio/dialogue-forge/src/components/GuidePanel';
-import { FlagManager } from '@portfolio/dialogue-forge/src/components/FlagManager';
-import { exportToYarn, importFromYarn } from '@portfolio/dialogue-forge/src/lib/yarn-converter';
-import { listLayouts } from '@portfolio/dialogue-forge/src/utils/layout';
-import { FlagSchema, exampleFlagSchema } from '@portfolio/dialogue-forge/src/types/flags';
-import { DialogueTree, DialogueNode, Choice } from '@portfolio/dialogue-forge/src/types';
+import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
 
 interface HistoryEntry {
   nodeId: string;

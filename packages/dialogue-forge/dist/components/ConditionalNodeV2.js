@@ -55,7 +55,7 @@ function ConditionalNodeV2({ data, selected }) {
             const positions = [];
             const headerHeight = headerRef.current.offsetHeight;
             let cumulativeHeight = headerHeight;
-            blocks.forEach((_, idx) => {
+            blocks.forEach((_block, idx) => {
                 const blockEl = blockRefs.current[idx];
                 if (blockEl) {
                     const blockHeight = blockEl.offsetHeight;
@@ -98,7 +98,7 @@ function ConditionalNodeV2({ data, selected }) {
             return (react_1.default.createElement("div", { key: block.id, ref: el => { blockRefs.current[idx] = el; }, className: "px-3 py-1.5 border-b border-[#2a2a3e] last:border-b-0" },
                 react_1.default.createElement("div", { className: "flex items-center gap-2 mb-1" },
                     react_1.default.createElement("span", { className: "text-[9px] px-1.5 py-0.5 rounded bg-black text-white font-semibold" }, blockType),
-                    block.condition && block.condition.length > 0 && (react_1.default.createElement("span", { className: "text-[9px] text-gray-500 font-mono truncate flex-1" }, block.condition.map(c => {
+                    block.condition && block.condition.length > 0 && (react_1.default.createElement("span", { className: "text-[9px] text-gray-500 font-mono truncate flex-1" }, block.condition.map((c) => {
                         const varName = `$${c.flag}`;
                         if (c.operator === 'is_set')
                             return varName;

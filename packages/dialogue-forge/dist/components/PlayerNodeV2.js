@@ -56,7 +56,7 @@ function PlayerNodeV2({ data, selected }) {
             const positions = [];
             const headerHeight = headerRef.current.offsetHeight;
             let cumulativeHeight = headerHeight;
-            choices.forEach((_, idx) => {
+            choices.forEach((_choice, idx) => {
                 const choiceEl = choiceRefs.current[idx];
                 if (choiceEl) {
                     const choiceHeight = choiceEl.offsetHeight;
