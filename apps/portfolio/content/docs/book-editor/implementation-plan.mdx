@@ -1,0 +1,333 @@
+---
+title: "Book Editor - Implementation Plan"
+description: "Step-by-step implementation plan and setup guide"
+date: "2025-01-20"
+---
+
+# Implementation Plan
+
+## Phase 1: Foundation (Week 1-2)
+
+### Setup
+1. **Install Dependencies**
+   ```bash
+   npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-collaboration
+   npm install yjs y-websocket
+   npm install epub-gen epubjs
+   npm install zod date-fns react-dropzone
+   npm install framer-motion
+   npm install -D vitest @testing-library/react @testing-library/jest-dom
+   ```
+
+2. **Create Directory Structure**
+   - Set up `components/book-editor/` structure
+   - Create `lib/book-editor/services/` for implementations
+   - Set up `public/books/` for media storage
+
+3. **Database Schema**
+   - Create Drizzle schema files
+   - Write migration scripts
+   - Set up test database
+
+### Core Components
+1. **Basic Types** (`types/book.types.ts`)
+   - Book, Chapter, Section interfaces
+   - Service interfaces
+
+2. **Service Interfaces** (`services/`)
+   - BookService interface
+   - VersionService interface
+   - CollaborationService interface
+   - MediaService interface
+
+3. **Basic Hooks**
+   - `useBookService` - Service injection
+   - `useBook` - Book data management
+
+## Phase 2: Reader (Week 3)
+
+### Components
+1. **BookReader.tsx** - Main reader component
+2. **ChapterView.tsx** - Chapter rendering
+3. **GrimoireTheme.tsx** - Theme provider
+4. **MediaViewer.tsx** - Image/media display
+
+### Features
+- Chapter navigation
+- Lazy loading
+- EPUB reading (epub.js)
+- HTML export
+- Basic animations
+
+## Phase 3: Editor Core (Week 4-5)
+
+### Components
+1. **BookEditor.tsx** - Main editor
+2. **RichTextEditor.tsx** - TipTap integration
+3. **ChapterEditor.tsx** - Chapter management
+4. **SectionEditor.tsx** - Section editing
+5. **MetadataPanel.tsx** - Metadata form
+
+### Features
+- Rich text editing (TipTap)
+- Section management (add, delete, reorder)
+- Metadata editing
+- Auto-save
+- Basic styling
+
+## Phase 4: Versioning (Week 6)
+
+### Components
+1. **VersionHistory.tsx** - Version timeline
+2. **BranchManager.tsx** - Branch UI
+3. **MergeInterface.tsx** - Merge conflicts
+
+### Features
+- Automatic version snapshots
+- Branch creation
+- Three-way merge algorithm
+- Conflict resolution UI
+- Version restoration
+
+### Implementation
+1. **Version Service**
+   - Create snapshot function
+   - Branch creation
+   - Merge algorithm
+   - Conflict detection
+
+2. **Merge Algorithm**
+   - Three-way comparison
+   - Conflict detection
+   - Auto-merge logic
+   - Manual resolution support
+
+## Phase 5: Collaboration (Week 7-8)
+
+### Components
+1. **CollaborationPanel.tsx** - User presence
+2. **WebSocket Integration** - Real-time sync
+
+### Features
+- User presence (who's online)
+- Cursor tracking
+- Highlights
+- Real-time updates
+
+### Implementation
+1. **WebSocket Server**
+   - Connection handling
+   - Message routing
+   - Room management (per book)
+
+2. **Y.js Integration**
+   - Y.js document setup
+   - WebSocket provider
+   - Collaboration extensions
+
+3. **Presence System**
+   - User tracking
+   - Cursor positions
+   - Status updates (active/idle/away)
+
+## Phase 6: Polish (Week 9-10)
+
+### Grimoire Theme
+1. **Dark Theme**
+   - Color palette
+   - Typography
+   - Spacing
+
+2. **Animations**
+   - Page turns
+   - Fade-ins
+   - Ink effects
+   - Hover states
+
+3. **Visual Effects**
+   - Paper texture
+   - Shadows
+   - Ornate borders
+   - Mystical icons
+
+### Export Features
+1. **EPUB Export**
+   - Generate EPUB file
+   - Include metadata
+   - Handle images
+   - Styling
+
+2. **HTML Export**
+   - Clean HTML output
+   - Preserve formatting
+   - Include styles
+
+## Phase 7: Testing (Week 11)
+
+### Unit Tests
+- Component tests
+- Hook tests
+- Utility function tests
+
+### Integration Tests
+- Service integration
+- WebSocket flow
+- Version merging
+
+### E2E Tests
+- Full editing workflow
+- Collaboration flow
+- Export functionality
+
+## Phase 8: Optimization (Week 12)
+
+### Performance
+- Lazy loading optimization
+- Content chunking
+- Memory management
+- Bundle size optimization
+
+### Accessibility
+- Keyboard navigation
+- Screen reader support
+- ARIA labels
+- Focus management
+
+## WebSocket Server Setup
+
+### Server Structure
+
+```typescript
+// lib/book-editor/websocket/server.ts
+import { WebSocketServer } from 'ws';
+import { setupWSConnection } from 'y-websocket';
+
+const wss = new WebSocketServer({ port: 8080 });
+
+wss.on('connection', (ws, req) => {
+  const bookId = extractBookId(req.url);
+  setupWSConnection(ws, req, { roomName: `book-${bookId}` });
+});
+```
+
+### Message Types
+
+```typescript
+type WebSocketMessage =
+  | { type: 'presence', userId: string, status: 'active' | 'idle' | 'away' }
+  | { type: 'cursor', userId: string, position: CursorPosition }
+  | { type: 'highlight', userId: string, highlight: Highlight }
+  | { type: 'typing', userId: string, chapterId: string };
+```
+
+## Content Chunking Implementation
+
+### Strategy: Chapter-Level Chunking
+
+**Why**: Simple, effective for most books, easy to implement
+
+**How**:
+1. Load book metadata immediately
+2. Load chapter list
+3. Load chapters on-demand:
+   - When user navigates
+   - When chapter enters viewport (Intersection Observer)
+   - Pre-load adjacent chapters
+
+**Implementation**:
+
+```typescript
+// hooks/useLazyChapter.ts
+export function useLazyChapter(chapterId: string) {
+  const [chapter, setChapter] = useState<Chapter | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [cache, setCache] = useState<Map<string, Chapter>>(new Map());
+
+  const loadChapter = useCallback(async () => {
+    if (cache.has(chapterId)) {
+      setChapter(cache.get(chapterId)!);
+      return;
+    }
+
+    setIsLoading(true);
+    const data = await bookService.getChapter(chapterId);
+    setCache(prev => new Map(prev).set(chapterId, data));
+    setChapter(data);
+    setIsLoading(false);
+  }, [chapterId, cache, bookService]);
+
+  // Auto-load when chapterId changes
+  useEffect(() => {
+    loadChapter();
+  }, [chapterId, loadChapter]);
+
+  return { chapter, isLoading, loadChapter };
+}
+```
+
+### When to Use Section-Level Chunking
+
+Only if:
+- Chapters are extremely long (1000+ sections)
+- Performance issues with chapter-level
+- Memory constraints
+
+**Recommendation**: Start with chapter-level, optimize later if needed.
+
+## Testing Setup with Vite
+
+### Vitest Configuration
+
+```typescript
+// vitest.config.ts
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './tests/setup.ts',
+  },
+});
+```
+
+### Test Structure
+
+```
+tests/
+├── setup.ts                    # Test setup
+├── mocks/
+│   ├── websocket.ts           # WebSocket mocks
+│   └── book-service.ts        # Service mocks
+├── components/
+│   ├── BookReader.test.tsx
+│   └── BookEditor.test.tsx
+├── hooks/
+│   ├── useBook.test.ts
+│   └── useVersioning.test.ts
+└── utils/
+    └── version-merge.test.ts
+```
+
+## Next Steps
+
+1. **Review Documentation**: Read through all docs
+2. **Set Up Project**: Create directory structure
+3. **Install Dependencies**: Add required packages
+4. **Start with Phase 1**: Foundation and core types
+5. **Iterate**: Build incrementally, test as you go
+
+## Questions to Resolve
+
+- [ ] WebSocket server location (separate service or Next.js API route?)
+- [ ] Media upload endpoint structure
+- [ ] Authentication integration (how users are identified)
+- [ ] Deployment strategy for WebSocket server
+- [ ] Backup/restore strategy for versions
+
+
+
+
+

@@ -1,0 +1,57 @@
+---
+title: "Overview"
+description: "Project goals and core concepts for Dialogue Forge"
+date: "2024-12-18"
+order: 2
+---
+
+# Overview
+
+## Problem Statement
+
+Traditional dialogue editors use node-based visual graphs. While powerful, they disconnect you from the actual experience of the conversation. You're manipulating boxes and lines instead of feeling the rhythm and tone of the dialogue.
+
+## Solution
+
+Dialogue Forge flips the approach: **you experience the dialogue as you build it**.
+
+The interface looks like a chat app. An AI character speaks to you, and you respond by selecting from choices. But here's the twist—when you need a new choice, you create it on the spot. When dialogue needs to branch based on past decisions, you set those conditions in context.
+
+## Core Concepts
+
+### Dialogue Nodes
+
+Each message in the conversation is a node. Nodes can be:
+
+- **AI Messages**: What the character says
+- **Choice Points**: Where the player selects a response
+- **Conditional Branches**: Different paths based on memory flags
+
+### Memory Flags
+
+When a player makes a choice, it can set a memory flag. These flags persist throughout the conversation and can be used to:
+
+- Unlock new dialogue options
+- Lock options that shouldn't appear
+- Change what the AI character says
+- Create meaningful consequences
+
+### Playthrough State
+
+The system tracks:
+
+- Current position in the dialogue tree
+- All memory flags set during this playthrough
+- History of the conversation for display
+
+## Design Principles
+
+1. **Play-First Design**: Build by playing, not by drawing graphs
+2. **Immediate Feedback**: See changes reflected instantly
+3. **Iterative Refinement**: Easy to replay and tweak
+4. **Simple Data Model**: JSON-based, human-readable dialogue format
+
+
+
+
+

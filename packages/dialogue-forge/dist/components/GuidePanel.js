@@ -104,41 +104,143 @@ function GuidePanel({ isOpen, onClose }) {
                     react_1.default.createElement("li", null, "Each choice in a Player node can connect to different NPC nodes for branching"))))
         },
         flags: {
-            title: 'Flags & Yarn Variables',
+            title: 'Game State & Flags',
             content: (react_1.default.createElement("div", { className: "space-y-4 text-sm" },
                 react_1.default.createElement("div", { className: "bg-[#1a2a3e] border-l-4 border-[#e94560] p-4 rounded" },
-                    react_1.default.createElement("h3", { className: "text-white font-semibold mb-2" }, "How Flags Work"),
+                    react_1.default.createElement("h3", { className: "text-white font-semibold mb-2" }, "Game State & Yarn Variables"),
                     react_1.default.createElement("p", { className: "text-gray-300 text-xs mb-2" },
-                        react_1.default.createElement("strong", null, "Flags are passed into the editor and used in the simulator.")),
-                    react_1.default.createElement("p", { className: "text-gray-400 text-xs mb-2" }, "Flags can be set during dialogue, which affects the state during simulation. Flags are exported/imported separately from dialogue."),
+                        react_1.default.createElement("strong", null, "Dialogue Forge automatically flattens your game state into Yarn Spinner-compatible variables.")),
+                    react_1.default.createElement("p", { className: "text-gray-400 text-xs mb-2" }, "Pass any JSON game state structure to ScenePlayer. Nested objects (player, characters, flags) are automatically flattened into flat variables that Yarn Spinner can use."),
                     react_1.default.createElement("p", { className: "text-gray-400 text-xs" },
-                        "In Yarn Spinner, flags become ",
+                        "In Yarn Spinner, these become ",
                         react_1.default.createElement("code", { className: "bg-[#0d0d14] px-1 rounded" }, "$variable"),
                         " commands like ",
-                        react_1.default.createElement("code", { className: "bg-[#0d0d14] px-1 rounded" }, "<<set $flag = value>>"),
+                        react_1.default.createElement("code", { className: "bg-[#0d0d14] px-1 rounded" }, "<<set $player_hp = 100>>"),
                         ".")),
-                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "What Are Flags?"),
-                react_1.default.createElement("p", { className: "text-gray-400" }, "Flags are variables that track what's happened in your game. Examples:"),
-                react_1.default.createElement("ul", { className: "list-disc list-inside space-y-1 text-sm ml-2 text-gray-400" },
-                    react_1.default.createElement("li", null,
-                        "Quest completed: ",
-                        react_1.default.createElement("code", { className: "bg-[#12121a] px-1 rounded" }, "quest_dragon_slayer = \"complete\"")),
-                    react_1.default.createElement("li", null,
-                        "Has item: ",
-                        react_1.default.createElement("code", { className: "bg-[#12121a] px-1 rounded" }, "item_ancient_key = true")),
-                    react_1.default.createElement("li", null,
-                        "Player reputation: ",
-                        react_1.default.createElement("code", { className: "bg-[#12121a] px-1 rounded" }, "stat_reputation = 50")),
-                    react_1.default.createElement("li", null,
-                        "Achievement unlocked: ",
-                        react_1.default.createElement("code", { className: "bg-[#12121a] px-1 rounded" }, "achievement_first_quest = true"))),
-                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Setting Up Flags"),
-                react_1.default.createElement("p", { className: "text-gray-400 mb-3" }, "Define your flags in code and pass them to the editor:"),
+                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Game State Structure"),
+                react_1.default.createElement("p", { className: "text-gray-400 mb-3" }, "Your game state can have any structure. Dialogue Forge supports nested objects and automatically flattens them:"),
+                react_1.default.createElement(CodeBlock_1.CodeBlock, { code: `// Example game state with nested structures
+interface GameState {
+  // Direct flags (optional, but recommended)
+  flags?: {
+    quest_dragon_slayer: 'not_started' | 'started' | 'complete';
+    item_ancient_key: boolean;
+  };
+  
+  // Player properties (flattened to $player_*)
+  player?: {
+    hp: number;
+    maxHp: number;
+    name: string;
+    // Nested objects are flattened too
+    affinity: {
+      A: number;  // Becomes $player_affinity_A
+      B: number;  // Becomes $player_affinity_B
+    };
+    elementAffinity: {
+      fire: number;   // Becomes $player_elementAffinity_fire
+      water: number;  // Becomes $player_elementAffinity_water
+    };
+  };
+  
+  // Characters as object (not array)
+  characters?: {
+    alice: { hp: 50, name: 'Alice' };  // Becomes $characters_alice_hp, $characters_alice_name
+    bob: { hp: 30, name: 'Bob' };      // Becomes $characters_bob_hp, $characters_bob_name
+  };
+  
+  // Any other game data
+  inventory?: string[];
+  location?: string;
+}
+
+const gameState: GameState = {
+  flags: {
+    quest_dragon_slayer: 'not_started',
+    item_ancient_key: false,
+  },
+  player: {
+    hp: 75,
+    maxHp: 100,
+    name: 'Hero',
+    affinity: { A: 0.8, B: 0.5, C: 0.2 },
+    elementAffinity: { fire: 0.9, water: 0.3 },
+  },
+  characters: {
+    alice: { hp: 50, name: 'Alice' },
+    bob: { hp: 30, name: 'Bob' },
+  },
+};`, language: "typescript" }),
+                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Automatic Flattening"),
+                react_1.default.createElement("p", { className: "text-gray-400 mb-3" }, "When you pass gameState to ScenePlayer, it's automatically flattened into Yarn-compatible variables:"),
+                react_1.default.createElement("div", { className: "bg-[#12121a] p-4 rounded border border-[#2a2a3e]" },
+                    react_1.default.createElement("p", { className: "text-gray-300 text-xs mb-2 font-semibold" }, "Flattening Rules:"),
+                    react_1.default.createElement("ul", { className: "list-disc list-inside space-y-1 text-xs text-gray-400 ml-2" },
+                        react_1.default.createElement("li", null,
+                            react_1.default.createElement("strong", null, "Nested objects:"),
+                            " ",
+                            react_1.default.createElement("code", null, "player.hp"),
+                            " \u2192 ",
+                            react_1.default.createElement("code", null, "$player_hp")),
+                        react_1.default.createElement("li", null,
+                            react_1.default.createElement("strong", null, "Deep nesting:"),
+                            " ",
+                            react_1.default.createElement("code", null, "player.affinity.A"),
+                            " \u2192 ",
+                            react_1.default.createElement("code", null, "$player_affinity_A")),
+                        react_1.default.createElement("li", null,
+                            react_1.default.createElement("strong", null, "Object keys:"),
+                            " ",
+                            react_1.default.createElement("code", null, "characters.alice.hp"),
+                            " \u2192 ",
+                            react_1.default.createElement("code", null, "$characters_alice_hp")),
+                        react_1.default.createElement("li", null,
+                            react_1.default.createElement("strong", null, "Arrays:"),
+                            " ",
+                            react_1.default.createElement("code", null, "inventory[0]"),
+                            " \u2192 ",
+                            react_1.default.createElement("code", null, "$inventory_0")),
+                        react_1.default.createElement("li", null,
+                            react_1.default.createElement("strong", null, "Only truthy values:"),
+                            " Skips 0, false, null, undefined, empty strings"),
+                        react_1.default.createElement("li", null,
+                            react_1.default.createElement("strong", null, "Yarn-compatible types:"),
+                            " Only boolean, number, string (validated)"))),
+                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Using in Yarn Conditions"),
+                react_1.default.createElement("p", { className: "text-gray-400 mb-3" }, "Flattened variables can be used in dialogue conditions:"),
+                react_1.default.createElement(CodeBlock_1.CodeBlock, { code: `// In your dialogue nodes, use flattened variable names:
+
+// Check player HP
+<<if $player_hp >= 50>>
+  Merchant: "You look healthy!"
+<<else>>
+  Merchant: "You should rest..."
+<<endif>>
+
+// Check rune affinity
+<<if $player_affinity_A > 0.7>>
+  Wizard: "You have strong affinity with rune A!"
+<<endif>>
+
+// Check character status
+<<if $characters_alice_hp < 20>>
+  Healer: "Alice needs healing!"
+<<endif>>
+
+// Check element affinity
+<<if $player_elementAffinity_fire > 0.8>>
+  Fire Mage: "You're a natural with fire magic!"
+<<endif>>`, language: "yarn" }),
+                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Flag Schema (For Editor)"),
+                react_1.default.createElement("p", { className: "text-gray-400 mb-3" },
+                    "Flag Schema is used in the ",
+                    react_1.default.createElement("strong", null, "editor"),
+                    " for autocomplete and validation. It's separate from game state:"),
                 react_1.default.createElement(CodeBlock_1.CodeBlock, { code: `import { FlagSchema } from '@portfolio/dialogue-forge';
 
+// Flag Schema helps the editor understand what flags exist
 const flagSchema: FlagSchema = {
   flags: [
-    // Quest flags
     {
       id: 'quest_dragon_slayer',
       name: 'Dragon Slayer Quest',
@@ -147,42 +249,33 @@ const flagSchema: FlagSchema = {
       defaultValue: 'not_started'
     },
     {
-      id: 'quest_dragon_slayer_complete',
-      name: 'Dragon Slayer Complete',
-      type: 'quest',
-    },
-    
-    // Item flags
-    {
-      id: 'item_ancient_key',
-      name: 'Ancient Key',
-      type: 'item',
-    },
-    
-    // Stat flags
-    {
-      id: 'stat_gold',
-      name: 'Gold',
+      id: 'player_hp',  // Matches flattened game state
+      name: 'Player HP',
       type: 'stat',
       valueType: 'number',
-      defaultValue: 0
     },
     {
-      id: 'stat_reputation',
-      name: 'Reputation',
+      id: 'player_affinity_A',  // Matches flattened game state
+      name: 'Rune A Affinity',
       type: 'stat',
       valueType: 'number',
-      defaultValue: 0
     },
-    
-    // Achievement flags
-    {
-      id: 'achievement_first_quest',
-      name: 'First Quest',
-      type: 'achievement',
-    }
   ]
-};`, language: "typescript" }),
+};
+
+// Use in editor for autocomplete
+<DialogueEditorV2
+  dialogue={dialogue}
+  flagSchema={flagSchema}  // Helps with autocomplete
+  onChange={...}
+/>
+
+// Game state is used in player
+<ScenePlayer
+  dialogue={dialogue}
+  gameState={gameState}  // Full game state (automatically flattened)
+  onComplete={...}
+/>`, language: "typescript" }),
                 react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Flag Types"),
                 react_1.default.createElement("div", { className: "space-y-2 text-sm" },
                     react_1.default.createElement("div", { className: "bg-[#12121a] p-2 rounded border border-[#2a2a3e]" },
@@ -190,7 +283,7 @@ const flagSchema: FlagSchema = {
                         " - Quest state (",
                         react_1.default.createElement("code", { className: "text-xs" }, "'not_started'"),
                         ", ",
-                        react_1.default.createElement("code", { className: "text-xs" }, "'in_progress'"),
+                        react_1.default.createElement("code", { className: "text-xs" }, "'started'"),
                         ", ",
                         react_1.default.createElement("code", { className: "text-xs" }, "'complete'"),
                         ")"),
@@ -202,51 +295,42 @@ const flagSchema: FlagSchema = {
                         " - Inventory items (true/false or quantity)"),
                     react_1.default.createElement("div", { className: "bg-[#12121a] p-2 rounded border border-[#2a2a3e]" },
                         react_1.default.createElement("strong", { className: "text-purple-400" }, "stat"),
-                        " - Player statistics (numbers: gold, reputation, etc.)"),
+                        " - Player statistics (numbers: hp, gold, affinity, etc.)"),
                     react_1.default.createElement("div", { className: "bg-[#12121a] p-2 rounded border border-[#2a2a3e]" },
                         react_1.default.createElement("strong", { className: "text-pink-400" }, "title"),
                         " - Earned player titles (true/false)"),
                     react_1.default.createElement("div", { className: "bg-[#12121a] p-2 rounded border border-[#2a2a3e]" },
                         react_1.default.createElement("strong", { className: "text-gray-400" }, "dialogue"),
-                        " - Temporary, dialogue-scoped flags"),
-                    react_1.default.createElement("div", { className: "bg-[#12121a] p-2 rounded border border-[#2a2a3e]" },
-                        react_1.default.createElement("strong", { className: "text-gray-400" }, "global"),
-                        " - Global game state")),
-                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Using Flags in Editor"),
-                react_1.default.createElement("ol", { className: "list-decimal list-inside space-y-2 text-sm ml-2" },
-                    react_1.default.createElement("li", null,
-                        "Pass ",
-                        react_1.default.createElement("code", { className: "bg-[#12121a] px-1 rounded" }, "flagSchema"),
-                        " to the editor"),
-                    react_1.default.createElement("li", null,
-                        "When setting flags, ",
-                        react_1.default.createElement("strong", null, "type to see matching flags"),
-                        " in the dropdown"),
-                    react_1.default.createElement("li", null, "Click a flag to add it (organized by category)"),
-                    react_1.default.createElement("li", null,
-                        "Flags are exported to Yarn as ",
-                        react_1.default.createElement("code", { className: "bg-[#12121a] px-1 rounded" }, "<<set $flag_name = true>>"))),
-                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Flag Naming Convention"),
-                react_1.default.createElement("p", { className: "text-gray-400 text-xs" }, "Use prefixes to organize flags:"),
-                react_1.default.createElement("div", { className: "bg-[#12121a] p-3 rounded border border-[#2a2a3e] text-xs font-mono space-y-1" },
-                    react_1.default.createElement("div", null,
-                        react_1.default.createElement("code", { className: "text-blue-400" }, "quest_*"),
-                        " - Quest-related flags"),
-                    react_1.default.createElement("div", null,
-                        react_1.default.createElement("code", { className: "text-yellow-400" }, "achievement_*"),
-                        " - Achievements"),
-                    react_1.default.createElement("div", null,
-                        react_1.default.createElement("code", { className: "text-green-400" }, "item_*"),
-                        " - Items"),
-                    react_1.default.createElement("div", null,
-                        react_1.default.createElement("code", { className: "text-purple-400" }, "stat_*"),
-                        " - Statistics"),
-                    react_1.default.createElement("div", null,
-                        react_1.default.createElement("code", { className: "text-pink-400" }, "title_*"),
-                        " - Titles"),
-                    react_1.default.createElement("div", null,
-                        react_1.default.createElement("code", { className: "text-gray-400" }, "dialogue_*"),
-                        " - Dialogue-scoped (temporary)"))))
+                        " - Temporary, dialogue-scoped flags")),
+                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Best Practices"),
+                react_1.default.createElement("div", { className: "space-y-2 text-sm" },
+                    react_1.default.createElement("div", { className: "bg-[#12121a] p-3 rounded border border-[#2a2a3e]" },
+                        react_1.default.createElement("strong", { className: "text-white text-xs" }, "1. Use descriptive names"),
+                        react_1.default.createElement("p", { className: "text-gray-400 text-xs mt-1" },
+                            "Flattened names should be clear: ",
+                            react_1.default.createElement("code", null, "$player_hp"),
+                            " not ",
+                            react_1.default.createElement("code", null, "$p_h"))),
+                    react_1.default.createElement("div", { className: "bg-[#12121a] p-3 rounded border border-[#2a2a3e]" },
+                        react_1.default.createElement("strong", { className: "text-white text-xs" }, "2. Keep structures consistent"),
+                        react_1.default.createElement("p", { className: "text-gray-400 text-xs mt-1" }, "Use the same game state structure throughout your app for predictable flattening")),
+                    react_1.default.createElement("div", { className: "bg-[#12121a] p-3 rounded border border-[#2a2a3e]" },
+                        react_1.default.createElement("strong", { className: "text-white text-xs" }, "3. Characters as objects, not arrays"),
+                        react_1.default.createElement("p", { className: "text-gray-400 text-xs mt-1" },
+                            "Use ",
+                            react_1.default.createElement("code", null,
+                                "characters: ",
+                                '{',
+                                " alice: ",
+                                '{...}',
+                                " ",
+                                '}'),
+                            " not ",
+                            react_1.default.createElement("code", null, "characters: [alice, ...]"),
+                            " for better naming")),
+                    react_1.default.createElement("div", { className: "bg-[#12121a] p-3 rounded border border-[#2a2a3e]" },
+                        react_1.default.createElement("strong", { className: "text-white text-xs" }, "4. Only truthy values are included"),
+                        react_1.default.createElement("p", { className: "text-gray-400 text-xs mt-1" }, "Zero, false, null, undefined, and empty strings are automatically excluded from flattening")))))
         },
         integration: {
             title: 'Integration Guide',

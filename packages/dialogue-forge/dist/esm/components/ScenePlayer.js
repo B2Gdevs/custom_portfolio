@@ -1,16 +1,35 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { mergeFlagUpdates } from '../lib/flag-manager';
-export function ScenePlayer({ dialogue, gameState, initialFlags, startNodeId, onComplete, onFlagUpdate, onNodeEnter, onNodeExit, onChoiceSelect, onDialogueStart, onDialogueEnd, }) {
-    // Extract flags from gameState or use initialFlags (legacy)
-    const flagsFromState = gameState && typeof gameState === 'object' && 'flags' in gameState
-        ? gameState.flags
-        : initialFlags || {};
+import { validateGameState, extractFlagsFromGameState } from '../utils/game-state-flattener';
+export function ScenePlayer({ dialogue, gameState, startNodeId, onComplete, onFlagUpdate, flattenConfig, onNodeEnter, onNodeExit, onChoiceSelect, onDialogueStart, onDialogueEnd, }) {
+    // Validate and extract flags from gameState
+    const initialFlags = useMemo(() => {
+        try {
+            validateGameState(gameState);
+            return extractFlagsFromGameState(gameState, flattenConfig);
+        }
+        catch (error) {
+            console.error('ScenePlayer: Invalid gameState', error);
+            throw error;
+        }
+    }, [gameState, flattenConfig]);
     const [currentNodeId, setCurrentNodeId] = useState(startNodeId || dialogue.startNodeId);
-    const [flags, setFlags] = useState(flagsFromState);
+    const [flags, setFlags] = useState(initialFlags);
     const [history, setHistory] = useState([]);
     const [isTyping, setIsTyping] = useState(false);
     const [visitedNodes, setVisitedNodes] = useState(new Set());
     const chatEndRef = useRef(null);
+    // Re-extract flags when gameState changes
+    useEffect(() => {
+        try {
+            validateGameState(gameState);
+            const newFlags = extractFlagsFromGameState(gameState, flattenConfig);
+            setFlags(newFlags);
+        }
+        catch (error) {
+            console.error('ScenePlayer: Failed to update flags from gameState', error);
+        }
+    }, [gameState, flattenConfig]);
     // Initialize dialogue
     useEffect(() => {
         if (currentNodeId === dialogue.startNodeId) {

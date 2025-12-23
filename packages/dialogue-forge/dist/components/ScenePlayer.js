@@ -36,17 +36,36 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ScenePlayer = ScenePlayer;
 const react_1 = __importStar(require("react"));
 const flag_manager_1 = require("../lib/flag-manager");
-function ScenePlayer({ dialogue, gameState, initialFlags, startNodeId, onComplete, onFlagUpdate, onNodeEnter, onNodeExit, onChoiceSelect, onDialogueStart, onDialogueEnd, }) {
-    // Extract flags from gameState or use initialFlags (legacy)
-    const flagsFromState = gameState && typeof gameState === 'object' && 'flags' in gameState
-        ? gameState.flags
-        : initialFlags || {};
+const game_state_flattener_1 = require("../utils/game-state-flattener");
+function ScenePlayer({ dialogue, gameState, startNodeId, onComplete, onFlagUpdate, flattenConfig, onNodeEnter, onNodeExit, onChoiceSelect, onDialogueStart, onDialogueEnd, }) {
+    // Validate and extract flags from gameState
+    const initialFlags = (0, react_1.useMemo)(() => {
+        try {
+            (0, game_state_flattener_1.validateGameState)(gameState);
+            return (0, game_state_flattener_1.extractFlagsFromGameState)(gameState, flattenConfig);
+        }
+        catch (error) {
+            console.error('ScenePlayer: Invalid gameState', error);
+            throw error;
+        }
+    }, [gameState, flattenConfig]);
     const [currentNodeId, setCurrentNodeId] = (0, react_1.useState)(startNodeId || dialogue.startNodeId);
-    const [flags, setFlags] = (0, react_1.useState)(flagsFromState);
+    const [flags, setFlags] = (0, react_1.useState)(initialFlags);
     const [history, setHistory] = (0, react_1.useState)([]);
     const [isTyping, setIsTyping] = (0, react_1.useState)(false);
     const [visitedNodes, setVisitedNodes] = (0, react_1.useState)(new Set());
     const chatEndRef = (0, react_1.useRef)(null);
+    // Re-extract flags when gameState changes
+    (0, react_1.useEffect)(() => {
+        try {
+            (0, game_state_flattener_1.validateGameState)(gameState);
+            const newFlags = (0, game_state_flattener_1.extractFlagsFromGameState)(gameState, flattenConfig);
+            setFlags(newFlags);
+        }
+        catch (error) {
+            console.error('ScenePlayer: Failed to update flags from gameState', error);
+        }
+    }, [gameState, flattenConfig]);
     // Initialize dialogue
     (0, react_1.useEffect)(() => {
         if (currentNodeId === dialogue.startNodeId) {

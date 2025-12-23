@@ -1,8 +1,74 @@
-# Portfolio V2
+# Portfolio V2 - Monorepo
 
-A sleek, neobrutal portfolio site built with Next.js, MDX, SQLite, and Drizzle ORM. Focused on software architecture documentation, project showcases, and blog content.
+A monorepo containing a sleek portfolio site and publishable npm packages. Built with Next.js, MDX, SQLite, and Drizzle ORM.
 
-## Features
+## 🏗️ Monorepo Structure
+
+```
+portfolio-v2/
+├── apps/
+│   └── portfolio/          # Main portfolio site
+├── packages/
+│   └── dialogue-forge/    # Visual dialogue editor package
+│       ├── src/           # Library source
+│       ├── demo/          # Standalone demo app
+│       └── bin/           # npx executable
+└── packages-shared/
+    └── server-template/   # Reusable demo server template
+```
+
+## 🚀 Quick Start
+
+### Install Dependencies
+
+```bash
+npm install
+```
+
+### Run Portfolio App
+
+```bash
+npm run dev
+# or
+cd apps/portfolio && npm run dev
+```
+
+Visit [http://localhost:3000](http://localhost:3000) to see your portfolio.
+
+### Run Package Demos
+
+```bash
+# Dialogue Forge demo
+cd packages/dialogue-forge/demo && npm run dev
+
+# Or after publishing, users can run:
+npx @portfolio/dialogue-forge
+```
+
+## 📦 Packages
+
+### @portfolio/dialogue-forge
+
+Visual node-based dialogue editor with Yarn Spinner support.
+
+**Install:**
+```bash
+npm install @portfolio/dialogue-forge
+```
+
+**Run Demo:**
+```bash
+npx @portfolio/dialogue-forge
+```
+
+**Use in Code:**
+```tsx
+import { DialogueEditorV2 } from '@portfolio/dialogue-forge';
+```
+
+See [packages/dialogue-forge/README.md](packages/dialogue-forge/README.md) for full documentation.
+
+## 🎨 Portfolio App Features
 
 - 🎨 **Neobrutal Design** - Bold, animated, fun design system
 - 📝 **MDX Support** - Write content in Markdown/MDX
@@ -12,61 +78,45 @@ A sleek, neobrutal portfolio site built with Next.js, MDX, SQLite, and Drizzle O
 - 🚀 **Projects Showcase** - Display your work beautifully
 - ✍️ **Blog** - Share your thoughts and learnings
 
-## Tech Stack
+## 📚 Documentation
 
-- **Framework**: Next.js 16
-- **Styling**: Tailwind CSS
-- **Database**: SQLite + Drizzle ORM
-- **Content**: MDX/Markdown files
-- **Animations**: Framer Motion
-- **Icons**: Lucide React
+- [Monorepo Plan](MONOREPO_PLAN.md) - Architecture overview
+- [Implementation Guide](IMPLEMENTATION_GUIDE.md) - Setup details
+- [Quick Start](QUICK_START.md) - Package development guide
 
-## Getting Started
+## 🔧 Development
 
-### Prerequisites
-
-- Node.js 18+ 
-- npm or yarn
-
-### Installation
+### Workspace Scripts
 
 ```bash
-# Install dependencies
-npm install
-
-# Generate database migrations
-npm run db:generate
-
-# Run development server
+# Run portfolio app
 npm run dev
+
+# Build portfolio
+npm run build
+
+# Lint
+npm run lint
 ```
 
-Visit [http://localhost:3000](http://localhost:3000) to see your site.
+### Package Development
 
-## Project Structure
+```bash
+# Build a package
+cd packages/dialogue-forge
+npm run build
 
+# Test a package
+npm run test
 ```
-portfolio-v2/
-├── app/                    # Next.js app directory
-│   ├── admin/              # Admin interface (dev only)
-│   ├── docs/               # Documentation pages
-│   ├── projects/           # Project showcase
-│   ├── blog/               # Blog posts
-│   └── page.tsx            # Home page
-├── components/             # React components
-│   ├── layout/            # Layout components
-│   ├── ui/                # UI components
-│   └── admin/             # Admin components
-├── content/                # MDX/Markdown files
-│   ├── docs/              # Documentation content
-│   ├── projects/          # Project content
-│   └── blog/              # Blog content
-├── lib/                    # Utilities
-│   ├── db/                # Database schema & connection
-│   ├── content.ts         # Content file utilities
-│   └── mdx.tsx            # MDX components
-└── styles/                 # Additional styles
-```
+
+## 📝 Publishing
+
+Packages are published to npm under the `@portfolio` scope.
+
+**Publisher:** [@magicborn](https://www.npmjs.com/~magicborn)
+
+See [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md) for publishing workflow.
 
 ## Database Commands
 

@@ -1,0 +1,480 @@
+---
+title: "Book Editor - Architecture Guide"
+description: "Complete architecture, file organization, and conventions for the book editor component"
+date: "2025-01-20"
+updated: "2025-01-20"
+---
+
+# Book Editor Architecture Guide
+
+## Table of Contents
+
+1. [Component Structure](#component-structure)
+2. [File Organization](#file-organization)
+3. [Naming Conventions](#naming-conventions)
+4. [Code Patterns](#code-patterns)
+5. [Service Architecture](#service-architecture)
+6. [Data Flow](#data-flow)
+7. [Module Boundaries](#module-boundaries)
+8. [Testing Structure](#testing-structure)
+
+## Component Structure
+
+### Directory Layout
+
+```
+components/book-editor/
+├── components/              # UI Components
+│   ├── BookReader/        # Reader components
+│   │   ├── BookReader.tsx
+│   │   ├── ChapterView.tsx
+│   │   ├── GrimoireTheme.tsx
+│   │   ├── MediaViewer.tsx
+│   │   └── ExportMenu.tsx
+│   ├── BookEditor/        # Editor components
+│   │   ├── BookEditor.tsx
+│   │   ├── RichTextEditor.tsx
+│   │   ├── ChapterEditor.tsx
+│   │   ├── SectionEditor.tsx
+│   │   ├── MetadataPanel.tsx
+│   │   ├── VersionHistory.tsx
+│   │   ├── BranchManager.tsx
+│   │   ├── MergeInterface.tsx
+│   │   └── CollaborationPanel.tsx
+│   ├── BookList/          # Library components
+│   │   ├── BookList.tsx
+│   │   ├── BookCard.tsx
+│   │   └── BookFilters.tsx
+│   └── shared/            # Shared components
+│       ├── StatusBadge.tsx
+│       ├── UserAvatar.tsx
+│       ├── LoadingSpinner.tsx
+│       └── ErrorBoundary.tsx
+├── hooks/                  # Custom hooks
+│   ├── useBook.ts
+│   ├── useBookService.ts
+│   ├── useAutoSave.ts
+│   ├── useVersioning.ts
+│   ├── useCollaboration.ts
+│   ├── useWebSocket.ts
+│   ├── usePermissions.ts
+│   └── useLazyChapter.ts
+├── services/               # Service interfaces (no implementations)
+│   ├── BookService.ts
+│   ├── VersionService.ts
+│   ├── CollaborationService.ts
+│   └── MediaService.ts
+├── types/                  # TypeScript definitions
+│   ├── book.types.ts
+│   ├── service.types.ts
+│   ├── collaboration.types.ts
+│   └── version.types.ts
+├── utils/                  # Utility functions
+│   ├── epub-generator.ts
+│   ├── html-exporter.ts
+│   ├── content-parser.ts
+│   ├── version-merge.ts
+│   └── chunk-manager.ts
+├── styles/                 # Styling
+│   ├── grimoire-theme.ts
+│   ├── animations.ts
+│   └── components.ts
+└── index.ts                # Public API exports
+```
+
+## File Organization
+
+### Component Files
+
+**Pattern**: One component per file, co-locate related files
+
+```
+ComponentName/
+├── ComponentName.tsx          # Main component
+├── ComponentName.test.tsx    # Tests
+└── types.ts                  # Component-specific types (if needed)
+```
+
+**Example**:
+```
+BookReader/
+├── BookReader.tsx
+├── BookReader.test.tsx
+└── types.ts
+```
+
+### Service Files
+
+**Pattern**: Interface in component library, implementation in lib
+
+```
+# Interface (modular, no deps)
+components/book-editor/services/BookService.ts
+
+# Implementation (has DB deps)
+lib/book-editor/services/book.service.ts
+```
+
+### Hook Files
+
+**Pattern**: One hook per file, descriptive names
+
+```
+hooks/
+├── useBook.ts              # Book data management
+├── useAutoSave.ts          # Auto-save with retry
+├── useVersioning.ts        # Version operations
+└── useCollaboration.ts     # Real-time collaboration
+```
+
+## Naming Conventions
+
+### Files & Directories
+
+- **Components**: `PascalCase.tsx` (e.g., `BookReader.tsx`)
+- **Hooks**: `camelCase.ts` with `use` prefix (e.g., `useBook.ts`)
+- **Services**: `PascalCase.service.ts` for interfaces, `camelCase.service.ts` for implementations
+- **Utils**: `kebab-case.ts` (e.g., `epub-generator.ts`)
+- **Types**: `kebab-case.types.ts` (e.g., `book.types.ts`)
+- **Tests**: `ComponentName.test.tsx` or `hookName.test.ts`
+- **Directories**: `kebab-case` (e.g., `book-editor/`)
+
+### Code
+
+- **Components**: `PascalCase` (e.g., `BookReader`)
+- **Functions**: `camelCase` (e.g., `generateEpub`)
+- **Constants**: `UPPER_SNAKE_CASE` (e.g., `MAX_RETRIES`)
+- **Types/Interfaces**: `PascalCase` (e.g., `Book`, `BookService`)
+- **Enums**: `PascalCase` with `PascalCase` values (e.g., `BookStatus.Draft`)
+
+## Code Patterns
+
+### Service Interface Pattern
+
+```typescript
+// components/book-editor/services/BookService.ts
+export interface BookService {
+  getBook(id: string): Promise<Book>;
+  saveBook(book: Book): Promise<Book>;
+  createBook(data: CreateBookInput): Promise<Book>;
+  deleteBook(id: string): Promise<void>;
+}
+```
+
+### Service Implementation Pattern
+
+```typescript
+// lib/book-editor/services/book.service.ts
+import { BookService } from '@/components/book-editor/services/BookService';
+import { db } from '@/lib/db';
+import { books } from '@/lib/db/schema';
+
+export class BookServiceImpl implements BookService {
+  async getBook(id: string): Promise<Book> {
+    const [book] = await db.select().from(books).where(eq(books.id, id));
+    if (!book) throw new Error('Book not found');
+    return this.mapToBook(book);
+  }
+  
+  // ... other methods
+}
+```
+
+### Hook Pattern
+
+```typescript
+// components/book-editor/hooks/useBook.ts
+'use client';
+
+import { useState, useEffect } from 'react';
+import { BookService } from '@/components/book-editor/services/BookService';
+import { useBookService } from './useBookService';
+
+export function useBook(bookId: string) {
+  const bookService = useBookService();
+  const [book, setBook] = useState<Book | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    bookService.getBook(bookId)
+      .then(setBook)
+      .catch(setError)
+      .finally(() => setLoading(false));
+  }, [bookId, bookService]);
+
+  return { book, loading, error };
+}
+```
+
+### Component Pattern
+
+```typescript
+// components/book-editor/components/BookReader/BookReader.tsx
+'use client';
+
+import { useBook } from '@/components/book-editor/hooks/useBook';
+import { ChapterView } from './ChapterView';
+
+interface BookReaderProps {
+  bookId: string;
+  initialChapter?: string;
+}
+
+export function BookReader({ bookId, initialChapter }: BookReaderProps) {
+  const { book, loading, error } = useBook(bookId);
+
+  if (loading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage error={error} />;
+  if (!book) return <NotFound />;
+
+  return (
+    <GrimoireTheme>
+      <ChapterView book={book} initialChapter={initialChapter} />
+    </GrimoireTheme>
+  );
+}
+```
+
+## Service Architecture
+
+### Service Injection
+
+Services are injected via React Context:
+
+```typescript
+// components/book-editor/contexts/BookServiceContext.tsx
+'use client';
+
+import { createContext, useContext } from 'react';
+import { BookService } from '../services/BookService';
+
+const BookServiceContext = createContext<BookService | null>(null);
+
+export function BookServiceProvider({ 
+  children, 
+  service 
+}: { 
+  children: React.ReactNode;
+  service: BookService;
+}) {
+  return (
+    <BookServiceContext.Provider value={service}>
+      {children}
+    </BookServiceContext.Provider>
+  );
+}
+
+export function useBookService(): BookService {
+  const service = useContext(BookServiceContext);
+  if (!service) {
+    throw new Error('useBookService must be used within BookServiceProvider');
+  }
+  return service;
+}
+```
+
+### Usage in App
+
+```typescript
+// app/books/[id]/page.tsx
+import { BookServiceProvider } from '@/components/book-editor/contexts/BookServiceContext';
+import { BookServiceImpl } from '@/lib/book-editor/services/book.service';
+import { BookReader } from '@/components/book-editor/components/BookReader/BookReader';
+
+export default function BookPage({ params }: { params: { id: string } }) {
+  const bookService = new BookServiceImpl();
+  
+  return (
+    <BookServiceProvider service={bookService}>
+      <BookReader bookId={params.id} />
+    </BookServiceProvider>
+  );
+}
+```
+
+## Data Flow
+
+### Reading Data
+
+```
+User Opens Book
+  ↓
+BookReader Component
+  ↓
+useBook Hook
+  ↓
+useBookService Hook (gets service from context)
+  ↓
+BookService Interface
+  ↓
+BookServiceImpl (implementation)
+  ↓
+Drizzle ORM
+  ↓
+SQLite Database
+  ↓
+Data Returns (reverse path)
+```
+
+### Saving Data
+
+```
+User Edits Content
+  ↓
+TipTap Editor (local state)
+  ↓
+useAutoSave Hook (debounced)
+  ↓
+BookService.saveBook()
+  ↓
+BookServiceImpl
+  ↓
+Database Update
+  ↓
+Success/Error Callback
+```
+
+### Real-Time Collaboration
+
+```
+User Types
+  ↓
+TipTap Editor
+  ↓
+Y.js Document (CRDT)
+  ↓
+useWebSocket Hook
+  ↓
+WebSocket Server
+  ↓
+Broadcast to Other Users
+  ↓
+Y.js Merge (automatic)
+  ↓
+TipTap Updates (other users)
+```
+
+## Module Boundaries
+
+### Clear Separation
+
+1. **Components** (`components/book-editor/components/`)
+   - UI only
+   - No database access
+   - No business logic (delegate to hooks/services)
+
+2. **Hooks** (`components/book-editor/hooks/`)
+   - State management
+   - Side effects
+   - Call services, not database directly
+
+3. **Services** (Interface: `components/book-editor/services/`, Implementation: `lib/book-editor/services/`)
+   - Business logic
+   - Database operations
+   - External API calls
+
+4. **Utils** (`components/book-editor/utils/`)
+   - Pure functions
+   - No side effects
+   - Easily testable
+
+### Import Rules
+
+- ✅ Components can import: hooks, types, utils, other components
+- ✅ Hooks can import: services (interface), types, utils
+- ✅ Services can import: types, database, external APIs
+- ✅ Utils can import: types only
+- ❌ Components cannot import: services (implementation), database
+- ❌ Hooks cannot import: database directly
+- ❌ Utils cannot import: anything with side effects
+
+## Testing Structure
+
+### Test Organization
+
+```
+tests/
+├── components/
+│   └── book-editor/
+│       ├── BookReader.test.tsx
+│       └── BookEditor.test.tsx
+├── hooks/
+│   └── book-editor/
+│       ├── useBook.test.ts
+│       └── useAutoSave.test.ts
+├── utils/
+│   └── book-editor/
+│       ├── epub-generator.test.ts
+│       └── version-merge.test.ts
+└── integration/
+    └── book-editor/
+        ├── collaboration.test.ts
+        └── versioning.test.ts
+```
+
+### Test Patterns
+
+```typescript
+// Component Test
+describe('BookReader', () => {
+  it('renders book content', () => {
+    const mockService = createMockBookService();
+    render(
+      <BookServiceProvider service={mockService}>
+        <BookReader bookId="123" />
+      </BookServiceProvider>
+    );
+    // Assertions
+  });
+});
+
+// Hook Test
+describe('useBook', () => {
+  it('loads book data', async () => {
+    const mockService = createMockBookService();
+    const { result } = renderHook(() => useBook('123'), {
+      wrapper: ({ children }) => (
+        <BookServiceProvider service={mockService}>
+          {children}
+        </BookServiceProvider>
+      ),
+    });
+    // Assertions
+  });
+});
+```
+
+## Quick Reference
+
+### Component Hierarchy
+
+```
+BookServiceProvider (context)
+  └── BookEditor/BookReader
+      ├── RichTextEditor (TipTap)
+      ├── ChapterEditor
+      ├── VersionHistory
+      └── CollaborationPanel
+```
+
+### Key Files
+
+- **Entry Point**: `components/book-editor/index.ts`
+- **Main Reader**: `components/book-editor/components/BookReader/BookReader.tsx`
+- **Main Editor**: `components/book-editor/components/BookEditor/BookEditor.tsx`
+- **Service Interface**: `components/book-editor/services/BookService.ts`
+- **Service Implementation**: `lib/book-editor/services/book.service.ts`
+
+### Common Patterns
+
+- **Get Book**: `useBook(bookId)` hook
+- **Save Book**: `bookService.saveBook(book)` via service
+- **Auto-Save**: `useAutoSave(bookId, content)` hook
+- **Versioning**: `useVersioning(bookId)` hook
+- **Collaboration**: `useCollaboration(bookId)` hook
+
+
+
+
+

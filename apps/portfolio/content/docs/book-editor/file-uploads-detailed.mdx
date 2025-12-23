@@ -1,0 +1,343 @@
+---
+title: "Book Editor - File Uploads Implementation"
+description: "Complete file upload implementation guide with Server Actions and database storage"
+date: "2025-01-20"
+updated: "2025-01-20"
+---
+
+# File Uploads Implementation
+
+## Overview
+
+We use **Next.js Server Actions** for file uploads, which handle both file storage and database records in one function - similar to Django's file fields.
+
+## Do We Need the Media Table?
+
+**Yes!** Even with Server Actions, we need the `media` table because:
+
+1. **Metadata Storage**: File name, type, size, dimensions
+2. **Relationships**: Link media to books/chapters/sections
+3. **Querying**: Find all media for a book, filter by type
+4. **Deletion**: Track what files exist to clean up
+5. **Permissions**: Track who uploaded what
+
+The Server Action handles the **upload process**, but the database stores the **metadata and relationships**.
+
+## Complete Implementation
+
+### 1. Server Action (File Upload + Database)
+
+```typescript
+// app/actions/media.ts
+'use server';
+
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
+import { db } from '@/lib/db';
+import { media } from '@/lib/db/schema';
+import { getCurrentUser } from '@/lib/auth/verify';
+import { revalidatePath } from 'next/cache';
+
+export async function uploadMedia(
+  bookId: string,
+  formData: FormData
+): Promise<{ id: string; url: string; fileName: string }> {
+  // Verify user has permission
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  // Check permissions (user must be owner or editor)
+  const hasPermission = await checkBookPermission(bookId, user.id, ['owner', 'editor']);
+  if (!hasPermission) {
+    throw new Error('No permission to upload media');
+  }
+
+  // Get file from FormData
+  const file = formData.get('file') as File;
+  if (!file) {
+    throw new Error('No file provided');
+  }
+
+  // Validate file type (optional - adjust as needed)
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error('Invalid file type');
+  }
+
+  // Create directory if it doesn't exist
+  const uploadDir = join(process.cwd(), 'public', 'books', bookId);
+  await mkdir(uploadDir, { recursive: true });
+
+  // Generate unique filename
+  const timestamp = Date.now();
+  const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+  const filename = `${timestamp}-${sanitizedName}`;
+  const filePath = join(uploadDir, filename);
+
+  // Save file to disk
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+  await writeFile(filePath, buffer);
+
+  // Get file metadata (for images, could use sharp to get dimensions)
+  const fileUrl = `/books/${bookId}/${filename}`;
+
+  // Save to database
+  const [mediaRecord] = await db.insert(media).values({
+    id: crypto.randomUUID(),
+    bookId,
+    fileUrl,
+    fileName: file.name,
+    fileType: file.type,
+    fileSize: file.size,
+    metadata: {
+      uploadedAt: new Date().toISOString(),
+      // Could add image dimensions here if needed
+    },
+    uploadedBy: user.id,
+    uploadedAt: new Date(),
+  }).returning();
+
+  // Revalidate the book page
+  revalidatePath(`/books/${bookId}`);
+
+  return {
+    id: mediaRecord.id,
+    url: fileUrl,
+    fileName: mediaRecord.fileName,
+  };
+}
+
+// Helper function to check permissions
+async function checkBookPermission(
+  bookId: string,
+  userId: string,
+  allowedRoles: string[]
+): Promise<boolean> {
+  const [collaborator] = await db.select()
+    .from(collaborators)
+    .where(and(
+      eq(collaborators.bookId, bookId),
+      eq(collaborators.userId, userId)
+    ))
+    .limit(1);
+
+  if (!collaborator) return false;
+  return allowedRoles.includes(collaborator.role);
+}
+```
+
+### 2. Client Component (Upload UI)
+
+```typescript
+// components/book-editor/components/shared/MediaUpload.tsx
+'use client';
+
+import { useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { uploadMedia } from '@/app/actions/media';
+import { Upload, X, Loader2 } from 'lucide-react';
+
+interface MediaUploadProps {
+  bookId: string;
+  onUploadComplete?: (media: { id: string; url: string }) => void;
+}
+
+export function MediaUpload({ bookId, onUploadComplete }: MediaUploadProps) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    accept: {
+      'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp', '.svg'],
+    },
+    maxSize: Infinity, // No size limit as requested
+    onDrop: async (acceptedFiles) => {
+      if (acceptedFiles.length === 0) return;
+
+      setUploading(true);
+      setError(null);
+
+      try {
+        for (const file of acceptedFiles) {
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const result = await uploadMedia(bookId, formData);
+          onUploadComplete?.(result);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Upload failed');
+      } finally {
+        setUploading(false);
+      }
+    },
+  });
+
+  return (
+    <div>
+      <div
+        {...getRootProps()}
+        className={`
+          border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
+          transition-colors
+          ${isDragActive
+            ? 'border-accent bg-accent/5'
+            : 'border-border hover:border-accent/50'
+          }
+          ${uploading ? 'opacity-50 cursor-not-allowed' : ''}
+        `}
+      >
+        <input {...getInputProps()} disabled={uploading} />
+        {uploading ? (
+          <div className="flex flex-col items-center gap-2">
+            <Loader2 className="animate-spin text-accent" size={24} />
+            <p className="text-text-muted">Uploading...</p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2">
+            <Upload size={24} className="text-text-muted" />
+            <p className="text-text-muted">
+              {isDragActive ? 'Drop files here' : 'Drag & drop or click to upload'}
+            </p>
+            <p className="text-sm text-text-muted">No size limit</p>
+          </div>
+        )}
+      </div>
+      {error && (
+        <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded text-red-500 text-sm">
+          {error}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### 3. Using Media in Sections
+
+When a user inserts an image in the editor:
+
+```typescript
+// In SectionEditor or RichTextEditor
+async function handleImageUpload(file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const { url, id } = await uploadMedia(bookId, formData);
+  
+  // Insert image into TipTap editor
+  editor.chain().focus().setImage({ src: url, alt: file.name }).run();
+  
+  // Update section content to reference media ID
+  await updateSection(sectionId, {
+    content: {
+      ...section.content,
+      mediaId: id, // Reference to media table
+    },
+  });
+}
+```
+
+### 4. Media Service Interface
+
+```typescript
+// components/book-editor/services/MediaService.ts
+export interface MediaService {
+  uploadMedia(bookId: string, file: File): Promise<Media>;
+  getMedia(bookId: string): Promise<Media[]>;
+  getMediaById(id: string): Promise<Media>;
+  deleteMedia(id: string): Promise<void>;
+  getMediaBySection(sectionId: string): Promise<Media[]>;
+}
+```
+
+### 5. Media Service Implementation
+
+```typescript
+// lib/book-editor/services/media.service.ts
+import { MediaService } from '@/components/book-editor/services/MediaService';
+import { db } from '@/lib/db';
+import { media } from '@/lib/db/schema';
+import { uploadMedia } from '@/app/actions/media';
+
+export class MediaServiceImpl implements MediaService {
+  async uploadMedia(bookId: string, file: File): Promise<Media> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return await uploadMedia(bookId, formData);
+  }
+
+  async getMedia(bookId: string): Promise<Media[]> {
+    return await db.select()
+      .from(media)
+      .where(eq(media.bookId, bookId))
+      .orderBy(desc(media.uploadedAt));
+  }
+
+  async getMediaById(id: string): Promise<Media> {
+    const [mediaRecord] = await db.select()
+      .from(media)
+      .where(eq(media.id, id))
+      .limit(1);
+    
+    if (!mediaRecord) throw new Error('Media not found');
+    return mediaRecord;
+  }
+
+  async deleteMedia(id: string): Promise<void> {
+    const mediaRecord = await this.getMediaById(id);
+    
+    // Delete file from disk
+    const filePath = join(process.cwd(), 'public', mediaRecord.fileUrl);
+    await unlink(filePath).catch(() => {}); // Ignore if file doesn't exist
+    
+    // Delete from database
+    await db.delete(media).where(eq(media.id, id));
+  }
+}
+```
+
+## File Storage Structure
+
+```
+public/
+└── books/
+    └── [bookId]/
+        ├── cover.jpg
+        ├── 1234567890-image1.png
+        ├── 1234567891-diagram.svg
+        └── ...
+```
+
+**URL Pattern**: `/books/[bookId]/[filename]`
+
+## Why This Approach?
+
+### Server Actions Benefits
+- ✅ **Type-Safe**: Full TypeScript support
+- ✅ **Simple**: One function handles file + database
+- ✅ **Built-in**: No extra API routes needed
+- ✅ **Secure**: Server-side only, no client exposure
+
+### Database Table Benefits
+- ✅ **Metadata**: Store file info, dimensions, etc.
+- ✅ **Relationships**: Link media to content
+- ✅ **Querying**: Find all images for a book
+- ✅ **Cleanup**: Track files for deletion
+- ✅ **Permissions**: Track uploader
+
+## Summary
+
+- **Server Action**: Handles file upload and saves to disk
+- **Database Table**: Stores metadata and relationships
+- **Both are needed**: Server Action for upload, database for tracking
+
+This is the best of both worlds - simple uploads (like Django) with full database tracking.
+
+
+
+
+

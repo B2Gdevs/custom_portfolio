@@ -8,17 +8,44 @@ import type { DialogueTree } from './index';
 import type { FlagSchema } from './flags';
 
 /**
- * Current game state - flags and their values
+ * Flag value types - must be Yarn Spinner-compatible
  */
-export interface GameFlagState {
-  [flagId: string]: boolean | number | string;
+export type FlagValue = boolean | number | string;
+
+/**
+ * Current game state - flags and their values (flat, Yarn-compatible)
+ */
+export interface FlagState {
+  [flagId: string]: FlagValue;
 }
+
+/**
+ * Legacy alias for backward compatibility
+ */
+export type GameFlagState = FlagState;
+
+/**
+ * Base game state structure that users can extend
+ * Must have a 'flags' property, but can have any other structure
+ */
+export interface BaseGameState {
+  flags?: FlagState;
+  // Users extend this with their own properties:
+  // player?: PlayerState;
+  // characters?: Record<string, CharacterState>;
+  // etc.
+}
+
+/**
+ * Convenience type for extending game state
+ */
+export type GameState<T extends Record<string, any> = {}> = BaseGameState & T;
 
 /**
  * Updated flags after dialogue completes
  */
 export interface DialogueResult {
-  updatedFlags: GameFlagState;
+  updatedFlags: FlagState;
   dialogueTree: DialogueTree;
   completedNodeIds: string[]; // Nodes that were visited
 }
@@ -28,10 +55,10 @@ export interface DialogueResult {
  */
 export interface DialogueRunProps {
   dialogue: DialogueTree;
-  initialFlags: GameFlagState;
+  gameState: Record<string, any>; // Any JSON game state (will be flattened)
   startNodeId?: string;
   onComplete?: (result: DialogueResult) => void;
-  onFlagUpdate?: (flags: GameFlagState) => void;
+  onFlagUpdate?: (flags: FlagState) => void;
 }
 
 /**
@@ -40,7 +67,6 @@ export interface DialogueRunProps {
 export interface DialogueEditProps {
   dialogue: DialogueTree | null;
   flagSchema?: FlagSchema;
-  initialFlags?: GameFlagState; // For simulation mode
   onChange: (dialogue: DialogueTree) => void;
   onExportYarn?: (yarn: string) => void;
   onExportJSON?: (json: string) => void;

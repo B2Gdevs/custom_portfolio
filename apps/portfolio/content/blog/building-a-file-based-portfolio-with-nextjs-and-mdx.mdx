@@ -1,0 +1,280 @@
+---
+title: "Building a File-Based Portfolio with Next.js and MDX: Admin System & Migration Deep Dive"
+description: "How I built a sleek portfolio site with a development-only admin interface, migrated content from a legacy system, and created a file-based content management system that's both powerful and simple."
+date: "2025-01-20"
+tags: ["Next.js", "MDX", "Portfolio", "Content Management", "Migration"]
+image: "/images/projects/portfolio/portfolio-hero.png"
+---
+
+When I decided to rebuild my portfolio, I wanted something that combined the simplicity of file-based content with the power of modern web frameworks. The result is a Next.js 16 portfolio with MDX support, a development-only admin interface, and a seamless migration path from legacy systems.
+
+## The Architecture: File-Based Content Management
+
+The core philosophy behind this portfolio is **simplicity through files**. Instead of a complex CMS or database-driven content system, everything lives in the file system:
+
+```
+content/
+├── projects/
+│   ├── bashful-ai-stable-diffusion-photoshop-plugin.mdx
+│   ├── rapidcli-service-oriented-cli-framework.mdx
+│   └── ...
+├── blog/
+│   └── building-colorfull-ai-technologies-that-scaled.mdx
+└── docs/
+    └── getting-started.mdx
+```
+
+Each content file is an MDX file with YAML frontmatter:
+
+```markdown
+---
+title: "My Project"
+description: "A cool project"
+date: "2024-01-01"
+tags: ["react", "nextjs"]
+images:
+  - "/images/projects/myproject/screenshot1.png"
+  - "/images/projects/myproject/screenshot2.png"
+featuredImage: "/images/projects/myproject/hero.png"
+githubUrl: "https://github.com/user/repo"
+liveUrl: "https://myproject.com"
+---
+
+# My Project
+
+Content goes here...
+```
+
+### The Content Loading System
+
+The magic happens in `lib/content.ts`, a simple utility that reads files from the filesystem:
+
+```typescript
+export function getAllContent(type: 'docs' | 'projects' | 'blog') {
+  const files = getContentFiles(type);
+  
+  return files
+    .map((file) => {
+      const slug = file.replace(/\.(md|mdx)$/, '');
+      const content = getContentBySlug(type, slug);
+      if (!content) return null;
+      return {
+        meta: content.meta,
+        slug,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => {
+      const dateA = a.meta.date ? new Date(a.meta.date).getTime() : 0;
+      const dateB = b.meta.date ? new Date(b.meta.date).getTime() : 0;
+      return dateB - dateA;
+    });
+}
+```
+
+This approach gives us:
+- **Version control**: All content is in Git
+- **No database migrations**: Just add/remove files
+- **Type safety**: TypeScript interfaces for frontmatter
+- **Fast builds**: Static generation at build time
+
+## The Admin Interface: Development-Only Security
+
+One of the coolest features is the **development-only admin interface**. When you run the site locally (`npm run dev`), you get a full admin dashboard at `/admin` that lets you browse all your content.
+
+### How It Works
+
+The admin system checks the environment:
+
+```typescript
+const isAdminEnabled = process.env.NODE_ENV === 'development';
+```
+
+In production, the admin routes return 403 errors, and the admin link is hidden from navigation. This gives you a powerful content management interface during development without any security concerns in production.
+
+### Admin Features
+
+The admin dashboard provides:
+
+1. **Projects Management** (`/admin/projects`)
+   - View all project files
+   - See metadata (title, description, tags)
+   - Quick links to GitHub and live demos
+   - Direct links to public project pages
+
+2. **Blog Management** (`/admin/blog`)
+   - Browse all blog posts
+   - View publication dates
+   - Quick access to edit files
+
+3. **Documentation Management** (`/admin/docs`)
+   - Manage documentation pages
+   - GitBook-style layout with sidebar navigation
+   - Table of contents generation
+
+### API Routes for Admin
+
+The admin pages use API routes to fetch content:
+
+```typescript
+// app/api/admin/projects/route.ts
+export async function GET() {
+  if (process.env.NODE_ENV !== 'development') {
+    return NextResponse.json({ error: 'Not available in production' }, { status: 403 });
+  }
+
+  const projects = getAllContent('projects');
+  return NextResponse.json(projects);
+}
+```
+
+These routes are server-side only and automatically disabled in production builds.
+
+## The Migration: From Legacy Portfolio to Modern Stack
+
+Migrating from my old portfolio (built with a different stack) was surprisingly straightforward. Here's how I did it:
+
+### Step 1: Content Extraction
+
+I started by identifying all the content I wanted to migrate:
+- 5 projects with full descriptions, images, and metadata
+- 1 blog post with full content
+- All associated images
+
+### Step 2: Image Migration
+
+I copied all images from the old portfolio's public directory to the new structure:
+
+```
+public/images/
+├── projects/
+│   ├── bashful/
+│   │   ├── featured.svg
+│   │   ├── bashful_the_photoshop_plugin.png
+│   │   └── ...
+│   ├── rapidcli/
+│   └── ...
+└── my_avatar.jpeg
+```
+
+### Step 3: MDX File Creation
+
+For each project, I created an MDX file with:
+- **Frontmatter**: All metadata (title, description, date, tags, images, URLs)
+- **Content**: The full project description and details
+
+Example structure:
+
+```markdown
+---
+title: "Bashful.ai: Bringing Stable Diffusion to Adobe Photoshop"
+description: "Launching a generative AI Photoshop plugin..."
+date: "2023-03-15"
+tags: ["AI", "Photoshop", "Plugin", "Stable Diffusion"]
+images:
+  - "/images/projects/bashful/image1.png"
+  - "/images/projects/bashful/image2.png"
+featuredImage: "/images/projects/bashful/featured.svg"
+githubUrl: "https://github.com/user/bashful"
+liveUrl: "https://bashful.ai"
+---
+
+## Overview
+
+When Stable Diffusion first burst onto the scene...
+```
+
+### Step 4: Image Gallery Integration
+
+I added automatic image gallery support to project pages:
+
+```typescript
+// Hero image at top
+{heroImage && (
+  <div className="mb-12 rounded-xl overflow-hidden">
+    <Image src={heroImage} alt={title} fill className="object-cover" />
+  </div>
+)}
+
+// Gallery grid below
+{galleryImages.length > 1 && (
+  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+    {galleryImages.map((img, idx) => (
+      <Image key={idx} src={img} alt={`${title} - Image ${idx + 1}`} />
+    ))}
+  </div>
+)}
+```
+
+### Step 5: MDX Image Component
+
+I created a custom MDX image component that automatically styles images in content:
+
+```typescript
+img: (props) => {
+  return (
+    <div className="my-8 rounded-lg overflow-hidden border border-border shadow-lg">
+      <Image
+        src={props.src}
+        alt={props.alt || ''}
+        width={1200}
+        height={600}
+        className="w-full h-auto object-cover"
+      />
+      {props.alt && (
+        <p className="text-sm text-text-muted text-center py-2 bg-bg-alt">
+          {props.alt}
+        </p>
+      )}
+    </div>
+  );
+}
+```
+
+Now any image referenced in MDX content automatically gets beautiful styling with captions.
+
+## The Result: A Sleek, Modern Portfolio
+
+The final portfolio features:
+
+- **Sleek Design**: Software architectural theme with tight spacing and subtle animations
+- **Image Galleries**: Automatic hero images and gallery grids for projects
+- **Admin Interface**: Development-only content management
+- **Type Safety**: Full TypeScript support for content metadata
+- **Performance**: Static generation with Next.js 16
+- **MDX Support**: Rich content with React components
+
+### Key Technical Decisions
+
+1. **File-based over Database**: Simpler, version-controlled, no migrations
+2. **MDX over Plain Markdown**: Enables React components in content
+3. **Development-only Admin**: Security through environment checks
+4. **Server Components**: Data fetching on the server, animations on the client
+5. **Next.js Image**: Automatic optimization and lazy loading
+
+## Lessons Learned
+
+1. **File-based CMS is powerful**: For portfolios and documentation, files beat databases
+2. **Environment-based security works**: Development-only features are simple and effective
+3. **MDX is amazing**: The ability to use React components in markdown is game-changing
+4. **Migration is straightforward**: When content is structured, moving it is just file operations
+
+## What's Next?
+
+The admin interface currently shows content but doesn't edit it (that's intentional - edit files directly). Future enhancements could include:
+
+- Content preview before publishing
+- Image upload interface
+- Draft/published workflow
+- Content search and filtering
+
+But honestly, the file-based approach is so simple and effective that I might just keep it as-is. Sometimes the best solution is the simplest one.
+
+---
+
+**Want to see the code?** Check out the [portfolio repository](https://github.com/yourusername/portfolio-v2) or visit the [live site](https://yourportfolio.com).
+
+
+
+
+

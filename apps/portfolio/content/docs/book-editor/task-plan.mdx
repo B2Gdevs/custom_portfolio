@@ -1,0 +1,446 @@
+---
+title: "Book Editor - Task Plan (Ordered by Ease)"
+description: "Step-by-step implementation plan, easiest tasks first"
+date: "2025-01-20"
+---
+
+# Task Plan - Ordered by Ease
+
+## Phase 1: Foundation (Easiest - Week 1)
+
+### Task 1.1: Project Setup ⭐ EASIEST
+**Time**: 30 minutes
+- Create directory structure
+- Install dependencies
+- Set up Vite for testing
+
+**Dependencies**: None
+**Files**:
+- `components/book-editor/` structure
+- `lib/book-editor/` structure
+- Update `package.json`
+
+### Task 1.2: Database Schema ⭐ EASY
+**Time**: 2 hours
+- Create Drizzle schema files
+- Define all tables (books, chapters, sections, versions, etc.)
+- Generate migrations
+
+**Dependencies**: Task 1.1
+**Files**:
+- `lib/db/schema/book-editor/`
+
+### Task 1.3: TypeScript Types ⭐ EASY
+**Time**: 1 hour
+- Define all TypeScript interfaces
+- Book, Chapter, Section, Version types
+- Service interfaces
+
+**Dependencies**: Task 1.2
+**Files**:
+- `components/book-editor/types/`
+
+### Task 1.4: Service Interfaces ⭐ EASY
+**Time**: 1 hour
+- Define BookService interface
+- Define VersionService interface
+- Define CollaborationService interface
+- Define MediaService interface
+
+**Dependencies**: Task 1.3
+**Files**:
+- `components/book-editor/services/`
+
+## Phase 2: Authentication (Easy - Week 1-2)
+
+### Task 2.1: Install NextAuth ⭐ EASY
+**Time**: 30 minutes
+- Install NextAuth.js
+- Install Drizzle adapter
+- Basic configuration
+
+**Dependencies**: Task 1.1
+**Files**:
+- `app/api/auth/[...nextauth]/route.ts`
+
+### Task 2.2: Password Utilities ⭐ EASY
+**Time**: 1 hour
+- Implement PBKDF2 hashing (Node.js crypto)
+- Password verification
+- Unit tests
+
+**Dependencies**: Task 2.1
+**Files**:
+- `lib/auth/password.ts`
+- `tests/utils/password.test.ts`
+
+### Task 2.3: NextAuth Setup ⭐ EASY
+**Time**: 2 hours
+- Configure NextAuth with credentials provider
+- Set up Drizzle adapter
+- Create login/register pages
+
+**Dependencies**: Task 2.1, 2.2
+**Files**:
+- `app/api/auth/[...nextauth]/route.ts`
+- `app/login/page.tsx`
+- `app/register/page.tsx`
+
+### Task 2.4: Auth Context ⭐ EASY
+**Time**: 1 hour
+- Create AuthContext
+- useAuth hook
+- Protect routes with middleware
+
+**Dependencies**: Task 2.3
+**Files**:
+- `components/book-editor/contexts/AuthContext.tsx`
+- `middleware.ts`
+
+## Phase 3: Basic Reader (Medium - Week 2)
+
+### Task 3.1: BookReader Component ⭐ MEDIUM
+**Time**: 3 hours
+- Basic reader component
+- Chapter navigation
+- Grimoire theme wrapper
+
+**Dependencies**: Task 1.4, 2.4
+**Files**:
+- `components/book-editor/components/BookReader/BookReader.tsx`
+- `components/book-editor/components/BookReader/GrimoireTheme.tsx`
+
+### Task 3.2: ChapterView Component ⭐ MEDIUM
+**Time**: 2 hours
+- Render chapters with sections
+- Basic styling
+- Lazy loading hook
+
+**Dependencies**: Task 3.1
+**Files**:
+- `components/book-editor/components/BookReader/ChapterView.tsx`
+- `components/book-editor/hooks/useLazyChapter.ts`
+
+### Task 3.3: Service Implementation ⭐ MEDIUM
+**Time**: 3 hours
+- Implement BookService
+- Database queries with Drizzle
+- Error handling
+
+**Dependencies**: Task 1.2, 1.4
+**Files**:
+- `lib/book-editor/services/book.service.ts`
+
+## Phase 4: Basic Editor (Medium - Week 3)
+
+### Task 4.1: Install TipTap ⭐ EASY
+**Time**: 30 minutes
+- Install TipTap and extensions
+- Basic setup
+
+**Dependencies**: Task 3.3
+**Files**:
+- Update `package.json`
+
+### Task 4.2: RichTextEditor Component ⭐ MEDIUM
+**Time**: 4 hours
+- TipTap editor wrapper
+- Basic extensions (bold, italic, headings, etc.)
+- HTML output
+
+**Dependencies**: Task 4.1
+**Files**:
+- `components/book-editor/components/BookEditor/RichTextEditor.tsx`
+
+### Task 4.3: BookEditor Component ⭐ MEDIUM
+**Time**: 3 hours
+- Main editor component
+- Chapter/section management
+- Save functionality
+
+**Dependencies**: Task 4.2, 3.3
+**Files**:
+- `components/book-editor/components/BookEditor/BookEditor.tsx`
+
+### Task 4.4: Auto-Save Hook ⭐ MEDIUM
+**Time**: 2 hours
+- useAutoSave hook
+- Debouncing
+- Auto-retry with exponential backoff
+
+**Dependencies**: Task 4.3
+**Files**:
+- `components/book-editor/hooks/useAutoSave.ts`
+
+## Phase 5: File Uploads (Easy - Week 3)
+
+### Task 5.1: Server Action for Uploads ⭐ EASY
+**Time**: 2 hours
+- Next.js Server Action
+- File saving to public/books/
+- Database record creation
+
+**Dependencies**: Task 1.2, 3.3
+**Files**:
+- `app/actions/media.ts`
+
+### Task 5.2: Media Upload Component ⭐ EASY
+**Time**: 2 hours
+- Upload UI with react-dropzone
+- Progress indicator
+- Image preview
+
+**Dependencies**: Task 5.1
+**Files**:
+- `components/book-editor/components/shared/MediaUpload.tsx`
+
+### Task 5.3: MediaViewer Component ⭐ EASY
+**Time**: 1 hour
+- Display images in reader
+- Lightbox/modal for full view
+
+**Dependencies**: Task 5.2
+**Files**:
+- `components/book-editor/components/BookReader/MediaViewer.tsx`
+
+## Phase 6: Versioning (Hard - Week 4)
+
+### Task 6.1: Version Service ⭐ MEDIUM
+**Time**: 4 hours
+- Create version snapshots
+- Store in database
+- Version retrieval
+
+**Dependencies**: Task 3.3
+**Files**:
+- `lib/book-editor/services/version.service.ts`
+
+### Task 6.2: Auto-Versioning ⭐ MEDIUM
+**Time**: 2 hours
+- Automatic snapshots on save
+- Version history UI
+
+**Dependencies**: Task 6.1, 4.4
+**Files**:
+- `components/book-editor/components/BookEditor/VersionHistory.tsx`
+
+### Task 6.3: Branching System ⭐ HARD
+**Time**: 6 hours
+- Create branches
+- Branch management UI
+- Branch switching
+
+**Dependencies**: Task 6.1
+**Files**:
+- `components/book-editor/components/BookEditor/BranchManager.tsx`
+- Update version service
+
+### Task 6.4: Merge Algorithm ⭐ HARDEST
+**Time**: 8 hours
+- Three-way merge implementation
+- Conflict detection
+- Merge UI
+
+**Dependencies**: Task 6.3
+**Files**:
+- `components/book-editor/utils/version-merge.ts`
+- `components/book-editor/components/BookEditor/MergeInterface.tsx`
+
+## Phase 7: Collaboration (Hard - Week 5-6)
+
+### Task 7.1: WebSocket Server Setup ⭐ MEDIUM
+**Time**: 4 hours
+- Custom Next.js server (dev)
+- WebSocket server
+- Room management
+
+**Dependencies**: Task 4.3
+**Files**:
+- `server.js` (custom server)
+- `lib/book-editor/websocket/server.ts`
+
+### Task 7.2: Y.js Integration ⭐ MEDIUM
+**Time**: 4 hours
+- Y.js document setup
+- TipTap collaboration extension
+- WebSocket provider
+
+**Dependencies**: Task 7.1, 4.2
+**Files**:
+- Update RichTextEditor.tsx
+- `lib/book-editor/websocket/client.ts`
+
+### Task 7.3: User Presence ⭐ MEDIUM
+**Time**: 4 hours
+- Track active users
+- Cursor positions
+- Status updates
+
+**Dependencies**: Task 7.2
+**Files**:
+- `components/book-editor/components/BookEditor/CollaborationPanel.tsx`
+- `lib/book-editor/services/collaboration.service.ts`
+
+### Task 7.4: Highlights System ⭐ MEDIUM
+**Time**: 3 hours
+- Highlight creation
+- Display highlights
+- User-specific colors
+
+**Dependencies**: Task 7.3
+**Files**:
+- Update RichTextEditor.tsx
+- Highlight storage in database
+
+## Phase 8: Export (Medium - Week 6)
+
+### Task 8.1: HTML Export ⭐ EASY
+**Time**: 2 hours
+- Generate clean HTML
+- Include styles
+- Download functionality
+
+**Dependencies**: Task 3.1
+**Files**:
+- `components/book-editor/utils/html-exporter.ts`
+
+### Task 8.2: EPUB Export ⭐ MEDIUM
+**Time**: 4 hours
+- Install epub-gen
+- Generate EPUB file
+- Include metadata and images
+
+**Dependencies**: Task 8.1
+**Files**:
+- `components/book-editor/utils/epub-generator.ts`
+- `components/book-editor/components/BookReader/ExportMenu.tsx`
+
+## Phase 9: Polish (Medium - Week 7)
+
+### Task 9.1: Grimoire Theme ⭐ MEDIUM
+**Time**: 6 hours
+- Dark color palette
+- Typography system
+- Ornate borders/effects
+
+**Dependencies**: Task 3.1, 4.3
+**Files**:
+- `components/book-editor/styles/grimoire-theme.ts`
+- `components/book-editor/styles/components.ts`
+
+### Task 9.2: Animations ⭐ MEDIUM
+**Time**: 4 hours
+- Page turn effects
+- Fade-ins
+- Ink effects
+- Hover states
+
+**Dependencies**: Task 9.1
+**Files**:
+- `components/book-editor/styles/animations.ts`
+
+### Task 9.3: Metadata Panel ⭐ EASY
+**Time**: 2 hours
+- Book metadata form
+- Tags, categories
+- Cover image upload
+
+**Dependencies**: Task 5.2, 4.3
+**Files**:
+- `components/book-editor/components/BookEditor/MetadataPanel.tsx`
+
+## Phase 10: Testing (Medium - Week 8)
+
+### Task 10.1: Unit Tests ⭐ EASY
+**Time**: 4 hours
+- Password utilities
+- Version merge algorithm
+- Export functions
+
+**Dependencies**: All previous phases
+**Files**:
+- `tests/utils/`
+
+### Task 10.2: Component Tests ⭐ MEDIUM
+**Time**: 6 hours
+- BookReader tests
+- BookEditor tests
+- Hook tests
+
+**Dependencies**: Task 10.1
+**Files**:
+- `tests/components/`
+- `tests/hooks/`
+
+### Task 10.3: Integration Tests ⭐ MEDIUM
+**Time**: 4 hours
+- Service integration
+- WebSocket flow
+- End-to-end workflows
+
+**Dependencies**: Task 10.2
+**Files**:
+- `tests/integration/`
+
+## Summary by Difficulty
+
+### ⭐ EASIEST (Start Here)
+1. Project Setup
+2. Database Schema
+3. TypeScript Types
+4. Service Interfaces
+5. Install NextAuth
+6. Password Utilities
+7. Install TipTap
+8. Server Action for Uploads
+9. HTML Export
+
+### ⭐ EASY
+1. NextAuth Setup
+2. Auth Context
+3. Media Upload Component
+4. MediaViewer Component
+5. Metadata Panel
+6. Unit Tests
+
+### ⭐ MEDIUM
+1. BookReader Component
+2. ChapterView Component
+3. Service Implementation
+4. RichTextEditor Component
+5. BookEditor Component
+6. Auto-Save Hook
+7. Version Service
+8. Auto-Versioning
+9. WebSocket Server Setup
+10. Y.js Integration
+11. User Presence
+12. Highlights System
+13. EPUB Export
+14. Grimoire Theme
+15. Animations
+16. Component Tests
+17. Integration Tests
+
+### ⭐ HARD
+1. Branching System
+
+### ⭐ HARDEST
+1. Merge Algorithm
+
+## Recommended Order
+
+**Week 1**: Tasks 1.1 → 1.4 → 2.1 → 2.4 (Foundation + Auth)
+**Week 2**: Tasks 3.1 → 3.3 → 4.1 → 4.4 (Reader + Basic Editor)
+**Week 3**: Tasks 5.1 → 5.3 → 6.1 → 6.2 (Uploads + Basic Versioning)
+**Week 4**: Tasks 6.3 → 6.4 (Advanced Versioning)
+**Week 5-6**: Tasks 7.1 → 7.4 (Collaboration)
+**Week 7**: Tasks 8.1 → 8.2 → 9.1 → 9.3 (Export + Polish)
+**Week 8**: Tasks 10.1 → 10.3 (Testing)
+
+This order minimizes dependencies and builds complexity gradually.
+
+
+
+
+

@@ -13,6 +13,7 @@ export * from './types';
 export * from './types/flags';
 export * from './types/game-state';
 export * from './types/constants';
+export { flattenGameState, validateGameState, extractFlagsFromGameState, type FlattenConfig, type FlattenedState } from './utils/game-state-flattener';
 export { exportToYarn, importFromYarn } from './lib/yarn-converter';
 export { initializeFlags, mergeFlagUpdates, validateFlags, getFlagValue } from './lib/flag-manager';
 export * from './utils/node-helpers';

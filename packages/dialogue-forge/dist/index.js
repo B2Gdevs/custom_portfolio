@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getFlagValue = exports.validateFlags = exports.mergeFlagUpdates = exports.initializeFlags = exports.importFromYarn = exports.exportToYarn = exports.listDemoFlagSchemas = exports.listExamples = exports.getDemoFlagSchema = exports.getExampleDialogue = exports.demoFlagSchemas = exports.exampleDialogues = exports.ExampleLoader = exports.ZoomControls = exports.FlagManager = exports.FlagSelector = exports.GuidePanel = exports.DialogueSimulator = exports.ScenePlayer = exports.DialogueEditorV2 = void 0;
+exports.getFlagValue = exports.validateFlags = exports.mergeFlagUpdates = exports.initializeFlags = exports.importFromYarn = exports.exportToYarn = exports.extractFlagsFromGameState = exports.validateGameState = exports.flattenGameState = exports.listDemoFlagSchemas = exports.listExamples = exports.getDemoFlagSchema = exports.getExampleDialogue = exports.demoFlagSchemas = exports.exampleDialogues = exports.ExampleLoader = exports.ZoomControls = exports.FlagManager = exports.FlagSelector = exports.GuidePanel = exports.DialogueSimulator = exports.ScenePlayer = exports.DialogueEditorV2 = void 0;
 var DialogueEditorV2_1 = require("./components/DialogueEditorV2");
 Object.defineProperty(exports, "DialogueEditorV2", { enumerable: true, get: function () { return DialogueEditorV2_1.DialogueEditorV2; } });
 var ScenePlayer_1 = require("./components/ScenePlayer");
@@ -47,6 +47,11 @@ __exportStar(require("./types"), exports);
 __exportStar(require("./types/flags"), exports);
 __exportStar(require("./types/game-state"), exports);
 __exportStar(require("./types/constants"), exports);
+// Export game state utilities
+var game_state_flattener_1 = require("./utils/game-state-flattener");
+Object.defineProperty(exports, "flattenGameState", { enumerable: true, get: function () { return game_state_flattener_1.flattenGameState; } });
+Object.defineProperty(exports, "validateGameState", { enumerable: true, get: function () { return game_state_flattener_1.validateGameState; } });
+Object.defineProperty(exports, "extractFlagsFromGameState", { enumerable: true, get: function () { return game_state_flattener_1.extractFlagsFromGameState; } });
 // Export utilities
 var yarn_converter_1 = require("./lib/yarn-converter");
 Object.defineProperty(exports, "exportToYarn", { enumerable: true, get: function () { return yarn_converter_1.exportToYarn; } });

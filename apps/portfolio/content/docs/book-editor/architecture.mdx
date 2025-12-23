@@ -1,0 +1,319 @@
+---
+title: "Book Editor - Architecture & Code Organization"
+description: "Detailed breakdown of code architecture, file structure, and component organization"
+date: "2025-01-20"
+---
+
+# Architecture & Code Organization
+
+## Project Structure
+
+```
+portfolio-v2/
+├── components/
+│   └── book-editor/                    # Book editor component library
+│       ├── components/
+│       │   ├── BookReader/            # Reader components
+│       │   │   ├── BookReader.tsx     # Main reader component
+│       │   │   ├── ChapterView.tsx    # Individual chapter display
+│       │   │   ├── GrimoireTheme.tsx  # Theme wrapper/provider
+│       │   │   ├── MediaViewer.tsx    # Image/media display
+│       │   │   └── ExportMenu.tsx    # Export options (EPUB/HTML)
+│       │   ├── BookEditor/            # Editor components
+│       │   │   ├── BookEditor.tsx     # Main editor component
+│       │   │   ├── RichTextEditor.tsx # TipTap editor wrapper
+│       │   │   ├── ChapterEditor.tsx  # Chapter editing interface
+│       │   │   ├── SectionEditor.tsx  # Individual section editor
+│       │   │   ├── MetadataPanel.tsx  # Book metadata form
+│       │   │   ├── VersionHistory.tsx # Version timeline UI
+│       │   │   ├── BranchManager.tsx  # Branch creation/management
+│       │   │   ├── MergeInterface.tsx  # Merge conflict resolution
+│       │   │   └── CollaborationPanel.tsx # User presence/cursors
+│       │   ├── BookList/              # Library components
+│       │   │   ├── BookList.tsx       # Book grid/list view
+│       │   │   ├── BookCard.tsx        # Individual book card
+│       │   │   └── BookFilters.tsx    # Filter/search UI
+│       │   └── shared/                # Shared components
+│       │       ├── StatusBadge.tsx     # Draft/Published badges
+│       │       ├── UserAvatar.tsx      # Collaborator avatars
+│       │       ├── LoadingSpinner.tsx  # Loading states
+│       │       └── ErrorBoundary.tsx  # Error handling
+│       ├── hooks/                      # Custom React hooks
+│       │   ├── useBook.ts             # Book data management
+│       │   ├── useBookService.ts      # Service injection hook
+│       │   ├── useAutoSave.ts         # Auto-save logic
+│       │   ├── useVersioning.ts       # Version operations
+│       │   ├── useCollaboration.ts    # Real-time collaboration
+│       │   ├── useWebSocket.ts        # WebSocket connection
+│       │   ├── usePermissions.ts     # Role-based access
+│       │   └── useLazyChapter.ts     # Lazy chapter loading
+│       ├── services/                   # Service interfaces
+│       │   ├── BookService.ts          # Main service interface
+│       │   ├── VersionService.ts      # Version operations interface
+│       │   ├── CollaborationService.ts # Collaboration interface
+│       │   └── MediaService.ts        # Media upload interface
+│       ├── types/                      # TypeScript definitions
+│       │   ├── book.types.ts          # Book, Chapter, Section types
+│       │   ├── service.types.ts       # Service interfaces
+│       │   ├── collaboration.types.ts  # Collaboration types
+│       │   └── version.types.ts       # Versioning types
+│       ├── schema/                     # Database schema
+│       │   ├── book.schema.ts         # Drizzle schema definitions
+│       │   └── migrations/            # SQL migration files
+│       ├── utils/                      # Utility functions
+│       │   ├── epub-generator.ts      # EPUB export logic
+│       │   ├── html-exporter.ts       # HTML export logic
+│       │   ├── content-parser.ts      # JSON content parsing
+│       │   ├── version-merge.ts       # Git-like merge algorithm
+│       │   ├── conflict-resolver.ts   # Conflict resolution
+│       │   └── chunk-manager.ts       # Content chunking
+│       ├── styles/                     # Styling and themes
+│       │   ├── grimoire-theme.ts      # Theme configuration
+│       │   ├── animations.ts           # Animation definitions
+│       │   └── components.ts          # Styled components
+│       ├── tests/                      # Test files
+│       │   ├── components/            # Component tests
+│       │   ├── hooks/                 # Hook tests
+│       │   ├── utils/                 # Utility tests
+│       │   └── integration/           # Integration tests
+│       └── index.ts                   # Public API exports
+│
+├── lib/
+│   └── book-editor/                   # Book editor implementations
+│       ├── services/                  # Service implementations
+│       │   ├── book.service.ts        # BookService implementation
+│       │   ├── version.service.ts     # VersionService implementation
+│       │   ├── collaboration.service.ts # CollaborationService impl
+│       │   └── media.service.ts       # MediaService implementation
+│       └── websocket/                 # WebSocket server/client
+│           ├── server.ts              # WebSocket server setup
+│           ├── client.ts              # WebSocket client
+│           └── handlers/              # Message handlers
+│
+├── app/
+│   └── books/                         # Book routes (example usage)
+│       ├── page.tsx                   # Book list page
+│       ├── [id]/
+│       │   ├── page.tsx               # Book reader/editor page
+│       │   └── edit/
+│       │       └── page.tsx           # Editor page
+│
+└── public/
+    └── books/                         # Book media storage
+        ├── covers/                    # Book cover images
+        ├── images/                    # Chapter images
+        └── media/                     # Other media files
+```
+
+## Component Responsibilities
+
+### BookReader Components
+- **BookReader.tsx**: Main reader component, handles chapter navigation, lazy loading
+- **ChapterView.tsx**: Renders individual chapters with sections
+- **GrimoireTheme.tsx**: Provides theme context and styling
+- **MediaViewer.tsx**: Displays images and media with lightbox/modal
+- **ExportMenu.tsx**: Handles EPUB/HTML export UI and logic
+
+### BookEditor Components
+- **BookEditor.tsx**: Main editor component, orchestrates editing workflow
+- **RichTextEditor.tsx**: Wraps TipTap editor with collaboration
+- **ChapterEditor.tsx**: Chapter-level editing interface
+- **SectionEditor.tsx**: Individual section editing (text, image, code, etc.)
+- **MetadataPanel.tsx**: Book metadata editing (title, description, tags, etc.)
+- **VersionHistory.tsx**: Displays version timeline, allows version restoration
+- **BranchManager.tsx**: Create/manage branches, view branch tree
+- **MergeInterface.tsx**: Visual merge conflict resolution UI
+- **CollaborationPanel.tsx**: Shows active users, their cursors, highlights
+
+### Hooks
+
+- **useBook.ts**: Manages book state, loading, saving
+- **useBookService.ts**: Injects and provides book service to components
+- **useAutoSave.ts**: Handles automatic saving with debouncing
+- **useVersioning.ts**: Version operations (create, restore, branch, merge)
+- **useCollaboration.ts**: Real-time collaboration state and operations
+- **useWebSocket.ts**: WebSocket connection management
+- **usePermissions.ts**: Role-based access control checks
+- **useLazyChapter.ts**: Lazy loads chapters on-demand
+
+### Services (Interfaces)
+
+All services are **interfaces only** - implementations live in `lib/book-editor/services/`:
+
+- **BookService**: CRUD operations for books, chapters, sections
+- **VersionService**: Version creation, branching, merging
+- **CollaborationService**: User presence, cursor sync, highlights
+- **MediaService**: File uploads, media management
+
+## Data Flow
+
+```
+User Action
+    ↓
+Component (BookEditor/BookReader)
+    ↓
+Hook (useBook, useCollaboration, etc.)
+    ↓
+Service Interface (BookService, etc.)
+    ↓
+Service Implementation (lib/book-editor/services/)
+    ↓
+Database (via Drizzle ORM)
+    ↓
+WebSocket (for collaboration events)
+```
+
+## Collaboration Flow
+
+```
+User Types
+    ↓
+TipTap Editor (local state)
+    ↓
+Y.js Document (CRDT)
+    ↓
+useWebSocket Hook
+    ↓
+WebSocket Server
+    ↓
+Broadcast to Other Users
+    ↓
+Y.js Merge (automatic conflict resolution)
+    ↓
+Update TipTap Editor (other users see changes)
+```
+
+## Versioning Flow
+
+```
+Auto-Save Triggered
+    ↓
+useAutoSave Hook
+    ↓
+Create Snapshot (full book state)
+    ↓
+VersionService.createVersion()
+    ↓
+Store in versions table
+    ↓
+(Optional) Create Branch
+    ↓
+Continue editing on branch
+```
+
+## Content Chunking Strategy
+
+### Why Chunking?
+
+For large books with many chapters, loading everything at once is inefficient. We use chunking to:
+
+1. **Reduce Initial Load**: Only load visible chapters
+2. **Improve Performance**: Smaller payloads, faster rendering
+3. **Better Memory Management**: Unload chapters not in view
+
+### Chunking Approach
+
+**Chapter-Level Chunking** (Recommended):
+- Each chapter is a separate chunk
+- Load chapters on-demand as user scrolls/navigates
+- Cache recently viewed chapters
+- Unload chapters after X minutes of inactivity
+
+**Section-Level Chunking** (For very long chapters):
+- Split chapters into sections (e.g., every 50 sections)
+- Load sections within a chapter as needed
+- More complex but better for extremely long content
+
+### Implementation
+
+```typescript
+// useLazyChapter hook handles this
+const { chapter, loadChapter, isLoading } = useLazyChapter(chapterId)
+
+// Chapters loaded when:
+// 1. User navigates to chapter
+// 2. Chapter comes into viewport (intersection observer)
+// 3. Pre-load adjacent chapters (predictive loading)
+```
+
+### Do You Need It?
+
+**Yes, if:**
+- Books have 10+ chapters
+- Chapters are long (100+ sections)
+- You want optimal performance
+
+**Maybe not, if:**
+- Books are short (1-5 chapters)
+- Chapters are small
+- Performance is acceptable without it
+
+**Recommendation**: Start with chapter-level chunking. It's simple and effective for most use cases.
+
+## Testing Strategy
+
+### Unit Tests
+- **Components**: Test rendering, user interactions
+- **Hooks**: Test state management, side effects
+- **Utils**: Test pure functions (merge, export, parsing)
+
+### Integration Tests
+- **Service Integration**: Test service implementations with test database
+- **WebSocket**: Test collaboration flow with mock WebSocket
+- **End-to-End**: Test full editing/reading workflow
+
+### Test Structure
+```
+tests/
+├── components/
+│   ├── BookReader.test.tsx
+│   ├── BookEditor.test.tsx
+│   └── ...
+├── hooks/
+│   ├── useBook.test.ts
+│   ├── useVersioning.test.ts
+│   └── ...
+├── utils/
+│   ├── version-merge.test.ts
+│   ├── epub-generator.test.ts
+│   └── ...
+└── integration/
+    ├── collaboration.test.ts
+    ├── versioning.test.ts
+    └── ...
+```
+
+## Conflict Resolution Strategies
+
+### Operational Transform (OT)
+- **How it works**: Transforms operations to resolve conflicts
+- **Pros**: Deterministic, well-understood
+- **Cons**: Complex, requires central server
+
+### CRDT (Conflict-Free Replicated Data Types) - **RECOMMENDED**
+- **How it works**: Data structures that automatically merge
+- **Pros**: No conflicts, works offline, decentralized
+- **Cons**: Slightly larger data structures
+- **Implementation**: Y.js (already in TipTap)
+
+### Last-Write-Wins (LWW)
+- **How it works**: Most recent edit wins
+- **Pros**: Simple
+- **Cons**: Can lose data, not ideal for collaboration
+
+### Three-Way Merge (Git-like)
+- **How it works**: Compare base, local, remote versions
+- **Pros**: Familiar (like git), handles complex conflicts
+- **Cons**: Requires manual resolution for conflicts
+- **Use case**: Version branching/merging (not real-time editing)
+
+### Our Approach
+
+- **Real-Time Editing**: Y.js CRDT (automatic, no conflicts)
+- **Version Merging**: Three-way merge (git-like, manual resolution)
+- **Best of both worlds**: Smooth collaboration + powerful versioning
+
+
+
+
+

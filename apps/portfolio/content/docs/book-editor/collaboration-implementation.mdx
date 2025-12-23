@@ -1,0 +1,551 @@
+---
+title: "Book Editor - Real-Time Collaboration Implementation"
+description: "Complete step-by-step guide to implementing real-time collaboration with WebSockets and alternatives"
+date: "2025-01-20"
+updated: "2025-01-20"
+---
+
+# Real-Time Collaboration Implementation Guide
+
+## Overview
+
+Real-time collaboration allows multiple users to edit the same book simultaneously, seeing each other's changes instantly with cursor positions and highlights.
+
+## Technology Stack
+
+- **Y.js**: CRDT (Conflict-Free Replicated Data Types) for automatic conflict resolution
+- **TipTap Collaboration Extension**: Integrates Y.js with TipTap editor
+- **WebSocket**: Real-time communication (or alternative)
+- **y-websocket**: Y.js WebSocket provider
+
+## Alternatives to WebSockets
+
+### Option 1: WebSockets (Recommended) ✅
+
+**Pros:**
+- ✅ Bidirectional (client ↔ server)
+- ✅ Low latency
+- ✅ Efficient (persistent connection)
+- ✅ Real-time updates
+
+**Cons:**
+- ⚠️ Requires persistent connection
+- ⚠️ More complex setup
+- ⚠️ Doesn't work with serverless (Vercel)
+
+**Best for**: Real-time collaboration, low latency required
+
+### Option 2: Server-Sent Events (SSE)
+
+**Pros:**
+- ✅ Works with Next.js API routes
+- ✅ Works with Vercel (serverless)
+- ✅ Simpler than WebSocket
+- ✅ Automatic reconnection
+
+**Cons:**
+- ❌ One-way only (server → client)
+- ❌ Client changes need separate API calls
+- ❌ Less efficient than WebSocket
+
+**Best for**: Read-heavy, serverless deployments
+
+### Option 3: Polling
+
+**Pros:**
+- ✅ Simplest to implement
+- ✅ Works everywhere
+- ✅ No special server setup
+
+**Cons:**
+- ❌ High latency
+- ❌ Inefficient (constant requests)
+- ❌ Not truly real-time
+
+**Best for**: Not recommended for collaboration
+
+### Option 4: WebRTC (Peer-to-Peer)
+
+**Pros:**
+- ✅ Direct peer connections
+- ✅ Very low latency
+- ✅ No server needed for sync
+
+**Cons:**
+- ❌ Complex setup
+- ❌ NAT traversal issues
+- ❌ Still need signaling server
+
+**Best for**: Specialized use cases, not recommended here
+
+## Recommendation
+
+**Use WebSockets** for development and production. It's the standard for real-time collaboration and works perfectly with Y.js.
+
+For serverless (Vercel), deploy WebSocket server separately (Railway, Render, etc.).
+
+## Step-by-Step Implementation
+
+### Step 1: Install Dependencies
+
+```bash
+npm install yjs y-websocket @tiptap/extension-collaboration @tiptap/extension-collaboration-cursor
+npm install ws @types/ws  # For WebSocket server
+```
+
+### Step 2: Create Y.js Document
+
+```typescript
+// lib/book-editor/collaboration/y-doc.ts
+import * as Y from 'yjs';
+
+// Create a Y.js document for each book
+const yDocs = new Map<string, Y.Doc>();
+
+export function getYDoc(bookId: string): Y.Doc {
+  if (!yDocs.has(bookId)) {
+    const ydoc = new Y.Doc();
+    yDocs.set(bookId, ydoc);
+  }
+  return yDocs.get(bookId)!;
+}
+
+// Clean up when book is closed
+export function destroyYDoc(bookId: string): void {
+  const ydoc = yDocs.get(bookId);
+  if (ydoc) {
+    ydoc.destroy();
+    yDocs.delete(bookId);
+  }
+}
+```
+
+### Step 3: WebSocket Server Setup
+
+#### Development (Custom Next.js Server)
+
+```typescript
+// server.js (root of project)
+const { createServer } = require('http');
+const { parse } = require('url');
+const next = require('next');
+const { WebSocketServer } = require('ws');
+const { setupWSConnection } = require('y-websocket/bin/utils');
+
+const dev = process.env.NODE_ENV !== 'production';
+const app = next({ dev });
+const handle = app.getRequestHandler();
+
+app.prepare().then(() => {
+  const server = createServer((req, res) => {
+    const parsedUrl = parse(req.url, true);
+    handle(req, res, parsedUrl);
+  });
+
+  // WebSocket server
+  const wss = new WebSocketServer({ server });
+
+  wss.on('connection', (ws, req) => {
+    // Extract book ID from URL: ws://localhost:3000/books/[bookId]
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const bookId = url.pathname.split('/').pop();
+    
+    if (!bookId) {
+      ws.close();
+      return;
+    }
+
+    // Set up Y.js WebSocket connection
+    setupWSConnection(ws, req, {
+      docName: `book-${bookId}`, // Room name
+    });
+  });
+
+  server.listen(3000, () => {
+    console.log('> Ready on http://localhost:3000');
+  });
+});
+```
+
+#### Production (Separate Server)
+
+```typescript
+// lib/book-editor/websocket/server.ts
+import { WebSocketServer } from 'ws';
+import { setupWSConnection } from 'y-websocket/bin/utils';
+
+const wss = new WebSocketServer({ port: 8080 });
+
+wss.on('connection', (ws, req) => {
+  const url = new URL(req.url || '', `ws://${req.headers.host}`);
+  const bookId = url.searchParams.get('bookId');
+  
+  if (!bookId) {
+    ws.close();
+    return;
+  }
+
+  setupWSConnection(ws, req, {
+    docName: `book-${bookId}`,
+  });
+});
+
+console.log('WebSocket server running on ws://localhost:8080');
+```
+
+### Step 4: Client-Side WebSocket Connection
+
+```typescript
+// components/book-editor/hooks/useWebSocket.ts
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import * as Y from 'yjs';
+import { WebsocketProvider } from 'y-websocket';
+
+const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3000';
+
+export function useWebSocket(bookId: string, yDoc: Y.Doc) {
+  const [connected, setConnected] = useState(false);
+  const providerRef = useRef<WebsocketProvider | null>(null);
+
+  useEffect(() => {
+    // Create WebSocket provider
+    const provider = new WebsocketProvider(
+      wsUrl,
+      `book-${bookId}`, // Room name
+      yDoc,
+      {
+        // Connection options
+        params: { bookId },
+        // Reconnect automatically
+        reconnect: true,
+      }
+    );
+
+    provider.on('status', (event: { status: string }) => {
+      setConnected(event.status === 'connected');
+    });
+
+    providerRef.current = provider;
+
+    return () => {
+      provider.destroy();
+      providerRef.current = null;
+    };
+  }, [bookId, yDoc]);
+
+  return { connected, provider: providerRef.current };
+}
+```
+
+### Step 5: Integrate with TipTap
+
+```typescript
+// components/book-editor/components/BookEditor/RichTextEditor.tsx
+'use client';
+
+import { useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Collaboration from '@tiptap/extension-collaboration';
+import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
+import { useWebSocket } from '@/components/book-editor/hooks/useWebSocket';
+import { getYDoc } from '@/lib/book-editor/collaboration/y-doc';
+import * as Y from 'yjs';
+
+export function RichTextEditor({ 
+  bookId, 
+  sectionId,
+  initialContent 
+}: { 
+  bookId: string;
+  sectionId: string;
+  initialContent?: string;
+}) {
+  // Get or create Y.js document for this book
+  const yDoc = getYDoc(bookId);
+  
+  // Get the Y.js text type for this section
+  const yText = yDoc.getText(`section-${sectionId}`);
+
+  // Connect WebSocket
+  const { connected } = useWebSocket(bookId, yDoc);
+
+  // Create TipTap editor with collaboration
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Collaboration.configure({
+        document: yDoc,
+      }),
+      CollaborationCursor.configure({
+        provider: provider, // From useWebSocket
+        user: {
+          name: currentUser.name,
+          color: getUserColor(currentUser.id), // Unique color per user
+        },
+      }),
+    ],
+    content: yText.toString(),
+  });
+
+  return (
+    <div>
+      {!connected && (
+        <div className="text-yellow-500 text-sm mb-2">
+          Connecting to collaboration server...
+        </div>
+      )}
+      <EditorContent editor={editor} />
+    </div>
+  );
+}
+```
+
+### Step 6: User Presence Tracking
+
+```typescript
+// components/book-editor/hooks/useCollaboration.ts
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useWebSocket } from './useWebSocket';
+import { getYDoc } from '@/lib/book-editor/collaboration/y-doc';
+
+interface Collaborator {
+  id: string;
+  name: string;
+  color: string;
+  cursor?: { sectionId: string; offset: number };
+  status: 'active' | 'idle' | 'away';
+}
+
+export function useCollaboration(bookId: string) {
+  const yDoc = getYDoc(bookId);
+  const { connected, provider } = useWebSocket(bookId, yDoc);
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+
+  useEffect(() => {
+    if (!provider) return;
+
+    // Listen for awareness updates (user presence)
+    const awareness = provider.awareness;
+
+    const updateCollaborators = () => {
+      const states = Array.from(awareness.getStates().values());
+      const users = states.map((state: any) => ({
+        id: state.user?.id,
+        name: state.user?.name,
+        color: state.user?.color,
+        cursor: state.cursor,
+        status: state.status || 'active',
+      }));
+
+      setCollaborators(users);
+    };
+
+    awareness.on('change', updateCollaborators);
+    updateCollaborators();
+
+    // Set our own presence
+    awareness.setLocalStateField('user', {
+      id: currentUser.id,
+      name: currentUser.name,
+      color: getUserColor(currentUser.id),
+    });
+
+    return () => {
+      awareness.off('change', updateCollaborators);
+    };
+  }, [provider, bookId]);
+
+  return { collaborators, connected };
+}
+```
+
+### Step 7: Highlights System
+
+```typescript
+// components/book-editor/hooks/useHighlights.ts
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useWebSocket } from './useWebSocket';
+import { getYDoc } from '@/lib/book-editor/collaboration/y-doc';
+import * as Y from 'yjs';
+
+interface Highlight {
+  id: string;
+  userId: string;
+  sectionId: string;
+  startOffset: number;
+  endOffset: number;
+  color: string;
+  note?: string;
+}
+
+export function useHighlights(bookId: string) {
+  const yDoc = getYDoc(bookId);
+  const { provider } = useWebSocket(bookId, yDoc);
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
+
+  useEffect(() => {
+    if (!provider) return;
+
+    // Get Y.js array for highlights
+    const yHighlights = yDoc.getArray<Highlight>(`highlights-${bookId}`);
+
+    // Listen for changes
+    const updateHighlights = () => {
+      setHighlights(yHighlights.toArray());
+    };
+
+    yHighlights.observe(updateHighlights);
+    updateHighlights();
+
+    return () => {
+      yHighlights.unobserve(updateHighlights);
+    };
+  }, [provider, bookId, yDoc]);
+
+  const addHighlight = (highlight: Omit<Highlight, 'id'>) => {
+    const yHighlights = yDoc.getArray<Highlight>(`highlights-${bookId}`);
+    yHighlights.push([{
+      ...highlight,
+      id: crypto.randomUUID(),
+    }]);
+  };
+
+  const removeHighlight = (id: string) => {
+    const yHighlights = yDoc.getArray<Highlight>(`highlights-${bookId}`);
+    const index = yHighlights.toArray().findIndex(h => h.id === id);
+    if (index !== -1) {
+      yHighlights.delete(index);
+    }
+  };
+
+  return { highlights, addHighlight, removeHighlight };
+}
+```
+
+### Step 8: Sync Highlights to Database
+
+```typescript
+// Periodically sync highlights to database (debounced)
+useEffect(() => {
+  if (!highlights.length) return;
+
+  const timer = setTimeout(async () => {
+    // Save highlights to database
+    await collaborationService.saveHighlights(bookId, highlights);
+  }, 5000); // Debounce 5 seconds
+
+  return () => clearTimeout(timer);
+}, [highlights, bookId]);
+```
+
+## Complete Flow Diagram
+
+```
+User A Types
+    ↓
+TipTap Editor (local)
+    ↓
+Y.js Document (local CRDT)
+    ↓
+WebSocket Provider
+    ↓
+WebSocket Server
+    ↓
+Broadcast to Room (book-123)
+    ↓
+User B's WebSocket
+    ↓
+Y.js Document (User B, automatic merge)
+    ↓
+TipTap Editor (User B, updates automatically)
+```
+
+## Setup Checklist
+
+### Development Setup
+
+- [ ] Install dependencies (`yjs`, `y-websocket`, `@tiptap/extension-collaboration`)
+- [ ] Create custom Next.js server (`server.js`)
+- [ ] Set up WebSocket server in `server.js`
+- [ ] Create Y.js document manager
+- [ ] Create `useWebSocket` hook
+- [ ] Integrate TipTap with Collaboration extension
+- [ ] Add user presence tracking
+- [ ] Add highlights system
+- [ ] Test with multiple browser tabs
+
+### Production Setup
+
+- [ ] Deploy WebSocket server separately (Railway/Render)
+- [ ] Set `NEXT_PUBLIC_WS_URL` environment variable
+- [ ] Update WebSocket connection URL
+- [ ] Test connection from production
+- [ ] Set up monitoring/error tracking
+
+## Environment Variables
+
+```env
+# Development
+NEXT_PUBLIC_WS_URL=ws://localhost:3000
+
+# Production
+NEXT_PUBLIC_WS_URL=wss://ws.yourdomain.com
+```
+
+## Testing Collaboration
+
+1. Open book editor in two browser tabs
+2. Type in one tab - should appear in other tab instantly
+3. Move cursor - should see other user's cursor
+4. Add highlight - should appear for both users
+5. Disconnect one tab - other user should see "away" status
+
+## Troubleshooting
+
+### Connection Issues
+- Check WebSocket URL is correct
+- Verify server is running
+- Check firewall/network settings
+- Look for CORS errors in console
+
+### Changes Not Syncing
+- Verify Y.js document is shared
+- Check WebSocket connection status
+- Ensure TipTap Collaboration extension is enabled
+- Check browser console for errors
+
+### Performance Issues
+- Limit number of concurrent users per book
+- Implement rate limiting
+- Use Redis for multi-instance scaling (future)
+
+## Summary
+
+**Implementation Steps:**
+1. Install Y.js and TipTap collaboration extensions
+2. Set up WebSocket server (custom server for dev, separate for prod)
+3. Create Y.js document per book
+4. Connect WebSocket provider
+5. Integrate with TipTap editor
+6. Add user presence tracking
+7. Add highlights system
+8. Sync to database periodically
+
+**Key Points:**
+- Y.js handles all conflict resolution automatically
+- WebSocket provides real-time communication
+- TipTap Collaboration extension makes it easy
+- Database sync happens periodically (not real-time)
+
+This gives you Google Docs-like collaboration with minimal code!
+
+
+
+
+

@@ -65,39 +65,136 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
       )
     },
     flags: {
-      title: 'Flags & Yarn Variables',
+      title: 'Game State & Flags',
       content: (
         <div className="space-y-4 text-sm">
           <div className="bg-[#1a2a3e] border-l-4 border-[#e94560] p-4 rounded">
-            <h3 className="text-white font-semibold mb-2">How Flags Work</h3>
+            <h3 className="text-white font-semibold mb-2">Game State & Yarn Variables</h3>
             <p className="text-gray-300 text-xs mb-2">
-              <strong>Flags are passed into the editor and used in the simulator.</strong>
+              <strong>Dialogue Forge automatically flattens your game state into Yarn Spinner-compatible variables.</strong>
             </p>
             <p className="text-gray-400 text-xs mb-2">
-              Flags can be set during dialogue, which affects the state during simulation. Flags are exported/imported separately from dialogue.
+              Pass any JSON game state structure to ScenePlayer. Nested objects (player, characters, flags) are automatically flattened into flat variables that Yarn Spinner can use.
             </p>
             <p className="text-gray-400 text-xs">
-              In Yarn Spinner, flags become <code className="bg-[#0d0d14] px-1 rounded">$variable</code> commands like <code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;set $flag = value&gt;&gt;</code>.
+              In Yarn Spinner, these become <code className="bg-[#0d0d14] px-1 rounded">$variable</code> commands like <code className="bg-[#0d0d14] px-1 rounded">&lt;&lt;set $player_hp = 100&gt;&gt;</code>.
             </p>
           </div>
-          
-          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">What Are Flags?</h3>
-          <p className="text-gray-400">Flags are variables that track what's happened in your game. Examples:</p>
-          <ul className="list-disc list-inside space-y-1 text-sm ml-2 text-gray-400">
-            <li>Quest completed: <code className="bg-[#12121a] px-1 rounded">quest_dragon_slayer = "complete"</code></li>
-            <li>Has item: <code className="bg-[#12121a] px-1 rounded">item_ancient_key = true</code></li>
-            <li>Player reputation: <code className="bg-[#12121a] px-1 rounded">stat_reputation = 50</code></li>
-            <li>Achievement unlocked: <code className="bg-[#12121a] px-1 rounded">achievement_first_quest = true</code></li>
-          </ul>
 
-          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Setting Up Flags</h3>
-          <p className="text-gray-400 mb-3">Define your flags in code and pass them to the editor:</p>
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Game State Structure</h3>
+          <p className="text-gray-400 mb-3">
+            Your game state can have any structure. Dialogue Forge supports nested objects and automatically flattens them:
+          </p>
+          
+          <CodeBlock code={`// Example game state with nested structures
+interface GameState {
+  // Direct flags (optional, but recommended)
+  flags?: {
+    quest_dragon_slayer: 'not_started' | 'started' | 'complete';
+    item_ancient_key: boolean;
+  };
+  
+  // Player properties (flattened to $player_*)
+  player?: {
+    hp: number;
+    maxHp: number;
+    name: string;
+    // Nested objects are flattened too
+    affinity: {
+      A: number;  // Becomes $player_affinity_A
+      B: number;  // Becomes $player_affinity_B
+    };
+    elementAffinity: {
+      fire: number;   // Becomes $player_elementAffinity_fire
+      water: number;  // Becomes $player_elementAffinity_water
+    };
+  };
+  
+  // Characters as object (not array)
+  characters?: {
+    alice: { hp: 50, name: 'Alice' };  // Becomes $characters_alice_hp, $characters_alice_name
+    bob: { hp: 30, name: 'Bob' };      // Becomes $characters_bob_hp, $characters_bob_name
+  };
+  
+  // Any other game data
+  inventory?: string[];
+  location?: string;
+}
+
+const gameState: GameState = {
+  flags: {
+    quest_dragon_slayer: 'not_started',
+    item_ancient_key: false,
+  },
+  player: {
+    hp: 75,
+    maxHp: 100,
+    name: 'Hero',
+    affinity: { A: 0.8, B: 0.5, C: 0.2 },
+    elementAffinity: { fire: 0.9, water: 0.3 },
+  },
+  characters: {
+    alice: { hp: 50, name: 'Alice' },
+    bob: { hp: 30, name: 'Bob' },
+  },
+};`} language="typescript" />
+
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Automatic Flattening</h3>
+          <p className="text-gray-400 mb-3">
+            When you pass gameState to ScenePlayer, it's automatically flattened into Yarn-compatible variables:
+          </p>
+          
+          <div className="bg-[#12121a] p-4 rounded border border-[#2a2a3e]">
+            <p className="text-gray-300 text-xs mb-2 font-semibold">Flattening Rules:</p>
+            <ul className="list-disc list-inside space-y-1 text-xs text-gray-400 ml-2">
+              <li><strong>Nested objects:</strong> <code>player.hp</code> → <code>$player_hp</code></li>
+              <li><strong>Deep nesting:</strong> <code>player.affinity.A</code> → <code>$player_affinity_A</code></li>
+              <li><strong>Object keys:</strong> <code>characters.alice.hp</code> → <code>$characters_alice_hp</code></li>
+              <li><strong>Arrays:</strong> <code>inventory[0]</code> → <code>$inventory_0</code></li>
+              <li><strong>Only truthy values:</strong> Skips 0, false, null, undefined, empty strings</li>
+              <li><strong>Yarn-compatible types:</strong> Only boolean, number, string (validated)</li>
+            </ul>
+          </div>
+
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Using in Yarn Conditions</h3>
+          <p className="text-gray-400 mb-3">
+            Flattened variables can be used in dialogue conditions:
+          </p>
+          
+          <CodeBlock code={`// In your dialogue nodes, use flattened variable names:
+
+// Check player HP
+<<if $player_hp >= 50>>
+  Merchant: "You look healthy!"
+<<else>>
+  Merchant: "You should rest..."
+<<endif>>
+
+// Check rune affinity
+<<if $player_affinity_A > 0.7>>
+  Wizard: "You have strong affinity with rune A!"
+<<endif>>
+
+// Check character status
+<<if $characters_alice_hp < 20>>
+  Healer: "Alice needs healing!"
+<<endif>>
+
+// Check element affinity
+<<if $player_elementAffinity_fire > 0.8>>
+  Fire Mage: "You're a natural with fire magic!"
+<<endif>>`} language="yarn" />
+
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Flag Schema (For Editor)</h3>
+          <p className="text-gray-400 mb-3">
+            Flag Schema is used in the <strong>editor</strong> for autocomplete and validation. It's separate from game state:
+          </p>
           
           <CodeBlock code={`import { FlagSchema } from '@portfolio/dialogue-forge';
 
+// Flag Schema helps the editor understand what flags exist
 const flagSchema: FlagSchema = {
   flags: [
-    // Quest flags
     {
       id: 'quest_dragon_slayer',
       name: 'Dragon Slayer Quest',
@@ -106,47 +203,38 @@ const flagSchema: FlagSchema = {
       defaultValue: 'not_started'
     },
     {
-      id: 'quest_dragon_slayer_complete',
-      name: 'Dragon Slayer Complete',
-      type: 'quest',
-    },
-    
-    // Item flags
-    {
-      id: 'item_ancient_key',
-      name: 'Ancient Key',
-      type: 'item',
-    },
-    
-    // Stat flags
-    {
-      id: 'stat_gold',
-      name: 'Gold',
+      id: 'player_hp',  // Matches flattened game state
+      name: 'Player HP',
       type: 'stat',
       valueType: 'number',
-      defaultValue: 0
     },
     {
-      id: 'stat_reputation',
-      name: 'Reputation',
+      id: 'player_affinity_A',  // Matches flattened game state
+      name: 'Rune A Affinity',
       type: 'stat',
       valueType: 'number',
-      defaultValue: 0
     },
-    
-    // Achievement flags
-    {
-      id: 'achievement_first_quest',
-      name: 'First Quest',
-      type: 'achievement',
-    }
   ]
-};`} language="typescript" />
+};
+
+// Use in editor for autocomplete
+<DialogueEditorV2
+  dialogue={dialogue}
+  flagSchema={flagSchema}  // Helps with autocomplete
+  onChange={...}
+/>
+
+// Game state is used in player
+<ScenePlayer
+  dialogue={dialogue}
+  gameState={gameState}  // Full game state (automatically flattened)
+  onComplete={...}
+/>`} language="typescript" />
 
           <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Flag Types</h3>
           <div className="space-y-2 text-sm">
             <div className="bg-[#12121a] p-2 rounded border border-[#2a2a3e]">
-              <strong className="text-blue-400">quest</strong> - Quest state (<code className="text-xs">'not_started'</code>, <code className="text-xs">'in_progress'</code>, <code className="text-xs">'complete'</code>)
+              <strong className="text-blue-400">quest</strong> - Quest state (<code className="text-xs">'not_started'</code>, <code className="text-xs">'started'</code>, <code className="text-xs">'complete'</code>)
             </div>
             <div className="bg-[#12121a] p-2 rounded border border-[#2a2a3e]">
               <strong className="text-yellow-400">achievement</strong> - Unlocked achievements (true/false)
@@ -155,7 +243,7 @@ const flagSchema: FlagSchema = {
               <strong className="text-green-400">item</strong> - Inventory items (true/false or quantity)
             </div>
             <div className="bg-[#12121a] p-2 rounded border border-[#2a2a3e]">
-              <strong className="text-purple-400">stat</strong> - Player statistics (numbers: gold, reputation, etc.)
+              <strong className="text-purple-400">stat</strong> - Player statistics (numbers: hp, gold, affinity, etc.)
             </div>
             <div className="bg-[#12121a] p-2 rounded border border-[#2a2a3e]">
               <strong className="text-pink-400">title</strong> - Earned player titles (true/false)
@@ -163,28 +251,34 @@ const flagSchema: FlagSchema = {
             <div className="bg-[#12121a] p-2 rounded border border-[#2a2a3e]">
               <strong className="text-gray-400">dialogue</strong> - Temporary, dialogue-scoped flags
             </div>
-            <div className="bg-[#12121a] p-2 rounded border border-[#2a2a3e]">
-              <strong className="text-gray-400">global</strong> - Global game state
-            </div>
           </div>
 
-          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Using Flags in Editor</h3>
-          <ol className="list-decimal list-inside space-y-2 text-sm ml-2">
-            <li>Pass <code className="bg-[#12121a] px-1 rounded">flagSchema</code> to the editor</li>
-            <li>When setting flags, <strong>type to see matching flags</strong> in the dropdown</li>
-            <li>Click a flag to add it (organized by category)</li>
-            <li>Flags are exported to Yarn as <code className="bg-[#12121a] px-1 rounded">&lt;&lt;set $flag_name = true&gt;&gt;</code></li>
-          </ol>
-
-          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Flag Naming Convention</h3>
-          <p className="text-gray-400 text-xs">Use prefixes to organize flags:</p>
-          <div className="bg-[#12121a] p-3 rounded border border-[#2a2a3e] text-xs font-mono space-y-1">
-            <div><code className="text-blue-400">quest_*</code> - Quest-related flags</div>
-            <div><code className="text-yellow-400">achievement_*</code> - Achievements</div>
-            <div><code className="text-green-400">item_*</code> - Items</div>
-            <div><code className="text-purple-400">stat_*</code> - Statistics</div>
-            <div><code className="text-pink-400">title_*</code> - Titles</div>
-            <div><code className="text-gray-400">dialogue_*</code> - Dialogue-scoped (temporary)</div>
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Best Practices</h3>
+          <div className="space-y-2 text-sm">
+            <div className="bg-[#12121a] p-3 rounded border border-[#2a2a3e]">
+              <strong className="text-white text-xs">1. Use descriptive names</strong>
+              <p className="text-gray-400 text-xs mt-1">
+                Flattened names should be clear: <code>$player_hp</code> not <code>$p_h</code>
+              </p>
+            </div>
+            <div className="bg-[#12121a] p-3 rounded border border-[#2a2a3e]">
+              <strong className="text-white text-xs">2. Keep structures consistent</strong>
+              <p className="text-gray-400 text-xs mt-1">
+                Use the same game state structure throughout your app for predictable flattening
+              </p>
+            </div>
+            <div className="bg-[#12121a] p-3 rounded border border-[#2a2a3e]">
+              <strong className="text-white text-xs">3. Characters as objects, not arrays</strong>
+              <p className="text-gray-400 text-xs mt-1">
+                Use <code>characters: {'{'} alice: {'{...}'} {'}'}</code> not <code>characters: [alice, ...]</code> for better naming
+              </p>
+            </div>
+            <div className="bg-[#12121a] p-3 rounded border border-[#2a2a3e]">
+              <strong className="text-white text-xs">4. Only truthy values are included</strong>
+              <p className="text-gray-400 text-xs mt-1">
+                Zero, false, null, undefined, and empty strings are automatically excluded from flattening
+              </p>
+            </div>
           </div>
         </div>
       )

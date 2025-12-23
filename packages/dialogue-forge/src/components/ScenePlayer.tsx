@@ -1,15 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { DialogueTree, DialogueNode, Choice } from '../types';
-import { GameFlagState, DialogueResult } from '../types/game-state';
+import { FlagState, DialogueResult } from '../types/game-state';
 import { mergeFlagUpdates } from '../lib/flag-manager';
+import { validateGameState, extractFlagsFromGameState, type FlattenConfig } from '../utils/game-state-flattener';
 
 export interface ScenePlayerProps {
   dialogue: DialogueTree;
-  gameState?: Record<string, any>; // Any JSON game state
-  initialFlags?: GameFlagState; // Legacy: use gameState instead
+  gameState: Record<string, any>; // Any JSON game state (must have valid structure)
   startNodeId?: string;
   onComplete: (result: DialogueResult) => void;
-  onFlagUpdate?: (flags: GameFlagState) => void;
+  onFlagUpdate?: (flags: FlagState) => void;
+  // Flattening configuration
+  flattenConfig?: FlattenConfig;
   // Event hooks
   onNodeEnter?: (nodeId: string, node: DialogueNode) => void;
   onNodeExit?: (nodeId: string, node: DialogueNode) => void;
@@ -28,27 +30,44 @@ interface HistoryEntry {
 export function ScenePlayer({
   dialogue,
   gameState,
-  initialFlags,
   startNodeId,
   onComplete,
   onFlagUpdate,
+  flattenConfig,
   onNodeEnter,
   onNodeExit,
   onChoiceSelect,
   onDialogueStart,
   onDialogueEnd,
 }: ScenePlayerProps) {
-  // Extract flags from gameState or use initialFlags (legacy)
-  const flagsFromState = gameState && typeof gameState === 'object' && 'flags' in gameState 
-    ? (gameState.flags as GameFlagState)
-    : initialFlags || {};
+  // Validate and extract flags from gameState
+  const initialFlags = useMemo(() => {
+    try {
+      validateGameState(gameState);
+      return extractFlagsFromGameState(gameState, flattenConfig);
+    } catch (error) {
+      console.error('ScenePlayer: Invalid gameState', error);
+      throw error;
+    }
+  }, [gameState, flattenConfig]);
   
   const [currentNodeId, setCurrentNodeId] = useState<string>(startNodeId || dialogue.startNodeId);
-  const [flags, setFlags] = useState<GameFlagState>(flagsFromState);
+  const [flags, setFlags] = useState<FlagState>(initialFlags);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [visitedNodes, setVisitedNodes] = useState<Set<string>>(new Set());
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Re-extract flags when gameState changes
+  useEffect(() => {
+    try {
+      validateGameState(gameState);
+      const newFlags = extractFlagsFromGameState(gameState, flattenConfig);
+      setFlags(newFlags);
+    } catch (error) {
+      console.error('ScenePlayer: Failed to update flags from gameState', error);
+    }
+  }, [gameState, flattenConfig]);
 
   // Initialize dialogue
   useEffect(() => {

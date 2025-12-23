@@ -1,0 +1,353 @@
+---
+title: "Book Editor - Database Schema"
+description: "Complete database schema for books, chapters, sections, versions, and collaboration"
+date: "2025-01-20"
+---
+
+# Database Schema
+
+## Schema Overview
+
+The book editor uses a normalized database structure with the following tables:
+
+- `books` - Book metadata and settings
+- `chapters` - Chapter organization
+- `sections` - Individual content sections (normalized)
+- `versions` - Version snapshots
+- `branches` - Version branches
+- `collaborators` - User permissions
+- `media` - Uploaded media files
+- `highlights` - User highlights/annotations
+- `user_presence` - Real-time user presence
+
+## Tables
+
+### books
+
+Main book table storing metadata and settings.
+
+```typescript
+books {
+  id: string (primary key, UUID)
+  title: string
+  description: string | null
+  cover_image_url: string | null
+  metadata: JSON {
+    author: string
+    tags: string[]
+    category: string
+    language: string
+    isbn: string | null
+    published_date: string | null
+    custom_fields: Record<string, any>
+  }
+  status: 'draft' | 'published'
+  created_at: timestamp
+  updated_at: timestamp
+  created_by: string (user_id)
+  current_version_id: string | null (FK to versions)
+  main_branch_id: string | null (FK to branches)
+}
+```
+
+### chapters
+
+Chapter organization within books.
+
+```typescript
+chapters {
+  id: string (primary key, UUID)
+  book_id: string (FK to books)
+  title: string
+  order: number
+  metadata: JSON {
+    summary: string | null
+    notes: string | null
+    word_count: number
+    reading_time: number (minutes)
+    custom_fields: Record<string, any>
+  }
+  created_at: timestamp
+  updated_at: timestamp
+  created_by: string (user_id)
+}
+```
+
+### sections
+
+Normalized content sections. Each section can be text, image, code, quote, etc.
+
+```typescript
+sections {
+  id: string (primary key, UUID)
+  chapter_id: string (FK to chapters)
+  order: number
+  content_type: 'text' | 'image' | 'media' | 'code' | 'quote' | 'heading'
+  content: JSON {
+    // For text:
+    html: string
+    text: string (plain text version)
+    
+    // For image:
+    image_url: string
+    alt_text: string
+    caption: string | null
+    
+    // For media:
+    media_url: string
+    media_type: string
+    caption: string | null
+    
+    // For code:
+    code: string
+    language: string
+    filename: string | null
+    
+    // For quote:
+    quote: string
+    attribution: string | null
+    
+    // For heading:
+    level: 1 | 2 | 3 | 4 | 5 | 6
+    text: string
+  }
+  metadata: JSON {
+    styles: Record<string, any>
+    annotations: Array<{
+      id: string
+      user_id: string
+      type: 'comment' | 'suggestion'
+      content: string
+      created_at: timestamp
+    }>
+    custom_fields: Record<string, any>
+  }
+  created_at: timestamp
+  updated_at: timestamp
+  created_by: string (user_id)
+}
+```
+
+### versions
+
+Version snapshots for git-like versioning.
+
+```typescript
+versions {
+  id: string (primary key, UUID)
+  book_id: string (FK to books)
+  version_number: number
+  parent_version_id: string | null (FK to versions, for branching)
+  branch_id: string | null (FK to branches)
+  snapshot: JSON {
+    // Full book state at this version
+    book: Book
+    chapters: Chapter[]
+    sections: Section[]
+  }
+  description: string | null
+  created_at: timestamp
+  created_by: string (user_id)
+  is_merge_commit: boolean
+  merge_from_version_id: string | null (FK to versions)
+}
+```
+
+### branches
+
+Version branches for parallel editing.
+
+```typescript
+branches {
+  id: string (primary key, UUID)
+  book_id: string (FK to books)
+  name: string
+  base_version_id: string (FK to versions)
+  head_version_id: string (FK to versions, current tip)
+  is_main: boolean
+  created_at: timestamp
+  created_by: string (user_id)
+  merged_into_branch_id: string | null (FK to branches)
+  merged_at: timestamp | null
+}
+```
+
+### collaborators
+
+User permissions and access control.
+
+```typescript
+collaborators {
+  id: string (primary key, UUID)
+  book_id: string (FK to books)
+  user_id: string
+  role: 'owner' | 'editor' | 'viewer'
+  permissions: JSON {
+    can_edit: boolean
+    can_delete: boolean
+    can_invite: boolean
+    can_export: boolean
+    can_manage_versions: boolean
+    chapter_permissions: Record<string, {
+      can_edit: boolean
+      can_delete: boolean
+    }>
+  }
+  invited_at: timestamp
+  invited_by: string (user_id)
+  joined_at: timestamp | null
+}
+```
+
+### media
+
+Uploaded media files (images, videos, etc.).
+
+```typescript
+media {
+  id: string (primary key, UUID)
+  book_id: string (FK to books)
+  file_url: string (path in public/books/)
+  file_name: string
+  file_type: string (mime type)
+  file_size: number (bytes)
+  metadata: JSON {
+    width: number | null (for images)
+    height: number | null (for images)
+    duration: number | null (for video/audio)
+    alt_text: string | null
+    caption: string | null
+  }
+  uploaded_at: timestamp
+  uploaded_by: string (user_id)
+}
+```
+
+### highlights
+
+User highlights and annotations.
+
+```typescript
+highlights {
+  id: string (primary key, UUID)
+  book_id: string (FK to books)
+  section_id: string (FK to sections)
+  user_id: string
+  start_offset: number (character offset in section)
+  end_offset: number
+  color: string (hex color)
+  note: string | null
+  created_at: timestamp
+  updated_at: timestamp
+}
+```
+
+### user_presence
+
+Real-time user presence tracking.
+
+```typescript
+user_presence {
+  id: string (primary key, UUID)
+  book_id: string (FK to books)
+  user_id: string
+  chapter_id: string | null (FK to chapters, current location)
+  section_id: string | null (FK to sections, current location)
+  cursor_position: JSON {
+    section_id: string
+    offset: number
+  } | null
+  status: 'active' | 'idle' | 'away'
+  last_seen_at: timestamp
+  websocket_id: string | null
+}
+```
+
+## Indexes
+
+For performance, create indexes on:
+
+```sql
+-- Books
+CREATE INDEX idx_books_created_by ON books(created_by);
+CREATE INDEX idx_books_status ON books(status);
+CREATE INDEX idx_books_updated_at ON books(updated_at);
+
+-- Chapters
+CREATE INDEX idx_chapters_book_id ON chapters(book_id);
+CREATE INDEX idx_chapters_order ON chapters(book_id, order);
+
+-- Sections
+CREATE INDEX idx_sections_chapter_id ON sections(chapter_id);
+CREATE INDEX idx_sections_order ON sections(chapter_id, order);
+CREATE INDEX idx_sections_content_type ON sections(content_type);
+
+-- Versions
+CREATE INDEX idx_versions_book_id ON versions(book_id);
+CREATE INDEX idx_versions_branch_id ON versions(branch_id);
+CREATE INDEX idx_versions_parent ON versions(parent_version_id);
+
+-- Branches
+CREATE INDEX idx_branches_book_id ON branches(book_id);
+CREATE INDEX idx_branches_main ON branches(book_id, is_main);
+
+-- Collaborators
+CREATE INDEX idx_collaborators_book_id ON collaborators(book_id);
+CREATE INDEX idx_collaborators_user_id ON collaborators(user_id);
+
+-- Media
+CREATE INDEX idx_media_book_id ON media(book_id);
+
+-- Highlights
+CREATE INDEX idx_highlights_section_id ON highlights(section_id);
+CREATE INDEX idx_highlights_user_id ON highlights(user_id);
+
+-- User Presence
+CREATE INDEX idx_user_presence_book_id ON user_presence(book_id);
+CREATE INDEX idx_user_presence_user_id ON user_presence(user_id);
+CREATE INDEX idx_user_presence_last_seen ON user_presence(last_seen_at);
+```
+
+## Relationships
+
+```
+books (1) ──→ (many) chapters
+chapters (1) ──→ (many) sections
+books (1) ──→ (many) versions
+books (1) ──→ (many) branches
+books (1) ──→ (many) collaborators
+books (1) ──→ (many) media
+books (1) ──→ (many) highlights
+books (1) ──→ (many) user_presence
+
+versions (1) ──→ (many) versions (parent/child)
+branches (1) ──→ (many) versions
+```
+
+## Drizzle Schema Example
+
+```typescript
+import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
+import { sql } from 'drizzle-orm';
+
+export const books = sqliteTable('books', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  description: text('description'),
+  coverImageUrl: text('cover_image_url'),
+  metadata: text('metadata', { mode: 'json' }).notNull(),
+  status: text('status', { enum: ['draft', 'published'] }).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+  createdBy: text('created_by').notNull(),
+  currentVersionId: text('current_version_id'),
+  mainBranchId: text('main_branch_id'),
+});
+
+// ... similar for other tables
+```
+
+
+
+
+

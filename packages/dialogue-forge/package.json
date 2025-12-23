@@ -5,8 +5,13 @@
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "dialogue-forge": "./bin/dialogue-forge.js"
+  },
   "files": [
     "dist",
+    "demo",
+    "bin",
     "README.md"
   ],
   "scripts": {

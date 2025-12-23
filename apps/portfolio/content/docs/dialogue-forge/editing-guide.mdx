@@ -1,0 +1,223 @@
+---
+title: "Editing Guide"
+description: "How to create and modify dialogues in Dialogue Forge"
+date: "2024-12-18"
+order: 6
+---
+
+# Editing Guide
+
+This guide covers how to create and modify dialogue trees in Dialogue Forge.
+
+## Current Editing Workflow
+
+Right now, dialogue trees are defined in the page component as TypeScript objects. To edit:
+
+1. Open `/app/dialogue-forge/page.tsx`
+2. Find the `sampleDialogue` object
+3. Modify the nodes directly
+4. Save and refresh to see changes
+
+## Adding a New Node
+
+### Step 1: Add the node to the `nodes` object
+
+```typescript
+nodes: {
+  // ... existing nodes ...
+  
+  'my_new_node': {
+    id: 'my_new_node',
+    type: 'ai',
+    speaker: 'Character Name',
+    content: "What the character says.",
+    nextNodeId: 'next_node_id'
+  }
+}
+```
+
+### Step 2: Connect it to the tree
+
+Update another node to point to your new node:
+
+```typescript
+// In an AI node:
+'previous_node': {
+  // ...
+  nextNodeId: 'my_new_node'  // Points to your new node
+}
+
+// Or in a choice:
+{
+  text: "Say something",
+  nextNodeId: 'my_new_node'  // Choice leads here
+}
+```
+
+## Adding a Choice Point
+
+```typescript
+'decision_moment': {
+  id: 'decision_moment',
+  type: 'choice_point',
+  content: '',
+  choices: [
+    {
+      id: 'choice_a',
+      text: "First option the player sees",
+      nextNodeId: 'result_a',
+      setFlags: ['chose_option_a']
+    },
+    {
+      id: 'choice_b', 
+      text: "Second option",
+      nextNodeId: 'result_b'
+    },
+    {
+      id: 'choice_c',
+      text: "Secret option (requires flag)",
+      nextNodeId: 'secret_path',
+      conditions: [
+        { flag: 'found_secret', operator: 'is_set' }
+      ]
+    }
+  ]
+}
+```
+
+## Adding Conditional Content
+
+### Conditional Choice (show only with flag)
+
+```typescript
+{
+  id: 'special_option',
+  text: "Use the ancient artifact",
+  nextNodeId: 'artifact_used',
+  conditions: [
+    { flag: 'has_artifact', operator: 'is_set' }
+  ]
+}
+```
+
+### Hiding a Choice (after it's used)
+
+```typescript
+{
+  id: 'one_time_option',
+  text: "Ask about the treasure",
+  nextNodeId: 'treasure_info',
+  setFlags: ['asked_about_treasure'],
+  conditions: [
+    { flag: 'asked_about_treasure', operator: 'is_not_set' }
+  ]
+}
+```
+
+## Creating a New Dialogue Tree
+
+Replace the entire `sampleDialogue` object:
+
+```typescript
+const sampleDialogue: DialogueTree = {
+  id: 'your-story-id',
+  title: 'Your Story Title',
+  startNodeId: 'start',
+  nodes: {
+    'start': {
+      id: 'start',
+      type: 'ai',
+      speaker: 'Narrator',
+      content: "Your opening text here...",
+      nextNodeId: 'first_choice'
+    },
+    'first_choice': {
+      id: 'first_choice',
+      type: 'choice_point',
+      content: '',
+      choices: [
+        {
+          id: 'option_1',
+          text: "First option",
+          nextNodeId: 'path_1'
+        },
+        {
+          id: 'option_2',
+          text: "Second option",
+          nextNodeId: 'path_2'
+        }
+      ]
+    },
+    'path_1': {
+      id: 'path_1',
+      type: 'ai',
+      speaker: 'Character',
+      content: "Response to first option...",
+      // No nextNodeId = ending
+    },
+    'path_2': {
+      id: 'path_2',
+      type: 'ai',
+      speaker: 'Character',
+      content: "Response to second option..."
+    }
+  }
+};
+```
+
+## Using the Editor Panel
+
+Toggle the **Editor** button in the header to see:
+
+- **Memory Flags** — All flags currently set in this playthrough
+- **Current Node** — The node ID and type you're on
+- **Dialogue Nodes** — List of all nodes (highlighted = current)
+
+Use this to:
+- Verify flags are being set correctly
+- See which node you're at
+- Debug branching issues
+
+## Quick Reference
+
+### Node Template (AI)
+```typescript
+'node_id': {
+  id: 'node_id',
+  type: 'ai',
+  speaker: 'Name',
+  content: "Text",
+  setFlags: ['flag1'],      // optional
+  nextNodeId: 'next_id'     // optional (omit for ending)
+}
+```
+
+### Node Template (Choice Point)
+```typescript
+'node_id': {
+  id: 'node_id',
+  type: 'choice_point',
+  content: '',
+  choices: [
+    {
+      id: 'choice_id',
+      text: "Button text",
+      nextNodeId: 'target_id',
+      setFlags: ['flag'],           // optional
+      conditions: [{ flag: 'x', operator: 'is_set' }]  // optional
+    }
+  ]
+}
+```
+
+## Coming Soon
+
+- **Visual node editor** — Edit nodes directly in the UI
+- **Import/Export** — Save and load dialogue trees as JSON files
+- **Multiple dialogues** — Switch between different dialogue trees
+- **Yarn Spinner format** — Export to `.yarn` files for Unreal Engine
+
+
+
+
+
