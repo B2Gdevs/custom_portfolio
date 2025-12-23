@@ -120,6 +120,14 @@ EOFSYNC
   chmod +x sync-to-repo.sh
 fi
 
+# Setup GitHub Actions workflow
+if [ -f "../.github/workflows/package-publish.yml.template" ]; then
+  echo "🔧 Setting up GitHub Actions workflow..."
+  mkdir -p .github/workflows
+  cp ../.github/workflows/package-publish.yml.template .github/workflows/publish.yml
+  echo "✅ Workflow template copied"
+fi
+
 # Make initial commit and push
 echo "💾 Making initial commit..."
 git add -A
@@ -135,4 +143,10 @@ git push -u origin main || git push -u origin master || {
 echo "✅ Repository setup complete!"
 echo "📦 GitHub: https://github.com/$ORG/$PACKAGE_NAME"
 echo "🔄 Sync: cd $PACKAGE_DIR && ./sync-to-repo.sh"
+echo ""
+echo "⚠️  IMPORTANT: Add NPM_TOKEN secret to GitHub repo:"
+echo "   1. Go to: https://github.com/$ORG/$PACKAGE_NAME/settings/secrets/actions"
+echo "   2. Click 'New repository secret'"
+echo "   3. Name: NPM_TOKEN"
+echo "   4. Value: Your npm token (get with: npm token create)"
 

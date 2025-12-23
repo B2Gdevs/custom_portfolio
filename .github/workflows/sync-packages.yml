@@ -1,0 +1,57 @@
+name: Sync Packages to GitHub Repos
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/**'
+  workflow_dispatch:
+
+jobs:
+  sync-packages:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package:
+          - dialogue-forge
+        # Add more packages here as you create them
+    
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Sync ${{ matrix.package }} to GitHub repo
+        working-directory: packages/${{ matrix.package }}
+        run: |
+          # Initialize git if needed
+          if [ ! -d ".git" ]; then
+            git init
+            git branch -M main
+            git remote add origin https://github.com/MagicbornStudios/${{ matrix.package }}.git || true
+          fi
+          
+          # Update remote URL
+          git remote set-url origin https://github.com/MagicbornStudios/${{ matrix.package }}.git
+          
+          # Add all files
+          git add -A
+          
+          # Commit if there are changes
+          git commit -m "Sync from monorepo main branch" || echo "No changes to commit"
+          
+          # Push to package repo
+          git push -u origin main || git push -u origin main --force
+
