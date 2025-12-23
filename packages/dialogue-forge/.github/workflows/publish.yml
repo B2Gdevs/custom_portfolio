@@ -36,10 +36,14 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       
       - name: Install dependencies
-        run: npm ci
+        run: npm install
+        # Only installs package dependencies (TypeScript, etc.)
+        # Demo dependencies are workspace refs - not needed for publishing
       
       - name: Build package
         run: npm run build
+        # This builds the library code to dist/
+        # Demo is included as-is in the published package
       
       - name: Bump version (if specified)
         if: github.event.inputs.version_bump != 'none' && github.event.inputs.version_bump != ''
