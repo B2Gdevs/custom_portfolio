@@ -12,12 +12,15 @@ echo ""
 echo "📦 Checking GitHub CLI..."
 if command -v gh &> /dev/null; then
   echo "✅ GitHub CLI installed"
-  if gh auth status &> /dev/null; then
+  AUTH_STATUS=$(gh auth status 2>&1 || echo "not authenticated")
+  if echo "$AUTH_STATUS" | grep -q "Logged in"; then
     echo "✅ GitHub CLI authenticated"
-    gh auth status
+    echo "$AUTH_STATUS" | head -3
   else
     echo "⚠️  GitHub CLI not authenticated"
     echo "   Run: gh auth login"
+    echo ""
+    echo "   If you just authenticated, wait a moment and try again"
   fi
 else
   echo "❌ GitHub CLI not installed"
