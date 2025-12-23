@@ -35,6 +35,8 @@ jobs:
       
       - name: Sync ${{ matrix.package }} to GitHub repo
         working-directory: packages/${{ matrix.package }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Initialize git if needed
           if [ ! -d ".git" ]; then
@@ -43,15 +45,25 @@ jobs:
             git remote add origin https://github.com/MagicbornStudios/${{ matrix.package }}.git || true
           fi
           
-          # Update remote URL
-          git remote set-url origin https://github.com/MagicbornStudios/${{ matrix.package }}.git
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Update remote URL with token for authentication
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/MagicbornStudios/${{ matrix.package }}.git
+          
+          # Ensure we're on main branch
+          git checkout -b main 2>/dev/null || git checkout main
           
           # Add all files
           git add -A
           
           # Commit if there are changes
-          git commit -m "Sync from monorepo main branch" || echo "No changes to commit"
+          git commit -m "Sync from monorepo main branch [skip ci]" || echo "No changes to commit"
           
-          # Push to package repo
+          # Push to package repo (this will trigger publish workflow)
           git push -u origin main || git push -u origin main --force
+          
+          echo "✅ Synced ${{ matrix.package }} to GitHub"
+          echo "📦 Package repo will automatically publish to npm"
 
