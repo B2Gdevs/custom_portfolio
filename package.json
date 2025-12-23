@@ -23,7 +23,8 @@
     "package:list": "./scripts/manage-packages.sh list",
     "package:tokens:all": "./scripts/setup-all-tokens.sh",
     "package:workflows:all": "./scripts/setup-all-workflows.sh",
-    "package:check": "./scripts/setup-env.sh"
+    "package:check": "./scripts/setup-env.sh",
+    "package:verify": "./scripts/verify-auth.sh"
   },
   "engines": {
     "node": ">=18.0.0"
