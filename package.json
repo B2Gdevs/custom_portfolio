@@ -11,7 +11,11 @@
     "dev": "npm run dev --workspace=@portfolio/app",
     "build": "npm run build --workspace=@portfolio/app",
     "start": "npm run start --workspace=@portfolio/app",
-    "lint": "npm run lint --workspace=@portfolio/app"
+    "lint": "npm run lint --workspace=@portfolio/app",
+    "package:setup": "./scripts/setup-package-repo.sh",
+    "package:publish": "./scripts/publish-package.sh",
+    "package:workflow": "./scripts/package-workflow.sh",
+    "package:check": "./scripts/setup-env.sh"
   },
   "engines": {
     "node": ">=18.0.0"
