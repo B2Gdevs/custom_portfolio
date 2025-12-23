@@ -17,16 +17,28 @@ fi
 
 # Check if authenticated (more robust check)
 echo "🔍 Checking GitHub CLI authentication..."
-AUTH_STATUS=$(gh auth status 2>&1 || echo "not authenticated")
-if ! echo "$AUTH_STATUS" | grep -q "Logged in"; then
+AUTH_STATUS=$(gh auth status 2>&1 || echo "")
+
+# Try multiple ways to detect authentication
+if echo "$AUTH_STATUS" | grep -qE "(Logged in|✓|github.com.*as)" || gh api user &> /dev/null; then
+  if gh api user &> /dev/null; then
+    USER=$(gh api user --jq .login 2>/dev/null || echo "unknown")
+    echo "✅ GitHub CLI authenticated as: $USER"
+  else
+    echo "✅ GitHub CLI authenticated"
+  fi
+else
   echo "❌ Not authenticated with GitHub CLI"
   echo ""
-  echo "Run: gh auth login"
-  echo "Then try again"
+  echo "Debug output:"
+  echo "$AUTH_STATUS"
+  echo ""
+  echo "Try:"
+  echo "  1. gh auth login"
+  echo "  2. gh auth refresh"
+  echo "  3. Then run this script again"
   exit 1
 fi
-
-echo "✅ GitHub CLI authenticated"
 echo ""
 
 # Check npm authentication

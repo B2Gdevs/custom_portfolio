@@ -20,20 +20,30 @@ echo "✅ GitHub CLI installed"
 
 # Check GitHub authentication
 echo "🔐 Checking GitHub authentication..."
-AUTH_OUTPUT=$(gh auth status 2>&1 || echo "not authenticated")
+AUTH_OUTPUT=$(gh auth status 2>&1 || echo "")
 
-if echo "$AUTH_OUTPUT" | grep -q "Logged in"; then
+# Try multiple ways to detect authentication
+if echo "$AUTH_OUTPUT" | grep -qE "(Logged in|✓|github.com.*as)"; then
   echo "✅ GitHub CLI authenticated"
-  echo "$AUTH_OUTPUT" | grep -E "(Logged in|github.com)" | head -2
+  echo "$AUTH_OUTPUT" | grep -E "(Logged in|github.com|as)" | head -3
+elif gh api user &> /dev/null; then
+  # If API call works, we're authenticated even if status check is weird
+  USER=$(gh api user --jq .login 2>/dev/null || echo "unknown")
+  echo "✅ GitHub CLI authenticated (verified via API)"
+  echo "   User: $USER"
 else
   echo "❌ GitHub CLI not authenticated"
+  echo ""
+  echo "Debug info:"
+  echo "$AUTH_OUTPUT"
   echo ""
   echo "To authenticate:"
   echo "  1. Run: gh auth login"
   echo "  2. Follow the prompts"
   echo "  3. Complete the browser authentication"
   echo ""
-  echo "If you just authenticated, wait a few seconds and try again"
+  echo "If you just authenticated, try:"
+  echo "  gh auth refresh"
   exit 1
 fi
 
