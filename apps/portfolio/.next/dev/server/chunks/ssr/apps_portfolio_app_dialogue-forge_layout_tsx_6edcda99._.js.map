@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/bgarrard/Documents/portfolio-v2/apps/portfolio/app/dialogue-forge/layout.tsx"],"sourcesContent":["'use client';\n\n// This layout removes the portfolio Nav and footer for the dialogue editor\n// The editor needs full-screen real estate without layout constraints\nexport default function DialogueForgeLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  return (\n    <div className=\"fixed inset-0 overflow-hidden\">\n      {children}\n    </div>\n  );\n}\n\n\n\n\n\n"],"names":[],"mappings":";;;;;AAAA;;AAIe,SAAS,oBAAoB,EAC1C,QAAQ,EAGT;IACC,qBACE,8OAAC;QAAI,WAAU;kBACZ;;;;;;AAGP"}}]
+}

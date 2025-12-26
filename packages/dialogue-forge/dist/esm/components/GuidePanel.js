@@ -200,7 +200,7 @@ const gameState: GameState = {
                     "Flag Schema is used in the ",
                     React.createElement("strong", null, "editor"),
                     " for autocomplete and validation. It's separate from game state:"),
-                React.createElement(CodeBlock, { code: `import { FlagSchema } from '@portfolio/dialogue-forge';
+                React.createElement(CodeBlock, { code: `import { FlagSchema } from '@magicborn/dialogue-forge';
 
 // Flag Schema helps the editor understand what flags exist
 const flagSchema: FlagSchema = {
@@ -302,9 +302,9 @@ const flagSchema: FlagSchema = {
                 React.createElement("p", null, "How to integrate Dialogue Forge with your game."),
                 React.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "1. Install Package"),
                 React.createElement("div", { className: "bg-[#12121a] p-4 rounded border border-[#2a2a3e]" },
-                    React.createElement("pre", { className: "text-xs font-mono text-gray-300" }, "npm install @portfolio/dialogue-forge")),
+                    React.createElement("pre", { className: "text-xs font-mono text-gray-300" }, "npm install @magicborn/dialogue-forge")),
                 React.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "2. Define Flag Schema"),
-                React.createElement(CodeBlock, { code: `import { FlagSchema } from '@portfolio/dialogue-forge';
+                React.createElement(CodeBlock, { code: `import { FlagSchema } from '@magicborn/dialogue-forge';
 
 const flagSchema: FlagSchema = {
   flags: [
@@ -314,7 +314,7 @@ const flagSchema: FlagSchema = {
   ]
 };`, language: "typescript" }),
                 React.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "3. Load Dialogue from Yarn"),
-                React.createElement(CodeBlock, { code: `import { importFromYarn } from '@portfolio/dialogue-forge';
+                React.createElement(CodeBlock, { code: `import { importFromYarn } from '@magicborn/dialogue-forge';
 
 // Load Yarn file
 const yarnContent = await loadFile('merchant.yarn');
@@ -352,7 +352,7 @@ const [gameState, setGameState] = useState<GameState>({
   },
 });`, language: "typescript" }),
                 React.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "5. Edit Dialogue"),
-                React.createElement(CodeBlock, { code: `import { DialogueEditorV2, exportToYarn } from '@portfolio/dialogue-forge';
+                React.createElement(CodeBlock, { code: `import { DialogueEditorV2, exportToYarn } from '@magicborn/dialogue-forge';
 
 <DialogueEditorV2
   dialogue={dialogue}
@@ -402,7 +402,7 @@ const gameState: GameState = {
   inventory: ['sword', 'potion'],
 };`, language: "typescript" }),
                 React.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "7. Run Dialogue (Scene Player)"),
-                React.createElement(CodeBlock, { code: `import { ScenePlayer } from '@portfolio/dialogue-forge';
+                React.createElement(CodeBlock, { code: `import { ScenePlayer } from '@magicborn/dialogue-forge';
 
 <ScenePlayer
   dialogue={dialogue}
@@ -453,7 +453,7 @@ const gameState: GameState = {
   importFromYarn,
   exportToYarn,
   FlagSchema
-} from '@portfolio/dialogue-forge';
+} from '@magicborn/dialogue-forge';
 
 // 1. Define flag schema
 const flagSchema: FlagSchema = {
@@ -864,7 +864,7 @@ Merchant: What would you like to buy?
                         " to combine multiple conditions. Choices only appear when all conditions are met.")),
                 React.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Code Example"),
                 React.createElement("div", { className: "bg-[#12121a] p-4 rounded border border-[#2a2a3e]" },
-                    React.createElement("pre", { className: "text-xs font-mono text-gray-300 whitespace-pre-wrap overflow-x-auto" }, `import { importFromYarn, exportToYarn } from '@portfolio/dialogue-forge';
+                    React.createElement("pre", { className: "text-xs font-mono text-gray-300 whitespace-pre-wrap overflow-x-auto" }, `import { importFromYarn, exportToYarn } from '@magicborn/dialogue-forge';
 
 // Import existing Yarn file
 const yarnContent = await fetch('dialogue.yarn').then(r => r.text());

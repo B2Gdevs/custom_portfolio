@@ -2,11 +2,11 @@
   "name": "@magicborn/dialogue-forge",
   "version": "0.1.0",
   "description": "Visual node-based dialogue editor with Yarn Spinner support",
-  "author": "Ben Garrard <benjamingarrard5279@gmail.com>",
+  "author": "Ben Garrard <b2gdevs@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MagicbornStudios/dialogue-forge.git"
+    "url": "git+https://github.com/MagicbornStudios/dialogue-forge.git"
   },
   "bugs": {
     "url": "https://github.com/MagicbornStudios/dialogue-forge/issues"
@@ -16,7 +16,11 @@
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "dialogue-forge": "./bin/dialogue-forge.js"
+    "dialogue-forge": "bin/dialogue-forge.js"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   },
   "files": [
     "dist",
@@ -26,7 +30,9 @@
   ],
   "scripts": {
     "build": "tsc && tsc --module esnext --outDir dist/esm",
-    "dev": "tsc --watch",
+    "dev": "npm run build && npm install --prefix demo && node bin/dialogue-forge.js",
+    "dev:setup": "npm run build && npm install --prefix demo",
+    "dev:watch": "tsc --watch",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:ui": "vitest --ui",
@@ -47,7 +53,7 @@
     "react-dom": "^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "@dagrejs/dagre": "^0.8.5",
+    "@dagrejs/dagre": "^1.1.8",
     "react-tooltip": "^5.30.0",
     "reactflow": "^11.11.4",
     "lucide-react": "^0.559.0",

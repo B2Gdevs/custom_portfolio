@@ -1,0 +1,1383 @@
+[00:00:00.665] Server  LOG      ✓ Ready in 467ms
+[00:00:05.505] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:05.701] Browser WARN    Image with src "/images/my_avatar.jpeg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:00:05.701] Browser WARN    Image with src "/images/projects/bashful/featured.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:00:05.891] Browser WARN    Image with src "/images/projects/colorfull/colorfull_site.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:00:08.857] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[00:00:08.857] Browser WARN    Image with src "/images/projects/rapidcli/RapidCLI.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:00:08.857] Browser WARN    Image with src "/images/projects/obj_detection/ux_feedback_1.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:00:09.029] Browser WARN    Image with src "/images/projects/cvjson/cvjson_documenation.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:00:12.579] Server  ERROR    ⨯ ./apps/portfolio/app/dialogue-forge/page.tsx:6:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/DialogueEditorV2'
+  4 | import Link from 'next/link';
+  5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+> 6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./apps/portfolio/app/dialogue-forge/page.tsx:8:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/FlagManager'
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+>  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./apps/portfolio/app/dialogue-forge/page.tsx:7:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/GuidePanel'
+   5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+>  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./apps/portfolio/app/dialogue-forge/page.tsx:9:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/lib/yarn-converter'
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+>  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./apps/portfolio/app/dialogue-forge/page.tsx:11:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/types/flags'
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+> 11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+  14 | interface HistoryEntry {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./apps/portfolio/app/dialogue-forge/page.tsx:10:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/utils/layout'
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+> 10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:00:13.073] Browser ERROR   uncaughtError: Error: ./apps/portfolio/app/dialogue-forge/page.tsx:6:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/DialogueEditorV2'
+  4 | import Link from 'next/link';
+  5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+> 6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:00:13.235] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:6:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/DialogueEditorV2'
+  4 | import Link from 'next/link';
+  5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+> 6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.235] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:8:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/FlagManager'
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+>  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.235] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:7:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/GuidePanel'
+   5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+>  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.235] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:9:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/lib/yarn-converter'
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+>  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.235] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:11:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/types/flags'
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+> 11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+  14 | interface HistoryEntry {
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.235] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:10:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/utils/layout'
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+> 10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.235] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:6:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/DialogueEditorV2'
+  4 | import Link from 'next/link';
+  5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+> 6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.235] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:8:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/FlagManager'
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+>  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.235] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:7:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/GuidePanel'
+   5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+>  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.235] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:9:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/lib/yarn-converter'
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+>  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.235] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:11:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/types/flags'
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+> 11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+  14 | interface HistoryEntry {
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.235] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:10:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/utils/layout'
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+> 10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:6:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/DialogueEditorV2'
+  4 | import Link from 'next/link';
+  5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+> 6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:8:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/FlagManager'
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+>  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:7:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/GuidePanel'
+   5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+>  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:9:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/lib/yarn-converter'
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+>  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:11:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/types/flags'
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+> 11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+  14 | interface HistoryEntry {
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:10:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/utils/layout'
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+> 10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:6:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/DialogueEditorV2'
+  4 | import Link from 'next/link';
+  5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+> 6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:8:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/FlagManager'
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+>  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:7:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/GuidePanel'
+   5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+>  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:9:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/lib/yarn-converter'
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+>  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:11:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/types/flags'
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+> 11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+  14 | interface HistoryEntry {
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:10:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/utils/layout'
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+> 10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:6:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/DialogueEditorV2'
+  4 | import Link from 'next/link';
+  5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+> 6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:8:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/FlagManager'
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+>  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:7:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/GuidePanel'
+   5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+>  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:9:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/lib/yarn-converter'
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+>  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:11:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/types/flags'
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+> 11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+  14 | interface HistoryEntry {
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:10:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/utils/layout'
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+> 10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:6:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/DialogueEditorV2'
+  4 | import Link from 'next/link';
+  5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+> 6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:8:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/FlagManager'
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+>  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:7:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/GuidePanel'
+   5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+>  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:9:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/lib/yarn-converter'
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+>  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:11:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/types/flags'
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+> 11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+  14 | interface HistoryEntry {
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:13.941] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:10:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/utils/layout'
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+> 10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:6:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/DialogueEditorV2'
+  4 | import Link from 'next/link';
+  5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+> 6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:8:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/FlagManager'
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+>  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:7:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/GuidePanel'
+   5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+>  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:9:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/lib/yarn-converter'
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+>  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:11:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/types/flags'
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+> 11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+  14 | interface HistoryEntry {
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:10:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/utils/layout'
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+> 10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:6:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/DialogueEditorV2'
+  4 | import Link from 'next/link';
+  5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+> 6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:8:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/FlagManager'
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+>  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:7:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/GuidePanel'
+   5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+>  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:9:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/lib/yarn-converter'
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+>  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:11:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/types/flags'
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+> 11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+  14 | interface HistoryEntry {
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:10:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/utils/layout'
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+> 10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:6:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/DialogueEditorV2'
+  4 | import Link from 'next/link';
+  5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+> 6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:8:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/FlagManager'
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+>  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:7:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/GuidePanel'
+   5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+>  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:9:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/lib/yarn-converter'
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+>  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:11:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/types/flags'
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+> 11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+  14 | interface HistoryEntry {
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:10:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/utils/layout'
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+> 10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:6:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/DialogueEditorV2'
+  4 | import Link from 'next/link';
+  5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+> 6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:8:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/FlagManager'
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+>  8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:7:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/components/GuidePanel'
+   5 | import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+   6 | import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
+>  7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:9:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/lib/yarn-converter'
+   7 | import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+>  9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:11:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/types/flags'
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+  10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+> 11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+  14 | interface HistoryEntry {
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[01:48:58.940] Browser ERROR   ./apps/portfolio/app/dialogue-forge/page.tsx:10:1
+Module not found: Can't resolve '@magicborn/dialogue-forge/src/utils/layout'
+   8 | import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';
+   9 | import { exportToYarn, importFromYarn } from '@magicborn/dialogue-forge/src/lib/yarn-converter';
+> 10 | import { listLayouts } from '@magicborn/dialogue-forge/src/utils/layout';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 | import { FlagSchema, exampleFlagSchema } from '@magicborn/dialogue-forge/src/types/flags';
+  12 | import { DialogueTree, DialogueNode, Choice } from '@magicborn/dialogue-forge/src/types';
+  13 |
+
+Import traces:
+  Client Component Browser:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component Browser]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Client Component SSR]
+    ./apps/portfolio/app/dialogue-forge/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
