@@ -280,12 +280,13 @@ export function ScenePlayer({
       )}
 
       {currentNode?.type === 'npc' && currentNode.nextNodeId && !isTyping && (
-        <div className="border-t border-[#1a1a2e] bg-[#0d0d14]/80 backdrop-blur-sm p-4">
+        <div className="border-t border-[#1a1a2e] bg-[#0d0d14]/80 backdrop-blur-sm p-4 sticky bottom-0 z-10">
           <div className="max-w-2xl mx-auto text-center">
-            <p className="text-xs text-gray-500 mb-2">Press Enter to continue</p>
+            <p className="text-xs text-gray-400 mb-3">Press <kbd className="px-2 py-1 bg-[#1a1a2e] border border-[#2a2a3e] rounded text-xs">Enter</kbd> to continue</p>
             <button
               onClick={() => setCurrentNodeId(currentNode.nextNodeId!)}
-              className="px-4 py-2 bg-[#1a1a2e] hover:bg-[#2a2a3e] text-gray-300 rounded-lg transition-colors border border-[#2a2a3e] hover:border-[#e94560]"
+              className="px-6 py-3 bg-[#e94560] hover:bg-[#d63850] text-white rounded-lg transition-colors font-medium shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+              autoFocus
             >
               Continue →
             </button>
