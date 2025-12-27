@@ -1,11 +1,13 @@
 import React from 'react';
 import { NodeProps } from 'reactflow';
 import { DialogueNode } from '../types';
+import { Character } from '../types/characters';
 import { FlagSchema } from '../types/flags';
 import { LayoutDirection } from '../utils/layout';
 interface PlayerNodeData {
     node: DialogueNode;
     flagSchema?: FlagSchema;
+    characters?: Record<string, Character>;
     isDimmed?: boolean;
     isInPath?: boolean;
     layoutDirection?: LayoutDirection;

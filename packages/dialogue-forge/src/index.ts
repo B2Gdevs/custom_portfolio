@@ -6,19 +6,23 @@ export { ScenePlayer as DialogueSimulator } from './components/ScenePlayer';
 export { GuidePanel } from './components/GuidePanel';
 export { FlagSelector } from './components/FlagSelector';
 export { FlagManager } from './components/FlagManager';
+export { CharacterSelector } from './components/CharacterSelector';
 export { ZoomControls } from './components/ZoomControls';
 export { ExampleLoader } from './components/ExampleLoader';
 
 // Export styles
 import './styles/scrollbar.css';
+import './styles/theme.css';
 
 // Export examples
 export { exampleDialogues, demoFlagSchemas, getExampleDialogue, getDemoFlagSchema, listExamples, listDemoFlagSchemas } from './examples';
+export { exampleCharacters, getExampleCharacters, getExampleCharacter, listExampleCharacterIds } from './examples';
 
 // Export all types
 export * from './types';
 export * from './types/flags';
 export * from './types/game-state';
+export * from './types/characters';
 export * from './types/constants';
 
 // Export game state utilities

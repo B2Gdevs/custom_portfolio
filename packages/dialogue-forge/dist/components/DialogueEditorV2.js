@@ -68,14 +68,24 @@ const edgeTypes = {
     choice: ChoiceEdgeV2_1.ChoiceEdgeV2,
     default: NPCEdgeV2_1.NPCEdgeV2, // Use custom component for NPC edges instead of React Flow default
 };
-function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJSON, className = '', showTitleEditor = true, flagSchema, initialViewMode = 'graph', layoutStrategy: propLayoutStrategy = 'dagre', // Accept from parent
+function DialogueEditorV2Internal({ dialogue, onChange, onExportYarn, onExportJSON, className = '', showTitleEditor = true, flagSchema, characters = {}, initialViewMode = 'graph', viewMode: controlledViewMode, onViewModeChange, layoutStrategy: propLayoutStrategy = 'dagre', // Accept from parent
 onLayoutStrategyChange, onOpenFlagManager, onOpenGuide, onLoadExampleDialogue, onLoadExampleFlags, 
 // Event hooks
 onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, onNodeSelect, onNodeDoubleClick: onNodeDoubleClickHook, }) {
-    const [viewMode, setViewMode] = (0, react_1.useState)(initialViewMode);
+    // Use controlled viewMode if provided, otherwise use internal state
+    const [internalViewMode, setInternalViewMode] = (0, react_1.useState)(initialViewMode);
+    const viewMode = controlledViewMode ?? internalViewMode;
+    const setViewMode = (mode) => {
+        if (controlledViewMode === undefined) {
+            setInternalViewMode(mode);
+        }
+        onViewModeChange?.(mode);
+    };
     const [layoutDirection, setLayoutDirection] = (0, react_1.useState)('TB');
     const layoutStrategy = propLayoutStrategy; // Use prop instead of state
     const [autoOrganize, setAutoOrganize] = (0, react_1.useState)(false); // Auto-layout on changes
+    // Track if we've made a direct React Flow update to avoid unnecessary conversions
+    const directUpdateRef = (0, react_1.useRef)(null);
     const [showPathHighlight, setShowPathHighlight] = (0, react_1.useState)(true); // Toggle path highlighting
     const [showBackEdges, setShowBackEdges] = (0, react_1.useState)(true); // Toggle back-edge styling
     const [showLayoutMenu, setShowLayoutMenu] = (0, react_1.useState)(false);
@@ -166,13 +176,20 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
         return { edgesToSelectedNode: edgesOnPath, nodeDepths: nodeDepthMap };
     }, [selectedNodeId, dialogue]);
     // Update nodes/edges when dialogue changes externally
+    // Skip conversion if we just made a direct React Flow update (for simple text changes)
     react_1.default.useEffect(() => {
         if (dialogue) {
+            // If we just updated a node directly in React Flow, skip full conversion
+            // The direct update already handled the visual change
+            if (directUpdateRef.current) {
+                directUpdateRef.current = null; // Clear the flag
+                return; // Skip conversion - React Flow is already updated
+            }
             const { nodes: newNodes, edges: newEdges } = (0, reactflow_converter_1.convertDialogueTreeToReactFlow)(dialogue, layoutDirection);
             setNodes(newNodes);
             setEdges(newEdges);
         }
-    }, [dialogue]);
+    }, [dialogue, layoutDirection]);
     // Calculate end nodes (nodes with no outgoing connections)
     const endNodeIds = (0, react_1.useMemo)(() => {
         if (!dialogue)
@@ -188,7 +205,7 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
         });
         return ends;
     }, [dialogue]);
-    // Add flagSchema, dim state, and layout direction to node data
+    // Add flagSchema, characters, dim state, and layout direction to node data
     const nodesWithFlags = (0, react_1.useMemo)(() => {
         const hasSelection = selectedNodeId !== null && showPathHighlight;
         const startNodeId = dialogue?.startNodeId;
@@ -204,6 +221,7 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
                 data: {
                     ...node.data,
                     flagSchema,
+                    characters, // Pass characters to all nodes including conditional
                     isDimmed,
                     isInPath,
                     layoutDirection,
@@ -212,7 +230,7 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
                 },
             };
         });
-    }, [nodes, flagSchema, nodeDepths, selectedNodeId, layoutDirection, showPathHighlight, dialogue, endNodeIds]);
+    }, [nodes, flagSchema, characters, nodeDepths, selectedNodeId, layoutDirection, showPathHighlight, dialogue, endNodeIds]);
     if (!dialogue) {
         return (react_1.default.createElement("div", { className: `dialogue-editor-v2-empty ${className}` },
             react_1.default.createElement("p", null, "No dialogue loaded. Please provide a dialogue tree.")));
@@ -774,6 +792,33 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
     // Handle node updates
     const handleUpdateNode = (0, react_1.useCallback)((nodeId, updates) => {
         const updatedNode = { ...dialogue.nodes[nodeId], ...updates };
+        // Check if this is a "simple" update (just text/content changes, not structural)
+        // Simple updates: speaker, content, characterId (non-structural properties)
+        // Structural updates: choices, conditionalBlocks, nextNodeId (affect edges/connections)
+        const isSimpleUpdate = Object.keys(updates).every(key => ['speaker', 'content', 'characterId', 'setFlags'].includes(key));
+        if (isSimpleUpdate && reactFlowInstance) {
+            // For simple updates, update React Flow directly without full tree conversion
+            // This is much faster and avoids expensive recalculations
+            const allNodes = reactFlowInstance.getNodes();
+            const nodeToUpdate = allNodes.find(n => n.id === nodeId);
+            if (nodeToUpdate) {
+                // Mark that we're doing a direct update to skip full conversion
+                directUpdateRef.current = nodeId;
+                // Update the node data directly in React Flow
+                const updatedReactFlowNode = {
+                    ...nodeToUpdate,
+                    data: {
+                        ...nodeToUpdate.data,
+                        node: updatedNode, // Update the dialogue node in the data
+                    },
+                };
+                // Update just this node in React Flow
+                const updatedNodes = allNodes.map(n => n.id === nodeId ? updatedReactFlowNode : n);
+                reactFlowInstance.setNodes(updatedNodes);
+            }
+        }
+        // Always update the dialogue tree (source of truth) - but this triggers full conversion
+        // The useEffect will handle the full conversion, but React Flow is already updated above
         onChange({
             ...dialogue,
             nodes: {
@@ -783,7 +828,7 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
         });
         // Call onNodeUpdate hook
         onNodeUpdate?.(nodeId, updates);
-    }, [dialogue, onChange, onNodeUpdate]);
+    }, [dialogue, onChange, onNodeUpdate, reactFlowInstance]);
     // Handle choice updates
     const handleAddChoice = (0, react_1.useCallback)((nodeId) => {
         const updated = (0, node_helpers_1.addChoiceToNode)(dialogue.nodes[nodeId]);
@@ -854,7 +899,7 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
     }, [dialogue, onChange, reactFlowInstance, layoutDirection, layoutStrategy]);
     return (react_1.default.createElement("div", { className: `dialogue-editor-v2 ${className} w-full h-full flex flex-col` },
         viewMode === 'graph' && (react_1.default.createElement("div", { className: "flex-1 flex overflow-hidden" },
-            react_1.default.createElement("div", { className: "flex-1 relative", ref: reactFlowWrapperRef },
+            react_1.default.createElement("div", { className: "flex-1 relative w-full h-full", ref: reactFlowWrapperRef, style: { minHeight: 0 } },
                 react_1.default.createElement(reactflow_1.default, { nodes: nodesWithFlags, edges: edges.map(edge => {
                         // Detect back-edges (loops) based on layout direction
                         const sourceNode = nodes.find(n => n.id === edge.source);
@@ -882,16 +927,24 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
                         setNodeContextMenu(null);
                         setSelectedNodeId(null);
                         setShowLayoutMenu(false);
-                    }, fitView: true, className: "bg-[#0a0a0f]", style: { background: 'radial-gradient(circle, #1a1a2e 1px, #08080c 1px)', backgroundSize: '20px 20px' }, defaultEdgeOptions: { type: 'default' }, connectionLineStyle: { stroke: '#e94560', strokeWidth: 2 }, connectionLineType: reactflow_1.ConnectionLineType.SmoothStep, snapToGrid: false, nodesConnectable: true, elementsSelectable: true, selectionOnDrag: true, panOnDrag: [1, 2], zoomOnScroll: true, zoomOnPinch: true, preventScrolling: true, zoomOnDoubleClick: false, minZoom: 0.1, maxZoom: 3, deleteKeyCode: ['Delete', 'Backspace'], tabIndex: 0 },
+                    }, fitView: true, className: "bg-df-canvas-bg", style: { background: 'radial-gradient(circle, var(--color-df-canvas-grid) 1px, var(--color-df-canvas-bg) 1px)', backgroundSize: '20px 20px' }, defaultEdgeOptions: { type: 'default' }, connectionLineStyle: { stroke: '#e94560', strokeWidth: 2 }, connectionLineType: reactflow_1.ConnectionLineType.SmoothStep, snapToGrid: false, nodesConnectable: true, elementsSelectable: true, selectionOnDrag: true, panOnDrag: true, panOnScroll: true, zoomOnScroll: true, zoomOnPinch: true, preventScrolling: false, 
+                    // Behavior:
+                    // - Click and drag a node = moves the node (React Flow handles this automatically)
+                    // - Click and drag empty space = pans canvas
+                    // - Trackpad two-finger swipe = pans canvas (works with panOnDrag)
+                    // - Scroll wheel/trackpad scroll = zooms
+                    // - Shift+Scroll = pans
+                    // Note: React Flow automatically detects if you're dragging a node vs empty space
+                    zoomOnDoubleClick: false, minZoom: 0.1, maxZoom: 3, deleteKeyCode: ['Delete', 'Backspace'], tabIndex: 0 },
                     react_1.default.createElement(reactflow_1.Background, { variant: reactflow_1.BackgroundVariant.Dots, gap: 20, size: 1, color: "#1a1a2e" }),
                     react_1.default.createElement(reactflow_1.Panel, { position: "bottom-right", className: "!p-0 !m-2" },
-                        react_1.default.createElement("div", { className: "bg-[#0d0d14] border border-[#2a2a3e] rounded-lg overflow-hidden shadow-xl" },
-                            react_1.default.createElement("div", { className: "px-3 py-1.5 border-b border-[#2a2a3e] flex items-center justify-between bg-[#12121a]" },
-                                react_1.default.createElement("span", { className: "text-[10px] font-medium text-gray-400 uppercase tracking-wider" }, "Overview"),
+                        react_1.default.createElement("div", { className: "bg-df-sidebar-bg border border-df-sidebar-border rounded-lg overflow-hidden shadow-xl" },
+                            react_1.default.createElement("div", { className: "px-3 py-1.5 border-b border-df-sidebar-border flex items-center justify-between bg-df-elevated" },
+                                react_1.default.createElement("span", { className: "text-[10px] font-medium text-df-text-secondary uppercase tracking-wider" }, "Overview"),
                                 react_1.default.createElement("div", { className: "flex items-center gap-1" },
-                                    react_1.default.createElement("span", { className: "w-2 h-2 rounded-full bg-[#e94560]", title: "NPC Node" }),
-                                    react_1.default.createElement("span", { className: "w-2 h-2 rounded-full bg-[#8b5cf6]", title: "Player Node" }),
-                                    react_1.default.createElement("span", { className: "w-2 h-2 rounded-full bg-blue-500", title: "Conditional" }))),
+                                    react_1.default.createElement("span", { className: "w-2 h-2 rounded-full bg-df-npc-selected", title: "NPC Node" }),
+                                    react_1.default.createElement("span", { className: "w-2 h-2 rounded-full bg-df-player-selected", title: "Player Node" }),
+                                    react_1.default.createElement("span", { className: "w-2 h-2 rounded-full bg-df-conditional-border", title: "Conditional" }))),
                             react_1.default.createElement(reactflow_1.MiniMap, { style: {
                                     width: 180,
                                     height: 120,
@@ -906,14 +959,14 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
                                     return '#4a4a6a';
                                 }, nodeStrokeWidth: 2, pannable: true, zoomable: true }))),
                     react_1.default.createElement(reactflow_1.Panel, { position: "top-left", className: "!bg-transparent !border-0 !p-0 !m-2" },
-                        react_1.default.createElement("div", { className: "flex flex-col gap-1.5 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg p-1.5 shadow-lg" },
+                        react_1.default.createElement("div", { className: "flex flex-col gap-1.5 bg-df-sidebar-bg border border-df-sidebar-border rounded-lg p-1.5 shadow-lg" },
                             react_1.default.createElement("div", { className: "relative" },
                                 react_1.default.createElement("button", { onClick: () => setShowLayoutMenu(!showLayoutMenu), className: `p-1.5 rounded transition-colors ${showLayoutMenu
-                                        ? 'bg-[#e94560]/20 text-[#e94560] border border-[#e94560]/50'
-                                        : 'bg-[#12121a] border border-[#2a2a3e] text-gray-400 hover:text-white hover:border-[#3a3a4e]'}`, title: `Layout: ${(0, layout_1.listLayouts)().find(l => l.id === layoutStrategy)?.name || layoutStrategy}` },
+                                        ? 'bg-df-npc-selected/20 text-df-npc-selected border border-df-npc-selected'
+                                        : 'bg-df-elevated border border-df-control-border text-df-text-secondary hover:text-df-text-primary hover:border-df-control-hover'}`, title: `Layout: ${(0, layout_1.listLayouts)().find(l => l.id === layoutStrategy)?.name || layoutStrategy}` },
                                     react_1.default.createElement(lucide_react_1.Grid3x3, { size: 14 })),
-                                showLayoutMenu && (react_1.default.createElement("div", { className: "absolute left-full ml-2 top-0 z-50 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg shadow-xl p-1 min-w-[200px]" },
-                                    react_1.default.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-wider px-2 py-1 border-b border-[#2a2a3e]" }, "Layout Algorithm"),
+                                showLayoutMenu && (react_1.default.createElement("div", { className: "absolute left-full ml-2 top-0 z-50 bg-df-sidebar-bg border border-df-sidebar-border rounded-lg shadow-xl p-1 min-w-[200px]" },
+                                    react_1.default.createElement("div", { className: "text-[10px] text-df-text-secondary uppercase tracking-wider px-2 py-1 border-b border-df-sidebar-border" }, "Layout Algorithm"),
                                     (0, layout_1.listLayouts)().map(layout => (react_1.default.createElement("button", { key: layout.id, onClick: () => {
                                             if (onLayoutStrategyChange) {
                                                 onLayoutStrategyChange(layout.id);
@@ -922,20 +975,20 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
                                                 setTimeout(() => handleAutoLayout(), 0);
                                             }
                                         }, className: `w-full text-left px-3 py-2 text-sm rounded transition-colors ${layoutStrategy === layout.id
-                                            ? 'bg-[#e94560]/20 text-[#e94560]'
-                                            : 'text-gray-300 hover:bg-[#1a1a2e]'}` },
+                                            ? 'bg-df-npc-selected/20 text-df-npc-selected'
+                                            : 'text-df-text-primary hover:bg-df-elevated'}` },
                                         react_1.default.createElement("div", { className: "font-medium" },
                                             layout.name,
                                             " ",
                                             layout.isDefault && '(default)'),
-                                        react_1.default.createElement("div", { className: "text-[10px] text-gray-500 mt-0.5" }, layout.description))))))),
-                            onOpenFlagManager && (react_1.default.createElement("button", { onClick: onOpenFlagManager, className: "p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors", title: "Manage Flags" },
+                                        react_1.default.createElement("div", { className: "text-[10px] text-df-text-secondary mt-0.5" }, layout.description))))))),
+                            onOpenFlagManager && (react_1.default.createElement("button", { onClick: onOpenFlagManager, className: "p-1.5 bg-df-elevated border border-df-control-border rounded text-df-text-secondary hover:text-df-text-primary hover:border-df-control-hover transition-colors", title: "Manage Flags" },
                                 react_1.default.createElement(lucide_react_1.Settings, { size: 14 }))),
-                            onOpenGuide && (react_1.default.createElement("button", { onClick: onOpenGuide, className: "p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors", title: "Guide & Documentation" },
+                            onOpenGuide && (react_1.default.createElement("button", { onClick: onOpenGuide, className: "p-1.5 bg-df-elevated border border-df-control-border rounded text-df-text-secondary hover:text-df-text-primary hover:border-df-control-hover transition-colors", title: "Guide & Documentation" },
                                 react_1.default.createElement(lucide_react_1.BookOpen, { size: 14 }))),
                             feature_flags_1.ENABLE_DEBUG_TOOLS && onLoadExampleDialogue && onLoadExampleFlags && (react_1.default.createElement(ExampleLoaderButton_1.ExampleLoaderButton, { onLoadDialogue: onLoadExampleDialogue, onLoadFlags: onLoadExampleFlags })))),
                     react_1.default.createElement(reactflow_1.Panel, { position: "top-right", className: "!bg-transparent !border-0 !p-0 !m-2" },
-                        react_1.default.createElement("div", { className: "flex items-center gap-1.5 bg-[#0d0d14] border border-[#2a2a3e] rounded-lg p-1.5 shadow-lg" },
+                        react_1.default.createElement("div", { className: "flex items-center gap-1.5 bg-df-sidebar-bg border border-df-sidebar-border rounded-lg p-1.5 shadow-lg" },
                             react_1.default.createElement("button", { onClick: () => {
                                     const newAutoOrganize = !autoOrganize;
                                     setAutoOrganize(newAutoOrganize);
@@ -944,31 +997,31 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
                                         handleAutoLayout();
                                     }
                                 }, className: `p-1.5 rounded transition-colors ${autoOrganize
-                                    ? 'bg-green-500/20 text-green-400 border border-green-500/50'
-                                    : 'bg-[#12121a] text-gray-500 hover:text-gray-300 border border-[#2a2a3e]'}`, title: autoOrganize ? `Auto Layout ON - Nodes auto-arrange` : "Auto Layout OFF - Free placement" },
+                                    ? 'bg-df-success/20 text-df-success border border-df-success'
+                                    : 'bg-df-elevated text-df-text-secondary hover:text-df-text-primary border border-df-control-border'}`, title: autoOrganize ? `Auto Layout ON - Nodes auto-arrange` : "Auto Layout OFF - Free placement" },
                                 react_1.default.createElement(lucide_react_1.Magnet, { size: 14 })),
-                            react_1.default.createElement("div", { className: "w-px h-5 bg-[#2a2a3e]" }),
-                            react_1.default.createElement("div", { className: "flex border border-[#2a2a3e] rounded overflow-hidden" },
+                            react_1.default.createElement("div", { className: "w-px h-5 bg-df-control-border" }),
+                            react_1.default.createElement("div", { className: "flex border border-df-control-border rounded overflow-hidden" },
                                 react_1.default.createElement("button", { onClick: () => handleAutoLayout('TB'), className: `p-1.5 transition-colors ${layoutDirection === 'TB'
-                                        ? 'bg-[#e94560]/20 text-[#e94560]'
-                                        : 'bg-[#12121a] text-gray-500 hover:text-gray-300'} border-r border-[#2a2a3e]`, title: "Vertical Layout (Top to Bottom)" },
+                                        ? 'bg-df-npc-selected/20 text-df-npc-selected'
+                                        : 'bg-df-elevated text-df-text-secondary hover:text-df-text-primary'} border-r border-df-control-border`, title: "Vertical Layout (Top to Bottom)" },
                                     react_1.default.createElement(lucide_react_1.ArrowDown, { size: 14 })),
                                 react_1.default.createElement("button", { onClick: () => handleAutoLayout('LR'), className: `p-1.5 transition-colors ${layoutDirection === 'LR'
-                                        ? 'bg-[#8b5cf6]/20 text-[#8b5cf6]'
-                                        : 'bg-[#12121a] text-gray-500 hover:text-gray-300'}`, title: "Horizontal Layout (Left to Right)" },
+                                        ? 'bg-df-player-selected/20 text-df-player-selected'
+                                        : 'bg-df-elevated text-df-text-secondary hover:text-df-text-primary'}`, title: "Horizontal Layout (Left to Right)" },
                                     react_1.default.createElement(lucide_react_1.ArrowRight, { size: 14 }))),
-                            react_1.default.createElement("button", { onClick: () => handleAutoLayout(), className: "p-1.5 bg-[#12121a] border border-[#2a2a3e] rounded text-gray-400 hover:text-white hover:border-[#3a3a4e] transition-colors", title: "Re-apply Layout" },
+                            react_1.default.createElement("button", { onClick: () => handleAutoLayout(), className: "p-1.5 bg-df-elevated border border-df-control-border rounded text-df-text-secondary hover:text-df-text-primary hover:border-df-control-hover transition-colors", title: "Re-apply Layout" },
                                 react_1.default.createElement(lucide_react_1.Layout, { size: 14 })),
-                            react_1.default.createElement("div", { className: "w-px h-5 bg-[#2a2a3e]" }),
+                            react_1.default.createElement("div", { className: "w-px h-5 bg-df-control-border" }),
                             react_1.default.createElement("button", { onClick: () => setShowPathHighlight(!showPathHighlight), className: `p-1.5 rounded transition-colors ${showPathHighlight
-                                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/50'
-                                    : 'bg-[#12121a] text-gray-500 hover:text-gray-300 border border-[#2a2a3e]'}`, title: showPathHighlight ? "Path Highlight ON" : "Path Highlight OFF" },
+                                    ? 'bg-df-info/20 text-df-info border border-df-info'
+                                    : 'bg-df-elevated text-df-text-secondary hover:text-df-text-primary border border-df-control-border'}`, title: showPathHighlight ? "Path Highlight ON" : "Path Highlight OFF" },
                                 react_1.default.createElement(lucide_react_1.Sparkles, { size: 14 })),
                             react_1.default.createElement("button", { onClick: () => setShowBackEdges(!showBackEdges), className: `p-1.5 rounded transition-colors ${showBackEdges
-                                    ? 'bg-orange-500/20 text-orange-400 border border-orange-500/50'
-                                    : 'bg-[#12121a] text-gray-500 hover:text-gray-300 border border-[#2a2a3e]'}`, title: showBackEdges ? "Loop Edges Styled" : "Loop Edges Normal" },
+                                    ? 'bg-df-warning/20 text-df-warning border border-df-warning'
+                                    : 'bg-df-elevated text-df-text-secondary hover:text-df-text-primary border border-df-control-border'}`, title: showBackEdges ? "Loop Edges Styled" : "Loop Edges Normal" },
                                 react_1.default.createElement(lucide_react_1.Undo2, { size: 14 })),
-                            react_1.default.createElement("div", { className: "w-px h-5 bg-[#2a2a3e]" }),
+                            react_1.default.createElement("div", { className: "w-px h-5 bg-df-control-border" }),
                             react_1.default.createElement("button", { onClick: () => {
                                     if (dialogue?.startNodeId) {
                                         setSelectedNodeId(dialogue.startNodeId);
@@ -978,7 +1031,7 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
                                             reactFlowInstance.setCenter(startNode.position.x + 110, startNode.position.y + 60, { zoom: 1, duration: 500 });
                                         }
                                     }
-                                }, className: "p-1.5 bg-green-500/20 text-green-400 border border-green-500/50 rounded transition-colors hover:bg-green-500/30", title: "Go to Start Node" },
+                                }, className: "p-1.5 bg-df-start/20 text-df-start border border-df-start rounded transition-colors hover:bg-df-start/30", title: "Go to Start Node" },
                                 react_1.default.createElement(lucide_react_1.Home, { size: 14 })),
                             react_1.default.createElement("button", { onClick: () => {
                                     const endNodes = Array.from(endNodeIds);
@@ -994,23 +1047,23 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
                                             reactFlowInstance.setCenter(endNode.position.x + 110, endNode.position.y + 60, { zoom: 1, duration: 500 });
                                         }
                                     }
-                                }, className: "p-1.5 bg-amber-500/20 text-amber-400 border border-amber-500/50 rounded transition-colors hover:bg-amber-500/30", title: `Go to End Node (${endNodeIds.size} total)` },
+                                }, className: "p-1.5 bg-df-end/20 text-df-end border border-df-end rounded transition-colors hover:bg-df-end/30", title: `Go to End Node (${endNodeIds.size} total)` },
                                 react_1.default.createElement(lucide_react_1.Flag, { size: 14 })))),
                     contextMenu && (react_1.default.createElement("div", { className: "fixed z-50", style: { left: contextMenu.x, top: contextMenu.y } },
-                        react_1.default.createElement("div", { className: "bg-[#0d0d14] border border-[#1a1a2e] rounded-lg shadow-lg p-1 min-w-[150px]" },
+                        react_1.default.createElement("div", { className: "bg-df-sidebar-bg border border-df-sidebar-border rounded-lg shadow-lg p-1 min-w-[150px]" },
                             react_1.default.createElement("button", { onClick: () => {
                                     handleAddNode('npc', contextMenu.graphX, contextMenu.graphY);
-                                }, className: "w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[#1a1a2e] rounded" }, "Add NPC Node"),
+                                }, className: "w-full text-left px-3 py-2 text-sm text-df-text-primary hover:bg-df-elevated rounded" }, "Add NPC Node"),
                             react_1.default.createElement("button", { onClick: () => {
                                     handleAddNode('player', contextMenu.graphX, contextMenu.graphY);
-                                }, className: "w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[#1a1a2e] rounded" }, "Add Player Node"),
+                                }, className: "w-full text-left px-3 py-2 text-sm text-df-text-primary hover:bg-df-elevated rounded" }, "Add Player Node"),
                             react_1.default.createElement("button", { onClick: () => {
                                     handleAddNode('conditional', contextMenu.graphX, contextMenu.graphY);
-                                }, className: "w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[#1a1a2e] rounded" }, "Add Conditional Node"),
-                            react_1.default.createElement("button", { onClick: () => setContextMenu(null), className: "w-full text-left px-3 py-2 text-sm text-gray-500 hover:bg-[#1a1a2e] rounded" }, "Cancel")))),
+                                }, className: "w-full text-left px-3 py-2 text-sm text-df-text-primary hover:bg-df-elevated rounded" }, "Add Conditional Node"),
+                            react_1.default.createElement("button", { onClick: () => setContextMenu(null), className: "w-full text-left px-3 py-2 text-sm text-df-text-secondary hover:bg-df-elevated rounded" }, "Cancel")))),
                     edgeDropMenu && (react_1.default.createElement("div", { className: "fixed z-50", style: { left: edgeDropMenu.x, top: edgeDropMenu.y } },
-                        react_1.default.createElement("div", { className: "bg-[#0d0d14] border border-[#1a1a2e] rounded-lg shadow-lg p-1 min-w-[150px]" },
-                            react_1.default.createElement("div", { className: "px-3 py-1 text-[10px] text-gray-500 uppercase border-b border-[#1a1a2e]" }, "Create Node"),
+                        react_1.default.createElement("div", { className: "bg-df-sidebar-bg border border-df-sidebar-border rounded-lg shadow-lg p-1 min-w-[150px]" },
+                            react_1.default.createElement("div", { className: "px-3 py-1 text-[10px] text-df-text-secondary uppercase border-b border-df-sidebar-border" }, "Create Node"),
                             react_1.default.createElement("button", { onClick: () => {
                                     handleAddNode('npc', edgeDropMenu.graphX, edgeDropMenu.graphY, {
                                         fromNodeId: edgeDropMenu.fromNodeId,
@@ -1018,7 +1071,7 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
                                         fromBlockIdx: edgeDropMenu.fromBlockIdx,
                                         sourceHandle: edgeDropMenu.sourceHandle,
                                     });
-                                }, className: "w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[#1a1a2e] rounded" }, "Add NPC Node"),
+                                }, className: "w-full text-left px-3 py-2 text-sm text-df-text-primary hover:bg-df-elevated rounded" }, "Add NPC Node"),
                             react_1.default.createElement("button", { onClick: () => {
                                     handleAddNode('player', edgeDropMenu.graphX, edgeDropMenu.graphY, {
                                         fromNodeId: edgeDropMenu.fromNodeId,
@@ -1026,7 +1079,7 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
                                         fromBlockIdx: edgeDropMenu.fromBlockIdx,
                                         sourceHandle: edgeDropMenu.sourceHandle,
                                     });
-                                }, className: "w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[#1a1a2e] rounded" }, "Add Player Node"),
+                                }, className: "w-full text-left px-3 py-2 text-sm text-df-text-primary hover:bg-df-elevated rounded" }, "Add Player Node"),
                             react_1.default.createElement("button", { onClick: () => {
                                     handleAddNode('conditional', edgeDropMenu.graphX, edgeDropMenu.graphY, {
                                         fromNodeId: edgeDropMenu.fromNodeId,
@@ -1034,43 +1087,43 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
                                         fromBlockIdx: edgeDropMenu.fromBlockIdx,
                                         sourceHandle: edgeDropMenu.sourceHandle,
                                     });
-                                }, className: "w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[#1a1a2e] rounded" }, "Add Conditional Node"),
+                                }, className: "w-full text-left px-3 py-2 text-sm text-df-text-primary hover:bg-df-elevated rounded" }, "Add Conditional Node"),
                             react_1.default.createElement("button", { onClick: () => {
                                     setEdgeDropMenu(null);
                                     connectingRef.current = null;
-                                }, className: "w-full text-left px-3 py-2 text-sm text-gray-500 hover:bg-[#1a1a2e] rounded" }, "Cancel")))),
+                                }, className: "w-full text-left px-3 py-2 text-sm text-df-text-secondary hover:bg-df-elevated rounded" }, "Cancel")))),
                     edgeContextMenu && (react_1.default.createElement("div", { className: "fixed z-50", style: { left: edgeContextMenu.x, top: edgeContextMenu.y } },
-                        react_1.default.createElement("div", { className: "bg-[#0d0d14] border border-[#1a1a2e] rounded-lg shadow-lg p-1 min-w-[180px]" },
-                            react_1.default.createElement("div", { className: "px-3 py-1 text-[10px] text-gray-500 uppercase border-b border-[#1a1a2e]" }, "Insert Node"),
+                        react_1.default.createElement("div", { className: "bg-df-sidebar-bg border border-df-sidebar-border rounded-lg shadow-lg p-1 min-w-[180px]" },
+                            react_1.default.createElement("div", { className: "px-3 py-1 text-[10px] text-df-text-secondary uppercase border-b border-df-sidebar-border" }, "Insert Node"),
                             react_1.default.createElement("button", { onClick: () => {
                                     handleInsertNode('npc', edgeContextMenu.edgeId, edgeContextMenu.graphX, edgeContextMenu.graphY);
-                                }, className: "w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[#1a1a2e] rounded" }, "Insert NPC Node"),
+                                }, className: "w-full text-left px-3 py-2 text-sm text-df-text-primary hover:bg-df-elevated rounded" }, "Insert NPC Node"),
                             react_1.default.createElement("button", { onClick: () => {
                                     handleInsertNode('player', edgeContextMenu.edgeId, edgeContextMenu.graphX, edgeContextMenu.graphY);
-                                }, className: "w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[#1a1a2e] rounded" }, "Insert Player Node"),
+                                }, className: "w-full text-left px-3 py-2 text-sm text-df-text-primary hover:bg-df-elevated rounded" }, "Insert Player Node"),
                             react_1.default.createElement("button", { onClick: () => {
                                     handleInsertNode('conditional', edgeContextMenu.edgeId, edgeContextMenu.graphX, edgeContextMenu.graphY);
-                                }, className: "w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[#1a1a2e] rounded" }, "Insert Conditional Node"),
-                            react_1.default.createElement("button", { onClick: () => setEdgeContextMenu(null), className: "w-full text-left px-3 py-2 text-sm text-gray-500 hover:bg-[#1a1a2e] rounded" }, "Cancel")))),
+                                }, className: "w-full text-left px-3 py-2 text-sm text-df-text-primary hover:bg-df-elevated rounded" }, "Insert Conditional Node"),
+                            react_1.default.createElement("button", { onClick: () => setEdgeContextMenu(null), className: "w-full text-left px-3 py-2 text-sm text-df-text-secondary hover:bg-df-elevated rounded" }, "Cancel")))),
                     nodeContextMenu && (react_1.default.createElement("div", { className: "fixed z-50", style: { left: nodeContextMenu.x, top: nodeContextMenu.y } },
-                        react_1.default.createElement("div", { className: "bg-[#1a1a2e] border border-purple-500 rounded-lg shadow-xl py-1 min-w-[180px]" },
+                        react_1.default.createElement("div", { className: "bg-df-elevated border border-df-player-border rounded-lg shadow-xl py-1 min-w-[180px]" },
                             (() => {
                                 const node = dialogue.nodes[nodeContextMenu.nodeId];
                                 if (!node)
                                     return null;
                                 return (react_1.default.createElement(react_1.default.Fragment, null,
-                                    react_1.default.createElement("div", { className: "px-3 py-1 text-[10px] text-gray-500 uppercase border-b border-[#2a2a3e]" }, node.id),
+                                    react_1.default.createElement("div", { className: "px-3 py-1 text-[10px] text-df-text-secondary uppercase border-b border-df-control-border" }, node.id),
                                     react_1.default.createElement("button", { onClick: () => {
                                             setSelectedNodeId(nodeContextMenu.nodeId);
                                             setNodeContextMenu(null);
-                                        }, className: "w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-[#2a2a3e] flex items-center gap-2" },
-                                        react_1.default.createElement(lucide_react_1.Edit3, { size: 14, className: "text-[#e94560]" }),
+                                        }, className: "w-full px-4 py-2 text-sm text-left text-df-text-primary hover:bg-df-control-hover flex items-center gap-2" },
+                                        react_1.default.createElement(lucide_react_1.Edit3, { size: 14, className: "text-df-npc-selected" }),
                                         " Edit Node"),
                                     node.type === 'player' && (react_1.default.createElement("button", { onClick: () => {
                                             handleAddChoice(nodeContextMenu.nodeId);
                                             setNodeContextMenu(null);
-                                        }, className: "w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-[#2a2a3e] flex items-center gap-2" },
-                                        react_1.default.createElement(lucide_react_1.Plus, { size: 14, className: "text-purple-400" }),
+                                        }, className: "w-full px-4 py-2 text-sm text-left text-df-text-primary hover:bg-df-control-hover flex items-center gap-2" },
+                                        react_1.default.createElement(lucide_react_1.Plus, { size: 14, className: "text-df-player-selected" }),
                                         " Add Choice")),
                                     node.type === 'npc' && !node.conditionalBlocks && (react_1.default.createElement("button", { onClick: () => {
                                             handleUpdateNode(nodeContextMenu.nodeId, {
@@ -1084,18 +1137,18 @@ onNodeAdd, onNodeDelete, onNodeUpdate, onConnect: onConnectHook, onDisconnect, o
                                             });
                                             setSelectedNodeId(nodeContextMenu.nodeId);
                                             setNodeContextMenu(null);
-                                        }, className: "w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-[#2a2a3e] flex items-center gap-2" },
-                                        react_1.default.createElement(lucide_react_1.Plus, { size: 14, className: "text-blue-400" }),
+                                        }, className: "w-full px-4 py-2 text-sm text-left text-df-text-primary hover:bg-df-control-hover flex items-center gap-2" },
+                                        react_1.default.createElement(lucide_react_1.Plus, { size: 14, className: "text-df-conditional-border" }),
                                         " Add Conditionals")),
                                     node.id !== dialogue.startNodeId && (react_1.default.createElement("button", { onClick: () => {
                                             handleDeleteNode(nodeContextMenu.nodeId);
                                             setNodeContextMenu(null);
-                                        }, className: "w-full px-4 py-2 text-sm text-left text-red-400 hover:bg-[#2a2a3e] flex items-center gap-2" },
+                                        }, className: "w-full px-4 py-2 text-sm text-left text-df-error hover:bg-df-control-hover flex items-center gap-2" },
                                         react_1.default.createElement(lucide_react_1.Trash2, { size: 14 }),
                                         " Delete"))));
                             })(),
-                            react_1.default.createElement("button", { onClick: () => setNodeContextMenu(null), className: "w-full px-4 py-1.5 text-xs text-gray-500 hover:text-gray-300 border-t border-[#2a2a3e] mt-1" }, "Cancel")))))),
-            selectedNode && (react_1.default.createElement(NodeEditor_1.NodeEditor, { node: selectedNode, dialogue: dialogue, onUpdate: (updates) => handleUpdateNode(selectedNode.id, updates), onFocusNode: (nodeId) => {
+                            react_1.default.createElement("button", { onClick: () => setNodeContextMenu(null), className: "w-full px-4 py-1.5 text-xs text-df-text-secondary hover:text-df-text-primary border-t border-df-control-border mt-1" }, "Cancel")))))),
+            selectedNode && (react_1.default.createElement(NodeEditor_1.NodeEditor, { node: selectedNode, dialogue: dialogue, characters: characters, onUpdate: (updates) => handleUpdateNode(selectedNode.id, updates), onFocusNode: (nodeId) => {
                     const targetNode = nodes.find(n => n.id === nodeId);
                     if (targetNode && reactFlowInstance) {
                         // Set selectedNodeId first so NodeEditor updates

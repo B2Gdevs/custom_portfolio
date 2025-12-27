@@ -14,6 +14,8 @@
 export { examplesRegistry, exampleFlagSchemas, getExampleMetadata, listExampleIds, getExampleFlagSchema, listFlagSchemaIds } from './examples-registry';
 import { getExampleDialogue as getYarnExampleDialogue } from './yarn-examples';
 import { listExampleIds, listFlagSchemaIds, getExampleFlagSchema } from './examples-registry';
+// Export character examples
+export { exampleCharacters, getExampleCharacters, getExampleCharacter, listExampleCharacterIds, } from './example-characters';
 import { exampleDialogues as legacyExamples, demoFlagSchemas as legacySchemas } from './legacy-examples';
 // Export legacy examples - these work alongside the new Yarn examples
 export const exampleDialogues = legacyExamples;

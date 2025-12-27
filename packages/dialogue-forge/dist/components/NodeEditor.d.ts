@@ -1,6 +1,7 @@
 import React from 'react';
 import { DialogueNode, DialogueTree, Choice } from '../types';
 import { FlagSchema } from '../types/flags';
+import { Character } from '../types/characters';
 interface NodeEditorProps {
     node: DialogueNode;
     dialogue: DialogueTree;
@@ -13,6 +14,7 @@ interface NodeEditorProps {
     onPlayFromHere?: (nodeId: string) => void;
     onFocusNode?: (nodeId: string) => void;
     flagSchema?: FlagSchema;
+    characters?: Record<string, Character>;
 }
-export declare function NodeEditor({ node, dialogue, onUpdate, onDelete, onAddChoice, onUpdateChoice, onRemoveChoice, onClose, onPlayFromHere, onFocusNode, flagSchema }: NodeEditorProps): React.JSX.Element;
+export declare function NodeEditor({ node, dialogue, onUpdate, onDelete, onAddChoice, onUpdateChoice, onRemoveChoice, onClose, onPlayFromHere, onFocusNode, flagSchema, characters, }: NodeEditorProps): React.JSX.Element;
 export {};

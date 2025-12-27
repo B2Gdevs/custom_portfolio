@@ -196,7 +196,7 @@ function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }) {
             }
         }
         // Only move to next node if it exists and is valid
-        if ((0, yarn_runner_1.isValidNextNode)(choice.nextNodeId, dialogue.nodes)) {
+        if (choice.nextNodeId && (0, yarn_runner_1.isValidNextNode)(choice.nextNodeId, dialogue.nodes)) {
             setCurrentNodeId(choice.nextNodeId);
         }
         else {

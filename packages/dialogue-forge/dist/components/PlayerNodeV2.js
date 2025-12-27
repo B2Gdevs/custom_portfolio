@@ -40,8 +40,12 @@ const lucide_react_1 = require("lucide-react");
 // Color scheme for choice edges (same as current implementation)
 const CHOICE_COLORS = ['#e94560', '#8b5cf6', '#06b6d4', '#22c55e', '#f59e0b'];
 function PlayerNodeV2({ data, selected }) {
-    const { node, flagSchema, isDimmed, isInPath, layoutDirection = 'TB', isStartNode, isEndNode } = data;
+    const { node, flagSchema, characters = {}, isDimmed, isInPath, layoutDirection = 'TB', isStartNode, isEndNode } = data;
     const choices = node.choices || [];
+    // Get character if characterId is set
+    const character = node.characterId ? characters[node.characterId] : undefined;
+    const displayName = character ? character.name : (node.speaker || 'Player');
+    const avatar = character?.avatar || '🎮';
     const updateNodeInternals = (0, reactflow_1.useUpdateNodeInternals)();
     const headerRef = (0, react_1.useRef)(null);
     const choiceRefs = (0, react_1.useRef)([]);
@@ -85,50 +89,70 @@ function PlayerNodeV2({ data, selected }) {
     }, [choices.length, node.id, updateNodeInternals]);
     // Check if this is an end node (player node with no choices that have nextNodeId)
     const hasNoOutgoingConnections = !choices.some(c => c.nextNodeId);
-    return (react_1.default.createElement("div", { className: `rounded-lg border-2 transition-all duration-300 ${selected ? 'border-[#8b5cf6] shadow-lg shadow-[#8b5cf6]/20' :
-            isStartNode ? 'border-green-500 shadow-md shadow-green-500/20' :
-                isEndNode ? 'border-amber-500 shadow-md shadow-amber-500/20' :
-                    'border-[#2a1a3a]'} ${isInPath ? 'border-[#8b5cf6]/70' : ''} bg-[#1e1e3a] min-w-[200px] relative`, style: isDimmed ? { opacity: 0.35, filter: 'saturate(0.3)' } : undefined },
-        isStartNode && (react_1.default.createElement("div", { className: "absolute -top-2 -left-2 bg-green-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shadow-lg z-10" },
-            react_1.default.createElement(lucide_react_1.Play, { size: 8, fill: "currentColor" }),
-            " START")),
-        isEndNode && (react_1.default.createElement("div", { className: "absolute -top-2 -right-2 bg-amber-500 text-black text-[8px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shadow-lg z-10" },
-            react_1.default.createElement(lucide_react_1.Flag, { size: 8 }),
-            " END")),
-        react_1.default.createElement(reactflow_1.Handle, { type: "target", position: targetPosition, className: "!bg-[#2a2a3e] !border-[#4a4a6a] !w-4 !h-4 !rounded-full" }),
-        react_1.default.createElement("div", { ref: headerRef, className: "px-3 py-1.5 border-b border-[#2a2a3e] bg-[#16162a] flex items-center gap-2 rounded-t-lg" },
-            react_1.default.createElement(lucide_react_1.GitBranch, { size: 12, className: "text-purple-400" }),
-            react_1.default.createElement("span", { className: "text-[10px] font-mono text-gray-500 truncate flex-1" }, node.id),
-            react_1.default.createElement("span", { className: "text-[10px] text-gray-600" }, "PLAYER")),
-        react_1.default.createElement("div", { className: "border-t border-[#2a2a3e]" }, choices.map((choice, idx) => {
+    // Border color based on state
+    const borderClass = selected
+        ? 'border-df-player-selected shadow-lg shadow-df-glow'
+        : isStartNode
+            ? 'border-df-start shadow-md'
+            : isEndNode
+                ? 'border-df-end shadow-md'
+                : 'border-df-player-border';
+    // Header background for player nodes
+    const headerBgClass = isStartNode
+        ? 'bg-df-start-bg'
+        : isEndNode
+            ? 'bg-df-end-bg'
+            : 'bg-df-player-header';
+    return (react_1.default.createElement("div", { className: `rounded-lg border-2 transition-all duration-300 ${borderClass} ${isInPath ? 'border-df-player-selected/70' : ''} bg-df-player-bg min-w-[320px] max-w-[450px] relative overflow-hidden`, style: isDimmed ? { opacity: 0.35, filter: 'saturate(0.3)' } : undefined },
+        react_1.default.createElement(reactflow_1.Handle, { type: "target", position: targetPosition, className: "!bg-df-control-bg !border-df-control-border !w-4 !h-4 !rounded-full" }),
+        react_1.default.createElement("div", { ref: headerRef, className: `${headerBgClass} border-b-2 border-df-player-border px-3 py-2.5 flex items-center gap-3 relative` },
+            react_1.default.createElement("div", { className: "w-14 h-14 rounded-full bg-df-player-bg border-[3px] border-df-player-border flex items-center justify-center text-3xl shadow-lg flex-shrink-0" }, avatar),
+            react_1.default.createElement("div", { className: "flex-1 min-w-0" },
+                react_1.default.createElement("h3", { className: "text-base font-bold text-df-text-primary truncate leading-tight" }, displayName)),
+            react_1.default.createElement("div", { className: "flex items-center gap-2 flex-shrink-0" },
+                react_1.default.createElement("div", { className: "flex items-center gap-1 px-2 py-1 rounded bg-df-base/50 border border-df-control-border", title: `Node ID: ${node.id}` },
+                    react_1.default.createElement(lucide_react_1.Hash, { size: 12, className: "text-df-text-secondary" }),
+                    react_1.default.createElement("span", { className: "text-[10px] font-mono text-df-text-secondary" }, node.id)),
+                react_1.default.createElement("div", { className: "flex items-center gap-1 px-2 py-1 rounded bg-df-player-selected/20 border border-df-player-selected/50", title: "Player Node" },
+                    react_1.default.createElement(lucide_react_1.GitBranch, { size: 14, className: "text-df-player-selected" }),
+                    react_1.default.createElement("span", { className: "text-[10px] font-semibold text-df-player-selected" }, "PLAYER"))),
+            isStartNode && (react_1.default.createElement("div", { className: "absolute top-1 right-1 bg-df-start text-df-text-primary text-[8px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5 shadow-lg z-20" },
+                react_1.default.createElement(lucide_react_1.Play, { size: 8, fill: "currentColor" }),
+                " START")),
+            isEndNode && (react_1.default.createElement("div", { className: "absolute top-1 right-1 bg-df-end text-df-text-primary text-[8px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5 shadow-lg z-20" },
+                react_1.default.createElement(lucide_react_1.Flag, { size: 8 }),
+                " END"))),
+        react_1.default.createElement("div", { className: "px-4 py-3 space-y-2" }, choices.map((choice, idx) => {
             // Use calculated position or fallback
+            const choiceColor = CHOICE_COLORS[idx % CHOICE_COLORS.length];
             return (react_1.default.createElement("div", { key: choice.id, ref: el => {
                     choiceRefs.current[idx] = el;
-                }, className: "px-3 py-1.5 text-[10px] text-gray-400 flex items-center gap-2 border-b border-[#2a2a3e] last:border-0 relative" },
-                react_1.default.createElement("div", { className: "flex-1 min-w-0" },
-                    react_1.default.createElement("span", { className: "truncate block bg-[#0d0d14] border border-[#2a2a3e] rounded px-2 py-1 text-gray-300" },
-                        "\"",
-                        choice.text || 'Empty choice',
-                        "\""),
-                    choice.setFlags && choice.setFlags.length > 0 && (react_1.default.createElement("div", { className: "mt-0.5 flex flex-wrap gap-0.5" }, choice.setFlags.map(flagId => {
-                        const flag = flagSchema?.flags.find(f => f.id === flagId);
-                        // If flag not found in schema, show as grey (dialogue/temporary)
-                        // If flag found, use its type color, but dialogue flags should be grey
-                        const flagType = flag?.type || 'dialogue';
-                        const colorClass = flagType === 'dialogue' ? 'bg-gray-500/20 text-gray-400 border-gray-500/30' :
-                            flagType === 'quest' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
-                                flagType === 'achievement' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' :
-                                    flagType === 'item' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
-                                        flagType === 'stat' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' :
-                                            flagType === 'title' ? 'bg-pink-500/20 text-pink-400 border-pink-500/30' :
-                                                flagType === 'global' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' :
-                                                    'bg-gray-500/20 text-gray-400 border-gray-500/30';
-                        return (react_1.default.createElement("span", { key: flagId, className: `text-[7px] px-0.5 py-0 rounded border ${colorClass}`, title: flag?.name || flagId }, flagType === 'dialogue' ? 't' : flagType[0]));
-                    })))),
-                react_1.default.createElement(reactflow_1.Handle, { type: "source", position: reactflow_1.Position.Right, id: `choice-${idx}`, style: {
-                        top: `50%`,
-                        transform: `translateY(-50%)`,
-                        right: '-6px',
-                    }, className: "!bg-[#2a2a3e] !border-2 hover:!border-[#e94560] hover:!bg-[#e94560]/20 !w-3 !h-3 !rounded-full" })));
-        }))));
+                }, className: "relative group" },
+                react_1.default.createElement("div", { className: "bg-df-elevated border border-df-control-border rounded-lg px-3 py-2 flex items-start gap-2 hover:border-df-player-selected/50 transition-colors" },
+                    react_1.default.createElement("div", { className: "flex-1 min-w-0" },
+                        react_1.default.createElement("p", { className: "text-sm text-df-text-primary leading-relaxed" },
+                            "\"",
+                            choice.text || 'Empty choice',
+                            "\""),
+                        choice.setFlags && choice.setFlags.length > 0 && (react_1.default.createElement("div", { className: "mt-1.5 flex flex-wrap gap-1" }, choice.setFlags.map(flagId => {
+                            const flag = flagSchema?.flags.find(f => f.id === flagId);
+                            const flagType = flag?.type || 'dialogue';
+                            const colorClass = flagType === 'dialogue' ? 'bg-df-flag-dialogue-bg text-df-flag-dialogue border-df-flag-dialogue' :
+                                flagType === 'quest' ? 'bg-df-flag-quest-bg text-df-flag-quest border-df-flag-quest' :
+                                    flagType === 'achievement' ? 'bg-df-flag-achievement-bg text-df-flag-achievement border-df-flag-achievement' :
+                                        flagType === 'item' ? 'bg-df-flag-item-bg text-df-flag-item border-df-flag-item' :
+                                            flagType === 'stat' ? 'bg-df-flag-stat-bg text-df-flag-stat border-df-flag-stat' :
+                                                flagType === 'title' ? 'bg-df-flag-title-bg text-df-flag-title border-df-flag-title' :
+                                                    flagType === 'global' ? 'bg-df-flag-global-bg text-df-flag-global border-df-flag-global' :
+                                                        'bg-df-flag-dialogue-bg text-df-flag-dialogue border-df-flag-dialogue';
+                            return (react_1.default.createElement("span", { key: flagId, className: `text-[8px] px-1 py-0.5 rounded-full border ${colorClass}`, title: flag?.name || flagId }, flagType === 'dialogue' ? 't' : flagType[0]));
+                        })))),
+                    react_1.default.createElement(reactflow_1.Handle, { type: "source", position: reactflow_1.Position.Right, id: `choice-${idx}`, style: {
+                            top: `50%`,
+                            transform: `translateY(-50%)`,
+                            right: '-6px',
+                            borderColor: choiceColor,
+                        }, className: "!bg-df-control-bg !border-2 hover:!border-df-player-selected hover:!bg-df-player-selected/20 !w-3 !h-3 !rounded-full" }))));
+        })),
+        react_1.default.createElement(reactflow_1.Handle, { type: "source", position: sourcePosition, id: "next", className: "!bg-df-control-bg !border-df-control-border !w-4 !h-4 !rounded-full hover:!border-df-player-selected hover:!bg-df-player-selected/20" })));
 }

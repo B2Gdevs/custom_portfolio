@@ -11,6 +11,7 @@
  * - index.ts: Public API for loading examples (this file)
  */
 export { examplesRegistry, exampleFlagSchemas, getExampleMetadata, listExampleIds, getExampleFlagSchema, listFlagSchemaIds, type ExampleMetadata } from './examples-registry';
+export { exampleCharacters, getExampleCharacters, getExampleCharacter, listExampleCharacterIds, } from './example-characters';
 /**
  * Legacy exports for backward compatibility
  * These maintain the old API while we migrate examples to Yarn format

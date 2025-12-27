@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { DialogueNode, DialogueTree, Choice, ConditionalBlock } from '../types';
 import { FlagSchema } from '../types/flags';
+import { Character } from '../types/characters';
 import { FlagSelector } from './FlagSelector';
+import { CharacterSelector } from './CharacterSelector';
 import { CONDITION_OPERATOR } from '../types/constants';
 import { AlertCircle, CheckCircle, Info, GitBranch, X, User, Maximize2 } from 'lucide-react';
 import { CHOICE_COLORS } from '../utils/reactflow-converter';
@@ -20,6 +22,7 @@ interface NodeEditorProps {
   onPlayFromHere?: (nodeId: string) => void;
   onFocusNode?: (nodeId: string) => void;
   flagSchema?: FlagSchema;
+  characters?: Record<string, Character>;
 }
 
 export function NodeEditor({
@@ -33,7 +36,8 @@ export function NodeEditor({
   onClose,
   onPlayFromHere,
   onFocusNode,
-  flagSchema
+  flagSchema,
+  characters = {},
 }: NodeEditorProps) {
   // Local state for condition input values (keyed by block id for conditional blocks, choice id for choices)
   const [conditionInputs, setConditionInputs] = useState<Record<string, string>>({});
@@ -214,40 +218,51 @@ export function NodeEditor({
       initializedBlocksRef.current.clear();
     }
     
-    // Initialize inputs for choice conditions
+    // Always sync choice condition inputs with actual choice data (not just initialize once)
     if (node.choices) {
       setConditionInputs(prev => {
         const newInputs: Record<string, string> = { ...prev };
         node.choices!.forEach(choice => {
           const choiceKey = `choice-${choice.id}`;
-          // Only initialize if this choice hasn't been initialized yet
-          if (!initializedChoicesRef.current.has(choiceKey)) {
-            initializedChoicesRef.current.add(choiceKey);
-            if (choice.conditions && choice.conditions.length > 0) {
-              // Convert condition array to Yarn-style string
-              const conditionStr = choice.conditions.map(cond => {
-                const varName = `$${cond.flag}`;
-                if (cond.operator === 'is_set') {
-                  return varName;
-                } else if (cond.operator === 'is_not_set') {
-                  return `not ${varName}`;
-                } else if (cond.value !== undefined) {
-                  const op = cond.operator === 'equals' ? '==' :
-                            cond.operator === 'not_equals' ? '!=' :
-                            cond.operator === 'greater_than' ? '>' :
-                            cond.operator === 'less_than' ? '<' :
-                            cond.operator === 'greater_equal' ? '>=' :
-                            cond.operator === 'less_equal' ? '<=' : '==';
-                  const value = typeof cond.value === 'string' ? `"${cond.value}"` : cond.value;
-                  return `${varName} ${op} ${value}`;
-                }
-                return '';
-              }).filter(c => c).join(' and ') || '';
+          // Always sync with actual choice data to ensure conditions persist
+          if (choice.conditions && choice.conditions.length > 0) {
+            // Convert condition array to Yarn-style string
+            const conditionStr = choice.conditions.map(cond => {
+              const varName = `$${cond.flag}`;
+              if (cond.operator === 'is_set') {
+                return varName;
+              } else if (cond.operator === 'is_not_set') {
+                return `not ${varName}`;
+              } else if (cond.value !== undefined) {
+                const op = cond.operator === 'equals' ? '==' :
+                          cond.operator === 'not_equals' ? '!=' :
+                          cond.operator === 'greater_than' ? '>' :
+                          cond.operator === 'less_than' ? '<' :
+                          cond.operator === 'greater_equal' ? '>=' :
+                          cond.operator === 'less_equal' ? '<=' : '==';
+                const value = typeof cond.value === 'string' ? `"${cond.value}"` : cond.value;
+                return `${varName} ${op} ${value}`;
+              }
+              return '';
+            }).filter(c => c).join(' and ') || '';
+            // Only update if different to avoid overwriting user typing
+            if (newInputs[choiceKey] !== conditionStr) {
               newInputs[choiceKey] = conditionStr;
-            } else if (choice.conditions !== undefined) {
-              // Empty array - user clicked "Add Condition"
+            }
+          } else if (choice.conditions !== undefined) {
+            // Empty array - user clicked "Add Condition"
+            if (newInputs[choiceKey] === undefined || newInputs[choiceKey] !== '') {
               newInputs[choiceKey] = '';
             }
+          } else {
+            // No conditions - clear the input if it exists
+            if (newInputs[choiceKey] !== undefined) {
+              delete newInputs[choiceKey];
+            }
+          }
+          // Mark as initialized
+          if (!initializedChoicesRef.current.has(choiceKey)) {
+            initializedChoicesRef.current.add(choiceKey);
           }
         });
         // Remove inputs for choices that no longer exist
@@ -275,12 +290,20 @@ export function NodeEditor({
     }
   }, [node.id, node.conditionalBlocks?.length, node.choices?.length]); // Only depend on length, not the arrays themselves
   
-  // Determine border color based on node type
+  // Determine border color based on node type - use duller border colors
   const getBorderColor = () => {
-    if (node.type === 'npc') return 'border-[#e94560]';
-    if (node.type === 'player') return 'border-[#8b5cf6]';
-    if (node.type === 'conditional') return 'border-[#3b82f6]';
-    return 'border-[#1a1a2e]';
+    if (node.type === 'npc') return 'border-df-npc-border';
+    if (node.type === 'player') return 'border-df-player-border';
+    if (node.type === 'conditional') return 'border-df-conditional-border';
+    return 'border-df-control-border';
+  };
+
+  // Get node type badge colors
+  const getNodeTypeBadge = () => {
+    if (node.type === 'npc') return 'bg-df-npc-selected/20 text-df-npc-selected';
+    if (node.type === 'player') return 'bg-df-player-selected/20 text-df-player-selected';
+    if (node.type === 'conditional') return 'bg-df-conditional-border/20 text-df-conditional-border';
+    return 'bg-df-control-bg text-df-text-secondary';
   };
 
   return (
@@ -301,14 +324,10 @@ export function NodeEditor({
           }
         }
       `}</style>
-      <aside className={`w-80 border-l ${getBorderColor()} bg-[#0d0d14] overflow-y-auto`}>
+      <aside className={`w-80 border-l ${getBorderColor()} bg-df-sidebar-bg overflow-y-auto`}>
       <div className="p-4 space-y-4">
         <div className="flex items-center justify-between">
-          <span className={`text-xs px-2 py-0.5 rounded ${
-            node.type === 'npc' ? 'bg-[#e94560]/20 text-[#e94560]' : 
-            node.type === 'player' ? 'bg-purple-500/20 text-purple-400' :
-            'bg-blue-500/20 text-blue-400'
-          }`}>
+          <span className={`text-xs px-2 py-0.5 rounded ${getNodeTypeBadge()}`}>
             {node.type === 'npc' ? 'NPC' : node.type === 'player' ? 'PLAYER' : 'CONDITIONAL'}
           </span>
           <div className="flex gap-1">
@@ -339,17 +358,36 @@ export function NodeEditor({
         {node.type === 'npc' && (
           <>
             <div>
-              <label className="text-[10px] text-gray-500 uppercase">Speaker</label>
+              <label className="text-[10px] text-df-text-secondary uppercase">Character</label>
+              <CharacterSelector
+                characters={characters}
+                selectedCharacterId={node.characterId}
+                onSelect={(characterId) => {
+                  const character = characterId ? characters[characterId] : undefined;
+                  onUpdate({ 
+                    characterId,
+                    speaker: character ? character.name : node.speaker, // Keep speaker as fallback
+                  });
+                }}
+                placeholder="Select character..."
+                className="mb-2"
+              />
+              <div className="text-[9px] text-df-text-tertiary mt-1">
+                Or enter custom speaker name below
+              </div>
+            </div>
+            <div>
+              <label className="text-[10px] text-df-text-secondary uppercase">Speaker (Custom)</label>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#2a2a3e] border border-[#2a2a3e] flex items-center justify-center flex-shrink-0">
-                  <User size={16} className="text-gray-500" />
+                <div className="w-8 h-8 rounded-full bg-df-control-bg border border-df-control-border flex items-center justify-center flex-shrink-0">
+                  <User size={16} className="text-df-text-secondary" />
                 </div>
                 <input
                   type="text"
                   value={node.speaker || ''}
                   onChange={(e) => onUpdate({ speaker: e.target.value })}
-                  className="flex-1 bg-[#12121a] border border-[#2a2a3e] rounded px-2 py-1 text-sm text-gray-200 focus:border-[#e94560] outline-none"
-                  placeholder="Character name"
+                  className="flex-1 bg-df-elevated border border-df-control-border rounded px-2 py-1 text-sm text-df-text-primary focus:border-df-npc-selected outline-none"
+                  placeholder="Custom speaker name (optional)"
                 />
               </div>
             </div>
@@ -358,7 +396,7 @@ export function NodeEditor({
               <textarea
                 value={node.content}
                 onChange={(e) => onUpdate({ content: e.target.value })}
-                className="w-full bg-[#12121a] border border-[#2a2a3e] rounded px-2 py-1 text-sm text-gray-200 focus:border-[#e94560] outline-none min-h-[100px] resize-y"
+                className="w-full bg-df-elevated border border-df-control-border rounded px-2 py-1 text-sm text-df-text-primary focus:border-df-npc-selected outline-none min-h-[100px] resize-y"
                 placeholder="What the character says..."
               />
             </div>
@@ -448,11 +486,26 @@ export function NodeEditor({
                         <span className={`text-[9px] px-1.5 py-0.5 rounded ${styles.tagBg} ${styles.tagText} font-semibold`}>
                           {block.type === 'if' ? 'IF' : block.type === 'elseif' ? 'ELSE IF' : 'ELSE'}
                         </span>
-                        {/* Speaker input */}
-                        <div className="flex items-center gap-2 flex-1">
-                          <div className="w-6 h-6 rounded-full bg-[#2a2a2a] flex items-center justify-center flex-shrink-0">
-                            <User size={12} className="text-gray-400" />
-                          </div>
+                        {/* Compact Character Selector */}
+                        <div className="flex items-center gap-1.5 flex-1">
+                          <CharacterSelector
+                            characters={characters}
+                            selectedCharacterId={block.characterId}
+                            onSelect={(characterId) => {
+                              const newBlocks = [...node.conditionalBlocks!];
+                              const character = characterId ? characters[characterId] : undefined;
+                              newBlocks[idx] = { 
+                                ...block, 
+                                characterId,
+                                speaker: character ? character.name : block.speaker, // Keep speaker as fallback
+                              };
+                              onUpdate({ conditionalBlocks: newBlocks });
+                            }}
+                            placeholder="Speaker..."
+                            compact={true}
+                            className="flex-1"
+                          />
+                          {/* Custom speaker input - fallback */}
                           <input
                             type="text"
                             value={block.speaker || ''}
@@ -461,8 +514,8 @@ export function NodeEditor({
                               newBlocks[idx] = { ...block, speaker: e.target.value || undefined };
                               onUpdate({ conditionalBlocks: newBlocks });
                             }}
-                            className={`flex-1 bg-[#1a1a1a] border border-[#2a2a2a] rounded px-2 py-1 text-xs ${styles.text} focus:border-blue-500 outline-none`}
-                            placeholder="Speaker (optional)"
+                            className={`flex-1 bg-df-elevated border border-df-control-border rounded px-1.5 py-0.5 text-[10px] text-df-text-primary focus:border-df-conditional-selected outline-none`}
+                            placeholder="Custom name"
                           />
                         </div>
                       </div>
@@ -962,17 +1015,36 @@ export function NodeEditor({
         {node.type === 'player' && (
           <div>
             <div>
-              <label className="text-[10px] text-gray-500 uppercase">Speaker</label>
+              <label className="text-[10px] text-df-text-secondary uppercase">Character</label>
+              <CharacterSelector
+                characters={characters}
+                selectedCharacterId={node.characterId}
+                onSelect={(characterId) => {
+                  const character = characterId ? characters[characterId] : undefined;
+                  onUpdate({ 
+                    characterId,
+                    speaker: character ? character.name : node.speaker, // Keep speaker as fallback
+                  });
+                }}
+                placeholder="Select character..."
+                className="mb-2"
+              />
+              <div className="text-[9px] text-df-text-tertiary mt-1">
+                Or enter custom speaker name below
+              </div>
+            </div>
+            <div>
+              <label className="text-[10px] text-df-text-secondary uppercase">Speaker (Custom)</label>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#2a2a3e] border border-[#2a2a3e] flex items-center justify-center flex-shrink-0">
-                  <User size={16} className="text-gray-500" />
+                <div className="w-8 h-8 rounded-full bg-df-control-bg border border-df-control-border flex items-center justify-center flex-shrink-0">
+                  <User size={16} className="text-df-text-secondary" />
                 </div>
                 <input
                   type="text"
                   value={node.speaker || ''}
                   onChange={(e) => onUpdate({ speaker: e.target.value })}
-                  className="flex-1 bg-[#12121a] border border-[#2a2a3e] rounded px-2 py-1 text-sm text-gray-200 focus:border-[#8b5cf6] outline-none"
-                  placeholder="Character name (optional)"
+                  className="flex-1 bg-df-elevated border border-df-control-border rounded px-2 py-1 text-sm text-df-text-primary focus:border-df-player-selected outline-none"
+                  placeholder="Custom speaker name (optional)"
                 />
               </div>
             </div>
@@ -1067,7 +1139,9 @@ export function NodeEditor({
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            onFocusNode(choice.nextNodeId);
+                            if (choice.nextNodeId && onFocusNode) {
+                              onFocusNode(choice.nextNodeId);
+                            }
                           }}
                           className="transition-colors cursor-pointer flex-shrink-0"
                           title={`Focus on node: ${choice.nextNodeId}`}
@@ -1081,8 +1155,8 @@ export function NodeEditor({
                       )}
                       <div className="relative flex-1">
                         <select
-                          value={choice.nextNodeId}
-                          onChange={(e) => onUpdateChoice(idx, { nextNodeId: e.target.value })}
+                          value={choice.nextNodeId || ''}
+                          onChange={(e) => onUpdateChoice(idx, { nextNodeId: e.target.value || undefined })}
                           className="w-full bg-[#0d0d14] border rounded px-2 py-1 pr-8 text-xs text-gray-300 outline-none"
                           style={{
                             borderColor: choice.nextNodeId ? darkChoiceColor : '#2a2a3e',
@@ -1159,42 +1233,67 @@ export function NodeEditor({
                           </button>
                         </div>
                         <div className="relative">
-                          <input
-                            type="text"
+                          <ConditionAutocomplete
                             value={conditionValue}
-                            onFocus={() => {
-                              setEditingCondition({
-                                id: choiceKey,
-                                value: conditionValue,
-                                type: 'choice',
-                                choiceIdx: idx
+                            onChange={(newValue) => {
+                              setConditionInputs(prev => ({ ...prev, [choiceKey]: newValue }));
+                              
+                              // Parse and update condition immediately
+                              const parseCondition = (conditionStr: string): any[] => {
+                                const conditions: any[] = [];
+                                if (!conditionStr.trim()) return conditions;
+                                const parts = conditionStr.split(/\s+and\s+/i);
+                                parts.forEach(part => {
+                                  part = part.trim();
+                                  if (part.startsWith('not ')) {
+                                    const flagName = part.substring(4).replace('$', '');
+                                    conditions.push({ flag: flagName, operator: 'is_not_set' });
+                                  } else if (part.match(/^\$(\w+)$/)) {
+                                    const match = part.match(/^\$(\w+)$/);
+                                    if (match) {
+                                      conditions.push({ flag: match[1], operator: 'is_set' });
+                                    }
+                                  } else {
+                                    const match = part.match(/^\$(\w+)\s*(==|!=|>=|<=|>|<)\s*(.+)$/);
+                                    if (match) {
+                                      const [, flagName, op, valueStr] = match;
+                                      let value: any = valueStr.trim();
+                                      // Remove quotes if present
+                                      if (value.startsWith('"') && value.endsWith('"')) {
+                                        value = value.slice(1, -1);
+                                      } else if (!isNaN(Number(value))) {
+                                        value = Number(value);
+                                      }
+                                      
+                                      const operator = op === '==' ? 'equals' :
+                                                       op === '!=' ? 'not_equals' :
+                                                       op === '>=' ? 'greater_equal' :
+                                                       op === '<=' ? 'less_equal' :
+                                                       op === '>' ? 'greater_than' :
+                                                       op === '<' ? 'less_than' : 'equals';
+                                      
+                                      conditions.push({ flag: flagName, operator, value });
+                                    }
+                                  }
+                                });
+                                return conditions;
+                              };
+                              
+                              const newConditions = parseCondition(newValue);
+                              onUpdateChoice(idx, { 
+                                conditions: newConditions.length > 0 ? newConditions : [] 
                               });
                             }}
-                            readOnly
-                            className="w-full bg-[#0d0d14] border rounded px-2 py-1 pr-8 text-xs text-gray-300 font-mono outline-none cursor-pointer hover:border-blue-500/50 transition-all"
+                            placeholder="e.g., $reputation &gt; 10 or $flag == &quot;value&quot;"
+                            className="w-full bg-[#0d0d14] border rounded px-2 py-1 pr-8 text-xs text-gray-300 font-mono outline-none hover:border-blue-500/50 transition-all"
                             style={{
                               borderColor: conditionValue.trim().length > 0 && debouncedValue.trim().length > 0
                                 ? (validationResult.isValid ? 'rgba(59, 130, 246, 0.5)' : 
                                    validationResult.errors.length > 0 ? '#ef4444' : '#eab308')
                                 : '#2a2a3e'
-                            }}
-                            placeholder='e.g., $reputation &gt; 10 or $flag == "value"'
+                            } as React.CSSProperties}
+                            flagSchema={flagSchema}
                           />
-                          {conditionValue.trim().length > 0 && debouncedValue.trim().length > 0 && validationResult.errors.length > 0 && (
-                            <div className="absolute right-2 top-1/2 -translate-y-1/2 text-red-500" title={validationResult.errors.join('\n')}>
-                              <AlertCircle size={14} />
-                            </div>
-                          )}
-                          {conditionValue.trim().length > 0 && debouncedValue.trim().length > 0 && validationResult.warnings.length > 0 && validationResult.errors.length === 0 && (
-                            <div className="absolute right-2 top-1/2 -translate-y-1/2 text-yellow-500" title={validationResult.warnings.join('\n')}>
-                              <Info size={14} />
-                            </div>
-                          )}
-                          {conditionValue.trim().length > 0 && debouncedValue.trim().length > 0 && validationResult.isValid && validationResult.errors.length === 0 && validationResult.warnings.length === 0 && (
-                            <div className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500" title="Valid condition">
-                              <CheckCircle size={14} />
-                            </div>
-                          )}
                         </div>
                         {conditionValue.trim().length > 0 && debouncedValue.trim().length > 0 && validationResult.errors.length > 0 && (
                           <p className="text-[10px] text-red-500 mt-1">{validationResult.errors[0]}</p>

@@ -12,7 +12,7 @@
  * - index.ts: Public API for loading examples (this file)
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.demoFlagSchemas = exports.exampleDialogues = exports.listFlagSchemaIds = exports.getExampleFlagSchema = exports.listExampleIds = exports.getExampleMetadata = exports.exampleFlagSchemas = exports.examplesRegistry = void 0;
+exports.demoFlagSchemas = exports.exampleDialogues = exports.listExampleCharacterIds = exports.getExampleCharacter = exports.getExampleCharacters = exports.exampleCharacters = exports.listFlagSchemaIds = exports.getExampleFlagSchema = exports.listExampleIds = exports.getExampleMetadata = exports.exampleFlagSchemas = exports.examplesRegistry = void 0;
 exports.listExamples = listExamples;
 exports.listDemoFlagSchemas = listDemoFlagSchemas;
 exports.getExampleDialogue = getExampleDialogue;
@@ -27,6 +27,12 @@ Object.defineProperty(exports, "getExampleFlagSchema", { enumerable: true, get: 
 Object.defineProperty(exports, "listFlagSchemaIds", { enumerable: true, get: function () { return examples_registry_1.listFlagSchemaIds; } });
 const yarn_examples_1 = require("./yarn-examples");
 const examples_registry_2 = require("./examples-registry");
+// Export character examples
+var example_characters_1 = require("./example-characters");
+Object.defineProperty(exports, "exampleCharacters", { enumerable: true, get: function () { return example_characters_1.exampleCharacters; } });
+Object.defineProperty(exports, "getExampleCharacters", { enumerable: true, get: function () { return example_characters_1.getExampleCharacters; } });
+Object.defineProperty(exports, "getExampleCharacter", { enumerable: true, get: function () { return example_characters_1.getExampleCharacter; } });
+Object.defineProperty(exports, "listExampleCharacterIds", { enumerable: true, get: function () { return example_characters_1.listExampleCharacterIds; } });
 const legacy_examples_1 = require("./legacy-examples");
 // Export legacy examples - these work alongside the new Yarn examples
 exports.exampleDialogues = legacy_examples_1.exampleDialogues;

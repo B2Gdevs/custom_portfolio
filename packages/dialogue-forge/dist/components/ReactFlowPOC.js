@@ -271,17 +271,17 @@ function ReactFlowPOC({ dialogue }) {
     const onNodesChange = (0, react_1.useCallback)((changes) => {
         // Update dialogue tree positions
         // This would sync back to our DialogueTree structure
-        console.log('Nodes changed:', changes);
+        // Handle node changes
     }, []);
     // Handle edge connections
     const onConnect = (0, react_1.useCallback)((connection) => {
         // Handle new edge connections
         // This would update our DialogueTree structure
-        console.log('Connected:', connection);
+        // Handle connection
     }, []);
     // Handle edge changes (delete, etc.)
     const onEdgesChange = (0, react_1.useCallback)((changes) => {
-        console.log('Edges changed:', changes);
+        // Handle edge changes
     }, []);
     return (react_1.default.createElement("div", { className: "w-full h-full" },
         react_1.default.createElement("div", { className: "p-8 text-gray-400" },

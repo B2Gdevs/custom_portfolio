@@ -72,12 +72,12 @@ export function ConditionAutocomplete({ value, onChange, onBlur, placeholder, cl
         const word = debouncedSearchTerm.toLowerCase();
         const isTypingVariable = word.startsWith('$') || word.length > 0;
         // If typing a variable (starts with $ or has text), show flags
-        if (flagSchema && isTypingVariable) {
+        if (flagSchema && (isTypingVariable || word === '')) {
             const searchTerm = word.startsWith('$') ? word.substring(1) : word;
             flagSchema.flags.forEach(flag => {
                 const flagId = flag.id.toLowerCase();
                 const flagName = flag.name.toLowerCase();
-                // Match if search term is empty (showing $) or matches flag id/name
+                // Match if search term is empty (showing $ or empty field) or matches flag id/name
                 if (!searchTerm || flagId.includes(searchTerm) || flagName.includes(searchTerm)) {
                     result.push({
                         type: 'flag',
@@ -89,9 +89,8 @@ export function ConditionAutocomplete({ value, onChange, onBlur, placeholder, cl
                 }
             });
         }
-        // Only show operators and keywords when user is actively typing (has typed $ or is in the middle of typing)
-        // Don't show them on empty field - only when user is expanding/typing
-        if (word === '$' && isTypingVariable) {
+        // Show operators and keywords when user has typed $ or is actively typing
+        if (word === '$' || (word.startsWith('$') && word.length > 1)) {
             // Operators - only show when user has typed $ and is looking for what comes next
             result.push({ type: 'operator', label: '==', insert: ' == ', description: 'Equals' }, { type: 'operator', label: '!=', insert: ' != ', description: 'Not equals' }, { type: 'operator', label: '>=', insert: ' >= ', description: 'Greater than or equal' }, { type: 'operator', label: '<=', insert: ' <= ', description: 'Less than or equal' }, { type: 'operator', label: '>', insert: ' > ', description: 'Greater than' }, { type: 'operator', label: '<', insert: ' < ', description: 'Less than' });
             // Keywords
@@ -112,16 +111,18 @@ export function ConditionAutocomplete({ value, onChange, onBlur, placeholder, cl
     // Track if user has actively typed in this session (not just focused on existing content)
     const [hasActivelyTyped, setHasActivelyTyped] = useState(false);
     // Update suggestions visibility when value or cursor changes
-    // Only show if user is actively typing (not just focusing on existing content)
+    // Show suggestions when typing $ or when actively typing
     useEffect(() => {
         const textBeforeCursor = value.substring(0, cursorPosition);
         const match = textBeforeCursor.match(/(\$?\w*)$/);
         const word = match ? match[1] : '';
-        // Show suggestions only when:
-        // 1. User has actively typed something (not just focused on existing content) AND
-        // 2. Is at a position where suggestions make sense (typing a variable starting with $)
-        const isTypingVariable = word.startsWith('$');
-        const shouldShow = hasActivelyTyped && isTypingVariable && suggestions.length > 0;
+        // Show suggestions when:
+        // 1. User is typing a variable (starts with $) OR
+        // 2. User has actively typed something and we have suggestions OR
+        // 3. Field is empty and user just focused (allow showing on empty field when typing $)
+        const isTypingVariable = word.startsWith('$') || word === '$';
+        const isEmpty = value.trim() === '';
+        const shouldShow = (hasActivelyTyped || isTypingVariable || isEmpty) && suggestions.length > 0;
         setShowSuggestions(shouldShow);
     }, [value, cursorPosition, suggestions.length, hasActivelyTyped]);
     // Handle selection change (for cursor tracking)
@@ -203,9 +204,8 @@ export function ConditionAutocomplete({ value, onChange, onBlur, placeholder, cl
             if (inputRef.current) {
                 setCursorPosition(inputRef.current.selectionStart || 0);
             }
-            // Reset active typing state when focusing - only show suggestions after user starts typing
-            // This prevents showing suggestions when just focusing on existing content
-            setHasActivelyTyped(false);
+            // Don't reset hasActivelyTyped on focus - allow showing suggestions if field is empty or has $
+            // This allows suggestions to show when user focuses and types $
         },
         onBlur: () => {
             // Delay to allow click on suggestion

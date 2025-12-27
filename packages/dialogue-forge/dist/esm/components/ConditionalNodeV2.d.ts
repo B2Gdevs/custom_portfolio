@@ -2,10 +2,12 @@ import React from 'react';
 import { NodeProps } from 'reactflow';
 import { DialogueNode } from '../types';
 import { FlagSchema } from '../types/flags';
+import { Character } from '../types/characters';
 import { LayoutDirection } from '../utils/layout';
 interface ConditionalNodeData {
     node: DialogueNode;
     flagSchema?: FlagSchema;
+    characters?: Record<string, Character>;
     isDimmed?: boolean;
     isInPath?: boolean;
     layoutDirection?: LayoutDirection;

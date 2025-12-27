@@ -399,9 +399,9 @@ const [gameState, setGameState] = useState<GameState>({
   }}
   flagSchema={flagSchema}
   // Event hooks
-  onNodeAdd={(node) => console.log('Node added:', node.id)}
-  onNodeDelete={(nodeId) => console.log('Node deleted:', nodeId)}
-  onConnect={(source, target) => console.log('Connected:', source, '->', target)}
+  onNodeAdd={(node) => {/* Example: handle node add */}}
+  onNodeDelete={(nodeId) => {/* Example: handle node delete */}}
+  onConnect={(source, target) => {/* Example: handle connect */}}
 />`, language: "typescript" }),
                 react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "6. Define Game State"),
                 react_1.default.createElement("p", { className: "text-gray-400 text-sm mb-2" }, "Game state can be any JSON object. Flags should represent the dialogue-relevant portion of your game state."),
@@ -465,21 +465,21 @@ const gameState: GameState = {
   }}
   // Event hooks
   onNodeEnter={(nodeId, node) => {
-    console.log('Entered node:', nodeId, node);
+    // Example: handle node enter
     // Trigger animations, sound effects, etc.
   }}
   onNodeExit={(nodeId, node) => {
-    console.log('Exited node:', nodeId, node);
+    // Example: handle node exit
   }}
   onChoiceSelect={(nodeId, choice) => {
-    console.log('Selected choice:', choice.text);
+    // Example: handle choice select
     // Track player decisions
   }}
   onDialogueStart={() => {
-    console.log('Dialogue started');
+    // Example: handle dialogue start
   }}
   onDialogueEnd={() => {
-    console.log('Dialogue ended');
+    // Example: handle dialogue end
   }}
 />`, language: "typescript" }),
                 react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Complete Example"),
@@ -538,23 +538,23 @@ const dialogue = importFromYarn(yarnFile, 'Merchant');
   flagSchema={flagSchema}
   // Event hooks
   onNodeAdd={(node) => {
-    console.log('Node added:', node.id);
+    // Example: handle node add
     // Track node creation
   }}
   onNodeDelete={(nodeId) => {
-    console.log('Node deleted:', nodeId);
+    // Example: handle node delete
   }}
   onNodeUpdate={(nodeId, updates) => {
-    console.log('Node updated:', nodeId, updates);
+    // Example: handle node update
   }}
   onConnect={(sourceId, targetId, sourceHandle) => {
-    console.log('Connected:', sourceId, '->', targetId);
+    // Example: handle connect
   }}
   onDisconnect={(edgeId, sourceId, targetId) => {
-    console.log('Disconnected:', sourceId, '->', targetId);
+    // Example: handle disconnect
   }}
   onNodeSelect={(nodeId) => {
-    console.log('Node selected:', nodeId);
+    // Example: handle node select
   }}
 />
 
@@ -570,11 +570,11 @@ const dialogue = importFromYarn(yarnFile, 'Merchant');
     }));
   }}
   onNodeEnter={(nodeId, node) => {
-    console.log('Entered node:', nodeId);
+    // Example: handle node enter
     // Play animations, sound effects
   }}
   onChoiceSelect={(nodeId, choice) => {
-    console.log('Selected:', choice.text);
+    // Example: handle choice select
     // Track player decisions
   }}
 />`, language: "typescript" }),
@@ -1043,6 +1043,201 @@ await saveFile('dialogue.yarn', newYarn);`))))
                             react_1.default.createElement("div", null,
                                 react_1.default.createElement("strong", { className: "text-white text-xs" }, "Square Selection"),
                                 react_1.default.createElement("p", { className: "text-gray-400 text-xs mt-1" }, "Selection box doesn't always capture all nodes within the selection area (deprioritized)")))))))
+        },
+        characters: {
+            title: 'Characters',
+            content: (react_1.default.createElement("div", { className: "space-y-4 text-sm" },
+                react_1.default.createElement("p", { className: "text-gray-300" }, "Dialogue Forge supports character assignment for NPC and Player nodes. Characters are defined in your game state and can be selected from a searchable dropdown."),
+                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Character System"),
+                react_1.default.createElement("p", { className: "text-gray-300 mb-3" }, "Each node (NPC or Player) can be assigned a character from your game state. When a character is assigned:"),
+                react_1.default.createElement("ul", { className: "list-disc list-inside space-y-1 text-sm ml-2 text-gray-300" },
+                    react_1.default.createElement("li", null, "The character's avatar and name are displayed on the node in the graph"),
+                    react_1.default.createElement("li", null, "The character name is used as the speaker name"),
+                    react_1.default.createElement("li", null, "You can still override with a custom speaker name if needed")),
+                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Game State Structure"),
+                react_1.default.createElement("p", { className: "text-gray-300 mb-3" },
+                    "Characters should be defined in your game state under the ",
+                    react_1.default.createElement("code", { className: "bg-[#0d0d14] px-1 rounded" }, "characters"),
+                    " property:"),
+                react_1.default.createElement(CodeBlock_1.CodeBlock, { code: `interface GameState {
+  flags?: FlagState;
+  characters?: {
+    [characterId: string]: Character;
+  };
+}
+
+interface Character {
+  id: string;
+  name: string;
+  avatar?: string; // URL or emoji (e.g., "👤", "🧙", "/avatars/wizard.png")
+  description?: string;
+}`, language: "typescript" }),
+                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Using Characters"),
+                react_1.default.createElement("ol", { className: "list-decimal list-inside space-y-2 text-sm ml-2 text-gray-300" },
+                    react_1.default.createElement("li", null,
+                        react_1.default.createElement("strong", null, "Define characters"),
+                        " in your game state with ",
+                        react_1.default.createElement("code", { className: "bg-[#0d0d14] px-1 rounded" }, "id"),
+                        ", ",
+                        react_1.default.createElement("code", { className: "bg-[#0d0d14] px-1 rounded" }, "name"),
+                        ", and optionally ",
+                        react_1.default.createElement("code", { className: "bg-[#0d0d14] px-1 rounded" }, "avatar")),
+                    react_1.default.createElement("li", null,
+                        react_1.default.createElement("strong", null, "Pass characters"),
+                        " to ",
+                        react_1.default.createElement("code", { className: "bg-[#0d0d14] px-1 rounded" }, "DialogueEditorV2"),
+                        " via the ",
+                        react_1.default.createElement("code", { className: "bg-[#0d0d14] px-1 rounded" }, "characters"),
+                        " prop"),
+                    react_1.default.createElement("li", null,
+                        react_1.default.createElement("strong", null, "Select a character"),
+                        " in the Node Editor using the character dropdown (searchable combobox)"),
+                    react_1.default.createElement("li", null,
+                        react_1.default.createElement("strong", null, "View on graph"),
+                        " - The character's avatar and name appear on the node")),
+                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Example"),
+                react_1.default.createElement(CodeBlock_1.CodeBlock, { code: `// Game state with characters
+const gameState = {
+  flags: { reputation: 50 },
+  characters: {
+    stranger: {
+      id: 'stranger',
+      name: 'Mysterious Stranger',
+      avatar: '👤',
+      description: 'A cloaked figure'
+    },
+    player: {
+      id: 'player',
+      name: 'Player',
+      avatar: '🎮',
+      description: 'The player character'
+    }
+  }
+};
+
+// Pass to DialogueEditorV2
+<DialogueEditorV2
+  dialogue={dialogueTree}
+  characters={gameState.characters}
+  flagSchema={flagSchema}
+  onChange={setDialogueTree}
+/>`, language: "typescript" }),
+                react_1.default.createElement("div", { className: "bg-[#1a2a3e] border-l-4 border-blue-500 p-4 rounded mt-4" },
+                    react_1.default.createElement("p", { className: "text-gray-300 text-xs" },
+                        react_1.default.createElement("strong", null, "Note:"),
+                        " If a character is not assigned, you can still use a custom speaker name. The character system is optional but recommended for consistency across your dialogue system."))))
+        },
+        theming: {
+            title: 'Theming',
+            content: (react_1.default.createElement("div", { className: "space-y-4 text-sm" },
+                react_1.default.createElement("p", { className: "text-gray-300" },
+                    "Dialogue Forge uses Tailwind CSS theme variables that you can override in your application. All theme variables are prefixed with ",
+                    react_1.default.createElement("code", { className: "bg-[#0d0d14] px-1 rounded" }, "df-"),
+                    " to avoid conflicts."),
+                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "How to Override Theme"),
+                react_1.default.createElement("p", { className: "text-gray-300 mb-3" }, "Copy the theme variables below into your CSS file and override the values you want to change:"),
+                react_1.default.createElement(CodeBlock_1.CodeBlock, { code: `@theme {
+  /* Base Colors */
+  --color-df-base: oklch(0.15 0.02 250);
+  --color-df-surface: oklch(0.18 0.02 260);
+  --color-df-elevated: oklch(0.22 0.02 270);
+  
+  /* NPC Node Colors */
+  --color-df-npc-bg: oklch(0.25 0.04 45);
+  --color-df-npc-border: oklch(0.40 0.08 35);
+  --color-df-npc-header: oklch(0.30 0.10 25);
+  --color-df-npc-selected: oklch(0.45 0.12 15);
+  
+  /* Player Node Colors */
+  --color-df-player-bg: oklch(0.22 0.08 300);
+  --color-df-player-border: oklch(0.45 0.15 310);
+  --color-df-player-header: oklch(0.28 0.12 290);
+  --color-df-player-selected: oklch(0.55 0.20 280);
+  
+  /* Conditional Node */
+  --color-df-conditional-bg: oklch(0.24 0.06 150);
+  --color-df-conditional-border: oklch(0.42 0.12 140);
+  --color-df-conditional-header: oklch(0.30 0.10 145);
+  
+  /* Start/End */
+  --color-df-start: oklch(0.55 0.15 140);
+  --color-df-start-bg: oklch(0.25 0.08 140);
+  --color-df-end: oklch(0.50 0.15 45);
+  --color-df-end-bg: oklch(0.25 0.08 45);
+  
+  /* Edges */
+  --color-df-edge-default: oklch(0.40 0.03 250);
+  --color-df-edge-default-hover: oklch(0.50 0.05 250);
+  --color-df-edge-choice-1: oklch(0.50 0.18 15);
+  --color-df-edge-choice-2: oklch(0.55 0.20 280);
+  --color-df-edge-choice-3: oklch(0.52 0.18 200);
+  --color-df-edge-choice-4: oklch(0.58 0.16 120);
+  --color-df-edge-choice-5: oklch(0.50 0.15 45);
+  --color-df-edge-loop: oklch(0.55 0.15 60);
+  --color-df-edge-dimmed: oklch(0.25 0.02 250);
+  
+  /* Status Colors */
+  --color-df-error: oklch(0.55 0.22 25);
+  --color-df-warning: oklch(0.65 0.18 70);
+  --color-df-success: oklch(0.60 0.18 150);
+  --color-df-info: oklch(0.55 0.15 220);
+  
+  /* Text Colors */
+  --color-df-text-primary: oklch(0.85 0.02 250);
+  --color-df-text-secondary: oklch(0.65 0.02 250);
+  --color-df-text-tertiary: oklch(0.45 0.02 250);
+  
+  /* UI Control Colors */
+  --color-df-control-bg: oklch(0.18 0.02 260);
+  --color-df-control-border: oklch(0.30 0.03 250);
+  --color-df-control-hover: oklch(0.25 0.03 250);
+  
+  /* Flag Colors */
+  --color-df-flag-dialogue: oklch(0.45 0.03 250);
+  --color-df-flag-dialogue-bg: oklch(0.20 0.02 250);
+  --color-df-flag-quest: oklch(0.50 0.15 220);
+  --color-df-flag-quest-bg: oklch(0.22 0.08 220);
+  --color-df-flag-achievement: oklch(0.60 0.18 70);
+  --color-df-flag-achievement-bg: oklch(0.25 0.10 70);
+  --color-df-flag-item: oklch(0.55 0.15 150);
+  --color-df-flag-item-bg: oklch(0.25 0.08 150);
+  --color-df-flag-stat: oklch(0.55 0.18 280);
+  --color-df-flag-stat-bg: oklch(0.25 0.10 280);
+  --color-df-flag-title: oklch(0.55 0.18 330);
+  --color-df-flag-title-bg: oklch(0.25 0.10 330);
+  --color-df-flag-global: oklch(0.50 0.15 45);
+  --color-df-flag-global-bg: oklch(0.25 0.08 45);
+  
+  /* Canvas/Background */
+  --color-df-canvas-bg: oklch(0.12 0.01 250);
+  --color-df-canvas-grid: oklch(0.20 0.02 250);
+  
+  /* Sidebar/Editor */
+  --color-df-sidebar-bg: oklch(0.18 0.02 260);
+  --color-df-sidebar-border: oklch(0.35 0.05 250);
+  --color-df-editor-bg: oklch(0.15 0.02 240);
+  --color-df-editor-border: oklch(0.30 0.03 250);
+}`, language: "css" }),
+                react_1.default.createElement("h3", { className: "text-lg font-semibold mt-6 mb-2 text-white" }, "Example: Custom Blue Theme"),
+                react_1.default.createElement(CodeBlock_1.CodeBlock, { code: `@theme {
+  /* Override NPC colors to blue */
+  --color-df-npc-bg: oklch(0.25 0.08 220);
+  --color-df-npc-border: oklch(0.50 0.15 220);
+  --color-df-npc-selected: oklch(0.60 0.20 220);
+  
+  /* Override player colors to purple */
+  --color-df-player-bg: oklch(0.25 0.10 300);
+  --color-df-player-border: oklch(0.55 0.20 300);
+  --color-df-player-selected: oklch(0.65 0.25 300);
+}`, language: "css" }),
+                react_1.default.createElement("div", { className: "bg-[#1a2a3e] border-l-4 border-blue-500 p-4 rounded mt-4" },
+                    react_1.default.createElement("p", { className: "text-gray-300 text-xs" },
+                        react_1.default.createElement("strong", null, "Note:"),
+                        " All Dialogue Forge components use these theme classes (e.g., ",
+                        react_1.default.createElement("code", { className: "bg-[#0d0d14] px-1 rounded" }, "bg-df-npc-bg"),
+                        ", ",
+                        react_1.default.createElement("code", { className: "bg-[#0d0d14] px-1 rounded" }, "text-df-text-primary"),
+                        "). By overriding the CSS variables, you change the colors throughout the entire editor without modifying any component code."))))
         }
     };
     return (react_1.default.createElement("div", { className: "fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4", onClick: onClose },

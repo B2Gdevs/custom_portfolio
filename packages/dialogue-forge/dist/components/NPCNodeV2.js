@@ -21,13 +21,13 @@ const lucide_react_1 = require("lucide-react");
 // Styles
 // ============================================================================
 const FLAG_COLORS = {
-    dialogue: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-    quest: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    achievement: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-    item: 'bg-green-500/20 text-green-400 border-green-500/30',
-    stat: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-    title: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
-    global: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+    dialogue: 'bg-df-flag-dialogue-bg text-df-flag-dialogue border-df-flag-dialogue',
+    quest: 'bg-df-flag-quest-bg text-df-flag-quest border-df-flag-quest',
+    achievement: 'bg-df-flag-achievement-bg text-df-flag-achievement border-df-flag-achievement',
+    item: 'bg-df-flag-item-bg text-df-flag-item border-df-flag-item',
+    stat: 'bg-df-flag-stat-bg text-df-flag-stat border-df-flag-stat',
+    title: 'bg-df-flag-title-bg text-df-flag-title border-df-flag-title',
+    global: 'bg-df-flag-global-bg text-df-flag-global border-df-flag-global',
 };
 function getFlagColorClass(type) {
     return FLAG_COLORS[type] || FLAG_COLORS.dialogue;
@@ -36,51 +36,62 @@ function getFlagColorClass(type) {
 // Component
 // ============================================================================
 function NPCNodeV2({ data, selected }) {
-    const { node, flagSchema, isDimmed, isInPath, layoutDirection = 'TB', isStartNode, isEndNode } = data;
+    const { node, flagSchema, characters = {}, isDimmed, isInPath, layoutDirection = 'TB', isStartNode, isEndNode } = data;
+    // Get character if characterId is set
+    const character = node.characterId ? characters[node.characterId] : undefined;
+    const displayName = character ? character.name : (node.speaker || 'NPC');
+    const avatar = character?.avatar || '👤';
     // Handle positions based on layout direction
     const isHorizontal = layoutDirection === 'LR';
     const targetPosition = isHorizontal ? reactflow_1.Position.Left : reactflow_1.Position.Top;
     const sourcePosition = isHorizontal ? reactflow_1.Position.Right : reactflow_1.Position.Bottom;
     // Border color based on state
     const borderClass = selected
-        ? 'border-[#e94560] shadow-lg shadow-[#e94560]/20'
+        ? 'border-df-npc-selected shadow-lg shadow-df-glow'
         : isStartNode
-            ? 'border-green-500 shadow-md shadow-green-500/20'
+            ? 'border-df-start shadow-md'
             : isEndNode
-                ? 'border-amber-500 shadow-md shadow-amber-500/20'
-                : 'border-[#4a1a1a]';
+                ? 'border-df-end shadow-md'
+                : 'border-df-npc-border';
     // Header background based on node type
     const headerBgClass = isStartNode
-        ? 'bg-green-500/10'
+        ? 'bg-df-start-bg'
         : isEndNode
-            ? 'bg-amber-500/10'
-            : 'bg-[#12121a]';
+            ? 'bg-df-end-bg'
+            : 'bg-df-npc-header';
     // Content preview (truncated)
     const contentPreview = node.content.length > 60
         ? node.content.slice(0, 60) + '...'
         : node.content;
-    return (react_1.default.createElement("div", { className: `rounded-lg border-2 transition-all duration-300 ${borderClass} ${isInPath ? 'border-[#e94560]/70' : ''} bg-[#1a1a2e] min-w-[200px] relative`, style: isDimmed ? { opacity: 0.35, filter: 'saturate(0.3)' } : undefined },
-        isStartNode && (react_1.default.createElement("div", { className: "absolute -top-2 -left-2 bg-green-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shadow-lg z-10" },
-            react_1.default.createElement(lucide_react_1.Play, { size: 8, fill: "currentColor" }),
-            " START")),
-        isEndNode && (react_1.default.createElement("div", { className: "absolute -top-2 -right-2 bg-amber-500 text-black text-[8px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shadow-lg z-10" },
-            react_1.default.createElement(lucide_react_1.Flag, { size: 8 }),
-            " END")),
-        react_1.default.createElement(reactflow_1.Handle, { type: "target", position: targetPosition, className: "!bg-[#2a2a3e] !border-[#4a4a6a] !w-4 !h-4 !rounded-full" }),
-        react_1.default.createElement("div", { className: `px-3 py-1.5 border-b border-[#2a2a3e] flex items-center gap-2 rounded-t-lg ${headerBgClass}` },
-            react_1.default.createElement(lucide_react_1.MessageSquare, { size: 12, className: "text-[#e94560]" }),
-            react_1.default.createElement("span", { className: "text-[10px] font-mono text-gray-500 truncate flex-1" }, node.id),
-            react_1.default.createElement("span", { className: "text-[10px] text-gray-600" }, "NPC")),
-        react_1.default.createElement("div", { className: "px-3 py-2 min-h-[50px]" },
-            node.speaker && (react_1.default.createElement("div", { className: "text-[10px] text-[#e94560] font-medium mb-1" }, node.speaker)),
-            react_1.default.createElement("div", { className: "text-xs text-gray-300 line-clamp-2 bg-[#0d0d14] border border-[#2a2a3e] rounded px-2 py-1" },
-                "\"",
-                contentPreview,
-                "\""),
-            node.setFlags && node.setFlags.length > 0 && (react_1.default.createElement("div", { className: "mt-1.5 flex flex-wrap gap-1" }, node.setFlags.map((flagId) => {
+    return (react_1.default.createElement("div", { className: `rounded-lg border-2 transition-all duration-300 ${borderClass} ${isInPath ? 'border-df-node-selected/70' : ''} bg-df-npc-bg min-w-[320px] max-w-[450px] relative overflow-hidden`, style: isDimmed ? { opacity: 0.35, filter: 'saturate(0.3)' } : undefined },
+        react_1.default.createElement(reactflow_1.Handle, { type: "target", position: targetPosition, className: "!bg-df-control-bg !border-df-control-border !w-4 !h-4 !rounded-full" }),
+        react_1.default.createElement("div", { className: `${headerBgClass} border-b-2 border-df-npc-border px-3 py-2.5 flex items-center gap-3 relative` },
+            react_1.default.createElement("div", { className: "w-14 h-14 rounded-full bg-df-npc-bg border-[3px] border-df-npc-border flex items-center justify-center text-3xl shadow-lg flex-shrink-0" }, avatar),
+            react_1.default.createElement("div", { className: "flex-1 min-w-0" },
+                react_1.default.createElement("h3", { className: "text-base font-bold text-df-text-primary truncate leading-tight" }, displayName)),
+            react_1.default.createElement("div", { className: "flex items-center gap-2 flex-shrink-0" },
+                react_1.default.createElement("div", { className: "flex items-center gap-1 px-2 py-1 rounded bg-df-base/50 border border-df-control-border", title: `Node ID: ${node.id}` },
+                    react_1.default.createElement(lucide_react_1.Hash, { size: 12, className: "text-df-text-secondary" }),
+                    react_1.default.createElement("span", { className: "text-[10px] font-mono text-df-text-secondary" }, node.id)),
+                react_1.default.createElement("div", { className: "flex items-center gap-1 px-2 py-1 rounded bg-df-npc-selected/20 border border-df-npc-selected/50", title: "NPC Node" },
+                    react_1.default.createElement(lucide_react_1.MessageSquare, { size: 14, className: "text-df-npc-selected" }),
+                    react_1.default.createElement("span", { className: "text-[10px] font-semibold text-df-npc-selected" }, "NPC"))),
+            isStartNode && (react_1.default.createElement("div", { className: "absolute top-1 right-1 bg-df-start text-df-text-primary text-[8px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5 shadow-lg z-20" },
+                react_1.default.createElement(lucide_react_1.Play, { size: 8, fill: "currentColor" }),
+                " START")),
+            isEndNode && (react_1.default.createElement("div", { className: "absolute top-1 right-1 bg-df-end text-df-text-primary text-[8px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5 shadow-lg z-20" },
+                react_1.default.createElement(lucide_react_1.Flag, { size: 8 }),
+                " END"))),
+        react_1.default.createElement("div", { className: "px-4 py-3" },
+            react_1.default.createElement("div", { className: "bg-df-elevated border border-df-control-border rounded-lg px-4 py-3 mb-2" },
+                react_1.default.createElement("p", { className: "text-sm text-df-text-primary leading-relaxed" },
+                    "\"",
+                    contentPreview,
+                    "\"")),
+            node.setFlags && node.setFlags.length > 0 && (react_1.default.createElement("div", { className: "flex flex-wrap gap-1" }, node.setFlags.map((flagId) => {
                 const flag = flagSchema?.flags.find((f) => f.id === flagId);
                 const flagType = flag?.type || 'dialogue';
-                return (react_1.default.createElement("span", { key: flagId, className: `text-[8px] px-1 py-0.5 rounded border ${getFlagColorClass(flagType)}`, title: flag?.name || flagId }, flagType === 'dialogue' ? 't' : flagType[0]));
+                return (react_1.default.createElement("span", { key: flagId, className: `text-[8px] px-1.5 py-0.5 rounded-full border ${getFlagColorClass(flagType)}`, title: flag?.name || flagId }, flagType === 'dialogue' ? 't' : flagType[0]));
             })))),
-        react_1.default.createElement(reactflow_1.Handle, { type: "source", position: sourcePosition, id: "next", className: "!bg-[#2a2a3e] !border-[#4a4a6a] !w-4 !h-4 !rounded-full hover:!border-[#e94560] hover:!bg-[#e94560]/20" })));
+        react_1.default.createElement(reactflow_1.Handle, { type: "source", position: sourcePosition, id: "next", className: "!bg-df-control-bg !border-df-control-border !w-4 !h-4 !rounded-full hover:!border-df-npc-selected hover:!bg-df-npc-selected/20" })));
 }

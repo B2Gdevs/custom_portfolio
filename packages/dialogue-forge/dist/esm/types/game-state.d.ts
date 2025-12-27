@@ -19,12 +19,14 @@ export interface FlagState {
  * Legacy alias for backward compatibility
  */
 export type GameFlagState = FlagState;
+import type { Character } from './characters';
 /**
  * Base game state structure that users can extend
  * Must have a 'flags' property, but can have any other structure
  */
 export interface BaseGameState {
     flags?: FlagState;
+    characters?: Record<string, Character>;
 }
 /**
  * Convenience type for extending game state

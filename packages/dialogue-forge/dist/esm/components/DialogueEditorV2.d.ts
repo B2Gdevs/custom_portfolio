@@ -8,10 +8,14 @@ import React from 'react';
 import 'reactflow/dist/style.css';
 import { DialogueEditorProps } from '../types';
 import { FlagSchema } from '../types/flags';
+import { Character } from '../types/characters';
 type ViewMode = 'graph' | 'yarn' | 'play';
 export declare function DialogueEditorV2(props: DialogueEditorProps & {
     flagSchema?: FlagSchema;
+    characters?: Record<string, Character>;
     initialViewMode?: ViewMode;
+    viewMode?: ViewMode;
+    onViewModeChange?: (mode: ViewMode) => void;
     layoutStrategy?: string;
     onLayoutStrategyChange?: (strategy: string) => void;
     onOpenFlagManager?: () => void;

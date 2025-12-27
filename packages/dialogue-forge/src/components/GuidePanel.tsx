@@ -359,9 +359,9 @@ const [gameState, setGameState] = useState<GameState>({
   }}
   flagSchema={flagSchema}
   // Event hooks
-  onNodeAdd={(node) => console.log('Node added:', node.id)}
-  onNodeDelete={(nodeId) => console.log('Node deleted:', nodeId)}
-  onConnect={(source, target) => console.log('Connected:', source, '->', target)}
+  onNodeAdd={(node) => {/* Example: handle node add */}}
+  onNodeDelete={(nodeId) => {/* Example: handle node delete */}}
+  onConnect={(source, target) => {/* Example: handle connect */}}
 />`} language="typescript" />
 
           <h3 className="text-lg font-semibold mt-6 mb-2 text-white">6. Define Game State</h3>
@@ -429,21 +429,21 @@ const gameState: GameState = {
   }}
   // Event hooks
   onNodeEnter={(nodeId, node) => {
-    console.log('Entered node:', nodeId, node);
+    // Example: handle node enter
     // Trigger animations, sound effects, etc.
   }}
   onNodeExit={(nodeId, node) => {
-    console.log('Exited node:', nodeId, node);
+    // Example: handle node exit
   }}
   onChoiceSelect={(nodeId, choice) => {
-    console.log('Selected choice:', choice.text);
+    // Example: handle choice select
     // Track player decisions
   }}
   onDialogueStart={() => {
-    console.log('Dialogue started');
+    // Example: handle dialogue start
   }}
   onDialogueEnd={() => {
-    console.log('Dialogue ended');
+    // Example: handle dialogue end
   }}
 />`} language="typescript" />
 
@@ -503,23 +503,23 @@ const dialogue = importFromYarn(yarnFile, 'Merchant');
   flagSchema={flagSchema}
   // Event hooks
   onNodeAdd={(node) => {
-    console.log('Node added:', node.id);
+    // Example: handle node add
     // Track node creation
   }}
   onNodeDelete={(nodeId) => {
-    console.log('Node deleted:', nodeId);
+    // Example: handle node delete
   }}
   onNodeUpdate={(nodeId, updates) => {
-    console.log('Node updated:', nodeId, updates);
+    // Example: handle node update
   }}
   onConnect={(sourceId, targetId, sourceHandle) => {
-    console.log('Connected:', sourceId, '->', targetId);
+    // Example: handle connect
   }}
   onDisconnect={(edgeId, sourceId, targetId) => {
-    console.log('Disconnected:', sourceId, '->', targetId);
+    // Example: handle disconnect
   }}
   onNodeSelect={(nodeId) => {
-    console.log('Node selected:', nodeId);
+    // Example: handle node select
   }}
 />
 
@@ -535,11 +535,11 @@ const dialogue = importFromYarn(yarnFile, 'Merchant');
     }));
   }}
   onNodeEnter={(nodeId, node) => {
-    console.log('Entered node:', nodeId);
+    // Example: handle node enter
     // Play animations, sound effects
   }}
   onChoiceSelect={(nodeId, choice) => {
-    console.log('Selected:', choice.text);
+    // Example: handle choice select
     // Track player decisions
   }}
 />`} language="typescript" />
@@ -1002,6 +1002,204 @@ await saveFile('dialogue.yarn', newYarn);`}
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )
+    },
+    characters: {
+      title: 'Characters',
+      content: (
+        <div className="space-y-4 text-sm">
+          <p className="text-gray-300">
+            Dialogue Forge supports character assignment for NPC and Player nodes. Characters are defined in your game state and can be selected from a searchable dropdown.
+          </p>
+
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Character System</h3>
+          <p className="text-gray-300 mb-3">
+            Each node (NPC or Player) can be assigned a character from your game state. When a character is assigned:
+          </p>
+          <ul className="list-disc list-inside space-y-1 text-sm ml-2 text-gray-300">
+            <li>The character's avatar and name are displayed on the node in the graph</li>
+            <li>The character name is used as the speaker name</li>
+            <li>You can still override with a custom speaker name if needed</li>
+          </ul>
+
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Game State Structure</h3>
+          <p className="text-gray-300 mb-3">
+            Characters should be defined in your game state under the <code className="bg-[#0d0d14] px-1 rounded">characters</code> property:
+          </p>
+
+          <CodeBlock code={`interface GameState {
+  flags?: FlagState;
+  characters?: {
+    [characterId: string]: Character;
+  };
+}
+
+interface Character {
+  id: string;
+  name: string;
+  avatar?: string; // URL or emoji (e.g., "👤", "🧙", "/avatars/wizard.png")
+  description?: string;
+}`} language="typescript" />
+
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Using Characters</h3>
+          <ol className="list-decimal list-inside space-y-2 text-sm ml-2 text-gray-300">
+            <li><strong>Define characters</strong> in your game state with <code className="bg-[#0d0d14] px-1 rounded">id</code>, <code className="bg-[#0d0d14] px-1 rounded">name</code>, and optionally <code className="bg-[#0d0d14] px-1 rounded">avatar</code></li>
+            <li><strong>Pass characters</strong> to <code className="bg-[#0d0d14] px-1 rounded">DialogueEditorV2</code> via the <code className="bg-[#0d0d14] px-1 rounded">characters</code> prop</li>
+            <li><strong>Select a character</strong> in the Node Editor using the character dropdown (searchable combobox)</li>
+            <li><strong>View on graph</strong> - The character's avatar and name appear on the node</li>
+          </ol>
+
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Example</h3>
+          <CodeBlock code={`// Game state with characters
+const gameState = {
+  flags: { reputation: 50 },
+  characters: {
+    stranger: {
+      id: 'stranger',
+      name: 'Mysterious Stranger',
+      avatar: '👤',
+      description: 'A cloaked figure'
+    },
+    player: {
+      id: 'player',
+      name: 'Player',
+      avatar: '🎮',
+      description: 'The player character'
+    }
+  }
+};
+
+// Pass to DialogueEditorV2
+<DialogueEditorV2
+  dialogue={dialogueTree}
+  characters={gameState.characters}
+  flagSchema={flagSchema}
+  onChange={setDialogueTree}
+/>`} language="typescript" />
+
+          <div className="bg-[#1a2a3e] border-l-4 border-blue-500 p-4 rounded mt-4">
+            <p className="text-gray-300 text-xs">
+              <strong>Note:</strong> If a character is not assigned, you can still use a custom speaker name. The character system is optional but recommended for consistency across your dialogue system.
+            </p>
+          </div>
+        </div>
+      )
+    },
+    theming: {
+      title: 'Theming',
+      content: (
+        <div className="space-y-4 text-sm">
+          <p className="text-gray-300">
+            Dialogue Forge uses Tailwind CSS theme variables that you can override in your application. All theme variables are prefixed with <code className="bg-[#0d0d14] px-1 rounded">df-</code> to avoid conflicts.
+          </p>
+
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">How to Override Theme</h3>
+          <p className="text-gray-300 mb-3">
+            Copy the theme variables below into your CSS file and override the values you want to change:
+          </p>
+
+          <CodeBlock code={`@theme {
+  /* Base Colors */
+  --color-df-base: oklch(0.15 0.02 250);
+  --color-df-surface: oklch(0.18 0.02 260);
+  --color-df-elevated: oklch(0.22 0.02 270);
+  
+  /* NPC Node Colors */
+  --color-df-npc-bg: oklch(0.25 0.04 45);
+  --color-df-npc-border: oklch(0.40 0.08 35);
+  --color-df-npc-header: oklch(0.30 0.10 25);
+  --color-df-npc-selected: oklch(0.45 0.12 15);
+  
+  /* Player Node Colors */
+  --color-df-player-bg: oklch(0.22 0.08 300);
+  --color-df-player-border: oklch(0.45 0.15 310);
+  --color-df-player-header: oklch(0.28 0.12 290);
+  --color-df-player-selected: oklch(0.55 0.20 280);
+  
+  /* Conditional Node */
+  --color-df-conditional-bg: oklch(0.24 0.06 150);
+  --color-df-conditional-border: oklch(0.42 0.12 140);
+  --color-df-conditional-header: oklch(0.30 0.10 145);
+  
+  /* Start/End */
+  --color-df-start: oklch(0.55 0.15 140);
+  --color-df-start-bg: oklch(0.25 0.08 140);
+  --color-df-end: oklch(0.50 0.15 45);
+  --color-df-end-bg: oklch(0.25 0.08 45);
+  
+  /* Edges */
+  --color-df-edge-default: oklch(0.40 0.03 250);
+  --color-df-edge-default-hover: oklch(0.50 0.05 250);
+  --color-df-edge-choice-1: oklch(0.50 0.18 15);
+  --color-df-edge-choice-2: oklch(0.55 0.20 280);
+  --color-df-edge-choice-3: oklch(0.52 0.18 200);
+  --color-df-edge-choice-4: oklch(0.58 0.16 120);
+  --color-df-edge-choice-5: oklch(0.50 0.15 45);
+  --color-df-edge-loop: oklch(0.55 0.15 60);
+  --color-df-edge-dimmed: oklch(0.25 0.02 250);
+  
+  /* Status Colors */
+  --color-df-error: oklch(0.55 0.22 25);
+  --color-df-warning: oklch(0.65 0.18 70);
+  --color-df-success: oklch(0.60 0.18 150);
+  --color-df-info: oklch(0.55 0.15 220);
+  
+  /* Text Colors */
+  --color-df-text-primary: oklch(0.85 0.02 250);
+  --color-df-text-secondary: oklch(0.65 0.02 250);
+  --color-df-text-tertiary: oklch(0.45 0.02 250);
+  
+  /* UI Control Colors */
+  --color-df-control-bg: oklch(0.18 0.02 260);
+  --color-df-control-border: oklch(0.30 0.03 250);
+  --color-df-control-hover: oklch(0.25 0.03 250);
+  
+  /* Flag Colors */
+  --color-df-flag-dialogue: oklch(0.45 0.03 250);
+  --color-df-flag-dialogue-bg: oklch(0.20 0.02 250);
+  --color-df-flag-quest: oklch(0.50 0.15 220);
+  --color-df-flag-quest-bg: oklch(0.22 0.08 220);
+  --color-df-flag-achievement: oklch(0.60 0.18 70);
+  --color-df-flag-achievement-bg: oklch(0.25 0.10 70);
+  --color-df-flag-item: oklch(0.55 0.15 150);
+  --color-df-flag-item-bg: oklch(0.25 0.08 150);
+  --color-df-flag-stat: oklch(0.55 0.18 280);
+  --color-df-flag-stat-bg: oklch(0.25 0.10 280);
+  --color-df-flag-title: oklch(0.55 0.18 330);
+  --color-df-flag-title-bg: oklch(0.25 0.10 330);
+  --color-df-flag-global: oklch(0.50 0.15 45);
+  --color-df-flag-global-bg: oklch(0.25 0.08 45);
+  
+  /* Canvas/Background */
+  --color-df-canvas-bg: oklch(0.12 0.01 250);
+  --color-df-canvas-grid: oklch(0.20 0.02 250);
+  
+  /* Sidebar/Editor */
+  --color-df-sidebar-bg: oklch(0.18 0.02 260);
+  --color-df-sidebar-border: oklch(0.35 0.05 250);
+  --color-df-editor-bg: oklch(0.15 0.02 240);
+  --color-df-editor-border: oklch(0.30 0.03 250);
+}`} language="css" />
+
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">Example: Custom Blue Theme</h3>
+          <CodeBlock code={`@theme {
+  /* Override NPC colors to blue */
+  --color-df-npc-bg: oklch(0.25 0.08 220);
+  --color-df-npc-border: oklch(0.50 0.15 220);
+  --color-df-npc-selected: oklch(0.60 0.20 220);
+  
+  /* Override player colors to purple */
+  --color-df-player-bg: oklch(0.25 0.10 300);
+  --color-df-player-border: oklch(0.55 0.20 300);
+  --color-df-player-selected: oklch(0.65 0.25 300);
+}`} language="css" />
+
+          <div className="bg-[#1a2a3e] border-l-4 border-blue-500 p-4 rounded mt-4">
+            <p className="text-gray-300 text-xs">
+              <strong>Note:</strong> All Dialogue Forge components use these theme classes (e.g., <code className="bg-[#0d0d14] px-1 rounded">bg-df-npc-bg</code>, <code className="bg-[#0d0d14] px-1 rounded">text-df-text-primary</code>). By overriding the CSS variables, you change the colors throughout the entire editor without modifying any component code.
+            </p>
           </div>
         </div>
       )

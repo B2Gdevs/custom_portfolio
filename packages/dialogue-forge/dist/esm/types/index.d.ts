@@ -2,7 +2,7 @@ import { ConditionOperator, NodeType } from './constants';
 export interface Choice {
     id: string;
     text: string;
-    nextNodeId: string;
+    nextNodeId?: string;
     conditions?: Condition[];
     setFlags?: string[];
 }
@@ -20,12 +20,14 @@ export interface ConditionalBlock {
     condition?: Condition[];
     content: string;
     speaker?: string;
+    characterId?: string;
     nextNodeId?: string;
 }
 export interface DialogueNode {
     id: string;
     type: NodeType;
     speaker?: string;
+    characterId?: string;
     content: string;
     choices?: Choice[];
     nextNodeId?: string;

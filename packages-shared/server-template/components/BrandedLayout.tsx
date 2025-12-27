@@ -48,6 +48,10 @@ export function BrandedLayout({
                   alt="Logo"
                   width={24}
                   height={24}
+                  onError={(e) => {
+                    // Hide logo if it doesn't exist
+                    e.currentTarget.style.display = 'none';
+                  }}
                   className="w-6 h-6 rounded-full bg-zinc-900/60 p-1"
                 />
                 <span className="text-sm font-semibold text-zinc-200">
