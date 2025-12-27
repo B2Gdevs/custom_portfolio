@@ -1,122 +1,140 @@
 # Portfolio V2 - Monorepo
 
-A monorepo containing a sleek portfolio site and publishable npm packages. Built with Next.js, MDX, SQLite, and Drizzle ORM.
+A monorepo containing a sleek portfolio site and publishable npm packages. Built with Next.js, MDX, SQLite, and Drizzle ORM. This README explains project structure, how to run the portfolio and package demos, and how to develop and publish packages.
 
 ## 🏗️ Monorepo Structure
 
+This repository is a monorepo that groups the main portfolio application and related packages (libraries and demos). The layout is intentionally simple so package demos can be run locally and packages can be published independently.
+
 ```
-portfolio-v2/
+custom_portfolio/
 ├── apps/
-│   └── portfolio/          # Main portfolio site
+│   └── portfolio/          # Main Next.js portfolio application (apps/portfolio)
 ├── packages/
-│   └── dialogue-forge/    # Visual dialogue editor package
-│       ├── src/           # Library source
-│       ├── demo/          # Standalone demo app
-│       └── bin/           # npx executable
+│   └── dialogue-forge/     # Visual dialogue editor package (library + demo + bin)
+│       ├── src/            # Library source (TypeScript)
+│       ├── demo/           # Standalone demo app (Next/Vite)
+│       └── bin/            # CLI entry (dialogue-forge)
 └── packages-shared/
-    └── server-template/   # Reusable demo server template
+    └── server-template/    # Reusable demo server template used by package demos
 ```
+
+Notes:
+- Packages are normal npm packages — each has its own package.json and scripts.
+- The dialogue-forge package name is @magicborn/dialogue-forge (see packages/dialogue-forge/package.json).
 
 ## 🚀 Quick Start
 
-### Install Dependencies
+### Install root dependencies
+
+From the repository root run:
 
 ```bash
 npm install
 ```
 
-### Run Portfolio App
+This installs dependencies for the workspace. If you use pnpm or yarn workspaces, you can use those instead (pnpm install, yarn install).
+
+### Run the Portfolio App (local dev)
 
 ```bash
+# From root (workspace-aware)
 npm run dev
-# or
-cd apps/portfolio && npm run dev
+# or run directly in the app folder
+cd apps/portfolio && npm install && npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000) to see your portfolio.
+Visit http://localhost:3000 to see the portfolio.
 
-### Run Package Demos
+### Run Package Demos (Dialogue Forge)
+
+There are two common ways to run the Dialogue Forge demo: locally from the monorepo, or via the package's published CLI/bin. The package.json for dialogue-forge contains the authoritative scripts.
+
+Local (recommended for development):
 
 ```bash
-# Dialogue Forge demo
-cd packages/dialogue-forge/demo && npm run dev
+# From the package demo directory
+cd packages/dialogue-forge/demo && npm install && npm run dev
 
-# Or after publishing, users can run:
-npx @portfolio/dialogue-forge
+# Or using the package's dev script from the package root which runs the demo:
+cd packages/dialogue-forge && npm install && npm run dev
 ```
+
+Published / installed usage (when the package is published to npm):
+
+The dialogue-forge package is published under the @magicborn scope (package.json: "name": "@magicborn/dialogue-forge"). When published, the package exposes a CLI binary named "dialogue-forge" (see the "bin" field in package.json). You can run the CLI demo with npx:
+
+```bash
+# Run the CLI/demo via npx (will download from npm if not installed locally)
+npx @magicborn/dialogue-forge
+# or (npx may resolve the bin name directly):
+npx dialogue-forge
+```
+
+If you want to install the library into another project:
+
+```bash
+npm install @magicborn/dialogue-forge
+```
+
+And import it in code:
+
+```tsx
+import { DialogueEditorV2 } from '@magicborn/dialogue-forge';
+```
+
+(See packages/dialogue-forge/README.md for package-specific usage and API docs.)
 
 ## 📦 Packages
 
-### @portfolio/dialogue-forge
+Each package lives in packages/ and has its own package.json. The dialogue-forge package includes:
+- name: @magicborn/dialogue-forge
+- bin: dialogue-forge -> bin/dialogue-forge.js
+- dev script: "dev" runs the demo (cd demo && npm install && npm run dev)
+- build script: builds TypeScript outputs to dist/
 
-Visual node-based dialogue editor with Yarn Spinner support.
-
-**Install:**
-```bash
-npm install @portfolio/dialogue-forge
-```
-
-**Run Demo:**
-```bash
-npx @portfolio/dialogue-forge
-```
-
-**Use in Code:**
-```tsx
-import { DialogueEditorV2 } from '@portfolio/dialogue-forge';
-```
-
-See [packages/dialogue-forge/README.md](packages/dialogue-forge/README.md) for full documentation.
-
-## 🎨 Portfolio App Features
-
-- 🎨 **Neobrutal Design** - Bold, animated, fun design system
-- 📝 **MDX Support** - Write content in Markdown/MDX
-- 🗄️ **SQLite Database** - Simple, local database with Drizzle ORM
-- 🔐 **Admin Interface** - Content management (development only)
-- 📚 **Documentation** - GitBook-style documentation pages
-- 🚀 **Projects Showcase** - Display your work beautifully
-- ✍️ **Blog** - Share your thoughts and learnings
-
-## 📚 Documentation
-
-- [Monorepo Plan](MONOREPO_PLAN.md) - Architecture overview
-- [Implementation Guide](IMPLEMENTATION_GUIDE.md) - Setup details
-- [Quick Start](QUICK_START.md) - Package development guide
-
-## 🔧 Development
-
-### Workspace Scripts
+When developing packages locally you can either run their demo directly (cd packages/<pkg>/demo) or use your package manager's workspace filters:
 
 ```bash
-# Run portfolio app
-npm run dev
-
-# Build portfolio
-npm run build
-
-# Lint
-npm run lint
+# npm (workspaces-aware) from repo root to run a package script:
+npm --workspace=@magicborn/dialogue-forge run dev
+# or with pnpm (filter):
+pnpm --filter @magicborn/dialogue-forge dev
 ```
 
-### Package Development
+## 🔧 Development Scripts
+
+Common scripts available from the repository or package roots:
+
+- npm run dev — run the portfolio app in development (workspace root or apps/portfolio)
+- npm run build — build the portfolio (and packages if scripted)
+- npm run lint — run linters (if configured)
+
+Package-level examples (packages/dialogue-forge):
 
 ```bash
-# Build a package
 cd packages/dialogue-forge
-npm run build
-
-# Test a package
-npm run test
+npm run build       # build the library (tsc -> dist)
+npm run dev         # runs the demo: cd demo && npm install && npm run dev
+npm run test        # run tests (vitest)
 ```
 
 ## 📝 Publishing
 
-Packages are published to npm under the `@portfolio` scope.
+Packages are published to npm under their scopes as declared in each package.json. For this repo the dialogue-forge package uses the @magicborn scope. Before publishing, ensure:
 
-**Publisher:** [@magicborn](https://www.npmjs.com/~magicborn)
+1. package.json has correct name, version, and publishConfig (access/registry)
+2. You have an NPM_TOKEN secret configured on the CI/publishing environment
+3. Run the package build locally: cd packages/dialogue-forge && npm run build
 
-See [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md) for publishing workflow.
+Example publish steps (manual):
+
+```bash
+cd packages/dialogue-forge
+npm publish --access public
+```
+
+The repo contains workflow templates to automate package sync and publishing; see .github/workflows/README.md for details.
 
 ## Database Commands
 
@@ -133,16 +151,11 @@ npm run db:studio
 
 ## Admin Interface
 
-The admin interface is **only available in development mode** for security. In production, it will be disabled.
-
-Access it at `/admin` when running in development.
+The admin interface is only available in development for security. Access it at /admin when running the dev server.
 
 ## Content Management
 
-### Adding Content
-
-1. **Markdown Files**: Add `.md` or `.mdx` files to `content/docs`, `content/projects`, or `content/blog`
-2. **Frontmatter**: Use YAML frontmatter for metadata:
+Add content as Markdown/MDX files under content/docs, content/projects, or content/blog. Use YAML frontmatter for metadata: 
 
 ```markdown
 ---
@@ -157,17 +170,12 @@ tags: [react, nextjs]
 Content goes here...
 ```
 
-### Database Content
+## Notes and Changes in this update
 
-Use the admin interface or directly interact with the database to manage content stored in SQLite.
+- Fixed dialogue-forge install/run instructions to match packages/dialogue-forge/package.json (package name: @magicborn/dialogue-forge; dev script runs demo; bin name: dialogue-forge).
+- Clarified local demo vs published usage and added workspace examples.
 
-## Deployment
-
-The admin interface is automatically disabled in production. Make sure to:
-
-1. Build the project: `npm run build`
-2. Set environment variables if needed
-3. Deploy to your hosting platform (Vercel, etc.)
+---
 
 ## License
 
