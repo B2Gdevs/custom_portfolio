@@ -206,6 +206,15 @@ export function ScenePlayer({
       });
     }
   };
+  console.log("isnpc", currentNode?.type === 'npc');
+  console.log("isplayer", currentNode?.type === 'player');
+  console.log("isTyping", isTyping);
+  console.log("availableChoices", availableChoices);
+  console.log("visitedNodes", visitedNodes);
+  console.log("flags", flags);
+  console.log("history", history);
+  console.log("currentNodeId", currentNodeId);
+  console.log("dialogue", dialogue);
 
   return (
     <div className="flex-1 flex flex-col">

@@ -36,9 +36,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PlayView = PlayView;
 const react_1 = __importStar(require("react"));
 const flag_manager_1 = require("../lib/flag-manager");
-const yarn_runner_1 = require("../lib/yarn-runner");
+const ScenePlayer_1 = require("./ScenePlayer");
 function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }) {
-    const [currentNodeId, setCurrentNodeId] = (0, react_1.useState)(startNodeId || dialogue.startNodeId);
     // Initialize game flags with defaults from schema, then merge with initialFlags
     const initialGameFlags = (0, react_1.useMemo)(() => {
         if (flagSchema) {
@@ -47,170 +46,42 @@ function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }) {
         }
         return initialFlags || {};
     }, [flagSchema, initialFlags]);
-    // Initialize variable manager
-    const variableManager = (0, react_1.useMemo)(() => {
-        return new yarn_runner_1.VariableManager(initialGameFlags, new Set());
+    // Convert flags to gameState format for ScenePlayer
+    const gameState = (0, react_1.useMemo)(() => {
+        return { flags: initialGameFlags };
     }, [initialGameFlags]);
-    const [gameFlags, setGameFlags] = (0, react_1.useState)(initialGameFlags);
-    const [history, setHistory] = (0, react_1.useState)([]);
-    const [isTyping, setIsTyping] = (0, react_1.useState)(false);
+    const [currentFlags, setCurrentFlags] = (0, react_1.useState)(initialGameFlags);
     const [showDebugPanel, setShowDebugPanel] = (0, react_1.useState)(false);
-    const chatEndRef = (0, react_1.useRef)(null);
-    // Track which flags were set during this run
     const [flagsSetDuringRun, setFlagsSetDuringRun] = (0, react_1.useState)(new Set());
-    // Use ref to track latest gameFlags to avoid stale closures
-    const gameFlagsRef = (0, react_1.useRef)(gameFlags);
-    (0, react_1.useEffect)(() => {
-        gameFlagsRef.current = gameFlags;
-    }, [gameFlags]);
-    // Process current node
-    (0, react_1.useEffect)(() => {
-        const node = dialogue.nodes[currentNodeId];
-        if (!node)
-            return;
-        // Update variable manager with current game flags (use ref to get latest)
-        Object.entries(gameFlagsRef.current).forEach(([key, value]) => {
-            variableManager.set(key, value);
-        });
-        // If it's a player node, just ensure typing is false and show choices
-        if (node.type === 'player') {
-            setIsTyping(false);
-            return;
+    // Track initial flags to detect changes
+    const initialFlagsRef = (0, react_1.useRef)(initialGameFlags);
+    const handleComplete = (result) => {
+        // Update flags from result
+        if (result.updatedFlags) {
+            setCurrentFlags(result.updatedFlags);
         }
-        // Process the node using the modular runner
-        setIsTyping(true);
-        const timer = setTimeout(() => {
-            // Update flags before processing
-            if (node.setFlags) {
-                // Update dialogue flags (temporary)
-                node.setFlags.forEach(flagId => {
-                    variableManager.addMemoryFlag(flagId);
-                });
-                // Update game flags (persistent)
-                if (flagSchema) {
-                    const gameFlagIds = node.setFlags.filter(flagId => {
-                        const flag = flagSchema.flags.find(f => f.id === flagId);
-                        return flag && flag.type !== 'dialogue';
-                    });
-                    if (gameFlagIds.length > 0) {
-                        const updated = (0, flag_manager_1.mergeFlagUpdates)(gameFlagsRef.current, gameFlagIds, flagSchema);
-                        setGameFlags(updated);
-                        // Update variable manager
-                        gameFlagIds.forEach(flagId => {
-                            const flag = flagSchema.flags.find(f => f.id === flagId);
-                            if (flag) {
-                                variableManager.set(flagId, flag.defaultValue ?? true);
-                            }
-                        });
-                        setFlagsSetDuringRun(prev => {
-                            const next = new Set(prev);
-                            gameFlagIds.forEach(f => next.add(f));
-                            return next;
-                        });
+    };
+    const handleFlagUpdate = (flags) => {
+        setCurrentFlags(flags);
+        // Track which flags were set during this run
+        if (flagSchema) {
+            setFlagsSetDuringRun(prev => {
+                const next = new Set(prev);
+                Object.keys(flags).forEach(flagId => {
+                    const initialValue = initialFlagsRef.current[flagId];
+                    const currentValue = flags[flagId];
+                    if (initialValue !== currentValue) {
+                        next.add(flagId);
                     }
-                }
-            }
-            // Process variable operations in content (e.g., <<set $var += 10>>)
-            (0, yarn_runner_1.processVariableOperationsInContent)(node.content, variableManager);
-            // Process the node
-            const result = (0, yarn_runner_1.processNode)(node, variableManager);
-            // Add to history if there's content
-            if (result.content) {
-                setHistory(prev => [...prev, {
-                        nodeId: node.id,
-                        type: 'npc',
-                        speaker: result.speaker,
-                        content: result.content
-                    }]);
-            }
-            // Update game flags from variable manager after operations
-            // Use functional update to avoid dependency issues
-            setGameFlags(prev => {
-                const updatedVars = variableManager.getAllVariables();
-                // Filter out undefined values and only update if there are changes
-                const definedVars = {};
-                for (const [key, value] of Object.entries(updatedVars)) {
-                    if (value !== undefined)
-                        definedVars[key] = value;
-                }
-                const hasChanges = Object.keys(definedVars).some(key => prev[key] !== definedVars[key]);
-                return hasChanges ? { ...prev, ...definedVars } : prev;
-            });
-            setIsTyping(false);
-            // Navigate to next node if valid
-            if (result.nextNodeId && (0, yarn_runner_1.isValidNextNode)(result.nextNodeId, dialogue.nodes)) {
-                setTimeout(() => setCurrentNodeId(result.nextNodeId), 300);
-            }
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [currentNodeId, dialogue.startNodeId, flagSchema]); // Removed gameFlags and variableManager from deps
-    (0, react_1.useEffect)(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [history, isTyping]);
-    const currentNode = dialogue.nodes[currentNodeId];
-    // Get available choices from processed node result
-    const processedResult = currentNode ? (0, yarn_runner_1.processNode)(currentNode, variableManager) : null;
-    const availableChoices = processedResult?.choices || [];
-    const handleChoice = (choice) => {
-        setHistory(prev => [...prev, {
-                nodeId: choice.id,
-                type: 'player',
-                content: choice.text
-            }]);
-        // Process variable operations in choice text
-        (0, yarn_runner_1.processVariableOperationsInContent)(choice.text, variableManager);
-        // Update game flags from variable manager after operations
-        const updatedVars = variableManager.getAllVariables();
-        const definedVars = {};
-        for (const [key, value] of Object.entries(updatedVars)) {
-            if (value !== undefined)
-                definedVars[key] = value;
-        }
-        setGameFlags(prev => ({ ...prev, ...definedVars }));
-        if (choice.setFlags) {
-            // Update dialogue flags (temporary)
-            choice.setFlags.forEach(flagId => {
-                variableManager.addMemoryFlag(flagId);
-            });
-            // Update game flags (persistent)
-            if (flagSchema) {
-                const gameFlagIds = choice.setFlags.filter(flagId => {
-                    const flag = flagSchema.flags.find(f => f.id === flagId);
-                    return flag && flag.type !== 'dialogue';
                 });
-                if (gameFlagIds.length > 0) {
-                    setGameFlags(prev => (0, flag_manager_1.mergeFlagUpdates)(prev, gameFlagIds, flagSchema));
-                    // Update variable manager
-                    gameFlagIds.forEach(flagId => {
-                        const flag = flagSchema.flags.find(f => f.id === flagId);
-                        if (flag) {
-                            variableManager.set(flagId, flag.defaultValue ?? true);
-                        }
-                    });
-                    setFlagsSetDuringRun(prev => {
-                        const next = new Set(prev);
-                        gameFlagIds.forEach(f => next.add(f));
-                        return next;
-                    });
-                }
-            }
-        }
-        // Only move to next node if it exists and is valid
-        if (choice.nextNodeId && (0, yarn_runner_1.isValidNextNode)(choice.nextNodeId, dialogue.nodes)) {
-            setCurrentNodeId(choice.nextNodeId);
-        }
-        else {
-            // Choice leads nowhere - dialogue complete
-            setIsTyping(false);
+                return next;
+            });
         }
     };
-    const handleRestart = () => {
-        setHistory([]);
-        variableManager.reset(initialGameFlags, new Set());
-        setGameFlags(initialGameFlags);
-        setFlagsSetDuringRun(new Set());
-        setCurrentNodeId(startNodeId || dialogue.startNodeId);
-    };
+    // Update gameState when flags change (for ScenePlayer)
+    const currentGameState = (0, react_1.useMemo)(() => {
+        return { flags: currentFlags };
+    }, [currentFlags]);
     // Get all non-dialogue flags from schema
     const gameFlagsList = (0, react_1.useMemo)(() => {
         if (!flagSchema)
@@ -250,7 +121,7 @@ function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }) {
                         const flag = flagSchema.flags.find(f => f.id === flagId);
                         if (!flag)
                             return null;
-                        const value = gameFlags[flagId];
+                        const value = currentFlags[flagId];
                         return (react_1.default.createElement("div", { key: flagId, className: "bg-[#12121a] border border-[#2a2a3e] rounded px-2 py-1.5 text-xs" },
                             react_1.default.createElement("div", { className: "flex items-center gap-2" },
                                 react_1.default.createElement("span", { className: `px-1.5 py-0.5 rounded text-[10px] border ${flagTypeColors[flag.type]}` }, flag.type),
@@ -265,7 +136,7 @@ function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }) {
                         gameFlagsList.length,
                         ")"),
                     react_1.default.createElement("div", { className: "space-y-1 max-h-96 overflow-y-auto" }, gameFlagsList.map(flag => {
-                        const value = gameFlags[flag.id];
+                        const value = currentFlags[flag.id];
                         const wasSet = flagsSetDuringRun.has(flag.id);
                         const hasValue = value !== undefined;
                         return (react_1.default.createElement("div", { key: flag.id, className: `bg-[#12121a] border rounded px-2 py-1.5 text-xs transition-colors ${wasSet ? 'border-[#e94560]/50 bg-[#e94560]/5' : 'border-[#2a2a3e]'}` },
@@ -280,28 +151,5 @@ function PlayView({ dialogue, startNodeId, flagSchema, initialFlags }) {
                                     typeof value === 'number' ? value :
                                         `"${value}"`))) : (react_1.default.createElement("div", { className: "mt-1 text-[10px] text-gray-600 italic" }, "Not set"))));
                     })))))),
-        react_1.default.createElement("div", { className: "flex-1 overflow-y-auto p-4" },
-            react_1.default.createElement("div", { className: "max-w-2xl mx-auto space-y-4" },
-                history.map((entry, idx) => (react_1.default.createElement("div", { key: idx, className: `flex ${entry.type === 'player' ? 'justify-end' : 'justify-start'}` },
-                    react_1.default.createElement("div", { className: `max-w-[80%] rounded-2xl px-4 py-3 ${entry.type === 'player'
-                            ? 'bg-[#e94560] text-white rounded-br-md'
-                            : 'bg-[#1a1a2e] text-gray-100 rounded-bl-md'}` },
-                        entry.type === 'npc' && entry.speaker && (react_1.default.createElement("div", { className: "text-xs text-[#e94560] font-medium mb-1" }, entry.speaker)),
-                        react_1.default.createElement("div", { className: "whitespace-pre-wrap" }, entry.content))))),
-                isTyping && (react_1.default.createElement("div", { className: "flex justify-start" },
-                    react_1.default.createElement("div", { className: "bg-[#1a1a2e] rounded-2xl rounded-bl-md px-4 py-3" },
-                        react_1.default.createElement("div", { className: "flex gap-1" },
-                            react_1.default.createElement("span", { className: "w-2 h-2 bg-[#e94560] rounded-full animate-bounce", style: { animationDelay: '0ms' } }),
-                            react_1.default.createElement("span", { className: "w-2 h-2 bg-[#e94560] rounded-full animate-bounce", style: { animationDelay: '150ms' } }),
-                            react_1.default.createElement("span", { className: "w-2 h-2 bg-[#e94560] rounded-full animate-bounce", style: { animationDelay: '300ms' } }))))),
-                react_1.default.createElement("div", { ref: chatEndRef }))),
-        currentNode?.type === 'player' && !isTyping && availableChoices.length > 0 && (react_1.default.createElement("div", { className: "border-t border-[#1a1a2e] bg-[#0d0d14]/80 backdrop-blur-sm p-4" },
-            react_1.default.createElement("div", { className: "max-w-2xl mx-auto space-y-2" }, availableChoices.map((choice) => (react_1.default.createElement("button", { key: choice.id, onClick: () => handleChoice(choice), className: "w-full text-left px-4 py-3 rounded-lg border border-[#2a2a3e] hover:border-[#e94560] bg-[#12121a] hover:bg-[#1a1a2e] text-gray-200 transition-all group flex items-center justify-between" },
-                react_1.default.createElement("span", null, choice.text),
-                react_1.default.createElement("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", className: "text-gray-600 group-hover:text-[#e94560] transition-colors" },
-                    react_1.default.createElement("polyline", { points: "9 18 15 12 9 6" })))))))),
-        currentNode?.type === 'npc' && !currentNode.nextNodeId && !isTyping && (react_1.default.createElement("div", { className: "border-t border-[#1a1a2e] bg-[#0d0d14]/80 backdrop-blur-sm p-4" },
-            react_1.default.createElement("div", { className: "max-w-2xl mx-auto text-center" },
-                react_1.default.createElement("p", { className: "text-gray-500 mb-3" }, "End of dialogue"),
-                react_1.default.createElement("button", { onClick: handleRestart, className: "px-4 py-2 bg-[#e94560] hover:bg-[#d63850] text-white rounded-lg transition-colors" }, "Play Again"))))));
+        react_1.default.createElement(ScenePlayer_1.ScenePlayer, { dialogue: dialogue, gameState: currentGameState, startNodeId: startNodeId, onComplete: handleComplete, onFlagUpdate: handleFlagUpdate })));
 }

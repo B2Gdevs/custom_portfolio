@@ -64,11 +64,9 @@ export function ScenePlayer({ dialogue, gameState, startNodeId, onComplete, onFl
                 setIsTyping(false);
                 // Call onNodeExit before moving to next
                 onNodeExit?.(currentNodeId, node);
-                // Auto-advance if there's a next node
-                if (node.nextNodeId) {
-                    setTimeout(() => setCurrentNodeId(node.nextNodeId), 300);
-                }
-                else {
+                // For NPC-only linear stories: don't auto-advance, wait for user input (Enter key or Continue button)
+                // Only auto-advance if there's no next node (dialogue complete)
+                if (!node.nextNodeId) {
                     // Dialogue complete
                     onDialogueEnd?.();
                     onComplete({
@@ -77,6 +75,7 @@ export function ScenePlayer({ dialogue, gameState, startNodeId, onComplete, onFl
                         completedNodeIds: Array.from(visitedNodes)
                     });
                 }
+                // If there's a nextNodeId, we'll wait for user to press Enter or click Continue
             }, 500);
             return () => clearTimeout(timer);
         }
@@ -148,6 +147,15 @@ export function ScenePlayer({ dialogue, gameState, startNodeId, onComplete, onFl
             });
         }
     };
+    console.log("isnpc", currentNode?.type === 'npc');
+    console.log("isplayer", currentNode?.type === 'player');
+    console.log("isTyping", isTyping);
+    console.log("availableChoices", availableChoices);
+    console.log("visitedNodes", visitedNodes);
+    console.log("flags", flags);
+    console.log("history", history);
+    console.log("currentNodeId", currentNodeId);
+    console.log("dialogue", dialogue);
     return (React.createElement("div", { className: "flex-1 flex flex-col" },
         React.createElement("div", { className: "flex-1 overflow-y-auto p-4" },
             React.createElement("div", { className: "max-w-2xl mx-auto space-y-4" },
@@ -177,8 +185,11 @@ export function ScenePlayer({ dialogue, gameState, startNodeId, onComplete, onFl
                         dialogueTree: dialogue,
                         completedNodeIds: Array.from(visitedNodes)
                     }), className: "px-4 py-2 bg-[#e94560] hover:bg-[#d63850] text-white rounded-lg transition-colors" }, "Close")))),
-        currentNode?.type === 'npc' && currentNode.nextNodeId && !isTyping && (React.createElement("div", { className: "border-t border-[#1a1a2e] bg-[#0d0d14]/80 backdrop-blur-sm p-4" },
+        currentNode?.type === 'npc' && currentNode.nextNodeId && !isTyping && (React.createElement("div", { className: "border-t border-[#1a1a2e] bg-[#0d0d14]/80 backdrop-blur-sm p-4 sticky bottom-0 z-10" },
             React.createElement("div", { className: "max-w-2xl mx-auto text-center" },
-                React.createElement("p", { className: "text-xs text-gray-500 mb-2" }, "Press Enter to continue"),
-                React.createElement("button", { onClick: () => setCurrentNodeId(currentNode.nextNodeId), className: "px-4 py-2 bg-[#1a1a2e] hover:bg-[#2a2a3e] text-gray-300 rounded-lg transition-colors border border-[#2a2a3e] hover:border-[#e94560]" }, "Continue \u2192"))))));
+                React.createElement("p", { className: "text-xs text-gray-400 mb-3" },
+                    "Press ",
+                    React.createElement("kbd", { className: "px-2 py-1 bg-[#1a1a2e] border border-[#2a2a3e] rounded text-xs" }, "Enter"),
+                    " to continue"),
+                React.createElement("button", { onClick: () => setCurrentNodeId(currentNode.nextNodeId), className: "px-6 py-3 bg-[#e94560] hover:bg-[#d63850] text-white rounded-lg transition-colors font-medium shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95", autoFocus: true }, "Continue \u2192"))))));
 }
