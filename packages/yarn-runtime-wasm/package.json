@@ -1,0 +1,44 @@
+{
+  "name": "@magicborn/yarn-runtime-wasm",
+  "version": "0.1.0",
+  "description": "Yarn Spinner runtime for browser using WASM or TypeScript VM",
+  "main": "./dist/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc && tsc -p tsconfig.esm.json",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "files": [
+    "dist",
+    "src",
+    "wasm"
+  ],
+  "keywords": [
+    "yarn-spinner",
+    "runtime",
+    "wasm",
+    "vm",
+    "dialogue"
+  ],
+  "author": "MagicbornStudios",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MagicbornStudios/yarn-runtime-wasm.git"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}
+

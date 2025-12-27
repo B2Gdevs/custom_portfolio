@@ -1,0 +1,42 @@
+{
+  "name": "@magicborn/yarn-artifacts",
+  "version": "0.1.0",
+  "description": "Load and parse Yarn Spinner compiled artifacts",
+  "main": "./dist/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc && tsc -p tsconfig.esm.json",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "keywords": [
+    "yarn-spinner",
+    "artifacts",
+    "yarnc",
+    "dialogue"
+  ],
+  "author": "MagicbornStudios",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MagicbornStudios/yarn-artifacts.git"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}
+

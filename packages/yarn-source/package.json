@@ -1,0 +1,45 @@
+{
+  "name": "@magicborn/yarn-source",
+  "version": "0.1.0",
+  "description": "Convert DialogueTree graphs to Yarn Spinner source format with stable line IDs",
+  "main": "./dist/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc && tsc -p tsconfig.esm.json",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "keywords": [
+    "yarn-spinner",
+    "dialogue",
+    "narrative",
+    "game-development"
+  ],
+  "author": "MagicbornStudios",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MagicbornStudios/yarn-source.git"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "peerDependencies": {
+    "@magicborn/dialogue-forge": "workspace:*"
+  }
+}
+

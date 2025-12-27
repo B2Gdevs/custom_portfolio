@@ -1,0 +1,48 @@
+{
+  "name": "@magicborn/yarn-compiler-client",
+  "version": "0.1.0",
+  "description": "Node.js wrapper for bundled Yarn Spinner compiler (ysc)",
+  "main": "./dist/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc && tsc -p tsconfig.esm.json",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "clean": "rm -rf dist",
+    "download-ysc": "node scripts/download-ysc.js"
+  },
+  "files": [
+    "dist",
+    "src",
+    "bin"
+  ],
+  "keywords": [
+    "yarn-spinner",
+    "compiler",
+    "ysc",
+    "dialogue"
+  ],
+  "author": "MagicbornStudios",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MagicbornStudios/yarn-compiler-client.git"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+
