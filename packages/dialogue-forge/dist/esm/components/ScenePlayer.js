@@ -95,6 +95,26 @@ export function ScenePlayer({ dialogue, gameState, startNodeId, onComplete, onFl
             return cond.operator === 'is_set' ? hasFlag : !hasFlag;
         });
     }) || [];
+    // Handle Enter key for advancing NPC-only dialogues
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Only handle Enter key when:
+            // 1. Not typing
+            // 2. Current node is NPC
+            // 3. There's a next node to advance to
+            // 4. Not waiting for player choice
+            if (e.key === 'Enter' &&
+                !isTyping &&
+                currentNode?.type === 'npc' &&
+                currentNode.nextNodeId &&
+                availableChoices.length === 0) {
+                e.preventDefault();
+                setCurrentNodeId(currentNode.nextNodeId);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isTyping, currentNode, availableChoices, setCurrentNodeId]);
     const handleChoice = (choice) => {
         const currentNode = dialogue.nodes[currentNodeId];
         // Call onChoiceSelect hook
@@ -156,5 +176,9 @@ export function ScenePlayer({ dialogue, gameState, startNodeId, onComplete, onFl
                         updatedFlags: flags,
                         dialogueTree: dialogue,
                         completedNodeIds: Array.from(visitedNodes)
-                    }), className: "px-4 py-2 bg-[#e94560] hover:bg-[#d63850] text-white rounded-lg transition-colors" }, "Close"))))));
+                    }), className: "px-4 py-2 bg-[#e94560] hover:bg-[#d63850] text-white rounded-lg transition-colors" }, "Close")))),
+        currentNode?.type === 'npc' && currentNode.nextNodeId && !isTyping && (React.createElement("div", { className: "border-t border-[#1a1a2e] bg-[#0d0d14]/80 backdrop-blur-sm p-4" },
+            React.createElement("div", { className: "max-w-2xl mx-auto text-center" },
+                React.createElement("p", { className: "text-xs text-gray-500 mb-2" }, "Press Enter to continue"),
+                React.createElement("button", { onClick: () => setCurrentNodeId(currentNode.nextNodeId), className: "px-4 py-2 bg-[#1a1a2e] hover:bg-[#2a2a3e] text-gray-300 rounded-lg transition-colors border border-[#2a2a3e] hover:border-[#e94560]" }, "Continue \u2192"))))));
 }
