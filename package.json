@@ -8,6 +8,7 @@
     "packages-shared/*"
   ],
   "scripts": {
+    "setup": "./scripts/setup-git-hooks.sh",
     "dev": "npm run dev --workspace=@portfolio/app",
     "build": "npm run build --workspace=@portfolio/app",
     "start": "npm run start --workspace=@portfolio/app",
@@ -17,6 +18,7 @@
     "package:token": "./scripts/manage-packages.sh token",
     "package:build": "./scripts/manage-packages.sh build",
     "package:sync": "./scripts/manage-packages.sh sync",
+    "package:sync:all": "./scripts/sync-all-packages.sh",
     "package:publish": "./scripts/manage-packages.sh publish",
     "package:workflow": "./scripts/manage-packages.sh workflow",
     "package:status": "./scripts/manage-packages.sh status",

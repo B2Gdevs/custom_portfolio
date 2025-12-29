@@ -33,6 +33,18 @@ From the repository root run:
 npm install
 ```
 
+### Setup git hooks (recommended)
+
+After cloning, set up git hooks for automatic package syncing:
+
+```bash
+npm run setup
+# or
+./scripts/setup-git-hooks.sh
+```
+
+This installs a post-push hook that automatically syncs changed packages to their GitHub repos when you push to `main`. See [MONOREPO_SYNC.md](./MONOREPO_SYNC.md) for details.
+
 This installs dependencies for the workspace. If you use pnpm or yarn workspaces, you can use those instead (pnpm install, yarn install).
 
 ### Run the Portfolio App (local dev)
