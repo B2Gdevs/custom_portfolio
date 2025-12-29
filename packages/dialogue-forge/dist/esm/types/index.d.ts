@@ -43,6 +43,7 @@ export interface DialogueTree {
     nodes: Record<string, DialogueNode>;
 }
 import { FlagSchema } from './flags';
+export type ViewMode = 'graph' | 'yarn' | 'play';
 export interface DialogueEditorProps {
     dialogue: DialogueTree | null;
     onChange: (dialogue: DialogueTree) => void;
