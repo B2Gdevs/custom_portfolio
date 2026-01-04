@@ -67,3 +67,4 @@ If a package sync fails:
 2. Manually sync the package: `./scripts/sync-package-to-repo.sh <package-name>`
 3. If there are conflicts, the script will try to pull/rebase automatically
 
+
