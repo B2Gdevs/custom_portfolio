@@ -1673,6 +1673,8 @@ export function DialogueEditorV2(props: DialogueEditorProps & {
   onLayoutStrategyChange?: (strategy: string) => void;
   onOpenFlagManager?: () => void;
   onOpenGuide?: () => void;
+  onLoadExampleDialogue?: (dialogue: DialogueTree) => void;
+  onLoadExampleFlags?: (flags: FlagSchema) => void;
 }) {
   return (
     <ReactFlowProvider>
