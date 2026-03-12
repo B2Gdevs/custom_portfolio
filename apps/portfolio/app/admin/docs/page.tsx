@@ -7,12 +7,17 @@ import { BookOpen, ExternalLink } from 'lucide-react';
 
 const isAdminEnabled = process.env.NODE_ENV === 'development';
 
+interface DocMeta {
+  title?: string;
+  description?: string;
+}
+
 export default function AdminDocsPage() {
   const [mounted, setMounted] = useState(false);
-  const [docs, setDocs] = useState<Array<{ meta: any; slug: string }>>([]);
+  const [docs, setDocs] = useState<Array<{ meta: DocMeta; slug: string }>>([]);
 
   useEffect(() => {
-    setMounted(true);
+    queueMicrotask(() => setMounted(true));
     if (isAdminEnabled) {
       fetch('/api/admin/docs')
         .then((res) => res.json())

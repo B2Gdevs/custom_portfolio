@@ -1,11 +1,10 @@
 import { notFound } from 'next/navigation';
 import { getContentBySlug, getAllContent } from '@/lib/content';
 import { MDXRemote } from 'next-mdx-remote/rsc';
-import { useMDXComponents } from '@/lib/mdx';
+import { getMDXComponents } from '@/lib/mdx';
 import { mdxOptions } from '@/lib/mdx-options';
 import DocsLayout from '@/components/docs/DocsLayout';
 import TableOfContents from '@/components/docs/TableOfContents';
-import { format } from 'date-fns';
 
 export async function generateStaticParams() {
   const docs = getAllContent('docs');
@@ -24,7 +23,7 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
     notFound();
   }
 
-  const components = useMDXComponents({});
+  const components = getMDXComponents({});
 
   return (
     <DocsLayout docs={allDocs} currentSlug={slugString}>

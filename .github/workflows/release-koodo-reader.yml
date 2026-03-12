@@ -1,0 +1,52 @@
+# Build Koodo Reader desktop app (Electron) from vendored submodule.
+# Tag with koodo-reader-v* to trigger. Requires vendor/koodo-reader checked out.
+# Wire .repub in Koodo (see .planning/VENDORING.md) for full reader support.
+name: Release Koodo Reader
+
+on:
+  push:
+    tags:
+      - 'koodo-reader-v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install root dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/koodo-reader-v}" >> $GITHUB_OUTPUT
+
+      - name: Build Koodo Reader (Electron)
+        run: |
+          cd vendor/koodo-reader
+          npm ci || npm install
+          npm run release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Koodo Reader ${{ steps.version.outputs.VERSION }}
+          files: vendor/koodo-reader/dist/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

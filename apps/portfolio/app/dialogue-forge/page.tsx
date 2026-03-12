@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, Save, Trash2, ChevronRight, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
+import { ArrowLeft, X, Check, GitBranch, MessageSquare, Play, Download, Upload, FileText, Code, Edit3, Plus } from 'lucide-react';
 import { DialogueEditorV2 } from '@magicborn/dialogue-forge/src/components/DialogueEditorV2';
 import { GuidePanel } from '@magicborn/dialogue-forge/src/components/GuidePanel';
 import { FlagManager } from '@magicborn/dialogue-forge/src/components/FlagManager';

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getContentBySlug, getAllContent } from '@/lib/content';
 import { MDXRemote } from 'next-mdx-remote/rsc';
-import { useMDXComponents } from '@/lib/mdx';
+import { getMDXComponents } from '@/lib/mdx';
 import { mdxOptions } from '@/lib/mdx-options';
 import { ExternalLink, Github } from 'lucide-react';
 import Link from 'next/link';
@@ -23,13 +23,14 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
     notFound();
   }
 
-  const components = useMDXComponents({});
+  const components = getMDXComponents({});
 
   const heroImage = project.meta.featuredImage || project.meta.images?.[0];
   const galleryImages = project.meta.images || [];
   
   // Parse media items from metadata
-  const mediaItems = (project.meta.media || []).map((item: any) => {
+  type MediaItemInput = { type?: string; url?: string } & Record<string, unknown>;
+  const mediaItems = ((project.meta.media || []) as unknown as MediaItemInput[]).map((item: MediaItemInput) => {
     if (item.type === 'video' && item.url) {
       // Convert YouTube URL to embed format
       let embedUrl = item.url;
@@ -59,7 +60,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
             embedUrl = `https://www.youtube.com/embed/${videoId}${startParam}`;
           }
         }
-      } catch (e) {
+      } catch (_e) {
         // If URL parsing fails, keep original URL
         console.warn('Failed to parse video URL:', item.url);
       }
@@ -160,7 +161,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         {/* Sticky Sidebar */}
         <div className="lg:col-span-1">
           <ProjectMediaSidebar
-            mediaItems={mediaItems}
+            mediaItems={mediaItems as { type: 'image' | 'video' | 'external' | 'documentation'; src?: string; url?: string; title?: string; thumbnail?: string }[]}
             galleryImages={galleryImages}
             projectTitle={project.meta.title}
           />

@@ -10,7 +10,7 @@ export async function GET() {
   try {
     const posts = getAllContent('blog');
     return NextResponse.json(posts);
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json({ error: 'Failed to fetch blog posts' }, { status: 500 });
   }
 }

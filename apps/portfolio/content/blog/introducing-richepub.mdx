@@ -1,0 +1,24 @@
+---
+title: "Introducing RichEPub: React, Tailwind, and npm in a Single Ebook"
+description: "Why I'm building a custom ebook format that supports full React components, Tailwind CSS, and npm dependencies—and how it compares to standard EPUB."
+date: "2025-03-11"
+tags: ["RichEPub", "EPUB", "React", "Tailwind", "Ebooks"]
+---
+
+Standard EPUB is great for universal reading: Kindle, Apple Books, Kobo, and every other reader understand it. But it's built on HTML, CSS, and a bit of JavaScript—no React, no component libraries, no Tailwind, no npm. If you want your "book" to be a real web app (interactive, styled with a design system, using the same stack you use everywhere else), EPUB won't get you there.
+
+That's why I'm building **RichEPub** (`.repub`): an ebook container format that supports React, Tailwind, and npm dependencies. It's not meant to be compatible with Kindle or iBooks. It's for **web-based readers** that can unpack and run the bundled app in a sandboxed iframe—like the one in this portfolio.
+
+## Goals
+
+- **Single file**: One `.repub` file contains the manifest, entry HTML, and pre-built JS/CSS. No runtime npm resolution; everything is bundled at build time.
+- **Author in familiar stack**: Write your book as a Vite + React + Tailwind project. Add any npm deps you want. The builder packs the build output into a `.repub`.
+- **Read in the browser**: The portfolio's [Books](/books) page lets you open a `.repub` in a sandboxed iframe so the React app runs without touching the rest of the site.
+- **Document dependencies**: The manifest lists the npm packages you used (for audit and documentation). The file itself is self-contained.
+
+## Non-goals
+
+- **Compatibility with standard readers**: `.repub` is not EPUB. Use standard EPUB when you need universal distribution; we also build EPUB from Markdown for that.
+- **Runtime npm resolution**: The reader does not fetch or resolve npm. The author's build step does that once; the `.repub` is static.
+
+In the next posts I'll cover the format spec, the toolchain, and reading .repub in the browser.

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getContentBySlug, getAllContent } from '@/lib/content';
 import { MDXRemote } from 'next-mdx-remote/rsc';
-import { useMDXComponents } from '@/lib/mdx';
+import { getMDXComponents } from '@/lib/mdx';
 import { mdxOptions } from '@/lib/mdx-options';
 import { format } from 'date-fns';
 import Link from 'next/link';
@@ -22,7 +22,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     notFound();
   }
 
-  const components = useMDXComponents({});
+  const components = getMDXComponents({});
   const heroImage = post.meta.featuredImage || post.meta.image;
   const galleryImages = post.meta.images || [];
 

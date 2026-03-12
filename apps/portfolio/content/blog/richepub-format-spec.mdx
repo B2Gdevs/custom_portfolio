@@ -1,0 +1,35 @@
+---
+title: "RichEPub Format Spec: Container, Manifest, and Versioning"
+description: "The .repub file is a ZIP with a defined layout and repub.json manifest. Here's the schema and how dependencies are declared."
+date: "2025-03-11"
+tags: ["RichEPub", "Format", "Specification"]
+---
+
+RichEPub (`.repub`) is a **ZIP-based container** with a fixed layout and a root manifest. Full documentation lives in the [docs](/docs/richepub/format-spec); this post summarizes the main ideas.
+
+## Layout
+
+- **repub.json** (root): Format version, book title, author, entry path, optional dependencies map, build info.
+- **content/index.html**: Entry document. It loads scripts and styles from `../assets/`.
+- **assets/**: Pre-built JS and CSS. No node_modules; everything is bundled at build time.
+- **meta/** (optional): Cover image, description, for catalog/UI.
+
+## repub.json
+
+- **formatVersion**: Integer (e.g. 1). Readers reject unknown versions.
+- **title**: Book title.
+- **author**: Optional.
+- **entry**: Path to entry HTML (e.g. content/index.html).
+- **dependencies**: Optional. Map of package name to version. Declarative only; used for docs/audit.
+- **buildInfo**: Optional. builderVersion, buildTime (ISO 8601).
+
+## Dependencies
+
+The dependencies object describes what the author used when building. It's typically derived from the repub project's package.json at pack time. The actual .repub does not contain node_modules; resolution and bundling happen in the builder. The reader never fetches npm.
+
+## Versioning
+
+- **formatVersion**: Bump when the container or manifest schema changes in a backward-incompatible way.
+- **builderVersion**: Identifies the tool that produced the file (for debugging).
+
+For the full schema and examples, see the [RichEPub format spec](/docs/richepub/format-spec) in the docs.

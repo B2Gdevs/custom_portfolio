@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Briefcase, FileText, Settings, Copy, Check } from 'lucide-react';
+import { Home, Briefcase, FileText, BookOpen, Settings, Copy, Check } from 'lucide-react';
 
 const navItems = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/projects', label: 'Projects', icon: Briefcase },
   { href: '/blog', label: 'Blog', icon: FileText },
+  { href: '/books', label: 'Books', icon: BookOpen },
 ];
 
 // Update this if you use a different email provider

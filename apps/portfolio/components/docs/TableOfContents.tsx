@@ -30,7 +30,7 @@ export default function TableOfContents() {
       }
     });
 
-    setHeadings(headingElements);
+    queueMicrotask(() => setHeadings(headingElements));
 
     // Intersection Observer for active heading
     const observer = new IntersectionObserver(

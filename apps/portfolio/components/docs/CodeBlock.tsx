@@ -9,7 +9,7 @@ interface CodeBlockProps {
   className?: string;
   'data-language'?: string;
   'data-label'?: string;
-  preProps?: any;
+  preProps?: React.HTMLAttributes<HTMLPreElement>;
 }
 
 const languageIcons: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
@@ -28,33 +28,28 @@ const languageIcons: Record<string, React.ComponentType<{ size?: number; classNa
   yml: FileCode,
 };
 
-// Default to Terminal icon if label contains "Terminal"
-const getIconForLabel = (label: string, language: string) => {
-  if (label.toLowerCase().includes('terminal')) {
-    return Terminal;
-  }
+// Pick icon by label/language; stable references only (no component created during render)
+function pickIcon(label: string, language: string): React.ComponentType<{ size?: number; className?: string }> {
+  if (label.toLowerCase().includes('terminal')) return Terminal;
   return languageIcons[language.toLowerCase()] || Code;
-};
+}
 
 export function CodeBlock({ children, className = '', preProps, ...props }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
   const codeRef = useRef<HTMLPreElement>(null);
-  
-  // Extract language from className (e.g., "language-bash" -> "bash")
-  const language = props['data-language'] || 
+
+  const language = props['data-language'] ||
     className
       .split(' ')
       .find(cls => cls.startsWith('language-'))
       ?.replace('language-', '') || '';
 
-  // Get label from data-label
   let label = props['data-label'];
   if (!label) {
     label = language ? language.charAt(0).toUpperCase() + language.slice(1) : 'Code';
   }
-  
-  // Get icon for language or label
-  const Icon = getIconForLabel(label, language);
+
+  const IconComponent = pickIcon(label, language);
 
   const copyToClipboard = async () => {
     if (!codeRef.current) return;
@@ -75,7 +70,8 @@ export function CodeBlock({ children, className = '', preProps, ...props }: Code
     <div className="relative group my-6 overflow-hidden rounded-lg border border-border bg-dark-alt">
       {/* Header bar - Docus style */}
       <div className="flex items-center gap-2 border-b border-border bg-dark-alt px-4 py-2.5">
-        <Icon size={14} className="shrink-0 text-green-300" />
+        {/* eslint-disable-next-line react-hooks/static-components -- IconComponent is stable ref */}
+        <IconComponent size={14} className="shrink-0 text-green-300" />
         <span className="text-green-200 text-xs font-medium">{label}</span>
         
         {/* Copy button - always visible on mobile, hover on desktop */}

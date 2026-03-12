@@ -1,0 +1,53 @@
+---
+title: "Building the RichEPub Toolchain"
+description: "Repub project layout, builder steps, and how to produce your first .repub file."
+date: "2025-03-11"
+tags: ["RichEPub", "Tooling", "Vite", "Build"]
+---
+
+The RichEPub builder lives in this repo as `packages/repub-builder`. It expects a **repub project**: a folder with a Vite (or similar) app that builds to static HTML + JS + CSS. The builder runs that build, then packs the output into a `.repub` file.
+
+## Repub project layout
+
+- **package.json**: Dependencies (React, Tailwind, etc.) and a `build` script (e.g. `vite build`).
+- **repub.config.json**: Book title, author, entry path, output path for the `.repub`.
+- **src/** (or your app root): React app. Build output goes to `dist/` (index.html + assets/).
+
+Example `repub.config.json`:
+
+```json
+{
+  "title": "My Book",
+  "author": "Author Name",
+  "entry": "content/index.html",
+  "outputPath": "dist/book.repub"
+}
+```
+
+## Builder steps
+
+1. **Install**: `npm install` in the repub project (optional flag: `--skip-install`).
+2. **Build**: `npm run build` (optional flag: `--skip-build`). Expects `dist/index.html` and `dist/assets/*`.
+3. **Rewrite paths**: The builder rewrites asset references in `index.html` from `./assets/` to `../assets/` so they resolve correctly when the file lives at `content/index.html` inside the ZIP.
+4. **Manifest**: Generate `repub.json` from config + `package.json` (dependencies, build time, format version).
+5. **Pack**: ZIP up `repub.json`, `content/index.html`, and `assets/*` as a `.repub` file.
+
+## Sample and CLI
+
+A sample repub project is at `packages/repub-builder/sample/`: Vite + React + Tailwind. From the builder package:
+
+```bash
+cd packages/repub-builder
+pnpm run build
+node dist/cli.js sample
+```
+
+Output: `sample/dist/sample-book.repub`. You can open it in the portfolio's [Books](/books) reader.
+
+## Producing the first .repub
+
+1. Copy or clone the sample; edit title in `repub.config.json` and add your content in `src/`.
+2. Run `npm install` and `npm run build` in the sample (or use the builder without `--skip-install` and `--skip-build`).
+3. Run the builder CLI with the project path. The resulting `.repub` can be placed in `apps/portfolio/public/books/<slug>/book.repub` and linked from the books list.
+
+Next: [Reading .repub in the browser](/blog/reading-repub-in-the-browser)—unpacking, sandboxing, and security.

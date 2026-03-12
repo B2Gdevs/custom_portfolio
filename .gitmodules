@@ -1,0 +1,6 @@
+[submodule "vendor/kookit"]
+	path = vendor/kookit
+	url = https://github.com/B2Gdevs/kookit.git
+[submodule "vendor/koodo-reader"]
+	path = vendor/koodo-reader
+	url = https://github.com/B2Gdevs/koodo-reader.git

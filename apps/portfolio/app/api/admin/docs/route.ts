@@ -10,7 +10,7 @@ export async function GET() {
   try {
     const docs = getAllContent('docs');
     return NextResponse.json(docs);
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json({ error: 'Failed to fetch docs' }, { status: 500 });
   }
 }

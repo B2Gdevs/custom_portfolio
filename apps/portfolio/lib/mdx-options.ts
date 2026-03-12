@@ -3,7 +3,16 @@ import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypePrettyCode from 'rehype-pretty-code';
 
-export const mdxOptions: any = {
+interface RehypeLineNode {
+  children: Array<{ type: string; value?: string }>;
+  properties?: { className?: string[] };
+}
+
+import { serialize } from 'next-mdx-remote/serialize';
+
+type MdxOptionsType = NonNullable<Parameters<typeof serialize>[1]>;
+
+export const mdxOptions: MdxOptionsType = {
   parseFrontmatter: false,
   mdxOptions: {
     remarkPlugins: [remarkGfm],
@@ -23,20 +32,20 @@ export const mdxOptions: any = {
         {
           theme: 'github-dark',
           keepBackground: false,
-          onVisitLine(node: any) {
-            // Prevent lines from collapsing in `display: grid` mode, and allow empty
-            // lines to be copy/pasted from the browser
+          onVisitLine(node: RehypeLineNode) {
             if (node.children.length === 0) {
               node.children = [{ type: 'text', value: ' ' }];
             }
           },
-          onVisitHighlightedLine(node: any) {
-            // Each line node by default has `class="line"`.
-            node.properties.className.push('highlighted');
+          onVisitHighlightedLine(node: RehypeLineNode) {
+            if (node.properties?.className) {
+              node.properties.className.push('highlighted');
+            }
           },
-          onVisitHighlightedWord(node: any) {
-            // Each word node has no className by default.
-            node.properties.className = ['word'];
+          onVisitHighlightedWord(node: RehypeLineNode) {
+            if (node.properties) {
+              node.properties.className = ['word'];
+            }
           },
         },
       ],

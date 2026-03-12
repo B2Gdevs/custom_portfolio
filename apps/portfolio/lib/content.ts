@@ -11,7 +11,12 @@ export interface ContentMeta {
   date?: string;
   updated?: string;
   tags?: string[];
-  [key: string]: any;
+  featuredImage?: string;
+  image?: string;
+  images?: string[];
+  githubUrl?: string;
+  liveUrl?: string;
+  [key: string]: string | string[] | number | boolean | undefined;
 }
 
 export function getContentFiles(type: 'docs' | 'projects' | 'blog'): string[] {

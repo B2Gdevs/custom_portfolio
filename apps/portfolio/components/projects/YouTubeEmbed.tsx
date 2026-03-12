@@ -29,7 +29,7 @@ export default function YouTubeEmbed({ url, title }: YouTubeEmbedProps) {
         startTime = t.replace(/[^0-9]/g, '');
       }
     }
-  } catch (e) {
+  } catch (_e) {
     console.warn('Failed to parse YouTube URL:', url);
   }
 
@@ -40,11 +40,6 @@ export default function YouTubeEmbed({ url, title }: YouTubeEmbedProps) {
       </div>
     );
   }
-
-  // Build embed URL with start time if provided
-  const embedUrl = startTime 
-    ? `https://www.youtube.com/embed/${videoId}?start=${startTime}`
-    : `https://www.youtube.com/embed/${videoId}`;
 
   return (
     <div className="my-8 rounded-lg overflow-hidden border border-border shadow-lg">

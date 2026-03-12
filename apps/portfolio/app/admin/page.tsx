@@ -14,7 +14,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setMounted(true);
+    queueMicrotask(() => setMounted(true));
     Promise.all([
       fetch('/api/admin/projects').then((r) => r.json()).catch(() => []),
       fetch('/api/admin/blog').then((r) => r.json()).catch(() => []),

@@ -7,12 +7,18 @@ import { FileText, ExternalLink } from 'lucide-react';
 
 const isAdminEnabled = process.env.NODE_ENV === 'development';
 
+interface PostMeta {
+  title?: string;
+  description?: string;
+  date?: string;
+}
+
 export default function AdminBlogPage() {
   const [mounted, setMounted] = useState(false);
-  const [posts, setPosts] = useState<Array<{ meta: any; slug: string }>>([]);
+  const [posts, setPosts] = useState<Array<{ meta: PostMeta; slug: string }>>([]);
 
   useEffect(() => {
-    setMounted(true);
+    queueMicrotask(() => setMounted(true));
     if (isAdminEnabled) {
       fetch('/api/admin/blog')
         .then((res) => res.json())

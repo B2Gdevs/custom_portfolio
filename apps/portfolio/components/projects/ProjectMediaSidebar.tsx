@@ -25,7 +25,6 @@ export default function ProjectMediaSidebar({
 }: ProjectMediaSidebarProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-  const observerRefs = useRef<(HTMLDivElement | null)[]>([]);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Combine gallery images with media items
@@ -102,7 +101,7 @@ export default function ProjectMediaSidebar({
 
     // Use intersection observers for each gallery image
     if (imageContainers.length > 0) {
-      imageContainers.forEach((container, index) => {
+      imageContainers.forEach((container, _index) => {
         const observer = new IntersectionObserver(
           (entries) => {
             entries.forEach((entry) => {

@@ -11,7 +11,7 @@ export default function AdminProjectsPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    queueMicrotask(() => setMounted(true));
   }, []);
 
   if (!mounted) return null;
@@ -70,8 +70,15 @@ export default function AdminProjectsPage() {
   );
 }
 
+interface ProjectMeta {
+  title?: string;
+  description?: string;
+  githubUrl?: string;
+  liveUrl?: string;
+}
+
 function AdminProjectsList() {
-  const [projects, setProjects] = useState<Array<{ meta: any; slug: string }>>([]);
+  const [projects, setProjects] = useState<Array<{ meta: ProjectMeta; slug: string }>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
