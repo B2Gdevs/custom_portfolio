@@ -19,7 +19,7 @@ const bookComponents = {
 
 /**
  * Compile MDX source to HTML using book-components as the component map.
- * Used by repub pack and epub when processing .mdx files.
+ * Used by repub epub when processing .mdx files.
  */
 export async function mdxToHtml(mdxSource: string, filePath?: string): Promise<string> {
   const file = filePath ? { path: filePath, value: mdxSource } : mdxSource;

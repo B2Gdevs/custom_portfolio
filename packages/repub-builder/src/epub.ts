@@ -88,6 +88,15 @@ function extractTitle(content: string): string {
   return h1 ? h1[1].trim() : '';
 }
 
+/** Remove the first H1 when it exactly matches the chapter title to avoid duplicate page titles. */
+function stripDuplicateTitle(html: string, chapterTitle: string): string {
+  const h1Match = html.match(/<h1(?:\s[^>]*)?>([\s\S]*?)<\/h1>/i);
+  if (!h1Match) return html;
+  const innerText = h1Match[1].replace(/<[^>]+>/g, '').trim();
+  if (innerText !== chapterTitle) return html;
+  return html.replace(/<h1(?:\s[^>]*)?>[\s\S]*?<\/h1>/i, '').trim();
+}
+
 export async function runEpub(folder: string, outputPath: string): Promise<void> {
   const meta = loadMeta(folder);
   const files = collectMdFiles(folder);
@@ -106,7 +115,8 @@ export async function runEpub(folder: string, outputPath: string): Promise<void>
         : await marked.parse(content);
     const htmlRewritten = rewriteImagesToBase64(html, folder);
     const title = data.title || extractTitle(content) || path.basename(fullPath, ext);
-    chapters.push({ title, data: htmlRewritten });
+    const dataHtml = stripDuplicateTitle(htmlRewritten, title);
+    chapters.push({ title, data: dataHtml });
   }
 
   const outDir = path.dirname(outputPath);

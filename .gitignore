@@ -13,9 +13,11 @@ node_modules/
 # testing
 /coverage
 
-# next.js (anywhere in repo)
+# next.js (anywhere in repo; do not commit build/cache)
 .next/
+**/.next/
 out/
+**/out/
 
 # production / build output
 build/

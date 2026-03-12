@@ -13,6 +13,5 @@ RichEPub is a custom ebook container format (**.repub**) that supports React, Ta
 
 ## Related
 
-- **[Book reader (static EPUB & RichEPub)](/docs/books/reader)** – Embed the reader in docs; it reads from static `book.epub` and `book.repub` files.
-- Standard **EPUB** is used for universal reading; see the books and export tooling for generating .epub from book content.
-- The portfolio includes a **.repub viewer** that unpacks and runs .repub files in a sandboxed iframe.
+- **[Book reader (EPUB)](/docs/books/reader)** – In-app reader loads `book.epub`; embeddable in docs via BookReaderEmbed.
+- Standard **EPUB** is used for reading; `pnpm run build:books` produces .epub from repo-root `books/`. The **.repub** format is legacy; the portfolio no longer builds or serves .repub (Koodo/Kookit can still open it when wired).

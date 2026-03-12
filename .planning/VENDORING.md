@@ -27,4 +27,4 @@ When `vendor/koodo-reader` is checked out (submodule init):
 2. Add `.repub` to the list and map it to format `"REPUB"` (or the key Koodo uses to select a renderer).
 3. Where the app instantiates a kookit render (e.g. `new EpubRender(buffer, config)`), add a branch for `.repub` / REPUB that uses `new RepubRender(buffer, config)` and then `renderTo(element)`.
 
-The embeddable **repub-reader** package in this repo is independent: portfolio and other apps can embed .repub without running Koodo Reader. Koodo is the desktop app we extend to open .repub files.
+The portfolio uses the in-app EPUB reader only; .repub is for Koodo Reader (desktop) when wired. Koodo is the desktop app we extend to open .repub files.

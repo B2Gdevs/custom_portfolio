@@ -12,20 +12,19 @@ Single living document for books tooling and the RichEPub reader. Update this as
 
 - **Build script:** Root-level `scripts/build-books.cjs` (invoked via `pnpm run build:books`).
 - **Input:** `books/<slug>/` for each slug (directory listing under `books/`).
-- **Output:** `apps/portfolio/public/books/<slug>/book.epub`, `book.repub`, and `apps/portfolio/public/books/manifest.json`.
-- **Manifest:** Array of `{ slug, title, description?, hasEpub, hasRepub }`. The books list (`lib/books.ts`) reads from this at runtime.
+- **Output:** `apps/portfolio/public/books/<slug>/book.epub` and `apps/portfolio/public/books/manifest.json`.
+- **Manifest:** Array of `{ slug, title, description?, hasEpub }`. The books list (`lib/books.ts`) reads from this at runtime.
 
 ## repub CLI and packages
 
-- **repub-cli (repub-builder):** CLI with subcommands `repub build`, `repub read`, `repub epub`, `repub pack`. Install from this repo only (no npm publish). See `packages/repub-builder/README.md`.
-- **repub-reader:** Embeddable SDK package (`@portfolio/repub-reader`). Unpacks .repub (ZIP → blob URLs), renders entry HTML in iframe. Used by portfolio and BookReaderEmbed so books can be read without the full Koodo Reader app.
-- **book-components:** MDX authoring components (BookRoot, Chapter, Section, ChapterTitle, PartDivider, Callout, Blockquote, Figure, CodeBlock, BookMeta). **Wired:** `repub pack` and `repub epub` compile `.mdx` files with `@mdx-js/mdx` and render using book-components as the component map; `.md` files use marked as before.
+- **repub-cli (repub-builder):** CLI with subcommands `repub build`, `repub read`, `repub epub`. Install from this repo only (no npm publish). See `packages/repub-builder/README.md`. (Legacy: `repub pack` for .repub has been removed; in-app reader is EPUB-only.)
+- **book-components:** MDX authoring components (BookRoot, Chapter, Section, ChapterTitle, PartDivider, Callout, Blockquote, Figure, CodeBlock, BookMeta). **Wired:** `repub epub` compiles `.mdx` with `@mdx-js/mdx` and book-components; `.md` uses marked.
 
 ## Vendored desktop reader (Koodo / Kookit)
 
 - **Kookit** (vendor/kookit): [B2Gdevs/kookit](https://github.com/B2Gdevs/kookit). We add a **.repub renderer** (RepubRender): unpack ZIP, repub.json + content/index.html + assets, expose to reader. See [.planning/VENDORING.md](.planning/VENDORING.md).
 - **Koodo Reader** (vendor/koodo-reader): [B2Gdevs/koodo-reader](https://github.com/B2Gdevs/koodo-reader). Vendored so we can register .repub and fix issues. When submodule is checked out, wire .repub to Kookit’s RepubRender.
-- **Embeddable reader:** The repub-reader package is independent; portfolio and other apps embed .repub without running Koodo. Koodo is the desktop app we extend to open .repub.
+- **Embeddable reader:** Portfolio uses the in-app EPUB reader (react-reader / epub.js). Koodo is the desktop app we extend to open .repub when the submodule is wired.
 
 ## Formats
 
@@ -39,10 +38,9 @@ Single living document for books tooling and the RichEPub reader. Update this as
 
 ## Reader
 
-- **Primary “reader” release:** The **Koodo Reader desktop app** (Electron) is the main consumer-facing reader build. **repub-reader** is the embeddable SDK used by the portfolio.
-- **Portfolio reader (RepubViewer):** Uses repub-reader SDK; unpacks .repub, rewrites asset URLs to blob URLs, loads entry HTML in iframe.
-- **Docs embed (BookReaderEmbed):** Same reader, embeddable in docs/articles; takes `slug` (and optional `title`), loads `/books/<slug>/book.repub`.
-- **Standalone:** Same .repub file can be opened by any host that implements the reader (e.g. portfolio or a minimal static page), or by the vendored Koodo Reader once .repub is registered.
+- **Portfolio reader:** In-app EPUB reader (react-reader / epub.js). Reads `book.epub` at `/books/<slug>/read` and in **BookReaderEmbed** (docs/articles). Location persisted in localStorage by slug.
+- **Koodo Reader (desktop):** Primary consumer-facing reader build (Electron). Can be extended to open .repub when submodule is wired.
+- **Standalone:** Same .epub file works in any EPUB reader; .repub remains for Koodo/Kookit when wired.
 
 ## Verification gates
 
@@ -60,4 +58,4 @@ Single living document for books tooling and the RichEPub reader. Update this as
 
 ## Distribution
 
-- **Repub-builder**, **repub-reader**, and **book-components** are **GitHub-repo only**. No npm publish. Consume via clone or workspace. README version automation: script + workflow substitute version into README on release.
+- **Repub-builder** and **book-components** are **GitHub-repo only**. No npm publish. Consume via clone or workspace. README version automation: script + workflow substitute version into README on release.

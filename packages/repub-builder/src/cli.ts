@@ -17,12 +17,11 @@ Usage:
   repub build [project-dir]     Build .repub from Vite project (default: cwd)
   repub read <file.repub>       Serve reader and open in browser
   repub epub <folder> [--output out.epub]  Pack folder of .md/.mdx into EPUB
-  repub pack <folder> [--output out.repub] Pack folder of .md/.mdx into .repub
 
 Options:
   --skip-install   (build) Skip npm install before build
   --skip-build     (build) Skip Vite build; use existing dist/
-  --output <path>  (epub, pack) Output file path
+  --output <path>  (epub) Output file path
   --help, -h       Show this help
   --version, -v    Show version
 `);
@@ -75,20 +74,6 @@ async function main(): Promise<void> {
     const outputPath = outIdx >= 0 && argv[outIdx + 1] ? path.resolve(argv[outIdx + 1]) : path.join(folder, 'book.epub');
     const { runEpub } = await import('./epub.js');
     await runEpub(folder, outputPath);
-    return;
-  }
-
-  if (sub === 'pack') {
-    const folderArg = argv[1];
-    if (!folderArg) {
-      console.error('repub pack requires <folder>');
-      process.exit(1);
-    }
-    const folder = path.resolve(folderArg);
-    const outIdx = argv.indexOf('--output');
-    const outputPath = outIdx >= 0 && argv[outIdx + 1] ? path.resolve(argv[outIdx + 1]) : path.join(folder, 'book.repub');
-    const { runPack } = await import('./pack.js');
-    await runPack(folder, outputPath);
     return;
   }
 

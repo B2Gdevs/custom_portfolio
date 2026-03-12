@@ -6,7 +6,8 @@ Read this each iteration; pick one task; update after completing.
 
 - [x] Fix Vercel build: add `onLoadExampleDialogue` and `onLoadExampleFlags` to `DialogueEditorV2` exported props type (packages/dialogue-forge).
 - [x] Add AGENTS.md and .planning with Ralph Wiggum loop artifacts.
-- [x] Repub plan: README version script + workflow; repub-reader package; repub-cli (build/read/epub/pack); vendor Kookit + Koodo Reader submodules; .repub renderer in Kookit (RepubRender); book-components package; .planning docs (REQUIREMENTS, VENDORING, this plan).
+- [x] Repub plan: README version script + workflow; repub-cli (build/read/epub); vendor Kookit + Koodo Reader submodules; .repub renderer in Kookit (RepubRender); book-components package; .planning docs (REQUIREMENTS, VENDORING, this plan).
+- [x] EPUB-only reader: RichEPub/.repub removed from portfolio; in-app reader is react-reader (epub.js); repub-reader and `repub pack` removed.
 
 ## Books & reader
 
@@ -14,7 +15,7 @@ Read this each iteration; pick one task; update after completing.
 - **Design / styling:** [.planning/DESIGN_STYLING.md](.planning/DESIGN_STYLING.md)
 - **Vendoring (Koodo/Kookit):** [.planning/VENDORING.md](.planning/VENDORING.md)
 
-Artifacts: `packages/repub-builder` (CLI), `packages/repub-reader` (embed SDK), `packages/book-components` (MDX components), `vendor/kookit` (with RepubRender), `vendor/koodo-reader` (submodule; wire .repub when checked out).
+Artifacts: `packages/repub-builder` (CLI, epub only), `packages/book-components` (MDX components), `vendor/kookit` (with RepubRender), `vendor/koodo-reader` (submodule; wire .repub when checked out).
 
 ## Release & lint
 
@@ -39,6 +40,6 @@ Artifacts: `packages/repub-builder` (CLI), `packages/repub-reader` (embed SDK), 
 
 - **Build:** Type fixes in app (mdx.tsx ComponentProps per element; projects mediaItems cast). `pnpm run build` and `pnpm run lint` pass.
 - **Submodules:** B2Gdevs/kookit and B2Gdevs/koodo-reader are our forks; `.gitmodules` is correct. Push vendor submodules to B2Gdevs when we have patches to publish.
-- **Book-components in repub:** `packages/repub-builder` uses `@mdx-js/mdx` + `@portfolio/book-components`; `pack` and `epub` subcommands compile `.mdx` with `mdxToHtml()`. `.md` unchanged (marked).
-- **Book-to-repub pipeline:** `pnpm run build:books` builds repub-builder, then runs `scripts/build-books.cjs` which calls `repub epub` and `repub pack` per book (no inline epub/repub logic). Books get MDX + book-components via the CLI.
+- **Book-components:** `packages/repub-builder` uses `@mdx-js/mdx` + `@portfolio/book-components`; `repub epub` compiles `.mdx` with `mdxToHtml()`. `.md` uses marked.
+- **Book pipeline:** `pnpm run build:books` builds repub-builder, then runs `scripts/build-books.cjs` which calls `repub epub` per book. Output: `book.epub` and manifest with `hasEpub` only.
 - **Optional done:** shiki in app deps; Next/MDX pinned via overrides; styled-jsx>react override for React 19.

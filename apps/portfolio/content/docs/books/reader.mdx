@@ -1,15 +1,15 @@
 ---
-title: Book reader (static EPUB & RichEPub)
-description: Embed the portfolio reader in docs; it reads from static book.epub and book.repub files built from repo-root books/.
+title: Book reader (EPUB)
+description: Embed the portfolio EPUB reader in docs; it loads book.epub from static files built from repo-root books/.
 ---
 
-# Book reader (static EPUB & RichEPub)
+# Book reader (EPUB)
 
-The portfolio serves built books from **static files** at `/books/<slug>/book.epub` and `/books/<slug>/book.repub`. These are produced by the root-level script `pnpm run build:books` from the **repo-root `books/`** directory.
+The portfolio serves built books from **static files** at `/books/<slug>/book.epub`. These are produced by the root-level script `pnpm run build:books` from the **repo-root `books/`** directory. The in-app reader loads `book.epub` and uses the same EPUB reader (react-reader / epub.js) on the [Books](/books) page and in embedded docs.
 
 ## Embedded reader in docs
 
-The **BookReaderEmbed** component can be used in any doc or article to show the same reader used on the [Books](/books) page, loading a specific book by slug from those static URLs.
+The **BookReaderEmbed** component can be used in any doc or article to show the same reader used on the [Books](/books) page, loading a specific book by slug from the static EPUB URL.
 
 Example (Mordred's Tale):
 
@@ -17,17 +17,16 @@ Example (Mordred's Tale):
 
 ## How it works
 
-- **EPUB**: Built from `books/<slug>/chapters/` (markdown → HTML) and written to `apps/portfolio/public/books/<slug>/book.epub`. Users can download it for any EPUB reader.
-- **RichEPub**: Same content is packaged as a single HTML document plus assets and zipped as `.repub`. The reader unpacks it and renders in a sandboxed iframe.
+- **EPUB**: Built from `books/<slug>/chapters/` (markdown → HTML) and written to `apps/portfolio/public/books/<slug>/book.epub`. Users can read in the browser or download for any EPUB reader.
 - **Manifest**: `build:books` writes `public/books/manifest.json`; the Books list and `getBooks()` read from that manifest.
 
-The reader component is standalone: it fetches `/books/<slug>/book.repub`, unpacks it, and displays the content. No server-side rendering of book content is required.
+The reader component fetches `/books/<slug>/book.epub` and renders it with the in-app EPUB reader. No server-side rendering of book content is required.
 
 ## Requirements and design
 
 **Requirements** and **design/styling** for books and the reader live in the repo under **`.planning/`**:
 
 - **REQUIREMENTS.md** – Books source of truth, tooling, formats, reader behavior, distribution (GitHub-only).
-- **DESIGN_STYLING.md** – Book-like typography, component set (Fumadocs-inspired), theme, future MDX reader.
+- **DESIGN_STYLING.md** – Book-like typography, component set (Fumadocs-inspired), theme.
 
 The implementation plan is in **IMPLEMENTATION_PLAN.md**. For contributors and agents: read `.planning/` for the single source of truth on what we're building and how it should look.

@@ -2,8 +2,8 @@
 
 /**
  * Download release artifacts from GitHub into .releases/
- * Usage: node scripts/download-releases.cjs [repub-tag] [repub-reader-tag] [koodo-tag]
- * If tags omitted, uses latest release for each prefix (repub-v*, repub-reader-v*, koodo-reader-v*).
+ * Usage: node scripts/download-releases.cjs [repub-tag] [koodo-tag]
+ * If tags omitted, uses latest release for each prefix (repub-v*, koodo-reader-v*).
  * Requires GITHUB_REPO env (e.g. MagicbornStudios/custom_portfolio) or defaults to that.
  */
 
@@ -79,10 +79,9 @@ async function downloadAsset(tagName, assetName, outPath) {
 }
 
 async function main() {
-  const [repubTag, repubReaderTag, koodoTag] = process.argv.slice(2);
+  const [repubTag, koodoTag] = process.argv.slice(2);
 
   const repub = repubTag || (await getLatestReleaseTag('repub-v'));
-  const repubReader = repubReaderTag || (await getLatestReleaseTag('repub-reader-v'));
   const koodo = koodoTag || (await getLatestReleaseTag('koodo-reader-v'));
 
   if (!repub) {
@@ -90,13 +89,6 @@ async function main() {
   } else {
     const version = repub.replace('repub-v', '');
     await downloadAsset(repub, `portfolio-repub-builder-${version}.tgz`, path.join(RELEASES_DIR, 'repub-builder.tgz'));
-  }
-
-  if (!repubReader) {
-    console.warn('No repub-reader release found (tag repub-reader-v*). Skip with second arg.');
-  } else {
-    const version = repubReader.replace('repub-reader-v', '');
-    await downloadAsset(repubReader, `portfolio-repub-reader-${version}.tgz`, path.join(RELEASES_DIR, 'repub-reader.tgz'));
   }
 
   if (!koodo) {

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getBooks } from '@/lib/books';
-import { BookOpen, Download, FileText } from 'lucide-react';
+import { BookOpen, Download } from 'lucide-react';
 
 export default function BooksPage() {
   const books = getBooks();
@@ -10,7 +10,7 @@ export default function BooksPage() {
       <header className="mb-12 pb-8 border-b border-border">
         <h1 className="text-4xl font-bold text-primary mb-2">Books</h1>
         <p className="text-text-muted">
-          Read in the browser or download as EPUB (universal) or RichEPub (.repub) for the full React experience.
+          Read in the browser or download as EPUB.
         </p>
       </header>
 
@@ -28,34 +28,24 @@ export default function BooksPage() {
                 <p className="text-text-muted mb-6">{book.description}</p>
               )}
               <div className="flex flex-wrap gap-3">
-                {book.hasRepub && (
+                {book.hasEpub && (
                   <>
                     <Link
                       href={`/books/${book.slug}/read`}
                       className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:opacity-90 transition"
                     >
                       <BookOpen size={16} />
-                      Read (RichEPub)
+                      Read
                     </Link>
                     <a
-                      href={`/books/${book.slug}/book.repub`}
-                      download={`${book.slug}.repub`}
+                      href={`/books/${book.slug}/book.epub`}
+                      download={`${book.slug}.epub`}
                       className="inline-flex items-center gap-2 rounded-lg border border-border bg-dark-alt px-4 py-2 text-sm font-medium text-primary hover:bg-dark-alt/80 transition"
                     >
                       <Download size={16} />
-                      Download RichEPub
+                      Download EPUB
                     </a>
                   </>
-                )}
-                {book.hasEpub && (
-                  <a
-                    href={`/books/${book.slug}/book.epub`}
-                    download={`${book.slug}.epub`}
-                    className="inline-flex items-center gap-2 rounded-lg border border-border bg-dark-alt px-4 py-2 text-sm font-medium text-primary hover:bg-dark-alt/80 transition"
-                  >
-                    <FileText size={16} />
-                    Download EPUB
-                  </a>
                 )}
               </div>
               {/* Placeholder for future enhancements: theme, font size, bookmarks */}

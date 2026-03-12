@@ -5,7 +5,6 @@ export interface BookEntry {
   slug: string;
   title: string;
   description?: string;
-  hasRepub: boolean;
   hasEpub: boolean;
 }
 

@@ -59,20 +59,14 @@ async function main() {
     const meta = loadBookMeta(bookDir, slug);
     const outDir = path.join(OUT_ROOT, slug);
     if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
-    let hasEpub = false;
-    let hasRepub = false;
     const epubPath = path.join(outDir, 'book.epub');
-    const repubPath = path.join(outDir, 'book.repub');
-    hasEpub = runRepub('epub', bookDir, epubPath);
+    const hasEpub = runRepub('epub', bookDir, epubPath);
     if (!hasEpub) console.error(`EPUB failed for ${slug}`);
-    hasRepub = runRepub('pack', bookDir, repubPath);
-    if (!hasRepub) console.error(`RichEPub failed for ${slug}`);
     manifest.push({
       slug,
       title: meta.title,
       description: meta.description || undefined,
       hasEpub: !!hasEpub,
-      hasRepub: !!hasRepub,
     });
   }
   if (!fs.existsSync(OUT_ROOT)) fs.mkdirSync(OUT_ROOT, { recursive: true });
