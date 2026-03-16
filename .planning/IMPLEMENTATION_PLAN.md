@@ -4,11 +4,22 @@ Read this each iteration; pick one task; update after completing.
 
 ## Done
 
+- [x] Nest section planning pages under a collapsed `Planning Docs` folder in the docs section tree instead of showing them as flat sibling links.
+- [x] Replace generic section planning placeholders with XML-structured docs pages (`planning docs`, `state`, `task registry`, `errors and attempts`, `decisions`) and make that planning group sort first inside each docs section.
+- [x] Documentation cleanup: remove obsolete `book-editor`, `richepub`, and generic top-level docs, then regroup the docs experience around active section folders such as `books` and `dialogue-forge`.
+- [x] Portfolio redesign phase 1: replace the tech-first home hero with a book-first landing experience.
+- [x] Portfolio redesign phase 2: add a featured-book "read now" section on `/` with working embedded reader preview and placeholder world-building copy.
+- [x] Portfolio redesign phase 3: add a `Listen` route and placeholder song dataset with working BandLab embeds.
+- [x] Portfolio redesign phase 4: add a direct `Projects`, `Blog`, and `Docs` hub on `/` and convert the shared shell to a styled sidebar.
 - [x] Fix Vercel deployment blocker: upgrade `next-mdx-remote` to `6.0.0` and pin root `packageManager` to `pnpm@10.28.0` so Vercel uses the expected pnpm major.
 - [x] Fix Vercel build: add `onLoadExampleDialogue` and `onLoadExampleFlags` to `DialogueEditorV2` exported props type (packages/dialogue-forge).
 - [x] Add AGENTS.md and .planning with Ralph Wiggum loop artifacts.
 - [x] Repub plan: README version script + workflow; repub-cli (build/read/epub); vendor Kookit + Koodo Reader submodules; .repub renderer in Kookit (RepubRender); book-components package; .planning docs (REQUIREMENTS, VENDORING, this plan).
 - [x] EPUB-only reader: RichEPub/.repub removed from portfolio; in-app reader is react-reader (epub.js); repub-reader and `repub pack` removed.
+- [x] Portfolio redesign follow-up: add a resume hub with direct printable resume pages and fold it into the public site navigation.
+- [x] Scrollbar polish follow-up: keep page and sidebar scrollbars visually aligned with stable gutters across the main site and docs shells.
+- [x] Docs planning follow-up: rewrite section planning pages into compact XML-style record layouts that are readable and parseable.
+- [x] Books reader follow-up: make the homepage reader load on demand from its CTA and show visible disabled upcoming-book choices.
 
 ## Books & reader
 
@@ -27,6 +38,8 @@ Artifacts: `packages/repub-builder` (CLI, epub only), `packages/book-components`
 
 ## Next (optional / when needed)
 
+- [ ] Portfolio redesign phase 5: replace current PCB / dev aesthetic on the public landing page with the literary visual system in `.planning/PORTFOLIO_EXPERIENCE_REDESIGN.md`.
+- [ ] Portfolio redesign phase 6: evaluate selective WebGL or React Three Fiber additions only after the non-WebGL experience is stable.
 - [x] Wire book-components into repub pack/epub when building from .mdx (MDX compiler + component map).
 - [ ] Upgrade Next.js 16.0.8 → 16.1.6 (security; see nextjs.org blog).
 - [ ] Resolve Turbopack shiki warning: add `shiki` to app deps or adjust serverExternalPackages if rehype-pretty-code breaks.
@@ -40,7 +53,16 @@ Artifacts: `packages/repub-builder` (CLI, epub only), `packages/book-components`
 ## Notes
 
 - **Deploy fix:** `apps/portfolio` now depends on `next-mdx-remote@^6.0.0`; `pnpm-lock.yaml` no longer contains `5.0.0`; root `package.json` pins `pnpm@10.28.0` for Vercel parity.
-- **Build:** Type fixes in app (mdx.tsx ComponentProps per element; projects mediaItems cast). `pnpm run build` and `pnpm run lint` pass.
+- **Redesign direction:** Follow the sequencing and atmosphere of `davidwhyte.com/experience` without cloning its stack; in this repo we keep Next.js and ship a book-first landing page before exploring heavier 3D.
+- **Redesign shipped:** `/` now leads with `mordreds_tale`, uses the front-page reader as the main reading surface, introduces a music lane via BandLab embeds, and keeps projects/blog/docs explicit in both the page content and the sidebar shell.
+- **Sidebar polish:** The thin dark scrollbar treatment is shared across the main site sidebar and the docs sidebar, staying visually hidden until hover or active scrolling.
+- **Resume hub:** `/resumes` now lists the tailored resumes, and `/resumes/<slug>` serves each HTML resume as a standalone printable document using the existing source files in `apps/portfolio/misc/html_resumes`.
+- **Planning docs shape:** section planning pages in `books` and `dialogue-forge` now use compact record tables with stable field names instead of paragraph-heavy placeholder prose.
+- **Verification (2026-03-16):** `pnpm run build` passes after the planning-doc rewrite. Root lint was not rerun because the existing `apps/portfolio/components/books/EpubViewer.tsx:144` blocker is unrelated to the MDX content changes.
+- **Books reader fix (2026-03-16):** the homepage reader now mounts only when requested, the CTA actually loads the featured EPUB into the front-page reader, the second book is visible as a disabled `coming soon` option, and `EpubViewer` now uses the direct EPUB URL instead of wrapping the file in a blob URL.
+- **Verification (2026-03-16):** `pnpm run lint` now completes with warnings only; the prior `EpubViewer` error is gone. `pnpm run build` passes after the books reader fix.
+- **Docs IA:** The docs area now groups content by real section folders instead of hardcoded legacy buckets; unsupported `book-editor` and `richepub` docs plus obsolete top-level docs were removed, and active sections now expose XML-inspired planning pages inside a collapsed `Planning Docs` folder.
+- **Build:** Type fixes in app (mdx.tsx ComponentProps per element; projects mediaItems cast). Current tree builds successfully; lint completes with warnings only.
 - **Submodules:** B2Gdevs/kookit and B2Gdevs/koodo-reader are our forks; `.gitmodules` is correct. Push vendor submodules to B2Gdevs when we have patches to publish.
 - **Book-components:** `packages/repub-builder` uses `@mdx-js/mdx` + `@portfolio/book-components`; `repub epub` compiles `.mdx` with `mdxToHtml()`. `.md` uses marked.
 - **Book pipeline:** `pnpm run build:books` builds repub-builder, then runs `scripts/build-books.cjs` which calls `repub epub` per book. Output: `book.epub` and manifest with `hasEpub` only.

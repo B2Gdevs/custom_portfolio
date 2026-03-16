@@ -1,0 +1,116 @@
+# Portfolio experience redesign
+
+Single source of truth for the book-first / music-aware redesign of the public portfolio.
+
+## Positioning
+
+- **What the site should feel like:** a living creative world with a technical archive behind it.
+- **What the site should not feel like:** a generic developer portfolio with a decorative book section bolted on.
+- **Core hierarchy:** `Book first -> Songs second -> Technical archive third`.
+
+## Information architecture
+
+### Home
+
+1. **Opening scene / hero**
+   - Full-bleed, atmospheric hero centered on the current book.
+   - Primary CTA: `Start reading`.
+   - Secondary CTA: `Enter the archive` or `See technical work`.
+   - Supporting line introduces Ben as writer, builder, and musician rather than leading with job title.
+
+2. **Read now**
+   - Featured book card with cover art, short synopsis, reading time / chapter count, and direct embedded reader preview.
+   - Show one current book only on the home page.
+   - Additional books move to `/books`.
+
+3. **World / premise strip**
+   - Short narrative section that explains the book world, themes, or current release status.
+   - This is where placeholder copy can live early.
+
+4. **Songs / soundtracks**
+   - Present songs as companions to the written world, not as an unrelated media grid.
+   - Support embedded BandLab players when available; use placeholder track cards when not.
+   - Initial schema: `title`, `era`, `mood`, `description`, `embedUrl`, `coverImage`.
+
+5. **Archive gateway**
+   - One section that routes to projects, docs, blog, and experiments.
+   - Framed as the workshop / archive / technical depth behind the creative work.
+   - Keep this on the home page, but below the creative sections.
+
+6. **Footer / contact**
+   - Keep contact simple.
+   - Social and external creative links belong here or in the music section, not in the hero.
+
+### Primary nav
+
+- `Home`
+- `Read`
+- `Listen`
+- `Archive`
+- optional: `About`
+
+Notes:
+- `Projects`, `Blog`, and `Docs` can remain as routes, but the visible top-level language should become more intentional.
+- `Archive` can internally fan out into projects, docs, blog, and tools.
+
+## Visual direction
+
+- **Tone:** literary, immersive, tactile, restrained.
+- **Avoid:** neon SaaS gradients, generic dev-portfolio cards, PCB/circuit motifs on the landing page.
+- **Palette direction:** parchment, ash, forest, ember, moonlit blue, muted gold.
+- **Typography direction:**
+  - Display: expressive serif.
+  - Body: readable serif or humanist sans.
+  - UI labels: small caps or restrained sans.
+- **Texture:** paper grain, fog, ink bleed, worn edges, dust, soft vignettes.
+
+## 3D and motion plan
+
+### Phase 1: CSS / DOM depth only
+
+- Floating book object with subtle perspective tilt.
+- Layered paper panels moving at different speeds on scroll.
+- Atmospheric particles or drifting flecks in the hero.
+- Staggered reveals for sections.
+
+This phase must work without WebGL and should ship first.
+
+### Phase 2: selective WebGL upgrade
+
+- Add `three` + `@react-three/fiber` + `@react-three/drei` only if Phase 1 is solid.
+- Candidate 3D elements:
+  - **Hero scene:** suspended book / pages / lantern / relic.
+  - **Song scene:** audio-reactive thread, waveform ribbon, or rotating talisman.
+  - **Archive scene:** constellation or depth map connecting technical sections.
+
+Rules:
+- No mandatory loading gate.
+- No fullscreen shader experiment that blocks reading.
+- Mobile gets a lighter fallback.
+- Respect `prefers-reduced-motion`.
+
+## Content and placeholder strategy
+
+- Use a single featured book for the first version, likely `mordreds_tale`.
+- Use placeholder cover art, short synopses, and section copy where needed.
+- Create a temporary song dataset with the two BandLab tracks plus placeholder metadata.
+- Technical archive cards can reuse existing projects/blog/docs content without rewriting all source files.
+
+## Recommended first implementation order
+
+1. Rework nav labels and homepage information hierarchy.
+2. Build a new home hero centered on the featured book and reading CTA.
+3. Add a home-page embedded reader preview for the featured book.
+4. Add a music section with placeholder cards or BandLab embeds.
+5. Collapse projects/blog/docs into an archive gateway section.
+6. Replace current dark tech visual language with the new literary system.
+7. Evaluate whether WebGL adds value after the non-WebGL version feels complete.
+
+## Acceptance criteria
+
+- The first screen clearly presents the site as creative work centered on the book.
+- A visitor can begin reading from the home page in one click.
+- Songs have a real place in the experience, even with placeholder metadata.
+- Technical work is still easy to reach, but no longer defines the first impression.
+- The page feels intentional on desktop and mobile.
+- The initial version works without relying on heavy 3D infrastructure.

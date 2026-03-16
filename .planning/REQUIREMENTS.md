@@ -39,6 +39,8 @@ Single living document for books tooling and the RichEPub reader. Update this as
 ## Reader
 
 - **Portfolio reader:** In-app EPUB reader (react-reader / epub.js). Reads `book.epub` at `/books/<slug>/read` and in **BookReaderEmbed** (docs/articles). Location persisted in localStorage by slug.
+- **Front-page activation:** The homepage can defer mounting the embedded reader, but the primary CTA must load the featured book into that reader when invoked.
+- **Book selection:** The homepage reader area should expose the available books list; entries without a built EPUB should remain visible but disabled as `coming soon`.
 - **Koodo Reader (desktop):** Primary consumer-facing reader build (Electron). Can be extended to open .repub when submodule is wired.
 - **Standalone:** Same .epub file works in any EPUB reader; .repub remains for Koodo/Kookit when wired.
 
@@ -59,3 +61,26 @@ Single living document for books tooling and the RichEPub reader. Update this as
 ## Distribution
 
 - **Repub-builder** and **book-components** are **GitHub-repo only**. No npm publish. Consume via clone or workspace. README version automation: script + workflow substitute version into README on release.
+
+## Portfolio experience redesign
+
+- **Goal:** Reposition the portfolio so the first impression is **author / artist / world-builder**, not **software architect**.
+- **Primary entry point:** The landing page should lead with the book and an immediate path to start reading.
+- **Secondary creative lane:** Songs and audio work should appear on the home page as a distinct section, using placeholders or BandLab embeds until the final catalog is ready.
+- **Resume access:** The site should expose a clear `resumes` destination where tailored resumes can be found quickly and opened in standalone print-friendly pages.
+- **Technical work:** Projects, docs, blog, and tooling still matter, but should live as clear secondary navigation destinations without dominating the first screen.
+- **Implementation rule:** Keep the existing Next.js/Vercel stack for the first redesign pass. Match the **content sequencing and atmosphere** of inspirational sites, not their exact implementation details.
+- **Placeholder-friendly:** Fake covers, descriptions, track art, and CTA copy are acceptable in early iterations as long as routes and components work end-to-end.
+- **Motion / depth:** The redesign should use layered motion and selective 3D to create presence, but must retain good mobile behavior, reasonable performance, and a reduced-motion fallback.
+- **Scrollbar consistency:** Shared shell scrollbars (page, site sidebar, docs sidebar, overlays) should use the same thin visual treatment without causing layout drift when they appear.
+- **Design source of truth:** Detailed IA, content order, and 3D decisions live in `.planning/PORTFOLIO_EXPERIENCE_REDESIGN.md`.
+
+## Documentation IA
+
+- **Section-first docs:** The docs area should be organized around active sections such as `books/` and `dialogue-forge/`, not generic buckets like “Core Concepts”.
+- **Planning-doc oriented:** Each active section should expose planning-style documentation as first-class pages, with `planning docs`, `state`, `task registry`, `errors and attempts`, and `decisions` appearing before general implementation notes.
+- **XML-inspired structure:** Those section planning pages should mirror the old XML planning breakdown in page form rather than using vague prose placeholders.
+- **Compact schema:** Planning pages should use compact repeated structures that are easy for humans to scan and easy for the site to parse later, favoring fixed fields, tables, and explicit record ids over paragraph-heavy prose.
+- **Nested planning folder:** In section navigation, planning pages should live inside a `Planning Docs` folder that is collapsed by default and can be expanded to select those pages.
+- **Remove stale docs:** Unsupported or abandoned sections like `richepub` and `book-editor`, plus obsolete top-level docs that only describe those systems, should be removed from the portfolio docs experience.
+- **Expandable later:** More section folders can be added as the site grows, but the docs shell should already assume real section folders are the unit of organization.
