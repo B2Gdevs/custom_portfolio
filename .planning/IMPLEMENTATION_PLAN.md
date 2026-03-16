@@ -4,6 +4,7 @@ Read this each iteration; pick one task; update after completing.
 
 ## Done
 
+- [x] Fix Vercel deployment blocker: upgrade `next-mdx-remote` to `6.0.0` and pin root `packageManager` to `pnpm@10.28.0` so Vercel uses the expected pnpm major.
 - [x] Fix Vercel build: add `onLoadExampleDialogue` and `onLoadExampleFlags` to `DialogueEditorV2` exported props type (packages/dialogue-forge).
 - [x] Add AGENTS.md and .planning with Ralph Wiggum loop artifacts.
 - [x] Repub plan: README version script + workflow; repub-cli (build/read/epub); vendor Kookit + Koodo Reader submodules; .repub renderer in Kookit (RepubRender); book-components package; .planning docs (REQUIREMENTS, VENDORING, this plan).
@@ -38,6 +39,7 @@ Artifacts: `packages/repub-builder` (CLI, epub only), `packages/book-components`
 
 ## Notes
 
+- **Deploy fix:** `apps/portfolio` now depends on `next-mdx-remote@^6.0.0`; `pnpm-lock.yaml` no longer contains `5.0.0`; root `package.json` pins `pnpm@10.28.0` for Vercel parity.
 - **Build:** Type fixes in app (mdx.tsx ComponentProps per element; projects mediaItems cast). `pnpm run build` and `pnpm run lint` pass.
 - **Submodules:** B2Gdevs/kookit and B2Gdevs/koodo-reader are our forks; `.gitmodules` is correct. Push vendor submodules to B2Gdevs when we have patches to publish.
 - **Book-components:** `packages/repub-builder` uses `@mdx-js/mdx` + `@portfolio/book-components`; `repub epub` compiles `.mdx` with `mdxToHtml()`. `.md` uses marked.
