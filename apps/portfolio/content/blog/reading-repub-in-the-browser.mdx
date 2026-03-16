@@ -1,31 +1,38 @@
 ---
-title: "Reading .repub in the Browser"
-description: "How the portfolio unpacks a .repub file, rewrites asset URLs to blob URLs, and runs the content in a sandboxed iframe."
+title: "Reading .repub in the Browser (Archived)"
+description: "A historical note from the custom-reader experiment. The current books flow is EPUB3-first."
 date: "2025-03-11"
-tags: ["RichEPub", "Security", "Browser", "Iframe"]
+tags: ["RichEPub", "Archive", "Browser", "Security"]
 ---
 
-The [Books](/books) page lets you open a `.repub` file directly in the browser. The viewer fetches the file, unpacks it with JSZip, and runs the bundled React app inside a **sandboxed iframe**. Here's how it works and what to watch for.
+This post is an archive note from the earlier RichEPub experiment.
 
-## Flow
+At that point the site could fetch a `.repub` file, unpack it in the browser, rewrite asset URLs, and run the bundled app inside a sandboxed iframe. The current books flow is different: the active reading path on the site is EPUB3-first, not `.repub`.
 
-1. **Fetch**: GET `/books/<bookSlug>/book.repub` (static file from `public/books/`).
-2. **Unpack**: JSZip loads the array buffer and exposes entries: `repub.json`, `content/index.html`, `assets/*.js`, `assets/*.css`.
-3. **Blob URLs**: Each file is read as a Blob and assigned a blob URL with `URL.createObjectURL(blob)`. We keep a list so we can revoke them on unmount.
-4. **Rewrite HTML**: The entry `content/index.html` references `../assets/...`. We replace those paths with the corresponding blob URLs so that when the document loads, script and link tags point at our blobs.
-5. **Inject**: We create a Blob for the rewritten HTML and set the iframe's `src` to that blob URL. The iframe loads the document; the document loads scripts and styles from the other blob URLs.
-6. **Sandbox**: The iframe has `sandbox="allow-scripts"` only. So the content runs in an opaque origin, can execute JS, but cannot access the parent window or escape the sandbox.
+## Why keep this note
 
-## Security
+The runtime is no longer the main direction, but the browser-side lessons still mattered:
 
-- **Arbitrary JS**: A `.repub` runs whatever JavaScript was bundled. The reader treats it as untrusted unless you only ever load your own content.
-- **Sandbox**: We do **not** add `allow-same-origin`; that would let the content break out. So the iframe cannot access cookies, localStorage, or the parent. Scripts run in isolation.
-- **Scope**: First version assumes `.repub` files are served from your own origin (e.g. `public/books/`). Allowing user-uploaded `.repub` would need the same sandboxing plus trust and validation.
+- sandboxing matters if book content can execute JavaScript
+- asset rewriting gets fragile quickly
+- custom runtime containers create a large maintenance surface
+- every custom reader feature pulls you farther away from the wider ebook ecosystem
 
-## Limitations
+## Why the experiment stopped
 
-- **Blob URL lifetime**: We revoke blob URLs when the component unmounts so we don't leak.
-- **No network**: The sandboxed iframe can still make network requests unless you add CSP. For maximum isolation you could serve the iframe from a strict CSP that blocks fetch/XHR; we don't do that by default.
-- **Size**: Large bundles (React + Tailwind + deps) mean larger `.repub` files. Tree-shaking and careful dependencies help.
+The browser reader technically worked. The problem was strategic, not just technical.
 
-For the format and toolchain, see [Introducing RichEPub](/blog/introducing-richepub), the [format spec](/blog/richepub-format-spec), and [building the toolchain](/blog/building-the-richepub-toolchain).
+Once the reader existed, the next question was whether the project really benefited from carrying a custom package format, custom runtime rules, and custom security surface. For this site, the answer turned into "not enough."
+
+That is why the active work moved back toward EPUB3 output and better author tooling instead of doubling down on `.repub`.
+
+## What still transfers
+
+If I revisit a richer authoring system later, the useful parts of this experiment are:
+
+- careful packaging expectations
+- explicit asset handling
+- predictable rendering constraints
+- strong separation between author tooling and reader runtime
+
+Those lessons still apply. The container itself is the part I no longer think needs to be custom.

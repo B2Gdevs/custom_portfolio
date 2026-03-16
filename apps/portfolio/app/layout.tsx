@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { ConditionalLayout } from '@/components/layout/ConditionalLayout';
 import { getAllContent } from '@/lib/content';
-import { getResumes } from '@/lib/resumes';
 import { buildSiteMenus } from '@/lib/site-menus';
 
 export const metadata: Metadata = {
@@ -23,8 +22,6 @@ export default function RootLayout({
   const navMenus = buildSiteMenus({
     projects: getAllContent('projects'),
     blogPosts: getAllContent('blog'),
-    docs: getAllContent('docs'),
-    resumes: getResumes().map(({ slug, title }) => ({ slug, title })),
   });
 
   return (

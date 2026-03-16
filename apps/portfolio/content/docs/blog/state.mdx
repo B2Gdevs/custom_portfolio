@@ -1,0 +1,44 @@
+---
+title: State
+description: Compact state records for the blog section.
+date: "2026-03-16"
+updated: "2026-03-16"
+order: 2
+---
+
+# State
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `blog` |
+| `owner` | `blog-section` |
+| `status` | `active` |
+| `updated` | `2026-03-16` |
+
+## Current Cycle
+
+| Field | Value |
+| --- | --- |
+| `phase` | `blog-02` |
+| `plan` | `blog-02-a` |
+| `focus` | keep the blog framed as a main public destination and carry the EPUB3-first editor narrative forward after the RichEPub rewrite |
+| `constraint` | planning for blog work lives in these docs, not `.planning` |
+
+## Next Queue
+
+| Priority | Action | Type |
+| --- | --- | --- |
+| `1` | decide which implementation and planning topics belong in the blog versus the docs section | `content-strategy` |
+| `2` | build a stable publishing pattern for long-form build logs and workshop notes | `publishing` |
+| `3` | decide which editor-planning milestones should turn into public blog updates versus staying internal to docs | `editor-narrative` |
+
+## References
+
+| Id | Path | Purpose |
+| --- | --- | --- |
+| `blog-root` | `apps/portfolio/content/blog/` | authored blog source |
+| `blog-index` | `apps/portfolio/app/blog/` | public blog listing and routes |
+| `home-archive` | `apps/portfolio/components/home/ArchiveGateway.tsx` | front-page entry point into blog |
+| `editor-docs` | `apps/portfolio/content/docs/editor/` | planning surface for the proposed EPUB authoring editor |

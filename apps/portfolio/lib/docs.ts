@@ -34,6 +34,21 @@ const DOC_SECTION_META: Record<string, DocSectionMeta> = {
     description: 'Editor notes, exporter docs, and planning material for the dialogue toolchain.',
     order: 1,
   },
+  blog: {
+    label: 'Blog',
+    description: 'Planning docs for the writing surface, publishing loop, and how posts should work as a public-facing stream.',
+    order: 2,
+  },
+  documentation: {
+    label: 'Documentation',
+    description: 'Planning docs for the docs site itself, including structure, requirements, and section-level improvements.',
+    order: 3,
+  },
+  editor: {
+    label: 'Editor',
+    description: 'Planning docs for a writing/editor workflow that can compile authored content down to clean EPUB3.',
+    order: 4,
+  },
 };
 
 function formatSectionLabel(sectionKey: string): string {
@@ -62,9 +77,11 @@ function getDocPriority(slug: string): number {
   if (leaf === 'task-registry') return 2;
   if (leaf === 'errors-and-attempts') return 3;
   if (leaf === 'decisions') return 4;
-  if (leaf === 'index') return 5;
-  if (leaf === 'overview') return 6;
-  if (leaf === 'getting-started') return 7;
+  if (leaf === 'requirements') return 5;
+  if (leaf === 'roadmap') return 6;
+  if (leaf === 'index') return 7;
+  if (leaf === 'overview') return 8;
+  if (leaf === 'getting-started') return 9;
   return 10;
 }
 

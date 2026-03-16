@@ -1,24 +1,45 @@
 ---
-title: "Introducing RichEPub: React, Tailwind, and npm in a Single Ebook"
-description: "Why I'm building a custom ebook format that supports full React components, Tailwind CSS, and npm dependencies—and how it compares to standard EPUB."
+title: "RichEPub Was the Wrong Layer to Reinvent"
+description: "The custom-format experiment was useful, but the active direction is better EPUB3 tooling rather than a new container."
 date: "2025-03-11"
-tags: ["RichEPub", "EPUB", "React", "Tailwind", "Ebooks"]
+tags: ["RichEPub", "EPUB3", "Writing Tools", "Books"]
 ---
 
-Standard EPUB is great for universal reading: Kindle, Apple Books, Kobo, and every other reader understand it. But it's built on HTML, CSS, and a bit of JavaScript—no React, no component libraries, no Tailwind, no npm. If you want your "book" to be a real web app (interactive, styled with a design system, using the same stack you use everywhere else), EPUB won't get you there.
+RichEPub started from a real frustration: I wanted books to feel more like designed software. React components, richer layouts, better author tooling, and a cleaner path from draft to reader all sounded like reasons to invent a new container.
 
-That's why I'm building **RichEPub** (`.repub`): an ebook container format that supports React, Tailwind, and npm dependencies. It's not meant to be compatible with Kindle or iBooks. It's for **web-based readers** that can unpack and run the bundled app in a sandboxed iframe—like the one in this portfolio.
+After pushing on it, I do not think the container is the real problem.
 
-## Goals
+EPUB3 already describes more of the book than I first gave it credit for. It is HTML, CSS, packaged assets, metadata, and a structure that normal readers already understand. There are limits, but there is not much in the current project that truly requires a brand-new runtime format.
 
-- **Single file**: One `.repub` file contains the manifest, entry HTML, and pre-built JS/CSS. No runtime npm resolution; everything is bundled at build time.
-- **Author in familiar stack**: Write your book as a Vite + React + Tailwind project. Add any npm deps you want. The builder packs the build output into a `.repub`.
-- **Read in the browser**: The portfolio's [Books](/books) page lets you open a `.repub` in a sandboxed iframe so the React app runs without touching the rest of the site.
-- **Document dependencies**: The manifest lists the npm packages you used (for audit and documentation). The file itself is self-contained.
+## What actually hurts
 
-## Non-goals
+- The source material is messy.
+- Books do not begin in one clean authoring format.
+- In this repo alone the path has already been `Notion -> markdown -> MDX`.
+- If this ever grows, it will have to deal with even more input shapes and editorial cleanup.
 
-- **Compatibility with standard readers**: `.repub` is not EPUB. Use standard EPUB when you need universal distribution; we also build EPUB from Markdown for that.
-- **Runtime npm resolution**: The reader does not fetch or resolve npm. The author's build step does that once; the `.repub` is static.
+That means the real work is not inventing a new ebook file type. The real work is building better authoring and transformation tools that can take uneven source material and compile it into cleaner EPUB3 output.
 
-In the next posts I'll cover the format spec, the toolchain, and reading .repub in the browser.
+## Where the experiment landed
+
+The useful idea inside RichEPub was never "ship a `.repub` file everywhere." It was:
+
+- create a stronger writing UI
+- make layout choices explicit
+- support custom components where they can still degrade cleanly
+- compile the result into standard EPUB3 instead of asking readers to adopt a new format
+
+If I build more in this direction, it will likely look less like a new spec and more like a React and Node based editor pipeline with structured export rules.
+
+## The more realistic next step
+
+A better system would be something closer to a writing tool:
+
+- lexical or another structured editor for authoring
+- component-driven page blocks for images, callouts, and ornamental layout
+- import paths for Notion exports, markdown, and MDX
+- an export layer that compiles those decisions down to EPUB3 without leaving a pile of manual cleanup at the end
+
+That is still a lot of work, and it may be more hassle than it is worth. But if there is a meaningful next step here, it is that. Not a new container.
+
+The RichEPub posts stay up because the experiment was useful. The active direction is EPUB3-first tooling, better editorial workflow, and better reader presentation on top of standard output.

@@ -41,16 +41,10 @@ interface ContentLinkInput {
 interface BuildSiteMenusInput {
   projects: ContentLinkInput[];
   blogPosts: ContentLinkInput[];
-  docs: ContentLinkInput[];
-  resumes: Array<{ slug: string; title: string }>;
 }
 
 function toTitle(item: ContentLinkInput | undefined, fallback: string): string {
   return item?.meta.title || fallback;
-}
-
-function toResumeTitle(item: { slug: string; title: string } | undefined, fallback: string): string {
-  return item?.title || fallback;
 }
 
 function nonRichEpubBlogPosts(posts: ContentLinkInput[]): ContentLinkInput[] {
@@ -60,23 +54,12 @@ function nonRichEpubBlogPosts(posts: ContentLinkInput[]): ContentLinkInput[] {
   });
 }
 
-function nonRichEpubDocs(docs: ContentLinkInput[]): ContentLinkInput[] {
-  return docs.filter((doc) => {
-    const slug = doc.slug.toLowerCase();
-    return !slug.includes('richepub') && !slug.includes('repub');
-  });
-}
-
 export function buildSiteMenus({
   projects,
   blogPosts,
-  docs,
-  resumes,
 }: BuildSiteMenusInput): NavMenuSection[] {
   const recentBlogPosts = nonRichEpubBlogPosts(blogPosts).slice(0, 2);
-  const recentDocs = nonRichEpubDocs(docs).slice(0, 2);
   const recentProjects = projects.slice(0, 2);
-  const recentResumes = resumes.slice(0, 2);
 
   return [
     {
@@ -130,35 +113,6 @@ export function buildSiteMenus({
       ],
     },
     {
-      id: 'resumes',
-      label: 'Resumes',
-      description: 'Printable versions tailored for specific kinds of roles.',
-      icon: 'file-text',
-      accent: 'from-[#b7865b]/28 to-transparent',
-      items: [
-        {
-          label: 'Resume Library',
-          description: 'Find every tailored printable version in one place.',
-          href: '/resumes',
-          icon: 'file-text',
-        },
-        {
-          label: toResumeTitle(recentResumes[0], 'Current Resume'),
-          description: 'Open a standalone print-friendly resume page.',
-          href: recentResumes[0] ? `/resumes/${recentResumes[0].slug}` : '/resumes',
-          icon: 'scroll',
-          external: Boolean(recentResumes[0]),
-        },
-        {
-          label: toResumeTitle(recentResumes[1], 'Another Resume'),
-          description: 'Jump straight to another tailored version.',
-          href: recentResumes[1] ? `/resumes/${recentResumes[1].slug}` : '/resumes',
-          icon: 'book-text',
-          external: Boolean(recentResumes[1]),
-        },
-      ],
-    },
-    {
       id: 'projects',
       label: 'Projects',
       description: 'Products, prototypes, and the strongest implementation case studies.',
@@ -208,33 +162,6 @@ export function buildSiteMenus({
           label: toTitle(recentBlogPosts[1], 'Recent Post'),
           description: 'Another recent blog post.',
           href: recentBlogPosts[1] ? `/blog/${recentBlogPosts[1].slug}` : '/blog',
-          icon: 'scroll',
-        },
-      ],
-    },
-    {
-      id: 'docs',
-      label: 'Docs',
-      description: 'Reference material, plans, and deeper implementation writing.',
-      icon: 'file-code',
-      accent: 'from-[#7a7f96]/26 to-transparent',
-      items: [
-        {
-          label: 'Documentation Home',
-          description: 'Open the main docs landing page.',
-          href: '/docs',
-          icon: 'file-code',
-        },
-        {
-          label: toTitle(recentDocs[0], 'Latest Doc'),
-          description: 'Most recently updated documentation.',
-          href: recentDocs[0] ? `/docs/${recentDocs[0].slug}` : '/docs',
-          icon: 'library',
-        },
-        {
-          label: toTitle(recentDocs[1], 'Recent Doc'),
-          description: 'Another recent documentation page.',
-          href: recentDocs[1] ? `/docs/${recentDocs[1].slug}` : '/docs',
           icon: 'scroll',
         },
       ],

@@ -1,0 +1,45 @@
+---
+title: State
+description: Compact state records for the documentation section.
+date: "2026-03-16"
+updated: "2026-03-16"
+order: 2
+---
+
+# State
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `documentation` |
+| `owner` | `docs-section` |
+| `status` | `active` |
+| `updated` | `2026-03-16` |
+
+## Current Cycle
+
+| Field | Value |
+| --- | --- |
+| `phase` | `documentation-02` |
+| `plan` | `documentation-02-a` |
+| `focus` | keep the roadmap and requirements pages current so the docs site has a stable overview and local source of truth |
+| `constraint` | docs-site planning and requirements should be tracked here instead of `.planning` |
+
+## Next Queue
+
+| Priority | Action | Type |
+| --- | --- | --- |
+| `1` | improve docs landing pages and section discoverability | `ux` |
+| `2` | decide how roadmap and requirements pages should surface from the documentation landing page | `ia` |
+| `3` | keep section roadmap summaries aligned with section planning updates | `maintenance` |
+
+## References
+
+| Id | Path | Purpose |
+| --- | --- | --- |
+| `docs-root` | `apps/portfolio/content/docs/` | authored documentation source |
+| `docs-page` | `apps/portfolio/app/docs/page.tsx` | documentation landing page |
+| `docs-layout` | `apps/portfolio/components/docs/DocsLayout.tsx` | docs navigation and section layout |
+| `docs-lib` | `apps/portfolio/lib/docs.ts` | docs grouping and planning-doc detection |
+| `docs-roadmap` | `apps/portfolio/content/docs/documentation/roadmap.mdx` | section-level overview of status and next work |

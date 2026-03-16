@@ -30,10 +30,10 @@ export default function CreativeHero({ featuredBook }: { featuredBook: FeaturedB
               Start reading
             </Link>
             <Link
-              href="/archive"
+              href="/blog"
               className="inline-flex items-center gap-2 rounded-full border border-border bg-dark-elevated px-5 py-3 text-sm font-medium text-primary transition-colors hover:border-accent hover:text-accent"
             >
-              Enter the archive
+              Read the blog
               <ArrowRight size={16} />
             </Link>
           </div>

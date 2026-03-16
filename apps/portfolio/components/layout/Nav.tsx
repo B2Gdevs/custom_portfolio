@@ -118,6 +118,35 @@ function SidebarContent({
         </div>
 
         <div className="mt-4">
+          <div className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-dark/70 p-1 shadow-[0_10px_30px_rgba(0,0,0,0.22)]">
+            <Link
+              href="/"
+              onClick={onNavigate}
+              className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
+                pathname === '/'
+                  ? 'bg-primary text-secondary'
+                  : 'text-text-muted hover:text-primary'
+              }`}
+            >
+              <Home size={14} />
+              <span>Home</span>
+            </Link>
+            <Link
+              href="/resumes"
+              onClick={onNavigate}
+              className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
+                pathname === '/resumes' || pathname.startsWith('/resumes/')
+                  ? 'bg-primary text-secondary'
+                  : 'text-text-muted hover:text-primary'
+              }`}
+            >
+              <FileText size={14} />
+              <span>Resumes</span>
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-4">
           <Link
             href="/"
             onClick={onNavigate}

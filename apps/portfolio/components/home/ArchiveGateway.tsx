@@ -1,76 +1,52 @@
 import Link from 'next/link';
-import { ArrowRight, BookText, FileCode2, FileText, FolderKanban } from 'lucide-react';
+import { ArrowRight, BookText, FileCode2 } from 'lucide-react';
 
 interface ArchiveGatewayProps {
-  resumeCount: number;
-  projectCount: number;
   blogCount: number;
   docCount: number;
-  featuredResumeTitle?: string;
-  featuredProjectTitle?: string;
   latestPostTitle?: string;
   latestDocTitle?: string;
 }
 
 export default function ArchiveGateway({
-  resumeCount,
-  projectCount,
   blogCount,
   docCount,
-  featuredResumeTitle,
-  featuredProjectTitle,
   latestPostTitle,
   latestDocTitle,
 }: ArchiveGatewayProps) {
   const cards = [
     {
-      title: 'Resumes',
-      description: 'Printable role-specific resumes collected in one place instead of scattered across the repo.',
-      href: '/resumes',
-      countLabel: `${resumeCount} versions`,
-      detail: featuredResumeTitle ? `Start here: ${featuredResumeTitle}` : 'Tailored copies for quick sharing and printing.',
-      icon: FileText,
-    },
-    {
-      title: 'Projects',
-      description: 'Products, prototypes, and systems that show how the work is built.',
-      href: '/projects',
-      countLabel: `${projectCount} projects`,
-      detail: featuredProjectTitle ? `Current front shelf: ${featuredProjectTitle}` : 'Technical case studies and shipped work.',
-      icon: FolderKanban,
-    },
-    {
-      title: 'Writing',
-      description: 'Essays, build notes, and postmortems from the workshop side of the practice.',
+      title: 'Blog',
+      description: 'Essays, build notes, and publishing posts from the workshop side of the practice.',
       href: '/blog',
       countLabel: `${blogCount} posts`,
-      detail: latestPostTitle ? `Latest note: ${latestPostTitle}` : 'Longer reflections and narrative build logs.',
+      detail: latestPostTitle ? `Latest note: ${latestPostTitle}` : 'Longer reflections, build logs, and publishing notes.',
       icon: BookText,
     },
     {
       title: 'Documentation',
-      description: 'Architecture notes, editor plans, implementation docs, and systems thinking.',
+      description: 'Planning loops, architecture notes, requirements, and implementation docs.',
       href: '/docs',
       countLabel: `${docCount} docs`,
-      detail: latestDocTitle ? `Recently updated: ${latestDocTitle}` : 'Technical depth for people who want to go deeper.',
+      detail: latestDocTitle ? `Recently updated: ${latestDocTitle}` : 'The technical side for people who want the deeper system view.',
       icon: FileCode2,
     },
   ];
 
   return (
     <section
-      id="projects-and-more"
+      id="blog-and-docs"
       className="section-shell"
     >
       <div className="mb-10 max-w-3xl">
-        <p className="section-kicker">Projects, blog, docs</p>
-        <h2 className="font-display text-4xl text-primary md:text-6xl">The technical work is still direct.</h2>
+        <p className="section-kicker">Blog, docs</p>
+        <h2 className="font-display text-4xl text-primary md:text-6xl">The public trail should stay simple.</h2>
         <p className="mt-5 text-lg leading-8 text-text-muted">
-          The front page starts with the book and the music, but the rest of the site is still plainly what it is: projects, writing, and documentation.
+          Beyond the reader and the music, the two places we should keep directing people are the blog and the documentation.
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-6 lg:grid-cols-2">
         {cards.map((card) => {
           const Icon = card.icon;
 
@@ -103,20 +79,6 @@ export default function ArchiveGateway({
 
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
-          href="/resumes"
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-dark px-5 py-3 text-sm font-medium text-primary transition-colors hover:border-accent hover:text-accent"
-        >
-          Resume library
-          <ArrowRight size={16} />
-        </Link>
-        <Link
-          href="/projects"
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-dark px-5 py-3 text-sm font-medium text-primary transition-colors hover:border-accent hover:text-accent"
-        >
-          All projects
-          <ArrowRight size={16} />
-        </Link>
-        <Link
           href="/blog"
           className="inline-flex items-center gap-2 rounded-full border border-border bg-dark px-5 py-3 text-sm font-medium text-primary transition-colors hover:border-accent hover:text-accent"
         >
@@ -127,7 +89,7 @@ export default function ArchiveGateway({
           href="/docs"
           className="inline-flex items-center gap-2 rounded-full border border-border bg-dark px-5 py-3 text-sm font-medium text-primary transition-colors hover:border-accent hover:text-accent"
         >
-          All docs
+          Documentation home
           <ArrowRight size={16} />
         </Link>
       </div>

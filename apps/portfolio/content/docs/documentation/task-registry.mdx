@@ -1,0 +1,24 @@
+---
+title: Task Registry
+description: Compact task records for the documentation section.
+date: "2026-03-16"
+updated: "2026-03-16"
+order: 3
+---
+
+# Task Registry
+
+## Phase `documentation-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `documentation-01-01` | `done` | create a section-local planning loop for documentation-site work | `-` | `pnpm exec next build` |
+| `documentation-01-02` | `done` | capture the documentation site's overall requirements inside the docs tree | `documentation-01-01` | `pnpm exec next build` |
+| `documentation-01-03` | `planned` | improve docs section navigation and planning-doc discoverability | `documentation-01-01` | `pnpm exec next build` |
+
+## Phase `documentation-02`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `documentation-02-01` | `done` | add a roadmap page with per-section status and next steps tied back to planning docs | `documentation-01-02` | `pnpm exec next build` |
+| `documentation-02-02` | `done` | keep documentation requirements in a stable reference doc instead of scattering them through status records | `documentation-01-02` | `pnpm exec next build` |

@@ -1,12 +1,59 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { BookOpen, LoaderCircle } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, LoaderCircle } from 'lucide-react';
 import { ReactReader, ReactReaderStyle } from 'react-reader';
 
 const STORAGE_PREFIX = 'epub-location-';
 const READER_HEADER_H = 52;
+const READER_FOOTER_H = 44;
 const READER_SPREAD_QUERY = '(min-width: 1200px)';
+const LOCATION_GENERATION_CHARS = 1200;
+
+interface ReaderNavItem {
+  label: string;
+  href: string;
+  subitems?: ReaderNavItem[];
+}
+
+interface ReaderLocation {
+  start?: {
+    href?: string;
+    cfi?: string;
+    displayed?: {
+      page: number;
+      total: number;
+    };
+  };
+}
+
+interface ReaderRendition {
+  book: {
+    ready: Promise<void>;
+    loaded: {
+      navigation: Promise<{
+        toc: ReaderNavItem[];
+      }>;
+    };
+    locations: {
+      generate: (chars: number) => Promise<Array<string>>;
+      length: () => number;
+      percentageFromCfi: (cfi: string) => number;
+      cfiFromPercentage: (percentage: number) => string;
+    };
+  };
+  flow: (mode: string) => void;
+  spread: (mode: string, min?: number) => void;
+  themes: {
+    register: (name: string, rules: Record<string, Record<string, string>>) => void;
+    select: (name: string) => void;
+    fontSize: (value: string) => void;
+  };
+  on: (event: string, listener: (location: ReaderLocation) => void) => void;
+  off: (event: string, listener: (location: ReaderLocation) => void) => void;
+  prev: () => Promise<void>;
+  next: () => Promise<void>;
+}
 
 export interface EpubViewerProps {
   epubUrl: string;
@@ -177,7 +224,7 @@ function createReaderStyles({
       top: headerOffset,
       left: isReaderMode ? 52 : 24,
       right: isReaderMode ? 32 : 24,
-      bottom: isReaderMode ? 28 : 24,
+      bottom: isReaderMode ? READER_FOOTER_H + 16 : 24,
       maxWidth: isReaderMode ? '96rem' : '48rem',
       marginLeft: 'auto',
       marginRight: 'auto',
@@ -192,6 +239,14 @@ function createReaderStyles({
     arrowHover: {
       ...ReactReaderStyle.arrowHover,
       color: '#fff4e6',
+    },
+    prev: {
+      ...ReactReaderStyle.prev,
+      display: isReaderMode ? 'none' : ReactReaderStyle.prev.display,
+    },
+    next: {
+      ...ReactReaderStyle.next,
+      display: isReaderMode ? 'none' : ReactReaderStyle.next.display,
     },
     tocArea: {
       ...ReactReaderStyle.tocArea,
@@ -262,6 +317,36 @@ function createReaderStyles({
   };
 }
 
+function flattenToc(items: ReaderNavItem[]): ReaderNavItem[] {
+  return items.flatMap((item) => [item, ...(item.subitems ? flattenToc(item.subitems) : [])]);
+}
+
+function normalizeHref(href?: string) {
+  return (href || '').split('#')[0].replace(/^\/+/, '');
+}
+
+function resolveSectionLabel(toc: ReaderNavItem[], href?: string) {
+  const currentHref = normalizeHref(href);
+  if (!currentHref) return '';
+
+  const flattened = flattenToc(toc);
+  const exactMatch = flattened.find((item) => normalizeHref(item.href) === currentHref);
+  if (exactMatch) return exactMatch.label;
+
+  const endMatch = flattened.find((item) => {
+    const itemHref = normalizeHref(item.href);
+    return itemHref && (currentHref.endsWith(itemHref) || itemHref.endsWith(currentHref));
+  });
+  if (endMatch) return endMatch.label;
+
+  const prefixMatch = flattened.find((item) => {
+    const itemHref = normalizeHref(item.href);
+    return itemHref && currentHref.startsWith(itemHref);
+  });
+
+  return prefixMatch?.label ?? '';
+}
+
 function createEpubViewStyles(layoutMode: 'compact' | 'reader') {
   return {
     viewHolder: {
@@ -291,10 +376,20 @@ export default function EpubViewer({
   const [epubBuffer, setEpubBuffer] = useState<ArrayBuffer | null>(null);
   const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [tocItems, setTocItems] = useState<ReaderNavItem[]>([]);
+  const [currentSectionLabel, setCurrentSectionLabel] = useState('');
+  const [currentPage, setCurrentPage] = useState<number | null>(null);
+  const [totalPages, setTotalPages] = useState<number | null>(null);
+  const [pageDraft, setPageDraft] = useState('');
   const renditionCleanupRef = useRef<(() => void) | null>(null);
+  const renditionRef = useRef<ReaderRendition | null>(null);
+  const latestLocationRef = useRef<ReaderLocation | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
+
+    latestLocationRef.current = null;
+    renditionRef.current = null;
 
     fetch(epubUrl, { signal: controller.signal })
       .then((response) => {
@@ -357,17 +452,52 @@ export default function EpubViewer({
   const headerOffset = title ? READER_HEADER_H : 0;
   const readerStyles = createReaderStyles({ headerOffset, layoutMode });
   const epubViewStyles = createEpubViewStyles(layoutMode);
+
+  const syncReaderPosition = useCallback(
+    (nextLocation: ReaderLocation, nextTocItems: ReaderNavItem[] = tocItems) => {
+      latestLocationRef.current = nextLocation;
+
+      const nextSectionLabel = resolveSectionLabel(nextTocItems, nextLocation.start?.href);
+      setCurrentSectionLabel(nextSectionLabel);
+
+      const generatedPageTotal = renditionRef.current?.book.locations.length?.() ?? 0;
+      const fallbackTotal = nextLocation.start?.displayed?.total ?? 0;
+      const resolvedTotal = generatedPageTotal || fallbackTotal;
+      setTotalPages(resolvedTotal > 0 ? resolvedTotal : null);
+
+      let resolvedPage: number | null = null;
+      const currentCfi = nextLocation.start?.cfi;
+
+      if (generatedPageTotal > 0 && currentCfi) {
+        const percentage = renditionRef.current?.book.locations.percentageFromCfi(currentCfi) ?? 0;
+        resolvedPage = Math.min(
+          generatedPageTotal,
+          Math.max(1, Math.round(percentage * Math.max(generatedPageTotal - 1, 1)) + 1)
+        );
+      } else if (nextLocation.start?.displayed?.page) {
+        resolvedPage = nextLocation.start.displayed.page;
+      }
+
+      setCurrentPage(resolvedPage);
+      setPageDraft(resolvedPage ? String(resolvedPage) : '');
+    },
+    [tocItems]
+  );
+
+  const handleTocChanged = useCallback(
+    (nextToc: ReaderNavItem[]) => {
+      setTocItems(nextToc);
+      if (latestLocationRef.current) {
+        syncReaderPosition(latestLocationRef.current, nextToc);
+      }
+    },
+    [syncReaderPosition]
+  );
+
   const handleRendition = useCallback(
-    (rendition: {
-      flow: (mode: string) => void;
-      spread: (mode: string, min?: number) => void;
-      themes: {
-        register: (name: string, rules: Record<string, Record<string, string>>) => void;
-        select: (name: string) => void;
-        fontSize: (value: string) => void;
-      };
-    }) => {
+    (rendition: ReaderRendition) => {
       renditionCleanupRef.current?.();
+      renditionRef.current = rendition;
 
       const applyLayout = () => {
         if (typeof window === 'undefined') return;
@@ -381,18 +511,79 @@ export default function EpubViewer({
       rendition.themes.fontSize(layoutMode === 'reader' ? '112%' : '100%');
       applyLayout();
 
+      const handleRelocated = (nextLocation: ReaderLocation) => {
+        syncReaderPosition(nextLocation);
+      };
+
+      rendition.on('relocated', handleRelocated);
+
+      void rendition.book.loaded.navigation.then((navigation) => {
+        setTocItems(navigation.toc);
+        if (latestLocationRef.current) {
+          syncReaderPosition(latestLocationRef.current, navigation.toc);
+        }
+      });
+
+      void rendition.book.ready
+        .then(() => rendition.book.locations.generate(LOCATION_GENERATION_CHARS))
+        .then(() => {
+          const locationTotal = rendition.book.locations.length();
+          setTotalPages(locationTotal > 0 ? locationTotal : null);
+
+          if (latestLocationRef.current) {
+            syncReaderPosition(latestLocationRef.current);
+          }
+        })
+        .catch(() => {
+          // fall back to display-based page counts if location generation fails
+        });
+
       if (typeof window !== 'undefined') {
         window.addEventListener('resize', applyLayout);
         renditionCleanupRef.current = () => {
           window.removeEventListener('resize', applyLayout);
+          rendition.off('relocated', handleRelocated);
+        };
+      } else {
+        renditionCleanupRef.current = () => {
+          rendition.off('relocated', handleRelocated);
         };
       }
     },
-    [layoutMode]
+    [layoutMode, syncReaderPosition]
   );
 
+  const handleStepPage = useCallback((direction: 'prev' | 'next') => {
+    if (direction === 'prev') {
+      void renditionRef.current?.prev();
+      return;
+    }
+
+    void renditionRef.current?.next();
+  }, []);
+
+  const handleJumpToPage = useCallback(() => {
+    const parsedPage = Number.parseInt(pageDraft, 10);
+    if (!Number.isFinite(parsedPage) || !totalPages || totalPages <= 0) {
+      return;
+    }
+
+    const clampedPage = Math.min(totalPages, Math.max(1, parsedPage));
+    const percentage =
+      totalPages <= 1 ? 0 : (clampedPage - 1) / Math.max(totalPages - 1, 1);
+    const cfi = renditionRef.current?.book.locations.cfiFromPercentage(percentage);
+
+    if (!cfi) return;
+
+    setLocation(cfi);
+    setPageDraft(String(clampedPage));
+  }, [pageDraft, totalPages]);
+
+  const footerLabel =
+    currentSectionLabel || (currentPage ? `Page ${currentPage}` : 'Current section');
+
   return (
-    <div className={`epub-reader-root flex flex-col h-full min-h-[400px] overflow-hidden ${className}`}>
+    <div className={`epub-reader-root relative flex h-full min-h-[400px] flex-col overflow-hidden ${className}`}>
       {title && (
         <header
           className="epub-reader-header flex items-center gap-3 shrink-0 px-4 border-b border-border bg-dark-alt"
@@ -425,7 +616,8 @@ export default function EpubViewer({
             location={location}
             locationChanged={locationChanged}
             showToc={true}
-            getRendition={handleRendition}
+            tocChanged={(nextToc) => handleTocChanged(nextToc as ReaderNavItem[])}
+            getRendition={(rendition) => handleRendition(rendition as ReaderRendition)}
             epubOptions={{
               flow: 'paginated',
               manager: 'default',
@@ -439,6 +631,56 @@ export default function EpubViewer({
           />
         )}
       </div>
+      {layoutMode === 'reader' && readyBuffer && !isLoadingBook && !visibleError ? (
+        <div className="pointer-events-none absolute inset-x-0 bottom-2 z-20 flex justify-center px-4">
+          <div className="pointer-events-auto flex w-full max-w-[102rem] items-center justify-between gap-3 rounded-full border border-[rgba(140,102,67,0.14)] bg-[rgba(12,9,7,0.78)] px-3 py-1.5 text-[0.76rem] text-[rgba(236,223,204,0.78)] shadow-[0_14px_34px_rgba(0,0,0,0.24)] backdrop-blur-md md:px-4">
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-medium tracking-[0.03em] text-[rgba(247,239,229,0.82)]">
+                {footerLabel}
+              </p>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => handleStepPage('prev')}
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[rgba(140,102,67,0.12)] bg-[rgba(255,255,255,0.03)] text-[rgba(236,223,204,0.78)] transition-colors hover:border-[rgba(213,176,131,0.24)] hover:text-[#fff3e5]"
+                aria-label="Previous page"
+              >
+                <ChevronLeft size={14} />
+              </button>
+              <div className="flex items-center gap-1.5 rounded-full border border-[rgba(140,102,67,0.1)] bg-[rgba(255,255,255,0.025)] px-2 py-1">
+                <input
+                  value={pageDraft}
+                  onChange={(event) => setPageDraft(event.target.value.replace(/[^\d]/g, ''))}
+                  onBlur={handleJumpToPage}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      handleJumpToPage();
+                    }
+                  }}
+                  inputMode="numeric"
+                  aria-label="Jump to page"
+                  className="w-10 border-0 bg-transparent p-0 text-right text-[0.76rem] font-medium text-[rgba(247,239,229,0.9)] outline-none placeholder:text-[rgba(232,216,195,0.32)]"
+                  placeholder={currentPage ? String(currentPage) : '1'}
+                />
+                <span className="text-[rgba(232,216,195,0.44)]">/</span>
+                <span className="min-w-8 text-left text-[0.76rem] font-medium text-[rgba(232,216,195,0.68)]">
+                  {totalPages ?? '...'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleStepPage('next')}
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[rgba(140,102,67,0.12)] bg-[rgba(255,255,255,0.03)] text-[rgba(236,223,204,0.78)] transition-colors hover:border-[rgba(213,176,131,0.24)] hover:text-[#fff3e5]"
+                aria-label="Next page"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

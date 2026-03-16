@@ -1,0 +1,24 @@
+---
+title: Task Registry
+description: Compact task records for the blog section.
+date: "2026-03-16"
+updated: "2026-03-16"
+order: 3
+---
+
+# Task Registry
+
+## Phase `blog-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `blog-01-01` | `done` | create a section-local planning loop for the blog inside the docs tree | `-` | `pnpm exec next build` |
+| `blog-01-02` | `done` | define the blog as a primary public destination from the front page | `blog-01-01` | `pnpm exec next build` |
+| `blog-01-03` | `planned` | decide how build logs, essays, and planning-adjacent posts should be categorized | `blog-01-01` | `pnpm exec next build` |
+
+## Phase `blog-02`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `blog-02-01` | `done` | rewrite the RichEPub posts around the EPUB3-first conclusion and remove stale claims about `.repub` as the active path | `blog-01-02` | `pnpm exec next build` |
+| `blog-02-02` | `done` | align blog copy with the new editor planning section so the public narrative points at tooling instead of a new book container | `blog-02-01` | `pnpm exec next build` |

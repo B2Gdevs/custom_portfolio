@@ -2,20 +2,17 @@ import { getAllContent } from '@/lib/content';
 import { getBooks } from '@/lib/books';
 import { getFeaturedBookShowcase } from '@/lib/featured-book';
 import { getMusicTracks } from '@/lib/music';
-import { getResumes } from '@/lib/resumes';
 import CreativeHero from '@/components/home/CreativeHero';
 import FeaturedBookExperience from '@/components/home/FeaturedBookExperience';
 import SoundtrackSection from '@/components/home/SoundtrackSection';
 import ArchiveGateway from '@/components/home/ArchiveGateway';
 
 export default async function Home() {
-  const projects = getAllContent('projects');
   const blogPosts = getAllContent('blog');
   const docs = getAllContent('docs');
   const books = getBooks();
   const featuredBook = getFeaturedBookShowcase();
   const tracks = getMusicTracks();
-  const resumes = getResumes();
 
   if (!featuredBook) {
     return (
@@ -39,12 +36,8 @@ export default async function Home() {
       <FeaturedBookExperience featuredBook={featuredBook} books={books} />
       <SoundtrackSection tracks={tracks} />
       <ArchiveGateway
-        resumeCount={resumes.length}
-        projectCount={projects.length}
         blogCount={blogPosts.length}
         docCount={docs.length}
-        featuredResumeTitle={resumes[0]?.title}
-        featuredProjectTitle={projects[0]?.meta.title}
         latestPostTitle={blogPosts[0]?.meta.title}
         latestDocTitle={docs[0]?.meta.title}
       />

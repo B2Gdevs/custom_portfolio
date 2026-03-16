@@ -1,0 +1,35 @@
+---
+title: Requirements
+description: Section requirements for the documentation site and its planning workflow.
+date: "2026-03-16"
+updated: "2026-03-16"
+order: 6
+---
+
+# Requirements
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `documentation` |
+| `scope` | `docs-site` |
+| `status` | `active` |
+| `owner` | `docs-section` |
+
+## Core Requirements
+
+| Id | Requirement | Why |
+| --- | --- | --- |
+| `DOC-REQ-01` | each active section should own its planning loop inside the docs tree | planning state should live next to the public implementation context |
+| `DOC-REQ-02` | the docs area should expose a roadmap with section-level status and next steps | readers need a short overview before drilling into section records |
+| `DOC-REQ-03` | planning docs and reference docs should remain clearly separated in section navigation | day-to-day planning should stay compact without burying reference material |
+| `DOC-REQ-04` | docs copy should be compact, field-based, and easy to render into structured UI later | these pages are living records, not prose essays |
+
+## Quality Gates
+
+| Gate | Rule |
+| --- | --- |
+| `render` | docs pages should build cleanly in Next.js |
+| `structure` | new section planning pages should follow the same compact record pattern |
+| `visibility` | roadmap and requirements pages should be easy to find from the documentation section |

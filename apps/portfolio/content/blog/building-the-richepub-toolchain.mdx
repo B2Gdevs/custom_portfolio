@@ -1,53 +1,55 @@
 ---
-title: "Building the RichEPub Toolchain"
-description: "Repub project layout, builder steps, and how to produce your first .repub file."
+title: "What the RichEPub Toolchain Actually Taught Me"
+description: "The useful part of the experiment was the workflow thinking, not the `.repub` format itself."
 date: "2025-03-11"
-tags: ["RichEPub", "Tooling", "Vite", "Build"]
+tags: ["RichEPub", "EPUB3", "Tooling", "Workflow"]
 ---
 
-The RichEPub builder lives in this repo as `packages/repub-builder`. It expects a **repub project**: a folder with a Vite (or similar) app that builds to static HTML + JS + CSS. The builder runs that build, then packs the output into a `.repub` file.
+The original RichEPub toolchain was built around a custom `.repub` package. In practice, that was not the part worth optimizing.
 
-## Repub project layout
+What mattered was the pipeline thinking behind it:
 
-- **package.json**: Dependencies (React, Tailwind, etc.) and a `build` script (e.g. `vite build`).
-- **repub.config.json**: Book title, author, entry path, output path for the `.repub`.
-- **src/** (or your app root): React app. Build output goes to `dist/` (index.html + assets/).
+- author from real working material instead of idealized clean input
+- preserve structure while moving between tools
+- let design decisions be explicit instead of accidental
+- export to something stable enough to survive outside one custom reader
 
-Example `repub.config.json`:
+That last point is where the custom format fell apart for me. EPUB3 is already good enough for most of the document and packaging layer. The harder problem is preparing content well enough that the EPUB looks intentional when it gets there.
 
-```json
-{
-  "title": "My Book",
-  "author": "Author Name",
-  "entry": "content/index.html",
-  "outputPath": "dist/book.repub"
-}
-```
+## The real pipeline problem
 
-## Builder steps
+Books can start almost anywhere:
 
-1. **Install**: `npm install` in the repub project (optional flag: `--skip-install`).
-2. **Build**: `npm run build` (optional flag: `--skip-build`). Expects `dist/index.html` and `dist/assets/*`.
-3. **Rewrite paths**: The builder rewrites asset references in `index.html` from `./assets/` to `../assets/` so they resolve correctly when the file lives at `content/index.html` inside the ZIP.
-4. **Manifest**: Generate `repub.json` from config + `package.json` (dependencies, build time, format version).
-5. **Pack**: ZIP up `repub.json`, `content/index.html`, and `assets/*` as a `.repub` file.
+- Notion exports
+- markdown folders
+- MDX files
+- partially structured drafts with images and ad hoc formatting
 
-## Sample and CLI
+Supporting those inputs cleanly is harder than inventing a zip file with a manifest. The expensive part is normalization, layout control, and export discipline.
 
-A sample repub project is at `packages/repub-builder/sample/`: Vite + React + Tailwind. From the builder package:
+## What I would build instead
 
-```bash
-cd packages/repub-builder
-pnpm run build
-node dist/cli.js sample
-```
+If this system keeps growing, the better direction is a writing and layout tool that compiles to EPUB3.
 
-Output: `sample/dist/sample-book.repub`. You can open it in the portfolio's [Books](/books) reader.
+The rough shape would be:
 
-## Producing the first .repub
+1. import uneven source material
+2. normalize it into a structured document model
+3. let the author apply richer layout and component choices in a controlled UI
+4. compile the result down to EPUB3-safe markup, assets, and metadata
 
-1. Copy or clone the sample; edit title in `repub.config.json` and add your content in `src/`.
-2. Run `npm install` and `npm run build` in the sample (or use the builder without `--skip-install` and `--skip-build`).
-3. Run the builder CLI with the project path. The resulting `.repub` can be placed in `apps/portfolio/public/books/<slug>/book.repub` and linked from the books list.
+That could still use React and Node for the toolchain. It could still use component ideas. It just does not need a new reader-facing format to justify itself.
 
-Next: [Reading .repub in the browser](/blog/reading-repub-in-the-browser)—unpacking, sandboxing, and security.
+## Why I am not rushing to build it
+
+Even that editor path might be more hassle than it is worth.
+
+The value only appears if it meaningfully reduces cleanup, improves layout quality, and keeps the export stable. Otherwise it becomes another custom system that mostly recreates problems other tools already solve well enough.
+
+So the current stance is simpler:
+
+- keep the books pipeline focused on EPUB3
+- keep the old RichEPub notes as archive material
+- plan the editor carefully before pretending it should exist
+
+That planning now lives in the docs as its own section, because the editor is a tooling problem first, not a format-spec problem.
