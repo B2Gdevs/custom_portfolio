@@ -5,28 +5,30 @@ description: Embed the portfolio EPUB reader in docs; it loads book.epub from st
 
 # Book reader (EPUB)
 
-The portfolio serves built books from **static files** at `/books/<slug>/book.epub`. These are produced by the root-level script `pnpm run build:books` from the **repo-root `books/`** directory. The in-app reader loads `book.epub` and uses the same EPUB reader (react-reader / epub.js) on the [Books](/books) page and in embedded docs.
+The portfolio serves built books from static files at `/books/<slug>/book.epub`. These are produced by the root-level script `pnpm run build:books` from the repo-root `books/` directory. The in-app reader loads `book.epub` and uses the same EPUB runtime on the dedicated book reader page and in embedded docs.
 
 ## Embedded reader in docs
 
-The **BookReaderEmbed** component can be used in any doc or article to show the same reader used on the [Books](/books) page, loading a specific book by slug from the static EPUB URL.
+The `BookReaderEmbed` component can be used in any doc or article to show the same reader used on the book reader page, loading a specific book by slug from the static EPUB URL.
 
-Example (Mordred's Tale):
+Example:
 
 <BookReaderEmbed slug="mordreds_tale" title="Mordred's Tale" />
 
 ## How it works
 
-- **EPUB**: Built from `books/<slug>/chapters/` (markdown → HTML) and written to `apps/portfolio/public/books/<slug>/book.epub`. Users can read in the browser or download for any EPUB reader.
-- **Manifest**: `build:books` writes `public/books/manifest.json`; the Books list and `getBooks()` read from that manifest.
+- EPUB: built from `books/<slug>/chapters/` and written to `apps/portfolio/public/books/<slug>/book.epub`
+- Manifest: `build:books` writes `public/books/manifest.json`, which powers the books list and `getBooks()`
+- Runtime: the reader fetches `/books/<slug>/book.epub` and renders it in-browser without server-side book rendering
 
-The reader component fetches `/books/<slug>/book.epub` and renders it with the in-app EPUB reader. No server-side rendering of book content is required.
+## Planning records
 
-## Requirements and design
+Books planning and operating records live directly in the books docs section:
 
-**Requirements** and **design/styling** for books and the reader live in the repo under **`.planning/`**:
+- [Planning docs](/docs/books/planning-docs)
+- [State](/docs/books/state)
+- [Task Registry](/docs/books/task-registry)
+- [Errors and Attempts](/docs/books/errors-and-attempts)
+- [Decisions](/docs/books/decisions)
 
-- **REQUIREMENTS.md** – Books source of truth, tooling, formats, reader behavior, distribution (GitHub-only).
-- **DESIGN_STYLING.md** – Book-like typography, component set (Fumadocs-inspired), theme.
-
-The implementation plan is in **IMPLEMENTATION_PLAN.md**. For contributors and agents: read `.planning/` for the single source of truth on what we're building and how it should look.
+For contributor loops and fixes, update these books docs first so the live section documentation stays aligned with the actual reader behavior and publishing pipeline.

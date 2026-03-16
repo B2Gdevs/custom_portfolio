@@ -1,0 +1,25 @@
+---
+title: Task Registry
+description: Compact task records for the Dialogue Forge section.
+date: "2026-03-15"
+updated: "2026-03-16"
+order: 3
+---
+
+# Task Registry
+
+## Phase `dialogue-forge-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `dialogue-forge-01-01` | `done` | move section planning docs into the Dialogue Forge docs area | `-` | `pnpm run build`, `pnpm run lint` |
+| `dialogue-forge-01-02` | `planned` | audit current Dialogue Forge docs against the shipped app and remove drift | `dialogue-forge-01-01` | `pnpm run build` |
+| `dialogue-forge-01-03` | `planned` | expand exporter and dialogue-model docs only where they still match the current tool | `dialogue-forge-01-02` | `pnpm run build` |
+
+## Registry Rules
+
+| Field | Value |
+| --- | --- |
+| `ordering` | rows stay in intended execution order |
+| `status-set` | `planned`, `in-progress`, `done`, `blocked` |
+| `verification` | keep command lists short and tied to the task |

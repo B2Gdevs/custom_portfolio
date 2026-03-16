@@ -9,13 +9,13 @@ import TableOfContents from '@/components/docs/TableOfContents';
 export async function generateStaticParams() {
   const docs = getAllContent('docs');
   return docs.map((doc) => ({
-    slug: doc.slug.split('/'), // Convert "book-editor/overview" to ["book-editor", "overview"]
+    slug: doc.slug.split('/'),
   }));
 }
 
 export default async function DocPage({ params }: { params: Promise<{ slug: string[] }> }) {
   const { slug } = await params;
-  const slugString = Array.isArray(slug) ? slug.join('/') : slug; // Convert array back to string
+  const slugString = Array.isArray(slug) ? slug.join('/') : slug;
   const doc = getContentBySlug('docs', slugString);
   const allDocs = getAllContent('docs');
 
@@ -26,7 +26,7 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
   const components = getMDXComponents({});
 
   return (
-    <DocsLayout docs={allDocs} currentSlug={slugString}>
+    <DocsLayout docs={allDocs}>
       <div className="flex gap-12 py-12">
         {/* Main Content */}
         <article className="flex-1 min-w-0">

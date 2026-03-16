@@ -1,141 +1,96 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  Menu, X, ChevronRight, ChevronDown, Home, Download, 
-  FolderTree, Send, ArrowLeftRight, Wrench, Edit, 
-  Settings, Palette, PenTool, Globe, Mountain, Hash, 
-  Code, Grid3x3, Image as ImageIcon, Cpu, MessageSquare,
-  BookOpen, FileCode, Database, Lock, Users, GitBranch,
-  FileText, Zap, Layers, Package, Terminal, FileCheck
+import {
+  BookOpen,
+  ChevronDown,
+  ChevronRight,
+  FileCode,
+  FileText,
+  FolderKanban,
+  GitBranch,
+  Home,
+  Menu,
+  MessageSquare,
+  ScrollText,
+  X,
 } from 'lucide-react';
 import type { ContentMeta } from '@/lib/content';
+import { buildDocSections, isPlanningDocSlug, splitSectionDocs } from '@/lib/docs';
 
 interface DocsLayoutProps {
   children: React.ReactNode;
   docs: Array<{ meta: ContentMeta; slug: string }>;
-  currentSlug?: string;
 }
 
 // Icon mapping for docs
 function getIconForDoc(slug: string, title: string): React.ComponentType<{ size?: number; className?: string }> {
   const slugLower = slug.toLowerCase();
   const titleLower = title.toLowerCase();
+  const sectionKey = slugLower.split('/')[0];
 
-  // Top-level docs
-  if (slugLower === 'getting-started') return Home;
-  if (slugLower === 'mdx-parser' || titleLower.includes('mdx')) return FileCode;
-  if (slugLower === 'architecture' || titleLower.includes('architecture')) return FolderTree;
+  if (slugLower.endsWith('/index') || slugLower.endsWith('/overview')) {
+    return Home;
+  }
 
-  // Book Editor docs
-  if (slugLower.includes('book-editor')) {
-    if (slugLower.includes('overview') || slugLower.includes('index')) return BookOpen;
-    if (slugLower.includes('architecture')) return Layers;
-    if (slugLower.includes('auth')) return Lock;
-    if (slugLower.includes('auth-options')) return Settings;
-    if (slugLower.includes('database')) return Database;
-    if (slugLower.includes('collaboration')) return Users;
-    if (slugLower.includes('conflict')) return GitBranch;
-    if (slugLower.includes('file-upload')) return FileText;
-    if (slugLower.includes('highlighting')) return PenTool;
-    if (slugLower.includes('tiptap')) return Edit;
-    if (slugLower.includes('quick-reference')) return Zap;
-    if (slugLower.includes('tech-stack')) return Package;
-    if (slugLower.includes('implementation')) return Terminal;
-    if (slugLower.includes('task-plan')) return FileCheck;
+  if (slugLower.endsWith('/planning-docs') || titleLower.includes('planning')) {
+    return FolderKanban;
+  }
+
+  if (slugLower.includes('architecture') || titleLower.includes('architecture')) {
+    return FileCode;
+  }
+
+  if (slugLower.includes('dialogue-nodes') || titleLower.includes('node')) {
+    return GitBranch;
+  }
+
+  if (slugLower.includes('yarn') || titleLower.includes('yarn')) {
+    return ScrollText;
+  }
+
+  if (slugLower.includes('reader') || titleLower.includes('reader')) {
     return BookOpen;
   }
 
-  // Default icons based on keywords
-  if (titleLower.includes('getting started') || titleLower.includes('introduction')) return Home;
-  if (titleLower.includes('installation') || titleLower.includes('setup')) return Download;
-  if (titleLower.includes('migration')) return ArrowLeftRight;
-  if (titleLower.includes('troubleshooting')) return Wrench;
-  if (titleLower.includes('configuration') || titleLower.includes('config')) return Settings;
-  if (titleLower.includes('theme') || titleLower.includes('styling')) return Palette;
-  if (titleLower.includes('customization')) return PenTool;
-  if (titleLower.includes('internationalization') || titleLower.includes('i18n')) return Globe;
-  if (titleLower.includes('markdown') || titleLower.includes('syntax')) return Hash;
-  if (titleLower.includes('code block') || titleLower.includes('code')) return Code;
-  if (titleLower.includes('component')) return Grid3x3;
-  if (titleLower.includes('image') || titleLower.includes('embed')) return ImageIcon;
-  if (titleLower.includes('mcp') || titleLower.includes('server')) return Cpu;
-  if (titleLower.includes('llm') || titleLower.includes('ai')) return MessageSquare;
+  if (sectionKey === 'books') return BookOpen;
+  if (sectionKey === 'dialogue-forge') return MessageSquare;
 
   return FileText;
 }
 
-// Organize docs into hierarchical sections
-function organizeDocs(docs: Array<{ meta: ContentMeta; slug: string }>) {
-  const sections: Record<string, Array<{ meta: ContentMeta; slug: string }>> = {};
-  const topLevel: Array<{ meta: ContentMeta; slug: string }> = [];
-
-  docs.forEach((doc) => {
-    if (doc.slug.includes('/')) {
-      const [section] = doc.slug.split('/');
-      if (!sections[section]) {
-        sections[section] = [];
-      }
-      sections[section].push(doc);
-    } else {
-      topLevel.push(doc);
-    }
-  });
-
-  return { sections, topLevel };
+function getSectionIcon(sectionKey: string): React.ComponentType<{ size?: number; className?: string }> {
+  if (sectionKey === 'books') return BookOpen;
+  if (sectionKey === 'dialogue-forge') return MessageSquare;
+  return FileText;
 }
 
-// Group top-level docs into sections
-function groupTopLevelDocs(docs: Array<{ meta: ContentMeta; slug: string }>) {
-  const groups: Record<string, Array<{ meta: ContentMeta; slug: string }>> = {
-    'Getting Started': [],
-    'Core Concepts': [],
-    'Essentials': [],
-  };
-
-  docs.forEach((doc) => {
-    const slug = doc.slug.toLowerCase();
-    const title = doc.meta.title.toLowerCase();
-
-    if (slug === 'getting-started' || title.includes('getting started') || title.includes('introduction')) {
-      groups['Getting Started'].push(doc);
-    } else if (
-      slug.includes('architecture') || 
-      title.includes('architecture') ||
-      slug.includes('mdx-parser')
-    ) {
-      groups['Core Concepts'].push(doc);
-    } else {
-      groups['Essentials'].push(doc);
-    }
-  });
-
-  // Remove empty groups
-  Object.keys(groups).forEach((key) => {
-    if (groups[key].length === 0) {
-      delete groups[key];
-    }
-  });
-
-  return groups;
-}
-
-export default function DocsLayout({ children, docs, currentSlug }: DocsLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['Getting Started', 'Core Concepts', 'Essentials', 'Book Editor']));
+export default function DocsLayout({ children, docs }: DocsLayoutProps) {
   const pathname = usePathname();
+  const docSections = useMemo(() => buildDocSections(docs), [docs]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    () => new Set(buildDocSections(docs).map((section) => section.key))
+  );
+  const [expandedPlanningFolders, setExpandedPlanningFolders] = useState<Set<string>>(() => {
+    const activeSectionKey = pathname?.startsWith('/docs/')
+      ? pathname.replace('/docs/', '').split('/')[0]
+      : null;
+    const activeDocSlug = pathname?.startsWith('/docs/') ? pathname.replace('/docs/', '') : '';
+    return activeSectionKey && isPlanningDocSlug(activeDocSlug) ? new Set([activeSectionKey]) : new Set();
+  });
+  const [sidebarScrolling, setSidebarScrolling] = useState(false);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { sections, topLevel } = useMemo(() => organizeDocs(docs), [docs]);
-  const topLevelGroups = useMemo(() => groupTopLevelDocs(topLevel), [topLevel]);
-
-  // Section display names
-  const sectionNames: Record<string, string> = {
-    'getting-started': 'Getting Started',
-    'book-editor': 'Book Editor',
-    'architecture': 'Architecture',
-  };
+  useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => {
@@ -147,6 +102,26 @@ export default function DocsLayout({ children, docs, currentSlug }: DocsLayoutPr
       }
       return next;
     });
+  };
+
+  const togglePlanningFolder = (section: string) => {
+    setExpandedPlanningFolders((prev) => {
+      const next = new Set(prev);
+      if (next.has(section)) {
+        next.delete(section);
+      } else {
+        next.add(section);
+      }
+      return next;
+    });
+  };
+
+  const handleSidebarScroll = () => {
+    setSidebarScrolling(true);
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    scrollTimeoutRef.current = setTimeout(() => setSidebarScrolling(false), 750);
   };
 
   // Navigation content component (reusable for mobile and desktop)
@@ -172,70 +147,79 @@ export default function DocsLayout({ children, docs, currentSlug }: DocsLayoutPr
           />
         </div>
 
-        {/* Top-level docs grouped by section */}
-        {Object.entries(topLevelGroups).map(([sectionName, sectionDocs]) => {
-          const isExpanded = expandedSections.has(sectionName);
+        {docSections.map((section) => {
+          const isExpanded = expandedSections.has(section.key);
+          const SectionIcon = getSectionIcon(section.key);
+          const { planningDocs, referenceDocs } = splitSectionDocs(section.docs);
+          const planningExpanded =
+            expandedPlanningFolders.has(section.key) ||
+            planningDocs.some((doc) => pathname === `/docs/${doc.slug}`);
           
           return (
-            <div key={sectionName}>
+            <div key={section.key}>
               <button
-                onClick={() => toggleSection(sectionName)}
+                onClick={() => toggleSection(section.key)}
                 className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-gray-300 hover:text-white transition-colors"
               >
-                <span>{sectionName}</span>
-                {isExpanded ? (
-                  <ChevronDown size={16} className="text-gray-500" />
-                ) : (
-                  <ChevronRight size={16} className="text-gray-500" />
-                )}
+                <span className="flex items-center gap-2">
+                  <SectionIcon size={15} className="text-accent" />
+                  <span>{section.label}</span>
+                </span>
+                <span className="ml-3 flex items-center gap-2 text-xs text-gray-500">
+                  <span>{section.docs.length}</span>
+                  {isExpanded ? (
+                    <ChevronDown size={16} className="text-gray-500" />
+                  ) : (
+                    <ChevronRight size={16} className="text-gray-500" />
+                  )}
+                </span>
               </button>
               
               {isExpanded && (
                 <div className="mt-1 space-y-0.5">
-                  {sectionDocs.map((doc) => {
-                    const docPath = `/docs/${doc.slug}`;
-                    const isActive = pathname === docPath;
-                    const Icon = getIconForDoc(doc.slug, doc.meta.title);
-                    
-                    return (
-                      <NavItem
-                        key={doc.slug}
-                        href={docPath}
-                        title={doc.meta.title}
-                        icon={Icon}
-                        isActive={isActive}
-                        onClick={onItemClick}
-                      />
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
+                  {planningDocs.length > 0 && (
+                    <div className="mb-2">
+                      <button
+                        onClick={() => togglePlanningFolder(section.key)}
+                        className="relative flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-gray-400 transition-colors hover:text-gray-200"
+                      >
+                        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-600/30" />
+                        <FolderKanban
+                          size={18}
+                          className={planningExpanded ? 'text-accent' : 'text-gray-400'}
+                        />
+                        <span className="flex-1 text-left font-medium">Planning Docs</span>
+                        {planningExpanded ? (
+                          <ChevronDown size={15} className="text-gray-500" />
+                        ) : (
+                          <ChevronRight size={15} className="text-gray-500" />
+                        )}
+                      </button>
 
-        {/* Sectioned docs (folders) */}
-        {Object.entries(sections).map(([sectionKey, sectionDocs]) => {
-          const sectionName = sectionNames[sectionKey] || sectionKey.charAt(0).toUpperCase() + sectionKey.slice(1);
-          const isExpanded = expandedSections.has(sectionName);
-          
-          return (
-            <div key={sectionKey}>
-              <button
-                onClick={() => toggleSection(sectionName)}
-                className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-gray-300 hover:text-white transition-colors"
-              >
-                <span>{sectionName}</span>
-                {isExpanded ? (
-                  <ChevronDown size={16} className="text-gray-500" />
-                ) : (
-                  <ChevronRight size={16} className="text-gray-500" />
-                )}
-              </button>
-              
-              {isExpanded && (
-                <div className="mt-1 space-y-0.5">
-                  {sectionDocs.map((doc) => {
+                      {planningExpanded && (
+                        <div className="mt-1 ml-5 space-y-0.5 border-l border-border/60 pl-3">
+                          {planningDocs.map((doc) => {
+                            const docPath = `/docs/${doc.slug}`;
+                            const isActive = pathname === docPath;
+                            const Icon = getIconForDoc(doc.slug, doc.meta.title);
+
+                            return (
+                              <NavItem
+                                key={doc.slug}
+                                href={docPath}
+                                title={doc.meta.title}
+                                icon={Icon}
+                                isActive={isActive}
+                                onClick={onItemClick}
+                              />
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {referenceDocs.map((doc) => {
                     const docPath = `/docs/${doc.slug}`;
                     const isActive = pathname === docPath;
                     const Icon = getIconForDoc(doc.slug, doc.meta.title);
@@ -333,9 +317,11 @@ export default function DocsLayout({ children, docs, currentSlug }: DocsLayoutPr
       <aside
         className={`
           fixed lg:hidden top-0 left-0 h-screen w-64 bg-dark-alt border-r border-border
-          overflow-y-auto z-40 transition-transform duration-300
+          sidebar-scroll-area overflow-y-auto z-40 transition-transform duration-300
+          ${sidebarScrolling ? 'scroll-active' : ''}
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
+        onScroll={handleSidebarScroll}
       >
         <div className="p-6">
           <NavigationContent onItemClick={() => setSidebarOpen(false)} />
@@ -347,7 +333,12 @@ export default function DocsLayout({ children, docs, currentSlug }: DocsLayoutPr
         <div className="flex gap-8 max-w-7xl mx-auto px-4 lg:px-8">
           {/* Desktop Sidebar - Part of centered content flow */}
           <aside className="hidden lg:block w-64 flex-shrink-0 border-r border-border">
-            <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+            <div
+              className={`sidebar-scroll-area sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto ${
+                sidebarScrolling ? 'scroll-active' : ''
+              }`}
+              onScroll={handleSidebarScroll}
+            >
               <div className="p-6">
                 <NavigationContent />
               </div>

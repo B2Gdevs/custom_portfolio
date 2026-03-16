@@ -1,49 +1,53 @@
 import { getAllContent } from '@/lib/content';
-import Hero from '@/components/home/Hero';
-import FeaturedProjectsHeader from '@/components/home/FeaturedProjectsHeader';
-import FeaturedProjects from '@/components/home/FeaturedProjects';
-import LatestBlogPost from '@/components/home/LatestBlogPost';
-import { getPCBPattern, getPCBPatternPath } from '@/lib/pcb-patterns';
+import { getBooks } from '@/lib/books';
+import { getFeaturedBookShowcase } from '@/lib/featured-book';
+import { getMusicTracks } from '@/lib/music';
+import { getResumes } from '@/lib/resumes';
+import CreativeHero from '@/components/home/CreativeHero';
+import FeaturedBookExperience from '@/components/home/FeaturedBookExperience';
+import SoundtrackSection from '@/components/home/SoundtrackSection';
+import ArchiveGateway from '@/components/home/ArchiveGateway';
 
 export default async function Home() {
   const projects = getAllContent('projects');
   const blogPosts = getAllContent('blog');
-  
-  // Get featured projects (first 2)
-  const featuredProjects = projects.slice(0, 2);
-  
-  // Get latest blog post
-  const latestBlogPost = blogPosts[0] || null;
+  const docs = getAllContent('docs');
+  const books = getBooks();
+  const featuredBook = getFeaturedBookShowcase();
+  const tracks = getMusicTracks();
+  const resumes = getResumes();
 
-  // Alternate PCB patterns per row (0 = Featured Projects, 1 = Latest Blog Post)
-  const featuredProjectsPattern = getPCBPattern(0); // 'grid'
-  const blogPostPattern = getPCBPattern(1); // 'curves'
+  if (!featuredBook) {
+    return (
+      <div className="mx-auto max-w-5xl px-6 py-24">
+        <div className="story-card p-8 md:p-10">
+          <p className="section-kicker">Featured reading unavailable</p>
+          <h1 className="mt-2 font-display text-4xl text-primary md:text-6xl">
+            The site is ready for a book-first landing page.
+          </h1>
+          <p className="mt-5 max-w-3xl text-lg leading-8 text-text-muted">
+            The home page expects a built book manifest with a featured title. Run the books pipeline, then this landing page can surface the reader directly.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full bg-dark">
-      <Hero />
-
-      {/* Featured Projects - Modern Card Layout */}
-      <section className="w-full relative overflow-hidden">
-        <div 
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: `url("${getPCBPatternPath(featuredProjectsPattern)}")`,
-            backgroundPosition: 'right center',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: '500px 400px',
-            opacity: 0.5,
-          }}
-        />
-        <div className="max-w-7xl mx-auto px-6 py-10 md:py-14 relative z-10">
-          <div className="max-w-5xl mx-auto">
-            <FeaturedProjectsHeader />
-            <FeaturedProjects projects={featuredProjects} />
-          </div>
-        </div>
-      </section>
-
-      <LatestBlogPost post={latestBlogPost} pattern={blogPostPattern} />
+    <div className="w-full">
+      <CreativeHero featuredBook={featuredBook} />
+      <FeaturedBookExperience featuredBook={featuredBook} books={books} />
+      <SoundtrackSection tracks={tracks} />
+      <ArchiveGateway
+        resumeCount={resumes.length}
+        projectCount={projects.length}
+        blogCount={blogPosts.length}
+        docCount={docs.length}
+        featuredResumeTitle={resumes[0]?.title}
+        featuredProjectTitle={projects[0]?.meta.title}
+        latestPostTitle={blogPosts[0]?.meta.title}
+        latestDocTitle={docs[0]?.meta.title}
+      />
     </div>
   );
 }

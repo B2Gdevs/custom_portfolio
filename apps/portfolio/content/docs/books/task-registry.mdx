@@ -1,0 +1,35 @@
+---
+title: Task Registry
+description: Compact task records for the books section.
+date: "2026-03-15"
+updated: "2026-03-16"
+order: 3
+---
+
+# Task Registry
+
+## Phase `books-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `books-01-01` | `done` | move section planning docs into the books docs area | `-` | `pnpm run build`, `pnpm run lint` |
+| `books-01-02` | `in-progress` | improve the dedicated reader so it feels like the primary reading surface | `books-01-01` | `pnpm run build` |
+| `books-01-03` | `done` | make the homepage CTA mount the featured book reader and expose a disabled coming-soon second book | `books-01-02` | `pnpm run build`, `pnpm run lint` |
+| `books-01-04` | `done` | fix EPUB image packaging so the front-page reader stops resolving broken archive assets | `books-01-03` | `pnpm run build:books`, `pnpm run build`, `pnpm run lint` |
+| `books-01-05` | `done` | make the book build pipeline treat empty upcoming-book folders as `coming soon` instead of logging a failed EPUB build | `books-01-04` | `pnpm run build:books` |
+| `books-01-06` | `done` | change the front-page reader to load EPUB bytes before mounting `react-reader` so browser requests stop falling back to `/META-INF/container.xml` | `books-01-05` | `pnpm run build`, `pnpm run lint` |
+| `books-01-07` | `done` | make the homepage act as a reader launch surface that routes into `/books/<slug>/read` instead of depending on a second embedded runtime | `books-01-06` | `pnpm run build`, `pnpm run lint` |
+| `books-01-08` | `done` | add header-level book switching on the dedicated reader page so the read route can move between available books without returning to the index | `books-01-07` | `pnpm run build`, `pnpm run lint` |
+| `books-01-09` | `done` | tune the dedicated reader for wide-screen spreads and a richer TOC presentation | `books-01-08` | `pnpm run build`, `pnpm run lint` |
+| `books-01-10` | `done` | shift the dedicated reader spread farther off the TOC toggle and align the reading stage with the header chrome | `books-01-09` | `pnpm run build`, `pnpm run lint` |
+| `books-01-11` | `done` | rewrite emitted EPUB page shells so lead images sit under the page title, opening paragraphs stay visible, and folio numbers render at the bottom | `books-01-10` | `pnpm run build:books`, `pnpm run build` |
+| `books-01-12` | `planned` | expand planning records around publishing, editions, and progression | `books-01-11` | `pnpm run build:books` |
+| `books-01-13` | `planned` | build a live EPUB for the next visible book once the manuscript is ready | `books-01-11` | `pnpm run build:books`, `pnpm run build` |
+
+## Registry Rules
+
+| Field | Value |
+| --- | --- |
+| `ordering` | rows stay in intended execution order |
+| `status-set` | `planned`, `in-progress`, `done`, `blocked` |
+| `verification` | list the smallest command set that proves the task |

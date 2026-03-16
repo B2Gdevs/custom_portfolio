@@ -1,0 +1,55 @@
+---
+title: State
+description: Compact state records for the books section.
+date: "2026-03-15"
+updated: "2026-03-16"
+order: 2
+---
+
+# State
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `books` |
+| `owner` | `books-section` |
+| `status` | `active` |
+| `updated` | `2026-03-16` |
+
+## Current Cycle
+
+| Field | Value |
+| --- | --- |
+| `phase` | `books-01` |
+| `plan` | `books-01-a` |
+| `focus` | dedicated reader page layout aligns with emitted EPUB pages so spreads show title, image, opening text, and bottom folios correctly |
+| `constraint` | planning for books work lives in these docs, aligned with the real publishing pipeline |
+
+## Next Queue
+
+| Priority | Action | Type |
+| --- | --- | --- |
+| `1` | align EPUB page structure with the dedicated reader layout before deeper reading features | `ux` |
+| `2` | build a live EPUB for the next book when that content is ready | `publishing` |
+| `3` | decide how missing book illustrations should be represented beyond silently stripping broken refs | `publishing-policy` |
+
+## References
+
+| Id | Path | Purpose |
+| --- | --- | --- |
+| `books-root` | `books/mordreds_tale/` | authored source of truth |
+| `home-page` | `apps/portfolio/app/page.tsx` | primary site reading entry |
+| `reader-embed` | `apps/portfolio/components/books/BookReaderEmbed.tsx` | embedded reader surface |
+| `viewer` | `apps/portfolio/components/books/EpubViewer.tsx` | EPUB runtime and loading path |
+| `epub-builder` | `packages/repub-builder/src/epub.ts` | EPUB image rewrite and chapter packaging |
+| `book-output` | `apps/portfolio/public/books/` | generated reading artifacts |
+| `front-page-reader` | `apps/portfolio/components/home/FeaturedBookExperience.tsx` | user-triggered reader mount path |
+
+## Human Input
+
+| Trigger | Action |
+| --- | --- |
+| publishing flow changes | update `current cycle` and `references` first |
+| reader UX changes | record the new focus before implementation |
+| new requirements appear | add them in the books docs planning pages before execution |

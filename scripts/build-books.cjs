@@ -35,6 +35,26 @@ function runRepub(sub, bookDir, outputPath) {
   return result.status === 0;
 }
 
+function hasBookSourceFiles(bookDir) {
+  const chaptersDir = path.join(bookDir, 'chapters');
+  if (fs.existsSync(chaptersDir)) {
+    const chapterDirs = fs.readdirSync(chaptersDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => path.join(chaptersDir, entry.name));
+
+    for (const chapterDir of chapterDirs) {
+      const files = fs.readdirSync(chapterDir, { withFileTypes: true });
+      if (files.some((entry) => entry.isFile() && /\.(md|mdx)$/i.test(entry.name))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  const rootFiles = fs.readdirSync(bookDir, { withFileTypes: true });
+  return rootFiles.some((entry) => entry.isFile() && /\.(md|mdx)$/i.test(entry.name));
+}
+
 async function main() {
   if (!fs.existsSync(BOOKS_ROOT)) {
     console.log('No books/ directory at repo root. Skipping.');
@@ -60,8 +80,13 @@ async function main() {
     const outDir = path.join(OUT_ROOT, slug);
     if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
     const epubPath = path.join(outDir, 'book.epub');
-    const hasEpub = runRepub('epub', bookDir, epubPath);
-    if (!hasEpub) console.error(`EPUB failed for ${slug}`);
+    const hasSourceFiles = hasBookSourceFiles(bookDir);
+    const hasEpub = hasSourceFiles ? runRepub('epub', bookDir, epubPath) : false;
+    if (!hasSourceFiles) {
+      console.log(`Skipping EPUB for ${slug}: no markdown source yet.`);
+    } else if (!hasEpub) {
+      console.error(`EPUB failed for ${slug}`);
+    }
     manifest.push({
       slug,
       title: meta.title,

@@ -29,7 +29,7 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
   const updatedDate = doc.meta.updated ? format(new Date(doc.meta.updated), 'MMMM d, yyyy') : null;
 
   return (
-    <DocsLayout docs={allDocs} currentSlug={slug}>
+    <DocsLayout docs={allDocs}>
       <div className="flex gap-8 py-12">
         <article className="flex-1 min-w-0">
           <header className="mb-12 pb-8 border-b border-border">

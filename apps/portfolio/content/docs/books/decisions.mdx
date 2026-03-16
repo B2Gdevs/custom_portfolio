@@ -1,0 +1,31 @@
+---
+title: Decisions
+description: Compact decision records for the books section.
+date: "2026-03-15"
+updated: "2026-03-16"
+order: 5
+---
+
+# Decisions
+
+| Id | Status | Summary | Consequence |
+| --- | --- | --- | --- |
+| `BOOKS-DOCS-PLANNING-FIRST` | `accepted` | books docs expose planning pages before general implementation docs | section users hit active planning context first |
+| `BOOKS-HOMEPAGE-READER-FIRST` | `superseded` | homepage reader was treated as the main reading surface, not a teaser | replaced by the dedicated reader route as the canonical runtime |
+| `BOOKS-HOMEPAGE-READER-LAZY-MOUNT` | `superseded` | homepage reader mounted only when the user explicitly asked for it | replaced by the homepage launch-surface approach |
+| `BOOKS-HOMEPAGE-READER-BYTE-LOAD` | `accepted` | embedded reader should load the `.epub` archive into memory before mounting `react-reader` | runtime behavior does not depend on browser MIME handling or URL-style EPUB fallback |
+| `BOOKS-HOMEPAGE-LAUNCHPAD` | `accepted` | homepage is the launch surface for books and routes into `/books/<slug>/read` for the stable session | the dedicated reader page is the canonical live reading runtime |
+| `BOOKS-DEDICATED-READER-BOOK-SWITCHER` | `accepted` | active reading sessions should expose book switching in the read-page header | readers can move between available books without leaving the reader route |
+| `BOOKS-DEDICATED-READER-SPREADS` | `accepted` | wide screens should use paginated two-page spreads when the viewport allows it | the reading surface behaves more like an opened book than a narrow preview |
+| `BOOKS-DEDICATED-READER-TOC-STYLING` | `accepted` | TOC chrome and in-book TOC typography should feel designed, not default | navigation surfaces should look intentional even before content-specific polish |
+| `BOOKS-DEDICATED-READER-STAGE-CLEARANCE` | `accepted` | the spread needs extra left clearance from the TOC toggle chrome in reader mode | reading pages should not feel pinned under the hamburger button |
+| `BOOKS-EMIT-PAGE-SHELLS` | `accepted` | EPUB generation should emit custom page wrappers with lead-image placement and bottom folios | the dedicated reader can treat source files like intentional printed pages instead of raw chapter fragments |
+| `BOOKS-MISSING-IMAGE-REFS-DO-NOT-SHIP` | `accepted` | EPUB generation must strip book image refs when the source illustration file is missing | reader editions prefer missing art over broken asset errors |
+| `BOOKS-REPO-SOURCE-OF-TRUTH` | `accepted` | authored books under `books/<slug>/` remain the publishing source of truth | updates must follow the repo content pipeline, not manual copies |
+
+## Decision Rule
+
+| Field | Value |
+| --- | --- |
+| `id-shape` | uppercase section key plus short decision name |
+| `status-set` | `accepted`, `superseded`, `proposed` |

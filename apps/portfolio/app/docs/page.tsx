@@ -1,14 +1,12 @@
 import { getAllContent } from '@/lib/content';
+import { buildDocSections } from '@/lib/docs';
 import DocsGrid from '@/components/docs/DocsGrid';
 import DocsLayout from '@/components/docs/DocsLayout';
 import RecentDocs from '@/components/docs/RecentDocs';
 
 export default function DocsPage() {
   const docs = getAllContent('docs');
-  
-  // Separate book editor docs
-  const bookEditorDocs = docs.filter(doc => doc.slug.startsWith('book-editor/'));
-  const otherDocs = docs.filter(doc => !doc.slug.startsWith('book-editor/'));
+  const sections = buildDocSections(docs);
 
   return (
     <DocsLayout docs={docs}>
@@ -19,25 +17,28 @@ export default function DocsPage() {
               Documentation
             </h1>
             <p className="text-lg text-text-muted leading-relaxed mt-4">
-              Comprehensive guides, tutorials, and architecture documentation
+              Section-based docs for active workstreams. Each section carries its own implementation notes and planning material.
             </p>
           </div>
 
           <RecentDocs docs={docs} />
 
-          {bookEditorDocs.length > 0 && (
-            <section className="mb-12">
-              <h2 className="text-3xl font-bold text-primary mb-6">Book Editor</h2>
-              <DocsGrid docs={bookEditorDocs} />
+          {sections.map((section) => (
+            <section key={section.key} className="mb-12">
+              <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold text-primary">{section.label}</h2>
+                  <p className="mt-2 max-w-3xl text-base leading-relaxed text-text-muted">
+                    {section.description}
+                  </p>
+                </div>
+                <div className="inline-flex w-fit items-center rounded-full border border-border bg-dark-alt px-3 py-1 text-sm text-text-muted">
+                  {section.docs.length} doc{section.docs.length === 1 ? '' : 's'}
+                </div>
+              </div>
+              <DocsGrid docs={section.docs} />
             </section>
-          )}
-
-          {otherDocs.length > 0 && (
-            <section>
-              <h2 className="text-3xl font-bold text-primary mb-6">General Documentation</h2>
-              <DocsGrid docs={otherDocs} />
-            </section>
-          )}
+          ))}
         </div>
       </div>
     </DocsLayout>

@@ -1,0 +1,37 @@
+---
+title: Planning Docs
+description: Compact XML-style planning index for the books section.
+date: "2026-03-15"
+updated: "2026-03-16"
+order: 1
+---
+
+# Planning Docs
+
+## Planning Index
+
+| Page | Record Set | Purpose |
+| --- | --- | --- |
+| [State](/docs/books/state) | `state-records` | Current phase, owner, next queue, and working references. |
+| [Task Registry](/docs/books/task-registry) | `task-records` | Ordered work items with status, dependencies, and verification commands. |
+| [Errors and Attempts](/docs/books/errors-and-attempts) | `attempt-records` | Failures, corrections, and still-open problem tracks. |
+| [Decisions](/docs/books/decisions) | `decision-records` | Accepted section decisions and their consequences. |
+
+## Section Scope
+
+| Field | Value |
+| --- | --- |
+| `section` | `books` |
+| `source` | repo-authored books under `books/<slug>/` |
+| `delivery` | EPUB output, manifest generation, and reading surfaces |
+| `coverage` | planning notes that affect publishing, editions, or reading UX |
+
+## Record Rules
+
+| Field | Rule |
+| --- | --- |
+| `priority` | Planning pages sort before general books docs. |
+| `shape` | Use fixed fields, short values, and explicit ids instead of prose blocks. |
+| `update-trigger` | Change these records before or with any books workflow change. |
+| `follow-on-docs` | Reader and implementation docs come after the planning stack. |
+| `agent-loop` | Follow `AGENTS.md`: read planning state, pick one books task, implement, verify, then update planning records. |

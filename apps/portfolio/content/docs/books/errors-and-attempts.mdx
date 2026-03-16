@@ -1,0 +1,30 @@
+---
+title: Errors and Attempts
+description: Compact attempt records for the books section.
+date: "2026-03-15"
+updated: "2026-03-16"
+order: 4
+---
+
+# Errors and Attempts
+
+| Id | Status | Context | Problem | Response |
+| --- | --- | --- | --- | --- |
+| `books-01-01` | `resolved` | early home-page reader pass | reader felt like a preview instead of the real surface | treat the homepage reader as the primary reading surface and keep iterating there |
+| `books-01-02` | `resolved` | first books planning-doc pass | planning pages were too generic and not close to the XML structure | split planning into explicit page types with stable record fields |
+| `books-01-03` | `resolved` | homepage embedded EPUB load | embedded reader auto-load threw `META-INF/container.xml` / missing-asset errors and the CTA only scrolled | defer mount to an explicit load action and use the direct EPUB URL in `EpubViewer` instead of a blob wrapper |
+| `books-01-04` | `resolved` | EPUB packaging for reader images | generated EPUB pages referenced `images/<uuid>.null` or source paths for illustrations that were not actually packaged | rewrite available book images to local asset paths during EPUB generation and strip source image tags when the file is missing |
+| `books-01-05` | `resolved` | upcoming book without manuscript pages | `build:books` logged a failed EPUB build for a book intentionally shown as `coming soon` | detect missing markdown sources early and skip EPUB packaging without treating it as a failure |
+| `books-01-06` | `resolved` | front-page reader still using packaged EPUB URL | browser still requested `/META-INF/container.xml` after the packaging fix because the runtime path could still fall back to directory-style EPUB resolution | fetch the `.epub` archive as an `ArrayBuffer` in `EpubViewer` and hand those bytes directly to `react-reader` |
+| `books-01-07` | `resolved` | homepage embed still diverged from the stable reader route | dedicated `/books/<slug>/read` rendered correctly while the front-page embed still failed to render consistently | stop treating the homepage as a second reader runtime and route readers from the front page into the dedicated reader page |
+| `books-01-08` | `resolved` | dedicated reader header only exposed a back link and title | switching books from the active reading session required backing out to the index | move book switching into the read-page header and keep unavailable books visibly disabled |
+| `books-01-09` | `resolved` | dedicated reader still felt like a narrow util shell on wide screens | widescreen reading did not use the available space and the TOC treatment looked flat | switch the reader to paginated spread-friendly rendering and restyle the TOC chrome and document typography |
+| `books-01-10` | `resolved` | dedicated reader spread sat too close to the TOC toggle chrome | the first page felt cramped against the left-side controls | move the reader stage farther right in reader mode so the spread clears the toggle area |
+| `books-01-11` | `resolved` | emitted EPUB pages did not fit the dedicated reader spread | lead images could jump to the next column, opening text disappeared from the first spread, and there were no visible bottom folios | emit each source page with a custom page wrapper, extracted lead image block, custom EPUB CSS, and footer folio metadata |
+
+## Follow-up Rule
+
+| Field | Value |
+| --- | --- |
+| `new-record-trigger` | add a row when a books problem changes approach, not for every small note |
+| `close-condition` | move a record to `resolved` only after the fix is shipped or the path is abandoned |

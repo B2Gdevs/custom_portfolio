@@ -1,0 +1,22 @@
+---
+title: Decisions
+description: Compact decision records for the Dialogue Forge section.
+date: "2026-03-15"
+updated: "2026-03-16"
+order: 5
+---
+
+# Decisions
+
+| Id | Status | Summary | Consequence |
+| --- | --- | --- | --- |
+| `DIALOGUE-FORGE-DOCS-PLANNING-FIRST` | `accepted` | planning pages come before general implementation docs | section users reach current planning context first |
+| `DIALOGUE-FORGE-DOCS-STAY-CLOSE-TO-THE-APP` | `accepted` | docs should reflect the shipped editor, not speculative branches | drift cleanup comes before more detail |
+| `DIALOGUE-FORGE-YARN-PATH-STILL-MATTERS` | `accepted` | Yarn Spinner export remains part of the documented identity while it matches the tool | exporter docs stay only while the real tool still supports that path |
+
+## Decision Rule
+
+| Field | Value |
+| --- | --- |
+| `id-shape` | uppercase section key plus short decision name |
+| `status-set` | `accepted`, `superseded`, `proposed` |
