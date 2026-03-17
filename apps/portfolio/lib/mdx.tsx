@@ -4,6 +4,8 @@ import Image from 'next/image';
 import { CodeBlock } from '@/components/docs/CodeBlock';
 import YouTubeEmbed from '@/components/projects/YouTubeEmbed';
 import BookReaderEmbed from '@/components/books/BookReaderEmbed';
+import Callout from '@/components/blog/Callout';
+import DocLinkCard from '@/components/blog/DocLinkCard';
 
 function buildMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -148,6 +150,12 @@ function buildMDXComponents(components: MDXComponents): MDXComponents {
     ),
     BookReaderEmbed: (props: { slug: string; title?: string }) => (
       <BookReaderEmbed slug={props.slug} title={props.title} />
+    ),
+    Callout: (props: { type?: 'info' | 'tip' | 'note' | 'warning'; title?: string; children?: React.ReactNode }) => (
+      <Callout type={props.type} title={props.title}>{props.children}</Callout>
+    ),
+    DocLinkCard: (props: { href: string; title: string; description?: string }) => (
+      <DocLinkCard href={props.href} title={props.title} description={props.description} />
     ),
     ...components,
   };

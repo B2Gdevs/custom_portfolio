@@ -1,12 +1,45 @@
 import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
 import matter from 'gray-matter';
 import { marked } from 'marked';
 import { mdxToHtml } from './mdxToHtml.js';
 
 const require = createRequire(import.meta.url);
 const Epub = require('epub-gen');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+interface BookMeta {
+  title: string;
+  author: string;
+}
+
+interface ChapterMeta {
+  key: string;
+  actLabel?: string;
+  chapterLabel?: string;
+  chapterTitle?: string;
+  chapterSubtitle?: string;
+  runningHead?: string;
+  tocTitle: string;
+  emitOpener: boolean;
+}
+
+interface ChapterEntry {
+  dir: string;
+  meta: ChapterMeta;
+  files: string[];
+}
+
+interface PageRenderMeta {
+  pageNumber: string;
+  title: string;
+  displayTitle: boolean;
+  filenameStem: string;
+}
+
 const EPUB_CSS = `
 html,
 body {
@@ -18,50 +51,97 @@ body {
   background: #f5ecde;
   color: #24170f;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 0.92rem;
-  line-height: 1.58;
+  font-size: 0.84rem;
+  line-height: 1.46;
 }
 
 .reader-page {
   box-sizing: border-box;
   min-height: 100%;
-  padding: 1.35rem 1.85rem 1.1rem;
+  padding: 0.88rem 1.18rem 0.78rem;
   display: flex;
   flex-direction: column;
 }
 
-.reader-page__chapter {
-  margin: 0 0 0.38rem;
+.reader-page__header {
+  margin: 0 0 0.4rem;
+}
+
+.reader-page__content {
+  flex: 1 1 auto;
+}
+
+.reader-page__running-head {
+  margin: 0;
   color: #836142;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
-.reader-page__title {
-  margin: 0;
+.reader-page__scene-title {
+  margin: 0.18rem 0 0;
   color: #1b120d;
-  font-size: 2rem;
-  line-height: 1.02;
+  font-size: 1.16rem;
+  line-height: 1.12;
 }
 
 .reader-page__figure {
-  margin: 0.85rem 0 0.95rem;
+  margin: 0.24rem 0 0.56rem;
   break-inside: avoid;
   page-break-inside: avoid;
+}
+
+.reader-page__figure-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 7.6rem;
+  height: 7.6rem;
+  padding: 0.42rem;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid rgba(102, 69, 36, 0.12);
+  border-radius: 0.7rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(232, 219, 198, 0.62)),
+    #efe1cb;
+  box-shadow: 0 12px 24px rgba(32, 18, 8, 0.12);
 }
 
 .reader-page__figure img {
   display: block;
   width: 100%;
-  max-width: 18rem;
-  max-height: 15rem;
+  height: 100%;
   margin: 0 auto;
   object-fit: cover;
-  border-radius: 0.8rem;
-  box-shadow: 0 18px 34px rgba(32, 18, 8, 0.16);
+  object-position: center;
+  border-radius: 0.52rem;
+}
+
+.reader-page__figure--placeholder .reader-page__figure-frame {
+  border-style: dashed;
+}
+
+.reader-page__placeholder {
+  display: flex;
+  min-height: 6.8rem;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.52rem;
+  background:
+    radial-gradient(circle at top, rgba(140, 102, 67, 0.14), transparent 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(216, 196, 166, 0.34));
+  color: #8b6a4a;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .reader-page__body {
@@ -73,7 +153,7 @@ body {
 }
 
 .reader-page__body p {
-  margin: 0 0 0.78rem;
+  margin: 0 0 0.58rem;
   orphans: 3;
   widows: 3;
 }
@@ -88,7 +168,7 @@ body {
 
 .reader-page__footer {
   margin-top: auto;
-  padding-top: 0.7rem;
+  padding-top: 0.45rem;
   border-top: 1px solid rgba(94, 67, 41, 0.16);
   text-align: center;
 }
@@ -96,8 +176,46 @@ body {
 .reader-page__folio {
   color: #836142;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.68rem;
   letter-spacing: 0.18em;
+}
+
+.reader-chapter-opener {
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 2.4rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.reader-chapter-opener__act,
+.reader-chapter-opener__label {
+  margin: 0;
+  color: #836142;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.reader-chapter-opener__label {
+  margin-top: 0.55rem;
+}
+
+.reader-chapter-opener__title {
+  margin: 0.9rem 0 0;
+  color: #1b120d;
+  font-size: 2.2rem;
+  line-height: 1.04;
+}
+
+.reader-chapter-opener__subtitle {
+  margin: 0.7rem 0 0;
+  color: #5f4633;
+  font-size: 0.98rem;
 }
 
 .h1,
@@ -144,15 +262,30 @@ nav a:visited {
 function slugToTitle(slug: string): string {
   return slug
     .split(/[-_]/)
+    .filter(Boolean)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
     .join(' ');
 }
 
-function loadMeta(folder: string): { title: string; author: string } {
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function isGenericPageTitle(value: string): boolean {
+  return /^page\s+\d+$/i.test(value.trim());
+}
+
+function loadMeta(folder: string): BookMeta {
   const p = path.join(folder, 'book.json');
   if (!fs.existsSync(p)) {
     return { title: slugToTitle(path.basename(folder)), author: '' };
   }
+
   const data = JSON.parse(fs.readFileSync(p, 'utf8'));
   return {
     title: data.title || slugToTitle(path.basename(folder)),
@@ -160,35 +293,106 @@ function loadMeta(folder: string): { title: string; author: string } {
   };
 }
 
-function collectMdFiles(folder: string): string[] {
-  const entries: string[] = [];
+function deriveChapterMeta(chapterDirName: string, chapterIndex: number): ChapterMeta {
+  const clean = chapterDirName.replace(/^\d+[-_]?/, '');
+  const key = clean || `chapter-${chapterIndex + 1}`;
+
+  if (/^prologue$/i.test(clean)) {
+    return {
+      key,
+      chapterLabel: 'Prologue',
+      chapterTitle: '',
+      runningHead: 'Prologue',
+      tocTitle: 'Prologue',
+      emitOpener: true,
+    };
+  }
+
+  const numberedMatch = clean.match(/^chapter[-_ ]?(\d+)(?:[-_](.+))?$/i);
+  if (numberedMatch) {
+    const chapterNumber = numberedMatch[1];
+    const chapterTitle = numberedMatch[2] ? slugToTitle(numberedMatch[2]) : '';
+    return {
+      key,
+      chapterLabel: `Chapter ${chapterNumber}`,
+      chapterTitle,
+      runningHead: chapterTitle || `Chapter ${chapterNumber}`,
+      tocTitle: chapterTitle ? `Chapter ${chapterNumber}: ${chapterTitle}` : `Chapter ${chapterNumber}`,
+      emitOpener: true,
+    };
+  }
+
+  const title = slugToTitle(clean);
+  return {
+    key,
+    chapterLabel: `Chapter ${chapterIndex + 1}`,
+    chapterTitle: title,
+    runningHead: title,
+    tocTitle: title ? `Chapter ${chapterIndex + 1}: ${title}` : `Chapter ${chapterIndex + 1}`,
+    emitOpener: true,
+  };
+}
+
+function loadChapterMeta(chapterDir: string, chapterIndex: number): ChapterMeta {
+  const defaults = deriveChapterMeta(path.basename(chapterDir), chapterIndex);
+  const chapterMetaPath = path.join(chapterDir, 'chapter.json');
+  if (!fs.existsSync(chapterMetaPath)) {
+    return defaults;
+  }
+
+  const data = JSON.parse(fs.readFileSync(chapterMetaPath, 'utf8'));
+  return {
+    ...defaults,
+    ...data,
+    key: data.key || defaults.key,
+    tocTitle: data.tocTitle || defaults.tocTitle,
+    emitOpener: data.emitOpener ?? defaults.emitOpener,
+  };
+}
+
+function collectChapterEntries(folder: string): ChapterEntry[] {
   const chaptersDir = path.join(folder, 'chapters');
   if (fs.existsSync(chaptersDir)) {
-    const chapterDirs = fs.readdirSync(chaptersDir, { withFileTypes: true })
-      .filter((e) => e.isDirectory())
-      .map((e) => e.name)
-      .sort();
-    for (const chDir of chapterDirs) {
-      const chPath = path.join(chaptersDir, chDir);
-      const files = fs.readdirSync(chPath, { withFileTypes: true })
-        .filter((e) => e.isFile() && (e.name.endsWith('.md') || e.name.endsWith('.mdx')))
-        .map((e) => path.join(chPath, e.name))
-        .sort();
-      entries.push(...files);
-    }
-  } else {
-    const files = fs.readdirSync(folder, { withFileTypes: true })
-      .filter((e) => e.isFile() && (e.name.endsWith('.md') || e.name.endsWith('.mdx')))
-      .map((e) => path.join(folder, e.name))
-      .sort();
-    entries.push(...files);
+    return fs.readdirSync(chaptersDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry, chapterIndex) => {
+        const dir = path.join(chaptersDir, entry.name);
+        const files = fs.readdirSync(dir, { withFileTypes: true })
+          .filter((file) => file.isFile() && /\.(md|mdx)$/i.test(file.name))
+          .map((file) => path.join(dir, file.name))
+          .sort();
+
+        return {
+          dir,
+          meta: loadChapterMeta(dir, chapterIndex),
+          files,
+        };
+      });
   }
-  return entries;
+
+  const files = fs.readdirSync(folder, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && /\.(md|mdx)$/i.test(entry.name))
+    .map((entry) => path.join(folder, entry.name))
+    .sort();
+
+  return [
+    {
+      dir: folder,
+      meta: {
+        key: path.basename(folder),
+        runningHead: slugToTitle(path.basename(folder)),
+        tocTitle: slugToTitle(path.basename(folder)),
+        emitOpener: false,
+      },
+      files,
+    },
+  ];
 }
 
 function rewriteImagesToFileUrls(html: string, folder: string): string {
   const imagesDir = path.join(folder, 'images');
   if (!fs.existsSync(imagesDir)) return html;
+
   return html.replace(
     /(<img[^>]*\ssrc=["'])(\/books\/[^/]+\/images\/)([^"')]+)(["'][^>]*>)/g,
     (_, before, _prefix, imageName, after) => {
@@ -204,28 +408,23 @@ function extractTitle(content: string): string {
   return h1 ? h1[1].trim() : '';
 }
 
-/** Remove the first H1 when it exactly matches the chapter title to avoid duplicate page titles. */
-function stripDuplicateTitle(html: string, chapterTitle: string): string {
-  const h1Match = html.match(/<h1(?:\s[^>]*)?>([\s\S]*?)<\/h1>/i);
-  if (!h1Match) return html;
-  const innerText = h1Match[1].replace(/<[^>]+>/g, '').trim();
-  if (innerText !== chapterTitle) return html;
-  return html.replace(/<h1(?:\s[^>]*)?>[\s\S]*?<\/h1>/i, '').trim();
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
 function extractLeadImage(html: string): { leadFigure: string; bodyHtml: string } {
   const match = html.match(/^\s*<p>\s*(<img[^>]+>)\s*<\/p>/i);
   if (!match) {
-    return { leadFigure: '', bodyHtml: html.trim() };
+    const inlineLeadMatch = html.match(/^\s*<p>\s*(<img[^>]+>)\s*([\s\S]*?)<\/p>/i);
+    if (!inlineLeadMatch) {
+      return { leadFigure: '', bodyHtml: html.trim() };
+    }
+
+    const [, imageTag, paragraphRemainder] = inlineLeadMatch;
+    const rebuiltLeadParagraph = paragraphRemainder.trim()
+      ? `<p>${paragraphRemainder.trim()}</p>`
+      : '';
+
+    return {
+      leadFigure: `<figure class="reader-page__figure">${imageTag}</figure>`,
+      bodyHtml: html.replace(inlineLeadMatch[0], rebuiltLeadParagraph).trim(),
+    };
   }
 
   return {
@@ -234,7 +433,29 @@ function extractLeadImage(html: string): { leadFigure: string; bodyHtml: string 
   };
 }
 
-function extractPageNumber(fullPath: string, title: string, fallbackIndex: number): string {
+function createFigureHtml(leadFigure: string): string {
+  if (leadFigure) {
+    return leadFigure.replace(
+      'class="reader-page__figure"',
+      'class="reader-page__figure"><div class="reader-page__figure-frame"'
+    ).replace('</figure>', '</div></figure>');
+  }
+
+  return `
+    <figure class="reader-page__figure reader-page__figure--placeholder" aria-hidden="true">
+      <div class="reader-page__figure-frame">
+        <div class="reader-page__placeholder">Illustration Pending</div>
+      </div>
+    </figure>
+  `.trim();
+}
+
+function extractPageNumber(fullPath: string, explicitPage: unknown, title: string, fallbackIndex: number): string {
+  if (typeof explicitPage === 'number' || typeof explicitPage === 'string') {
+    const normalized = String(explicitPage).trim();
+    if (normalized) return normalized;
+  }
+
   const basename = path.basename(fullPath);
   const fileMatch = basename.match(/page[-_ ]?(\d+)/i);
   if (fileMatch) return fileMatch[1];
@@ -245,40 +466,95 @@ function extractPageNumber(fullPath: string, title: string, fallbackIndex: numbe
   return String(fallbackIndex + 1);
 }
 
-function extractChapterLabel(folder: string, fullPath: string): string {
-  const chaptersRoot = path.join(folder, 'chapters');
-  const relativeDir = path.relative(chaptersRoot, path.dirname(fullPath));
-  const segment = relativeDir.split(path.sep)[0] || '';
-  const clean = segment.replace(/^\d+[-_]?/, '');
-  return clean ? slugToTitle(clean) : '';
+function inferFilenameTitle(fullPath: string): string {
+  const basename = path.basename(fullPath, path.extname(fullPath));
+  const fileMatch = basename.match(/page[-_ ]?\d+(?:[-_](.+))?$/i);
+  if (!fileMatch || !fileMatch[1]) return '';
+  return slugToTitle(fileMatch[1]);
+}
+
+function buildPageMeta(fullPath: string, data: Record<string, unknown>, content: string, fallbackIndex: number): PageRenderMeta {
+  const headingTitle = extractTitle(content);
+  const filenameTitle = inferFilenameTitle(fullPath);
+  const explicitTitle = typeof data.title === 'string' ? data.title.trim() : '';
+  const title = explicitTitle || headingTitle || filenameTitle;
+  const displayTitle = data.displayTitle === true;
+  const pageNumber = extractPageNumber(fullPath, data.page, title, fallbackIndex);
+
+  return {
+    pageNumber,
+    title: title && !isGenericPageTitle(title) ? title : '',
+    displayTitle,
+    filenameStem: path.basename(fullPath, path.extname(fullPath)),
+  };
+}
+
+function stripLeadingPageHeading(html: string): string {
+  return html.replace(/^\s*<h1(?:\s[^>]*)?>[\s\S]*?<\/h1>\s*/i, '').trim();
+}
+
+function buildRunningHead(chapterMeta: ChapterMeta): string {
+  return chapterMeta.runningHead || chapterMeta.chapterTitle || chapterMeta.chapterLabel || chapterMeta.tocTitle;
+}
+
+function renderChapterOpener(chapterMeta: ChapterMeta): string {
+  const act = chapterMeta.actLabel
+    ? `<p class="reader-chapter-opener__act">${escapeHtml(chapterMeta.actLabel)}</p>`
+    : '';
+  const label = chapterMeta.chapterLabel
+    ? `<p class="reader-chapter-opener__label">${escapeHtml(chapterMeta.chapterLabel)}</p>`
+    : '';
+  const titleText = chapterMeta.chapterTitle || chapterMeta.chapterLabel || chapterMeta.tocTitle;
+  const title = titleText
+    ? `<h1 class="reader-chapter-opener__title">${escapeHtml(titleText)}</h1>`
+    : '';
+  const subtitle = chapterMeta.chapterSubtitle
+    ? `<p class="reader-chapter-opener__subtitle">${escapeHtml(chapterMeta.chapterSubtitle)}</p>`
+    : '';
+
+  return `
+    <section class="reader-chapter-opener">
+      ${act}
+      ${label}
+      ${title}
+      ${subtitle}
+    </section>
+  `.trim();
 }
 
 function wrapPageHtml({
+  chapterMeta,
   title,
   bodyHtml,
   leadFigure,
   pageNumber,
-  chapterLabel,
+  displayTitle,
 }: {
+  chapterMeta: ChapterMeta;
   title: string;
   bodyHtml: string;
   leadFigure: string;
   pageNumber: string;
-  chapterLabel: string;
+  displayTitle: boolean;
 }): string {
-  const chapterMeta = chapterLabel
-    ? `<p class="reader-page__chapter">${escapeHtml(chapterLabel)}</p>`
+  const runningHead = buildRunningHead(chapterMeta);
+  const runningHeadHtml = runningHead
+    ? `<p class="reader-page__running-head">${escapeHtml(runningHead)}</p>`
     : '';
+  const sceneTitle = displayTitle && title
+    ? `<h2 class="reader-page__scene-title">${escapeHtml(title)}</h2>`
+    : '';
+  const header = runningHeadHtml || sceneTitle
+    ? `<header class="reader-page__header">${runningHeadHtml}${sceneTitle}</header>`
+    : '';
+  const figureHtml = createFigureHtml(leadFigure);
 
   return `
     <article class="reader-page" data-page-number="${escapeHtml(pageNumber)}">
-      <header class="reader-page__header">
-        ${chapterMeta}
-        <h1 class="reader-page__title">${escapeHtml(title)}</h1>
-      </header>
-      ${leadFigure}
-      <div class="reader-page__body">
-        ${bodyHtml}
+      ${header}
+      <div class="reader-page__content">
+        ${figureHtml}
+        <div class="reader-page__body">${bodyHtml}</div>
       </div>
       <footer class="reader-page__footer">
         <span class="reader-page__folio">${escapeHtml(pageNumber)}</span>
@@ -289,37 +565,60 @@ function wrapPageHtml({
 
 export async function runEpub(folder: string, outputPath: string): Promise<void> {
   const meta = loadMeta(folder);
-  const files = collectMdFiles(folder);
+  const chapterEntries = collectChapterEntries(folder).filter((entry) => entry.files.length > 0);
+  const files = chapterEntries.flatMap((entry) => entry.files);
+
   if (files.length === 0) {
     throw new Error(`No .md or .mdx files found in ${folder}`);
   }
 
-  const chapters: { title: string; data: string }[] = [];
-  for (const [index, fullPath] of files.entries()) {
-    const raw = fs.readFileSync(fullPath, 'utf8');
-    const { data, content } = matter(raw);
-    const ext = path.extname(fullPath).toLowerCase();
-    const html =
-      ext === '.mdx'
-        ? await mdxToHtml(content, fullPath)
-        : await marked.parse(content);
-    const htmlRewritten = rewriteImagesToFileUrls(html, folder);
-    const title = data.title || extractTitle(content) || path.basename(fullPath, ext);
-    const dataHtml = stripDuplicateTitle(htmlRewritten, title);
-    const { leadFigure, bodyHtml } = extractLeadImage(dataHtml);
-    const pageNumber = extractPageNumber(fullPath, title, index);
-    const chapterLabel = extractChapterLabel(folder, fullPath);
+  const content: Array<{
+    title: string;
+    data: string;
+    excludeFromToc?: boolean;
+    filename?: string;
+  }> = [];
 
-    chapters.push({
-      title,
-      data: wrapPageHtml({
-        title,
-        bodyHtml,
-        leadFigure,
-        pageNumber,
-        chapterLabel,
-      }),
-    });
+  let globalPageIndex = 0;
+
+  for (const chapterEntry of chapterEntries) {
+    if (chapterEntry.meta.emitOpener) {
+      content.push({
+        title: chapterEntry.meta.tocTitle,
+        data: renderChapterOpener(chapterEntry.meta),
+        filename: `${chapterEntry.meta.key}-opener`,
+      });
+    }
+
+    for (const fullPath of chapterEntry.files) {
+      const raw = fs.readFileSync(fullPath, 'utf8');
+      const { data, content: markdownContent } = matter(raw);
+      const ext = path.extname(fullPath).toLowerCase();
+      const html =
+        ext === '.mdx'
+          ? await mdxToHtml(markdownContent, fullPath)
+          : await marked.parse(markdownContent);
+      const htmlRewritten = rewriteImagesToFileUrls(html, folder);
+      const pageMeta = buildPageMeta(fullPath, data, markdownContent, globalPageIndex);
+      const cleanedHtml = stripLeadingPageHeading(htmlRewritten);
+      const { leadFigure, bodyHtml } = extractLeadImage(cleanedHtml);
+
+      content.push({
+        title: pageMeta.title || `Page ${pageMeta.pageNumber}`,
+        filename: `${chapterEntry.meta.key}-${pageMeta.filenameStem}`,
+        excludeFromToc: true,
+        data: wrapPageHtml({
+          chapterMeta: chapterEntry.meta,
+          title: pageMeta.title,
+          bodyHtml,
+          leadFigure,
+          pageNumber: pageMeta.pageNumber,
+          displayTitle: pageMeta.displayTitle,
+        }),
+      });
+
+      globalPageIndex += 1;
+    }
   }
 
   const outDir = path.dirname(outputPath);
@@ -331,8 +630,10 @@ export async function runEpub(folder: string, outputPath: string): Promise<void>
     tocTitle: 'Contents',
     appendChapterTitles: false,
     css: EPUB_CSS,
-    content: chapters,
+    customOpfTemplatePath: path.join(__dirname, 'templates', 'content.opf.ejs'),
+    content,
   };
+
   await new Epub(option, outputPath).promise;
   console.log('EPUB:', outputPath);
 }

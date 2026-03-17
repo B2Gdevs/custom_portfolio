@@ -1,7 +1,10 @@
+---
+page: 53
+title: "The Send Off"
+displayTitle: false
+---
+
 ![Page 22](/books/mordreds_tale/images/ch02-p022.png)
-
-# Page 53 — The Send-Off
-
 The storm outside beat against the walls, but the voices inside only grew heavier, dull with drink and repetition. Derrick and Corin circled the same talk, bribes and guards, while Selene’s tongue cut sharper and Ox stayed mostly silent. Dice rattled. Tankards clattered. Jack sat through it, the noise thick as smoke, until the words no longer mattered. They had already marked him, already made their intent clear.
 
 At length, Derrick leaned back, his voice steady despite the haze. “That’s enough for tonight.”

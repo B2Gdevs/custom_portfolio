@@ -1,7 +1,10 @@
+---
+page: 51
+title: "Invitation In The Storm"
+displayTitle: false
+---
+
 ![Page 20](/books/mordreds_tale/images/ch02-p020.png)
-
-# Page 51 — Invitation in the Storm
-
 The rain battered the shutters, rattling them in their frames. The storm made the room feel small, the air close, as if the world outside had disappeared.
 
 Derrick leaned across the table, his scarred face catching the lamplight. “You’re not a boy anymore, Jack. Fifteen makes you a man. And I’ve seen enough to know you’re not just any man.”

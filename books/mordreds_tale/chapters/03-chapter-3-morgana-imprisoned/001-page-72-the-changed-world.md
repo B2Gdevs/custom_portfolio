@@ -1,7 +1,10 @@
+---
+page: 72
+title: "The Changed World"
+displayTitle: false
+---
+
 ![Page 1](/books/mordreds_tale/images/ch03-p001.png)
-
-# Page 72 - The Changed World
-
 The palisade gates opened to reveal a settlement transformed.
 Morgana stepped through, the child pressed against her chest, and stopped. This was not the small huts the slaves used to live in, she. Stone buildings rose three stories high along paved streets. A fountain stood in the central square, water flowing freely—an impossible luxury in a world without magic, yet there it was. Scaffolding marked new construction everywhere she looked. Merchants called out their wares. Children ran laughing between the buildings.
 

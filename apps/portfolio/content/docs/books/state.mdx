@@ -23,16 +23,16 @@ order: 2
 | --- | --- |
 | `phase` | `books-01` |
 | `plan` | `books-01-a` |
-| `focus` | dedicated reader page should carry a subtle bottom navigation strip with section title, page flipping, and direct page-number jumps |
+| `focus` | keep the cleaner two-page reader, but make every illustrated page use the same fixed image frame shape as the placeholder state so art stays visually consistent and text always begins beneath it |
 | `constraint` | planning for books work lives in these docs, aligned with the real publishing pipeline |
 
 ## Next Queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | add bottom reader controls for section title, page flipping, and page-number jumps without breaking spread layout | `ux` |
-| `2` | align EPUB page structure with the dedicated reader layout before deeper reading features | `ux` |
-| `3` | build a live EPUB for the next book when that content is ready | `publishing` |
+| `1` | replace the built-in TOC with a real collapsed custom panel and restore two-page spreads on wide screens | `reader-ux` |
+| `2` | keep every page on one consistent image slot shape and allow cropping instead of special-case image layouts | `page-shell` |
+| `3` | refine chapter metadata and opener styling now that the source and EPUB structure are formalized | `structure-polish` |
 
 ## References
 
@@ -43,6 +43,7 @@ order: 2
 | `reader-embed` | `apps/portfolio/components/books/BookReaderEmbed.tsx` | embedded reader surface |
 | `viewer` | `apps/portfolio/components/books/EpubViewer.tsx` | EPUB runtime and loading path |
 | `epub-builder` | `packages/repub-builder/src/epub.ts` | EPUB image rewrite and chapter packaging |
+| `books-structure-doc` | `apps/portfolio/content/docs/books/book-structure.mdx` | formal source and EPUB structure rules |
 | `book-output` | `apps/portfolio/public/books/` | generated reading artifacts |
 | `front-page-reader` | `apps/portfolio/components/home/FeaturedBookExperience.tsx` | user-triggered reader mount path |
 

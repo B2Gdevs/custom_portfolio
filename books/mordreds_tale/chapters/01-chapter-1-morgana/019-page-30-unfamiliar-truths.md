@@ -1,7 +1,10 @@
+---
+page: 30
+title: "Unfamiliar Truths"
+displayTitle: false
+---
+
 ![Page 19](/books/mordreds_tale/images/ch01-p019.png)
-
-# Page 30 — Unfamiliar Truths
-
 The guards braced as Morgana drew closer, but neither struck. Their eyes lingered on the child she carried, as if he unsettled them more than her presence.
 
 “Where is Merlin?” she asked, her voice cutting sharp. “Why does he not stand here to answer me?”

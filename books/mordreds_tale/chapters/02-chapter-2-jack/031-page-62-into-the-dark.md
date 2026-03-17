@@ -1,7 +1,10 @@
+---
+page: 62
+title: "Into The Dark"
+displayTitle: false
+---
+
 ![Page 31](/books/mordreds_tale/images/ch02-p031.png)
-
-# Page 62 — Into the Dark
-
 The guards marched Jack from the Council Hall straight to the Lair's entrance. No holding cell. No time to prepare. Gruff's words echoed in his mind: You will depart immediately.
 
 The barricades loomed before them—wooden beams, broken furniture, salvaged metal—all pulled aside just enough to reveal the gaping entrance. Ancient steps descended into the earth, their surface marred by dried blood turned rust-brown.

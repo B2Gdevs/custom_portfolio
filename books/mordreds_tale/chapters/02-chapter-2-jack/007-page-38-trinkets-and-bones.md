@@ -1,7 +1,10 @@
+---
+page: 38
+title: "Trinkets And Bones"
+displayTitle: false
+---
+
 ![Page 7](/books/mordreds_tale/images/ch02-p007.png)
-
-# Page 38 — Trinkets and Bones
-
 The gang arrived with their usual noise — Derrick Varro first, sleeves rolled, grin too sharp. Selene followed, flipping her coin as if it was weightless, her gaze darting everywhere at once. Ox shouldered through the crowd like a cart in a narrow lane, and Corin trailed, clutching his pouch of relics.
 
 Jack’s seat was already warm when Derrick spotted him. “Jack,” Derrick drawled. “Can’t keep away, can you?”

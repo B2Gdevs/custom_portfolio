@@ -1,7 +1,10 @@
+---
+page: 34
+title: "The Knock"
+displayTitle: false
+---
+
 ![Page 3](/books/mordreds_tale/images/ch02-p003.png)
-
-# Page 34 — The Knock
-
 A soft rap on the door cut the room in two. Morgause paused, one hand on the latch of the tar pot, and set it down without clatter. She wiped her palms along her skirt, smoothing away dust that wasn’t there.
 
 Jack didn’t look up at first. Knocks came and went in Taro—neighbors borrowing, sellers haggling, children daring each other. Another rap. The kind that expected to be answered.

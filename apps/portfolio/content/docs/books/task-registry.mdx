@@ -23,9 +23,12 @@ order: 3
 | `books-01-09` | `done` | tune the dedicated reader for wide-screen spreads and a richer TOC presentation | `books-01-08` | `pnpm run build`, `pnpm run lint` |
 | `books-01-10` | `done` | shift the dedicated reader spread farther off the TOC toggle and align the reading stage with the header chrome | `books-01-09` | `pnpm run build`, `pnpm run lint` |
 | `books-01-11` | `done` | rewrite emitted EPUB page shells so lead images sit under the page title, opening paragraphs stay visible, and folio numbers render at the bottom | `books-01-10` | `pnpm run build:books`, `pnpm run build` |
-| `books-01-12` | `in-progress` | add a subtle bottom navigation strip with current section title, previous/next controls, and direct page jumps on the dedicated reader | `books-01-11` | `pnpm run build`, `pnpm run lint` |
-| `books-01-13` | `planned` | expand planning records around publishing, editions, and progression | `books-01-12` | `pnpm run build:books` |
-| `books-01-14` | `planned` | build a live EPUB for the next visible book once the manuscript is ready | `books-01-12` | `pnpm run build:books`, `pnpm run build` |
+| `books-01-12` | `done` | add a subtle bottom navigation strip with current section title, previous/next controls, and direct page jumps on the dedicated reader | `books-01-11` | `pnpm run build`, `pnpm run lint` |
+| `books-01-13` | `done` | define a formal manuscript convention for acts, chapters, chapter openers, and story pages, then teach the EPUB builder to emit that structure | `books-01-12` | `pnpm run build:books`, `pnpm run build` |
+| `books-01-14` | `done` | fix EPUB spine generation so story pages excluded from the TOC still appear in reading order | `books-01-13` | `pnpm run build:books`, `pnpm run build` |
+| `books-01-15` | `in-progress` | replace the built-in TOC with a truly collapsed custom panel, restore wide-screen two-page spreads, and keep every illustrated page on the same fixed image frame shape as the placeholder state | `books-01-14` | `pnpm run build:books`, `pnpm run build` |
+| `books-01-16` | `planned` | expand planning records around publishing, editions, and progression | `books-01-15` | `pnpm run build:books` |
+| `books-01-17` | `planned` | build a live EPUB for the next visible book once the manuscript is ready | `books-01-15` | `pnpm run build:books`, `pnpm run build` |
 
 ## Registry Rules
 

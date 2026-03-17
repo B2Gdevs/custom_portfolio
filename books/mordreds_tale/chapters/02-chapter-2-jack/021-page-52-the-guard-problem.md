@@ -1,7 +1,10 @@
+---
+page: 52
+title: "The Guard Problem"
+displayTitle: false
+---
+
 ![Page 21](/books/mordreds_tale/images/ch02-p021.png)
-
-# Page 52 — The Guard Problem
-
 The storm drummed against the windows so loud the room trembled. Rain streaked the shutters, wind howling like a beast outside. Derrick’s voice cut through the noise, low and determined.
 
 “We can’t move yet.”

@@ -1,7 +1,10 @@
+---
+page: 71
+title: "Magic Found"
+displayTitle: false
+---
+
 ![Page 39](/books/mordreds_tale/images/ch02-p039.png)
-
-# Page 71 — Magic Found
-
 Six weeks, maybe more—time blurred in the unchanging glow. Jack returned to Morgana's chamber after hunting, the goblin meat wrapped in cloth and tied to his belt. Water could wait.
 
 He barricaded the door as always, then collapsed onto the bed beside her. Exhaustion pulled at him immediately.

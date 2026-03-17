@@ -1,7 +1,10 @@
+---
+page: 17
+title: "Chamber Of Entwined Relics Part 1"
+displayTitle: false
+---
+
 ![Page 6](/books/mordreds_tale/images/ch01-p006.png)
-
-# Page 17 - Chamber of Entwined Relics - Part 1
-
 The stairway narrowed, and the air turned heavier — not with weight, but with silence. The next level opened into a domed vault that had been overtaken by creeping vines, both physical and architectural. Here, the lair no longer resembled a building, but something older — a space grown rather than constructed.
 
 This was once the Chamber of Entwined Relics. Now it was something between a grave and a garden.

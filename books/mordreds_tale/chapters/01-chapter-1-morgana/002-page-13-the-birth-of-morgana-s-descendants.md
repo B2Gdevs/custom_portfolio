@@ -1,7 +1,10 @@
+---
+page: 13
+title: "The Birth Of Morgana S Descendants"
+displayTitle: false
+---
+
 ![Page 2](/books/mordreds_tale/images/ch01-p002.png)
-
-# Page 13 - The birth of Morgana’s Descendants
-
 The room was too quiet.
 
 Morgana lay half-curled in her bedding, breath ragged, fingers locked in the folds of the blanket. Her skin was hot with sweat, pain still pulsing through her like echoes of thunder. Her eyes fluttered open again, trying to focus.

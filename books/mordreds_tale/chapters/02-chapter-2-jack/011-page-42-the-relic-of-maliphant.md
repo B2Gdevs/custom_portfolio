@@ -1,7 +1,10 @@
+---
+page: 42
+title: "The Relic Of Maliphant"
+displayTitle: false
+---
+
 ![Page 11](/books/mordreds_tale/images/ch02-p011.png)
-
-# Page 42 — The Relic of Maliphant
-
 The pendant hit the table with a dull clink. Corin’s grin stretched ear to ear, yellow teeth catching the lantern glow. “Look at it, boys. We finally got our hands on the bastard’s prize.”
 
 Selene leaned in, her coin dancing through her fingers. “All that for a rock?”

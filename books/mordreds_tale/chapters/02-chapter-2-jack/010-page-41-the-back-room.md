@@ -1,7 +1,10 @@
+---
+page: 41
+title: "The Back Room"
+displayTitle: false
+---
+
 ![Page 10](/books/mordreds_tale/images/ch02-p010.png)
-
-# Page 41 — The Back Room
-
 The Barrel’s rear chamber was smaller, its air thicker. Smoke curled low, lanterns guttered against walls scarred by years of knife games and private dealings. The laughter from the front dulled to a muffled roar, leaving the table here a quiet stage.
 
 Derrick dropped into a chair with casual authority, stretching his arms across the backrest. Selene perched beside him, coin dancing in her fingers, watching Jack like a hawk weighing prey. Ox closed the door with a thud and leaned against it, a living barricade.

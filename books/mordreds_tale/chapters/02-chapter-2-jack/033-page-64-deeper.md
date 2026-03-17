@@ -1,7 +1,10 @@
+---
+page: 64
+title: "Deeper"
+displayTitle: false
+---
+
 ![Page 33](/books/mordreds_tale/images/ch02-p033.png)
-
-# Page 64 — Deeper
-
 Jack stumbled through the gallery, his breath coming in ragged gasps. Behind him, somewhere in the twisted corridors, something hunted. He'd heard it from the moment the guards had sealed the entrance—scraping. Rhythmic and deliberate. Claws on wood.
 He didn't know what made the sound. Didn't want to know.
 The gallery opened into a descending passage—stairs carved from the same pale, glowing wood, spiraling down into deeper shadow. The faint luminescence that lit the upper level dimmed here, the wood darker and more twisted.

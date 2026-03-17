@@ -1,7 +1,10 @@
+---
+page: 61
+title: "Judgment"
+displayTitle: false
+---
+
 ![Page 30](/books/mordreds_tale/images/ch02-p030.png)
-
-# Page 61 — Judgment
-
 The Council Hall was built from stone blocks older than the Fall, its high windows letting in weak morning light that fell across the curved table where seven figures sat. Jack knelt in chains before them, the pendant burning in his stomach like a coal, while guards flanked him on either side.
 Gruff sat at the center, the transformed dwarf's ancient eyes fixed on Jack with terrible weight. Around him sat the others—Marcus, Roran, Elena, Sara, Krix, and Thoren. These were the survivors who had built Tarro from the ruins of the Pantheon's fall.
 "Bring forward the witness," Gruff said, his voice deep as grinding stone.

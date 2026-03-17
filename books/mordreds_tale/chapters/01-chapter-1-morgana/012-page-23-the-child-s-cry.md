@@ -1,7 +1,10 @@
+---
+page: 23
+title: "The Child S Cry"
+displayTitle: false
+---
+
 ![Page 12](/books/mordreds_tale/images/ch01-p012.png)
-
-# Page 23 — The Child’s Cry
-
 The lycanthrope bent low, jaws yawning wide over the newborn. Strings of saliva dripped onto the swaddle, hissing faintly where they struck the cold stone. Its yellowed fangs gleamed, inches from the infant’s throat.
 
 Morgana lunged — but she was too far. The child screamed.

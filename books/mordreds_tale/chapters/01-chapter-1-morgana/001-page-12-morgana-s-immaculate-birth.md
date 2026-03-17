@@ -1,7 +1,10 @@
+---
+page: 12
+title: "Morgana S Immaculate Birth"
+displayTitle: false
+---
+
 ![Page 1](/books/mordreds_tale/images/ch01-p001.png)
-
-# Page 12 - Morgana’s Immaculate Birth
-
 Morgana’s eyes opened to the quiet stillness of her chamber.
 
 Faint torch light filled the room with a glow around her, soft and familiar. The black woven drapes, covering the vine-like wooding of the walls, had a slight tint of grey that she was unused to. Her bed was just as it always had been — layered with embroidered blankets, pillows fluffed, the scent of old incense lingering in the air. For a moment, everything seemed normal.

@@ -1,7 +1,10 @@
+---
+page: 65
+title: "The Beast"
+displayTitle: false
+---
+
 ![Page 34](/books/mordreds_tale/images/ch02-p034.png)
-
-# Page 65 — The Beast
-
 The creature filled the opening, and Jack's mind struggled to process what he was seeing. It stood on two legs like a man but was wrong in every proportion—seven feet tall, shoulders too broad, arms hanging low and ending in hands tipped with claws the length of daggers. Its body was covered in patches of matted fur over pale, stretched skin. The head was the worst—caught somewhere between human and wolf, the jaw elongated and filled with fangs, but the eyes... the eyes held terrible intelligence.
 This was no mindless animal. It was thinking. Planning.
 The creature's nostrils flared, scenting the air. Its lips pulled back from yellowed fangs as it took a step into the chamber. Then another. The floor groaned under its weight.

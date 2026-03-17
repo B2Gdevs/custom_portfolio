@@ -1,7 +1,10 @@
+---
+page: 57
+title: "What He D Done"
+displayTitle: false
+---
+
 ![Page 26](/books/mordreds_tale/images/ch02-p026.png)
-
-# Page 57 - What He’d Done
-
 The storm was the only sound.
 
 Jack stood over his mother's body, chest heaving, hands still curved into shapes that had held her life. Water ran down his face—rain, not tears. He stared at what he'd done, at the corpse that had been Morgause, and waited for something to break inside him.

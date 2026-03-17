@@ -1,7 +1,10 @@
+---
+page: 63
+title: "The First Level"
+displayTitle: false
+---
+
 ![Page 32](/books/mordreds_tale/images/ch02-p032.png)
-
-# Page 63 — The First Level
-
 The corridor stretched ahead, doors lining both sides. Some hung open, revealing chambers thick with dust and debris. Others were sealed tight, their surfaces marked with deep scratches—something had tried to get in. Or out.
 
 Jack kept to the middle of the corridor, away from the doorways. The dim glow from the walls was enough to navigate by, but shadows pooled in corners and doorways, hiding whatever might be waiting there.

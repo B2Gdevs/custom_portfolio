@@ -1,7 +1,10 @@
+---
+page: 60
+title: "Discovery"
+displayTitle: false
+---
+
 ![Page 29](/books/mordreds_tale/images/ch02-p029.png)
-
-# Page 60 - Discovery
-
 Jack woke to voices.
 For one blessed moment, wrapped in the warmth of dry hay, he didn't remember. Then it crashed back—his mother's face, her throat under his hands, the terrible stillness when she'd stopped moving—and he jerked upright.
 Below, in the barn's lower level, boots scraped across wood. The grey light of dawn filtered through cracks in the walls, painting everything in shades of ash.

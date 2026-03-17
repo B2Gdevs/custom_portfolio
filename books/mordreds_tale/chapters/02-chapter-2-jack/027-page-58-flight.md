@@ -1,7 +1,10 @@
+---
+page: 58
+title: "Flight"
+displayTitle: false
+---
+
 ![Page 27](/books/mordreds_tale/images/ch02-p027.png)
-
-# Page 58 - Flight
-
 The streets of Tarro were rivers. Water rushed through the gutters, spilled over cobblestones, turned every low place into a temporary lake. Jack splashed through it all, head down, cloak pulled tight. The rain was so heavy he could barely see ten feet ahead, which was good—it meant no one could see him either.
 His mind raced faster than his feet. He'd killed her. He'd actually killed her. The thought kept circling, refusing to settle into something real. His hands still tingled where they'd gripped her throat. He could still feel the moment she'd gone slack, the terrible finality of it.
 No. Don't think about it. Think about what comes next.

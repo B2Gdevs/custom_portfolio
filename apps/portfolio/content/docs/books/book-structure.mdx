@@ -1,0 +1,63 @@
+---
+title: Book Structure
+description: Formal manuscript conventions for books, chapters, acts, and EPUB emission.
+date: "2026-03-16"
+updated: "2026-03-16"
+order: 6
+---
+
+# Book Structure
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `scope` | `books-source-and-epub-output` |
+| `status` | `active` |
+| `owner` | `books-section` |
+| `version` | `books-structure-01` |
+
+## Source Convention
+
+| Level | Path | Rule |
+| --- | --- | --- |
+| `book` | `books/<slug>/book.json` | book-wide metadata such as title, author, and description lives here |
+| `chapter` | `books/<slug>/chapters/<nn-slug>/chapter.json` | each chapter folder carries structure metadata such as act, chapter label, chapter title, and running head |
+| `page` | `books/<slug>/chapters/<nn-slug>/<nnn-page-...>.md` | each file is a content page, not a TOC chapter by default |
+
+## Chapter Metadata
+
+| Field | Meaning |
+| --- | --- |
+| `actLabel` | optional act marker such as `Act I` |
+| `chapterLabel` | chapter kicker such as `Chapter 2` or `Prologue` |
+| `chapterTitle` | main chapter opener title |
+| `chapterSubtitle` | optional subtitle shown on the opener page |
+| `runningHead` | short label used for story-page orientation and reader UI |
+| `tocTitle` | title exposed in the EPUB table of contents |
+
+## Page Frontmatter
+
+| Field | Meaning | Default |
+| --- | --- | --- |
+| `page` | printed folio number for the manuscript page | derived from filename |
+| `title` | optional scene/page title stored as metadata | derived from heading or filename slug |
+| `displayTitle` | whether that page title should render visibly on the page | `false` |
+
+## Page Content Rule
+
+| Part | Rule |
+| --- | --- |
+| `lead image` | if a page has art, place it as the first markdown image in the file |
+| `placeholder` | if a page has no art yet, the EPUB builder emits a default illustration frame instead of collapsing the slot |
+| `body` | story text follows the image slot and should read correctly even when the art is still pending |
+
+## EPUB Rules
+
+| Rule | Result |
+| --- | --- |
+| chapter opener pages are emitted from `chapter.json` | the TOC reflects actual chapter structure |
+| story pages are emitted after the opener and excluded from TOC | the reader does not treat every page file like a chapter |
+| page titles render only when `displayTitle: true` | generic `Page 2` headings do not become giant visible titles |
+| every story page reserves one illustration slot before the body | the reader keeps a consistent paperback rhythm even when art is missing |
+| running heads and folios remain subtle | the layout reads more like a paperback than a document preview |

@@ -1,7 +1,10 @@
+---
+page: 25
+title: "The Broken Silence"
+displayTitle: false
+---
+
 ![Page 14](/books/mordreds_tale/images/ch01-p014.png)
-
-# Page 25 — The Broken Silence
-
 The lycanthrope thrashed beneath her grip, strength enough to fell a dozen men — but not enough to shake her. Its growls echoed in the empty hall, a fading hymn to defiance. She pressed down, pinning its shoulders, then twisted. The crack resounded through the chamber, final and absolute.
 
 Silence fell.

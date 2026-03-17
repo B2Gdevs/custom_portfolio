@@ -1,7 +1,10 @@
+---
+page: 56
+title: "The Snap"
+displayTitle: false
+---
+
 ![Page 25](/books/mordreds_tale/images/ch02-p025.png)
-
-# Page 56 - The Snap
-
 "—and the worst part," Morgause was saying, "is that you don't even care. You don't care that we're ruined. You don't care that I've given everything for you. You just—"
 
 Jack's hands shot out.

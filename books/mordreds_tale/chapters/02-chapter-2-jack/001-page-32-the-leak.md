@@ -1,7 +1,10 @@
+---
+page: 32
+title: "The Leak"
+displayTitle: false
+---
+
 ![Page 1](/books/mordreds_tale/images/ch02-p001.png)
-
-# Page 32 — The Leak
-
 The roof ticked like a metronome, each drop hitting the basin with a hard plink. Jack sat at the table, whittling a stick into curls no one had asked for. The ladder leaned against the wall, a silent accusation. Nails, tar, a half-split shake—everything he needed to fix the problem waited within arm’s reach.
 
 “Boards are soft,” Morgause said, eyeing the stain widening along the rafters. Her tone was even. “If the wind comes up, it’ll peel the corner clean.”

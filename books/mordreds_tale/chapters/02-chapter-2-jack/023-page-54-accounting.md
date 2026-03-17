@@ -1,7 +1,10 @@
+---
+page: 54
+title: "Accounting"
+displayTitle: false
+---
+
 ![Page 23](/books/mordreds_tale/images/ch02-p023.png)
-
-# Page 54 — Accounting
-
 The storm hammered the broken roof with fists of water. Rain poured through the gaping wound where timbers had snapped under the weight, cascading in silver sheets that turned their home into a drowning box. Jack stood in the doorway, cloak dripping, and stared at the ruin.
 Morgause stood in the center of it all, water streaming down her face and soaked dress, her thin frame trembling—not from cold, but fury. Behind her, their bedding floated in muddy pools. The chest that held their clothing gaped open, everything inside soaked through. Even the hearth had drowned, ashes spreading in grey trails across the floorboards.
 "Where were you?" Her voice cut through the storm's roar. Not loud, but sharp enough to draw blood. "While our roof gave way, while everything we had washed into the mud—where were you, Jack?"

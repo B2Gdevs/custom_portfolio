@@ -1,7 +1,10 @@
+---
+page: 49
+title: "Bringing Jack In"
+displayTitle: false
+---
+
 ![Page 18](/books/mordreds_tale/images/ch02-p018.png)
-
-# Page 49 — Bringing Jack In
-
 Derrick’s gaze fixed on Jack, sharp as a blade. “You’re fifteen now. A man.” His words cut through the thunder outside, the table going quiet around him. “We’ve been watching you.”
 
 Jack blinked, caught between pride and unease. “Watching me?”

@@ -1,7 +1,10 @@
+---
+page: 20
+title: "Pilgrims Of Dust"
+displayTitle: false
+---
+
 ![Page 9](/books/mordreds_tale/images/ch01-p009.png)
-
-# Page 20 - Pilgrims of Dust
-
 Morgana stepped among the ruins. Where once foreign envoys had bowed, corpses now slumped. Adventurers, thieves, the desperate — all drawn here long after the Pantheon’s fall. Their armor was cracked, their swords scattered. None bore battle wounds. They had not died fighting. They had died waiting.
 
 Her torch caught on a splintered chest. Inside, half-born objects gleamed faintly: fused coins, a dagger with no edge. The lair had offered promise but delivered nothing. She had seen the same illusion of wealth before — a lure, not a gift.

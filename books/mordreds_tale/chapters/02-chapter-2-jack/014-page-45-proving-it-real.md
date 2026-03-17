@@ -1,7 +1,10 @@
+---
+page: 45
+title: "Proving It Real"
+displayTitle: false
+---
+
 ![Page 14](/books/mordreds_tale/images/ch02-p014.png)
-
-# Page 45 — Proving It Real
-
 Selene squinted at the pendant, her lip curling. “How do you even know it’s real? Could’ve come off any corpse. For all you know, some merchant hammered it together and spun you a tale.”
 
 Corin’s fist tightened around the chain. “Don’t talk rot.” His voice was sharp, almost defensive. “I stood in Maliphant’s hall more nights than I can count. Saw him sit that throne. Saw this hanging off his neck, right where his chestplate left room.”

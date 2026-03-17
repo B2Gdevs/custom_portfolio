@@ -1,7 +1,10 @@
+---
+page: 66
+title: "The Living Quarters"
+displayTitle: false
+---
+
 ![Page 35](/books/mordreds_tale/images/ch02-p035.png)
-
-# Page 66 — The Living Quarters
-
 The world became a chaos of splintering wood and falling debris. Jack felt the sickening lurch of free fall, saw the creature's surprised roar as they both plunged through rotted flooring into darkness below.
 He hit hard—another floor, solid this time—and the impact drove the air from his lungs. Pain exploded through his back and shoulder. Above him, the creature crashed through the wreckage, its massive body smashing aside broken planks and beams.
 Jack rolled, gasping for breath that wouldn't come. The pendant in his stomach convulsed, and he retched blood onto pale blue wood that glowed with trapped moonlight.

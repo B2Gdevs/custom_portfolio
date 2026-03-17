@@ -1,7 +1,10 @@
+---
+page: 46
+title: "Jack S Questions"
+displayTitle: false
+---
+
 ![Page 15](/books/mordreds_tale/images/ch02-p015.png)
-
-# Page 46 — Jack’s Questions
-
 Jack leaned forward, elbows on his knees, eyes never leaving the pendant. His tongue darted over his lips before he finally spoke. “So… what’s it do?”
 
 The room quieted a little, though the storm outside filled the silence quick enough. The rain hammered the shutters like fists, and Ox cursed as he shoved them tighter again.

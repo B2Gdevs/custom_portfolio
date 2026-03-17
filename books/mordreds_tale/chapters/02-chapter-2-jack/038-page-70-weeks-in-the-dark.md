@@ -1,7 +1,10 @@
+---
+page: 70
+title: "Weeks In The Dark"
+displayTitle: false
+---
+
 ![Page 38](/books/mordreds_tale/images/ch02-p038.png)
-
-# Page 70 - Weeks in the Dark
-
 Jack woke to dim light unchanged, time meaningless in the Lair's depths. His throat still burned but less than before. The claw marks across his ribs had scabbed over. He was healing.
 
 The water skin was empty. His stomach cramped with hunger.

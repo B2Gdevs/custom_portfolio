@@ -1,7 +1,10 @@
+---
+page: 29
+title: "Into The Light"
+displayTitle: false
+---
+
 ![Page 18](/books/mordreds_tale/images/ch01-p018.png)
-
-# Page 29 — Into the Light
-
 The gate’s ruin yawned wide behind her, splintered wood and snapped iron scattered like bones. Morgana stepped out, boots pressing into scorched soil. The air was harsh, wind carrying the scent of smoke and char. Her eyes narrowed against the glare. After the suffocating weight of the lair, the daylight seemed too sharp, too empty.
 
 Two guards stood at the perimeter of the lair. They had clearly not expected her. Spears lifted shakily, their eyes darting between her face and the swaddled child in her arms. One whispered a curse under his breath. The other barked, louder than his courage could support, “Stop where you are!”

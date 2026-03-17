@@ -29,7 +29,7 @@
     "react"
   ],
   "scripts": {
-    "build": "tsc && node -e \"require('fs').copyFileSync('src/reader.html','dist/reader.html')\"",
+    "build": "tsc && node -e \"const fs=require('fs'); fs.copyFileSync('src/reader.html','dist/reader.html'); fs.mkdirSync('dist/templates',{recursive:true}); fs.copyFileSync('src/templates/content.opf.ejs','dist/templates/content.opf.ejs');\"",
     "repub": "node dist/cli.js"
   },
   "dependencies": {

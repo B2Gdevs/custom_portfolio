@@ -1,0 +1,214 @@
+---
+title: "Making the Site More Personal: Reader, Books, and Repo Structure"
+description: "How we repositioned the portfolio around the book and the in-app reader, and how the repo is now structured—books, planning docs, and a single source of truth."
+date: "2026-03-16"
+tags: ["Portfolio", "Reader", "Books", "Redesign", "Monorepo"]
+---
+
+We’ve been shifting this site from “developer portfolio first” to something that leads with the creative work: the book, the reader, and the world behind it. That meant rethinking the information architecture, building an in-app EPUB reader and a full books pipeline, and tightening how the repo and its documentation are organized. This post walks through what we did, how it’s wired, and where you can find the planning docs and implementation details if you want to go deeper.
+
+---
+
+## Why we changed direction
+
+The old site led with tech: projects, resume, and “what I build.” The book felt like an add-on. We wanted the first impression to be **author and world-builder**, not “software architect.” So we made that explicit in our planning and then in the product.
+
+Our design source of truth puts it like this:
+
+> **What the site should feel like:** a living creative world with a technical archive behind it.  
+> **What it should not feel like:** a generic developer portfolio with a decorative book section bolted on.  
+> **Core hierarchy:** Book first → Songs second → Technical archive third.
+
+That hierarchy drove everything: the new hero, the “Start reading” CTA, the embedded reader on the home page, the music lane, and the way projects/blog/docs are framed as the **archive**—the workshop behind the creative work—instead of the main event.
+
+<Callout type="tip" title="Planning docs">
+The full IA, content order, and visual direction live in our planning repo. You can read the experience redesign doc and requirements in the docs area linked below.
+</Callout>
+
+---
+
+## A more personal portfolio
+
+### Information architecture
+
+We reworked the home page and primary nav around that hierarchy.
+
+**Home page flow:**
+
+1. **Opening scene / hero** — Full-bleed, atmospheric hero centered on the current book. Primary CTA: “Start reading.” Secondary: “Enter the archive” or “See technical work.” The supporting line introduces the site as writer, builder, and musician rather than leading with a job title.
+
+2. **Read now** — Featured book card with cover art, short synopsis, and a direct embedded reader preview. One current book on the home page; additional books live at `/books`. The reader mounts when you hit the CTA so you can start reading without leaving the landing page.
+
+3. **World / premise strip** — Short narrative that explains the book world, themes, or release status. Placeholder copy is fine here until the final text is ready.
+
+4. **Songs / soundtracks** — Music as a companion to the written world. We support BandLab embeds and placeholder track cards. Schema: `title`, `era`, `mood`, `description`, `embedUrl`, `coverImage`.
+
+5. **Archive gateway** — One section that routes to Projects, Docs, Blog, and experiments. Framed as the workshop behind the creative work, kept below the creative sections.
+
+6. **Footer / contact** — Kept simple; social and external links live here or in the music section.
+
+**Primary nav:** Home, Read, Listen, Archive (and optionally About). Projects, Blog, and Docs remain as routes but the top-level language is more intentional; Archive fans out to them.
+
+### Visual direction
+
+We’re moving away from the old PCB/dev aesthetic on the public landing page. The target is **literary, immersive, tactile, restrained**:
+
+- **Avoid:** neon SaaS gradients, generic dev-portfolio cards, circuit motifs on the first screen.
+- **Palette direction:** parchment, ash, forest, ember, moonlit blue, muted gold.
+- **Typography:** expressive serif for display, readable serif or humanist sans for body, small caps or restrained sans for UI labels.
+- **Texture:** paper grain, fog, ink bleed, worn edges, soft vignettes.
+
+Motion and depth are phased: first CSS/DOM-only (floating book, layered panels, staggered reveals), then optional WebGL only if the baseline experience is solid and we don’t block reading. We also care about scrollbar consistency across the main site and docs shells, and a reduced-motion fallback.
+
+<Callout type="note" title="Implementation rule">
+We kept the existing Next.js/Vercel stack for the first redesign pass. We matched the **content sequencing and atmosphere** of inspirational sites, not their exact implementation. Placeholder covers, descriptions, and CTA copy are acceptable as long as routes and components work end-to-end.
+</Callout>
+
+---
+
+## The reader and books pipeline
+
+We wanted reading to be **immediate**: one click from the homepage into the book. That required an in-app EPUB reader and a clear path from source manuscript to published EPUB.
+
+### Where you read
+
+- **Homepage “read now” block** — The primary CTA loads the featured book into an embedded reader on the same page. No separate app, no extra navigation.
+- **Dedicated reading route** — `/books/<slug>/read` gives you a full-page reading view for any book that has a built EPUB.
+- **Progress** — Reading position is persisted in `localStorage` by slug. You can leave and come back without losing your place.
+
+The portfolio uses **react-reader** (epub.js) for the in-app experience. The same `.epub` file is served at `/books/<slug>/book.epub` for download, so you can open it in any EPUB reader if you prefer.
+
+### Where the books come from
+
+Book content lives at the **repo root** under `books/<slug>/` (e.g. `books/mordreds_tale/`). Structure:
+
+- **Chapters:** `books/<slug>/chapters/<chapter-dir>/` with `.md` or `.mdx` pages.
+- **Metadata:** Optional `book.json` (title, author, description) and per-chapter metadata (e.g. act, chapter title, running head). See the book structure doc for the full convention.
+- **Build:** A root-level script runs the **repub-builder** CLI to turn each book into an EPUB.
+
+Build command:
+
+```bash
+pnpm run build:books
+```
+
+That builds the `repub-builder` package, then runs `scripts/build-books.cjs`, which calls `repub epub` for each book. Output:
+
+- `apps/portfolio/public/books/<slug>/book.epub`
+- `apps/portfolio/public/books/manifest.json` — array of `{ slug, title, description?, hasEpub }`. The site’s `lib/books.ts` reads this at runtime so the homepage and book list know what’s available. Books without a built EPUB show as “coming soon.”
+
+<Callout type="info" title="Formats">
+**EPUB** is the universal format we use in the portfolio: markdown/MDX → HTML, images inlined as base64, served at `/books/<slug>/book.epub`. We also have a **RichEPub (.repub)** path for the future desktop reader (Koodo/Kookit); the in-app site is EPUB-only for now.
+</Callout>
+
+### Under the hood: repub-builder and book-components
+
+- **repub-builder** — CLI with subcommands `repub build`, `repub read`, `repub epub`. Install from this repo only (no npm publish). See `packages/repub-builder/README.md`. The `repub epub` command compiles `.mdx` with `@mdx-js/mdx` and the book-components; plain `.md` uses marked.
+
+- **book-components** — MDX authoring components: `BookRoot`, `Chapter`, `Section`, `ChapterTitle`, `PartDivider`, `Callout`, `Blockquote`, `Figure`, `CodeBlock`, `BookMeta`. They’re wired so that `repub epub` produces the HTML that goes into the EPUB.
+
+- **Vendored desktop reader** — We vendor **Kookit** (rendering engine) and **Koodo Reader** (Electron desktop app) as submodules. We maintain forks so we can add a .repub renderer (RepubRender) and wire .repub in Koodo when the submodule is checked out. The portfolio itself does not depend on that; the in-app reader is EPUB-only.
+
+If you want the full requirements and vendoring details, they’re in the planning docs:
+
+<DocLinkCard href="/docs/books/book-structure" title="Book structure" description="Formal manuscript conventions: chapters, metadata, EPUB emission." />
+<DocLinkCard href="/docs/books/state" title="Books section state" description="Current cycle, focus, and next queue for the books pipeline." />
+<DocLinkCard href="/docs/books/planning-docs" title="Books planning docs" description="Planning docs index for the books section." />
+
+---
+
+## How this repo is structured
+
+The repo is a **monorepo** with a single place for “what we’re building and why.”
+
+### Top-level layout
+
+| Area | Purpose |
+|------|---------|
+| `apps/portfolio` | Next.js site (landing, reader, blog, docs, projects, resumes). |
+| `packages/repub-builder` | CLI for building EPUBs from markdown/MDX. |
+| `packages/book-components` | MDX components used when compiling book content. |
+| `books/` | Source for each book (`books/<slug>/`). |
+| `vendor/` | Git submodules: Kookit, Koodo Reader (forks; .repub when wired). |
+| `scripts/` | Root scripts, e.g. `build-books.cjs`, `download-releases.cjs`. |
+| `.planning/` | Source of truth for requirements, implementation plan, redesign, vendoring. |
+
+Example directory tree (simplified):
+
+```
+repo root
+├── apps/portfolio/          # Next.js app
+├── packages/
+│   ├── repub-builder/      # repub epub CLI
+│   └── book-components/    # MDX book components
+├── books/
+│   └── mordreds_tale/      # First book source
+├── vendor/
+│   ├── kookit/             # Submodule
+│   └── koodo-reader/       # Submodule
+├── scripts/
+│   ├── build-books.cjs
+│   └── download-releases.cjs
+└── .planning/
+    ├── REQUIREMENTS.md
+    ├── IMPLEMENTATION_PLAN.md
+    ├── PORTFOLIO_EXPERIENCE_REDESIGN.md
+    └── VENDORING.md
+```
+
+### The .planning directory
+
+`.planning/` is where we keep scope, gates, and next steps:
+
+- **REQUIREMENTS.md** — Books source of truth, tooling, reader behavior, portfolio experience redesign, docs IA, verification gates, releases.
+- **IMPLEMENTATION_PLAN.md** — Ralph Wiggum loop state: done, in progress, next. Links to REQUIREMENTS, DESIGN_STYLING, VENDORING.
+- **PORTFOLIO_EXPERIENCE_REDESIGN.md** — Positioning, IA, visual direction, 3D/motion plan, content strategy, acceptance criteria.
+- **VENDORING.md** — How we vendor and fork Koodo Reader and Kookit, submodule usage, and wiring .repub in Koodo.
+
+We use a simple loop: read the plan, pick one task, implement, verify (`pnpm install`, `pnpm run build`, `pnpm run lint`), update the plan, commit.
+
+### Documentation IA
+
+The **docs** area on the site is organized by **section** (e.g. `books/`, `dialogue-forge/`), not one flat bucket. Each section has:
+
+- **Planning Docs** (collapsed by default) — `planning docs`, `state`, `task registry`, `errors and attempts`, `decisions`. These use compact, scannable structures (tables, fixed fields) so humans and tooling can parse them.
+- **Reference docs** — Section-specific how-to and reference (e.g. book structure, reader, dialogue-forge overview).
+
+We removed obsolete sections (e.g. old `richepub`, `book-editor` docs) and made real section folders the unit of organization. More sections can be added as the site grows.
+
+<DocLinkCard href="/docs" title="Documentation hub" description="Browse all sections: books, dialogue-forge, documentation, and more." />
+<DocLinkCard href="/docs/books/decisions" title="Books decisions" description="Record of key decisions for the books pipeline and reader." />
+<DocLinkCard href="/docs/books/task-registry" title="Books task registry" description="Task registry for the books section." />
+
+---
+
+## What we shipped (implementation highlights)
+
+The implementation plan tracks what’s done. Here’s a condensed list of the work that directly supports this post:
+
+- **Portfolio redesign phases 1–4:** Book-first hero, “read now” section with embedded reader, Listen route with BandLab embeds, Projects/Blog/Docs hub and styled sidebar.
+- **Books reader:** EPUB-only in-app reader (react-reader/epub.js); homepage reader loads on demand from the CTA; book list shows “coming soon” for books without a built EPUB; progress in localStorage by slug.
+- **Repub and tooling:** repub-builder CLI (`repub epub`), book-components wired for MDX; Koodo and Kookit vendored as submodules; release workflows and download script for repub-builder, repub-reader, and Koodo builds.
+- **Docs and planning:** Section-first docs with Planning Docs folder; XML-style planning pages (state, task registry, decisions, errors-and-attempts); cleanup of obsolete docs; `.planning/` as single source of truth.
+- **Resume hub:** `/resumes` and printable resume pages; scrollbar polish across site and docs.
+
+Before any release we require: `pnpm install`, `pnpm run build`, and `pnpm run lint` all pass. Lint is not optional.
+
+---
+
+## Try the reader
+
+You can jump straight into the featured book from here. The embed below loads the same reader that appears on the homepage when you hit “Start reading.”
+
+<BookReaderEmbed slug="mordreds_tale" title="Mordred's Tale" />
+
+---
+
+## What’s next
+
+- **Portfolio redesign phase 5** — Replace the current PCB/dev aesthetic on the public landing page with the literary visual system in the redesign doc.
+- **Phase 6 (optional)** — Evaluate selective WebGL or React Three Fiber only after the non-WebGL experience is stable.
+- **More books** — Add more titles to the pipeline as manuscripts are ready; they’ll show up in the list and get “coming soon” until their EPUB is built.
+- **Reader UX** — Replace the built-in TOC with a custom collapsed panel; restore two-page spreads on wide screens; refine chapter metadata and opener styling.
+
+The reader and repo structure are in place so we can focus on content and atmosphere without re-plumbing the basics. If you’re curious about any part of the stack, the docs and planning links above are the best place to start.

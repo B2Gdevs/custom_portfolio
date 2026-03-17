@@ -1,7 +1,10 @@
+---
+page: 14
+title: "Morgana S Child And Resolve"
+displayTitle: false
+---
+
 ![Page 3](/books/mordreds_tale/images/ch01-p003.png)
-
-# Page 14 - Morgana’s child and resolve
-
 The chamber was still.
 
 Hours may have passed. Time had blurred.

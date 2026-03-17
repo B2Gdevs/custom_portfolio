@@ -1,7 +1,10 @@
+---
+page: 21
+title: "The Predator Emerges"
+displayTitle: false
+---
+
 ![Page 10](/books/mordreds_tale/images/ch01-p010.png)
-
-# Page 21 — The Predator Emerges
-
 She turned toward the sound. The scrape came again — steady, rhythmic. Not a corpse settling. Alive.
 
 Her torch swept the chamber. For a breath, there was nothing but shadows and bones. Then, from the dais where the Pantheon once sat, a shape detached from the dark.

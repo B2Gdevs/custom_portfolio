@@ -1,7 +1,10 @@
+---
+page: 16
+title: "The Gallery Of Echoes"
+displayTitle: false
+---
+
 ![Page 5](/books/mordreds_tale/images/ch01-p005.png)
-
-# Page 16 — The Gallery of Echoes
-
 Morgana ascended the vine-slick stairs, her torch casting shadows up the carved wood that bent ever so slightly, as if curling away from the light. As the corridor opened, she stepped into a massive vaulted chamber — once known as the Gallery of Echoes.
 
 In the age of the Pantheon, this space had been a marvel of acoustic and visual illusion. Voices could travel the length of the hall without ever being raised. The gods would perform speeches here — amplified, looped, layered by design — their words turning into divine chorus, their images reflected across mirrored walls that shimmered with enchantment.

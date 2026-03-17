@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { BookOpen, ChevronLeft, ChevronRight, LoaderCircle } from 'lucide-react';
+import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
+import { BookOpen, ChevronLeft, ChevronRight, LoaderCircle, Menu, X } from 'lucide-react';
 import { ReactReader, ReactReaderStyle } from 'react-reader';
 
 const STORAGE_PREFIX = 'epub-location-';
@@ -73,12 +73,12 @@ const READER_THEME_RULES = {
   },
   body: {
     'font-family': '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-    'font-size': '0.94rem',
-    'line-height': '1.6',
+    'font-size': '0.84rem',
+    'line-height': '1.46',
     padding: '0',
   },
   p: {
-    margin: '0 0 0.78rem',
+    margin: '0 0 0.58rem',
   },
   'h1, h2, h3, h4': {
     color: '#1d120d',
@@ -102,7 +102,7 @@ const READER_THEME_RULES = {
     'border-radius': '1rem',
     'box-shadow': '0 24px 50px rgba(43, 27, 16, 0.2)',
     display: 'block',
-    margin: '1rem auto',
+    margin: '0.6rem auto',
     'max-width': '100%',
   },
   '.reader-page': {
@@ -110,7 +110,19 @@ const READER_THEME_RULES = {
     display: 'flex',
     'flex-direction': 'column',
     'min-height': '100%',
-    padding: '1.35rem 1.85rem 1.1rem',
+    padding: '0.88rem 1.18rem 0.78rem',
+  },
+  '.reader-page__header': {
+    margin: '0 0 0.4rem',
+  },
+  '.reader-page__running-head': {
+    color: '#836142',
+    'font-family': 'var(--font-sans)',
+    'font-size': '0.62rem',
+    'font-weight': '700',
+    'letter-spacing': '0.2em',
+    margin: '0',
+    'text-transform': 'uppercase',
   },
   '.reader-page__chapter': {
     color: '#836142',
@@ -123,40 +135,76 @@ const READER_THEME_RULES = {
   },
   '.reader-page__title': {
     color: '#1b120d',
-    'font-size': '2rem',
+    'font-size': '1.3rem',
     'line-height': '1.02',
     margin: '0',
   },
   '.reader-page__figure': {
-    margin: '0.85rem 0 0.95rem',
+    margin: '0.24rem 0 0.56rem',
     'page-break-inside': 'avoid',
     'break-inside': 'avoid',
   },
+  '.reader-page__figure-frame': {
+    display: 'flex',
+    'align-items': 'center',
+    'justify-content': 'center',
+    'min-height': '7.6rem',
+    height: '7.6rem',
+    padding: '0.42rem',
+    'box-sizing': 'border-box',
+    overflow: 'hidden',
+    border: '1px solid rgba(102, 69, 36, 0.12)',
+    'border-radius': '0.7rem',
+    background:
+      'linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(232, 219, 198, 0.62)), #efe1cb',
+    'box-shadow': '0 12px 24px rgba(32, 18, 8, 0.12)',
+  },
   '.reader-page__figure img': {
-    'border-radius': '0.8rem',
-    'box-shadow': '0 18px 34px rgba(32, 18, 8, 0.16)',
+    'border-radius': '0.58rem',
+    'box-shadow': 'none',
     margin: '0 auto',
-    'max-height': '15rem',
-    'max-width': '18rem',
+    height: '100%',
     'object-fit': 'cover',
+    'object-position': 'center',
     width: '100%',
+  },
+  '.reader-page__figure--placeholder .reader-page__figure-frame': {
+    'border-style': 'dashed',
+  },
+  '.reader-page__placeholder': {
+    display: 'flex',
+    'align-items': 'center',
+    'justify-content': 'center',
+    'min-height': '6.8rem',
+    width: '100%',
+    'border-radius': '0.58rem',
+    background:
+      'radial-gradient(circle at top, rgba(140, 102, 67, 0.14), transparent 58%), linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(216, 196, 166, 0.34))',
+    color: '#8b6a4a',
+    'font-family': 'var(--font-sans)',
+    'font-size': '0.62rem',
+    'font-weight': '700',
+    'letter-spacing': '0.16em',
+    'text-align': 'center',
+    'text-transform': 'uppercase',
   },
   '.reader-page__body': {
     flex: '1 1 auto',
   },
   '.reader-page__body p': {
-    margin: '0 0 0.78rem',
+    margin: '0 0 0.58rem',
+    'line-height': '1.46',
   },
   '.reader-page__footer': {
     'border-top': '1px solid rgba(94, 67, 41, 0.16)',
     'margin-top': 'auto',
-    'padding-top': '0.7rem',
+    'padding-top': '0.45rem',
     'text-align': 'center',
   },
   '.reader-page__folio': {
     color: '#836142',
     'font-family': 'var(--font-sans)',
-    'font-size': '0.8rem',
+    'font-size': '0.68rem',
     'letter-spacing': '0.18em',
   },
   '.h1, nav h1, h1.h1': {
@@ -222,10 +270,10 @@ function createReaderStyles({
     reader: {
       ...ReactReaderStyle.reader,
       top: headerOffset,
-      left: isReaderMode ? 52 : 24,
-      right: isReaderMode ? 32 : 24,
+      left: isReaderMode ? 24 : 24,
+      right: isReaderMode ? 24 : 24,
       bottom: isReaderMode ? READER_FOOTER_H + 16 : 24,
-      maxWidth: isReaderMode ? '96rem' : '48rem',
+      maxWidth: isReaderMode ? '88rem' : '48rem',
       marginLeft: 'auto',
       marginRight: 'auto',
       width: '100%',
@@ -365,6 +413,30 @@ function createEpubViewStyles(layoutMode: 'compact' | 'reader') {
   };
 }
 
+function renderTocTree(
+  items: ReaderNavItem[],
+  onSelect: (href?: string) => void,
+  depth = 0
+): ReactNode {
+  return items.map((item) => {
+    const href = item.href || '';
+
+    return (
+      <div key={`${depth}-${href}-${item.label}`} className="space-y-1">
+        <button
+          type="button"
+          onClick={() => onSelect(href)}
+          className="block w-full rounded-lg px-3 py-2 text-left text-sm text-[rgba(236,223,204,0.82)] transition-colors hover:bg-[rgba(255,255,255,0.05)] hover:text-[#fff3e5]"
+          style={{ paddingLeft: `${0.75 + depth * 0.9}rem` }}
+        >
+          {item.label}
+        </button>
+        {item.subitems?.length ? renderTocTree(item.subitems, onSelect, depth + 1) : null}
+      </div>
+    );
+  });
+}
+
 export default function EpubViewer({
   epubUrl,
   title,
@@ -377,6 +449,7 @@ export default function EpubViewer({
   const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [tocItems, setTocItems] = useState<ReaderNavItem[]>([]);
+  const [isTocOpen, setIsTocOpen] = useState(false);
   const [currentSectionLabel, setCurrentSectionLabel] = useState('');
   const [currentPage, setCurrentPage] = useState<number | null>(null);
   const [totalPages, setTotalPages] = useState<number | null>(null);
@@ -498,17 +571,19 @@ export default function EpubViewer({
     (rendition: ReaderRendition) => {
       renditionCleanupRef.current?.();
       renditionRef.current = rendition;
-
       const applyLayout = () => {
-        if (typeof window === 'undefined') return;
-        const useSpread = window.matchMedia(READER_SPREAD_QUERY).matches;
+        const useSpread =
+          typeof window !== 'undefined' &&
+          layoutMode === 'reader' &&
+          window.matchMedia(READER_SPREAD_QUERY).matches;
+
         rendition.flow('paginated');
         rendition.spread(useSpread ? 'always' : 'none', 1200);
       };
 
       rendition.themes.register('portfolio-reader', READER_THEME_RULES);
       rendition.themes.select('portfolio-reader');
-      rendition.themes.fontSize(layoutMode === 'reader' ? '112%' : '100%');
+      rendition.themes.fontSize(layoutMode === 'reader' ? '96%' : '100%');
       applyLayout();
 
       const handleRelocated = (nextLocation: ReaderLocation) => {
@@ -582,6 +657,13 @@ export default function EpubViewer({
   const footerLabel =
     currentSectionLabel || (currentPage ? `Page ${currentPage}` : 'Current section');
 
+  const handleTocSelect = useCallback((href?: string) => {
+    if (href) {
+      setLocation(href);
+    }
+    setIsTocOpen(false);
+  }, []);
+
   return (
     <div className={`epub-reader-root relative flex h-full min-h-[400px] flex-col overflow-hidden ${className}`}>
       {title && (
@@ -599,6 +681,41 @@ export default function EpubViewer({
         </header>
       )}
       <div className="epub-reader-content flex-1 min-h-0 relative">
+        {layoutMode === 'reader' ? (
+          <>
+            <div className="pointer-events-none absolute left-4 top-4 z-30">
+              <button
+                type="button"
+                onClick={() => setIsTocOpen((value) => !value)}
+                className="pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(140,102,67,0.18)] bg-[rgba(18,13,10,0.88)] text-[rgba(236,223,204,0.82)] shadow-[0_12px_24px_rgba(0,0,0,0.22)] backdrop-blur-md transition-colors hover:border-[rgba(213,176,131,0.32)] hover:text-[#fff3e5]"
+                aria-label={isTocOpen ? 'Close contents' : 'Open contents'}
+              >
+                {isTocOpen ? <X size={16} /> : <Menu size={16} />}
+              </button>
+            </div>
+            {isTocOpen ? (
+              <>
+                <div
+                  className="absolute inset-0 z-20 bg-[rgba(0,0,0,0.36)] backdrop-blur-[2px]"
+                  onClick={() => setIsTocOpen(false)}
+                  aria-hidden
+                />
+                <aside className="absolute inset-y-0 left-0 z-30 w-[19rem] border-r border-[rgba(140,102,67,0.14)] bg-[linear-gradient(180deg,rgba(24,18,14,0.97),rgba(13,10,8,0.98))] px-4 pb-6 pt-16 shadow-[18px_0_40px_rgba(0,0,0,0.28)]">
+                  <p className="px-3 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[rgba(213,176,131,0.72)]">
+                    Contents
+                  </p>
+                  <div className="mt-3 max-h-full overflow-y-auto pr-1">
+                    {tocItems.length ? (
+                      <div className="space-y-1">{renderTocTree(tocItems, handleTocSelect)}</div>
+                    ) : (
+                      <p className="px-3 text-sm text-[rgba(236,223,204,0.56)]">Loading contents...</p>
+                    )}
+                  </div>
+                </aside>
+              </>
+            ) : null}
+          </>
+        ) : null}
         {isLoadingBook ? (
           <div className="flex h-full min-h-[inherit] items-center justify-center gap-3 text-sm text-text-muted">
             <LoaderCircle size={18} className="animate-spin" />
@@ -615,7 +732,7 @@ export default function EpubViewer({
             title=""
             location={location}
             locationChanged={locationChanged}
-            showToc={true}
+            showToc={false}
             tocChanged={(nextToc) => handleTocChanged(nextToc as ReaderNavItem[])}
             getRendition={(rendition) => handleRendition(rendition as ReaderRendition)}
             epubOptions={{

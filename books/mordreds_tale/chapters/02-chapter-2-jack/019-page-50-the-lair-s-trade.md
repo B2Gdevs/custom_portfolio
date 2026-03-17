@@ -1,7 +1,10 @@
+---
+page: 50
+title: "The Lair S Trade"
+displayTitle: false
+---
+
 ![Page 19](/books/mordreds_tale/images/ch02-p019.png)
-
-# Page 50 — The Lair’s Trade
-
 Corin reached under the table and pulled out a roll of hide, stained and creased from years of use. He slapped it down and spread it wide. Lines scratched in charcoal ran crooked across its surface, broken hallways, circles for chambers, jagged marks where someone’s hand had pressed too hard.
 
 Jack leaned forward, breath caught. It wasn’t much — half the marks made no sense — but he recognized it for what it was: a map. A map of the Lair.

@@ -1,7 +1,10 @@
+---
+page: 31
+title: "Toward The Council"
+displayTitle: false
+---
+
 ![Page 20](/books/mordreds_tale/images/ch01-p020.png)
-
-# Page 31 — Toward the Council
-
 The guards did not lower their spears, but neither did they try to bar her way. Their eyes darted between one another, wordless agreement forming in their silence. At last, the taller one spoke, voice rough with unease.
 
 “You can’t stay here. Not in the open. You’ll come with us — to the Council.”

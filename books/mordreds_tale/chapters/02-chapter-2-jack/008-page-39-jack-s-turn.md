@@ -1,7 +1,10 @@
+---
+page: 39
+title: "Jack S Turn"
+displayTitle: false
+---
+
 ![Page 8](/books/mordreds_tale/images/ch02-p008.png)
-
-# Page 39 — Jack’s Turn
-
 “Your throw,” Derrick said, pushing the dice toward him.
 
 Jack scooped them up, the weight of Morgause’s stolen coins already leaving his pocket. He rattled the bones, felt their clatter vibrate through his fingers, and cast them across the board. They tumbled, spun, froze. The table jeered. His throw was bad — again.

@@ -1,7 +1,10 @@
+---
+page: 18
+title: "Chamber Of Entwined Relics Part 2"
+displayTitle: false
+---
+
 ![Page 7](/books/mordreds_tale/images/ch01-p007.png)
-
-# Page 18 - Chamber of Entwined Relics Part 2
-
 The corridor leading upward was rimmed with curving roots. No straight lines remained. It felt like walking through a throat.
 
 To either side, relics jutted from the walls — unfinished, malformed, or decayed. A spear that had grown barbs. A ring that extended into thorned wire.  

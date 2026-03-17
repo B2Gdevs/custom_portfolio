@@ -1,7 +1,10 @@
+---
+page: 27
+title: "The Seal"
+displayTitle: false
+---
+
 ![Page 16](/books/mordreds_tale/images/ch01-p016.png)
-
-# Page 27 — The Seal
-
 The further Morgana walked, the heavier the air became. Not with silence — but with stench. The Hall of Hollow Pilgrims reeked of rot and iron, a foul musk that caught in her throat. The gods had once filled this place with ceremony; now it had become a midden for the dead.
 
 Bodies littered the approach to the gate. Some were nothing more than skeletons collapsed against the stone, jaws slack in eternal pleading. Others were newer, their flesh gray and half-consumed. She stepped past the twisted form of a beggar, still clutching an empty cup, his bones chewed through by something not human. Beside him, a creature’s carcass sprawled broken — its skull split where it had dashed itself against the wood.

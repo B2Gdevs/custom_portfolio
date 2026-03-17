@@ -1,8 +1,10 @@
+---
+page: 48
+title: "The Value Of Hope"
+displayTitle: false
+---
+
 ![Page 17](/books/mordreds_tale/images/ch02-p017.png)
-
-# Page 48 — The Value of Hope
-
-
 The storm hammered the roof, every gust rattling the shutters like a drumbeat. Derrick leaned in, voice rising to cut through the noise. “It’s not just about the power of one treasure, Jack. It’s about what you can build with them. You want to run a kingdom? Feed a people? Keep them safe? That takes more than swords.”
 
 Corin nodded, jabbing a finger at the map spread across the table. “Say the goblet flowed again. Endless water—enough for crops, enough for soldiers. That alone could feed half the realm. And if the bracelets that sped the harvests woke up? You’d never see famine again. Every field could bloom in days.”

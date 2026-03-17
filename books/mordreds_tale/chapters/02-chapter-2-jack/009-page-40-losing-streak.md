@@ -1,7 +1,10 @@
+---
+page: 40
+title: "Losing Streak"
+displayTitle: false
+---
+
 ![Page 9](/books/mordreds_tale/images/ch02-p009.png)
-
-# Page 40 — Losing Streak
-
 Jack’s coins dwindled fast. The dice spun from his fingers again and again, tumbling across the wood like traitors. Each throw was another copper sliding from his pile into Derrick’s or Selene’s waiting hands. He told himself the next toss would turn, that luck was bound to tilt back, but the bones refused him.
 
 “Snake eyes,” Derrick announced with relish, sweeping in Jack’s last pair of coins. “Looks like the roof wins today, eh?”
