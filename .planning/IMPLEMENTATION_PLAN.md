@@ -20,6 +20,11 @@ Read this each iteration; pick one task; update after completing.
 - [x] Scrollbar polish follow-up: keep page and sidebar scrollbars visually aligned with stable gutters across the main site and docs shells.
 - [x] Docs planning follow-up: rewrite section planning pages into compact XML-style record layouts that are readable and parseable.
 - [x] Books reader follow-up: make the homepage reader load on demand from its CTA and show visible disabled upcoming-book choices.
+- [x] Books reader spread fix: restore visible two-page desktop spreads after `build:books` by pairing authored pages into shared EPUB spine documents and lowering the in-app spread threshold to match the actual reader viewport.
+- [x] Books reader shell polish: remove the shared public footer from `/books/[bookSlug]/read`, let the reader page consume the full available shell height, and add a collapsible desktop sidebar for more reading room.
+- [x] Books reader header polish: compact the read-page top bar, keep the active book title prominent, convert book switching to a tabgroup, and add motion to the desktop sidebar collapse/expand transition.
+- [x] Books reader TOC motion polish: animate the in-reader contents sidebar and backdrop so the EPUB reader panel opens and closes with the same eased motion language as the site shell.
+- [x] Books reader local upload + frozen runtime: allow opening arbitrary local `.epub` files in the in-app reader and add a separate production-style reader build/run path for reading without `next dev` hot reload.
 
 ## Books & reader
 
@@ -66,4 +71,15 @@ Artifacts: `packages/repub-builder` (CLI, epub only), `packages/book-components`
 - **Submodules:** B2Gdevs/kookit and B2Gdevs/koodo-reader are our forks; `.gitmodules` is correct. Push vendor submodules to B2Gdevs when we have patches to publish.
 - **Book-components:** `packages/repub-builder` uses `@mdx-js/mdx` + `@portfolio/book-components`; `repub epub` compiles `.mdx` with `mdxToHtml()`. `.md` uses marked.
 - **Book pipeline:** `pnpm run build:books` builds repub-builder, then runs `scripts/build-books.cjs` which calls `repub epub` per book. Output: `book.epub` and manifest with `hasEpub` only.
+- **Books spread fix (2026-03-20):** `repub epub` now wraps two authored pages into each generated spine document so epub.js has adjacent page content to show in spreads, and `EpubViewer` now enables spreads based on the real reader container width (`1050px`) instead of the previous `1200px` cutoff that the sidebar layout never reached.
+- **Verification (2026-03-20):** `node scripts/build-books.cjs`, `pnpm run build`, and `pnpm run lint` all pass for this reader fix; lint still reports the existing warning-only backlog.
+- **Books shell polish (2026-03-20):** the shared layout now hides the site footer on `/books/[bookSlug]/read`, persists a desktop sidebar collapsed state in localStorage, defaults the read route to the compact icon rail, and lets the reader page fill the remaining shell height instead of reserving extra viewport space for the old footer layout.
+- **Verification (2026-03-20):** `pnpm run build` and `pnpm run lint` pass after the read-page shell changes; lint remains warning-only in existing unrelated files.
+- **Books header polish (2026-03-20):** the read-page header now uses a tighter vertical rhythm, keeps the current book title as the primary identifier, exposes the available books as a real tablist, and animates the desktop sidebar between full and compact states instead of snapping between widths.
+- **Verification (2026-03-20):** `pnpm run build` and `pnpm run lint` pass after the animated sidebar and tabgroup update; lint remains warning-only in the existing unrelated backlog.
+- **Books reader TOC motion (2026-03-20):** `EpubViewer` now animates the contents overlay fade, the sidebar slide-in/out, and the contents list entrance so the reader drawer no longer snaps open over the book.
+- **Verification (2026-03-20):** `pnpm run build` and `pnpm run lint` pass after the EPUB reader TOC motion update; lint remains warning-only in the existing unrelated backlog.
+- **Books local upload + frozen runtime (2026-03-20):** `/books/upload/read` now opens arbitrary local `.epub` files inside the same reader workspace, the library page links to that flow, built-in book read pages can temporarily switch to a local upload, and `EpubViewer` accepts either fetched EPUB URLs or in-memory uploaded EPUB bytes.
+- **Standalone reader runtime (2026-03-20):** root scripts now build a frozen production snapshot into `.standalone/portfolio-reader` and run it on port `3410` via `next start`, so reading can happen against a non-hot-reloading build while `pnpm dev` continues separately.
+- **Verification (2026-03-20):** `pnpm run lint` passes with the existing warning-only backlog, `pnpm run build:reader:standalone` succeeds, and `node scripts/run-reader-standalone.cjs` stays up until manually stopped / timeout.
 - **Optional done:** shiki in app deps; Next/MDX pinned via overrides; styled-jsx>react override for React 19.

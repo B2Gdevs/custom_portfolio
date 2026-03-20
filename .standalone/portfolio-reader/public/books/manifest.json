@@ -1,0 +1,13 @@
+[
+  {
+    "slug": "mordreds_legacy",
+    "title": "Mordreds Legacy",
+    "hasEpub": false
+  },
+  {
+    "slug": "mordreds_tale",
+    "title": "Mordred's Tale",
+    "description": "A dark fantasy novel. Morgana, Jack, and the threads of fate.",
+    "hasEpub": true
+  }
+]

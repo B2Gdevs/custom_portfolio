@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <defs>
+    <pattern id="pcbCurves" width="300" height="300" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="rgba(0, 220, 130, 0.25)" stroke-width="2" stroke-linecap="round">
+        <!-- minimal wave -->
+        <path d="M30 150 Q100 100, 170 150 T310 150" />
+        
+        <!-- single pad at end -->
+        <circle cx="310" cy="150" r="3.5" fill="rgba(0, 220, 130, 0.3)" />
+      </g>
+    </pattern>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#pcbCurves)"/>
+</svg>

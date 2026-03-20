@@ -1,14 +1,19 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { BookOpen, ChevronLeft, ChevronRight, LoaderCircle, Menu, X } from 'lucide-react';
 import { ReactReader, ReactReaderStyle } from 'react-reader';
 
 const STORAGE_PREFIX = 'epub-location-';
 const READER_HEADER_H = 52;
 const READER_FOOTER_H = 44;
-const READER_SPREAD_QUERY = '(min-width: 1200px)';
+const READER_SPREAD_MIN_WIDTH = 1050;
 const LOCATION_GENERATION_CHARS = 1200;
+const TOC_PANEL_TRANSITION = {
+  duration: 0.24,
+  ease: [0.22, 1, 0.36, 1] as const,
+};
 
 interface ReaderNavItem {
   label: string;
@@ -56,7 +61,8 @@ interface ReaderRendition {
 }
 
 export interface EpubViewerProps {
-  epubUrl: string;
+  epubUrl?: string;
+  epubData?: ArrayBuffer | null;
   title?: string;
   /** Key for persisting location (e.g. book slug). If set, location is saved to localStorage. */
   storageKey?: string;
@@ -439,6 +445,7 @@ function renderTocTree(
 
 export default function EpubViewer({
   epubUrl,
+  epubData,
   title,
   storageKey,
   className = '',
@@ -457,12 +464,24 @@ export default function EpubViewer({
   const renditionCleanupRef = useRef<(() => void) | null>(null);
   const renditionRef = useRef<ReaderRendition | null>(null);
   const latestLocationRef = useRef<ReaderLocation | null>(null);
+  const readerRootRef = useRef<HTMLDivElement | null>(null);
+  const sourceKey = epubData
+    ? `buffer:${storageKey ?? title ?? epubData.byteLength}`
+    : `url:${epubUrl ?? 'missing'}`;
 
   useEffect(() => {
-    const controller = new AbortController();
-
     latestLocationRef.current = null;
     renditionRef.current = null;
+
+    if (epubData) {
+      return;
+    }
+
+    if (!epubUrl) {
+      return;
+    }
+
+    const controller = new AbortController();
 
     fetch(epubUrl, { signal: controller.signal })
       .then((response) => {
@@ -475,14 +494,14 @@ export default function EpubViewer({
       .then((buffer) => {
         if (controller.signal.aborted) return;
         setEpubBuffer(buffer);
-        setLoadedUrl(epubUrl);
+        setLoadedUrl(sourceKey);
         setLoadError(null);
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) return;
         const message =
           error instanceof Error ? error.message : 'Unable to load this EPUB right now.';
-        setLoadedUrl(epubUrl);
+        setLoadedUrl(sourceKey);
         setEpubBuffer(null);
         setLoadError(message);
       });
@@ -490,7 +509,7 @@ export default function EpubViewer({
     return () => {
       controller.abort();
     };
-  }, [epubUrl]);
+  }, [epubData, epubUrl, sourceKey]);
 
   useEffect(() => {
     return () => {
@@ -500,11 +519,15 @@ export default function EpubViewer({
   }, []);
 
   useEffect(() => {
-    if (!storageKey || typeof window === 'undefined') return;
-    const saved = window.localStorage.getItem(STORAGE_PREFIX + storageKey);
-    if (saved) {
-      queueMicrotask(() => setLocation(saved));
+    if (typeof window === 'undefined') return;
+
+    if (!storageKey) {
+      queueMicrotask(() => setLocation(0));
+      return;
     }
+
+    const saved = window.localStorage.getItem(STORAGE_PREFIX + storageKey);
+    queueMicrotask(() => setLocation(saved ?? 0));
   }, [storageKey]);
 
   useEffect(() => {
@@ -519,9 +542,10 @@ export default function EpubViewer({
   const locationChanged = useCallback((epubcfi: string) => {
     setLocation(epubcfi);
   }, []);
-  const isLoadingBook = loadedUrl !== epubUrl && !loadError;
-  const readyBuffer = loadedUrl === epubUrl ? epubBuffer : null;
-  const visibleError = loadedUrl === epubUrl ? loadError : null;
+  const isActiveSourceLoaded = loadedUrl === sourceKey;
+  const readyBuffer = epubData ?? (isActiveSourceLoaded ? epubBuffer : null);
+  const visibleError = epubData ? null : isActiveSourceLoaded ? loadError : null;
+  const isLoadingBook = epubData ? false : Boolean(epubUrl) && !isActiveSourceLoaded;
   const headerOffset = title ? READER_HEADER_H : 0;
   const readerStyles = createReaderStyles({ headerOffset, layoutMode });
   const epubViewStyles = createEpubViewStyles(layoutMode);
@@ -573,12 +597,11 @@ export default function EpubViewer({
       renditionRef.current = rendition;
       const applyLayout = () => {
         const useSpread =
-          typeof window !== 'undefined' &&
           layoutMode === 'reader' &&
-          window.matchMedia(READER_SPREAD_QUERY).matches;
+          (readerRootRef.current?.clientWidth ?? 0) >= READER_SPREAD_MIN_WIDTH;
 
         rendition.flow('paginated');
-        rendition.spread(useSpread ? 'always' : 'none', 1200);
+        rendition.spread(useSpread ? 'always' : 'none', READER_SPREAD_MIN_WIDTH);
       };
 
       rendition.themes.register('portfolio-reader', READER_THEME_RULES);
@@ -665,7 +688,10 @@ export default function EpubViewer({
   }, []);
 
   return (
-    <div className={`epub-reader-root relative flex h-full min-h-[400px] flex-col overflow-hidden ${className}`}>
+    <div
+      ref={readerRootRef}
+      className={`epub-reader-root relative flex h-full min-h-[400px] flex-col overflow-hidden ${className}`}
+    >
       {title && (
         <header
           className="epub-reader-header flex items-center gap-3 shrink-0 px-4 border-b border-border bg-dark-alt"
@@ -693,27 +719,51 @@ export default function EpubViewer({
                 {isTocOpen ? <X size={16} /> : <Menu size={16} />}
               </button>
             </div>
-            {isTocOpen ? (
-              <>
-                <div
-                  className="absolute inset-0 z-20 bg-[rgba(0,0,0,0.36)] backdrop-blur-[2px]"
-                  onClick={() => setIsTocOpen(false)}
-                  aria-hidden
-                />
-                <aside className="absolute inset-y-0 left-0 z-30 w-[19rem] border-r border-[rgba(140,102,67,0.14)] bg-[linear-gradient(180deg,rgba(24,18,14,0.97),rgba(13,10,8,0.98))] px-4 pb-6 pt-16 shadow-[18px_0_40px_rgba(0,0,0,0.28)]">
-                  <p className="px-3 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[rgba(213,176,131,0.72)]">
-                    Contents
-                  </p>
-                  <div className="mt-3 max-h-full overflow-y-auto pr-1">
-                    {tocItems.length ? (
-                      <div className="space-y-1">{renderTocTree(tocItems, handleTocSelect)}</div>
-                    ) : (
-                      <p className="px-3 text-sm text-[rgba(236,223,204,0.56)]">Loading contents...</p>
-                    )}
-                  </div>
-                </aside>
-              </>
-            ) : null}
+            <AnimatePresence initial={false}>
+              {isTocOpen ? (
+                <motion.div
+                  className="pointer-events-none absolute inset-0 z-20"
+                  initial={{ opacity: 1 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 1 }}
+                >
+                  <motion.button
+                    type="button"
+                    aria-label="Close contents"
+                    className="pointer-events-auto absolute inset-0 bg-[rgba(0,0,0,0.36)] backdrop-blur-[2px]"
+                    onClick={() => setIsTocOpen(false)}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={TOC_PANEL_TRANSITION}
+                  />
+                  <motion.aside
+                    className="pointer-events-auto absolute inset-y-0 left-0 z-30 w-[19rem] border-r border-[rgba(140,102,67,0.14)] bg-[linear-gradient(180deg,rgba(24,18,14,0.97),rgba(13,10,8,0.98))] px-4 pb-6 pt-16 shadow-[18px_0_40px_rgba(0,0,0,0.28)]"
+                    initial={{ opacity: 0, x: -28 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -28 }}
+                    transition={TOC_PANEL_TRANSITION}
+                  >
+                    <p className="px-3 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[rgba(213,176,131,0.72)]">
+                      Contents
+                    </p>
+                    <motion.div
+                      className="mt-3 max-h-full overflow-y-auto pr-1"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ duration: 0.18, delay: 0.04 }}
+                    >
+                      {tocItems.length ? (
+                        <div className="space-y-1">{renderTocTree(tocItems, handleTocSelect)}</div>
+                      ) : (
+                        <p className="px-3 text-sm text-[rgba(236,223,204,0.56)]">Loading contents...</p>
+                      )}
+                    </motion.div>
+                  </motion.aside>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
           </>
         ) : null}
         {isLoadingBook ? (
@@ -727,7 +777,7 @@ export default function EpubViewer({
           </div>
         ) : (
           <ReactReader
-            key={`${epubUrl}-${readyBuffer.byteLength}`}
+            key={`${sourceKey}-${readyBuffer.byteLength}`}
             url={readyBuffer}
             title=""
             location={location}
@@ -739,7 +789,7 @@ export default function EpubViewer({
               flow: 'paginated',
               manager: 'default',
               spread: layoutMode === 'reader' ? 'auto' : 'none',
-              minSpreadWidth: 1200,
+              minSpreadWidth: READER_SPREAD_MIN_WIDTH,
               snap: true,
             }}
             loadingView={<div className="flex h-full items-center justify-center gap-3 text-sm text-text-muted"><LoaderCircle size={18} className="animate-spin" /><span>Loading book...</span></div>}

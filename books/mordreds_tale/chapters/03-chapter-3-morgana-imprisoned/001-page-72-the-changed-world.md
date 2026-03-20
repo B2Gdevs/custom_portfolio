@@ -6,7 +6,7 @@ displayTitle: false
 
 ![Page 1](/books/mordreds_tale/images/ch03-p001.png)
 The palisade gates opened to reveal a settlement transformed.
-Morgana stepped through, the child pressed against her chest, and stopped. This was not the small huts the slaves used to live in, she. Stone buildings rose three stories high along paved streets. A fountain stood in the central square, water flowing freely—an impossible luxury in a world without magic, yet there it was. Scaffolding marked new construction everywhere she looked. Merchants called out their wares. Children ran laughing between the buildings.
+Morgana stepped through, the child pressed against her chest, and stopped. This was not the small huts the slaves used to live in. Stone buildings rose three stories high along paved streets. A fountain stood in the central square, water flowing freely—an impossible luxury in a world without magic, yet there it was. Scaffolding marked new construction everywhere she looked. Merchants called out their wares. Children ran laughing between the buildings.
 
 
 This was prosperity. Order. A city being born.
@@ -26,13 +26,13 @@ The Council Hall's doors stood open. Inside, seven figures sat at a curved table
 
 "…"
 
-Morgana looked directly at the man and made it obvious to that she wouldn’t respond to him through a . 
+Morgana looked directly at the man and made it obvious she wouldn’t answer him.
 
 
 Marcus's eyes widened. "Morgana. You were part of the Pantheon's court."
 
 
-"I was, its good to see a familiar face."
+"I was. It’s good to see a familiar face."
 
 
 ”So you’ll talk now..ah?," the rough man said, studying her. "Where have you been all this time?"
@@ -47,7 +47,7 @@ Silence to what the man said only looking at Marcus.
 
 
 
-Marcus looks at the man and then at Morgana, “Where…have…you been all this time?”
+Marcus looked at the man and then at Morgana. “Where… have… you been all this time?”
 
 
 "I went to sleep in my chamber. When I woke, everything had changed.  But I made my way out, but encountered much change within the home i once knew, and now i am here before you."
@@ -60,7 +60,7 @@ Marcus looks at the man and then at Morgana, “Where…have…you been all this
 
 
 
-Morgana looks at him listening
+Morgana listened.
 
 
 

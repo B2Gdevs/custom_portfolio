@@ -4,10 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   BookOpenText,
   BookText,
   Check,
+  ChevronLeft,
+  ChevronRight,
   Compass,
   Copy,
   FileCode2,
@@ -49,10 +52,12 @@ const iconMap: Record<NavIconKey, React.ComponentType<{ size?: number; className
 function SidebarContent({
   pathname,
   navMenus,
+  collapsed = false,
   onNavigate,
 }: {
   pathname: string;
   navMenus: NavMenuSection[];
+  collapsed?: boolean;
   onNavigate?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
@@ -84,6 +89,113 @@ function SidebarContent({
     }
     scrollTimeoutRef.current = setTimeout(() => setIsScrolling(false), 750);
   };
+
+  if (collapsed) {
+    const collapsedItems = [
+      {
+        href: '/',
+        label: 'Home',
+        icon: Home,
+        isActive: pathname === '/',
+      },
+      {
+        href: '/resumes',
+        label: 'Resumes',
+        icon: FileText,
+        isActive: pathname === '/resumes' || pathname.startsWith('/resumes/'),
+      },
+      ...navMenus.flatMap((menu) =>
+        menu.items
+          .filter((item) => !item.external)
+          .map((item) => ({
+            href: item.href,
+            label: item.label,
+            icon: iconMap[item.icon],
+            isActive: pathname === item.href || pathname.startsWith(item.href + '/'),
+          }))
+      ),
+    ];
+
+    return (
+      <div className="sidebar-shell flex h-full flex-col items-center">
+        <div className="sidebar-ornament" />
+
+        <div className="relative z-10 flex w-full justify-center border-b border-border/70 px-3 py-5">
+          <Link
+            href="/"
+            onClick={onNavigate}
+            className="rounded-[1.4rem] p-2 transition-colors hover:bg-white/5"
+            aria-label="Go to home"
+            title="Home"
+          >
+            <div className="sidebar-logo-wrap">
+              <Image
+                src="/logo.svg"
+                alt="Logo"
+                width={36}
+                height={36}
+                className="h-9 w-9 rounded-full bg-zinc-900/60 p-1 logo-hover-green"
+              />
+            </div>
+          </Link>
+        </div>
+
+        <div
+          className={`sidebar-scroll-area relative z-10 flex-1 overflow-y-auto px-2 py-5 ${
+            isScrolling ? 'scroll-active' : ''
+          }`}
+          onScroll={handleScroll}
+        >
+          <div className="flex flex-col items-center gap-2">
+            {collapsedItems.map((item) => {
+              const ItemIcon = item.icon;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onNavigate}
+                  aria-label={item.label}
+                  title={item.label}
+                  className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition-colors ${
+                    item.isActive
+                      ? 'border-[rgba(213,176,131,0.45)] bg-[rgba(213,176,131,0.14)] text-[#fff3e5]'
+                      : 'border-border/70 bg-dark/60 text-text-muted hover:border-[rgba(213,176,131,0.4)] hover:text-primary'
+                  }`}
+                >
+                  <ItemIcon size={17} />
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="relative z-10 flex w-full flex-col items-center gap-3 border-t border-border/70 px-3 py-5">
+          <button
+            type="button"
+            onClick={handleCopyEmail}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-primary text-secondary transition hover:opacity-90"
+            aria-label={copied ? 'Copied email' : 'Copy email'}
+            title={copied ? 'Copied!' : 'Copy email'}
+          >
+            {copied ? <Check size={16} /> : <Copy size={16} />}
+          </button>
+
+          {process.env.NODE_ENV === 'development' ? (
+            <Link
+              href="/admin"
+              onClick={onNavigate}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/70 bg-dark/60 text-text-muted transition-colors hover:text-primary"
+              aria-label="Admin"
+              title="Admin"
+            >
+              <Settings size={16} />
+            </Link>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="sidebar-shell flex h-full flex-col">
@@ -123,9 +235,7 @@ function SidebarContent({
               href="/"
               onClick={onNavigate}
               className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
-                pathname === '/'
-                  ? 'bg-primary text-secondary'
-                  : 'text-text-muted hover:text-primary'
+                pathname === '/' ? 'bg-primary text-secondary' : 'text-text-muted hover:text-primary'
               }`}
             >
               <Home size={14} />
@@ -151,9 +261,7 @@ function SidebarContent({
             href="/"
             onClick={onNavigate}
             className={`sidebar-home-link ${
-              pathname === '/'
-                ? 'sidebar-link-active'
-                : 'sidebar-link-idle'
+              pathname === '/' ? 'sidebar-link-active' : 'sidebar-link-idle'
             }`}
           >
             <span className="sidebar-icon-badge">
@@ -178,10 +286,7 @@ function SidebarContent({
             const SectionIcon = iconMap[menu.icon];
 
             return (
-              <section
-                key={menu.id}
-                className="sidebar-section-card"
-              >
+              <section key={menu.id} className="sidebar-section-card">
                 <div className={`sidebar-section-glow bg-gradient-to-br ${menu.accent}`} />
                 <div className="relative z-10">
                   <div className="flex items-start gap-3 px-1">
@@ -218,10 +323,7 @@ function SidebarContent({
                               <span className="block text-sm font-medium text-primary">{item.label}</span>
                               <span className="mt-1 block text-xs leading-6 text-text-muted">{item.description}</span>
                             </span>
-                            <MoveUpRight
-                              size={14}
-                              className="mt-1 shrink-0 text-text-muted"
-                            />
+                            <MoveUpRight size={14} className="mt-1 shrink-0 text-text-muted" />
                           </a>
                         );
                       }
@@ -263,7 +365,7 @@ function SidebarContent({
           {copied ? 'Copied!' : 'Copy email'}
         </button>
 
-        {process.env.NODE_ENV === 'development' && (
+        {process.env.NODE_ENV === 'development' ? (
           <Link
             href="/admin"
             onClick={onNavigate}
@@ -272,13 +374,21 @@ function SidebarContent({
             <Settings size={16} />
             Admin
           </Link>
-        )}
+        ) : null}
       </div>
     </div>
   );
 }
 
-export default function Nav({ navMenus }: { navMenus: NavMenuSection[] }) {
+export default function Nav({
+  navMenus,
+  collapsed = false,
+  onToggleCollapsed,
+}: {
+  navMenus: NavMenuSection[];
+  collapsed?: boolean;
+  onToggleCollapsed?: () => void;
+}) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -290,10 +400,7 @@ export default function Nav({ navMenus }: { navMenus: NavMenuSection[] }) {
     <>
       <div className="border-b border-border/80 bg-dark-alt/85 px-4 py-4 backdrop-blur-xl lg:hidden">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-          <Link
-            href="/"
-            className="flex items-center gap-3"
-          >
+          <Link href="/" className="flex items-center gap-3">
             <div className="sidebar-logo-wrap">
               <Image
                 src="/logo.svg"
@@ -319,14 +426,39 @@ export default function Nav({ navMenus }: { navMenus: NavMenuSection[] }) {
         </div>
       </div>
 
-      <aside className="hidden border-r border-border/80 bg-dark-alt/85 lg:sticky lg:top-0 lg:block lg:h-screen lg:w-[320px] lg:backdrop-blur-xl">
-        <SidebarContent
-          pathname={pathname ?? ''}
-          navMenus={navMenus}
-        />
+      <aside
+        className={`hidden overflow-hidden border-r border-border/80 bg-dark-alt/85 transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:sticky lg:top-0 lg:block lg:h-screen lg:backdrop-blur-xl ${
+          collapsed ? 'lg:w-[88px]' : 'lg:w-[320px]'
+        }`}
+      >
+        <div className="relative h-full">
+          <button
+            type="button"
+            onClick={onToggleCollapsed}
+            className={`absolute top-4 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-dark/80 text-text-muted transition-colors hover:text-primary ${
+              collapsed ? 'left-1/2 -translate-x-1/2' : 'right-4'
+            }`}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          </button>
+          <AnimatePresence initial={false} mode="wait">
+            <motion.div
+              key={collapsed ? 'collapsed-sidebar' : 'expanded-sidebar'}
+              initial={{ opacity: 0, x: collapsed ? -18 : 18 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: collapsed ? 18 : -18 }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className="h-full"
+            >
+              <SidebarContent pathname={pathname ?? ''} navMenus={navMenus} collapsed={collapsed} />
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </aside>
 
-      {mobileOpen && (
+      {mobileOpen ? (
         <div className="fixed inset-0 z-[80] lg:hidden">
           <button
             type="button"
@@ -349,7 +481,7 @@ export default function Nav({ navMenus }: { navMenus: NavMenuSection[] }) {
             />
           </div>
         </div>
-      )}
+      ) : null}
     </>
   );
 }

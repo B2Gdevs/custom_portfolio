@@ -40,6 +40,12 @@ interface PageRenderMeta {
   filenameStem: string;
 }
 
+interface RenderedPage {
+  title: string;
+  filename: string;
+  data: string;
+}
+
 const EPUB_CSS = `
 html,
 body {
@@ -61,6 +67,18 @@ body {
   padding: 0.88rem 1.18rem 0.78rem;
   display: flex;
   flex-direction: column;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.reader-spread {
+  min-height: 100%;
+}
+
+.reader-spread > .reader-page + .reader-page {
+  break-before: column;
+  page-break-before: always;
+  -webkit-column-break-before: always;
 }
 
 .reader-page__header {
@@ -590,6 +608,8 @@ export async function runEpub(folder: string, outputPath: string): Promise<void>
       });
     }
 
+    const renderedPages: RenderedPage[] = [];
+
     for (const fullPath of chapterEntry.files) {
       const raw = fs.readFileSync(fullPath, 'utf8');
       const { data, content: markdownContent } = matter(raw);
@@ -603,10 +623,9 @@ export async function runEpub(folder: string, outputPath: string): Promise<void>
       const cleanedHtml = stripLeadingPageHeading(htmlRewritten);
       const { leadFigure, bodyHtml } = extractLeadImage(cleanedHtml);
 
-      content.push({
+      renderedPages.push({
         title: pageMeta.title || `Page ${pageMeta.pageNumber}`,
         filename: `${chapterEntry.meta.key}-${pageMeta.filenameStem}`,
-        excludeFromToc: true,
         data: wrapPageHtml({
           chapterMeta: chapterEntry.meta,
           title: pageMeta.title,
@@ -618,6 +637,20 @@ export async function runEpub(folder: string, outputPath: string): Promise<void>
       });
 
       globalPageIndex += 1;
+    }
+
+    for (let index = 0; index < renderedPages.length; index += 2) {
+      const spreadPages = renderedPages.slice(index, index + 2);
+      const spreadBase = spreadPages[0];
+      const spreadSuffix =
+        spreadPages.length > 1 ? `-${spreadPages[spreadPages.length - 1].filename}` : '';
+
+      content.push({
+        title: spreadBase.title,
+        filename: `${spreadBase.filename}${spreadSuffix}`,
+        excludeFromToc: true,
+        data: `<section class="reader-spread">${spreadPages.map((page) => page.data).join('\n')}</section>`,
+      });
     }
   }
 

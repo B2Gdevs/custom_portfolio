@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getBooks } from '@/lib/books';
-import { BookOpen, Download } from 'lucide-react';
+import { BookOpen, Download, FolderUp } from 'lucide-react';
 
 export default function BooksPage() {
   const books = getBooks();
@@ -16,6 +16,22 @@ export default function BooksPage() {
       </header>
 
       <div className="grid gap-8">
+        <article className="story-card p-6 md:p-8">
+          <p className="section-kicker">Local file</p>
+          <h2 className="mt-2 font-display text-3xl text-primary">Open your own EPUB in the site reader</h2>
+          <p className="mb-6 mt-4 text-text-muted">
+            Use the same in-browser reading surface for any `.epub` on your machine without adding it to the repo or rebuilding the books manifest.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/books/upload/read"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-secondary transition hover:opacity-90"
+            >
+              <FolderUp size={16} />
+              Open Local EPUB
+            </Link>
+          </div>
+        </article>
         {books.length === 0 ? (
           <p className="text-text-muted">No books yet. Add entries in <code className="bg-dark-alt px-2 py-1 rounded border border-border">lib/books.ts</code> and place files under <code className="bg-dark-alt px-2 py-1 rounded border border-border">public/books/</code>.</p>
         ) : (
