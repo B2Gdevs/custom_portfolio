@@ -4,6 +4,7 @@ Read this each iteration; pick one task; update after completing.
 
 ## Done
 
+- [x] Resume follow-up: add a new standalone `your dream job` resume tailored to Capital Factory's open Austin role and register it in the `/resumes` library.
 - [x] Nest section planning pages under a collapsed `Planning Docs` folder in the docs section tree instead of showing them as flat sibling links.
 - [x] Replace generic section planning placeholders with XML-structured docs pages (`planning docs`, `state`, `task registry`, `errors and attempts`, `decisions`) and make that planning group sort first inside each docs section.
 - [x] Documentation cleanup: remove obsolete `book-editor`, `richepub`, and generic top-level docs, then regroup the docs experience around active section folders such as `books` and `dialogue-forge`.
@@ -57,6 +58,8 @@ Artifacts: `packages/repub-builder` (CLI, epub only), `packages/book-components`
 
 ## Notes
 
+- **Resume update (2026-03-23):** added `/resumes/your-dream-job` backed by `dream_job_resume.html`, with a more cinematic Austin/Capital Factory-specific narrative emphasizing founder empathy, community building, and startup ecosystem support.
+- **Verification (2026-03-23):** `pnpm install`, `pnpm run build`, and `pnpm run lint` all complete successfully; lint still reports the existing warning-only backlog in unrelated files.
 - **Deploy fix:** `apps/portfolio` now depends on `next-mdx-remote@^6.0.0`; `pnpm-lock.yaml` no longer contains `5.0.0`; root `package.json` pins `pnpm@10.28.0` for Vercel parity.
 - **Redesign direction:** Follow the sequencing and atmosphere of `davidwhyte.com/experience` without cloning its stack; in this repo we keep Next.js and ship a book-first landing page before exploring heavier 3D.
 - **Redesign shipped:** `/` now leads with `mordreds_tale`, uses the front-page reader as the main reading surface, introduces a music lane via BandLab embeds, and keeps projects/blog/docs explicit in both the page content and the sidebar shell.
