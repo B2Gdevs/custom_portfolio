@@ -5,6 +5,7 @@ Read this each iteration; pick one task; update after completing.
 ## Done
 
 - [x] Resume follow-up: add a new standalone `your dream job` resume tailored to Capital Factory's open Austin role and register it in the `/resumes` library.
+- [x] Resume standards follow-up: restyle the Capital Factory resume to match the light editorial direction and add a source-of-truth guidelines doc for printable resume design.
 - [x] Nest section planning pages under a collapsed `Planning Docs` folder in the docs section tree instead of showing them as flat sibling links.
 - [x] Replace generic section planning placeholders with XML-structured docs pages (`planning docs`, `state`, `task registry`, `errors and attempts`, `decisions`) and make that planning group sort first inside each docs section.
 - [x] Documentation cleanup: remove obsolete `book-editor`, `richepub`, and generic top-level docs, then regroup the docs experience around active section folders such as `books` and `dialogue-forge`.
@@ -59,6 +60,7 @@ Artifacts: `packages/repub-builder` (CLI, epub only), `packages/book-components`
 ## Notes
 
 - **Resume update (2026-03-23):** added `/resumes/your-dream-job` backed by `dream_job_resume.html`, with a more cinematic Austin/Capital Factory-specific narrative emphasizing founder empathy, community building, and startup ecosystem support.
+- **Resume standards (2026-03-23):** `dream_job_resume.html` now uses a lighter editorial palette with a print-safe single-column fallback, and `.planning/RESUME_DESIGN_GUIDELINES.md` documents the preferred resume references plus non-negotiable print/layout standards for future variants.
 - **Verification (2026-03-23):** `pnpm install`, `pnpm run build`, and `pnpm run lint` all complete successfully; lint still reports the existing warning-only backlog in unrelated files.
 - **Deploy fix:** `apps/portfolio` now depends on `next-mdx-remote@^6.0.0`; `pnpm-lock.yaml` no longer contains `5.0.0`; root `package.json` pins `pnpm@10.28.0` for Vercel parity.
 - **Redesign direction:** Follow the sequencing and atmosphere of `davidwhyte.com/experience` without cloning its stack; in this repo we keep Next.js and ship a book-first landing page before exploring heavier 3D.

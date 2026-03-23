@@ -15,7 +15,7 @@ const resumes: ResumeEntry[] = [
     fileName: 'dream_job_resume.html',
     title: 'Your Dream Job Resume',
     role: 'Capital Factory Austin — startup ecosystem, founder support, and community building',
-    summary: "A more cinematic Austin-focused resume tailored to Capital Factory’s open-ended dream-role application and founder ecosystem work.",
+    summary: "A light editorial, print-safe Austin-focused resume tailored to Capital Factory’s open-ended dream-role application and founder ecosystem work.",
   },
   {
     slug: 'openweb-ui',
