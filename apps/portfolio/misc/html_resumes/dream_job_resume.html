@@ -392,7 +392,7 @@
 
       html,
       body {
-        background: #ffffff !important;
+        background: var(--paper) !important;
       }
 
       body {
@@ -406,9 +406,9 @@
       }
 
       .resume-shell {
-        border: none !important;
+        border: 1px solid rgba(47, 68, 88, 0.12) !important;
         box-shadow: none !important;
-        background: #ffffff !important;
+        background: rgba(255, 253, 250, 0.96) !important;
       }
 
       .hero,
@@ -420,59 +420,83 @@
       .stat,
       .pill,
       .hero-note {
-        background: #ffffff !important;
         box-shadow: none !important;
         backdrop-filter: none !important;
       }
 
       .hero {
-        padding: 0 0 18px !important;
-        border-bottom: 1px solid #cfd5de !important;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(230, 235, 240, 0.35)),
+          var(--paper-strong) !important;
+        padding: 30px 30px 24px !important;
+        border-bottom: 1px solid var(--rule) !important;
         page-break-inside: avoid;
       }
 
+      .panel {
+        padding: 24px 26px 26px !important;
+        background: var(--paper-strong) !important;
+      }
+
+      .panel + .panel {
+        border-left: 1px solid var(--rule) !important;
+        border-top: none !important;
+        margin-top: 0 !important;
+        padding-top: 24px !important;
+        background: linear-gradient(180deg, rgba(230, 235, 240, 0.32), rgba(255, 253, 250, 1)) !important;
+      }
+
+      .spotlight-card,
+      .quote-card,
+      .section-card,
+      .hero-note,
+      .pill {
+        background: rgba(255, 255, 255, 0.88) !important;
+      }
+
+      .stat {
+        background: var(--accent-soft) !important;
+        box-shadow: none !important;
+      }
+
       .eyebrow {
-        border-color: #cfd5de !important;
-        background: #f4f6f8 !important;
-        color: #2f4458 !important;
+        border-color: rgba(47, 68, 88, 0.14) !important;
+        background: rgba(255, 255, 255, 0.78) !important;
+        color: var(--accent-strong) !important;
       }
 
       .hero-top,
       .spotlight,
       .grid,
-      .contact,
       .stats,
       .two-col-list {
-        display: block !important;
+        display: grid !important;
       }
 
-      .hero-note,
-      .spotlight-card,
-      .quote-card,
-      .pill,
-      .stat,
-      .section-card {
-        border-color: #d7dde5 !important;
+      .hero-top {
+        grid-template-columns: minmax(0, 1.55fr) minmax(240px, 0.75fr) !important;
       }
 
-      .hero-note,
-      .spotlight-card,
-      .quote-card,
-      .section-card,
-      .stat,
-      .pill {
-        margin-top: 10px !important;
+      .spotlight {
+        grid-template-columns: minmax(0, 1.3fr) minmax(220px, 0.7fr) !important;
       }
 
-      .panel {
-        padding: 18px 0 0 !important;
+      .grid {
+        grid-template-columns: minmax(0, 1.12fr) minmax(245px, 0.78fr) !important;
       }
 
-      .panel + .panel {
-        border-left: none !important;
-        border-top: 1px solid #d7dde5 !important;
-        margin-top: 18px !important;
-        padding-top: 18px !important;
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+
+      .two-col-list {
+        grid-template-columns: 1fr 1fr !important;
+      }
+
+      .contact {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
       }
 
       a {
@@ -481,7 +505,20 @@
       }
 
       h1 {
-        font-size: 34px !important;
+        font-size: 40px !important;
+      }
+
+      p,
+      li {
+        font-size: 13px !important;
+        line-height: 1.5 !important;
+      }
+
+      .role,
+      .exp-meta,
+      .stat span,
+      .print-hint {
+        color: var(--muted) !important;
       }
 
       h2,

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ExternalLink, Printer } from 'lucide-react';
+import { Download, ExternalLink, Printer } from 'lucide-react';
 import { getResumes } from '@/lib/resumes';
 
 export const metadata: Metadata = {
@@ -16,7 +16,7 @@ export default function ResumesPage() {
         <p className="section-kicker">Resumes</p>
         <h1 className="mt-2 font-display text-5xl text-primary md:text-6xl">Printable resume library</h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-text-muted">
-          Open any version as a standalone HTML page, then print straight from the browser. These are the tailored copies that are easiest to find and hand off.
+          Open any version as a standalone HTML page, print straight from the browser, or download the original source file from the same `misc/html_resumes` library the site reads from.
         </p>
       </header>
 
@@ -31,6 +31,7 @@ export default function ResumesPage() {
               <h2 className="mt-2 font-display text-3xl text-primary">{resume.title}</h2>
               <p className="mt-4 text-sm uppercase tracking-[0.18em] text-text-muted">{resume.role}</p>
               <p className="mt-5 text-base leading-7 text-text-muted">{resume.summary}</p>
+              <p className="mt-4 font-mono text-xs text-text-muted/80">Source file: {resume.fileName}</p>
             </div>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -49,6 +50,13 @@ export default function ResumesPage() {
               >
                 <Printer size={16} />
                 Open here
+              </a>
+              <a
+                href={`/resumes/${resume.slug}?download=1`}
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-transparent px-5 py-3 text-sm font-medium text-primary transition hover:border-accent hover:text-accent"
+              >
+                <Download size={16} />
+                Download HTML
               </a>
             </div>
           </article>

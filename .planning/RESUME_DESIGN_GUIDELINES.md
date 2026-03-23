@@ -1,6 +1,6 @@
 # Resume design guidelines and references
 
-Source of truth for future HTML resume work. The Capital Factory resume reset established the baseline: resumes should feel editorial and intentional on screen, but stay boringly reliable in print.
+Source of truth for future HTML resume work. The Capital Factory resume reset established the baseline: resumes should feel editorial and intentional on screen, and print should preserve that same structure whenever the browser can do it reliably.
 
 ## Design references
 
@@ -14,19 +14,22 @@ Use these as atmosphere references, not copy targets.
 
 Every standalone resume in `apps/portfolio/misc/html_resumes/` should meet these rules.
 
-1. **Print first, then screen polish**
+1. **Print should match the live layout**
    - Browser print/PDF export is a release gate for resume pages.
-   - If a layout looks better on screen but becomes fragile in print, prefer the print-safe solution.
+   - The first choice is to preserve the same hierarchy, columns, cards, and spacing the user sees on screen.
+   - Only introduce a print-only simplification when the screen layout actually breaks in print preview or exported PDF.
 
 2. **Letter-sized output**
    - Define `@page { size: letter; }`.
    - Use printable margins or an equivalent internal padding strategy that survives Chrome/Safari print-to-PDF.
 
 3. **Stable print flow**
-   - Multi-column screen layouts must either:
-     - linearize into one column in `@media print`, or
-     - switch to a print-stable table/fixed-column pattern already proven by the older resumes.
-   - Do not rely on glassmorphism, blur, sticky positioning, or decorative overlap in print mode.
+   - Multi-column screen layouts should stay multi-column in `@media print` when the browser preview/export keeps them readable and aligned.
+   - If a browser cannot preserve that layout cleanly, then fall back to either:
+     - a one-column print flow, or
+     - a print-stable table/fixed-column pattern already proven by the older resumes.
+   - Do not rely on sticky positioning, decorative overlap, or effects that disappear entirely when backgrounds are disabled.
+   - Mild paper tones, borders, and card fills are acceptable in print when they help the PDF resemble the live page and still read in grayscale.
 
 4. **Page-break controls**
    - Guard headers, experience blocks, cards, stat groups, and education blocks with `break-inside: avoid` / `page-break-inside: avoid` when practical.
@@ -65,4 +68,4 @@ The Capital Factory resume now represents the preferred aesthetic baseline:
 - warmer paper tones instead of blue chrome,
 - serif-forward editorial hierarchy,
 - restrained slate accenting,
-- and a dedicated print fallback that linearizes the layout for stability.
+- and a print mode that aims to preserve the same live layout before falling back to simplification.
