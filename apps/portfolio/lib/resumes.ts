@@ -11,6 +11,13 @@ export interface ResumeEntry {
 
 const resumes: ResumeEntry[] = [
   {
+    slug: 'your-dream-job',
+    fileName: 'dream_job_resume.html',
+    title: 'Your Dream Job Resume',
+    role: 'Capital Factory Austin — startup ecosystem, founder support, and community building',
+    summary: "A more cinematic Austin-focused resume tailored to Capital Factory’s open-ended dream-role application and founder ecosystem work.",
+  },
+  {
     slug: 'openweb-ui',
     fileName: 'openweb_ui.html',
     title: 'Developer Relations Resume',
