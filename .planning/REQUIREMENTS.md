@@ -68,6 +68,7 @@ Single living document for books tooling and the RichEPub reader. Update this as
 - **Primary entry point:** The landing page should lead with the book and an immediate path to start reading.
 - **Secondary creative lane:** Songs and audio work should appear on the home page as a distinct section, using placeholders or BandLab embeds until the final catalog is ready.
 - **Resume access:** The site should expose a clear `resumes` destination where tailored resumes can be found quickly and opened in standalone print-friendly pages.
+- **Resume design source of truth:** Resume visual direction, print standards, and references should live in `.planning/RESUME_DESIGN_GUIDELINES.md` so new resume variants stay printable and aesthetically consistent.
 - **Technical work:** Projects, docs, blog, and tooling still matter, but should live as clear secondary navigation destinations without dominating the first screen.
 - **Implementation rule:** Keep the existing Next.js/Vercel stack for the first redesign pass. Match the **content sequencing and atmosphere** of inspirational sites, not their exact implementation details.
 - **Placeholder-friendly:** Fake covers, descriptions, track art, and CTA copy are acceptable in early iterations as long as routes and components work end-to-end.
