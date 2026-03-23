@@ -4,6 +4,8 @@ Read this each iteration; pick one task; update after completing.
 
 ## Done
 
+- [x] Resume library follow-up: treat `misc/html_resumes` as the website source set so resume pages can discover those HTML files, surface metadata, and offer direct downloads.
+- [x] Resume print follow-up: make the Capital Factory resume print with the same editorial multi-column layout as the live page, and update the resume design guidelines to prefer screen-matching print output when stable.
 - [x] Resume follow-up: add a new standalone `your dream job` resume tailored to Capital Factory's open Austin role and register it in the `/resumes` library.
 - [x] Resume standards follow-up: restyle the Capital Factory resume to match the light editorial direction and add a source-of-truth guidelines doc for printable resume design.
 - [x] Nest section planning pages under a collapsed `Planning Docs` folder in the docs section tree instead of showing them as flat sibling links.
@@ -59,8 +61,10 @@ Artifacts: `packages/repub-builder` (CLI, epub only), `packages/book-components`
 
 ## Notes
 
+- **Resume library follow-up (2026-03-23):** the website now treats `apps/portfolio/misc/html_resumes/` as the source set for the public resume library, including file discovery, metadata extraction with per-file fallbacks, and direct HTML downloads.
+- **Resume print follow-up (2026-03-23):** `dream_job_resume.html` print styles now preserve the live editorial grid, cards, and paper-toned treatment instead of flattening into a stripped-down single column, and `.planning/RESUME_DESIGN_GUIDELINES.md` now states that resume print mode should match the live layout whenever it remains stable in browser PDF export.
 - **Resume update (2026-03-23):** added `/resumes/your-dream-job` backed by `dream_job_resume.html`, with a more cinematic Austin/Capital Factory-specific narrative emphasizing founder empathy, community building, and startup ecosystem support.
-- **Resume standards (2026-03-23):** `dream_job_resume.html` now uses a lighter editorial palette with a print-safe single-column fallback, and `.planning/RESUME_DESIGN_GUIDELINES.md` documents the preferred resume references plus non-negotiable print/layout standards for future variants.
+- **Resume standards (2026-03-23):** `dream_job_resume.html` now uses a lighter editorial palette with print behavior documented in `.planning/RESUME_DESIGN_GUIDELINES.md`, including the preference to preserve the live layout when browser PDF export keeps it stable.
 - **Verification (2026-03-23):** `pnpm install`, `pnpm run build`, and `pnpm run lint` all complete successfully; lint still reports the existing warning-only backlog in unrelated files.
 - **Deploy fix:** `apps/portfolio` now depends on `next-mdx-remote@^6.0.0`; `pnpm-lock.yaml` no longer contains `5.0.0`; root `package.json` pins `pnpm@10.28.0` for Vercel parity.
 - **Redesign direction:** Follow the sequencing and atmosphere of `davidwhyte.com/experience` without cloning its stack; in this repo we keep Next.js and ship a book-first landing page before exploring heavier 3D.
