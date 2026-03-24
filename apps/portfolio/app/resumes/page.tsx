@@ -63,6 +63,28 @@ export default function ResumesPage() {
           </article>
         ))}
       </div>
+
+      <section className="story-card mt-8 max-w-4xl p-6 md:p-8">
+        <h2 className="font-display text-2xl text-primary">Direct source downloads</h2>
+        <p className="mt-3 text-sm leading-7 text-text-muted">
+          Need the raw files fast? Every resume discovered in <code>misc/html_resumes</code> is listed here as a direct download.
+        </p>
+        <ul className="mt-5 space-y-2 text-sm text-primary">
+          {resumes.map((resume) => (
+            <li key={`download-${resume.slug}`}>
+              <a
+                href={`/resumes/download/${resume.slug}`}
+                download={resume.fileName}
+                className="inline-flex items-center gap-2 underline decoration-border underline-offset-4 transition hover:text-accent"
+              >
+                <Download size={14} />
+                <span>{resume.fileName}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
     </div>
   );
 }
