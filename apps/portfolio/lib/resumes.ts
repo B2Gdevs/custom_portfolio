@@ -19,8 +19,16 @@ interface ResumeMetadataOverride {
 }
 
 const resumeMetadataOverrides: Record<string, ResumeMetadataOverride> = {
-  'dream_job_resume.html': {
+  'blitzpanel_resume.html': {
     order: 0,
+    slug: 'blitzpanel-founding-engineer',
+    title: 'Blitzpanel Founding Engineer Resume',
+    role: 'Founding engineer, internal automation, and schema-driven tooling for quote-to-build workflows',
+    summary:
+      'Tailored toward Blitzpanel: pipeline automation, CAD-adjacent spatial data thinking, generated multi-language contracts, and operator-first internal tools.',
+  },
+  'dream_job_resume.html': {
+    order: 1,
     slug: 'your-dream-job',
     title: 'Your Dream Job Resume',
     role: 'Capital Factory Austin — startup ecosystem, founder support, and community building',
@@ -28,7 +36,7 @@ const resumeMetadataOverrides: Record<string, ResumeMetadataOverride> = {
       "A light editorial, Austin-focused resume tailored to Capital Factory’s open-ended dream-role application and founder ecosystem work.",
   },
   'openweb_ui.html': {
-    order: 1,
+    order: 2,
     slug: 'openweb-ui',
     title: 'Developer Relations Resume',
     role: 'DevRel, developer advocacy, and technical writing',
@@ -36,7 +44,7 @@ const resumeMetadataOverrides: Record<string, ResumeMetadataOverride> = {
       'A print-ready version centered on developer-facing product work, advocacy, and communication.',
   },
   'bild_resume.html': {
-    order: 2,
+    order: 3,
     slug: 'bild',
     title: 'AI Engineer Resume',
     role: 'AI engineer, founding engineer, and systems builder',
@@ -44,14 +52,14 @@ const resumeMetadataOverrides: Record<string, ResumeMetadataOverride> = {
       'Tailored toward AI product work, systems architecture, and high-velocity startup execution.',
   },
   'autohdr_resume.html': {
-    order: 3,
+    order: 4,
     slug: 'autohdr',
     title: 'AI and Imaging Resume',
     role: 'Full-stack engineer focused on AI and image systems',
     summary: 'Highlights image pipelines, applied ML work, and backend systems for imaging-heavy roles.',
   },
   'axiom_resume.html': {
-    order: 4,
+    order: 5,
     slug: 'axiom',
     title: 'Full-Stack Systems Resume',
     role: 'Full-stack engineer, founder, and systems builder',

@@ -137,6 +137,20 @@ export function buildSiteMenus({
           href: recentProjects[1] ? `/projects/${recentProjects[1].slug}` : '/projects',
           icon: 'wand',
         },
+        {
+          label: 'DungeonBreak Docs (Live)',
+          description: 'Open the side project currently in active development.',
+          href: 'https://dungeon-break-docs.vercel.app/',
+          icon: 'move-up-right',
+          external: true,
+        },
+        {
+          label: 'GitHub + Stats',
+          description: 'Quick access to repositories, activity, and contribution stats.',
+          href: 'https://github.com/B2Gdevs',
+          icon: 'file-code',
+          external: true,
+        },
       ],
     },
     {
