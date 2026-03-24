@@ -52,7 +52,8 @@ export default function ResumesPage() {
                 Open here
               </a>
               <a
-                href={`/resumes/${resume.slug}?download=1`}
+                href={`/resumes/download/${resume.slug}`}
+                download={resume.fileName}
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-transparent px-5 py-3 text-sm font-medium text-primary transition hover:border-accent hover:text-accent"
               >
                 <Download size={16} />

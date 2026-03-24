@@ -4,6 +4,7 @@ Read this each iteration; pick one task; update after completing.
 
 ## Done
 
+- [x] Resume library download follow-up: add explicit `/resumes/download/[slug]` attachment routes and wire the `/resumes` cards to direct file downloads for every discovered HTML resume.
 - [x] Resume library follow-up: treat `misc/html_resumes` as the website source set so resume pages can discover those HTML files, surface metadata, and offer direct downloads.
 - [x] Resume print follow-up: make the Capital Factory resume print with the same editorial multi-column layout as the live page, and update the resume design guidelines to prefer screen-matching print output when stable.
 - [x] Resume follow-up: add a new standalone `your dream job` resume tailored to Capital Factory's open Austin role and register it in the `/resumes` library.
@@ -61,6 +62,7 @@ Artifacts: `packages/repub-builder` (CLI, epub only), `packages/book-components`
 
 ## Notes
 
+- **Resume download follow-up (2026-03-24):** `/resumes` now points each card to `/resumes/download/<slug>` with `download` hints, and the new download route always serves the source HTML as an attachment so all listed resumes download reliably from the library page.
 - **Resume library follow-up (2026-03-23):** the website now treats `apps/portfolio/misc/html_resumes/` as the source set for the public resume library, including file discovery, metadata extraction with per-file fallbacks, and direct HTML downloads.
 - **Resume print follow-up (2026-03-23):** `dream_job_resume.html` print styles now preserve the live editorial grid, cards, and paper-toned treatment instead of flattening into a stripped-down single column, and `.planning/RESUME_DESIGN_GUIDELINES.md` now states that resume print mode should match the live layout whenever it remains stable in browser PDF export.
 - **Resume update (2026-03-23):** added `/resumes/your-dream-job` backed by `dream_job_resume.html`, with a more cinematic Austin/Capital Factory-specific narrative emphasizing founder empathy, community building, and startup ecosystem support.
