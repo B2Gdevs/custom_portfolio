@@ -4,6 +4,7 @@ Read this each iteration; pick one task; update after completing.
 
 ## Done
 
+- [x] Blitzpanel resume expansion follow-up: rebuilt `blitzpanel_resume.html` with deeper professional summary, expanded past experience, current project detail, and additional talents while keeping the printable editorial style.
 - [x] Portfolio nav + resume follow-up: added a Blitzpanel-tailored resume (including current side-project narrative) and updated navigation with direct tabs for projects/books/songs plus GitHub and live side-project links.
 - [x] Resume library UX follow-up: add an explicit direct-download list on `/resumes` so every discovered HTML resume appears as a visible list item link.
 - [x] Resume library download follow-up: add explicit `/resumes/download/[slug]` attachment routes and wire the `/resumes` cards to direct file downloads for every discovered HTML resume.
@@ -64,6 +65,7 @@ Artifacts: `packages/repub-builder` (CLI, epub only), `packages/book-components`
 
 ## Notes
 
+- **Blitzpanel resume expansion (2026-03-24):** `blitzpanel_resume.html` now reads like a fuller traditional resume with expanded professional summary, richer past/current experience detail, Blitzpanel-relevant project highlights, and an explicit additional-talents section tied to the current stack and active work.
 - **Blitzpanel follow-up (2026-03-24):** added `blitzpanel_resume.html` to `misc/html_resumes` and registered metadata so it appears first in `/resumes`; updated sidebar top tabs to include Projects, Books, Songs, and an external GitHub shortcut; removed the previous `Current shape` copy card; added direct external links for GitHub and `dungeon-break-docs.vercel.app` in the Projects nav section.
 - **Resume download list follow-up (2026-03-24):** `/resumes` now includes a `Direct source downloads` bullet list that enumerates every discovered file from `misc/html_resumes` (including axiom/autohdr/bild/openweb variants) with direct attachment links.
 - **Resume download follow-up (2026-03-24):** `/resumes` now points each card to `/resumes/download/<slug>` with `download` hints, and the new download route always serves the source HTML as an attachment so all listed resumes download reliably from the library page.

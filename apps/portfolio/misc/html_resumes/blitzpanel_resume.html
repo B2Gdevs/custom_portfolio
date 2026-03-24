@@ -53,7 +53,7 @@
       font-size: 11px;
       font-weight: 700;
     }
-    .hero-top { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(260px, 0.75fr); gap: 22px; align-items: start; margin-top: 18px; }
+    .hero-top { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(270px, 0.8fr); gap: 22px; align-items: start; margin-top: 18px; }
     h1 { font-family: var(--serif); font-size: 46px; line-height: 0.96; letter-spacing: -0.04em; font-weight: 700; color: #1a1f29; }
     .role { margin-top: 12px; max-width: 760px; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; }
     .hero-note { padding: 18px; border: 1px solid rgba(47, 68, 88, 0.14); background: rgba(255, 255, 255, 0.74); }
@@ -62,12 +62,12 @@
     .contact { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
     .pill { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid rgba(47, 68, 88, 0.13); background: rgba(255, 255, 255, 0.88); color: var(--ink); font-size: 13px; white-space: nowrap; }
     .spotlight { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(250px, 0.7fr); gap: 14px; margin-top: 22px; }
-    .spotlight-card, .quote-card, .panel, .section-card, .stat { break-inside: avoid; page-break-inside: avoid; }
+    .spotlight-card, .quote-card, .panel, .section-card, .stat, .project-card { break-inside: avoid; page-break-inside: avoid; }
     .spotlight-card, .quote-card { border: 1px solid rgba(47, 68, 88, 0.14); background: rgba(255, 255, 255, 0.82); padding: 18px 20px; }
     .spotlight-card p { font-size: 15px; line-height: 1.66; }
     .quote-card { border-left: 4px solid var(--warm); background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(237,230,217,0.88)); }
     .quote-card p { font-family: var(--serif); font-size: 16px; line-height: 1.6; color: var(--accent-strong); }
-    .grid { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(280px, 0.82fr); gap: 0; }
+    .grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr); gap: 0; }
     .panel { padding: 28px 30px 30px; background: var(--paper-strong); }
     .panel + .panel { border-left: 1px solid var(--rule); background: linear-gradient(180deg, rgba(230,235,240,0.32), rgba(255,253,250,1)); }
     h2 { margin-bottom: 14px; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent-strong); font-weight: 800; }
@@ -77,6 +77,10 @@
     li { margin: 7px 0; font-size: 14px; line-height: 1.58; }
     .section-card { border-top: 1px solid var(--rule); padding-top: 16px; margin-top: 16px; }
     .exp-meta { margin-top: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    .project-grid { display: grid; gap: 12px; margin-top: 6px; }
+    .project-card { border: 1px solid rgba(47,68,88,0.12); background: rgba(255, 255, 255, 0.86); padding: 14px; }
+    .project-card h4 { font-size: 15px; color: var(--accent-strong); margin-bottom: 5px; }
+    .project-card p { font-size: 13px; color: #2a313d; }
     .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
     .stat { padding: 12px 14px; border: 1px solid rgba(47,68,88,0.12); background: var(--accent-soft); }
     .stat strong { display: block; font-size: 19px; line-height: 1.1; color: var(--accent-strong); }
@@ -123,7 +127,7 @@
 
         <div class="spotlight">
           <div class="spotlight-card">
-            <p><strong>Current side project:</strong> I am actively shipping <em>DungeonBreak-docs</em>, a TypeScript-first monorepo with a deterministic engine package, Next.js docs/CMS/play surface, and a static review hub that bundles tests, coverage, and structured game data for reliable handoff and inspection.</p>
+            <p><strong>Current side project (in production):</strong> I am actively shipping <em>DungeonBreak-docs</em>, a TypeScript-first monorepo with a deterministic engine package, Next.js docs/CMS/play surface, and an Astro review hub that bundles tests, coverage, and structured game data for reliable handoff and inspection.</p>
           </div>
           <div class="quote-card">
             <p>One schema, many runtimes: author once, validate once, consume everywhere.</p>
@@ -134,53 +138,89 @@
       <section class="grid">
         <div class="panel">
           <section>
-            <h2>Summary</h2>
-            <p>I own full-stack systems end-to-end: requirements, contracts, data ingestion, internal UX, and delivery. My strongest fit for Blitzpanel is building the connective tissue between quoting, parts/BOM logic, drawing automation, and build packet generation, with clear schemas and fast operator tooling.</p>
+            <h2>Professional summary</h2>
+            <p>I am a full-stack founding-engineer profile with a builder/operator mindset: I clarify requirements, design the contracts, ship the tooling, and stay accountable to what operators and customers need in production. I have spent the last several years building data-heavy systems where correctness, reviewability, and speed of iteration all matter at once. For Blitzpanel, that translates directly to owning quote-to-build automation surfaces and making sure BOM logic, drawings, and output packets stay coherent as complexity grows.</p>
           </section>
 
           <section class="section-card">
-            <h2>Selected experience</h2>
-            <h3>Founding Engineer / Systems Builder — Product + Tooling</h3>
-            <div class="exp-meta">Austin, TX • 2023–Present</div>
+            <h2>Current work (deep detail)</h2>
+            <h3>DungeonBreak-docs — systems + docs + runtime delivery</h3>
+            <div class="exp-meta">Founder/Engineer • 2024–Present • TypeScript, Next.js, Astro, Node.js, JSON Schema</div>
             <ul>
-              <li>Architected and shipped a TypeScript monorepo containing a published engine package, a Next.js authoring/docs surface, and an Astro review hub for artifact inspection.</li>
-              <li>Implemented schema-driven contract generation using Quicktype, producing TypeScript plus generated C++ and C# contracts from canonical JSON Schema sources.</li>
-              <li>Built deterministic content pipelines that transform imperfect source files into normalized packs and runtime snapshots with graceful fallback behavior.</li>
-              <li>Designed hierarchical spatial models with canonical transforms (level → room → entity/item) so downstream clients can auto-place instances from structured data.</li>
-              <li>Created build/review automation that stages reports, static bundles, and game assets into operator-ready artifacts that work in static hosting and local file contexts.</li>
+              <li>Designed a schema-first architecture where authored content is validated once and then consumed by multiple runtimes, reducing ad-hoc parser behavior and keeping downstream output stable.</li>
+              <li>Built deterministic build pipelines that transform hand-authored source data into normalized packs, generated contract types, and static review artifacts suitable for PR review and non-technical inspection.</li>
+              <li>Implemented Quicktype-based multi-language contract generation (TypeScript, C++, C#) from canonical schema sources to keep web and native-adjacent consumers synchronized.</li>
+              <li>Created operator-facing documentation and review surfaces so dense game/system data can be audited quickly, with clear traceability from source records to runtime payloads.</li>
+              <li>Maintained lint/build/release gates and planning documentation so implementation stays aligned with requirements and regressions are caught early.</li>
             </ul>
           </section>
 
           <section class="section-card">
-            <h2>Blitzpanel-relevant project</h2>
-            <h3>DungeonBreak-docs (side project in progress)</h3>
-            <div class="exp-meta">Live app: dungeon-break-docs.vercel.app</div>
+            <h2>Selected past experience</h2>
+            <h3>Founding Engineer / Product Systems Builder</h3>
+            <div class="exp-meta">Austin, TX • 2021–2024</div>
             <ul>
-              <li>Developed a multi-stage pipeline from authored content → validated bundle → runtime consumption → static review packet.</li>
-              <li>Maintained cross-runtime contract discipline to keep web runtime consumers aligned with native-adjacent (C++/Unreal-facing) ingestion paths.</li>
-              <li>Implemented internal dashboards/explorers that keep dense operational data legible and actionable for fast iteration loops.</li>
-              <li>Set up reproducible build and lint gates with explicit planning/task state to reduce regressions and speed up contributor onboarding.</li>
+              <li>Shipped internal product tooling across React + Next.js frontends and Node/TypeScript services, turning loosely defined process steps into repeatable operational workflows.</li>
+              <li>Owned data modeling and API design for fast-moving product teams, with emphasis on explicit contracts and predictable versioning as features evolved.</li>
+              <li>Built admin and support-facing interfaces (search, triage, data inspection, status views) to reduce bottlenecks and shorten incident/debug loops.</li>
+              <li>Partnered directly with stakeholders on scope and sequencing, balancing near-term shipping pressure with long-term maintainability.</li>
             </ul>
+
+            <h3 style="margin-top: 14px;">Independent Full-Stack Engineer</h3>
+            <div class="exp-meta">Client + product work • 2018–2021</div>
+            <ul>
+              <li>Delivered end-to-end web applications including discovery, technical architecture, implementation, deployment, and handoff documentation.</li>
+              <li>Implemented data transformation pipelines and integration adapters that normalized inconsistent third-party inputs into reliable internal structures.</li>
+              <li>Produced UI systems and interaction patterns emphasizing clarity for non-technical operators while preserving power-user workflows.</li>
+            </ul>
+          </section>
+
+          <section class="section-card">
+            <h2>Blitzpanel-relevant projects</h2>
+            <div class="project-grid">
+              <article class="project-card">
+                <h4>Schema Contract Tooling</h4>
+                <p>Generated strongly typed contracts across TS/C++/C# from one source schema to keep multi-runtime behavior aligned and reduce hand-maintained drift.</p>
+              </article>
+              <article class="project-card">
+                <h4>Deterministic Build + Review Packets</h4>
+                <p>Built reproducible artifact bundles containing structured outputs, coverage snapshots, and test signals so teams can verify generated results quickly.</p>
+              </article>
+              <article class="project-card">
+                <h4>Spatial / Hierarchical Data Modeling</h4>
+                <p>Implemented canonical transform chains and nested models (level → room → entity/item) that map cleanly to coordinate-driven downstream consumers.</p>
+              </article>
+            </div>
           </section>
         </div>
 
         <aside class="panel">
           <section>
-            <h2>Core strengths</h2>
+            <h2>Primary stack</h2>
             <ul>
-              <li>TypeScript, React, Next.js, Node.js</li>
-              <li>Schema-first API and data design</li>
-              <li>JSON Schema + generated codecs (TS/C++/C#)</li>
-              <li>Pipeline automation and static artifact packaging</li>
-              <li>Internal operator UX (dashboards, explorers, review tools)</li>
-              <li>Spatial data models and transform hierarchies</li>
+              <li>TypeScript, Node.js, React, Next.js</li>
+              <li>Monorepo workflows with pnpm + workspace packages</li>
+              <li>JSON Schema, generated typings/codecs, contract discipline</li>
+              <li>Build automation, static artifact packaging, CI lint/build gates</li>
+              <li>Operator tooling: explorers, admin views, review dashboards</li>
+            </ul>
+          </section>
+
+          <section class="section-card">
+            <h2>Additional talents</h2>
+            <ul>
+              <li>Technical writing and architecture documentation for cross-functional teams.</li>
+              <li>Rapid prototyping: from vague concept to testable product slice quickly.</li>
+              <li>Creative direction + world-building for narrative/product storytelling.</li>
+              <li>Audio/song development and multimedia integration for interactive projects.</li>
+              <li>Hands-on debugging under ambiguity with pragmatic decision-making.</li>
             </ul>
           </section>
 
           <section class="section-card">
             <h2>Impact themes</h2>
             <div class="stats">
-              <div class="stat"><strong>End-to-end</strong><span>Authoring → build → review</span></div>
+              <div class="stat"><strong>End-to-end</strong><span>Requirements → contracts → UX → release</span></div>
               <div class="stat"><strong>Cross-runtime</strong><span>Web + generated native contracts</span></div>
               <div class="stat"><strong>Deterministic</strong><span>Validation and normalized data flows</span></div>
               <div class="stat"><strong>Operator-first</strong><span>Fast, dense internal UX</span></div>
@@ -189,7 +229,7 @@
 
           <section class="section-card">
             <h2>Why Blitzpanel</h2>
-            <p class="small">I’m excited by industrial software where good tooling directly improves hardware outcomes. Blitzpanel’s quote-to-build workflow is the exact kind of high-leverage automation problem I like to own: practical interfaces, strict contracts, and systems that keep teams moving under real constraints.</p>
+            <p class="small">I’m drawn to industrial software because better tools directly improve physical outcomes. Blitzpanel’s quote/BOM/drawing/build-packet loop is the kind of high-leverage systems problem I love: practical UI, strict contracts, and automation that materially helps teams deliver under real-world constraints.</p>
           </section>
 
           <section class="section-card">
