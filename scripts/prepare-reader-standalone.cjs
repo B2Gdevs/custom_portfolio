@@ -1,43 +1,110 @@
 const fs = require('fs');
 const path = require('path');
+const { execSync, spawnSync } = require('child_process');
 
 const rootDir = path.resolve(__dirname, '..');
 const appDir = path.join(rootDir, 'apps', 'portfolio');
-const buildSourceDir = path.join(appDir, '.next');
-const publicSourceDir = path.join(appDir, 'public');
-const outputDir = path.join(rootDir, '.standalone', 'portfolio-reader');
+const buildsRootDir = path.join(appDir, '.reader-builds', 'portfolio-reader');
+const buildsManifestPath = path.join(buildsRootDir, 'manifest.json');
 
-function assertExists(targetPath, label) {
-  if (!fs.existsSync(targetPath)) {
-    throw new Error(`${label} not found at ${targetPath}. Run the app build first.`);
+function formatDatePart(value) {
+  return String(value).padStart(2, '0');
+}
+
+function getGitCommit() {
+  try {
+    return execSync('git rev-parse --short HEAD', {
+      cwd: rootDir,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .toString()
+      .trim();
+  } catch {
+    return 'nogit';
   }
 }
 
-function copyDirectory(source, destination) {
-  fs.mkdirSync(path.dirname(destination), { recursive: true });
-  fs.cpSync(source, destination, { recursive: true, force: true });
+function createBuildId() {
+  const now = new Date();
+  const stamp = [
+    now.getFullYear(),
+    formatDatePart(now.getMonth() + 1),
+    formatDatePart(now.getDate()),
+  ].join('');
+  const time = [
+    formatDatePart(now.getHours()),
+    formatDatePart(now.getMinutes()),
+    formatDatePart(now.getSeconds()),
+  ].join('');
+
+  return `${stamp}-${time}-${getGitCommit()}`;
 }
 
-assertExists(buildSourceDir, 'Next build output');
+function readBuildManifest() {
+  if (!fs.existsSync(buildsManifestPath)) {
+    return { latestBuildId: null, builds: [] };
+  }
 
-fs.rmSync(outputDir, { recursive: true, force: true });
-fs.mkdirSync(outputDir, { recursive: true });
-
-copyDirectory(buildSourceDir, path.join(outputDir, '.next'));
-
-if (fs.existsSync(publicSourceDir)) {
-  copyDirectory(publicSourceDir, path.join(outputDir, 'public'));
+  try {
+    return JSON.parse(fs.readFileSync(buildsManifestPath, 'utf8'));
+  } catch {
+    return { latestBuildId: null, builds: [] };
+  }
 }
+
+function runWorkspaceBuild(distDirRelative) {
+  const packageManagerEntrypoint = process.env.npm_execpath;
+  if (!packageManagerEntrypoint) {
+    throw new Error('npm_execpath is not set. Run this script through pnpm.');
+  }
+
+  const entryExt = path.extname(packageManagerEntrypoint).toLowerCase();
+  const command = entryExt === '.js' || entryExt === '.cjs' ? process.execPath : packageManagerEntrypoint;
+  const commandArgs =
+    command === process.execPath
+      ? [packageManagerEntrypoint, 'run', 'build', '--workspace=@portfolio/app']
+      : ['run', 'build', '--workspace=@portfolio/app'];
+
+  const result = spawnSync(command, commandArgs, {
+    cwd: rootDir,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      PORTFOLIO_DIST_DIR: distDirRelative,
+    },
+  });
+
+  if (result.status !== 0) {
+    process.exit(result.status ?? 1);
+  }
+}
+
+const buildId = process.env.READER_BUILD_ID || createBuildId();
+const distDirRelative = path.join('.reader-builds', 'portfolio-reader', buildId).replace(/\\/g, '/');
+const versionedOutputDir = path.join(buildsRootDir, buildId);
+
+fs.rmSync(versionedOutputDir, { recursive: true, force: true });
+fs.mkdirSync(buildsRootDir, { recursive: true });
+
+runWorkspaceBuild(distDirRelative);
+
+const buildManifest = readBuildManifest();
+const builds = Array.isArray(buildManifest.builds)
+  ? buildManifest.builds.filter((entry) => entry && entry.id !== buildId)
+  : [];
+builds.unshift({
+  id: buildId,
+  createdAt: new Date().toISOString(),
+  path: path.relative(rootDir, versionedOutputDir).replace(/\\/g, '/'),
+  distDir: distDirRelative,
+});
 
 fs.writeFileSync(
-  path.join(outputDir, 'package.json'),
+  buildsManifestPath,
   JSON.stringify(
     {
-      name: 'portfolio-reader-standalone',
-      private: true,
-      scripts: {
-        start: 'node server.cjs',
-      },
+      latestBuildId: buildId,
+      builds,
     },
     null,
     2
@@ -45,45 +112,5 @@ fs.writeFileSync(
   'utf8'
 );
 
-fs.writeFileSync(
-  path.join(outputDir, 'server.cjs'),
-  [
-    "const { spawn } = require('child_process');",
-    "const fs = require('fs');",
-    "const path = require('path');",
-    '',
-    "process.env.NODE_ENV = 'production';",
-    "process.env.PORT = process.env.PORT || '3410';",
-    "process.env.HOSTNAME = process.env.HOSTNAME || '127.0.0.1';",
-    'process.chdir(__dirname);',
-    '',
-    'const nextBinCandidates = [',
-    "  path.join(__dirname, '..', '..', 'apps', 'portfolio', 'node_modules', 'next', 'dist', 'bin', 'next'),",
-    "  path.join(__dirname, '..', '..', 'node_modules', 'next', 'dist', 'bin', 'next'),",
-    '];',
-    'const nextBin = nextBinCandidates.find((candidate) => fs.existsSync(candidate));',
-    '',
-    'if (!nextBin) {',
-    "  console.error('Unable to find the Next.js runtime. Run pnpm install in the repo root first.');",
-    '  process.exit(1);',
-    '}',
-    '',
-    "const child = spawn(process.execPath, [nextBin, 'start', '-p', process.env.PORT, '-H', process.env.HOSTNAME], {",
-    '  cwd: __dirname,',
-    "  stdio: 'inherit',",
-    '  env: process.env,',
-    '});',
-    '',
-    "child.on('exit', (code, signal) => {",
-    '  if (signal) {',
-    '    process.kill(process.pid, signal);',
-    '    return;',
-    '  }',
-    '  process.exit(code ?? 0);',
-    '});',
-    '',
-  ].join('\n'),
-  'utf8'
-);
-
-console.log(`Standalone reader prepared at ${outputDir}`);
+console.log(`Versioned reader build saved as ${path.relative(rootDir, versionedOutputDir)}`);
+console.log(`Latest reader build id: ${buildId}`);

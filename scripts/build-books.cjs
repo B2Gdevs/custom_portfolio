@@ -9,6 +9,23 @@ const BOOKS_ROOT = path.join(ROOT, 'books');
 const OUT_ROOT = path.join(ROOT, 'apps', 'portfolio', 'public', 'books');
 const REPUB_CLI = path.join(ROOT, 'packages', 'repub-builder', 'dist', 'cli.js');
 
+function removeStaleRepubArtifacts(targetDir) {
+  if (!fs.existsSync(targetDir)) return;
+
+  const entries = fs.readdirSync(targetDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.join(targetDir, entry.name);
+    if (entry.isDirectory()) {
+      removeStaleRepubArtifacts(fullPath);
+      continue;
+    }
+
+    if (entry.isFile() && /\.repub$/i.test(entry.name)) {
+      fs.unlinkSync(fullPath);
+    }
+  }
+}
+
 function loadBookMeta(bookDir, slug) {
   const p = path.join(bookDir, 'book.json');
   if (!fs.existsSync(p)) {
@@ -79,6 +96,7 @@ async function main() {
     const meta = loadBookMeta(bookDir, slug);
     const outDir = path.join(OUT_ROOT, slug);
     if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+    removeStaleRepubArtifacts(outDir);
     const epubPath = path.join(outDir, 'book.epub');
     const hasSourceFiles = hasBookSourceFiles(bookDir);
     const hasEpub = hasSourceFiles ? runRepub('epub', bookDir, epubPath) : false;

@@ -2,8 +2,8 @@
 
 /**
  * Download release artifacts from GitHub into .releases/
- * Usage: node scripts/download-releases.cjs [repub-tag] [koodo-tag]
- * If tags omitted, uses latest release for each prefix (repub-v*, koodo-reader-v*).
+ * Usage: node scripts/download-releases.cjs [koodo-tag]
+ * If tag omitted, uses latest release for the koodo-reader-v* prefix.
  * Requires GITHUB_REPO env (e.g. MagicbornStudios/custom_portfolio) or defaults to that.
  */
 
@@ -79,20 +79,11 @@ async function downloadAsset(tagName, assetName, outPath) {
 }
 
 async function main() {
-  const [repubTag, koodoTag] = process.argv.slice(2);
-
-  const repub = repubTag || (await getLatestReleaseTag('repub-v'));
+  const [koodoTag] = process.argv.slice(2);
   const koodo = koodoTag || (await getLatestReleaseTag('koodo-reader-v'));
 
-  if (!repub) {
-    console.warn('No repub-builder release found (tag repub-v*). Skip with first arg.');
-  } else {
-    const version = repub.replace('repub-v', '');
-    await downloadAsset(repub, `portfolio-repub-builder-${version}.tgz`, path.join(RELEASES_DIR, 'repub-builder.tgz'));
-  }
-
   if (!koodo) {
-    console.warn('No Koodo Reader release found (tag koodo-reader-v*). Skip with third arg.');
+    console.warn('No Koodo Reader release found (tag koodo-reader-v*).');
   } else {
     const release = await apiGet(`/repos/${REPO}/releases/tags/${koodo}`);
     const assets = release.assets || [];

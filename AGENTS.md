@@ -30,7 +30,7 @@ At the start of every session, read **[.planning/REQUIREMENTS.md](.planning/REQU
 - `pnpm install` succeeds.
 - `pnpm run build` succeeds (Next.js + TypeScript).
 - `pnpm run lint` passes. Lint failures block release.
-- Release artifacts: **repub-builder** tarball and **Koodo Reader desktop** build. Download into `.releases/` via `scripts/download-releases.cjs`.
+- Release artifacts: **Koodo Reader desktop** build. Download into `.releases/` via `scripts/download-releases.cjs`.
 
 ## GSD (Get Shit Done) – Codex
 

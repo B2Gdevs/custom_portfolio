@@ -56,3 +56,8 @@ next-env.d.ts
 
 # Release artifacts (downloaded by scripts/download-releases.cjs)
 .releases/
+
+# Local frozen reader builds
+.standalone/
+.reader-builds/
+**/.reader-builds/

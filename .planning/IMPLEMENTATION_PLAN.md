@@ -25,6 +25,7 @@ Read this each iteration; pick one task; update after completing.
 - [x] Books reader header polish: compact the read-page top bar, keep the active book title prominent, convert book switching to a tabgroup, and add motion to the desktop sidebar collapse/expand transition.
 - [x] Books reader TOC motion polish: animate the in-reader contents sidebar and backdrop so the EPUB reader panel opens and closes with the same eased motion language as the site shell.
 - [x] Books reader local upload + frozen runtime: allow opening arbitrary local `.epub` files in the in-app reader and add a separate production-style reader build/run path for reading without `next dev` hot reload.
+- [x] Books reader build cleanup + versioning: remove stale `.repub` artifacts from active book outputs, remove the obsolete repub release/download path, and store frozen reader builds as versioned snapshots with a default `latest` runner.
 
 ## Books & reader
 
@@ -82,4 +83,7 @@ Artifacts: `packages/repub-builder` (CLI, epub only), `packages/book-components`
 - **Books local upload + frozen runtime (2026-03-20):** `/books/upload/read` now opens arbitrary local `.epub` files inside the same reader workspace, the library page links to that flow, built-in book read pages can temporarily switch to a local upload, and `EpubViewer` accepts either fetched EPUB URLs or in-memory uploaded EPUB bytes.
 - **Standalone reader runtime (2026-03-20):** root scripts now build a frozen production snapshot into `.standalone/portfolio-reader` and run it on port `3410` via `next start`, so reading can happen against a non-hot-reloading build while `pnpm dev` continues separately.
 - **Verification (2026-03-20):** `pnpm run lint` passes with the existing warning-only backlog, `pnpm run build:reader:standalone` succeeds, and `node scripts/run-reader-standalone.cjs` stays up until manually stopped / timeout.
+- **Reader build cleanup + versioning (2026-03-20):** `build:books` now deletes stale `.repub` artifacts from active public book outputs, the committed `public/books/*.repub` files and `release-repub.yml` automation were removed, the old tracked `.standalone/portfolio-reader` mirror was deleted, and versioned reader builds now live under `apps/portfolio/.reader-builds/portfolio-reader/<build-id>`.
+- **Reader build commands (2026-03-20):** `pnpm build:reader` creates a new versioned non-dev reader build by running `next build` against an isolated `distDir`, `pnpm reader` runs the latest build via plain `next start`, `pnpm reader <build-id>` runs a previous build, and `pnpm reader:list` shows the available build ids.
+- **Reader launcher fix (2026-03-20):** the reader runner accepts shorthand invocations such as `pnpm reader --latest`, `pnpm reader latest`, and `pnpm reader <build-id>`, and the `next start` launcher now defaults to `127.0.0.1` unless `READER_HOST` is explicitly set so it does not inherit the Windows machine-name `HOSTNAME`.
 - **Optional done:** shiki in app deps; Next/MDX pinned via overrides; styled-jsx>react override for React 19.

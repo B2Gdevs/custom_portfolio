@@ -6,6 +6,7 @@ import rehypePrettyCode from 'rehype-pretty-code';
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  distDir: process.env.PORTFOLIO_DIST_DIR || '.next',
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   experimental: {
     mdxRs: false,

@@ -1,6 +1,6 @@
 # Build Koodo Reader desktop app (Electron) from vendored submodule.
 # Tag with koodo-reader-v* to trigger. Requires vendor/koodo-reader checked out.
-# Wire .repub in Koodo (see .planning/VENDORING.md) for full reader support.
+# Desktop reader release workflow. See .planning/VENDORING.md for vendoring details.
 name: Release Koodo Reader
 
 on:

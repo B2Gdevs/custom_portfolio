@@ -15,34 +15,35 @@ Single living document for books tooling and the RichEPub reader. Update this as
 - **Output:** `apps/portfolio/public/books/<slug>/book.epub` and `apps/portfolio/public/books/manifest.json`.
 - **Manifest:** Array of `{ slug, title, description?, hasEpub }`. The books list (`lib/books.ts`) reads from this at runtime.
 
-## repub CLI and packages
+## Builder package and authoring components
 
-- **repub-cli (repub-builder):** CLI with subcommands `repub build`, `repub read`, `repub epub`. Install from this repo only (no npm publish). See `packages/repub-builder/README.md`. (Legacy: `repub pack` for .repub has been removed; in-app reader is EPUB-only.)
-- **book-components:** MDX authoring components (BookRoot, Chapter, Section, ChapterTitle, PartDivider, Callout, Blockquote, Figure, CodeBlock, BookMeta). **Wired:** `repub epub` compiles `.mdx` with `@mdx-js/mdx` and book-components; `.md` uses marked.
+- **EPUB builder package:** The workspace package still lives at `packages/repub-builder`, but its active job in this repo is EPUB generation only. Build books through `pnpm run build:books`; there is no active `.repub` output or release path.
+- **book-components:** MDX authoring components (BookRoot, Chapter, Section, ChapterTitle, PartDivider, Callout, Blockquote, Figure, CodeBlock, BookMeta). **Wired:** the EPUB build compiles `.mdx` with `@mdx-js/mdx` and book-components; `.md` uses marked.
 
-## Vendored desktop reader (Koodo / Kookit)
+## Vendored desktop reader
 
-- **Kookit** (vendor/kookit): [B2Gdevs/kookit](https://github.com/B2Gdevs/kookit). We add a **.repub renderer** (RepubRender): unpack ZIP, repub.json + content/index.html + assets, expose to reader. See [.planning/VENDORING.md](.planning/VENDORING.md).
-- **Koodo Reader** (vendor/koodo-reader): [B2Gdevs/koodo-reader](https://github.com/B2Gdevs/koodo-reader). Vendored so we can register .repub and fix issues. When submodule is checked out, wire .repub to Kookit’s RepubRender.
-- **Embeddable reader:** Portfolio uses the in-app EPUB reader (react-reader / epub.js). Koodo is the desktop app we extend to open .repub when the submodule is wired.
+- **Kookit** (vendor/kookit): [B2Gdevs/kookit](https://github.com/B2Gdevs/kookit).
+- **Koodo Reader** (vendor/koodo-reader): [B2Gdevs/koodo-reader](https://github.com/B2Gdevs/koodo-reader). Vendored for desktop reader work; the portfolio itself remains EPUB-only.
+- **Embeddable reader:** Portfolio uses the in-app EPUB reader (react-reader / epub.js).
 
-## Formats
+## Format
 
-- **EPUB:** Universal format. Built from markdown/MDX → HTML; images inlined as base64. Served at `/books/<slug>/book.epub` for download. Plain .md must not fail for epub.
-- **RichEPub (.repub):** Web-only. ZIP with `repub.json`, `content/index.html`, and `assets/`. Unpacked and rendered in a sandboxed iframe by the portfolio reader. No npm at runtime.
+- **EPUB:** Universal format. Built from markdown/MDX → HTML; images inlined as base64. Served at `/books/<slug>/book.epub` for download. Plain `.md` must not fail for EPUB.
 
-## RichEPub content
+## Compiled book content
 
-- **Today:** Markdown compiled with marked; `.mdx` compiled with `@mdx-js/mdx` and book-components (Callout, ChapterTitle, Figure, etc.) at pack/epub build time. Single static HTML document with nav + sections; images in `assets/images/`.
-- **Future (optional):** Reader app (Vite + React) that consumes book MDX + shared component library; build that app into .repub.
+- **Today:** Markdown compiled with marked; `.mdx` compiled with `@mdx-js/mdx` and book-components (Callout, ChapterTitle, Figure, etc.) during EPUB build time. Single static HTML document with nav + sections; images in `assets/images/`.
+- **Future (optional):** richer author tooling is fine, but the active output target remains EPUB.
 
 ## Reader
 
 - **Portfolio reader:** In-app EPUB reader (react-reader / epub.js). Reads `book.epub` at `/books/<slug>/read` and in **BookReaderEmbed** (docs/articles). Location persisted in localStorage by slug.
+- **Local EPUB upload:** The books area should allow opening an arbitrary local `.epub` file in the same in-app reader without adding it to the repo.
 - **Front-page activation:** The homepage can defer mounting the embedded reader, but the primary CTA must load the featured book into that reader when invoked.
 - **Book selection:** The homepage reader area should expose the available books list; entries without a built EPUB should remain visible but disabled as `coming soon`.
-- **Koodo Reader (desktop):** Primary consumer-facing reader build (Electron). Can be extended to open .repub when submodule is wired.
-- **Standalone:** Same .epub file works in any EPUB reader; .repub remains for Koodo/Kookit when wired.
+- **Koodo Reader (desktop):** Primary consumer-facing desktop reader build (Electron).
+- **Standalone:** Same `.epub` file works in any EPUB reader, and the repo should also support a frozen in-browser reader build for local use.
+- **Frozen reader builds:** The repo should support versioned non-dev reader builds so the latest frozen build can be run by default while older frozen builds remain launchable by id.
 
 ## Verification gates
 
@@ -50,13 +51,13 @@ Single living document for books tooling and the RichEPub reader. Update this as
 
 ## Releases and .releases
 
-- **Three release artifacts:** (1) **repub-builder** tarball, (2) **repub-reader** tarball, (3) **Koodo Reader** desktop build (Electron). The **reader** (Koodo desktop) is the priority consumer-facing build; repub-reader is the embeddable SDK used by the portfolio.
+- **Release artifact:** **Koodo Reader** desktop build (Electron) remains the consumer-facing downloadable release.
 - Artifacts are published to GitHub Releases (this repo or fork repos as specified).
-- **Download script:** `scripts/download-releases.cjs` (or equivalent) downloads the latest release artifacts into **`.releases/`** in this repo. Success criterion: you can run the script and get builds under `.releases/`.
+- **Download script:** `scripts/download-releases.cjs` (or equivalent) downloads the latest Koodo Reader artifacts into **`.releases/`** in this repo. Success criterion: you can run the script and get builds under `.releases/`.
 
 ## Submodules and forks
 
-- We push to **this repo** and to **vendored repos**. For `vendor/kookit` and `vendor/koodo-reader` we maintain **forks** (e.g. under MagicbornStudios or same org) so we can push our patches (RepubRender, .repub wiring, build config). `.gitmodules` points to those forks; upstream (B2Gdevs) remains the source of truth for pulling updates. Fork URLs are documented in [.planning/VENDORING.md](.planning/VENDORING.md).
+- We push to **this repo** and to **vendored repos**. For `vendor/kookit` and `vendor/koodo-reader` we maintain **forks** (e.g. under MagicbornStudios or same org) so we can push desktop-reader patches and build config updates. `.gitmodules` points to those forks; upstream (B2Gdevs) remains the source of truth for pulling updates. Fork URLs are documented in [.planning/VENDORING.md](.planning/VENDORING.md).
 
 ## Distribution
 

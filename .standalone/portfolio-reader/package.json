@@ -1,7 +1,0 @@
-{
-  "name": "portfolio-reader-standalone",
-  "private": true,
-  "scripts": {
-    "start": "node server.cjs"
-  }
-}
