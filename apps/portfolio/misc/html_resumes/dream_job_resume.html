@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Benjamin Garrard — Capital Factory Resume</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --paper: #f5f1e8;
+      --paper-strong: #fffdfa;
+      --paper-soft: #ede6d9;
+      --ink: #1f2430;
+      --muted: #616876;
+      --rule: #d6cfbf;
+      --accent: #5d6f82;
+      --accent-soft: #e6ebf0;
+      --accent-strong: #2f4458;
+      --warm: #8b6847;
+      --shadow: rgba(31, 36, 48, 0.08);
+      --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman", serif;
+      --sans: Inter, "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --mono: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      background: #ebe4d6;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: var(--sans);
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.1)),
+        radial-gradient(circle at top, rgba(93, 111, 130, 0.08), transparent 40%),
+        var(--paper);
+      line-height: 1.58;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 36px 24px 52px;
+    }
+
+    .resume-shell {
+      border: 1px solid rgba(47, 68, 88, 0.12);
+      background: rgba(255, 253, 250, 0.92);
+      box-shadow: 0 22px 55px var(--shadow);
+    }
+
+    .hero {
+      padding: 34px 34px 30px;
+      border-bottom: 1px solid var(--rule);
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(230, 235, 240, 0.35)),
+        var(--paper-strong);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border: 1px solid rgba(47, 68, 88, 0.14);
+      background: rgba(255, 255, 255, 0.78);
+      color: var(--accent-strong);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .hero-top {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(260px, 0.75fr);
+      gap: 22px;
+      align-items: start;
+      margin-top: 18px;
+    }
+
+    h1 {
+      font-family: var(--serif);
+      font-size: 46px;
+      line-height: 0.96;
+      letter-spacing: -0.04em;
+      font-weight: 700;
+      color: #1a1f29;
+    }
+
+    .role {
+      margin-top: 12px;
+      max-width: 760px;
+      font-size: 14px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+    }
+
+    .hero-note {
+      padding: 18px 18px 16px;
+      border: 1px solid rgba(47, 68, 88, 0.14);
+      background: rgba(255, 255, 255, 0.74);
+    }
+
+    .hero-note strong {
+      display: block;
+      margin-bottom: 8px;
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent-strong);
+    }
+
+    .hero-note p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.62;
+    }
+
+    .contact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border: 1px solid rgba(47, 68, 88, 0.13);
+      background: rgba(255, 255, 255, 0.88);
+      color: var(--ink);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .spotlight {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(250px, 0.7fr);
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .spotlight-card,
+    .quote-card,
+    .panel,
+    .section-card,
+    .stat {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .spotlight-card,
+    .quote-card {
+      border: 1px solid rgba(47, 68, 88, 0.14);
+      background: rgba(255, 255, 255, 0.82);
+      padding: 18px 20px;
+    }
+
+    .spotlight-card p {
+      font-size: 15px;
+      line-height: 1.66;
+    }
+
+    .quote-card {
+      border-left: 4px solid var(--warm);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(237, 230, 217, 0.88));
+    }
+
+    .quote-card p {
+      font-family: var(--serif);
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--accent-strong);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.18fr) minmax(280px, 0.82fr);
+      gap: 0;
+    }
+
+    .panel {
+      padding: 28px 30px 30px;
+      background: var(--paper-strong);
+    }
+
+    .panel + .panel {
+      border-left: 1px solid var(--rule);
+      background: linear-gradient(180deg, rgba(230, 235, 240, 0.32), rgba(255, 253, 250, 1));
+    }
+
+    h2 {
+      margin-bottom: 14px;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent-strong);
+      font-weight: 800;
+    }
+
+    h3 {
+      font-family: var(--serif);
+      font-size: 17px;
+      line-height: 1.2;
+      font-weight: 700;
+      color: #19212b;
+    }
+
+    p {
+      font-size: 14px;
+    }
+
+    ul {
+      padding-left: 18px;
+    }
+
+    li {
+      margin: 7px 0;
+      font-size: 14px;
+      line-height: 1.58;
+    }
+
+    .summary p + p {
+      margin-top: 10px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .stat {
+      padding: 12px 14px;
+      border: 1px solid rgba(47, 68, 88, 0.12);
+      background: var(--accent-soft);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 19px;
+      line-height: 1.1;
+      color: var(--accent-strong);
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 5px;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .section-card {
+      margin-top: 18px;
+      padding: 15px 16px;
+      border: 1px solid rgba(47, 68, 88, 0.13);
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .section-card h3 {
+      margin-bottom: 8px;
+      font-size: 16px;
+      color: var(--accent-strong);
+    }
+
+    .exp-role + .exp-role,
+    .edu,
+    .stack-block + .stack-block {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--rule);
+    }
+
+    .exp-role,
+    .edu,
+    .stack-block {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .exp-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: baseline;
+      margin-bottom: 7px;
+    }
+
+    .exp-title {
+      font-family: var(--serif);
+      font-size: 18px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .exp-meta {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      white-space: nowrap;
+    }
+
+    .exp-sub {
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: var(--accent);
+      letter-spacing: 0.02em;
+    }
+
+    .list-tight li {
+      margin: 5px 0;
+    }
+
+    .two-col-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 18px;
+    }
+
+    .two-col-list ul {
+      margin: 0;
+    }
+
+    .stack-block p + p {
+      margin-top: 8px;
+    }
+
+    .aside-intro {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .print-hint {
+      margin-top: 18px;
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+      letter-spacing: 0.01em;
+    }
+
+    @media (max-width: 980px) {
+      .hero-top,
+      .spotlight,
+      .grid,
+      .two-col-list,
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .panel + .panel {
+        border-left: none;
+        border-top: 1px solid var(--rule);
+      }
+
+      h1 {
+        font-size: 38px;
+      }
+    }
+
+    @media print {
+      @page {
+        size: letter;
+        margin: 0.5in;
+      }
+
+      * {
+        print-color-adjust: exact !important;
+        -webkit-print-color-adjust: exact !important;
+      }
+
+      html,
+      body {
+        background: var(--paper) !important;
+      }
+
+      body {
+        color: #1f2430 !important;
+      }
+
+      .wrap {
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .resume-shell {
+        border: 1px solid rgba(47, 68, 88, 0.12) !important;
+        box-shadow: none !important;
+        background: rgba(255, 253, 250, 0.96) !important;
+      }
+
+      .hero,
+      .panel,
+      .panel + .panel,
+      .spotlight-card,
+      .quote-card,
+      .section-card,
+      .stat,
+      .pill,
+      .hero-note {
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+      }
+
+      .hero {
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(230, 235, 240, 0.35)),
+          var(--paper-strong) !important;
+        padding: 30px 30px 24px !important;
+        border-bottom: 1px solid var(--rule) !important;
+        page-break-inside: avoid;
+      }
+
+      .panel {
+        padding: 24px 26px 26px !important;
+        background: var(--paper-strong) !important;
+      }
+
+      .panel + .panel {
+        border-left: 1px solid var(--rule) !important;
+        border-top: none !important;
+        margin-top: 0 !important;
+        padding-top: 24px !important;
+        background: linear-gradient(180deg, rgba(230, 235, 240, 0.32), rgba(255, 253, 250, 1)) !important;
+      }
+
+      .spotlight-card,
+      .quote-card,
+      .section-card,
+      .hero-note,
+      .pill {
+        background: rgba(255, 255, 255, 0.88) !important;
+      }
+
+      .stat {
+        background: var(--accent-soft) !important;
+        box-shadow: none !important;
+      }
+
+      .eyebrow {
+        border-color: rgba(47, 68, 88, 0.14) !important;
+        background: rgba(255, 255, 255, 0.78) !important;
+        color: var(--accent-strong) !important;
+      }
+
+      .hero-top,
+      .spotlight,
+      .grid,
+      .stats,
+      .two-col-list {
+        display: grid !important;
+      }
+
+      .hero-top {
+        grid-template-columns: minmax(0, 1.55fr) minmax(240px, 0.75fr) !important;
+      }
+
+      .spotlight {
+        grid-template-columns: minmax(0, 1.3fr) minmax(220px, 0.7fr) !important;
+      }
+
+      .grid {
+        grid-template-columns: minmax(0, 1.12fr) minmax(245px, 0.78fr) !important;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+
+      .two-col-list {
+        grid-template-columns: 1fr 1fr !important;
+      }
+
+      .contact {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+      }
+
+      a {
+        color: inherit !important;
+        text-decoration: none !important;
+      }
+
+      h1 {
+        font-size: 40px !important;
+      }
+
+      p,
+      li {
+        font-size: 13px !important;
+        line-height: 1.5 !important;
+      }
+
+      .role,
+      .exp-meta,
+      .stat span,
+      .print-hint {
+        color: var(--muted) !important;
+      }
+
+      h2,
+      h3,
+      .exp-head,
+      .exp-role,
+      .edu,
+      .stack-block,
+      .section-card,
+      .quote-card,
+      .spotlight-card {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .print-hint {
+        color: #5a6470 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <article class="resume-shell">
+      <header class="hero">
+        <div class="eyebrow">Your Dream Job • Capital Factory • Austin</div>
+
+        <div class="hero-top">
+          <div>
+            <h1>Benjamin Garrard</h1>
+            <div class="role">Startup ecosystem builder • founder-minded engineer • community-first operator</div>
+          </div>
+          <div class="hero-note">
+            <strong>Why this fits</strong>
+            <p>I build for founders, ship quickly with incomplete information, and genuinely love the Austin startup community.</p>
+          </div>
+        </div>
+
+        <div class="contact" aria-label="Contact">
+          <span class="pill">Austin, TX</span>
+          <span class="pill"><a href="tel:9038302348">903-830-2348</a></span>
+          <span class="pill"><a href="mailto:benjamingarrard5279@gmail.com">benjamingarrard5279@gmail.com</a></span>
+          <span class="pill"><a href="https://bengarrard.com" target="_blank" rel="noopener noreferrer">bengarrard.com</a></span>
+          <span class="pill"><a href="https://github.com/B2Gdevs" target="_blank" rel="noopener noreferrer">github.com/B2Gdevs</a></span>
+          <span class="pill"><a href="https://www.linkedin.com/in/benjamin-garrard/" target="_blank" rel="noopener noreferrer">linkedin.com/in/benjamin-garrard</a></span>
+        </div>
+
+        <div class="spotlight">
+          <div class="spotlight-card">
+            <p>
+              Founder and engineer with a track record of helping early-stage teams turn ambiguity into working systems, better stories,
+              and usable products. I am at my best around builders: onboarding partners, tightening product feedback loops,
+              unblocking technical decisions, and creating energy around what a team is making.
+            </p>
+          </div>
+          <div class="quote-card">
+            <p>
+              “I want to be useful everywhere Capital Factory creates momentum: helping founders, supporting programs,
+              translating between technical and non-technical people, and making the room more ambitious.”
+            </p>
+          </div>
+        </div>
+      </header>
+
+      <section class="grid" aria-label="Resume Content">
+        <div class="panel summary">
+          <h2>Tailored Summary</h2>
+          <p>
+            Capital Factory sits at the intersection of startups, investors, operators, and community — and that is exactly the kind of environment where I do my best work.
+            I have built venture-backed products, supported enterprise deployments, run founder-style operations, and created communities around technical products.
+          </p>
+          <p>
+            I would bring a rare mix of founder empathy, technical fluency, documentation discipline, and event-energy execution: I can help a startup debug a workflow,
+            help a program explain value more clearly, help a community member feel welcome, and help internal teams move from idea to shipped improvement fast.
+          </p>
+
+          <div class="stats" aria-label="Selected highlights">
+            <div class="stat"><strong>$5M</strong><span>valuation at Colorfull</span></div>
+            <div class="stat"><strong>100+ DAU</strong><span>AI creative product</span></div>
+            <div class="stat"><strong>$200K/yr</strong><span>estimated savings at Moveworks</span></div>
+            <div class="stat"><strong>500+</strong><span>Loom walkthroughs recorded</span></div>
+          </div>
+
+          <div class="section-card">
+            <h3>What I would contribute at Capital Factory</h3>
+            <ul class="list-tight">
+              <li>Founder-facing credibility from having shipped products, raised expectations, and lived startup tradeoffs firsthand.</li>
+              <li>Program and event support with technical depth: demos, office hours, founder triage, product feedback, and ecosystem storytelling.</li>
+              <li>High-trust relationship building across entrepreneurs, investors, mentors, and internal teams.</li>
+              <li>Operational follow-through: notes, docs, tooling, and repeatable systems that make community work scale.</li>
+            </ul>
+          </div>
+
+          <div style="margin-top: 18px;">
+            <h2>Professional Experience</h2>
+          </div>
+
+          <div class="exp-role">
+            <div class="exp-head">
+              <div class="exp-title">Founder &amp; CTO — Colorfull</div>
+              <div class="exp-meta">Oct 2023 – Jul 2025 • Austin, TX</div>
+            </div>
+            <div class="exp-sub">Real-time ordering and logistics platform • startup execution • partner onboarding • cross-functional leadership</div>
+            <ul>
+              <li>Led product, engineering, partner onboarding, and day-to-day execution for a startup that reached a <strong>$5M valuation</strong>.</li>
+              <li>Worked directly with business owners, translating operational pain points into product decisions, implementation plans, and shipped software.</li>
+              <li>Built systems on GCP, Stripe Connect onboarding flows, and operational tooling while also handling the founder work of prioritization, communication, and trust-building.</li>
+              <li>Created 500+ Loom videos and a documentation-heavy culture so teammates and partners could move faster with less ambiguity.</li>
+            </ul>
+          </div>
+
+          <div class="exp-role">
+            <div class="exp-head">
+              <div class="exp-title">Founder — Bashful.ai</div>
+              <div class="exp-meta">Jan 2023 – Oct 2023 • Austin, TX</div>
+            </div>
+            <div class="exp-sub">AI creative tooling • community building • product iteration</div>
+            <ul>
+              <li>Built and launched an AI Photoshop plugin used by <strong>100+ daily active users</strong>, balancing product development with community support and fast iteration.</li>
+              <li>Moderated a user Discord, answered questions directly, collected product feedback, and turned user pain into roadmap decisions and feature improvements.</li>
+              <li>Created a user experience that made advanced AI workflows feel accessible for working creatives rather than just technical early adopters.</li>
+            </ul>
+          </div>
+
+          <div class="exp-role">
+            <div class="exp-head">
+              <div class="exp-title">Customer Success Engineer — Moveworks</div>
+              <div class="exp-meta">Sep 2021 – Dec 2022</div>
+            </div>
+            <div class="exp-sub">Enterprise AI platform • technical relationship management • enablement</div>
+            <ul>
+              <li>Partnered with customers on integrations, troubleshooting, and enablement across ServiceNow, Active Directory, Slack, Teams, FreshDesk, and NetSuite.</li>
+              <li>Built internal Python tooling used by 30+ technical users, with an estimated <strong>$200K annual savings</strong> by reducing investigations from hours to minutes.</li>
+              <li>Earned recognition for documentation and Q&amp;A contributions, reflecting a consistent habit of making complex systems easier for others to navigate.</li>
+            </ul>
+          </div>
+
+          <div class="exp-role">
+            <div class="exp-head">
+              <div class="exp-title">Founder — Texas State VR Organization</div>
+              <div class="exp-meta">University leadership</div>
+            </div>
+            <div class="exp-sub">Community building • student leadership • technical programming</div>
+            <ul>
+              <li>Founded a VR-focused student organization and helped create a home for technically curious builders to learn, collaborate, and ship.</li>
+              <li>Led peers around emerging technology in a way that mixed enthusiasm, practical support, and a bias toward making things real.</li>
+            </ul>
+          </div>
+
+          <div class="print-hint">
+            Print standard: neutral palette, no glassmorphism, guarded page breaks, and a single-column print flow so browser PDF export stays stable.
+          </div>
+        </div>
+
+        <aside class="panel">
+          <h2>Capital Factory Alignment</h2>
+          <p class="aside-intro">
+            The role fit here is less about a single title and more about where technical credibility, hospitality, founder empathy, and follow-through overlap.
+          </p>
+          <ul>
+            <li><strong>Austin-rooted:</strong> I live in Austin and want to invest my energy in the Texas founder ecosystem long term.</li>
+            <li><strong>Founder empathy:</strong> I know the emotional and operational reality of early-stage work, not just the theory.</li>
+            <li><strong>Technical translator:</strong> I can move between engineers, operators, creatives, customers, and leadership without losing clarity.</li>
+            <li><strong>Community instinct:</strong> I like helping people feel seen, connected, and excited to come back.</li>
+            <li><strong>Bias for action:</strong> I am comfortable owning messy work and making it better through systems, follow-up, and iteration.</li>
+          </ul>
+
+          <div class="section-card">
+            <h3>Useful functions I could step into</h3>
+            <ul class="list-tight">
+              <li>Startup support, founder success, or accelerator operations</li>
+              <li>Technical community programming and founder education</li>
+              <li>Platform, product, or ecosystem enablement for portfolio companies</li>
+              <li>Special projects that need both execution and taste</li>
+            </ul>
+          </div>
+
+          <div class="stack-block">
+            <h2>Strengths</h2>
+            <div class="two-col-list">
+              <ul>
+                <li>Product intuition</li>
+                <li>Founder communication</li>
+                <li>Technical diligence</li>
+                <li>Documentation systems</li>
+                <li>Partner onboarding</li>
+              </ul>
+              <ul>
+                <li>Event energy</li>
+                <li>Community support</li>
+                <li>Rapid prototyping</li>
+                <li>Startup storytelling</li>
+                <li>Cross-functional execution</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="stack-block">
+            <h2>Technical Foundation</h2>
+            <div class="two-col-list">
+              <ul>
+                <li>TypeScript / Node.js</li>
+                <li>Python</li>
+                <li>React / Next.js</li>
+                <li>Postgres / SQL Server</li>
+                <li>REST APIs / webhooks</li>
+              </ul>
+              <ul>
+                <li>GCP / Cloud Run / Tasks</li>
+                <li>Stripe / platform flows</li>
+                <li>Queues / async systems</li>
+                <li>AI workflows / retrieval</li>
+                <li>GitHub / CI / DX tooling</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="stack-block">
+            <h2>Why Austin matters to me</h2>
+            <p>
+              I do not just want a job in Austin — I want to help shape the kind of city and startup culture that makes ambitious people stay here,
+              build here, and believe bigger here. Capital Factory is one of the clearest places to do that work.
+            </p>
+          </div>
+
+          <div class="edu">
+            <h2>Education</h2>
+            <p><strong>B.S. Computer Science</strong> — Texas State University</p>
+            <p style="margin-top: 8px; color: var(--muted);">GPA: 3.7 • Founded a VR developer organization • Built collaborative research tooling</p>
+          </div>
+        </aside>
+      </section>
+    </article>
+  </main>
+</body>
+</html>

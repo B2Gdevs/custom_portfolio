@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Benjamin Garrard — Blitzpanel Founding Engineer Resume</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --paper: #f5f1e8;
+      --paper-strong: #fffdfa;
+      --paper-soft: #ede6d9;
+      --ink: #1f2430;
+      --muted: #616876;
+      --rule: #d6cfbf;
+      --accent: #5d6f82;
+      --accent-soft: #e6ebf0;
+      --accent-strong: #2f4458;
+      --warm: #8b6847;
+      --shadow: rgba(31, 36, 48, 0.08);
+      --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman", serif;
+      --sans: Inter, "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { background: #ebe4d6; }
+    body {
+      min-height: 100vh;
+      font-family: var(--sans);
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.1)),
+        radial-gradient(circle at top, rgba(93, 111, 130, 0.08), transparent 40%),
+        var(--paper);
+      line-height: 1.58;
+    }
+    a { color: inherit; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 36px 24px 52px; }
+    .resume-shell { border: 1px solid rgba(47, 68, 88, 0.12); background: rgba(255, 253, 250, 0.92); box-shadow: 0 22px 55px var(--shadow); }
+    .hero {
+      padding: 34px 34px 30px;
+      border-bottom: 1px solid var(--rule);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(230, 235, 240, 0.35)), var(--paper-strong);
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border: 1px solid rgba(47, 68, 88, 0.14);
+      background: rgba(255, 255, 255, 0.78);
+      color: var(--accent-strong);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .hero-top { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(270px, 0.8fr); gap: 22px; align-items: start; margin-top: 18px; }
+    h1 { font-family: var(--serif); font-size: 46px; line-height: 0.96; letter-spacing: -0.04em; font-weight: 700; color: #1a1f29; }
+    .role { margin-top: 12px; max-width: 760px; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; }
+    .hero-note { padding: 18px; border: 1px solid rgba(47, 68, 88, 0.14); background: rgba(255, 255, 255, 0.74); }
+    .hero-note strong { display: block; margin-bottom: 8px; font-family: var(--serif); font-size: 20px; font-weight: 700; color: var(--accent-strong); }
+    .hero-note p { font-size: 13px; color: var(--muted); line-height: 1.62; }
+    .contact { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid rgba(47, 68, 88, 0.13); background: rgba(255, 255, 255, 0.88); color: var(--ink); font-size: 13px; white-space: nowrap; }
+    .spotlight { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(250px, 0.7fr); gap: 14px; margin-top: 22px; }
+    .spotlight-card, .quote-card, .panel, .section-card, .stat, .project-card { break-inside: avoid; page-break-inside: avoid; }
+    .spotlight-card, .quote-card { border: 1px solid rgba(47, 68, 88, 0.14); background: rgba(255, 255, 255, 0.82); padding: 18px 20px; }
+    .spotlight-card p { font-size: 15px; line-height: 1.66; }
+    .quote-card { border-left: 4px solid var(--warm); background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(237,230,217,0.88)); }
+    .quote-card p { font-family: var(--serif); font-size: 16px; line-height: 1.6; color: var(--accent-strong); }
+    .grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr); gap: 0; }
+    .panel { padding: 28px 30px 30px; background: var(--paper-strong); }
+    .panel + .panel { border-left: 1px solid var(--rule); background: linear-gradient(180deg, rgba(230,235,240,0.32), rgba(255,253,250,1)); }
+    h2 { margin-bottom: 14px; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent-strong); font-weight: 800; }
+    h3 { font-family: var(--serif); font-size: 17px; line-height: 1.2; font-weight: 700; color: #19212b; }
+    p { font-size: 14px; }
+    ul { padding-left: 18px; }
+    li { margin: 7px 0; font-size: 14px; line-height: 1.58; }
+    .section-card { border-top: 1px solid var(--rule); padding-top: 16px; margin-top: 16px; }
+    .exp-meta { margin-top: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    .project-grid { display: grid; gap: 12px; margin-top: 6px; }
+    .project-card { border: 1px solid rgba(47,68,88,0.12); background: rgba(255, 255, 255, 0.86); padding: 14px; }
+    .project-card h4 { font-size: 15px; color: var(--accent-strong); margin-bottom: 5px; }
+    .project-card p { font-size: 13px; color: #2a313d; }
+    .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+    .stat { padding: 12px 14px; border: 1px solid rgba(47,68,88,0.12); background: var(--accent-soft); }
+    .stat strong { display: block; font-size: 19px; line-height: 1.1; color: var(--accent-strong); }
+    .stat span { display: block; margin-top: 5px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .small { color: var(--muted); font-size: 13px; line-height: 1.6; }
+    @media (max-width: 980px) {
+      .hero-top, .spotlight, .grid { grid-template-columns: 1fr; }
+      .panel + .panel { border-left: 0; border-top: 1px solid var(--rule); }
+    }
+    @media print {
+      @page { size: letter; margin: 0.42in; }
+      html, body { background: #fff; }
+      .wrap { max-width: none; margin: 0; padding: 0; }
+      .resume-shell { border: none; box-shadow: none; background: #fff; }
+      .hero, .panel { padding-left: 0; padding-right: 0; }
+      a { text-decoration: none; color: inherit; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <main class="resume-shell">
+      <header class="hero">
+        <div class="eyebrow">Founding Engineer • Blitzpanel Alignment • Austin</div>
+        <div class="hero-top">
+          <div>
+            <h1>Benjamin Garrard</h1>
+            <div class="role">Founding engineer candidate for quote → BOM → drawings → build packet automation</div>
+          </div>
+          <aside class="hero-note">
+            <strong>What I bring</strong>
+            <p>I build schema-first systems, internal tooling, and operator UIs that turn messy authoring data into deterministic, reviewable outputs across web and native-adjacent runtimes.</p>
+          </aside>
+        </div>
+
+        <div class="contact">
+          <span class="pill">Austin, TX</span>
+          <span class="pill"><a href="mailto:benjamingarrard5279@gmail.com">benjamingarrard5279@gmail.com</a></span>
+          <span class="pill"><a href="https://bengarrard.com" target="_blank" rel="noopener noreferrer">bengarrard.com</a></span>
+          <span class="pill"><a href="https://github.com/B2Gdevs" target="_blank" rel="noopener noreferrer">github.com/B2Gdevs</a></span>
+          <span class="pill"><a href="https://dungeon-break-docs.vercel.app/" target="_blank" rel="noopener noreferrer">dungeon-break-docs.vercel.app</a></span>
+          <span class="pill"><a href="https://www.linkedin.com/in/benjamin-garrard/" target="_blank" rel="noopener noreferrer">linkedin.com/in/benjamin-garrard</a></span>
+        </div>
+
+        <div class="spotlight">
+          <div class="spotlight-card">
+            <p><strong>Current side project (in production):</strong> I am actively shipping <em>DungeonBreak-docs</em>, a TypeScript-first monorepo with a deterministic engine package, Next.js docs/CMS/play surface, and an Astro review hub that bundles tests, coverage, and structured game data for reliable handoff and inspection.</p>
+          </div>
+          <div class="quote-card">
+            <p>One schema, many runtimes: author once, validate once, consume everywhere.</p>
+          </div>
+        </div>
+      </header>
+
+      <section class="grid">
+        <div class="panel">
+          <section>
+            <h2>Professional summary</h2>
+            <p>I am a full-stack founding-engineer profile with a builder/operator mindset: I clarify requirements, design the contracts, ship the tooling, and stay accountable to what operators and customers need in production. I have spent the last several years building data-heavy systems where correctness, reviewability, and speed of iteration all matter at once. For Blitzpanel, that translates directly to owning quote-to-build automation surfaces and making sure BOM logic, drawings, and output packets stay coherent as complexity grows.</p>
+          </section>
+
+          <section class="section-card">
+            <h2>Current work (deep detail)</h2>
+            <h3>DungeonBreak-docs — systems + docs + runtime delivery</h3>
+            <div class="exp-meta">Founder/Engineer • 2024–Present • TypeScript, Next.js, Astro, Node.js, JSON Schema</div>
+            <ul>
+              <li>Designed a schema-first architecture where authored content is validated once and then consumed by multiple runtimes, reducing ad-hoc parser behavior and keeping downstream output stable.</li>
+              <li>Built deterministic build pipelines that transform hand-authored source data into normalized packs, generated contract types, and static review artifacts suitable for PR review and non-technical inspection.</li>
+              <li>Implemented Quicktype-based multi-language contract generation (TypeScript, C++, C#) from canonical schema sources to keep web and native-adjacent consumers synchronized.</li>
+              <li>Created operator-facing documentation and review surfaces so dense game/system data can be audited quickly, with clear traceability from source records to runtime payloads.</li>
+              <li>Maintained lint/build/release gates and planning documentation so implementation stays aligned with requirements and regressions are caught early.</li>
+            </ul>
+          </section>
+
+          <section class="section-card">
+            <h2>Selected past experience</h2>
+            <h3>Founding Engineer / Product Systems Builder</h3>
+            <div class="exp-meta">Austin, TX • 2021–2024</div>
+            <ul>
+              <li>Shipped internal product tooling across React + Next.js frontends and Node/TypeScript services, turning loosely defined process steps into repeatable operational workflows.</li>
+              <li>Owned data modeling and API design for fast-moving product teams, with emphasis on explicit contracts and predictable versioning as features evolved.</li>
+              <li>Built admin and support-facing interfaces (search, triage, data inspection, status views) to reduce bottlenecks and shorten incident/debug loops.</li>
+              <li>Partnered directly with stakeholders on scope and sequencing, balancing near-term shipping pressure with long-term maintainability.</li>
+            </ul>
+
+            <h3 style="margin-top: 14px;">Independent Full-Stack Engineer</h3>
+            <div class="exp-meta">Client + product work • 2018–2021</div>
+            <ul>
+              <li>Delivered end-to-end web applications including discovery, technical architecture, implementation, deployment, and handoff documentation.</li>
+              <li>Implemented data transformation pipelines and integration adapters that normalized inconsistent third-party inputs into reliable internal structures.</li>
+              <li>Produced UI systems and interaction patterns emphasizing clarity for non-technical operators while preserving power-user workflows.</li>
+            </ul>
+          </section>
+
+          <section class="section-card">
+            <h2>Blitzpanel-relevant projects</h2>
+            <div class="project-grid">
+              <article class="project-card">
+                <h4>Schema Contract Tooling</h4>
+                <p>Generated strongly typed contracts across TS/C++/C# from one source schema to keep multi-runtime behavior aligned and reduce hand-maintained drift.</p>
+              </article>
+              <article class="project-card">
+                <h4>Deterministic Build + Review Packets</h4>
+                <p>Built reproducible artifact bundles containing structured outputs, coverage snapshots, and test signals so teams can verify generated results quickly.</p>
+              </article>
+              <article class="project-card">
+                <h4>Spatial / Hierarchical Data Modeling</h4>
+                <p>Implemented canonical transform chains and nested models (level → room → entity/item) that map cleanly to coordinate-driven downstream consumers.</p>
+              </article>
+            </div>
+          </section>
+        </div>
+
+        <aside class="panel">
+          <section>
+            <h2>Primary stack</h2>
+            <ul>
+              <li>TypeScript, Node.js, React, Next.js</li>
+              <li>Monorepo workflows with pnpm + workspace packages</li>
+              <li>JSON Schema, generated typings/codecs, contract discipline</li>
+              <li>Build automation, static artifact packaging, CI lint/build gates</li>
+              <li>Operator tooling: explorers, admin views, review dashboards</li>
+            </ul>
+          </section>
+
+          <section class="section-card">
+            <h2>Additional talents</h2>
+            <ul>
+              <li>Technical writing and architecture documentation for cross-functional teams.</li>
+              <li>Rapid prototyping: from vague concept to testable product slice quickly.</li>
+              <li>Creative direction + world-building for narrative/product storytelling.</li>
+              <li>Audio/song development and multimedia integration for interactive projects.</li>
+              <li>Hands-on debugging under ambiguity with pragmatic decision-making.</li>
+            </ul>
+          </section>
+
+          <section class="section-card">
+            <h2>Impact themes</h2>
+            <div class="stats">
+              <div class="stat"><strong>End-to-end</strong><span>Requirements → contracts → UX → release</span></div>
+              <div class="stat"><strong>Cross-runtime</strong><span>Web + generated native contracts</span></div>
+              <div class="stat"><strong>Deterministic</strong><span>Validation and normalized data flows</span></div>
+              <div class="stat"><strong>Operator-first</strong><span>Fast, dense internal UX</span></div>
+            </div>
+          </section>
+
+          <section class="section-card">
+            <h2>Why Blitzpanel</h2>
+            <p class="small">I’m drawn to industrial software because better tools directly improve physical outcomes. Blitzpanel’s quote/BOM/drawing/build-packet loop is the kind of high-leverage systems problem I love: practical UI, strict contracts, and automation that materially helps teams deliver under real-world constraints.</p>
+          </section>
+
+          <section class="section-card">
+            <h2>Links</h2>
+            <ul>
+              <li><a href="https://github.com/B2Gdevs" target="_blank" rel="noopener noreferrer">GitHub profile</a></li>
+              <li><a href="https://dungeon-break-docs.vercel.app/" target="_blank" rel="noopener noreferrer">DungeonBreak-docs live site</a></li>
+              <li><a href="https://bengarrard.com/projects" target="_blank" rel="noopener noreferrer">Selected projects</a></li>
+            </ul>
+          </section>
+        </aside>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

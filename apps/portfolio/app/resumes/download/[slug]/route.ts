@@ -4,7 +4,7 @@ import { getResumeBySlug, resolveResumeHtmlPath } from '@/lib/resumes';
 export const runtime = 'nodejs';
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
@@ -21,17 +21,12 @@ export async function GET(
   }
 
   const html = await fs.readFile(htmlPath, 'utf8');
-  const shouldDownload = new URL(request.url).searchParams.get('download') === '1';
 
   return new Response(html, {
     headers: {
-      'content-type': 'text/html; charset=utf-8',
+      'content-type': 'application/octet-stream',
+      'content-disposition': `attachment; filename="${resume.fileName}"`,
       'cache-control': 'public, max-age=0, must-revalidate',
-      ...(shouldDownload
-        ? {
-            'content-disposition': `attachment; filename="${resume.fileName}"`,
-          }
-        : {}),
     },
   });
 }

@@ -4,6 +4,14 @@ Read this each iteration; pick one task; update after completing.
 
 ## Done
 
+- [x] Blitzpanel resume expansion follow-up: rebuilt `blitzpanel_resume.html` with deeper professional summary, expanded past experience, current project detail, and additional talents while keeping the printable editorial style.
+- [x] Portfolio nav + resume follow-up: added a Blitzpanel-tailored resume (including current side-project narrative) and updated navigation with direct tabs for projects/books/songs plus GitHub and live side-project links.
+- [x] Resume library UX follow-up: add an explicit direct-download list on `/resumes` so every discovered HTML resume appears as a visible list item link.
+- [x] Resume library download follow-up: add explicit `/resumes/download/[slug]` attachment routes and wire the `/resumes` cards to direct file downloads for every discovered HTML resume.
+- [x] Resume library follow-up: treat `misc/html_resumes` as the website source set so resume pages can discover those HTML files, surface metadata, and offer direct downloads.
+- [x] Resume print follow-up: make the Capital Factory resume print with the same editorial multi-column layout as the live page, and update the resume design guidelines to prefer screen-matching print output when stable.
+- [x] Resume follow-up: add a new standalone `your dream job` resume tailored to Capital Factory's open Austin role and register it in the `/resumes` library.
+- [x] Resume standards follow-up: restyle the Capital Factory resume to match the light editorial direction and add a source-of-truth guidelines doc for printable resume design.
 - [x] Nest section planning pages under a collapsed `Planning Docs` folder in the docs section tree instead of showing them as flat sibling links.
 - [x] Replace generic section planning placeholders with XML-structured docs pages (`planning docs`, `state`, `task registry`, `errors and attempts`, `decisions`) and make that planning group sort first inside each docs section.
 - [x] Documentation cleanup: remove obsolete `book-editor`, `richepub`, and generic top-level docs, then regroup the docs experience around active section folders such as `books` and `dialogue-forge`.
@@ -58,6 +66,15 @@ Artifacts: `packages/repub-builder` (CLI, epub only), `packages/book-components`
 
 ## Notes
 
+- **Blitzpanel resume expansion (2026-03-24):** `blitzpanel_resume.html` now reads like a fuller traditional resume with expanded professional summary, richer past/current experience detail, Blitzpanel-relevant project highlights, and an explicit additional-talents section tied to the current stack and active work.
+- **Blitzpanel follow-up (2026-03-24):** added `blitzpanel_resume.html` to `misc/html_resumes` and registered metadata so it appears first in `/resumes`; updated sidebar top tabs to include Projects, Books, Songs, and an external GitHub shortcut; removed the previous `Current shape` copy card; added direct external links for GitHub and `dungeon-break-docs.vercel.app` in the Projects nav section.
+- **Resume download list follow-up (2026-03-24):** `/resumes` now includes a `Direct source downloads` bullet list that enumerates every discovered file from `misc/html_resumes` (including axiom/autohdr/bild/openweb variants) with direct attachment links.
+- **Resume download follow-up (2026-03-24):** `/resumes` now points each card to `/resumes/download/<slug>` with `download` hints, and the new download route always serves the source HTML as an attachment so all listed resumes download reliably from the library page.
+- **Resume library follow-up (2026-03-23):** the website now treats `apps/portfolio/misc/html_resumes/` as the source set for the public resume library, including file discovery, metadata extraction with per-file fallbacks, and direct HTML downloads.
+- **Resume print follow-up (2026-03-23):** `dream_job_resume.html` print styles now preserve the live editorial grid, cards, and paper-toned treatment instead of flattening into a stripped-down single column, and `.planning/RESUME_DESIGN_GUIDELINES.md` now states that resume print mode should match the live layout whenever it remains stable in browser PDF export.
+- **Resume update (2026-03-23):** added `/resumes/your-dream-job` backed by `dream_job_resume.html`, with a more cinematic Austin/Capital Factory-specific narrative emphasizing founder empathy, community building, and startup ecosystem support.
+- **Resume standards (2026-03-23):** `dream_job_resume.html` now uses a lighter editorial palette with print behavior documented in `.planning/RESUME_DESIGN_GUIDELINES.md`, including the preference to preserve the live layout when browser PDF export keeps it stable.
+- **Verification (2026-03-23):** `pnpm install`, `pnpm run build`, and `pnpm run lint` all complete successfully; lint still reports the existing warning-only backlog in unrelated files.
 - **Deploy fix:** `apps/portfolio` now depends on `next-mdx-remote@^6.0.0`; `pnpm-lock.yaml` no longer contains `5.0.0`; root `package.json` pins `pnpm@10.28.0` for Vercel parity.
 - **Redesign direction:** Follow the sequencing and atmosphere of `davidwhyte.com/experience` without cloning its stack; in this repo we keep Next.js and ship a book-first landing page before exploring heavier 3D.
 - **Redesign shipped:** `/` now leads with `mordreds_tale`, uses the front-page reader as the main reading surface, introduces a music lane via BandLab embeds, and keeps projects/blog/docs explicit in both the page content and the sidebar shell.

@@ -15,6 +15,7 @@ import {
   Copy,
   FileCode2,
   FileText,
+  Github,
   Headphones,
   Home,
   LibraryBig,
@@ -31,6 +32,7 @@ import {
 import type { NavIconKey, NavMenuSection } from '@/lib/site-menus';
 
 const EMAIL = 'benjamingarrard5279@gmail.com';
+const GITHUB_URL = 'https://github.com/B2Gdevs';
 
 const iconMap: Record<NavIconKey, React.ComponentType<{ size?: number; className?: string }>> = {
   'book-open': BookOpenText,
@@ -103,6 +105,24 @@ function SidebarContent({
         label: 'Resumes',
         icon: FileText,
         isActive: pathname === '/resumes' || pathname.startsWith('/resumes/'),
+      },
+      {
+        href: '/projects',
+        label: 'Projects',
+        icon: Compass,
+        isActive: pathname === '/projects' || pathname.startsWith('/projects/'),
+      },
+      {
+        href: '/books',
+        label: 'Books',
+        icon: LibraryBig,
+        isActive: pathname === '/books' || pathname.startsWith('/books/'),
+      },
+      {
+        href: '/listen',
+        label: 'Songs',
+        icon: Headphones,
+        isActive: pathname === '/listen' || pathname.startsWith('/listen/'),
       },
       ...navMenus.flatMap((menu) =>
         menu.items
@@ -222,15 +242,8 @@ function SidebarContent({
           </div>
         </Link>
 
-        <div className="sidebar-intro-card mt-4">
-          <p className="section-kicker">Current shape</p>
-          <p className="mt-3 text-sm leading-7 text-text-muted">
-            Book first, songs close by, and the rest of the work still easy to reach.
-          </p>
-        </div>
-
         <div className="mt-4">
-          <div className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-dark/70 p-1 shadow-[0_10px_30px_rgba(0,0,0,0.22)]">
+          <div className="inline-flex flex-wrap items-center gap-1 rounded-2xl border border-border/70 bg-dark/70 p-1 shadow-[0_10px_30px_rgba(0,0,0,0.22)]">
             <Link
               href="/"
               onClick={onNavigate}
@@ -253,6 +266,52 @@ function SidebarContent({
               <FileText size={14} />
               <span>Resumes</span>
             </Link>
+            <Link
+              href="/projects"
+              onClick={onNavigate}
+              className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
+                pathname === '/projects' || pathname.startsWith('/projects/')
+                  ? 'bg-primary text-secondary'
+                  : 'text-text-muted hover:text-primary'
+              }`}
+            >
+              <Compass size={14} />
+              <span>Projects</span>
+            </Link>
+            <Link
+              href="/books"
+              onClick={onNavigate}
+              className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
+                pathname === '/books' || pathname.startsWith('/books/')
+                  ? 'bg-primary text-secondary'
+                  : 'text-text-muted hover:text-primary'
+              }`}
+            >
+              <LibraryBig size={14} />
+              <span>Books</span>
+            </Link>
+            <Link
+              href="/listen"
+              onClick={onNavigate}
+              className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
+                pathname === '/listen' || pathname.startsWith('/listen/')
+                  ? 'bg-primary text-secondary'
+                  : 'text-text-muted hover:text-primary'
+              }`}
+            >
+              <Headphones size={14} />
+              <span>Songs</span>
+            </Link>
+            <a
+              href={GITHUB_URL}
+              target="_blank"
+              rel="noreferrer"
+              onClick={onNavigate}
+              className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium text-text-muted transition-colors hover:text-primary"
+            >
+              <Github size={14} />
+              <span>GitHub</span>
+            </a>
           </div>
         </div>
 
