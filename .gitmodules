@@ -4,3 +4,6 @@
 [submodule "vendor/koodo-reader"]
 	path = vendor/koodo-reader
 	url = https://github.com/B2Gdevs/koodo-reader.git
+[submodule "vendor/repo-planner"]
+	path = vendor/repo-planner
+	url = https://github.com/MagicbornStudios/RepoPlanner.git

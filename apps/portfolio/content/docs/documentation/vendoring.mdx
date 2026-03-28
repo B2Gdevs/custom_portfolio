@@ -1,0 +1,61 @@
+---
+title: Vendoring
+description: Git submodules for Kookit, Koodo Reader, and RepoPlanner; forks and update commands.
+date: "2026-03-29"
+updated: "2026-03-29"
+order: 22
+repoPath: apps/portfolio/content/docs/documentation/vendoring.mdx
+---
+
+# Vendoring
+
+## Kookit and Koodo Reader
+
+- **Kookit:** [B2Gdevs/kookit](https://github.com/B2Gdevs/kookit) – rendering engine (EPUB, PDF, MD, etc.). Vendored at `vendor/kookit`.
+- **Koodo Reader:** [B2Gdevs/koodo-reader](https://github.com/B2Gdevs/koodo-reader) – desktop ebook app. Vendored at `vendor/koodo-reader`.
+
+We push to **this repo** and to **vendored repos**. We maintain **forks** of kookit and koodo-reader (e.g. `MagicbornStudios/kookit`, `MagicbornStudios/koodo-reader`) so we can push our patches. `.gitmodules` points to the fork URLs; upstream (B2Gdevs) remains the source for pulling updates.
+
+### Submodules
+
+- `vendor/kookit` and `vendor/koodo-reader` are git submodules. After clone, run:
+
+```bash
+git submodule update --init --recursive
+```
+
+- To update submodule from remote: `git submodule update --remote vendor/kookit` (or `vendor/koodo-reader`).
+
+### Our changes in Kookit
+
+- **RepubRender:** `vendor/kookit/src/renders/RepubRender.ts` – unpacks .repub (ZIP), rewrites asset refs to blob URLs, builds a single-section book and renders via `GeneralRender`/iframe. Exported from `vendor/kookit/src/index.ts`.
+- **Build output:** `rollup.config.js` was changed to output to `vendor/kookit/dist/` instead of a hardcoded path so the package builds in this repo.
+
+### Wiring Koodo Reader to .repub
+
+When `vendor/koodo-reader` is checked out (submodule init):
+
+1. In the Koodo Reader app, find where supported file extensions or format types are defined (e.g. `.epub`, `.pdf`).
+2. Add `.repub` to the list and map it to format `"REPUB"` (or the key Koodo uses to select a renderer).
+3. Where the app instantiates a kookit render (e.g. `new EpubRender(buffer, config)`), add a branch for `.repub` / REPUB that uses `new RepubRender(buffer, config)` and then `renderTo(element)`.
+
+The portfolio uses the in-app EPUB reader only; .repub is for Koodo Reader (desktop) when wired.
+
+---
+
+## RepoPlanner
+
+- **RepoPlanner:** [MagicbornStudios/RepoPlanner](https://github.com/MagicbornStudios/RepoPlanner) – planning CLI, templates, and optional local cockpit. Vendored at `vendor/repo-planner`.
+
+### Submodule
+
+```bash
+git submodule update --init --recursive vendor/repo-planner
+```
+
+Pin upgrades intentionally: `cd vendor/repo-planner && git fetch && git checkout <ref> && cd ../.. && git add vendor/repo-planner && git commit -m "chore: bump RepoPlanner"`.
+
+### Host usage in this repo
+
+- Root scripts: `pnpm planning`, `pnpm planning:snapshot`, `pnpm planning:init`, `pnpm planning:checklist`, `pnpm planning:ui` (local report viewer). See [Repo Planner integration](/docs/repo-planner/integration).
+- Planning root: `.planning/` at the monorepo root; optional `REPOPLANNER_PROJECT_ROOT` when running CLI from another cwd.

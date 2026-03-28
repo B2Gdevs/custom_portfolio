@@ -1,0 +1,44 @@
+---
+title: State
+description: RepoPlanner integration state for the portfolio monorepo.
+date: "2026-03-29"
+updated: "2026-03-29"
+order: 4
+repoPath: apps/portfolio/content/docs/repo-planner/state.mdx
+taskPhase: repo-planner-integration-01
+---
+
+# Repo Planner — State
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `repo-planner` |
+| `owner` | `monorepo` |
+| `status` | `active` |
+| `updated` | `2026-03-29` |
+
+## Current cycle
+
+| Field | Value |
+| --- | --- |
+| `phase` | `repo-planner-integration-01` |
+| `focus` | Submodule pinned; root `pnpm planning*` scripts; docs section; XML bootstrap alongside existing `.planning/*.md`; clarify local-only cockpit vs public read-only site |
+| `constraint` | Do not deploy editable RepoPlanner cockpit on production portfolio |
+
+## Next queue
+
+| Priority | Action |
+| --- | --- |
+| `1` | Reconcile `REQUIREMENTS.xml` stub with `.planning/REQUIREMENTS.md` over time; pick single agent read order |
+| `2` | Optional: client-side or isolated **upload pack / .zip .planning** viewer — read-only, ephemeral only |
+| `3` | Bump `vendor/repo-planner` when upstream adds features this repo needs |
+
+## References
+
+| Id | Path |
+| --- | --- |
+| `submodule` | `vendor/repo-planner` |
+| `cli` | `vendor/repo-planner/scripts/loop-cli.mjs` |
+| `root-scripts` | `package.json` (repository root) |

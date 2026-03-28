@@ -4,8 +4,8 @@ Operational commands and loop state. Keep this file lean (~60 lines).
 
 ## Mandatory context (read order)
 
-1. **Section planning MDX (first for section-scoped work)** - Under `apps/portfolio/content/docs/<section>/`, read in order: **`planning-docs.mdx`** (index) -> **`state.mdx`** -> **`task-registry.mdx`** -> **`decisions.mdx`** (and section-specific planning pages linked from the index). The **documentation** section also publishes **[global planning](apps/portfolio/content/docs/documentation/global-planning.mdx)** (`/docs/documentation/global-planning`): repo-wide vs section layers, id namespaces, cross-references to `.planning`, and Mermaid workflow diagrams. Active sections with this stack today: `books/`, `dialogue-forge/`, `documentation/`, `blog/`, `editor/`, and `magicborn/`. These pages are the **public, browsable** source of truth for tasks and phase ids (for example `books-ai-01-02`, `documentation-site-03-02`).
-2. **Repo-root planning** - **[.planning/REQUIREMENTS.md](.planning/REQUIREMENTS.md)** and **[.planning/IMPLEMENTATION_PLAN.md](.planning/IMPLEMENTATION_PLAN.md)** for monorepo scope, verification gates, and cross-cutting queues.
+1. **Global + section planning MDX** — For **repo-wide** context first: **`content/docs/global/planning-docs.mdx`** → **`global-planning.mdx`** (`/docs/global/global-planning`): layers (`.planning` vs section docs), id namespaces, cross-references, Mermaid diagrams, planning-pack policy, RepoPlanner pointers. For **section-scoped** work, under `apps/portfolio/content/docs/<section>/` read: **`planning-docs.mdx`** → **`state.mdx`** → **`task-registry.mdx`** → **`decisions.mdx`**. Active sections today: **`global/`**, `books/`, `dialogue-forge/`, `documentation/`, `blog/`, `editor/`, `magicborn/`, `repo-planner/`. **RepoPlanner CLI** (optional): from repo root, `pnpm planning snapshot`, `pnpm planning setup checklist`; XML under `.planning/` after `pnpm planning:init` — see **`content/docs/repo-planner/integration.mdx`**. These pages are the **public, browsable** source of truth for tasks and phase ids (for example `books-ai-01-02`, `documentation-site-03-02`).
+2. **Repo-root planning** - **[.planning/REQUIREMENTS.md](.planning/REQUIREMENTS.md)** and **[.planning/IMPLEMENTATION_PLAN.md](.planning/IMPLEMENTATION_PLAN.md)** for monorepo scope, verification gates, and cross-cutting queues. **RepoPlanner XML** (`.planning/STATE.xml`, `TASK-REGISTRY.xml`, …) mirrors the agent loop; run **`pnpm planning snapshot`** for a merged view. During migration, **`REQUIREMENTS.md` stays the narrative source of truth** alongside stub **`REQUIREMENTS.xml`** until content is consolidated.
 3. **This file** - **`AGENTS.md`** (root) for the Ralph loop and commands.
 
 Never start implementation before the relevant **section task registry / state** and **`.planning`** items are updated for that scope. If something is ambiguous, document it in the section planning pages or `.planning` and ask or decide before coding.
@@ -64,8 +64,9 @@ Reference tasks **by id** in conversation (`books-ai-01-04`, `documentation-site
 
 ## Artifacts
 
-- `apps/portfolio/content/docs/<section>/` - section planning MDX (**read first** for section work); see **Planning packs** in [.planning/REQUIREMENTS.md](.planning/REQUIREMENTS.md) for homepage modal / downloadable `.md` roadmap.
-- `.planning/` - Ralph Wiggum state (plan, progress); GSD also uses `.planning/`.
+- `apps/portfolio/content/docs/<section>/` - section planning MDX (**read first** for section work), including **`global/`** and **`repo-planner/`**; see **Planning packs** in [.planning/REQUIREMENTS.md](.planning/REQUIREMENTS.md) for homepage modal / downloadable `.md` roadmap.
+- `.planning/` - Ralph Wiggum state (plan, progress); RepoPlanner **`.xml`** + **`planning-config.toml`**; GSD also uses `.planning/`.
+- `vendor/repo-planner/` - RepoPlanner submodule (CLI: **`pnpm planning`** from repo root).
 - `.codex/` - GSD skills for Codex (local install).
 - `AGENTS.md` - this file (root); optional per-section `AGENTS.md` under a section folder may be added later. Until then, root `AGENTS.md` plus section planning pages apply.
 

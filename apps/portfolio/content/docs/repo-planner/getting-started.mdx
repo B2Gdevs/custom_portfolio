@@ -1,0 +1,39 @@
+---
+title: Getting started
+description: Planning loop concepts and RepoPlanner CLI entry points for any project.
+date: "2026-03-29"
+updated: "2026-03-29"
+order: 2
+repoPath: apps/portfolio/content/docs/repo-planner/getting-started.mdx
+---
+
+# Repo Planner — Getting started
+
+You do not have to use this monorepo’s layout to benefit from a **planning loop**: keep a visible **state**, an ordered **task registry**, and a **roadmap** (or phase list). Agents and humans read the same files; ids stay stable in chat and commits.
+
+## Reference implementation
+
+[MagicbornStudios/RepoPlanner](https://github.com/MagicbornStudios/RepoPlanner) provides:
+
+- **XML-shaped** templates under `.planning/templates/` (bundled inside the submodule).
+- **`loop-cli.mjs`** — snapshot, task updates, reports, `setup checklist`, `init` for greenfield bootstrap.
+- Optional **cockpit UI** when embedded in a Next app (see upstream **INSTALL.md**). This portfolio keeps the **full editing cockpit local / operator-only**; production **docs** stay read-only.
+
+## In this repo (from monorepo root)
+
+```bash
+git submodule update --init --recursive vendor/repo-planner
+pnpm planning setup checklist    # verify .planning + XML when present
+pnpm planning snapshot         # agent-friendly bundle / reports
+pnpm planning:ui               # local markdown report viewer (127.0.0.1)
+```
+
+Pass **`--root <path>`** or set **`REPOPLANNER_PROJECT_ROOT`** if the CLI must resolve a different project root.
+
+Greenfield bootstrap (creates XML + templates; use **`--no-agents-md`** here because **`AGENTS.md` already exists**):
+
+```bash
+pnpm planning:init
+```
+
+**Brownfield:** this repo already had `.planning/*.md`. After **`pnpm planning:init`**, you will have **parallel** `REQUIREMENTS.xml` (stub) alongside **`REQUIREMENTS.md`** — reconcile over time; see [Integration](/docs/repo-planner/integration).

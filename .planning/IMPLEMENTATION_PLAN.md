@@ -27,8 +27,9 @@ Read this each iteration; pick one task; update after completing.
 - [x] Portfolio redesign follow-up: add a resume hub with direct printable resume pages and fold it into the public site navigation.
 - [x] Scrollbar polish follow-up: keep page and sidebar scrollbars visually aligned with stable gutters across the main site and docs shells.
 - [x] Docs planning follow-up: rewrite section planning pages into compact XML-style record layouts that are readable and parseable.
-- [x] Documentation: global planning page (Mermaid, id namespaces, `.planning` cross-refs) at `content/docs/documentation/global-planning.mdx` + `mermaid` dependency and MDX `pre` handling.
+- [x] Documentation: global planning page (Mermaid, id namespaces, `.planning` cross-refs) at `content/docs/global/global-planning.mdx` + `mermaid` dependency and MDX `pre` handling.
 - [x] Planning ids: document `books-*` streams (`reader`, `publishing`, `ai`, including `books-ai-00` vs `books-ai-01`) aligned to `<namespace>-<stream>-<phase>-<task>`; `magicborn` in `lib/docs.ts` + planning-pack `SECTION_LABELS`; REQUIREMENTS task convention uses namespace/stream wording; books planning-docs links to global planning.
+- [x] RepoPlanner: `vendor/repo-planner` submodule; root `pnpm planning*` scripts + workspace CLI deps; **`content/docs/global/`** (`/docs/global/global-planning`); **`content/docs/repo-planner/`**; architecture/design/resume/portfolio/vendoring moved from `.planning` to **documentation** MDX; `.planning/VENDORING.md` stub; XML bootstrap (`pnpm planning:init`) alongside existing `.planning/*.md`.
 - [x] Books reader follow-up: make the homepage reader load on demand from its CTA and show visible disabled upcoming-book choices.
 - [x] Books reader spread fix: restore visible two-page desktop spreads after `build:books` by pairing authored pages into shared EPUB spine documents and lowering the in-app spread threshold to match the actual reader viewport.
 - [x] Books reader shell polish: remove the shared public footer from `/books/[bookSlug]/read`, let the reader page consume the full available shell height, and add a collapsible desktop sidebar for more reading room.
@@ -44,9 +45,9 @@ Read this each iteration; pick one task; update after completing.
 ## Books & reader
 
 - **Requirements:** [.planning/REQUIREMENTS.md](.planning/REQUIREMENTS.md) — includes **Reader + AI roadmap (phases)** (shipped vs planned).
-- **Architecture / conventions:** [.planning/ARCHITECTURE_CONVENTIONS.md](.planning/ARCHITECTURE_CONVENTIONS.md)
-- **Design / styling:** [.planning/DESIGN_STYLING.md](.planning/DESIGN_STYLING.md)
-- **Vendoring (Koodo/Kookit):** [.planning/VENDORING.md](.planning/VENDORING.md)
+- **Architecture / conventions:** [architecture-conventions.mdx](../apps/portfolio/content/docs/documentation/architecture-conventions.mdx)
+- **Design / styling:** [design-styling.mdx](../apps/portfolio/content/docs/documentation/design-styling.mdx)
+- **Vendoring (Koodo/Kookit/RepoPlanner):** [vendoring.mdx](../apps/portfolio/content/docs/documentation/vendoring.mdx) · pointer [.planning/VENDORING.md](.planning/VENDORING.md)
 - **Books docs (mirrored tasks):** [task-registry.mdx](apps/portfolio/content/docs/books/task-registry.mdx), [state.mdx](apps/portfolio/content/docs/books/state.mdx)
 
 Artifacts: `packages/repub-builder` (CLI, epub only), `packages/book-components` (MDX components), `vendor/kookit` (with RepubRender), `vendor/koodo-reader` (submodule; wire .repub when checked out).
@@ -80,7 +81,7 @@ Cross-cutting work tracked in **documentation** section: [task-registry.mdx](app
 | 4 | **Modal registry** (Zustand) + planning pack UI: tabs, PDF-style thumbnails, hover download/expand. | `documentation-site-03-04` |
 | 5 | List **only existing** files; no placeholders for missing section `AGENTS.md`. | `documentation-site-03-05` |
 
-**Global planning (human index):** [global-planning.mdx](apps/portfolio/content/docs/documentation/global-planning.mdx) at `/docs/documentation/global-planning` — layers (`.planning` vs section docs), id shape `<namespace>-<stream>-<phase>-<task>`, cross-reference conventions, Mermaid workflow diagrams; exported in planning-pack `.md` with fenced `mermaid` blocks. Linked from root `AGENTS.md` and [documentation/planning-docs.mdx](apps/portfolio/content/docs/documentation/planning-docs.mdx).
+**Global planning (human index):** [global-planning.mdx](apps/portfolio/content/docs/global/global-planning.mdx) at `/docs/global/global-planning` — layers (`.planning` vs section docs), id shape `<namespace>-<stream>-<phase>-<task>`, cross-reference conventions, Mermaid workflow diagrams; exported in planning-pack `.md` with fenced `mermaid` blocks. Linked from root `AGENTS.md`, [global/planning-docs.mdx](apps/portfolio/content/docs/global/planning-docs.mdx), and [documentation/planning-docs.mdx](apps/portfolio/content/docs/documentation/planning-docs.mdx). **RepoPlanner:** `vendor/repo-planner`, root `pnpm planning*` — [repo-planner docs](apps/portfolio/content/docs/repo-planner/planning-docs.mdx).
 
 ## Next (planning-first refactor queue)
 
@@ -94,7 +95,7 @@ Cross-cutting work tracked in **documentation** section: [task-registry.mdx](app
 - [ ] **Books publishing follow-up:** tracked as `books-publishing-01-01` / `books-publishing-01-02` for editions/progression planning and the next visible book EPUB.
 - [ ] **AI hardening:** rate limits, abuse logging, and post-RAG operational cleanup.
 - [ ] **Assistant UI / Tool UI / MCP:** evaluate via `books-ai-01-07`; add read-only MCP apps when the agent stack stabilizes.
-- [ ] Portfolio redesign phase 5: replace current PCB / dev aesthetic on the public landing page with the literary visual system in `.planning/PORTFOLIO_EXPERIENCE_REDESIGN.md`.
+- [ ] Portfolio redesign phase 5: replace current PCB / dev aesthetic on the public landing page with the literary visual system in [portfolio-experience-redesign.mdx](../apps/portfolio/content/docs/documentation/portfolio-experience-redesign.mdx).
 - [ ] Portfolio redesign phase 6: evaluate selective WebGL or React Three Fiber additions only after the non-WebGL experience is stable.
 - [x] Wire book-components into repub pack/epub when building from .mdx (MDX compiler + component map).
 - [ ] Upgrade Next.js 16.0.8 → 16.1.6 (security; see nextjs.org blog).
@@ -108,16 +109,16 @@ Cross-cutting work tracked in **documentation** section: [task-registry.mdx](app
 
 ## Notes
 
-- **Planning reset (2026-03-28):** clarified the product boundary: visitors are read-only by default, browser authoring must be local-first/export-oriented unless explicitly gated, repo files remain the canonical source for authored content, and the DB is reserved for narrow owner-critical operational data. Refactor stages now live in `.planning/ARCHITECTURE_CONVENTIONS.md`.
+- **Planning reset (2026-03-28):** clarified the product boundary: visitors are read-only by default, browser authoring must be local-first/export-oriented unless explicitly gated, repo files remain the canonical source for authored content, and the DB is reserved for narrow owner-critical operational data. Refactor stages now live in [architecture-conventions.mdx](../apps/portfolio/content/docs/documentation/architecture-conventions.mdx).
 - **RAG direction (2026-03-28):** planning now assumes a slim Payload CMS + SQLite backend for chat retrieval data, with `sqlite-vec` as the vector layer. Repo content stays canonical; indexed chunks are the retrieval copy. Source scope is docs/projects/blog plus `magicborn` worldbuilding material, ingest is script-first with an admin trigger, admin uses basic auth, embeddings default to `text-embedding-3-small` at `1536` dimensions, retrieval uses an FTS5 BM25 rerank pass, chat reads only from the last completed ingest run, removed sources drop out of the active corpus immediately on commit, and source ids remain stable across reindex runs.
 - **Blitzpanel resume expansion (2026-03-24):** `blitzpanel_resume.html` now reads like a fuller traditional resume with expanded professional summary, richer past/current experience detail, Blitzpanel-relevant project highlights, and an explicit additional-talents section tied to the current stack and active work.
 - **Blitzpanel follow-up (2026-03-24):** added `blitzpanel_resume.html` to `misc/html_resumes` and registered metadata so it appears first in `/resumes`; updated sidebar top tabs to include Projects, Books, Songs, and an external GitHub shortcut; removed the previous `Current shape` copy card; added direct external links for GitHub and `dungeon-break-docs.vercel.app` in the Projects nav section.
 - **Resume download list follow-up (2026-03-24):** `/resumes` now includes a `Direct source downloads` bullet list that enumerates every discovered file from `misc/html_resumes` (including axiom/autohdr/bild/openweb variants) with direct attachment links.
 - **Resume download follow-up (2026-03-24):** `/resumes` now points each card to `/resumes/download/<slug>` with `download` hints, and the new download route always serves the source HTML as an attachment so all listed resumes download reliably from the library page.
 - **Resume library follow-up (2026-03-23):** the website now treats `apps/portfolio/misc/html_resumes/` as the source set for the public resume library, including file discovery, metadata extraction with per-file fallbacks, and direct HTML downloads.
-- **Resume print follow-up (2026-03-23):** `dream_job_resume.html` print styles now preserve the live editorial grid, cards, and paper-toned treatment instead of flattening into a stripped-down single column, and `.planning/RESUME_DESIGN_GUIDELINES.md` now states that resume print mode should match the live layout whenever it remains stable in browser PDF export.
+- **Resume print follow-up (2026-03-23):** `dream_job_resume.html` print styles now preserve the live editorial grid, cards, and paper-toned treatment instead of flattening into a stripped-down single column, and [resume-design-guidelines.mdx](../apps/portfolio/content/docs/documentation/resume-design-guidelines.mdx) states that resume print mode should match the live layout whenever it remains stable in browser PDF export.
 - **Resume update (2026-03-23):** added `/resumes/your-dream-job` backed by `dream_job_resume.html`, with a more cinematic Austin/Capital Factory-specific narrative emphasizing founder empathy, community building, and startup ecosystem support.
-- **Resume standards (2026-03-23):** `dream_job_resume.html` now uses a lighter editorial palette with print behavior documented in `.planning/RESUME_DESIGN_GUIDELINES.md`, including the preference to preserve the live layout when browser PDF export keeps it stable.
+- **Resume standards (2026-03-23):** `dream_job_resume.html` now uses a lighter editorial palette with print behavior documented in [resume-design-guidelines.mdx](../apps/portfolio/content/docs/documentation/resume-design-guidelines.mdx), including the preference to preserve the live layout when browser PDF export keeps it stable.
 - **Verification (2026-03-23):** `pnpm install`, `pnpm run build`, and `pnpm run lint` all complete successfully; lint still reports the existing warning-only backlog in unrelated files.
 - **Deploy fix:** `apps/portfolio` now depends on `next-mdx-remote@^6.0.0`; `pnpm-lock.yaml` no longer contains `5.0.0`; root `package.json` pins `pnpm@10.28.0` for Vercel parity.
 - **Redesign direction:** Follow the sequencing and atmosphere of `davidwhyte.com/experience` without cloning its stack; in this repo we keep Next.js and ship a book-first landing page before exploring heavier 3D.

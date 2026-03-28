@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<roadmap>
+  <phase id="01">
+    <goal>Phase 01 — establish requirements and deliver the first planned vertical slice.</goal>
+    <requirements>REQ-01</requirements>
+    <depends></depends>
+    <status>planned</status>
+    <links>
+      <plan>.planning/phases/01-greenfield/01-01-PLAN.xml</plan>
+      <summary>.planning/phases/01-greenfield/01-01-SUMMARY.xml</summary>
+    </links>
+  </phase>
+  <doc-flow>
+    <doc name="TASK-REGISTRY.xml">List tasks with keywords + statuses.</doc>
+    <doc name="STATE.xml">Current phase pointer + next action.</doc>
+    <doc name="REQUIREMENTS.xml">Product / PRD references (CDATA docs).</doc>
+  </doc-flow>
+</roadmap>

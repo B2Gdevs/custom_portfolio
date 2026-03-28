@@ -37,11 +37,21 @@
     "package:token:check": "./scripts/check-token-setup.sh",
     "package:org:setup": "./scripts/setup-org-secrets.sh",
     "package:org:update": "./scripts/update-org-npm-token.sh",
-    "build:books": "pnpm --filter @portfolio/repub-builder run build && node scripts/build-books.cjs"
+    "build:books": "pnpm --filter @portfolio/repub-builder run build && node scripts/build-books.cjs",
+    "planning": "node vendor/repo-planner/scripts/loop-cli.mjs",
+    "planning:init": "node vendor/repo-planner/scripts/loop-cli.mjs init --no-agents-md",
+    "planning:snapshot": "node vendor/repo-planner/scripts/loop-cli.mjs snapshot",
+    "planning:checklist": "node vendor/repo-planner/scripts/loop-cli.mjs setup checklist",
+    "planning:report-view": "node vendor/repo-planner/scripts/loop-cli.mjs report view",
+    "planning:ui": "node vendor/repo-planner/scripts/loop-cli.mjs report view"
   },
   "devDependencies": {
+    "@iarna/toml": "^2.2.5",
     "archiver": "^7.0.1",
+    "commander": "^14.0.3",
+    "ejs": "^5.0.1",
     "epub-gen": "^0.1.0",
+    "fast-xml-parser": "^5.5.9",
     "gray-matter": "^4.0.3",
     "marked": "^15.0.0"
   },

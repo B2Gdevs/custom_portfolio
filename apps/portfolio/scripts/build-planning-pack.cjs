@@ -15,12 +15,14 @@ const OUT_MANIFEST = path.join(ROOT, 'public', 'planning-pack', 'manifest.json')
 const DEMO_DIR = path.join(ROOT, 'public', 'planning-pack', 'demo');
 
 const SECTION_LABELS = {
+  global: 'Global',
   books: 'Books',
   'dialogue-forge': 'Dialogue Forge',
   blog: 'Blog',
   documentation: 'Documentation',
   editor: 'Editor',
   magicborn: 'Magicborn',
+  'repo-planner': 'Repo Planner',
 };
 
 function formatSectionLabel(sectionKey) {

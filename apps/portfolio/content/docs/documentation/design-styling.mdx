@@ -1,6 +1,15 @@
+---
+title: Books and reader design
+description: Design and styling notes for book content and the in-app reader (book-like, reading-first).
+date: "2026-03-29"
+updated: "2026-03-29"
+order: 21
+repoPath: apps/portfolio/content/docs/documentation/design-styling.mdx
+---
+
 # Books & reader – design and styling
 
-Design and styling for book content and the RichEPub reader. Use Fumadocs as a **structural/component guide**, not a visual copy; aim for **book-like**, reading-first presentation.
+Design and styling for book content and the in-app EPUB reader. Use Fumadocs as a **structural/component guide**, not a visual copy; aim for **book-like**, reading-first presentation.
 
 ## Book-like vs docs-like
 
@@ -22,7 +31,7 @@ List what we want; implement later.
 - **Blockquote:** Styled quotes, optionally with attribution.
 - **Figure with caption:** Image + caption block.
 - **Code block:** Syntax-highlighted code (when needed in narrative).
-- **TOC / sidebar (optional):** For .repub reader, optional sidebar or floating TOC; keep minimal so it doesn’t dominate.
+- **TOC / sidebar (optional):** For the reader, optional sidebar or floating TOC; keep minimal so it doesn’t dominate.
 
 Later: character/setting callouts, timeline, maps, etc.
 
@@ -33,10 +42,10 @@ Later: character/setting callouts, timeline, maps, etc.
 
 ## Future MDX reader
 
-- The React-based .repub reader will use a **component map** for MDX (e.g. `Callout`, `ChapterTitle`, custom blocks).
+- A React-based reader can use a **component map** for MDX (e.g. `Callout`, `ChapterTitle`, custom blocks).
 - **Framer Motion:** Use in layout (chapter transition, scroll-triggered reveals) and in custom MDX components (e.g. Callout expand, image reveal). Keep animations **subtle** so they don’t distract from reading.
 - MDX in that context can use Framer Motion via the components we provide in the map (client components).
 
 ## Single source, two outputs
 
-Same `books/<slug>/` source → **EPUB** (HTML, base64 images) and **RichEPub** (static HTML today; React+MDX bundle later). One requirements doc (`.planning/REQUIREMENTS.md`) and this design doc keep the intent clear.
+Same `books/<slug>/` source → **EPUB** (HTML, base64 images) and readable surfaces on the site. One requirements doc ([`.planning/REQUIREMENTS.md`](../../../../../.planning/REQUIREMENTS.md)) and this design doc keep the intent clear.

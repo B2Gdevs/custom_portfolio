@@ -1,0 +1,57 @@
+---
+title: Integration
+description: How custom_portfolio vendors RepoPlanner — scripts, env, production boundaries.
+date: "2026-03-29"
+updated: "2026-03-29"
+order: 3
+repoPath: apps/portfolio/content/docs/repo-planner/integration.mdx
+---
+
+# Repo Planner — Integration (this monorepo)
+
+## Submodule
+
+| Path | Upstream |
+| --- | --- |
+| `vendor/repo-planner` | [MagicbornStudios/RepoPlanner](https://github.com/MagicbornStudios/RepoPlanner) |
+
+Update intentionally: `cd vendor/repo-planner && git fetch && git checkout <ref>` then commit the submodule pointer from the host repo.
+
+## Root scripts
+
+Defined in root **`package.json`** (run from **repository root**):
+
+| Script | Purpose |
+| --- | --- |
+| `pnpm planning` | Pass-through to `loop-cli.mjs` (e.g. `pnpm planning snapshot`) |
+| `pnpm planning:init` | `init --no-agents-md` — bootstrap XML/templates without overwriting **`AGENTS.md`** |
+| `pnpm planning:snapshot` | Snapshot / agent context |
+| `pnpm planning:checklist` | `setup checklist` |
+| `pnpm planning:ui` / `pnpm planning:report-view` | **Local** report viewer (default port from CLI) |
+
+**CLI dependencies** (`commander`, `fast-xml-parser`, `@iarna/toml`, `ejs`) are installed at the **workspace root** so `node` can resolve them when executing the submodule script.
+
+## Project root resolution
+
+By default the CLI uses **`process.cwd()`**. Set **`REPOPLANNER_PROJECT_ROOT`** (path relative to cwd) or pass **`--root <path>`** when running from another directory.
+
+## Product boundary (non-negotiable)
+
+| Surface | Audience | Behavior |
+| --- | --- | --- |
+| **RepoPlanner live cockpit** (full UI when embedded per upstream **INSTALL.md**) | **Operators, local machine** | Authoritative edits; **export** and commit to git |
+| **`pnpm planning:ui`** | Local | Read-oriented report viewer |
+| **Portfolio production (`vercel` / public)** | Visitors | **Read-only** — static MDX, planning-pack **downloads**, no write-back; any future **upload-to-analyze** flow must be **ephemeral** (same spirit as the in-app **reader**) |
+
+We **do not** ship the RepoPlanner **editing** cockpit on the public portfolio site. The site is not a channel for **AI to mutate the repository** or persist planning sessions server-side.
+
+## MDX section docs vs XML
+
+- **Public narrative + section registries:** `apps/portfolio/content/docs/<section>/*.mdx` (unchanged for visitors).
+- **Structured agent loop (RepoPlanner):** `.planning/*.xml` + `planning-config.toml` after **`pnpm planning:init`**. Markdown **`REQUIREMENTS.md`** / **`IMPLEMENTATION_PLAN.md`** remain until you migrate content and update **`AGENTS.md`** read order.
+
+## Further reading
+
+- Upstream **[INSTALL.md](https://github.com/MagicbornStudios/RepoPlanner/blob/main/INSTALL.md)** (embed cockpit, API routes — **not** applied to production portfolio per policy above).
+- [Vendoring](/docs/documentation/vendoring) — submodule commands alongside Kookit/Koodo.
+- [Global planning](/docs/global/global-planning) — whole-repo planning model.

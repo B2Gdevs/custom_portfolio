@@ -138,7 +138,7 @@ Work on this roadmap should follow **AGENTS.md**: requirements and task registry
 
 ## Submodules and forks
 
-- We push to **this repo** and to **vendored repos**. For `vendor/kookit` and `vendor/koodo-reader` we maintain **forks** (e.g. under MagicbornStudios or same org) so we can push desktop-reader patches and build config updates. `.gitmodules` points to those forks; upstream (B2Gdevs) remains the source of truth for pulling updates. Fork URLs are documented in [.planning/VENDORING.md](.planning/VENDORING.md).
+- We push to **this repo** and to **vendored repos**. For `vendor/kookit` and `vendor/koodo-reader` we maintain **forks** (e.g. under MagicbornStudios or same org) so we can push desktop-reader patches and build config updates. `.gitmodules` points to those forks; upstream (B2Gdevs) remains the source of truth for pulling updates. Fork URLs are documented in [Vendoring (docs)](../apps/portfolio/content/docs/documentation/vendoring.mdx) (see also the short pointer [.planning/VENDORING.md](.planning/VENDORING.md)).
 
 ## Distribution
 
@@ -151,13 +151,13 @@ Work on this roadmap should follow **AGENTS.md**: requirements and task registry
 - **Secondary creative lane:** Songs and audio work should appear on the home page as a distinct section, using placeholders or BandLab embeds until the final catalog is ready.
 - **Resume access:** The site should expose a clear `resumes` destination where tailored resumes can be found quickly and opened in standalone print-friendly pages.
 - **Resume source files:** HTML resumes stored in `apps/portfolio/misc/html_resumes/` are the source set for the website resume library; the site should be able to discover them, surface useful metadata from them, and let visitors download the original HTML when needed.
-- **Resume design source of truth:** Resume visual direction, print standards, and references should live in `.planning/RESUME_DESIGN_GUIDELINES.md` so new resume variants stay printable and aesthetically consistent.
+- **Resume design source of truth:** Resume visual direction, print standards, and references live in [resume design guidelines](../apps/portfolio/content/docs/documentation/resume-design-guidelines.mdx) so new resume variants stay printable and aesthetically consistent.
 - **Technical work:** Projects, docs, blog, and tooling still matter, but should live as clear secondary navigation destinations without dominating the first screen.
 - **Implementation rule:** Keep the existing Next.js/Vercel stack for the first redesign pass. Match the content sequencing and atmosphere of inspirational sites, not their exact implementation details.
 - **Placeholder-friendly:** Fake covers, descriptions, track art, and CTA copy are acceptable in early iterations as long as routes and components work end-to-end.
 - **Motion / depth:** The redesign should use layered motion and selective 3D to create presence, but must retain good mobile behavior, reasonable performance, and a reduced-motion fallback.
 - **Scrollbar consistency:** Shared shell scrollbars (page, site sidebar, docs sidebar, overlays) should use the same thin visual treatment without causing layout drift when they appear.
-- **Design source of truth:** Detailed IA, content order, and 3D decisions live in `.planning/PORTFOLIO_EXPERIENCE_REDESIGN.md`.
+- **Design source of truth:** Detailed IA, content order, and 3D decisions live in [portfolio experience redesign](../apps/portfolio/content/docs/documentation/portfolio-experience-redesign.mdx).
 
 ## Documentation IA
 
@@ -170,13 +170,13 @@ Work on this roadmap should follow **AGENTS.md**: requirements and task registry
 - **Nested planning folder:** In section navigation, planning pages should live inside a `Planning Docs` folder that is collapsed by default and can be expanded to select those pages.
 - **Remove stale docs:** Unsupported or abandoned sections like `richepub` and `book-editor`, plus obsolete top-level docs that only describe those systems, should be removed from the portfolio docs experience.
 - **Expandable later:** More section folders can be added as the site grows, but the docs shell should already assume real section folders are the unit of organization.
-- **Architecture source of truth:** Repo-level architecture and coding conventions live in `.planning/ARCHITECTURE_CONVENTIONS.md`; section docs can summarize or mirror those rules, but should not silently drift from them.
+- **Architecture source of truth:** Repo-level architecture and coding conventions live in [architecture conventions](../apps/portfolio/content/docs/documentation/architecture-conventions.mdx); section docs can summarize or mirror those rules, but should not silently drift from them.
 
 ## Planning packs & homepage modal
 
 - **Agent read order:** Codex/Cursor and human operators should treat **section planning MDX** (`apps/portfolio/content/docs/<section>/planning-docs.mdx` first) as the primary index for section-scoped work, then **`.planning/REQUIREMENTS.md`** and **`IMPLEMENTATION_PLAN.md`**, then root **`AGENTS.md`**. (Encoded in root `AGENTS.md`.)
 - **Machine-local hints:** Planning MDX may set YAML frontmatter **`repoPath`** (repo-relative file path) and optional **`taskPhase`** (e.g. `books-ai-01`, `documentation-site-03`) so agents grep/open the correct file despite public URLs living under `/docs/...`. The docs UI only surfaces `title` and `description` in the page header; other frontmatter keys stay off-page.
-- **Task identity convention:** Use `<namespace>-<stream>-<phase>-<task>` for section task ids (same shape as [global planning](../apps/portfolio/content/docs/documentation/global-planning.mdx): namespace = docs folder key, stream = product line inside that section). Examples: `books-ai-01-04` (books section, **ai** stream = site chat + planned RAG backend), `books-reader-01-15`, `documentation-site-03-04`, `magicborn-world-01-04`. Phase headings mirror the prefix without the final task segment (e.g. `books-ai-01`). Avoid bare `namespace-phase-task` three-segment ids for new work when a stream name keeps queues distinct.
+- **Task identity convention:** Use `<namespace>-<stream>-<phase>-<task>` for section task ids (same shape as [global planning](../apps/portfolio/content/docs/global/global-planning.mdx): namespace = docs folder key, stream = product line inside that section). Examples: `books-ai-01-04` (books section, **ai** stream = site chat + planned RAG backend), `books-reader-01-15`, `documentation-site-03-04`, `magicborn-world-01-04`. Phase headings mirror the prefix without the final task segment (e.g. `books-ai-01`). Avoid bare `namespace-phase-task` three-segment ids for new work when a stream name keeps queues distinct.
 - **Root plan convention:** `.planning/IMPLEMENTATION_PLAN.md` is a summary and cross-cutting queue, not a second detailed task registry. Section planning pages own section task ids; the root plan should reference those ids instead of re-describing them as a parallel backlog.
 - **Demo pack (static):** Ship starter `.md` files under **`public/planning-pack/demo/`** for visitors and template projects. Content is explicitly **example-only**: first phases and requirements must describe the **shape** of a real loop, with a clear banner that the AI or human should **replace** demo text when starting a real project. Include a downloadable **`AGENTS.md`** in the demo folder that reinforces read order and planning-first rules.
 - **Real pack (this repo):** **Build-time** export of **section planning MDX** only (pages matching the planning-doc leaf set: `planning-docs`, `state`, `task-registry`, `errors-and-attempts`, `decisions`) into **`public/planning-pack/site/`** plus **`manifest.json`**. **Do not** publish or list repo-root **`.planning/*.md`** in the public gallery; those stay private to the repository.

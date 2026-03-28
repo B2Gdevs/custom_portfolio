@@ -145,15 +145,16 @@ repo root
 │   └── mordreds_tale/      # First book source
 ├── vendor/
 │   ├── kookit/             # Submodule
-│   └── koodo-reader/       # Submodule
+│   ├── koodo-reader/       # Submodule
+│   └── repo-planner/       # Submodule (planning CLI + templates)
 ├── scripts/
 │   ├── build-books.cjs
 │   └── download-releases.cjs
 └── .planning/
     ├── REQUIREMENTS.md
     ├── IMPLEMENTATION_PLAN.md
-    ├── PORTFOLIO_EXPERIENCE_REDESIGN.md
-    └── VENDORING.md
+    ├── *.xml                     # RepoPlanner loop (STATE, TASK-REGISTRY, …) alongside .md
+    └── VENDORING.md              # Pointer → docs site vendoring page
 ```
 
 ### The .planning directory
@@ -161,9 +162,9 @@ repo root
 `.planning/` is where we keep scope, gates, and next steps:
 
 - **REQUIREMENTS.md** — Books source of truth, tooling, reader behavior, portfolio experience redesign, docs IA, verification gates, releases.
-- **IMPLEMENTATION_PLAN.md** — Ralph Wiggum loop state: done, in progress, next. Links to REQUIREMENTS, DESIGN_STYLING, VENDORING.
-- **PORTFOLIO_EXPERIENCE_REDESIGN.md** — Positioning, IA, visual direction, 3D/motion plan, content strategy, acceptance criteria.
-- **VENDORING.md** — How we vendor and fork Koodo Reader and Kookit, submodule usage, and wiring .repub in Koodo.
+- **IMPLEMENTATION_PLAN.md** — Ralph Wiggum loop state: done, in progress, next. Links to REQUIREMENTS, architecture/design docs on the docs site, vendoring.
+- **RepoPlanner XML** — Parallel agent-loop artifacts (`STATE.xml`, `TASK-REGISTRY.xml`, …) via `vendor/repo-planner` and `pnpm planning*`.
+- **VENDORING.md** — Short pointer; full submodule docs live under **Documentation → Vendoring** on the site.
 
 We use a simple loop: read the plan, pick one task, implement, verify (`pnpm install`, `pnpm run build`, `pnpm run lint`), update the plan, commit.
 

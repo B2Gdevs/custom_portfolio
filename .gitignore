@@ -61,3 +61,7 @@ next-env.d.ts
 .standalone/
 .reader-builds/
 **/.reader-builds/
+
+# RepoPlanner CLI telemetry (local only; do not commit)
+.planning/reports/usage.jsonl
+.planning/reports/metrics.jsonl

@@ -1,10 +1,10 @@
 ---
 title: Global planning
-description: How repo-wide .planning relates to section docs, ID namespaces, cross-references, and workflow diagrams.
+description: Repo-wide planning layers, task ids, workflows, downloads, and RepoPlanner boundaries.
 date: "2026-03-28"
 updated: "2026-03-29"
 order: 2
-repoPath: apps/portfolio/content/docs/documentation/global-planning.mdx
+repoPath: apps/portfolio/content/docs/global/global-planning.mdx
 taskPhase: documentation-site-04
 ---
 
@@ -12,11 +12,13 @@ taskPhase: documentation-site-04
 
 This page is the **human index** for planning across the monorepo. **Authoritative gates and long-form requirements** stay in [`.planning/REQUIREMENTS.md`](../../../../../.planning/REQUIREMENTS.md), [`.planning/IMPLEMENTATION_PLAN.md`](../../../../../.planning/IMPLEMENTATION_PLAN.md), and root **`AGENTS.md`**. **Section-owned work** lives under `apps/portfolio/content/docs/<section>/` (state, task registry, decisions, and optional sub-project registries such as a single book’s task list).
 
+During migration, **RepoPlanner** adds parallel **XML** under `.planning/` (`STATE.xml`, `TASK-REGISTRY.xml`, …). Markdown requirements and the implementation plan remain the narrative source until you cut over; use **`pnpm planning`** / **`pnpm planning:snapshot`** from the repo root. Details: [Repo Planner integration](/docs/repo-planner/integration).
+
 ## Layers
 
 | Layer | Location | Owns |
 | --- | --- | --- |
-| Global | `.planning/*.md`, root `AGENTS.md` | Cross-cutting requirements, release gates, monorepo read order, links into sections |
+| Global | `.planning/` (`.md` + RepoPlanner `.xml`), root `AGENTS.md` | Cross-cutting requirements, release gates, monorepo read order, links into sections |
 | Section | `content/docs/<section>/` | Phases and tasks scoped to that product area (books, documentation, editor, …) |
 | Sub-project (optional) | Same section, extra pages (e.g. `mordreds-tale-task-registry`) | Long streams inside a section without crowding the main registry |
 
@@ -30,7 +32,7 @@ Use a **fixed segment order** so ids parse left to right:
 
 | Segment | Meaning |
 | --- | --- |
-| `namespace` | Partition key: matches the docs folder and known sections in `apps/portfolio/lib/docs.ts` (`books`, `documentation`, `editor`, `dialogue-forge`, `blog`, `magicborn`, …). |
+| `namespace` | Partition key: matches the docs folder and known sections in `apps/portfolio/lib/docs.ts` (`books`, `documentation`, `editor`, `dialogue-forge`, `blog`, `magicborn`, `repo-planner`, …). |
 | `stream` | Product line inside that section (e.g. books: `reader`, `publishing`, `ai`; documentation: `site`; editor: `workflow`). Prefer stable stream names over one-off topics. |
 | `phase` | `01`, `02`, … or `01a` for a decimal insert between phases. |
 | `task` | `01`, `02`, … within the phase (omit only when naming a phase as a whole). |
@@ -41,11 +43,12 @@ Use a **fixed segment order** so ids parse left to right:
 | --- | --- |
 | `books-reader-03-02` | Books → reader stream → phase 3 → task 2 |
 | `books-publishing-01-01` | Books → EPUB / build / pipeline |
+| `books-ai-01-04` | Books → ai stream → phase 1 → task 4 |
 | `documentation-site-03-04` | Documentation section → docs-site work → phase 3 → task 4 |
 | `editor-workflow-02-01` | Editor section → authoring toolchain |
 | `global-release-01-02` | Optional prefix for repo-wide-only tasks (lint gates, submodules) when not folded into `IMPLEMENTATION_PLAN` prose |
 
-**Frontmatter helpers** (section pages): keep `repoPath`, `taskPhase`, and (when useful) a stable `section` value aligned with the namespace above. See [Planning Docs](/docs/documentation/planning-docs).
+**Frontmatter helpers** (section pages): keep `repoPath`, `taskPhase`, and (when useful) a stable `section` value aligned with the namespace above. See [Documentation planning](/docs/documentation/planning-docs).
 
 ## Cross-reference conventions
 
@@ -61,7 +64,7 @@ Root **read order** for agents is defined in **`AGENTS.md`** (global first for m
 
 ```mermaid
 flowchart TB
-  subgraph global[".planning (global)"]
+  subgraph globalLayer[".planning (global)"]
     R[REQUIREMENTS.md]
     P[IMPLEMENTATION_PLAN.md]
     A[AGENTS.md]
@@ -97,13 +100,11 @@ flowchart LR
   br1 -.->|shared UX shell| air
 ```
 
-*Illustrative only:* rename or replace nodes when you add a dedicated **AI / RAG** namespace or section.
-
 ## Workflow: section vs sub-project registry (example)
 
 ```mermaid
 flowchart TB
-  subgraph books["Section: books"]
+  subgraph booksSec["Section: books"]
     TR[task-registry]
     MT[mordreds-tale-task-registry]
   end
@@ -115,8 +116,36 @@ flowchart TB
 
 Fenced blocks with language `mermaid` render on the site. Exported planning-pack `.md` files keep the same fences so offline readers and tools that support Mermaid can render them.
 
+<details>
+<summary><strong>Planning without this repository’s layout</strong></summary>
+
+Many projects use a single **STATE**, **TASK-REGISTRY** (or Kanban), and **ROADMAP** (or milestone list). The shape matters more than the filenames: short loops, explicit task ids, and a clear “what’s next” for humans and agents.
+
+[RepoPlanner](https://github.com/MagicbornStudios/RepoPlanner) is a reference implementation: XML templates, CLI (`pnpm planning` in this repo), and optional **local** tooling. This portfolio vendors it under `vendor/repo-planner`; see [Repo Planner — Getting started](/docs/repo-planner/getting-started).
+</details>
+
+<details>
+<summary><strong>Downloadable planning pack (read-only)</strong></summary>
+
+At build time, section planning MDX is mirrored to **`/planning-pack/site/*.md`** plus **`/planning-pack/manifest.json`** (see the homepage **Planning pack** modal). That export is **read-only** for visitors: static Markdown, no write-back to the repo.
+
+**Not included in the public pack:** repo-root `.planning/*.md` and `.xml` stay **private to the repository** by policy (see [.planning/REQUIREMENTS.md](../../../../../.planning/REQUIREMENTS.md) — Planning packs). Operators share or archive those via git or exports from the **local** RepoPlanner flow — not the public gallery.
+</details>
+
+<details>
+<summary><strong>RepoPlanner cockpit vs this site (boundary)</strong></summary>
+
+| Surface | Who | Mutability |
+| --- | --- | --- |
+| **Live RepoPlanner UI** (`pnpm planning:ui` = local report viewer; full cockpit when embedded per [INSTALL](https://github.com/MagicbornStudios/RepoPlanner/blob/main/INSTALL.md)) | Operators on **your machine** | Edit and **export**; commit results to git |
+| **Portfolio production** | Visitors | **Read-only** — static MDX, planning-pack downloads, and any future **upload-to-view** flow must stay **ephemeral** (same idea as the in-app **reader**: nothing long-lived on the server, no production “AI edits the repo”). |
+
+We do **not** deploy an editable RepoPlanner cockpit on the public portfolio app. See [Repo Planner — Integration](/docs/repo-planner/integration).
+</details>
+
 ## See also
 
-- [Planning Docs](/docs/documentation/planning-docs) — documentation section loop and id rules for `documentation-site-*`
-- [State](/docs/documentation/state) — current documentation-section cycle
-- [Task registry](/docs/documentation/task-registry) — executable tasks and phases for the docs site
+- [Repo Planner](/docs/repo-planner/planning-docs) — submodule, CLI, local-only cockpit policy
+- [Documentation planning](/docs/documentation/planning-docs) — docs-site section loop and `documentation-site-*` ids
+- [Vendoring](/docs/documentation/vendoring) — submodules including `vendor/repo-planner`
+- [Architecture conventions](/docs/documentation/architecture-conventions) — product boundaries and layering (engineering-focused)

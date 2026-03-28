@@ -24,36 +24,46 @@ interface DocSectionMeta {
 }
 
 const DOC_SECTION_META: Record<string, DocSectionMeta> = {
+  global: {
+    label: 'Global',
+    description: 'Repo-wide planning index, layers, task ids, workflows, and planning-pack policy.',
+    order: 0,
+  },
   books: {
     label: 'Books',
     description: 'Reader notes, publishing workflow, and planning docs for the book side of the site.',
-    order: 0,
+    order: 1,
   },
   'dialogue-forge': {
     label: 'Dialogue Forge',
     description: 'Editor notes, exporter docs, and planning material for the dialogue toolchain.',
-    order: 1,
+    order: 2,
   },
   blog: {
     label: 'Blog',
     description: 'Planning docs for the writing surface, publishing loop, and how posts should work as a public-facing stream.',
-    order: 2,
+    order: 3,
   },
   documentation: {
     label: 'Documentation',
     description: 'Planning docs for the docs site itself, including structure, requirements, and section-level improvements.',
-    order: 3,
+    order: 4,
   },
   editor: {
     label: 'Editor',
     description: 'Planning docs for a writing/editor workflow that can compile authored content down to clean EPUB3.',
-    order: 4,
+    order: 5,
   },
   magicborn: {
     label: 'Magicborn',
     description:
       'Worldbuilding and canon dossiers; planned RAG corpus alongside site docs and books planning.',
-    order: 5,
+    order: 6,
+  },
+  'repo-planner': {
+    label: 'Repo Planner',
+    description: 'Vendored RepoPlanner CLI, submodule, local cockpit policy, and integration tasks.',
+    order: 7,
   },
 };
 

@@ -1,0 +1,80 @@
+---
+title: Architecture conventions
+description: Product boundaries, layering, and refactor direction for the portfolio app.
+date: "2026-03-29"
+updated: "2026-03-29"
+order: 20
+repoPath: apps/portfolio/content/docs/documentation/architecture-conventions.mdx
+---
+
+# Architecture and coding conventions
+
+Source of truth for product boundaries, layering, and refactor direction. Update this before large structural work.
+
+## Product model
+
+- **Portfolio, not platform:** The app is a personal portfolio and creative workspace. Optimize for owner workflows, public reading, and lightweight interaction. Do not assume multi-user SaaS requirements.
+- **Read-only by default:** Public visitors can browse, read, and optionally chat. Any mutation path must be explicitly justified and gated.
+- **Local-first authoring:** If a browser editor exists for manuscript/planning/creative work, treat it as a local workspace first. Important output must be exportable. Server persistence is optional and must be deliberate.
+- **Repo-first publishing:** Authored site content lives in files. The repo is the canonical source for books, blog, docs, resumes, and curated project content.
+
+## Persistence ownership
+
+Choose one owner for every new datum before implementation:
+
+| Owner | Use for | Do not use for |
+| --- | --- | --- |
+| `repo` | authored content, planning docs, canonical copy, versioned assets | casual session state, public user drafts |
+| `client-local` | reader annotations, chat drafts/history, editor drafts, view preferences, temporary workspaces | anything that must survive device/browser loss without export |
+| `server` | narrow owner-critical operational data such as messages, moderation, inbox/review state | default storage for books, blog posts, docs, or anonymous user creative work |
+
+Rules:
+
+- The current local SQLite setup is a convenience, not a durable public data platform.
+- Vercel-hosted ephemeral/local storage should be treated as disposable unless a real hosted persistence layer is introduced.
+- If data matters to the user and there is no real account/persistence plan, require export/import.
+
+## Admin and CMS posture
+
+- Keep `/admin` owner-only and local/dev-first by default.
+- Treat Payload CMS as a possible future tool for **narrow operational collections** or a slim RAG backend (`sources`, `chunks`, `ingest-runs`, `messages`) when it reduces wiring, not as the default publishing backend.
+- Do not migrate file-authored content into a CMS or database unless requirements explicitly change.
+- Never expose manuscript or `.planning` writes on public routes without explicit auth or local-only gating.
+- Do not ship an unauthenticated public admin surface in production; public read APIs and owner ingest/admin surfaces are separate concerns.
+
+## Folder and layer rules
+
+Target structure for the app:
+
+- `app/`: route entrypoints, server actions, API handlers, and page-level composition only.
+- `components/<feature>/`: view components and interaction shells. Keep them focused on rendering and local UI state.
+- `services/<domain>/`: domain logic, IO orchestration, persistence adapters, and feature workflows. Introduce this instead of growing `lib/` into a grab bag.
+- `lib/`: shared low-level utilities, format helpers, and framework glue that are not feature-owned.
+- `stores/`: Zustand stores only when a feature truly needs cross-component client state.
+- `queries/`: React Query hooks only when there is actual async/server state worth caching and invalidating.
+- `types/` or domain-local `types.ts`: stable shared interfaces; keep them near the owning domain when practical.
+
+## Coding conventions
+
+- Prefer feature ownership over giant shared files. A feature folder with a few focused files is better than one oversized utility module.
+- Keep IO away from presentational components. UI components should not directly own file reads, database setup, raw `fetch` orchestration, or provider wiring when a service can own it.
+- Follow DRY by extracting repeated policy or transformation logic, not by forcing unrelated features through premature abstractions.
+- Follow SOLID pragmatically: single-purpose modules, explicit interfaces between layers, dependency direction from UI to services to storage adapters.
+- Add new dependencies only when they reduce long-term complexity. Avoid stacking multiple overlapping frameworks for the same job.
+- Prefer composition over inheritance and small adapters over magic global helpers.
+- When introducing browser persistence, wrap storage access behind feature-specific adapters so schema/version changes stay isolated.
+- Validate external or user-generated data at the boundary before it enters the rest of the app.
+
+## Current repo implications
+
+- `apps/portfolio/lib/content.ts` already supports the repo-first content model and should remain the canonical path for file-authored content.
+- `apps/portfolio/lib/db/schema.ts` currently models `projects`, `blog_posts`, and `docs`, but that should be treated as legacy/dev-only direction unless requirements change. Those collections are not the planned source of truth.
+- `apps/portfolio/app/admin/*` currently reads file-based content in development, which is consistent with the current product posture.
+
+## Explicit refactor stages
+
+1. **Boundary audit:** remove ambiguity around what belongs in repo files, client-local state, and server storage.
+2. **Service extraction:** move feature logic out of routes/components into domain services and adapters.
+3. **State normalization:** standardize localStorage/IndexedDB/export flows for client-owned data.
+4. **Owner tools:** tighten admin/auth boundaries and only then evaluate whether a CMS like Payload adds enough value for narrow internal data.
+5. **Hardening:** add rate limits, logging, and hosted persistence only where a real operational need exists.

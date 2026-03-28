@@ -1,0 +1,28 @@
+---
+title: Task Registry
+description: RepoPlanner alignment tasks for the portfolio monorepo.
+date: "2026-03-29"
+updated: "2026-03-29"
+order: 5
+repoPath: apps/portfolio/content/docs/repo-planner/task-registry.mdx
+---
+
+# Repo Planner — Task Registry
+
+## Phase `repo-planner-integration-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `repo-planner-integration-01-01` | `done` | Add `vendor/repo-planner` submodule; document in [Vendoring](/docs/documentation/vendoring) | `-` | submodule path exists |
+| `repo-planner-integration-01-02` | `done` | Root `pnpm planning*` scripts + CLI deps at workspace root | `01-01` | `pnpm planning -- --help` |
+| `repo-planner-integration-01-03` | `done` | Docs section `repo-planner/` + [Global](/docs/global/global-planning) IA | `01-02` | `pnpm run build` |
+| `repo-planner-integration-01-04` | `done` | Bootstrap RepoPlanner XML via `pnpm planning:init` (alongside existing `.md`) | `01-02` | `.planning/STATE.xml` exists |
+| `repo-planner-integration-01-05` | `planned` | Migrate narrative requirements from MD → XML or generated MD; update `AGENTS.md` read order | `01-04` | agents use one canonical path |
+| `repo-planner-integration-01-06` | `planned` | Optional read-only upload viewer for pack / `.planning` zip (ephemeral) | `01-03` | no prod write path |
+
+## Registry rules
+
+| Field | Value |
+| --- | --- |
+| `status-set` | `planned`, `in-progress`, `done`, `blocked` |
+| `verification` | smallest proof that matches the row |
