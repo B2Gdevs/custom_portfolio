@@ -2,8 +2,9 @@
 title: Planning Docs
 description: Planning loop records for the documentation section.
 date: "2026-03-16"
-updated: "2026-03-16"
+updated: "2026-03-28"
 order: 1
+repoPath: apps/portfolio/content/docs/documentation/planning-docs.mdx
 ---
 
 # Planning Docs
@@ -12,6 +13,7 @@ order: 1
 
 | Record | Purpose |
 | --- | --- |
+| `global-planning` | repo-wide vs section planning model, id namespaces, cross-references, Mermaid workflow diagrams |
 | `state` | current cycle, focus, and constraints for the documentation section |
 | `task-registry` | active and queued documentation-site work |
 | `errors-and-attempts` | notable failed approaches and restructures |
@@ -26,3 +28,22 @@ order: 1
 | `3` | verify docs rendering and app build output |
 | `4` | write the new state back into these records |
 
+## Agent context (read order)
+
+For **documentation-section** work, read this page first, then [global planning](/docs/documentation/global-planning) (namespaces, references, diagrams), then [state](/docs/documentation/state), [task registry](/docs/documentation/task-registry), [decisions](/docs/documentation/decisions). For **monorepo-wide** gates, read [.planning/REQUIREMENTS.md](../../../../../.planning/REQUIREMENTS.md) and [.planning/IMPLEMENTATION_PLAN.md](../../../../../.planning/IMPLEMENTATION_PLAN.md), then root **`AGENTS.md`** at the repository root. Full order is specified in that file.
+
+## Machine-readable frontmatter
+
+| Field | Use |
+| --- | --- |
+| `repoPath` | Repo-relative path to this `.mdx` file for grep and editor open. |
+| `taskPhase` | Registry phase id this page most closely tracks (e.g. `documentation-site-03`). |
+
+These keys are not rendered in the docs article body (only `title` / `description` appear in the header).
+
+## Id Rule
+
+| Field | Value |
+| --- | --- |
+| `phase-id` | use `documentation-site-<phase>` for documentation section phases |
+| `task-id` | use `documentation-site-<phase>-<task>` for executable work |

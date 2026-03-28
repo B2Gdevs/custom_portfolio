@@ -1,11 +1,23 @@
 import type { MDXComponents } from 'mdx/types';
-import React, { type ComponentProps } from 'react';
+import React, { type ComponentProps, type ReactNode } from 'react';
 import Image from 'next/image';
 import { CodeBlock } from '@/components/docs/CodeBlock';
+import { Mermaid } from '@/components/docs/Mermaid';
 import YouTubeEmbed from '@/components/projects/YouTubeEmbed';
 import BookReaderEmbed from '@/components/books/BookReaderEmbed';
 import Callout from '@/components/blog/Callout';
 import DocLinkCard from '@/components/blog/DocLinkCard';
+
+function reactNodeToPlainText(node: ReactNode): string {
+  if (node == null || typeof node === 'boolean') return '';
+  if (typeof node === 'string' || typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(reactNodeToPlainText).join('');
+  if (React.isValidElement(node)) {
+    const props = node.props as { children?: ReactNode };
+    return reactNodeToPlainText(props.children);
+  }
+  return '';
+}
 
 function buildMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -103,7 +115,12 @@ function buildMDXComponents(components: MDXComponents): MDXComponents {
       // Extract language from className or data-language
       const langMatch = className.match(/language-(\w+)/);
       const language: string = langMatch ? langMatch[1] : String(dataLanguage ?? '');
-      
+
+      if (language === 'mermaid') {
+        const chart = reactNodeToPlainText(codeElement).trim();
+        return <Mermaid chart={chart} />;
+      }
+
       // Pass the pre element directly (rehype-pretty-code already created it with syntax highlighting)
       // props contains the pre element attributes, props.children contains the code element
       return (

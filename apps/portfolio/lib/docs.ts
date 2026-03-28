@@ -73,22 +73,24 @@ function getDocPriority(slug: string): number {
   const leaf = slug.split('/').pop() || slug;
 
   if (leaf === 'planning-docs') return 0;
-  if (leaf === 'state') return 1;
-  if (leaf === 'task-registry') return 2;
-  if (leaf === 'errors-and-attempts') return 3;
-  if (leaf === 'decisions') return 4;
-  if (leaf === 'requirements') return 5;
-  if (leaf === 'roadmap') return 6;
-  if (leaf === 'index') return 7;
-  if (leaf === 'overview') return 8;
-  if (leaf === 'getting-started') return 9;
-  return 10;
+  if (leaf === 'global-planning') return 1;
+  if (leaf === 'state') return 2;
+  if (leaf === 'task-registry') return 3;
+  if (leaf === 'errors-and-attempts') return 4;
+  if (leaf === 'decisions') return 5;
+  if (leaf === 'requirements') return 6;
+  if (leaf === 'roadmap') return 7;
+  if (leaf === 'index') return 8;
+  if (leaf === 'overview') return 9;
+  if (leaf === 'getting-started') return 10;
+  return 11;
 }
 
 export function isPlanningDocSlug(slug: string): boolean {
   const leaf = slug.split('/').pop() || slug;
   return (
     leaf === 'planning-docs' ||
+    leaf === 'global-planning' ||
     leaf === 'state' ||
     leaf === 'task-registry' ||
     leaf === 'errors-and-attempts' ||

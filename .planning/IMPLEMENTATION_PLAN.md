@@ -27,6 +27,7 @@ Read this each iteration; pick one task; update after completing.
 - [x] Portfolio redesign follow-up: add a resume hub with direct printable resume pages and fold it into the public site navigation.
 - [x] Scrollbar polish follow-up: keep page and sidebar scrollbars visually aligned with stable gutters across the main site and docs shells.
 - [x] Docs planning follow-up: rewrite section planning pages into compact XML-style record layouts that are readable and parseable.
+- [x] Documentation: global planning page (Mermaid, id namespaces, `.planning` cross-refs) at `content/docs/documentation/global-planning.mdx` + `mermaid` dependency and MDX `pre` handling.
 - [x] Books reader follow-up: make the homepage reader load on demand from its CTA and show visible disabled upcoming-book choices.
 - [x] Books reader spread fix: restore visible two-page desktop spreads after `build:books` by pairing authored pages into shared EPUB spine documents and lowering the in-app spread threshold to match the actual reader viewport.
 - [x] Books reader shell polish: remove the shared public footer from `/books/[bookSlug]/read`, let the reader page consume the full available shell height, and add a collapsible desktop sidebar for more reading room.
@@ -34,14 +35,30 @@ Read this each iteration; pick one task; update after completing.
 - [x] Books reader TOC motion polish: animate the in-reader contents sidebar and backdrop so the EPUB reader panel opens and closes with the same eased motion language as the site shell.
 - [x] Books reader local upload + frozen runtime: allow opening arbitrary local `.epub` files in the in-app reader and add a separate production-style reader build/run path for reading without `next dev` hot reload.
 - [x] Books reader build cleanup + versioning: remove stale `.repub` artifacts from active book outputs, remove the obsolete repub release/download path, and store frozen reader builds as versioned snapshots with a default `latest` runner.
+- [x] Ch3 manuscript: Jack lair intercut dateline uses **earlier** flashback wording so chronology matches Morgana’s present thread.
+- [x] Reader annotations + export: CFI highlights/comments, IndexedDB, JSON import/export, optional `META-INF/portfolio-annotations.json` repack, planning panel on read route.
+- [x] Site AI chat: CopilotKit + OpenAI (`gpt-4o-mini` default) with floating bubble.
+- [x] Planning portal: build-time export of section planning MDX to `public/planning-pack/site/`, demo pack + generic planning-agent `AGENTS.md`, `manifest.json`, Zustand modal registry, planning pack modal (nav + hero entry points).
 
 ## Books & reader
 
-- **Requirements:** [.planning/REQUIREMENTS.md](.planning/REQUIREMENTS.md)
+- **Requirements:** [.planning/REQUIREMENTS.md](.planning/REQUIREMENTS.md) — includes **Reader + AI roadmap (phases)** (shipped vs planned).
+- **Architecture / conventions:** [.planning/ARCHITECTURE_CONVENTIONS.md](.planning/ARCHITECTURE_CONVENTIONS.md)
 - **Design / styling:** [.planning/DESIGN_STYLING.md](.planning/DESIGN_STYLING.md)
 - **Vendoring (Koodo/Kookit):** [.planning/VENDORING.md](.planning/VENDORING.md)
+- **Books docs (mirrored tasks):** [task-registry.mdx](apps/portfolio/content/docs/books/task-registry.mdx), [state.mdx](apps/portfolio/content/docs/books/state.mdx)
 
 Artifacts: `packages/repub-builder` (CLI, epub only), `packages/book-components` (MDX components), `vendor/kookit` (with RepubRender), `vendor/koodo-reader` (submodule; wire .repub when checked out).
+
+### Reader / annotations / site AI — phase snapshot (2026-03-28)
+
+| Track | Shipped in repo | Still open (see REQUIREMENTS phase table + Next below) |
+| --- | --- | --- |
+| Manuscript | Ch3 Jack dateline + `MT-CH3-JACK-DATELINE` | — |
+| Reader annotations | P1–P3 + P3b per REQUIREMENTS | P4 build merge, P5 EPUB planning spine |
+| Site AI | CopilotKit + `/api/copilotkit` + layout-gated bubble | AI-v1a-AI-v1d Payload + `sqlite-vec` RAG planning, then AI-v2 stack evaluation |
+
+**Process:** Prefer updating REQUIREMENTS phase table and books **task registry** / **state** before coding new reader or AI scope. Early implementation of annotations/chat is acknowledged in REQUIREMENTS; future work should stay plan-first per AGENTS.md.
 
 ## Release & lint
 
@@ -50,8 +67,32 @@ Artifacts: `packages/repub-builder` (CLI, epub only), `packages/book-components`
 - [x] **Release workflows:** repub-builder tarball glob fixed (`portfolio-repub-builder-*.tgz`); repub-reader release added (tag `repub-reader-v*`); Koodo Reader release workflow added (tag `koodo-reader-v*`, builds from vendor/koodo-reader). **Wire .repub in Koodo** (see VENDORING.md) when reader is built.
 - [x] **.releases:** `.releases/` in gitignore; `scripts/download-releases.cjs` downloads repub-builder, repub-reader, and Koodo Reader assets into `.releases/`. Run with optional tag args or leave empty for latest.
 
-## Next (optional / when needed)
+## Planning portal & agent doc hierarchy
 
+Cross-cutting work tracked in **documentation** section: [task-registry.mdx](apps/portfolio/content/docs/documentation/task-registry.mdx) phase `documentation-site-03`. Spec: [.planning/REQUIREMENTS.md](.planning/REQUIREMENTS.md) **Planning packs & homepage modal**.
+
+| Step | Task | Id (documentation section) |
+| --- | --- | --- |
+| 1 | Document and adopt **read order** + `repoPath` / `taskPhase` frontmatter; keep **root `AGENTS.md`** and `.planning` in sync. | `documentation-site-03-01` |
+| 2 | **Demo pack** static `.md` under `public/planning-pack/demo/` + generic **planning agent** `AGENTS.md`. | `documentation-site-03-02` |
+| 3 | **Build-time** export: section planning MDX → `public/planning-pack/site/` + `manifest.json` (**no** public `.planning`). | `documentation-site-03-03` |
+| 4 | **Modal registry** (Zustand) + planning pack UI: tabs, PDF-style thumbnails, hover download/expand. | `documentation-site-03-04` |
+| 5 | List **only existing** files; no placeholders for missing section `AGENTS.md`. | `documentation-site-03-05` |
+
+**Global planning (human index):** [global-planning.mdx](apps/portfolio/content/docs/documentation/global-planning.mdx) at `/docs/documentation/global-planning` — layers (`.planning` vs section docs), id shape `<namespace>-<stream>-<phase>-<task>`, cross-reference conventions, Mermaid workflow diagrams; exported in planning-pack `.md` with fenced `mermaid` blocks. Linked from root `AGENTS.md` and [documentation/planning-docs.mdx](apps/portfolio/content/docs/documentation/planning-docs.mdx).
+
+## Next (planning-first refactor queue)
+
+- [ ] **Phase 1 - product boundary cleanup:** formalize `repo` vs `client-local` vs `server` ownership for every active feature; remove any assumption that public visitors can write manuscript/planning data or that authored content belongs in the DB.
+- [ ] **Phase 1a - content source cleanup:** deprecate DB-backed `projects` / `blog_posts` / `docs` as planned source-of-truth collections in `apps/portfolio/lib/db/schema.ts`; keep file-authored content repo-first.
+- [ ] **Phase 2 - service extraction:** introduce domain service folders for content, books/reader, chat, and admin so routes/components stop owning mixed UI + IO logic.
+- [ ] **Phase 2a - state boundary rules:** introduce storage adapters for `localStorage` / IndexedDB flows and only add Zustand or React Query where shared client state or async caching is justified.
+- [ ] **Phase 3 - owner-only admin posture:** keep `/admin` local/dev or explicitly auth-gated; if Payload is introduced, scope it to narrow owner-operated collections such as messages/inbox or other internal records, not blog/docs/books publishing.
+- [ ] **Books AI planning:** tracked in [task-registry.mdx](apps/portfolio/content/docs/books/task-registry.mdx) as `books-ai-01-01` through `books-ai-01-07` (Payload collections, `sqlite-vec` with `text-embedding-3-small` `1536d`, `magicborn` worldbuilding ingest scope, hybrid rerank/filter, citation panel, basic-auth admin and ingest flow).
+- [ ] **Books reader follow-up:** tracked as `books-reader-02-01` / `books-reader-02-02` for annotation merge and optional planning XHTML in the EPUB spine.
+- [ ] **Books publishing follow-up:** tracked as `books-publishing-01-01` / `books-publishing-01-02` for editions/progression planning and the next visible book EPUB.
+- [ ] **AI hardening:** rate limits, abuse logging, and post-RAG operational cleanup.
+- [ ] **Assistant UI / Tool UI / MCP:** evaluate via `books-ai-01-07`; add read-only MCP apps when the agent stack stabilizes.
 - [ ] Portfolio redesign phase 5: replace current PCB / dev aesthetic on the public landing page with the literary visual system in `.planning/PORTFOLIO_EXPERIENCE_REDESIGN.md`.
 - [ ] Portfolio redesign phase 6: evaluate selective WebGL or React Three Fiber additions only after the non-WebGL experience is stable.
 - [x] Wire book-components into repub pack/epub when building from .mdx (MDX compiler + component map).
@@ -66,6 +107,8 @@ Artifacts: `packages/repub-builder` (CLI, epub only), `packages/book-components`
 
 ## Notes
 
+- **Planning reset (2026-03-28):** clarified the product boundary: visitors are read-only by default, browser authoring must be local-first/export-oriented unless explicitly gated, repo files remain the canonical source for authored content, and the DB is reserved for narrow owner-critical operational data. Refactor stages now live in `.planning/ARCHITECTURE_CONVENTIONS.md`.
+- **RAG direction (2026-03-28):** planning now assumes a slim Payload CMS + SQLite backend for chat retrieval data, with `sqlite-vec` as the vector layer. Repo content stays canonical; indexed chunks are the retrieval copy. Source scope is docs/projects/blog plus `magicborn` worldbuilding material, ingest is script-first with an admin trigger, admin uses basic auth, embeddings default to `text-embedding-3-small` at `1536` dimensions, retrieval uses an FTS5 BM25 rerank pass, chat reads only from the last completed ingest run, removed sources drop out of the active corpus immediately on commit, and source ids remain stable across reindex runs.
 - **Blitzpanel resume expansion (2026-03-24):** `blitzpanel_resume.html` now reads like a fuller traditional resume with expanded professional summary, richer past/current experience detail, Blitzpanel-relevant project highlights, and an explicit additional-talents section tied to the current stack and active work.
 - **Blitzpanel follow-up (2026-03-24):** added `blitzpanel_resume.html` to `misc/html_resumes` and registered metadata so it appears first in `/resumes`; updated sidebar top tabs to include Projects, Books, Songs, and an external GitHub shortcut; removed the previous `Current shape` copy card; added direct external links for GitHub and `dungeon-break-docs.vercel.app` in the Projects nav section.
 - **Resume download list follow-up (2026-03-24):** `/resumes` now includes a `Direct source downloads` bullet list that enumerates every discovered file from `misc/html_resumes` (including axiom/autohdr/bild/openweb variants) with direct attachment links.

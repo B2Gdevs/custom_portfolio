@@ -32,6 +32,15 @@ export const mdxOptions: MdxOptionsType = {
         {
           theme: 'github-dark',
           keepBackground: false,
+          filter: (node: { tagName?: string; children?: unknown[] }) => {
+            if (node.tagName !== 'pre') return true;
+            const child = node.children?.[0] as
+              | { properties?: { className?: string | string[] } }
+              | undefined;
+            const cls = child?.properties?.className;
+            const list = Array.isArray(cls) ? cls : cls ? [cls] : [];
+            return !list.some((c) => String(c).includes('language-mermaid'));
+          },
           onVisitLine(node: RehypeLineNode) {
             if (node.children.length === 0) {
               node.children = [{ type: 'text', value: ' ' }];
