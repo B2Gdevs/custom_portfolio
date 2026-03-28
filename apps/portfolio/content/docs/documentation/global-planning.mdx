@@ -2,7 +2,7 @@
 title: Global planning
 description: How repo-wide .planning relates to section docs, ID namespaces, cross-references, and workflow diagrams.
 date: "2026-03-28"
-updated: "2026-03-28"
+updated: "2026-03-29"
 order: 2
 repoPath: apps/portfolio/content/docs/documentation/global-planning.mdx
 taskPhase: documentation-site-04
@@ -31,7 +31,7 @@ Use a **fixed segment order** so ids parse left to right:
 | Segment | Meaning |
 | --- | --- |
 | `namespace` | Partition key: matches the docs folder and known sections in `apps/portfolio/lib/docs.ts` (`books`, `documentation`, `editor`, `dialogue-forge`, `blog`, `magicborn`, …). |
-| `stream` | Product line inside that section (e.g. `reader`, `publishing`, `site` for the docs site itself, `workflow` for the editor toolchain). Prefer stable stream names over one-off topics. |
+| `stream` | Product line inside that section (e.g. books: `reader`, `publishing`, `ai`; documentation: `site`; editor: `workflow`). Prefer stable stream names over one-off topics. |
 | `phase` | `01`, `02`, … or `01a` for a decimal insert between phases. |
 | `task` | `01`, `02`, … within the phase (omit only when naming a phase as a whole). |
 

@@ -20,6 +20,7 @@ const SECTION_LABELS = {
   blog: 'Blog',
   documentation: 'Documentation',
   editor: 'Editor',
+  magicborn: 'Magicborn',
 };
 
 function formatSectionLabel(sectionKey) {

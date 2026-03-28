@@ -28,6 +28,7 @@ Read this each iteration; pick one task; update after completing.
 - [x] Scrollbar polish follow-up: keep page and sidebar scrollbars visually aligned with stable gutters across the main site and docs shells.
 - [x] Docs planning follow-up: rewrite section planning pages into compact XML-style record layouts that are readable and parseable.
 - [x] Documentation: global planning page (Mermaid, id namespaces, `.planning` cross-refs) at `content/docs/documentation/global-planning.mdx` + `mermaid` dependency and MDX `pre` handling.
+- [x] Planning ids: document `books-*` streams (`reader`, `publishing`, `ai`, including `books-ai-00` vs `books-ai-01`) aligned to `<namespace>-<stream>-<phase>-<task>`; `magicborn` in `lib/docs.ts` + planning-pack `SECTION_LABELS`; REQUIREMENTS task convention uses namespace/stream wording; books planning-docs links to global planning.
 - [x] Books reader follow-up: make the homepage reader load on demand from its CTA and show visible disabled upcoming-book choices.
 - [x] Books reader spread fix: restore visible two-page desktop spreads after `build:books` by pairing authored pages into shared EPUB spine documents and lowering the in-app spread threshold to match the actual reader viewport.
 - [x] Books reader shell polish: remove the shared public footer from `/books/[bookSlug]/read`, let the reader page consume the full available shell height, and add a collapsible desktop sidebar for more reading room.

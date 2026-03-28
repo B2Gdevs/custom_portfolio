@@ -2,8 +2,9 @@
 title: Planning Docs
 description: Compact XML-style planning index for the books section.
 date: "2026-03-15"
-updated: "2026-03-16"
+updated: "2026-03-29"
 order: 1
+repoPath: apps/portfolio/content/docs/books/planning-docs.mdx
 ---
 
 # Planning Docs
@@ -17,14 +18,18 @@ order: 1
 | [Errors and Attempts](/docs/books/errors-and-attempts) | `attempt-records` | Failures, corrections, and still-open problem tracks. |
 | [Decisions](/docs/books/decisions) | `decision-records` | Accepted section decisions and their consequences. |
 
+## Repo-wide planning model
+
+For **namespaces, streams, cross-references to `.planning`, and Mermaid workflow diagrams**, read [Global planning](/docs/documentation/global-planning) in the documentation section first when onboarding or renaming phases. Books task ids below already follow that shape.
+
 ## Book: Mordred's Tale
 
 | Page | Record Set | Purpose |
 | --- | --- | --- |
-| [Mordred's Tale — Outline](/docs/books/mordreds-tale-outline) | `mordreds-tale-outline` | Full narrative arc, chapter beats, path to completed first draft. |
-| [Mordred's Tale — State](/docs/books/mordreds-tale-state) | `mordreds-tale-state` | Narrative fronts, manuscript position, next writing queue. |
-| [Mordred's Tale — Task Registry](/docs/books/mordreds-tale-task-registry) | `mordreds-tale-tasks` | Writing and story tasks (draft to completion first; polish phase later). |
-| [Mordred's Tale — Decisions](/docs/books/mordreds-tale-decisions) | `mordreds-tale-decisions` | Story and writing decisions (style, timeline, POV). |
+| [Mordred's Tale - Outline](/docs/books/mordreds-tale-outline) | `mordreds-tale-outline` | Full narrative arc, chapter beats, path to completed first draft. |
+| [Mordred's Tale - State](/docs/books/mordreds-tale-state) | `mordreds-tale-state` | Narrative fronts, manuscript position, next writing queue. |
+| [Mordred's Tale - Task Registry](/docs/books/mordreds-tale-task-registry) | `mordreds-tale-tasks` | Writing and story tasks (draft to completion first; polish phase later). |
+| [Mordred's Tale - Decisions](/docs/books/mordreds-tale-decisions) | `mordreds-tale-decisions` | Story and writing decisions (style, timeline, POV). |
 
 ## Section Scope
 
@@ -32,8 +37,8 @@ order: 1
 | --- | --- |
 | `section` | `books` |
 | `source` | repo-authored books under `books/<slug>/` |
-| `delivery` | EPUB output, manifest generation, and reading surfaces |
-| `coverage` | planning notes that affect publishing, editions, or reading UX |
+| `delivery` | EPUB output, manifest generation, reading surfaces, and site AI planning |
+| `coverage` | planning notes that affect publishing, editions, reading UX, `magicborn` worldbuilding ingestion, or RAG-backed chat |
 
 ## Record Rules
 
@@ -43,5 +48,23 @@ order: 1
 | `shape` | Use fixed fields, short values, and explicit ids instead of prose blocks. |
 | `update-trigger` | Change these records before or with any books workflow change. |
 | `follow-on-docs` | Reader and implementation docs come after the planning stack. |
+| `reader-extensions` | Shipped reader/AI scope is summarized in [.planning/REQUIREMENTS.md](../../../../../.planning/REQUIREMENTS.md) **Reader + AI roadmap (phases)** (P0-P3b, AI-v0 shipped; Payload + `sqlite-vec` RAG planning now tracked under AI-v1a-AI-v1d, with `magicborn` as the public lore corpus and a lightweight rerank pass; P4-P5 and AI-v2 still planned). Details and task ids: [task registry](/docs/books/task-registry). |
 | `agent-loop` | Follow `AGENTS.md`: read planning state, pick one books task, implement, verify, then update planning records. |
 | `book-planning` | Per-book planning (e.g. Mordred's Tale) uses the same compact schema: state, task registry, decisions. Update book state and tasks when drafting or revising manuscript. |
+
+## Phases, task ids, and frontmatter
+
+Shape matches [global planning](/docs/documentation/global-planning): **`<books>-<stream>-<phase>-<task>`** (namespace `books` is fixed for this section).
+
+| Stream | Phases (examples) | Scope |
+| --- | --- | --- |
+| `reader` | `books-reader-01`, `books-reader-02` | In-app EPUB reader, annotations, read-route planning UI |
+| `publishing` | `books-publishing-01` | Editions, build visibility, next live EPUB |
+| `ai` | `books-ai-00`, `books-ai-01` | **`books-ai-00`** = shipped site chat (CopilotKit). **`books-ai-01`** = planned Payload + `sqlite-vec` RAG, ingest, citations, owner tooling |
+
+- **Phase id:** `books-<stream>-<phase>` (e.g. `books-reader-02`, `books-publishing-01`, `books-ai-01`).
+- **Task id:** `books-<stream>-<phase>-<task>` (e.g. `books-ai-01-04`, `books-reader-01-16`, `books-publishing-01-02`).
+- **`repoPath`:** Optional YAML frontmatter on any planning `.mdx` file: repo-relative path to this file (this page sets `repoPath: apps/portfolio/content/docs/books/planning-docs.mdx`). Not shown in the article body.
+- **`taskPhase`:** Optional frontmatter when a page is owned by a single phase (e.g. a future `books-ai-01-kickoff.mdx`). Omit on shared indexes like [task registry](/docs/books/task-registry).
+
+Read order for **books** work: this page -> [global planning](/docs/documentation/global-planning) (optional but recommended once) -> [state](/docs/books/state) -> [task registry](/docs/books/task-registry) -> linked book-specific pages; then [.planning/REQUIREMENTS.md](../../../../../.planning/REQUIREMENTS.md) for reader/tooling scope; root **`AGENTS.md`** for the loop.

@@ -49,6 +49,12 @@ const DOC_SECTION_META: Record<string, DocSectionMeta> = {
     description: 'Planning docs for a writing/editor workflow that can compile authored content down to clean EPUB3.',
     order: 4,
   },
+  magicborn: {
+    label: 'Magicborn',
+    description:
+      'Worldbuilding and canon dossiers; planned RAG corpus alongside site docs and books planning.',
+    order: 5,
+  },
 };
 
 function formatSectionLabel(sectionKey: string): string {

@@ -2,33 +2,81 @@
 title: Task Registry
 description: Compact task records for the books section.
 date: "2026-03-15"
-updated: "2026-03-16"
+updated: "2026-03-29"
+repoPath: apps/portfolio/content/docs/books/task-registry.mdx
 order: 3
 ---
 
 # Task Registry
 
-## Phase `books-01`
+## Id shape (books section)
+
+All ids here use **`<books>-<stream>-<phase>-<task>`** (see [global planning](/docs/documentation/global-planning)). Streams in this registry:
+
+| Stream | Meaning |
+| --- | --- |
+| `reader` | EPUB reading surfaces, annotations, read-page planning strip |
+| `publishing` | Editions and which book EPUBs are live |
+| `ai` | Site chat + RAG roadmap: **`books-ai-00`** = shipped CopilotKit (task `books-ai-00-01`); **`books-ai-01`** = forward Payload / `sqlite-vec` / ingest / citations queue |
+
+Legacy-looking ids such as `books-ai-01-04` are **not** a separate scheme: **`ai`** is the stream name, same as **`reader`** in `books-reader-01-16`.
+
+## Phase `books-reader-01`
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
-| `books-01-01` | `done` | move section planning docs into the books docs area | `-` | `pnpm run build`, `pnpm run lint` |
-| `books-01-02` | `in-progress` | improve the dedicated reader so it feels like the primary reading surface | `books-01-01` | `pnpm run build` |
-| `books-01-03` | `done` | make the homepage CTA mount the featured book reader and expose a disabled coming-soon second book | `books-01-02` | `pnpm run build`, `pnpm run lint` |
-| `books-01-04` | `done` | fix EPUB image packaging so the front-page reader stops resolving broken archive assets | `books-01-03` | `pnpm run build:books`, `pnpm run build`, `pnpm run lint` |
-| `books-01-05` | `done` | make the book build pipeline treat empty upcoming-book folders as `coming soon` instead of logging a failed EPUB build | `books-01-04` | `pnpm run build:books` |
-| `books-01-06` | `done` | change the front-page reader to load EPUB bytes before mounting `react-reader` so browser requests stop falling back to `/META-INF/container.xml` | `books-01-05` | `pnpm run build`, `pnpm run lint` |
-| `books-01-07` | `done` | make the homepage act as a reader launch surface that routes into `/books/<slug>/read` instead of depending on a second embedded runtime | `books-01-06` | `pnpm run build`, `pnpm run lint` |
-| `books-01-08` | `done` | add header-level book switching on the dedicated reader page so the read route can move between available books without returning to the index | `books-01-07` | `pnpm run build`, `pnpm run lint` |
-| `books-01-09` | `done` | tune the dedicated reader for wide-screen spreads and a richer TOC presentation | `books-01-08` | `pnpm run build`, `pnpm run lint` |
-| `books-01-10` | `done` | shift the dedicated reader spread farther off the TOC toggle and align the reading stage with the header chrome | `books-01-09` | `pnpm run build`, `pnpm run lint` |
-| `books-01-11` | `done` | rewrite emitted EPUB page shells so lead images sit under the page title, opening paragraphs stay visible, and folio numbers render at the bottom | `books-01-10` | `pnpm run build:books`, `pnpm run build` |
-| `books-01-12` | `done` | add a subtle bottom navigation strip with current section title, previous/next controls, and direct page jumps on the dedicated reader | `books-01-11` | `pnpm run build`, `pnpm run lint` |
-| `books-01-13` | `done` | define a formal manuscript convention for acts, chapters, chapter openers, and story pages, then teach the EPUB builder to emit that structure | `books-01-12` | `pnpm run build:books`, `pnpm run build` |
-| `books-01-14` | `done` | fix EPUB spine generation so story pages excluded from the TOC still appear in reading order | `books-01-13` | `pnpm run build:books`, `pnpm run build` |
-| `books-01-15` | `in-progress` | replace the built-in TOC with a truly collapsed custom panel, restore wide-screen two-page spreads, and keep every illustrated page on the same fixed image frame shape as the placeholder state | `books-01-14` | `pnpm run build:books`, `pnpm run build` |
-| `books-01-16` | `planned` | expand planning records around publishing, editions, and progression | `books-01-15` | `pnpm run build:books` |
-| `books-01-17` | `planned` | build a live EPUB for the next visible book once the manuscript is ready | `books-01-15` | `pnpm run build:books`, `pnpm run build` |
+| `books-reader-01-01` | `done` | move section planning docs into the books docs area | `-` | `pnpm run build`, `pnpm run lint` |
+| `books-reader-01-02` | `done` | improve the dedicated reader so it feels like the primary reading surface | `books-reader-01-01` | `pnpm run build` |
+| `books-reader-01-03` | `done` | make the homepage CTA mount the featured book reader and expose a disabled coming-soon second book | `books-reader-01-02` | `pnpm run build`, `pnpm run lint` |
+| `books-reader-01-04` | `done` | fix EPUB image packaging so the front-page reader stops resolving broken archive assets | `books-reader-01-03` | `pnpm run build:books`, `pnpm run build`, `pnpm run lint` |
+| `books-reader-01-05` | `done` | make the book build pipeline treat empty upcoming-book folders as `coming soon` instead of logging a failed EPUB build | `books-reader-01-04` | `pnpm run build:books` |
+| `books-reader-01-06` | `done` | change the front-page reader to load EPUB bytes before mounting `react-reader` so browser requests stop falling back to `/META-INF/container.xml` | `books-reader-01-05` | `pnpm run build`, `pnpm run lint` |
+| `books-reader-01-07` | `done` | make the homepage act as a reader launch surface that routes into `/books/<slug>/read` instead of depending on a second embedded runtime | `books-reader-01-06` | `pnpm run build`, `pnpm run lint` |
+| `books-reader-01-08` | `done` | add header-level book switching on the dedicated reader page so the read route can move between available books without returning to the index | `books-reader-01-07` | `pnpm run build`, `pnpm run lint` |
+| `books-reader-01-09` | `done` | tune the dedicated reader for wide-screen spreads and a richer TOC presentation | `books-reader-01-08` | `pnpm run build`, `pnpm run lint` |
+| `books-reader-01-10` | `done` | shift the dedicated reader spread farther off the TOC toggle and align the reading stage with the header chrome | `books-reader-01-09` | `pnpm run build`, `pnpm run lint` |
+| `books-reader-01-11` | `done` | rewrite emitted EPUB page shells so lead images sit under the page title, opening paragraphs stay visible, and folio numbers render at the bottom | `books-reader-01-10` | `pnpm run build:books`, `pnpm run build` |
+| `books-reader-01-12` | `done` | add a subtle bottom navigation strip with current section title, previous/next controls, and direct page jumps on the dedicated reader | `books-reader-01-11` | `pnpm run build`, `pnpm run lint` |
+| `books-reader-01-13` | `done` | define a formal manuscript convention for acts, chapters, chapter openers, and story pages, then teach the EPUB builder to emit that structure | `books-reader-01-12` | `pnpm run build:books`, `pnpm run build` |
+| `books-reader-01-14` | `done` | fix EPUB spine generation so story pages excluded from the TOC still appear in reading order | `books-reader-01-13` | `pnpm run build:books`, `pnpm run build` |
+| `books-reader-01-15` | `done` | replace the built-in TOC with a truly collapsed custom panel, restore wide-screen two-page spreads, and keep every illustrated page on the same fixed image frame shape as the placeholder state | `books-reader-01-14` | `pnpm run build:books`, `pnpm run build` |
+| `books-reader-01-16` | `done` | ship reader annotations (highlights/comments, CFI, IndexedDB, list/jump/delete/edit note) | `books-reader-01-15` | `pnpm run build`, `pnpm run lint` |
+| `books-reader-01-17` | `done` | JSON export/import for annotation sets + optional annotated EPUB zip with `META-INF/portfolio-annotations.json` | `books-reader-01-16` | manual reader smoke test |
+| `books-reader-01-18` | `done` | read-only planning/docs panel on dedicated reader route for Mordred's Tale | `books-reader-01-15` | `pnpm run build` |
+
+## Phase `books-publishing-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `books-publishing-01-01` | `planned` | expand planning records around publishing, editions, and progression | `books-reader-01-15` | `pnpm run build:books` |
+| `books-publishing-01-02` | `planned` | build a live EPUB for the next visible book once the manuscript is ready | `books-publishing-01-01` | `pnpm run build:books`, `pnpm run build` |
+
+## Phase `books-ai-00`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `books-ai-00-01` | `done` | AI-v0: site floating AI chat (CopilotKit + OpenAI mini); document env in `.env.example` | `-` | `pnpm run build`, `pnpm run lint` |
+
+## Phase `books-reader-02`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `books-reader-02-01` | `planned` | P4: merge exported annotations into `build:books` output for fixed author editions | `books-reader-01-17` | `pnpm run build:books` |
+| `books-reader-02-02` | `planned` | P5: supplementary planning XHTML in EPUB spine (offline author pack); defer until P4 evaluated | `books-reader-02-01` | `pnpm run build:books` |
+
+## Phase `books-ai-01` (forward queue)
+
+Work after `books-ai-00` and alongside `books-reader-02` / `books-publishing-01`. Phase ids mirror [.planning/REQUIREMENTS.md](../../../../../.planning/REQUIREMENTS.md) **Reader + AI roadmap**.
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `books-ai-01-01` | `planned` | AI-v1a: define Payload CMS collections (`sources`, `chunks`, `ingest-runs`, optional messages), source-of-truth boundaries, and SQLite ownership for chat retrieval | `books-ai-00-01` | planning docs updated |
+| `books-ai-01-02` | `planned` | AI-v1b: plan `sqlite-vec` loading strategy, `vec0` table shape, metadata/aux column usage, and `text-embedding-3-small` `1536d` cosine storage | `books-ai-01-01` | planning docs updated |
+| `books-ai-01-03` | `planned` | AI-v1c: design ingest + chunking pipeline for `content/docs`, `content/projects`, `content/blog`, and `magicborn` world-building material; exclude raw manuscript text by default; define reindex/checksum rules | `books-ai-01-02` | planning docs updated |
+| `books-ai-01-04` | `planned` | AI-v1c: design retrieval contract for query embeddings, vector top-k search, lightweight rerank/filter, and citation payloads back to chat | `books-ai-01-03` | planning docs updated |
+| `books-ai-01-05` | `planned` | AI-v1c: plan chat UX to render cited chunks inside a collapsible Sources panel with source links and snippets | `books-ai-01-04` | design notes in decisions/requirements |
+| `books-ai-01-06` | `planned` | AI-v1d: define basic-auth protection for Payload admin and ingest/reindex controls, plus script-first and admin-trigger ingest flows | `books-ai-01-01` | decision recorded |
+| `books-ai-01-07` | `planned` | AI-v2: evaluate Assistant UI / Tool UI vs CopilotKit AG-UI; read-only MCP when stack is stable | `books-ai-01-05` | design notes in decisions |
 
 ## Registry Rules
 
