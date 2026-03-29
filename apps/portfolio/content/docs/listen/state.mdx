@@ -1,0 +1,44 @@
+---
+title: State
+description: Compact state records for the Listen section.
+date: "2026-03-28"
+updated: "2026-03-28"
+order: 2
+repoPath: apps/portfolio/content/docs/listen/state.mdx
+taskPhase: listen-surface-01
+---
+
+# State
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `listen` |
+| `owner` | `listen-section` |
+| `status` | `active` |
+| `updated` | `2026-03-28` |
+
+## Current cycle
+
+| Field | Value |
+| --- | --- |
+| `phase` | `listen-surface-01` |
+| `plan` | ship a single **Listen** index at **`/listen`**: songs + **BandLab presets** in one catalog, **filter/search** parity with blog and projects, and **group passwords** for locked rows — no full user accounts |
+| `focus` | planning docs and task registry are authoritative; implementation follows **`listen-surface-01-01`** onward |
+| `constraint` | keep unlock **simple** (shared secrets per lock group, browser session); do not scope OAuth or per-user ACLs in v1 |
+
+## Next queue
+
+| Priority | Action | Type |
+| --- | --- | --- |
+| `1` | `listen-surface-01-01`–`01-03`: unified catalog model, discovery UI, password gate | `feature` |
+| `2` | `listen-surface-01-04`–`01-05`: route doc + nav cross-links | `ia` |
+
+## References
+
+| Id | Path | Purpose |
+| --- | --- | --- |
+| `listen-page` | `apps/portfolio/app/listen/` | public Listen route |
+| `music-lib` | `apps/portfolio/lib/music.ts` | current static tracks |
+| `route-conventions` | `content/docs/documentation/route-conventions.mdx` | URL taxonomy |

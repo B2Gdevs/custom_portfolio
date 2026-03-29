@@ -2,7 +2,7 @@
 title: State
 description: RepoPlanner integration state for the portfolio monorepo.
 date: "2026-03-29"
-updated: "2026-03-29"
+updated: "2026-03-30"
 order: 4
 repoPath: apps/portfolio/content/docs/repo-planner/state.mdx
 taskPhase: repo-planner-integration-01
@@ -17,23 +17,26 @@ taskPhase: repo-planner-integration-01
 | `section` | `repo-planner` |
 | `owner` | `monorepo` |
 | `status` | `active` |
-| `updated` | `2026-03-29` |
+| `updated` | `2026-03-30` |
 
 ## Current cycle
 
 | Field | Value |
 | --- | --- |
 | `phase` | `repo-planner-integration-01` |
-| `focus` | Submodule pinned; root `pnpm planning*` scripts; docs section; XML bootstrap alongside existing `.planning/*.md`; clarify local-only cockpit vs public read-only site |
-| `constraint` | Do not deploy editable RepoPlanner cockpit on production portfolio |
+| `focus` | **Export-first embed:** default **403** on **`apply`** + **CLI POST**; GET reads committed **`.planning/`**; docs explain greenfield init vs portfolio **`.md`** loop; upstream track **client-only** cockpit + export |
+| `constraint` | **`PLANNING_COCKPIT_ALLOW_SERVER_WRITES=1`** only when operators want server writes from the browser; no in-site planning LLM |
 
 ## Next queue
 
 | Priority | Action |
 | --- | --- |
-| `1` | Reconcile `REQUIREMENTS.xml` stub with `.planning/REQUIREMENTS.md` over time; pick single agent read order |
+| `1` | Finish merging archive narrative into **[documentation/requirements](/docs/documentation/requirements)**; keep **`REQUIREMENTS.xml`** stub aligned; **`.planning/*.xml`** roadmap-first |
 | `2` | Optional: client-side or isolated **upload pack / .zip .planning** viewer — read-only, ephemeral only |
-| `3` | Bump `vendor/repo-planner` when upstream adds features this repo needs |
+| `3` | Upstream: hide or no-op **Chat** tab in embed; optional **`repo-planner-integration-01-10`** (install-routes, zip ingest) |
+| `4` | Bump `vendor/repo-planner` when upstream improves components (real shadcn vs stubs) |
+| `5` | Execute `repo-planner-integration-01-08` — pack-parity `.planning` + move doc-template prose to AGENTS/skills |
+| `6` | **`repo-planner-integration-01-13`** + **`documentation-site-07-01`**: formal CLI (`--help`, subcommands, `npx` / global); see [integration](/docs/repo-planner/integration) **Planned: formal CLI** |
 
 ## References
 
@@ -42,3 +45,4 @@ taskPhase: repo-planner-integration-01
 | `submodule` | `vendor/repo-planner` |
 | `cli` | `vendor/repo-planner/scripts/loop-cli.mjs` |
 | `root-scripts` | `package.json` (repository root) |
+| `tool-page` | `apps/portfolio/app/docs/apps/repo-planner/page.tsx` |

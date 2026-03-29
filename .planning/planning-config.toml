@@ -1,7 +1,7 @@
 [planning]
 sprintSize = 5
 currentProfile = "human"
-conventionsPaths = ["AGENTS.md"]
+conventionsPaths = ["AGENTS.md", "REQUIREMENTS.md", ".planning/AGENTS.md"]
 
 [profiles.human]
 description = "Default human view."

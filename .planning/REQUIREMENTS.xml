@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <planning-references>
   <doc>
-    <path>README.md</path>
+    <path>apps/portfolio/content/docs/documentation/requirements.mdx</path>
     <content><![CDATA[
-# Requirements (REQ-01)
+# Requirements (stub)
 
-Describe what this repository should deliver, who it is for, and what "done" means for phase 01.
+Canonical monorepo requirements: documentation section requirements.mdx.
+Cross-cutting queue: documentation/state.mdx.
+Overview: documentation/roadmap.mdx.
 
-- Replace this stub with your real PRD bullets or link out to a longer doc.
-- Keep ROADMAP phase 01 requirements in sync (e.g. REQ-01).
+Repo root REQUIREMENTS.md is a stub pointer only.
 ]]></content>
   </doc>
 </planning-references>

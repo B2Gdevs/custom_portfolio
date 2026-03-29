@@ -3,9 +3,32 @@ title: "RichEPub Format Spec (Archived)"
 description: "An archived note describing the earlier `.repub` container experiment and its manifest shape."
 date: "2025-03-11"
 tags: ["RichEPub", "Format", "Specification"]
+links:
+  - label: "Books Planning Docs"
+    href: "/docs/books/planning-docs"
+    description: "Current books direction after the `.repub` archive."
+  - label: "Editor Docs"
+    href: "/docs/editor"
+    description: "Where the remaining tooling questions live."
+searchKeywords: ["repub spec", "zip container", "archive format note", "builder versioning"]
 ---
 
-RichEPub (`.repub`) is a **ZIP-based container** with a fixed layout and a root manifest. This post is kept as an archived note from that experiment.
+## Downloads & Resources
+
+- [Books Planning Docs](/docs/books/planning-docs) for the live books pipeline.
+- [Editor Docs](/docs/editor) for the current authoring-tool discussion.
+
+## Introduction
+
+RichEPub (`.repub`) is a **ZIP-based container** with a fixed layout and a root manifest. This post is kept as an archived note from that experiment, not as the active recommendation for the books pipeline.
+
+## Tradeoffs
+
+A fixed container format makes packaging rules explicit, but it also forces the reader, builder, and documentation to move in lockstep. That coordination cost is exactly why the project stepped back toward EPUB3 for the current path.
+
+## What Was Done
+
+This note documents the old container shape, manifest fields, and versioning expectations so the archive remains referenceable without pretending the format is still the primary direction.
 
 ## Layout
 
@@ -31,5 +54,14 @@ The dependencies object describes what the author used when building. It's typic
 
 - **formatVersion**: Bump when the container or manifest schema changes in a backward-incompatible way.
 - **builderVersion**: Identifies the tool that produced the file (for debugging).
+
+## Conclusion
+
+The specification is still worth preserving as an artifact, but it now serves as reference material rather than roadmap. The live work moved to better tooling and standard output instead of continued container design.
+
+## Examples
+
+- The layout and `repub.json` sections are the clearest concrete examples of how the old container was structured.
+- The versioning notes are the example of the operational overhead that comes with maintaining a custom format.
 
 The project is no longer an active part of the docs surface here, but the archive note remains useful if you need to reference the container shape later.

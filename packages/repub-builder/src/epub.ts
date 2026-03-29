@@ -275,6 +275,69 @@ nav a:visited {
   font-weight: 600;
   text-decoration: none;
 }
+
+.planning-appendix-doc {
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 1.1rem 1.05rem 1.6rem;
+  background: #f5ecde;
+  color: #24170f;
+}
+
+.planning-appendix-header {
+  margin: 0 0 0.85rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid rgba(94, 67, 41, 0.2);
+}
+
+.planning-appendix-kicker {
+  margin: 0 0 0.28rem;
+  color: #836142;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.planning-appendix-title {
+  margin: 0;
+  color: #1b120d;
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.planning-appendix-path {
+  margin: 0.35rem 0 0;
+  color: #6b5340;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.68rem;
+  word-break: break-all;
+}
+
+.planning-appendix-body {
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.planning-appendix-body > :first-child {
+  margin-top: 0;
+}
+
+.planning-appendix-pre {
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  overflow-x: auto;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(102, 69, 36, 0.18);
+  background: rgba(255, 255, 255, 0.45);
+  color: #2a1710;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 `;
 
 function slugToTitle(slug: string): string {
@@ -540,6 +603,147 @@ function renderChapterOpener(chapterMeta: ChapterMeta): string {
   `.trim();
 }
 
+const PLANNING_SKIP_DIR_NAMES = new Set([
+  'node_modules',
+  '.git',
+  'dist',
+  '.next',
+  '__pycache__',
+]);
+
+const PLANNING_TEXT_EXT = /\.(md|mdx|xml|toml|txt)$/i;
+
+function slugifyForFilename(value: string): string {
+  const s = value
+    .replace(/\\/g, '/')
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .toLowerCase();
+  return s || 'doc';
+}
+
+function collectPlanningFilePaths(rootDir: string): string[] {
+  const root = path.resolve(rootDir);
+  if (!fs.existsSync(root)) {
+    console.warn(`Planning dir not found, skipping: ${root}`);
+    return [];
+  }
+  const out: string[] = [];
+  function walk(dir: string) {
+    let entries: fs.Dirent[];
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const ent of entries) {
+      if (PLANNING_SKIP_DIR_NAMES.has(ent.name)) continue;
+      const full = path.join(dir, ent.name);
+      if (ent.isDirectory()) walk(full);
+      else if (ent.isFile() && PLANNING_TEXT_EXT.test(ent.name)) out.push(full);
+    }
+  }
+  walk(root);
+  return out.sort((a, b) => a.localeCompare(b));
+}
+
+export interface RunEpubOptions {
+  planningDirs?: string[];
+}
+
+async function buildPlanningAppendixContent(
+  bookFolder: string,
+  planningRoots: string[],
+): Promise<
+  Array<{
+    title: string;
+    data: string;
+    filename: string;
+    excludeFromToc?: boolean;
+  }>
+> {
+  const items: Array<{
+    title: string;
+    data: string;
+    filename: string;
+    excludeFromToc?: boolean;
+  }> = [];
+  const usedFilenames = new Set<string>();
+
+  for (const rootRaw of planningRoots) {
+    const root = path.resolve(rootRaw);
+    const rootLabel = path.basename(root);
+    const filePaths = collectPlanningFilePaths(root);
+
+    for (const fileAbs of filePaths) {
+      const rel = path.relative(root, fileAbs);
+      const relDisplay = rel.split(path.sep).join(' / ');
+      const ext = path.extname(fileAbs).toLowerCase();
+      const baseStem = slugifyForFilename(
+        `${rootLabel}-${rel.replace(/\.[^.]+$/, '')}`,
+      );
+      let stem = `plan-${baseStem}`;
+      if (usedFilenames.has(stem)) {
+        let n = 2;
+        while (usedFilenames.has(`${stem}-${n}`)) n += 1;
+        stem = `${stem}-${n}`;
+      }
+      usedFilenames.add(stem);
+
+      let title: string;
+      let data: string;
+
+      if (ext === '.md' || ext === '.mdx') {
+        const raw = fs.readFileSync(fileAbs, 'utf8');
+        const parsed = matter(raw);
+        const fm = parsed.data as Record<string, unknown>;
+        const body = parsed.content;
+        if (typeof fm.title === 'string' && fm.title.trim()) {
+          title = `${rootLabel}: ${fm.title.trim()}`;
+        } else {
+          title = `${rootLabel}: ${relDisplay}`;
+        }
+        const html =
+          ext === '.mdx' ? await mdxToHtml(body, fileAbs) : await marked.parse(body);
+        const htmlRewritten = rewriteImagesToFileUrls(html, bookFolder);
+        const bodyInner = stripLeadingPageHeading(htmlRewritten.trim());
+        data = `
+    <article class="planning-appendix-doc">
+      <header class="planning-appendix-header">
+        <p class="planning-appendix-kicker">Planning supplement</p>
+        <h1 class="planning-appendix-title">${escapeHtml(title)}</h1>
+        <p class="planning-appendix-path">${escapeHtml(relDisplay)}</p>
+      </header>
+      <div class="planning-appendix-body">${bodyInner}</div>
+    </article>
+  `.trim();
+      } else {
+        title = `${rootLabel}: ${relDisplay}`;
+        const rawText = fs.readFileSync(fileAbs, 'utf8');
+        data = `
+    <article class="planning-appendix-doc planning-appendix-doc--raw">
+      <header class="planning-appendix-header">
+        <p class="planning-appendix-kicker">Planning supplement</p>
+        <h1 class="planning-appendix-title">${escapeHtml(title)}</h1>
+        <p class="planning-appendix-path">${escapeHtml(relDisplay)}</p>
+      </header>
+      <pre class="planning-appendix-pre">${escapeHtml(rawText)}</pre>
+    </article>
+  `.trim();
+      }
+
+      items.push({
+        title,
+        filename: stem,
+        excludeFromToc: true,
+        data,
+      });
+    }
+  }
+
+  return items;
+}
+
 function wrapPageHtml({
   chapterMeta,
   title,
@@ -581,7 +785,11 @@ function wrapPageHtml({
   `.trim();
 }
 
-export async function runEpub(folder: string, outputPath: string): Promise<void> {
+export async function runEpub(
+  folder: string,
+  outputPath: string,
+  options?: RunEpubOptions,
+): Promise<void> {
   const meta = loadMeta(folder);
   const chapterEntries = collectChapterEntries(folder).filter((entry) => entry.files.length > 0);
   const files = chapterEntries.flatMap((entry) => entry.files);
@@ -652,6 +860,15 @@ export async function runEpub(folder: string, outputPath: string): Promise<void>
         data: `<section class="reader-spread">${spreadPages.map((page) => page.data).join('\n')}</section>`,
       });
     }
+  }
+
+  const planningRoots = (options?.planningDirs ?? [])
+    .map((d) => path.resolve(d))
+    .filter((d) => fs.existsSync(d));
+
+  if (planningRoots.length > 0) {
+    const appendix = await buildPlanningAppendixContent(folder, planningRoots);
+    content.push(...appendix);
   }
 
   const outDir = path.dirname(outputPath);

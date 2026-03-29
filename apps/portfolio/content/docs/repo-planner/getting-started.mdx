@@ -2,7 +2,7 @@
 title: Getting started
 description: Planning loop concepts and RepoPlanner CLI entry points for any project.
 date: "2026-03-29"
-updated: "2026-03-29"
+updated: "2026-03-30"
 order: 2
 repoPath: apps/portfolio/content/docs/repo-planner/getting-started.mdx
 ---
@@ -36,4 +36,4 @@ Greenfield bootstrap (creates XML + templates; use **`--no-agents-md`** here bec
 pnpm planning:init
 ```
 
-**Brownfield:** this repo already had `.planning/*.md`. After **`pnpm planning:init`**, you will have **parallel** `REQUIREMENTS.xml` (stub) alongside **`REQUIREMENTS.md`** — reconcile over time; see [Integration](/docs/repo-planner/integration).
+**Brownfield:** **`pnpm planning:init`** (minimal) creates **`.planning/`** for **XML** + **`planning-config.toml`** + **`.planning/AGENTS.md`**; may create repo-root **`REQUIREMENTS.md`** as a **stub** if missing. **Canonical** monorepo narrative: **[documentation/requirements](/docs/documentation/requirements)** + **[documentation/state](/docs/documentation/state)**. Execution lives in **`ROADMAP.xml`** / **`TASK-REGISTRY.xml`** / **`STATE.xml`** — not `IMPLEMENTATION_PLAN.md`. Stub **`REQUIREMENTS.xml`** points at those documentation paths; see [Integration](/docs/repo-planner/integration).

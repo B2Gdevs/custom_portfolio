@@ -3,9 +3,32 @@ title: "What the RichEPub Toolchain Actually Taught Me"
 description: "The useful part of the experiment was the workflow thinking, not the `.repub` format itself."
 date: "2025-03-11"
 tags: ["RichEPub", "EPUB3", "Tooling", "Workflow"]
+links:
+  - label: "Books Planning Docs"
+    href: "/docs/books/planning-docs"
+    description: "Current books and reader planning after the RichEPub archive."
+  - label: "Editor Docs"
+    href: "/docs/editor"
+    description: "Where the tooling and authoring questions live now."
+searchKeywords: ["richepub archive", "epub3 tooling", "writing pipeline", "authoring workflow"]
 ---
 
-The original RichEPub toolchain was built around a custom `.repub` package. In practice, that was not the part worth optimizing.
+## Downloads & Resources
+
+- [Books Planning Docs](/docs/books/planning-docs) for the live books and reader direction.
+- [Editor Docs](/docs/editor) for the tooling questions that replaced the old container-first framing.
+
+## Introduction
+
+The original RichEPub toolchain was built around a custom `.repub` package. In practice, that was not the part worth optimizing; the useful work was always in how messy writing inputs get normalized into something publishable.
+
+## Tradeoffs
+
+Inventing a new container promises control, but it also expands maintenance, reader constraints, and compatibility risk. Leaning on EPUB3 narrows the theoretical ceiling while dramatically improves interoperability and keeps the effort focused on authoring quality.
+
+## What Was Done
+
+This note captures the lessons from that experiment and narrows the active path: treat the old `.repub` work as archive material, keep the books pipeline EPUB3-first, and reserve future custom tooling for the editorial layer where it actually helps.
 
 What mattered was the pipeline thinking behind it:
 
@@ -53,3 +76,12 @@ So the current stance is simpler:
 - plan the editor carefully before pretending it should exist
 
 That planning now lives in the docs as its own section, because the editor is a tooling problem first, not a format-spec problem.
+
+## Conclusion
+
+The experiment only became useful once it was demoted from product direction to learning artifact. The durable insight is that export discipline and author tooling matter more than a bespoke container.
+
+## Examples
+
+- The uneven input list in this post is the clearest example of the real problem space.
+- The four-step editor pipeline is the practical replacement for the old `.repub`-first approach.

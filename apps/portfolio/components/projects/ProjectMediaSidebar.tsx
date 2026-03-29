@@ -296,7 +296,7 @@ export default function ProjectMediaSidebar({
                   className={`w-2 h-2 rounded-full transition-all ${
                     index === activeIndex
                       ? 'bg-accent w-6'
-                      : 'bg-text-muted hover:bg-text-primary'
+                      : 'bg-text-muted hover:bg-primary/50'
                   }`}
                   aria-label={`Go to media ${index + 1}`}
                 />

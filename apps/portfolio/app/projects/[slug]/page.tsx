@@ -3,10 +3,13 @@ import { getContentBySlug, getAllContent } from '@/lib/content';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { getMDXComponents } from '@/lib/mdx';
 import { mdxOptions } from '@/lib/mdx-options';
-import { ExternalLink, Github } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import ProjectMediaSidebar from '@/components/projects/ProjectMediaSidebar';
+import TableOfContents from '@/components/docs/TableOfContents';
+import { ContentTopLinks } from '@/components/content/ContentTopLinks';
+import { RequiredSectionsNotice } from '@/components/content/RequiredSectionsNotice';
+import { buildContentLinkGroups } from '@/lib/content-view-models';
 
 export async function generateStaticParams() {
   const projects = getAllContent('projects');
@@ -24,15 +27,13 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   }
 
   const components = getMDXComponents({});
-
   const heroImage = project.meta.featuredImage || project.meta.images?.[0];
   const galleryImages = project.meta.images || [];
-  
-  // Parse media items from metadata
+  const linkGroups = buildContentLinkGroups(project.meta);
+
   type MediaItemInput = { type?: string; url?: string } & Record<string, unknown>;
   const mediaItems = ((project.meta.media || []) as unknown as MediaItemInput[]).map((item: MediaItemInput) => {
     if (item.type === 'video' && item.url) {
-      // Convert YouTube URL to embed format
       let embedUrl = item.url;
       try {
         if (item.url.includes('youtube.com/watch') || item.url.includes('youtu.be/')) {
@@ -49,7 +50,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
           }
 
           if (videoId) {
-            // Convert timestamp from '302s' format to seconds number
             let startParam = '';
             if (timestamp) {
               const seconds = timestamp.replace(/[^0-9]/g, '');
@@ -60,8 +60,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
             embedUrl = `https://www.youtube.com/embed/${videoId}${startParam}`;
           }
         }
-      } catch (_e) {
-        // If URL parsing fails, keep original URL
+      } catch (_error) {
         console.warn('Failed to parse video URL:', item.url);
       }
       return { ...item, url: embedUrl };
@@ -70,11 +69,10 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   });
 
   return (
-    <article className="max-w-7xl mx-auto px-6 py-20">
-      {/* Hero Image */}
-      {heroImage && (
-        <div className="mb-12 rounded-xl overflow-hidden border border-border shadow-xl">
-          <div className="relative w-full h-96 md:h-[500px]">
+    <article className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+      {heroImage ? (
+        <div className="mb-10 overflow-hidden rounded-[2rem] border border-border shadow-xl">
+          <div className="relative h-80 w-full md:h-[500px]">
             <Image
               src={heroImage}
               alt={project.meta.title}
@@ -84,82 +82,86 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
             />
           </div>
         </div>
-      )}
+      ) : null}
 
-      <header className="mb-12">
-        <h1 className="text-5xl font-bold text-primary mb-4">{project.meta.title}</h1>
-        {project.meta.description && (
-          <p className="text-xl text-text-muted mb-6">{project.meta.description}</p>
-        )}
-        <div className="flex gap-4 flex-wrap">
-          {project.meta.githubUrl && (
-            <a
-              href={project.meta.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="brutal-button px-4 py-2 bg-secondary text-primary flex items-center gap-2"
-            >
-              <Github size={20} />
-              GitHub
-            </a>
-          )}
-          {project.meta.liveUrl && (
-            <a
-              href={project.meta.liveUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="brutal-button px-4 py-2 bg-accent text-secondary flex items-center gap-2"
-            >
-              <ExternalLink size={20} />
-              Live Demo
-            </a>
-          )}
-        </div>
-      </header>
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem_22rem]">
+        <div className="min-w-0 space-y-8 xl:col-span-2">
+          <header className="rounded-[2rem] border border-border/70 bg-dark-alt/60 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.16)]">
+            <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Project</p>
+            <h1 className="mt-3 font-serif text-4xl text-primary sm:text-5xl">{project.meta.title}</h1>
+            {project.meta.description ? (
+              <p className="mt-4 max-w-3xl text-lg text-text-muted">{project.meta.description}</p>
+            ) : null}
+            <div className="mt-5 flex flex-wrap gap-2">
+              {(project.meta.tags ?? []).map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full border border-border/70 px-3 py-1 text-xs text-text-muted"
+                >
+                  {tag}
+                </span>
+              ))}
+              {project.meta.status ? (
+                <span className="rounded-full border border-accent/50 px-3 py-1 text-xs uppercase tracking-[0.2em] text-accent">
+                  {project.meta.status}
+                </span>
+              ) : null}
+            </div>
+          </header>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Content */}
-        <div className="lg:col-span-2">
-          {/* Image Gallery */}
-          {galleryImages.length > 1 && (
-            <div className="mb-12" data-gallery-container>
-              <h2 className="text-2xl font-bold text-primary mb-6">Gallery</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <ContentTopLinks
+            heading="Links & Downloads"
+            appLinks={linkGroups.appLinks}
+            downloads={linkGroups.downloads}
+            links={linkGroups.links}
+          />
+
+          {process.env.NODE_ENV !== 'production' ? (
+            <RequiredSectionsNotice type="projects" missing={project.missingRequiredSections} />
+          ) : null}
+
+          {galleryImages.length > 1 ? (
+            <section className="rounded-[2rem] border border-border/70 bg-dark-alt/55 p-6" data-gallery-container>
+              <h2 className="font-serif text-2xl text-primary">Gallery</h2>
+              <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3">
                 {galleryImages.map((img: string, idx: number) => (
                   <div
                     key={idx}
                     data-gallery-image
-                    className="relative aspect-video rounded-lg overflow-hidden border border-border shadow-md hover:shadow-xl transition-shadow group cursor-pointer"
+                    className="group relative aspect-video cursor-pointer overflow-hidden rounded-2xl border border-border shadow-md transition-shadow hover:shadow-xl"
                   >
                     <Image
                       src={img}
                       alt={`${project.meta.title} - Image ${idx + 1}`}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   </div>
                 ))}
               </div>
+            </section>
+          ) : null}
+
+          <div className="rounded-[2rem] border border-border/70 bg-dark-alt/40 p-6 sm:p-8">
+            <div className="prose prose-lg max-w-none">
+              <MDXRemote source={project.content} components={components} options={mdxOptions} />
             </div>
-          )}
-          
-          <div className="prose prose-lg max-w-none">
-            <MDXRemote source={project.content} components={components} options={mdxOptions} />
           </div>
-          
-          <div className="mt-12 pt-8 border-t-4 border-primary">
-            <Link
-              href="/projects"
-              className="text-accent font-semibold hover:underline"
-            >
+
+          <div className="border-t border-border/70 pt-8">
+            <Link href="/projects" className="text-accent font-semibold hover:underline">
               ← Back to Projects
             </Link>
           </div>
         </div>
 
-        {/* Sticky Sidebar */}
-        <div className="lg:col-span-1">
+        <aside className="hidden xl:block">
+          <div className="sticky top-24 rounded-[2rem] border border-border/70 bg-dark-alt/60 p-5">
+            <TableOfContents headings={project.headings} />
+          </div>
+        </aside>
+
+        <div className="xl:col-span-1">
           <ProjectMediaSidebar
             mediaItems={mediaItems as { type: 'image' | 'video' | 'external' | 'documentation'; src?: string; url?: string; title?: string; thumbnail?: string }[]}
             galleryImages={galleryImages}
@@ -170,4 +172,3 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
     </article>
   );
 }
-

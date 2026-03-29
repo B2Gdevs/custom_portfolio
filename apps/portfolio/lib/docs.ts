@@ -26,7 +26,7 @@ interface DocSectionMeta {
 const DOC_SECTION_META: Record<string, DocSectionMeta> = {
   global: {
     label: 'Global',
-    description: 'Repo-wide planning index, layers, task ids, workflows, and planning-pack policy.',
+    description: 'Repo-wide planning loop (planning-docs, state, task registry) plus reference guides (e.g. global planning diagrams).',
     order: 0,
   },
   books: {
@@ -60,10 +60,16 @@ const DOC_SECTION_META: Record<string, DocSectionMeta> = {
       'Worldbuilding and canon dossiers; planned RAG corpus alongside site docs and books planning.',
     order: 6,
   },
+  listen: {
+    label: 'Listen',
+    description:
+      'Planning for /listen — tracks, BandLab presets, discovery filters, and simple group-password locks.',
+    order: 7,
+  },
   'repo-planner': {
     label: 'Repo Planner',
     description: 'Vendored RepoPlanner CLI, submodule, local cockpit policy, and integration tasks.',
-    order: 7,
+    order: 8,
   },
 };
 
@@ -85,11 +91,11 @@ function getSectionMeta(sectionKey: string): DocSectionMeta {
   );
 }
 
-function getDocPriority(slug: string): number {
+/** Sort order for docs in a section and for files under the virtual `planning/` folder in the file tree. */
+export function getDocPriority(slug: string): number {
   const leaf = slug.split('/').pop() || slug;
 
   if (leaf === 'planning-docs') return 0;
-  if (leaf === 'global-planning') return 1;
   if (leaf === 'state') return 2;
   if (leaf === 'task-registry') return 3;
   if (leaf === 'errors-and-attempts') return 4;
@@ -99,14 +105,21 @@ function getDocPriority(slug: string): number {
   if (leaf === 'index') return 8;
   if (leaf === 'overview') return 9;
   if (leaf === 'getting-started') return 10;
+  /** Stream-specific planning under `books/planning/` (e.g. Mordred's Tale). */
+  if (leaf.startsWith('mordreds-tale-')) {
+    if (leaf.includes('state')) return 20;
+    if (leaf.includes('task-registry')) return 21;
+    if (leaf.includes('decisions')) return 22;
+  }
   return 11;
 }
 
 export function isPlanningDocSlug(slug: string): boolean {
-  const leaf = slug.split('/').pop() || slug;
+  const parts = slug.split('/').filter(Boolean);
+  if (parts[0] === 'books' && parts[1] === 'planning') return true;
+  const leaf = parts[parts.length - 1] || slug;
   return (
     leaf === 'planning-docs' ||
-    leaf === 'global-planning' ||
     leaf === 'state' ||
     leaf === 'task-registry' ||
     leaf === 'errors-and-attempts' ||

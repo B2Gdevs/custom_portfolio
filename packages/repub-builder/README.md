@@ -37,3 +37,7 @@ console.log('Built:', outPath);
 ## Format
 
 See the [RichEPub format spec](https://github.com/MagicbornStudios/custom_portfolio/tree/main/apps/portfolio/content/docs/richepub) for the container layout and `repub.json` schema.
+
+## Roadmap: manuscript EPUB + reader runtime
+
+This package already powers **CLI / build-time** manuscript → EPUB for `books/<slug>/` (see repo `scripts/build-books.cjs`). **Planned:** add a **documented runtime surface** (React reader shell / workspace, optional Next.js route-handler helpers) so **`@portfolio/repub-builder`** is the single vertical for both **build** and **in-browser reading** — see [Route conventions](https://github.com/MagicbornStudios/custom_portfolio/blob/main/apps/portfolio/content/docs/documentation/route-conventions.mdx) and books decision **`BOOKS-READER-RUNTIME-REPUB-PACKAGE`**.

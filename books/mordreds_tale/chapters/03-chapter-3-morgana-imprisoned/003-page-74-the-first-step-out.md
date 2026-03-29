@@ -6,7 +6,7 @@ displayTitle: false
 
 ![Page 3](/books/mordreds_tale/images/ch03-p003.png)
 
-*Later — the lair.*
+*Earlier — the lair, before the eastern quarters.*
 
 Jack stood at the chamber door with a satchel of relics strapped tight to his hip and Maliphant’s pendant warm against his chest. The sleeping woman lay as she always lay: beautiful, infuriatingly peaceful, inhumanly still. He had learned the rhythm of her — how long a touch lasted in metal, how greedily a bracelet drank, how the glow died if you stepped away too soon.
 

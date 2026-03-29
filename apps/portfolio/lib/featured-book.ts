@@ -82,7 +82,7 @@ export function getFeaturedBookShowcase(slug = 'mordreds_tale'): FeaturedBookSho
     status: 'EPUB preview live now',
     heroEyebrow: 'A dark fantasy world is opening here first.',
     heroSummary:
-      'Lead with the story. Let visitors enter the book immediately, then discover the songs, systems, and experiments that orbit it.',
+      'Checkout my first book, Mordred\'s Tale.',
     worldIntro:
       'Mordred\'s Tale lives between myth and street-level survival: cursed bloodlines, old magic, scavenged relics, and people trying to stay human while power keeps asking for more.',
     worldDetails: [

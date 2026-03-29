@@ -72,13 +72,13 @@ export function buildSiteMenus({
         {
           label: 'Start Mordred\'s Tale',
           description: 'Jump straight into the in-browser reader.',
-          href: '/books/mordreds_tale/read',
+          href: '/apps/reader?book=mordreds_tale',
           icon: 'book-open',
         },
         {
-          label: 'All Books',
-          description: 'Browse every available reading edition.',
-          href: '/books',
+          label: 'Reader & library',
+          description: 'Open the in-browser reader and pick a book.',
+          href: '/apps/reader',
           icon: 'scroll',
         },
       ],

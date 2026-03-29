@@ -22,6 +22,7 @@ const SECTION_LABELS = {
   documentation: 'Documentation',
   editor: 'Editor',
   magicborn: 'Magicborn',
+  listen: 'Listen',
   'repo-planner': 'Repo Planner',
 };
 

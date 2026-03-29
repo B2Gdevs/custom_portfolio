@@ -2,8 +2,9 @@
 title: Planning Docs
 description: Planning loop records for the blog section.
 date: "2026-03-16"
-updated: "2026-03-16"
+updated: "2026-03-28"
 order: 1
+repoPath: apps/portfolio/content/docs/blog/planning-docs.mdx
 ---
 
 # Planning Docs
@@ -12,7 +13,7 @@ order: 1
 
 | Record | Purpose |
 | --- | --- |
-| `state` | current cycle, focus, and constraints for the blog section |
+| `state` | current cycle, focus, constraints, and active phase ids for the blog section |
 | `task-registry` | active and queued blog work in execution order |
 | `errors-and-attempts` | notable failed approaches and course corrections |
 | `decisions` | stable section decisions for blog structure and publishing |
@@ -26,3 +27,17 @@ order: 1
 | `3` | verify the site build and relevant content rendering |
 | `4` | update the blog records again before moving on |
 
+## Id Rule
+
+| Field | Value |
+| --- | --- |
+| `phase-id` | use `blog-<stream>-<phase>` for blog planning phases |
+| `task-id` | use `blog-<stream>-<phase>-<task>` for executable work |
+| `attempt-id` | use `blog-<stream>-<phase>-attempt-<task>` for notable course corrections |
+
+## Current Streams
+
+| Stream | Purpose |
+| --- | --- |
+| `content` | publishing strategy, categorization, and editorial direction |
+| `discovery` | index-page search, filters, sort, command palette, and article chrome |

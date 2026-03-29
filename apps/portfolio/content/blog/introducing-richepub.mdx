@@ -3,9 +3,32 @@ title: "RichEPub Was the Wrong Layer to Reinvent"
 description: "The custom-format experiment was useful, but the active direction is better EPUB3 tooling rather than a new container."
 date: "2025-03-11"
 tags: ["RichEPub", "EPUB3", "Writing Tools", "Books"]
+links:
+  - label: "Books Planning Docs"
+    href: "/docs/books/planning-docs"
+    description: "Current books roadmap after the RichEPub reset."
+  - label: "Editor Docs"
+    href: "/docs/editor"
+    description: "The live planning surface for authoring-tool questions."
+searchKeywords: ["repub archive", "epub3 first", "book tooling", "writing tool direction"]
 ---
 
+## Downloads & Resources
+
+- [Books Planning Docs](/docs/books/planning-docs) for the current shipping direction.
+- [Editor Docs](/docs/editor) for the authoring-tool discussion that survived the format reset.
+
+## Introduction
+
 RichEPub started from a real frustration: I wanted books to feel more like designed software. React components, richer layouts, better author tooling, and a cleaner path from draft to reader all sounded like reasons to invent a new container.
+
+## Tradeoffs
+
+The appeal of a custom format was flexibility, but that flexibility came with a hidden cost: every extra runtime rule, packaging rule, and reader expectation would have to be carried forever. Standard EPUB3 is more constrained, but it dramatically lowers the surface area that needs defending.
+
+## What Was Done
+
+This archive post narrows the original idea to its useful core: move away from container invention, keep the book output standard, and focus future effort on a structured authoring pipeline instead.
 
 After pushing on it, I do not think the container is the real problem.
 
@@ -41,5 +64,14 @@ A better system would be something closer to a writing tool:
 - an export layer that compiles those decisions down to EPUB3 without leaving a pile of manual cleanup at the end
 
 That is still a lot of work, and it may be more hassle than it is worth. But if there is a meaningful next step here, it is that. Not a new container.
+
+## Conclusion
+
+RichEPub only stayed valuable once it stopped pretending to be the final packaging answer. The real opportunity is better editorial workflow on the way to EPUB3, not another file format.
+
+## Examples
+
+- The `Notion -> markdown -> MDX` path is the most concrete example in the post of why source normalization matters more than containers.
+- The proposed writing-tool stack shows what a future iteration would actually need to own.
 
 The RichEPub posts stay up because the experiment was useful. The active direction is EPUB3-first tooling, better editorial workflow, and better reader presentation on top of standard output.

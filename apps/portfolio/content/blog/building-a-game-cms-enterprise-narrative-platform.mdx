@@ -7,9 +7,32 @@ featuredImage: "/images/blog/2025-12-21-21-10-14.png"
 images:
   - "/images/blog/2025-12-21-21-10-14.png"
   - "/images/blog/2025-12-21-21-10-45.png"
+links:
+  - label: "Dialogue Forge"
+    href: "/apps/dialogue-forge"
+    description: "The current internal narrative-tool surface."
+  - label: "Dialogue Forge Docs"
+    href: "/docs/dialogue-forge"
+    description: "Planning and architecture notes for narrative tooling."
+searchKeywords: ["blocknote editor", "game cms", "narrative tooling", "open source contribution"]
 ---
 
-I've been deep in the trenches building a game CMS enterprise narrative and storytelling platform. It's a complex system designed to help game developers and narrative designers create, manage, and deploy interactive stories at scale. Think of it as a content management system specifically tailored for branching narratives, dialogue trees, and story-driven game experiences.
+## Downloads & Resources
+
+- [Dialogue Forge](/apps/dialogue-forge) for the current internal narrative-tool surface.
+- [Dialogue Forge Docs](/docs/dialogue-forge) for the planning and implementation trail behind the idea.
+
+## Introduction
+
+I've been deep in the trenches building a game CMS enterprise narrative and storytelling platform. It's a system aimed at helping game developers and narrative designers create, manage, and deploy interactive stories at scale, with the editor choice acting as the critical leverage point.
+
+## Tradeoffs
+
+The editor decision came down to speed versus control. A custom editor would match the exact workflow, but it would take longer and cost more to maintain. A mature block editor like BlockNote gives up some purity in exchange for faster iteration, stronger defaults, and a healthier open-source ecosystem.
+
+## What Was Done
+
+This post documents the editor evaluation itself, why BlockNote surfaced as the best current fit, and how the open-source contribution history made the choice feel less theoretical and more grounded in tools I had already touched.
 
 ## The Challenge: Finding the Right Editor
 
@@ -111,4 +134,13 @@ As I continue building, I'm sure I'll find more opportunities to contribute back
 **Interested in BlockNote?** Check out the [project on GitHub](https://github.com/TypeCellOS/BlockNote) and the [documentation](https://www.blocknotejs.org/).
 
 **Building something similar?** I'd love to hear about your approach to narrative content management in games.
+
+## Conclusion
+
+The most useful part of this exploration was realizing that the editor is not just a widget choice; it shapes how narrative data, collaboration, and export pipelines will evolve. BlockNote made sense because it kept the platform moving without requiring a full custom editor bet on day one.
+
+## Examples
+
+- The BlockNote PR reference in this post is a concrete example of prior open-source work feeding directly into current product decisions.
+- The feature and block examples show the kinds of narrative-specific extensions a game-focused CMS still needs, even when the base editor is borrowed.
 

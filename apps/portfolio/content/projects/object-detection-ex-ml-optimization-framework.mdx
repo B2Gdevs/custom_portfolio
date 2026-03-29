@@ -2,21 +2,41 @@
 title: "Object Detection EX: Machine Learning Optimization Framework"
 description: "A comprehensive research framework for analyzing object detection data, optimizing ML models with genetic algorithms, and conducting systematic experiments on high-dimensional feature spaces."
 date: "2018-09-15"
+status: "research"
+featured: false
+featuredOrder: 6
 tags: ["Machine Learning", "Research", "Optimization", "Computer Vision", "Genetic Algorithms"]
 images:
   - "/images/projects/obj_detection/ux_feedback_1.png"
   - "/images/projects/obj_detection/ux_feedback_2.png"
   - "/images/projects/obj_detection/ux_feedback_3.png"
 featuredImage: "/images/projects/obj_detection/ux_feedback_1.png"
+searchKeywords: ["genetic algorithm optimization", "object detection research", "tsne visualization", "detectron experiments"]
 ---
+
+## Links & Downloads
+
+- This framework was research tooling rather than a public SaaS product, so the main artifacts here are the write-up, screenshots, and the related CVJSON workflow described inside the project.
 
 ## Overview
 
 Object Detection EX is a comprehensive research framework I developed during my time at Mayachitra to analyze object detection data produced by Detectron, optimize machine learning models through evolutionary algorithms, and conduct systematic experiments on high-dimensional feature spaces. The framework addresses the complex challenges of working with object detection annotations, feature extraction, and hyperparameter optimization in a research environment.
 
+## Role & Context
+
+This project sat inside a research environment where experimentation speed mattered as much as raw model quality. My role was to build the framework around the experiments: data handling, optimization loops, visualization, and reporting, so the research process became systematic instead of improvised.
+
 ## The Challenge
 
 Working with object detection data presents unique challenges: feature spaces are high-dimensional, annotations exist in multiple formats (JSON ground truth labels vs. HDF5 feature files), and finding optimal model architectures requires extensive experimentation. Traditional grid search approaches become computationally prohibitive when dealing with large hyperparameter spaces, especially when working with neural networks that require significant training time.
+
+## Tradeoffs
+
+The main tradeoff was between exhaustive optimization and tractable experimentation. Grid search is conceptually simple but becomes prohibitively expensive quickly, so the framework deliberately leans on approximations like genetic algorithms where the search cost has to stay practical.
+
+## Implementation
+
+The sections below walk through the core components of the framework, the optimization strategy, and the tooling that turned repeated model experiments into a more disciplined research workflow.
 
 ## Key Components
 
@@ -118,7 +138,12 @@ The framework was designed for analyzing maritime object detection datasets, spe
 - **Model Optimization**: Finding optimal neural network architectures for specific detection tasks
 - **Comparative Studies**: Systematic evaluation of different classifiers and architectures
 
-## Challenges and Solutions
+## Examples & Media
+
+- The three research screenshots are the main visual examples of how the framework exposed experiment and analysis feedback.
+- The genetic algorithm sample and the class-grouping notes are examples of the kinds of workflows the framework was built to support.
+
+## Tradeoffs
 
 **Challenge 1: Data Format Mismatch**
 - **Problem**: Ground truth annotations in JSON format vs. features in HDF5 format
@@ -136,7 +161,7 @@ The framework was designed for analyzing maritime object detection datasets, spe
 - **Problem**: Research experiments need systematic tracking and reporting
 - **Solution**: Automated experiment pipelines that collect metrics and generate comprehensive reports
 
-## Outcome
+## Outcomes
 
 Object Detection EX successfully streamlined the research workflow for object detection analysis, reducing experiment setup time from hours to minutes. The genetic algorithm implementation proved particularly valuable, finding optimal hyperparameters more efficiently than exhaustive grid search while maintaining comparable or better results.
 

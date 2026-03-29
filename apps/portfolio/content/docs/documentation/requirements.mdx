@@ -2,7 +2,8 @@
 title: Requirements
 description: Section requirements for the documentation site and its planning workflow.
 date: "2026-03-16"
-updated: "2026-03-16"
+updated: "2026-03-28"
+repoPath: apps/portfolio/content/docs/documentation/requirements.mdx
 order: 6
 ---
 
@@ -25,6 +26,37 @@ order: 6
 | `DOC-REQ-02` | the docs area should expose a roadmap with section-level status and next steps | readers need a short overview before drilling into section records |
 | `DOC-REQ-03` | planning docs and reference docs should remain clearly separated in section navigation | day-to-day planning should stay compact without burying reference material |
 | `DOC-REQ-04` | docs copy should be compact, field-based, and easy to render into structured UI later | these pages are living records, not prose essays |
+| `DOC-REQ-05` | section planning MDX is the first stop for **section** work; **root `.planning/*.xml`** + **root `AGENTS.md`** for **monorepo** gates — same workflow, two layers | matches root [`AGENTS.md`](../../../../../AGENTS.md) |
+| `DOC-REQ-06` | planning MDX may include `repoPath` and `taskPhase` frontmatter for local search; values must stay repo-accurate | agents and humans find files without guessing URL ↔ path mapping |
+| `DOC-REQ-07` | planning pack modal: demo `.md` plus build-time exports of section planning MDX only; `.planning` not public; open from nav/hero via Zustand modal registry (`documentation-site-03-04`) | planning packs policy also summarized in [global planning](/docs/global/global-planning) |
+| `DOC-REQ-08` | the docs IA should expose `magicborn` as a first-class section for public worldbuilding material written in short story form | world/lore writing needs a stable public home and a clear ingestion source for site chat |
+| `DOC-REQ-09` | active public content areas like `blog` and `projects` should have section-local planning docs when their UX, IA, or schema is being actively redesigned | content-structure decisions should not get buried in unrelated documentation pages |
+
+## Monorepo scope (canonical narrative)
+
+Narrative for **cross-section** product scope lives **here**, not in repo-root **`REQUIREMENTS.md`** (that file is a **stub pointer**). **`.planning/REQUIREMENTS.xml`** is a machine stub that points to this page.
+
+| Topic | Requirement |
+| --- | --- |
+| **Books / EPUB** | Optional **planning supplement** trees: `repub epub … --planning <dir>` and `book.json` **`epubPlanningDirs`** via `@portfolio/repub-builder` and `scripts/build-books.cjs` — detail in [books planning-docs](/docs/books/planning-docs). |
+| **Reader + site** | Books, reader, site stack, documentation — restore deeper tables from archive as you merge. |
+| **Site AI** | Chat should ground on repo-backed RAG, **Sources** panel with snippets and deep links; public chat read-only; repo content is source of truth. |
+| **Listen** | **`/listen`** — unified catalog for **audio tracks** and **BandLab presets**, discovery UX aligned with blog/projects, **group-based shared passwords** for locked rows (no per-user accounts in v1). Planning: [listen planning-docs](/docs/listen/planning-docs). |
+
+## CLI productization (decisions, 2026-03-30)
+
+Tracked as **`documentation-site-07`** / **`repo-planner-integration-01-13`**. **Owner intent:**
+
+| Decision | Choice |
+| --- | --- |
+| **Distribution (v1)** | Document **`pnpm dlx`** / **`npx`**-style invocation; no requirement to publish to npm for the first cut. |
+| **RepoPlanner code** | Changes land in **`vendor/repo-planner`** submodule (upstream); bump submodule in this repo. |
+| **Packages** | **Two CLIs** — RepoPlanner loop-cli (product name TBD) and **`repub`**; not one mega-cli. |
+| **Rich UI** | **Ink** for TTY-rich flows where it helps. |
+| **Argv** | **Breaking argv / subcommand changes allowed** when improving structure. |
+| **`@portfolio/repub-builder`** | **Publish later**; **today** document **`pnpm dlx`** / workspace **`pnpm exec repub`**. |
+| **Published components / runtimes** | **Next.js only** for the app-embed story (RepoPlanner UI package, portfolio host). |
+| **Node** | Explicit **`engines.node`** (e.g. **≥ 22**) on publishable CLIs. |
 
 ## Quality Gates
 

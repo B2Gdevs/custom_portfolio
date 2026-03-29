@@ -1,19 +1,16 @@
-import { getAllContent } from '@/lib/content';
-import ProjectsGrid from '@/components/projects/ProjectsGrid';
-import ProjectsHeader from '@/components/projects/ProjectsHeader';
+import { ContentIndexClient } from '@/components/content/ContentIndexClient';
+import { getAllContentEntries } from '@/lib/content';
+import { toDiscoveryItem } from '@/lib/content-view-models';
 
 export default function ProjectsPage() {
-  const projects = getAllContent('projects');
+  const projects = getAllContentEntries('projects').map((entry) => toDiscoveryItem('projects', entry));
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-20">
-      <div className="max-w-4xl mx-auto text-center mb-12">
-        <ProjectsHeader />
-      </div>
-      <div className="max-w-5xl mx-auto">
-        <ProjectsGrid projects={projects} />
-      </div>
-    </div>
+    <ContentIndexClient
+      kind="projects"
+      title="Projects"
+      description="Case studies, experiments, and proof-of-work pages with featured ordering, metadata-driven links, and the same search rhythm as the blog."
+      items={projects}
+    />
   );
 }
-

@@ -2,12 +2,62 @@
 <task-registry>
   <phase id="01">
     <task id="01-01" agent-id="" status="planned">
-      <goal>Refine REQUIREMENTS.xml and phase 01 plan; run snapshot and claim this task when ready.</goal>
-      <keywords>bootstrap,requirements,planning</keywords>
+      <goal>Migrate any remaining narrative from .planning-archive/2026-03-29-pre-barebones/ into apps/portfolio/content/docs/documentation/requirements.mdx (and section registries); align ROADMAP.xml and TASK-REGISTRY.xml with real open work.</goal>
+      <keywords>bootstrap,migration,requirements,roadmap</keywords>
       <commands>
-        <command>node vendor/repo-planner/scripts/loop-cli.mjs snapshot</command>
+        <command>pnpm run lint</command>
       </commands>
       <depends></depends>
+    </task>
+    <task id="01-02" agent-id="" status="done">
+      <goal>Add a shared logging layer for server and client flows, then instrument the assistant-ui chat path so request, retrieval, upstream, and error handling are easy to debug without permanent ad hoc console logs.</goal>
+      <keywords>logging,chat,debugging,assistant-ui,rag</keywords>
+      <commands>
+        <command>pnpm --filter @portfolio/app test:unit</command>
+        <command>pnpm run build</command>
+        <command>pnpm run lint</command>
+      </commands>
+      <depends></depends>
+    </task>
+    <task id="01-03" agent-id="" status="done">
+      <goal>Implement the blog and projects content-discovery pass after the planning loop: searchable/filterable index pages, command-palette hit flow, strict article/project structure, and matching docs-side records.</goal>
+      <keywords>planning,blog,projects,search,filters,information-architecture</keywords>
+      <commands>
+        <command>pnpm --filter @portfolio/app test:unit</command>
+        <command>if (Test-Path apps/portfolio/.next/lock) { Remove-Item -Force apps/portfolio/.next/lock }; pnpm --filter @portfolio/app test:e2e</command>
+        <command>pnpm run build</command>
+        <command>pnpm run lint</command>
+      </commands>
+      <depends></depends>
+    </task>
+    <task id="01-04" agent-id="" status="done">
+      <goal>Books EPUB planning supplement: repeatable `repub epub --planning &lt;dir&gt;`, `runEpub` appendix for md/mdx/xml/toml/txt, `scripts/build-books.cjs` reads `book.json` epubPlanningDirs; Mordred&apos;s Tale bundles `apps/portfolio/content/docs/books/planning`. Section registry: `books-reader-02-02` done; docs in books planning-docs.mdx.</goal>
+      <keywords>books,epub,repub-builder,planning,build-books</keywords>
+      <commands>
+        <command>pnpm --filter @portfolio/repub-builder run build</command>
+        <command>pnpm run build:books</command>
+      </commands>
+      <depends></depends>
+    </task>
+    <task id="01-05" agent-id="" status="planned">
+      <goal>Formal monorepo CLIs (two packages): submodule loop-cli + repub-builder — Ink TTY UX, --help/subcommands/version, pnpm dlx docs first then npm publish; engines.node &gt;= 22; breaking argv OK. Registry: documentation-site-07-01/02, repo-planner-integration-01-13. Decisions in documentation/requirements.mdx.</goal>
+      <keywords>cli,repo-planner,repub,ink,dlx</keywords>
+      <commands>
+        <command>pnpm planning -- --help</command>
+        <command>pnpm exec repub --help</command>
+      </commands>
+      <depends></depends>
+    </task>
+    <task id="01-06" agent-id="" status="done">
+      <goal>Retrofit the existing blog posts and project writeups to the strict literal section contracts and richer metadata expected by the new discovery shell, then lock that contract with a regression test.</goal>
+      <keywords>blog,projects,content,mdx,template-contract</keywords>
+      <commands>
+        <command>pnpm --filter @portfolio/app test:unit</command>
+        <command>if (Test-Path apps/portfolio/.next/lock) { Remove-Item -Force apps/portfolio/.next/lock }; pnpm --filter @portfolio/app test:e2e</command>
+        <command>pnpm run build</command>
+        <command>pnpm run lint</command>
+      </commands>
+      <depends>01-03</depends>
     </task>
   </phase>
 </task-registry>

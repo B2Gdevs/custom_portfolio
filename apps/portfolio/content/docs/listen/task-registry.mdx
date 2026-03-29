@@ -1,0 +1,26 @@
+---
+title: Task Registry
+description: Compact task records for the Listen section.
+date: "2026-03-28"
+updated: "2026-03-28"
+order: 3
+repoPath: apps/portfolio/content/docs/listen/task-registry.mdx
+---
+
+# Task Registry
+
+## Phase `listen-surface-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `listen-surface-01-01` | `planned` | **Catalog model:** extend or replace `music.ts` with a typed list of **items** where each row is `kind: "track" \| "preset"`, shares **filter facets** (e.g. genre, mood, era, free tags), optional **BandLab** links, and optional **`lockGroup`** (slug) when the row is gated | `-` | types compile; sample rows cover at least one locked track and one locked preset |
+| `listen-surface-01-02` | `planned` | **Discovery UX:** `/listen` uses the same **filter rail + search + sort** behavior as blog/projects (reuse **`ContentIndexClient`** or shared primitives from `blog-discovery-01` / projects index) so the mental model stays one system | `listen-surface-01-01` | manual UX pass in dev; `pnpm run build`, `pnpm run lint` |
+| `listen-surface-01-03` | `planned` | **Unlock:** server-verified **shared password per `lockGroup`** (env map or single secret multi-group table — see [decisions](/docs/listen/decisions)); after success, set a **session-scoped cookie** (or equivalent) so embeds and play links work without re-prompting every navigation; locked cards show title/teaser only until unlocked | `listen-surface-01-01` | unlock flow works in dev; secrets not in client bundle |
+| `listen-surface-01-04` | `planned` | **IA:** register **`listen`** in docs section meta; ensure **nav / footer** point at `/listen` where appropriate; optional command-palette scope for Listen hits | `listen-surface-01-02` | `pnpm run build` |
+| `listen-surface-01-05` | `planned` | **Route conventions:** update [route conventions](/docs/documentation/route-conventions) with **`/listen`** as an explicit **top-level content index** (alongside blog/projects), not an `/apps/*` tool; add redirect note only if a second path is introduced later | `listen-surface-01-04` | doc reviewed |
+
+## Later (unscheduled)
+
+| Id | Status | Note |
+| --- | --- | --- |
+| `listen-surface-02-*` | `idea` | optional **`/apps/listen`** only if Listen becomes primarily interactive tooling; v1 stays **`/listen`** per [route-and-urls](/docs/listen/route-and-urls) |

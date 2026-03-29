@@ -12,6 +12,10 @@ node_modules/
 
 # testing
 /coverage
+playwright-report/
+test-results/
+**/playwright-report/
+**/test-results/
 
 # next.js (anywhere in repo; do not commit build/cache)
 .next/
@@ -62,6 +66,6 @@ next-env.d.ts
 .reader-builds/
 **/.reader-builds/
 
-# RepoPlanner CLI telemetry (local only; do not commit)
-.planning/reports/usage.jsonl
-.planning/reports/metrics.jsonl
+# RepoPlanner CLI telemetry + generated reports (local only; do not commit)
+.planning-reports/
+.planning/reports/

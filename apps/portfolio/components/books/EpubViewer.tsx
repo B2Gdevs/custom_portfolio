@@ -2,8 +2,30 @@
 
 import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { BookOpen, ChevronLeft, ChevronRight, LoaderCircle, Menu, X } from 'lucide-react';
+import {
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Highlighter,
+  LoaderCircle,
+  Menu,
+  StickyNote,
+  Trash2,
+  Upload,
+  X,
+} from 'lucide-react';
 import { ReactReader, ReactReaderStyle } from 'react-reader';
+import {
+  annotationsToExportPayload,
+  embedAnnotationsInEpub,
+  loadAnnotationsFromIndexedDb,
+  parseAnnotationsFile,
+  saveAnnotationsToIndexedDb,
+  serializeAnnotationsExport,
+  sha256Hex,
+  type PortfolioAnnotation,
+} from '@/lib/epub-annotations';
 
 const STORAGE_PREFIX = 'epub-location-';
 const READER_HEADER_H = 52;
@@ -13,6 +35,11 @@ const LOCATION_GENERATION_CHARS = 1200;
 const TOC_PANEL_TRANSITION = {
   duration: 0.24,
   ease: [0.22, 1, 0.36, 1] as const,
+};
+
+const EPUB_HIGHLIGHT_STYLES: Record<string, string> = {
+  fill: 'rgba(213, 176, 131, 0.38)',
+  'mix-blend-mode': 'multiply',
 };
 
 interface ReaderNavItem {
@@ -32,7 +59,19 @@ interface ReaderLocation {
   };
 }
 
+interface EpubAnnotationsApi {
+  highlight: (
+    cfiRange: string,
+    data: Record<string, unknown>,
+    cb?: () => void,
+    className?: string,
+    styles?: Record<string, string>
+  ) => unknown;
+  remove: (cfiRange: string, type: string) => void;
+}
+
 interface ReaderRendition {
+  annotations?: EpubAnnotationsApi;
   book: {
     ready: Promise<void>;
     loaded: {
@@ -54,8 +93,8 @@ interface ReaderRendition {
     select: (name: string) => void;
     fontSize: (value: string) => void;
   };
-  on: (event: string, listener: (location: ReaderLocation) => void) => void;
-  off: (event: string, listener: (location: ReaderLocation) => void) => void;
+  on: (event: string, listener: (...args: unknown[]) => void) => void;
+  off: (event: string, listener: (...args: unknown[]) => void) => void;
   prev: () => Promise<void>;
   next: () => Promise<void>;
 }
@@ -66,8 +105,14 @@ export interface EpubViewerProps {
   title?: string;
   /** Key for persisting location (e.g. book slug). If set, location is saved to localStorage. */
   storageKey?: string;
+  /**
+   * When set, opens here first instead of restoring from localStorage (EPUB internal `href` path or CFI string).
+   */
+  initialLocation?: string | number;
   className?: string;
   layoutMode?: 'compact' | 'reader';
+  /** Highlights and notes (reader layout only by default). */
+  annotationsEnabled?: boolean;
 }
 
 const READER_THEME_RULES = {
@@ -448,8 +493,10 @@ export default function EpubViewer({
   epubData,
   title,
   storageKey,
+  initialLocation,
   className = '',
   layoutMode = 'compact',
+  annotationsEnabled = layoutMode === 'reader',
 }: EpubViewerProps) {
   const [location, setLocation] = useState<string | number>(0);
   const [epubBuffer, setEpubBuffer] = useState<ArrayBuffer | null>(null);
@@ -461,6 +508,15 @@ export default function EpubViewer({
   const [currentPage, setCurrentPage] = useState<number | null>(null);
   const [totalPages, setTotalPages] = useState<number | null>(null);
   const [pageDraft, setPageDraft] = useState('');
+  const [contentHash, setContentHash] = useState<string | null>(null);
+  const [annotations, setAnnotations] = useState<PortfolioAnnotation[]>([]);
+  const [annotationsHydrated, setAnnotationsHydrated] = useState(!storageKey);
+  const [renditionApplyKey, setRenditionApplyKey] = useState(0);
+  const [isNotesOpen, setIsNotesOpen] = useState(false);
+  const [selectionDraft, setSelectionDraft] = useState<{ cfiRange: string; quote: string } | null>(
+    null
+  );
+  const importInputRef = useRef<HTMLInputElement | null>(null);
   const renditionCleanupRef = useRef<(() => void) | null>(null);
   const renditionRef = useRef<ReaderRendition | null>(null);
   const latestLocationRef = useRef<ReaderLocation | null>(null);
@@ -521,6 +577,11 @@ export default function EpubViewer({
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    if (initialLocation !== undefined && initialLocation !== null && initialLocation !== '') {
+      queueMicrotask(() => setLocation(initialLocation));
+      return;
+    }
+
     if (!storageKey) {
       queueMicrotask(() => setLocation(0));
       return;
@@ -528,7 +589,7 @@ export default function EpubViewer({
 
     const saved = window.localStorage.getItem(STORAGE_PREFIX + storageKey);
     queueMicrotask(() => setLocation(saved ?? 0));
-  }, [storageKey]);
+  }, [storageKey, initialLocation]);
 
   useEffect(() => {
     if (!storageKey || typeof location !== 'string') return;
@@ -549,6 +610,65 @@ export default function EpubViewer({
   const headerOffset = title ? READER_HEADER_H : 0;
   const readerStyles = createReaderStyles({ headerOffset, layoutMode });
   const epubViewStyles = createEpubViewStyles(layoutMode);
+
+  useEffect(() => {
+    if (!readyBuffer || !annotationsEnabled || !storageKey) {
+      setContentHash(null);
+      return;
+    }
+    let cancelled = false;
+    void sha256Hex(readyBuffer).then((h) => {
+      if (!cancelled) setContentHash(h);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [readyBuffer, annotationsEnabled, storageKey]);
+
+  useEffect(() => {
+    if (!storageKey || !contentHash || !annotationsEnabled) {
+      setAnnotations([]);
+      setAnnotationsHydrated(true);
+      return;
+    }
+    let cancelled = false;
+    setAnnotationsHydrated(false);
+    void loadAnnotationsFromIndexedDb(storageKey, contentHash).then((list) => {
+      if (cancelled) return;
+      setAnnotations(list);
+      setAnnotationsHydrated(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [storageKey, contentHash, annotationsEnabled]);
+
+  useEffect(() => {
+    if (!annotationsHydrated || !storageKey || !contentHash) return;
+    const id = window.setTimeout(() => {
+      void saveAnnotationsToIndexedDb(storageKey, contentHash, annotations);
+    }, 500);
+    return () => window.clearTimeout(id);
+  }, [annotations, annotationsHydrated, storageKey, contentHash]);
+
+  useEffect(() => {
+    if (!renditionApplyKey || !annotationsEnabled || !annotationsHydrated) return;
+    const r = renditionRef.current as (ReaderRendition & { annotations?: EpubAnnotationsApi }) | null;
+    if (!r?.annotations) return;
+    for (const a of annotations) {
+      try {
+        r.annotations.highlight(
+          a.cfiRange,
+          { id: a.id },
+          undefined,
+          'portfolio-reader-highlight',
+          EPUB_HIGHLIGHT_STYLES,
+        );
+      } catch {
+        /* ignore invalid CFI */
+      }
+    }
+  }, [renditionApplyKey, annotations, annotationsEnabled, annotationsHydrated]);
 
   const syncReaderPosition = useCallback(
     (nextLocation: ReaderLocation, nextTocItems: ReaderNavItem[] = tocItems) => {
@@ -609,11 +729,21 @@ export default function EpubViewer({
       rendition.themes.fontSize(layoutMode === 'reader' ? '96%' : '100%');
       applyLayout();
 
-      const handleRelocated = (nextLocation: ReaderLocation) => {
-        syncReaderPosition(nextLocation);
+      const handleRelocated = (nextLocation: unknown) => {
+        syncReaderPosition(nextLocation as ReaderLocation);
       };
 
       rendition.on('relocated', handleRelocated);
+
+      const handleSelected = (cfiRange: unknown, contents: unknown) => {
+        if (!annotationsEnabled || layoutMode !== 'reader') return;
+        if (typeof cfiRange !== 'string' || !cfiRange) return;
+        const win = (contents as { window?: Window } | undefined)?.window;
+        const quote = win?.getSelection?.()?.toString?.().trim() ?? '';
+        if (!quote) return;
+        setSelectionDraft({ cfiRange, quote });
+      };
+      rendition.on('selected', handleSelected);
 
       void rendition.book.loaded.navigation.then((navigation) => {
         setTocItems(navigation.toc);
@@ -631,9 +761,11 @@ export default function EpubViewer({
           if (latestLocationRef.current) {
             syncReaderPosition(latestLocationRef.current);
           }
+          setRenditionApplyKey((k) => k + 1);
         })
         .catch(() => {
           // fall back to display-based page counts if location generation fails
+          setRenditionApplyKey((k) => k + 1);
         });
 
       if (typeof window !== 'undefined') {
@@ -641,14 +773,16 @@ export default function EpubViewer({
         renditionCleanupRef.current = () => {
           window.removeEventListener('resize', applyLayout);
           rendition.off('relocated', handleRelocated);
+          rendition.off('selected', handleSelected);
         };
       } else {
         renditionCleanupRef.current = () => {
           rendition.off('relocated', handleRelocated);
+          rendition.off('selected', handleSelected);
         };
       }
     },
-    [layoutMode, syncReaderPosition]
+    [annotationsEnabled, layoutMode, syncReaderPosition]
   );
 
   const handleStepPage = useCallback((direction: 'prev' | 'next') => {
@@ -687,11 +821,108 @@ export default function EpubViewer({
     setIsTocOpen(false);
   }, []);
 
+  const addHighlightFromSelection = useCallback(() => {
+    if (!selectionDraft) return;
+    const r = renditionRef.current as (ReaderRendition & { annotations?: EpubAnnotationsApi }) | null;
+    if (!r?.annotations) return;
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const next: PortfolioAnnotation = {
+      id,
+      cfiRange: selectionDraft.cfiRange,
+      quote: selectionDraft.quote,
+      note: '',
+      color: 'amber',
+      createdAt: now,
+      updatedAt: now,
+    };
+    try {
+      r.annotations.highlight(
+        next.cfiRange,
+        { id: next.id },
+        undefined,
+        'portfolio-reader-highlight',
+        EPUB_HIGHLIGHT_STYLES,
+      );
+    } catch {
+      return;
+    }
+    setAnnotations((prev) => [...prev, next]);
+    setSelectionDraft(null);
+  }, [selectionDraft]);
+
+  const removeAnnotation = useCallback((row: PortfolioAnnotation) => {
+    const r = renditionRef.current as (ReaderRendition & { annotations?: EpubAnnotationsApi }) | null;
+    r?.annotations?.remove(row.cfiRange, 'highlight');
+    setAnnotations((prev) => prev.filter((a) => a.id !== row.id));
+  }, []);
+
+  const updateAnnotationNote = useCallback((id: string, note: string) => {
+    const now = new Date().toISOString();
+    setAnnotations((prev) => prev.map((a) => (a.id === id ? { ...a, note, updatedAt: now } : a)));
+  }, []);
+
+  const downloadAnnotationsJson = useCallback(() => {
+    if (!storageKey || !contentHash) return;
+    const payload = annotationsToExportPayload(storageKey, contentHash, annotations);
+    const blob = new Blob([serializeAnnotationsExport(payload)], {
+      type: 'application/json',
+    });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${storageKey}-annotations.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }, [annotations, contentHash, storageKey]);
+
+  const onImportAnnotationsFile = useCallback(
+    async (file: File | null) => {
+      if (!file || !storageKey || !contentHash) return;
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(await file.text()) as unknown;
+      } catch {
+        return;
+      }
+      const data = parseAnnotationsFile(parsed);
+      if (!data) return;
+      const r = renditionRef.current as (ReaderRendition & { annotations?: EpubAnnotationsApi }) | null;
+      for (const a of annotations) {
+        r?.annotations?.remove(a.cfiRange, 'highlight');
+      }
+      setAnnotations(data.annotations);
+      setRenditionApplyKey((k) => k + 1);
+    },
+    [annotations, contentHash, storageKey],
+  );
+
+  const downloadAnnotatedEpub = useCallback(async () => {
+    if (!readyBuffer || !storageKey || !contentHash) return;
+    const payload = annotationsToExportPayload(storageKey, contentHash, annotations);
+    const blob = await embedAnnotationsInEpub(readyBuffer, payload);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${storageKey}-annotated.epub`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }, [annotations, contentHash, readyBuffer, storageKey]);
+
   return (
     <div
       ref={readerRootRef}
       className={`epub-reader-root relative flex h-full min-h-[400px] flex-col overflow-hidden ${className}`}
     >
+      <input
+        ref={importInputRef}
+        type="file"
+        accept="application/json,.json"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0] ?? null;
+          event.target.value = '';
+          void onImportAnnotationsFile(file);
+        }}
+      />
       {title && (
         <header
           className="epub-reader-header flex items-center gap-3 shrink-0 px-4 border-b border-border bg-dark-alt"
@@ -712,7 +943,10 @@ export default function EpubViewer({
             <div className="pointer-events-none absolute left-4 top-4 z-30">
               <button
                 type="button"
-                onClick={() => setIsTocOpen((value) => !value)}
+                onClick={() => {
+                  setIsNotesOpen(false);
+                  setIsTocOpen((value) => !value);
+                }}
                 className="pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(140,102,67,0.18)] bg-[rgba(18,13,10,0.88)] text-[rgba(236,223,204,0.82)] shadow-[0_12px_24px_rgba(0,0,0,0.22)] backdrop-blur-md transition-colors hover:border-[rgba(213,176,131,0.32)] hover:text-[#fff3e5]"
                 aria-label={isTocOpen ? 'Close contents' : 'Open contents'}
               >
@@ -764,6 +998,124 @@ export default function EpubViewer({
                 </motion.div>
               ) : null}
             </AnimatePresence>
+            {annotationsEnabled && storageKey ? (
+              <>
+                <div className="pointer-events-none absolute right-4 top-4 z-30">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsNotesOpen((v) => !v);
+                      setIsTocOpen(false);
+                    }}
+                    className="pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(140,102,67,0.18)] bg-[rgba(18,13,10,0.88)] text-[rgba(236,223,204,0.82)] shadow-[0_12px_24px_rgba(0,0,0,0.22)] backdrop-blur-md transition-colors hover:border-[rgba(213,176,131,0.32)] hover:text-[#fff3e5]"
+                    aria-label={isNotesOpen ? 'Close notes' : 'Open notes and highlights'}
+                  >
+                    <StickyNote size={16} />
+                  </button>
+                </div>
+                <AnimatePresence initial={false}>
+                  {isNotesOpen ? (
+                    <motion.div
+                      className="pointer-events-none absolute inset-0 z-20"
+                      initial={{ opacity: 1 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 1 }}
+                    >
+                      <motion.button
+                        type="button"
+                        aria-label="Close notes"
+                        className="pointer-events-auto absolute inset-0 bg-[rgba(0,0,0,0.36)] backdrop-blur-[2px]"
+                        onClick={() => setIsNotesOpen(false)}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={TOC_PANEL_TRANSITION}
+                      />
+                      <motion.aside
+                        className="pointer-events-auto absolute inset-y-0 right-0 z-30 flex min-h-0 w-[20rem] max-w-[min(20rem,100vw-2rem)] flex-col border-l border-[rgba(140,102,67,0.14)] bg-[linear-gradient(180deg,rgba(24,18,14,0.97),rgba(13,10,8,0.98))] py-4 pl-3 pr-4 pt-16 shadow-[-18px_0_40px_rgba(0,0,0,0.28)]"
+                        initial={{ opacity: 0, x: 28 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 28 }}
+                        transition={TOC_PANEL_TRANSITION}
+                      >
+                        <p className="px-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[rgba(213,176,131,0.72)]">
+                          Highlights & notes
+                        </p>
+                        <div className="mt-3 flex flex-wrap gap-2 px-2">
+                          <button
+                            type="button"
+                            onClick={() => downloadAnnotationsJson()}
+                            disabled={!contentHash}
+                            className="inline-flex items-center gap-1 rounded-full border border-[rgba(140,102,67,0.22)] bg-[rgba(255,255,255,0.04)] px-2.5 py-1 text-[0.7rem] text-[rgba(236,223,204,0.85)] disabled:opacity-40"
+                          >
+                            <Download size={12} /> Export JSON
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => importInputRef.current?.click()}
+                            disabled={!contentHash}
+                            className="inline-flex items-center gap-1 rounded-full border border-[rgba(140,102,67,0.22)] bg-[rgba(255,255,255,0.04)] px-2.5 py-1 text-[0.7rem] text-[rgba(236,223,204,0.85)] disabled:opacity-40"
+                          >
+                            <Upload size={12} /> Import
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void downloadAnnotatedEpub()}
+                            disabled={!contentHash || !readyBuffer}
+                            className="inline-flex items-center gap-1 rounded-full border border-[rgba(140,102,67,0.22)] bg-[rgba(255,255,255,0.04)] px-2.5 py-1 text-[0.7rem] text-[rgba(236,223,204,0.85)] disabled:opacity-40"
+                          >
+                            <Download size={12} /> Annotated EPUB
+                          </button>
+                        </div>
+                        <p className="mt-2 px-2 text-[0.65rem] leading-snug text-[rgba(236,223,204,0.45)]">
+                          Select text in the page, then use “Add highlight”. Notes are stored in this browser;
+                          annotated EPUB adds META-INF/portfolio-annotations.json.
+                        </p>
+                        <div className="mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+                          {!annotations.length ? (
+                            <p className="px-2 text-sm text-[rgba(236,223,204,0.5)]">No highlights yet.</p>
+                          ) : (
+                            annotations.map((row) => (
+                              <div
+                                key={row.id}
+                                className="rounded-xl border border-[rgba(140,102,67,0.12)] bg-[rgba(255,255,255,0.03)] p-2.5"
+                              >
+                                <p className="text-[0.72rem] leading-relaxed text-[rgba(247,239,229,0.88)]">
+                                  {row.quote}
+                                </p>
+                                <textarea
+                                  value={row.note}
+                                  onChange={(e) => updateAnnotationNote(row.id, e.target.value)}
+                                  placeholder="Note…"
+                                  rows={2}
+                                  className="mt-2 w-full resize-none rounded-lg border border-[rgba(140,102,67,0.15)] bg-[rgba(0,0,0,0.2)] px-2 py-1.5 text-[0.72rem] text-[rgba(247,239,229,0.9)] outline-none placeholder:text-[rgba(236,223,204,0.35)]"
+                                />
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => setLocation(row.cfiRange)}
+                                    className="text-[0.68rem] font-medium text-[#d5b083] hover:underline"
+                                  >
+                                    Go to
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeAnnotation(row)}
+                                    className="inline-flex items-center gap-1 text-[0.68rem] text-[rgba(246,189,162,0.85)] hover:underline"
+                                  >
+                                    <Trash2 size={12} /> Remove
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </motion.aside>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </>
+            ) : null}
           </>
         ) : null}
         {isLoadingBook ? (
@@ -798,6 +1150,28 @@ export default function EpubViewer({
           />
         )}
       </div>
+      {layoutMode === 'reader' && annotationsEnabled && selectionDraft ? (
+        <div className="pointer-events-none absolute inset-x-0 bottom-[4.75rem] z-40 flex justify-center px-4">
+          <div className="pointer-events-auto flex max-w-lg items-center gap-2 rounded-full border border-[rgba(140,102,67,0.22)] bg-[rgba(18,13,10,0.92)] px-3 py-2 text-[0.72rem] text-[rgba(236,223,204,0.88)] shadow-[0_12px_32px_rgba(0,0,0,0.35)] backdrop-blur-md">
+            <Highlighter size={14} className="shrink-0 text-[#d5b083]" aria-hidden />
+            <span className="line-clamp-2 min-w-0 flex-1">{selectionDraft.quote}</span>
+            <button
+              type="button"
+              onClick={addHighlightFromSelection}
+              className="shrink-0 rounded-full bg-[rgba(213,176,131,0.22)] px-2.5 py-1 text-[0.68rem] font-semibold text-[#fff3e5] hover:bg-[rgba(213,176,131,0.32)]"
+            >
+              Add highlight
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectionDraft(null)}
+              className="shrink-0 rounded-full px-2 py-1 text-[0.68rem] text-[rgba(236,223,204,0.55)] hover:text-[#fff3e5]"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      ) : null}
       {layoutMode === 'reader' && readyBuffer && !isLoadingBook && !visibleError ? (
         <div className="pointer-events-none absolute inset-x-0 bottom-2 z-20 flex justify-center px-4">
           <div className="pointer-events-auto flex w-full max-w-[102rem] items-center justify-between gap-3 rounded-full border border-[rgba(140,102,67,0.14)] bg-[rgba(12,9,7,0.78)] px-3 py-1.5 text-[0.76rem] text-[rgba(236,223,204,0.78)] shadow-[0_14px_34px_rgba(0,0,0,0.24)] backdrop-blur-md md:px-4">

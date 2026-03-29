@@ -2,7 +2,9 @@
 title: State
 description: Compact state records for the documentation section.
 date: "2026-03-16"
-updated: "2026-03-16"
+updated: "2026-03-28"
+repoPath: apps/portfolio/content/docs/documentation/state.mdx
+taskPhase: documentation-site-06
 order: 2
 ---
 
@@ -15,24 +17,43 @@ order: 2
 | `section` | `documentation` |
 | `owner` | `docs-section` |
 | `status` | `active` |
-| `updated` | `2026-03-16` |
+| `updated` | `2026-03-30` |
 
 ## Current Cycle
 
 | Field | Value |
 | --- | --- |
-| `phase` | `documentation-02` |
-| `plan` | `documentation-02-a` |
-| `focus` | keep the roadmap and requirements pages current so the docs site has a stable overview and local source of truth |
-| `constraint` | docs-site planning and requirements should be tracked here instead of `.planning` |
+| `phase` | `documentation-site-06` (URL taxonomy) + ongoing `documentation-site-03` / `04` |
+| `plan` | **[Route conventions](/docs/documentation/route-conventions)**: `/apps` owns interactive tools; `/docs/apps` migrates off the MDX tree; reader **library shell** planned under **books** `books-reader-03` |
+| `focus` | execute `documentation-site-06-02`–`06-03` when ready; keep planning modal + pack pipeline; onboard `magicborn` / `projects` per `documentation-site-04` |
+| `constraint` | section planning MDX is first for **section** work; root `.planning` stays canonical for **monorepo** gates; see root `AGENTS.md` |
 
 ## Next Queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | improve docs landing pages and section discoverability | `ux` |
-| `2` | decide how roadmap and requirements pages should surface from the documentation landing page | `ia` |
-| `3` | keep section roadmap summaries aligned with section planning updates | `maintenance` |
+| `1` | `documentation-site-06-02`–`06-03`: **`/apps` hub** + repo-planner route move + link sweep ([route conventions](/docs/documentation/route-conventions)) | `ia` |
+| `2` | `documentation-site-03-01` through `documentation-site-03-05`: planning portal phases (demo pack, real export pipeline, modal UI, optional section `AGENTS.md`) | `feature` |
+| `3` | `documentation-site-02-03`: surface architecture / product-boundary `.planning` docs from docs section | `ia` |
+| `4` | `documentation-site-04-01` / `documentation-site-04-02`: onboard `magicborn` as a first-class docs section and keep its planning pages aligned with the RAG source map | `ia` |
+| `5` | `documentation-site-04-03`: onboard `projects` as a first-class planning section for showcase UX and schema work | `ia` |
+| `6` | `documentation-site-07-01` / `07-02` + `repo-planner-integration-01-13`: formal CLIs (Ink, **two** packages, submodule upstream, **`pnpm dlx`** docs first) | `tooling` |
+
+## Cross-cutting queue
+
+Monorepo-wide items that are not (yet) a full `.planning` task row. Mirror or close them in **`.planning/TASK-REGISTRY.xml`** when they become single units of work.
+
+| Status | Item |
+| --- | --- |
+| `open` | Merge remaining narrative from `.planning-archive/2026-03-29-pre-barebones/` into **[requirements](/docs/documentation/requirements)**, section registries, and **`.planning/*.xml`**. |
+| `open` | Advance `books-ai-01-05` → `books-ai-01-07` assistant evaluation — [books task registry](/docs/books/task-registry). |
+| `done` | EPUB planning supplement (`repub epub --planning`, `epubPlanningDirs`, `pnpm run build:books`); `.planning` task `01-04` + [books task registry](/docs/books/task-registry). |
+| `done` | Shared app logging layer (chat / RAG / structured debug). |
+| `open` | Live AI `429 insufficient_quota` mismatch — [books state](/docs/books/state). |
+| `open` | Blog + projects discovery pass — blog/projects section registries. |
+| `open` | **Listen** surface — phase **`listen-surface-01`**: catalog + filters + group passwords; [listen task registry](/docs/listen/task-registry). |
+| `open` | **CLI ergonomics:** `documentation-site-07-01` / `07-02` — Ink, **two CLIs**, submodule bumps, **`pnpm dlx`** docs; publish repub + planners later per [requirements](/docs/documentation/requirements) CLI table. |
+| `open` | **Reader shell + cockpit embed:** shared modal body, **reader** modal store, **docs** context menu — [embed architecture](/docs/documentation/reader-repo-planner-embed-architecture); **`documentation-site-08`**, **`books-reader-03-06`**, **`repo-planner-integration-02`**. |
 
 ## References
 
@@ -42,4 +63,9 @@ order: 2
 | `docs-page` | `apps/portfolio/app/docs/page.tsx` | documentation landing page |
 | `docs-layout` | `apps/portfolio/components/docs/DocsLayout.tsx` | docs navigation and section layout |
 | `docs-lib` | `apps/portfolio/lib/docs.ts` | docs grouping and planning-doc detection |
+| `route-conventions` | `apps/portfolio/content/docs/documentation/route-conventions.mdx` | `/docs` vs `/apps` taxonomy and migration checklist |
+| `reader-repo-planner-embed` | `apps/portfolio/content/docs/documentation/reader-repo-planner-embed-architecture.mdx` | repub-builder shell + repo-planner cockpit + portfolio host wiring |
 | `docs-roadmap` | `apps/portfolio/content/docs/documentation/roadmap.mdx` | section-level overview of status and next work |
+| `agents-root` | `AGENTS.md` (repo root) | Ralph loop + mandatory read order for agents |
+| `planning-reqs` | [requirements.mdx](/docs/documentation/requirements) (this section) | monorepo requirements + planning-pack rules |
+| `site-theme` | `apps/portfolio/app/globals.css`, `apps/portfolio/app/layout.tsx` | shadcn oklch tokens, `@theme inline`, IBM Plex, `dark` root class |

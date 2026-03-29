@@ -1,0 +1,150 @@
+[rag-runner 2026-03-28T21:40:02.264Z] starting {
+  appRoot: 'C:\\Users\\benja\\Documents\\custom_portfolio\\apps\\portfolio'
+}
+[rag-runner 2026-03-28T21:40:02.270Z] bundling entry {
+  entry: 'C:\\Users\\benja\\Documents\\custom_portfolio\\apps\\portfolio\\scripts\\rag-ingest-entry.ts'
+}
+[rag-runner 2026-03-28T21:40:02.314Z] bundle ready {
+  outfile: 'C:\\Users\\benja\\Documents\\custom_portfolio\\apps\\portfolio\\.tmp\\portfolio-rag-PcjBb5\\rag-ingest.mjs'
+}
+[rag-ingest 2026-03-28T21:40:05.063Z] starting ingest run {
+  triggeredBy: 'script',
+  payloadDb: 'C:\\Users\\benja\\Documents\\custom_portfolio\\apps\\portfolio\\portfolio.db'
+}
+[rag-ingest 2026-03-28T21:40:05.071Z] payload db cleanup complete
+[⣷] Pulling schema from database...
+[2K[1G[✓] Pulling schema from database...
+[16:40:05] [33mWARN[39m: [36mNo email adapter provided. Email will be written to console. More info at https://payloadcms.com/docs/email/overview.[39m
+[rag-ingest 2026-03-28T21:40:05.484Z] payload client ready
+[rag-ingest 2026-03-28T21:40:05.575Z] ingest run created { runId: '4' }
+[rag-ingest 2026-03-28T21:40:05.884Z] source snapshot loaded { sourceCount: 37 }
+[rag-ingest 2026-03-28T21:40:05.908Z] loaded existing payload state { existingSourceCount: 37, activeRunId: null }
+[rag-ingest 2026-03-28T21:40:05.909Z] stale source scan complete { deletedSources: 0 }
+[rag-ingest 2026-03-28T21:40:05.930Z] embedding source chunks {
+  sourceId: 'blog:building-a-file-based-portfolio-with-nextjs-and-mdx',
+  chunkCount: 19
+}
+[rag-ingest 2026-03-28T21:40:07.293Z] embedding source chunks {
+  sourceId: 'blog:building-a-game-cms-enterprise-narrative-platform',
+  chunkCount: 12
+}
+[rag-ingest 2026-03-28T21:40:08.133Z] embedding source chunks {
+  sourceId: 'blog:building-colorfull-ai-technologies-that-scaled',
+  chunkCount: 18
+}
+[rag-ingest 2026-03-28T21:40:08.880Z] embedding source chunks { sourceId: 'blog:building-the-richepub-toolchain', chunkCount: 4 }
+[rag-ingest 2026-03-28T21:40:09.158Z] embedding source chunks { sourceId: 'blog:introducing-richepub', chunkCount: 4 }
+[rag-ingest 2026-03-28T21:40:09.451Z] embedding source chunks {
+  sourceId: 'blog:making-the-site-more-personal-reader-and-repo-structure',
+  chunkCount: 16
+}
+[rag-ingest 2026-03-28T21:40:10.358Z] embedding source chunks { sourceId: 'blog:reading-repub-in-the-browser', chunkCount: 4 }
+[rag-ingest 2026-03-28T21:40:10.871Z] embedding source chunks { sourceId: 'blog:richepub-format-spec', chunkCount: 5 }
+[rag-ingest 2026-03-28T21:40:11.277Z] embedding source chunks { sourceId: 'docs:books/book-structure', chunkCount: 6 }
+[rag-ingest 2026-03-28T21:40:11.688Z] embedding source chunks { sourceId: 'docs:books/mordreds-tale-decisions', chunkCount: 2 }
+[rag-ingest 2026-03-28T21:40:11.971Z] source progress {
+  processedSources: 10,
+  totalSources: 37,
+  indexedChunks: 90,
+  reusedChunks: 0,
+  newlyEmbeddedSources: 10
+}
+[rag-ingest 2026-03-28T21:40:11.978Z] embedding source chunks { sourceId: 'docs:books/mordreds-tale-outline', chunkCount: 16 }
+[rag-ingest 2026-03-28T21:40:12.823Z] embedding source chunks { sourceId: 'docs:books/mordreds-tale-state', chunkCount: 8 }
+[rag-ingest 2026-03-28T21:40:13.465Z] embedding source chunks { sourceId: 'docs:books/mordreds-tale-task-registry', chunkCount: 6 }
+[rag-ingest 2026-03-28T21:40:14.094Z] embedding source chunks { sourceId: 'docs:books/reader', chunkCount: 4 }
+[rag-ingest 2026-03-28T21:40:14.726Z] embedding source chunks { sourceId: 'docs:dialogue-forge/architecture', chunkCount: 2 }
+[rag-ingest 2026-03-28T21:40:15.158Z] embedding source chunks { sourceId: 'docs:dialogue-forge/dialogue-nodes', chunkCount: 11 }
+[rag-ingest 2026-03-28T21:40:15.646Z] embedding source chunks { sourceId: 'docs:dialogue-forge/editing-guide', chunkCount: 6 }
+[rag-ingest 2026-03-28T21:40:16.217Z] embedding source chunks { sourceId: 'docs:dialogue-forge/getting-started', chunkCount: 5 }
+[rag-ingest 2026-03-28T21:40:16.609Z] embedding source chunks { sourceId: 'docs:dialogue-forge/overview', chunkCount: 6 }
+[rag-ingest 2026-03-28T21:40:17.144Z] embedding source chunks { sourceId: 'docs:dialogue-forge/yarn-spinner', chunkCount: 7 }
+[rag-ingest 2026-03-28T21:40:17.650Z] source progress {
+  processedSources: 20,
+  totalSources: 37,
+  indexedChunks: 161,
+  reusedChunks: 0,
+  newlyEmbeddedSources: 20
+}
+[rag-ingest 2026-03-28T21:40:17.656Z] embedding source chunks {
+  sourceId: 'docs:documentation/architecture-conventions',
+  chunkCount: 8
+}
+[rag-ingest 2026-03-28T21:40:18.208Z] embedding source chunks { sourceId: 'docs:documentation/design-styling', chunkCount: 7 }
+[rag-ingest 2026-03-28T21:40:18.751Z] embedding source chunks {
+  sourceId: 'docs:documentation/portfolio-experience-redesign',
+  chunkCount: 10
+}
+[rag-ingest 2026-03-28T21:40:19.212Z] embedding source chunks {
+  sourceId: 'docs:documentation/resume-design-guidelines',
+  chunkCount: 5
+}
+[rag-ingest 2026-03-28T21:40:19.518Z] embedding source chunks { sourceId: 'docs:documentation/vendoring', chunkCount: 7 }
+[rag-ingest 2026-03-28T21:40:19.977Z] embedding source chunks {
+  sourceId: 'docs:magicborn/borrowed-magic-and-the-relic-economy',
+  chunkCount: 6
+}
+[rag-ingest 2026-03-28T21:40:20.304Z] embedding source chunks { sourceId: 'docs:magicborn/house-of-small-mercies', chunkCount: 6 }
+[rag-ingest 2026-03-28T21:40:20.636Z] embedding source chunks {
+  sourceId: 'docs:magicborn/jack-of-taro-and-the-logic-of-worth',
+  chunkCount: 6
+}
+[rag-ingest 2026-03-28T21:40:21.222Z] embedding source chunks { sourceId: 'docs:magicborn/morgana-the-sleeping-root', chunkCount: 6 }
+[rag-ingest 2026-03-28T21:40:21.651Z] embedding source chunks { sourceId: 'docs:repo-planner/getting-started', chunkCount: 3 }
+[rag-ingest 2026-03-28T21:40:22.058Z] source progress {
+  processedSources: 30,
+  totalSources: 37,
+  indexedChunks: 225,
+  reusedChunks: 0,
+  newlyEmbeddedSources: 30
+}
+[rag-ingest 2026-03-28T21:40:22.063Z] embedding source chunks { sourceId: 'docs:repo-planner/integration', chunkCount: 6 }
+[rag-ingest 2026-03-28T21:40:22.479Z] embedding source chunks {
+  sourceId: 'projects:bashful-ai-stable-diffusion-photoshop-plugin',
+  chunkCount: 8
+}
+[rag-ingest 2026-03-28T21:40:22.979Z] embedding source chunks {
+  sourceId: 'projects:colorfull-corporate-meal-delivery-platform',
+  chunkCount: 32
+}
+[rag-ingest 2026-03-28T21:40:23.802Z] embedding source chunks {
+  sourceId: 'projects:cvjson-computer-vision-json-library',
+  chunkCount: 31
+}
+[rag-ingest 2026-03-28T21:40:24.794Z] embedding source chunks {
+  sourceId: 'projects:dialogue-forge-interactive-narrative-builder',
+  chunkCount: 11
+}
+[rag-ingest 2026-03-28T21:40:25.295Z] embedding source chunks {
+  sourceId: 'projects:object-detection-ex-ml-optimization-framework',
+  chunkCount: 14
+}
+[rag-ingest 2026-03-28T21:40:25.942Z] embedding source chunks {
+  sourceId: 'projects:rapidcli-service-oriented-cli-framework',
+  chunkCount: 41
+}
+[rag-ingest 2026-03-28T21:40:26.828Z] source progress {
+  processedSources: 37,
+  totalSources: 37,
+  indexedChunks: 368,
+  reusedChunks: 0,
+  newlyEmbeddedSources: 37
+}
+[rag-ingest 2026-03-28T21:40:26.828Z] writing sidecar search rows { rowCount: 368, runId: '4' }
+[rag-ingest 2026-03-28T21:40:26.833Z] ingest run failed {
+  name: 'SqliteError',
+  message: 'Only integers are allows for primary key values on rag_chunk_vectors',
+  stack: 'SqliteError: Only integers are allows for primary key values on rag_chunk_vectors\n' +
+    '    at convertError (C:\\Users\\benja\\Documents\\custom_portfolio\\node_modules\\.pnpm\\libsql@0.5.29\\node_modules\\libsql\\index.js:59:12)\n' +
+    '    at Statement.run (C:\\Users\\benja\\Documents\\custom_portfolio\\node_modules\\.pnpm\\libsql@0.5.29\\node_modules\\libsql\\index.js:335:13)\n' +
+    '    at file:///C:/Users/benja/Documents/custom_portfolio/apps/portfolio/.tmp/portfolio-rag-PcjBb5/rag-ingest.mjs:622:17\n' +
+    '    at C:\\Users\\benja\\Documents\\custom_portfolio\\node_modules\\.pnpm\\libsql@0.5.29\\node_modules\\libsql\\index.js:149:26\n' +
+    '    at replaceRunChunks (file:///C:/Users/benja/Documents/custom_portfolio/apps/portfolio/.tmp/portfolio-rag-PcjBb5/rag-ingest.mjs:625:3)\n' +
+    '    at ingestRagCorpus (file:///C:/Users/benja/Documents/custom_portfolio/apps/portfolio/.tmp/portfolio-rag-PcjBb5/rag-ingest.mjs:1133:5)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n' +
+    '    at async main (file:///C:/Users/benja/Documents/custom_portfolio/apps/portfolio/.tmp/portfolio-rag-PcjBb5/rag-ingest.mjs:1200:19)'
+}
+[rag-runner 2026-03-28T22:19:46.070Z] child process finished { status: 1, signal: null }
+[rag-runner 2026-03-28T22:19:46.094Z] cleaned temp bundle {
+  tempDir: 'C:\\Users\\benja\\Documents\\custom_portfolio\\apps\\portfolio\\.tmp\\portfolio-rag-PcjBb5'
+}

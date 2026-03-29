@@ -3,11 +3,29 @@ title: "Reading .repub in the Browser (Archived)"
 description: "A historical note from the custom-reader experiment. The current books flow is EPUB3-first."
 date: "2025-03-11"
 tags: ["RichEPub", "Archive", "Browser", "Security"]
+links:
+  - label: "Books Planning Docs"
+    href: "/docs/books/planning-docs"
+    description: "The EPUB3-first reading direction that replaced the custom reader."
+searchKeywords: ["repub browser reader", "sandboxed iframe", "epub3 first", "archive note"]
 ---
 
-This post is an archive note from the earlier RichEPub experiment.
+## Downloads & Resources
 
-At that point the site could fetch a `.repub` file, unpack it in the browser, rewrite asset URLs, and run the bundled app inside a sandboxed iframe. The current books flow is different: the active reading path on the site is EPUB3-first, not `.repub`.
+- [Books Planning Docs](/docs/books/planning-docs) for the active EPUB3-first reading path.
+
+## Introduction
+
+This post is an archive note from the earlier RichEPub experiment. At that point the site could fetch a `.repub` file, unpack it in the browser, rewrite asset URLs, and run the bundled app inside a sandboxed iframe.
+
+## Tradeoffs
+
+The custom browser runtime gave maximal control over rendering, but it came with security, maintenance, and ecosystem tradeoffs that kept compounding. Every convenience feature for the reader also pulled the project further away from standard ebook flows.
+
+## What Was Done
+
+This note preserves the runtime lessons that still matter, then records why the project stepped away from a browser-executed `.repub` container in favor of EPUB3 output and better author tooling.
+The current books flow is different: the active reading path on the site is EPUB3-first, not `.repub`.
 
 ## Why keep this note
 
@@ -36,3 +54,12 @@ If I revisit a richer authoring system later, the useful parts of this experimen
 - strong separation between author tooling and reader runtime
 
 Those lessons still apply. The container itself is the part I no longer think needs to be custom.
+
+## Conclusion
+
+The browser experiment was technically interesting, but strategically it created more surface area than value. The useful lessons survived; the custom runtime did not.
+
+## Examples
+
+- Sandboxed iframes and rewritten asset URLs are the clearest examples here of the engineering burden a custom browser container creates.
+- The shift back to EPUB3 is the example of the broader product correction that followed.

@@ -1,0 +1,22 @@
+---
+title: Errors and Attempts
+description: Compact attempt records for the projects section.
+date: "2026-03-28"
+updated: "2026-03-28"
+order: 4
+---
+
+# Errors and Attempts
+
+| Id | Status | Context | Problem | Response |
+| --- | --- | --- | --- | --- |
+| `projects-showcase-01-attempt-01` | `resolved` | pre-planning baseline | the projects area had public pages but no section-local planning loop, so UX and metadata decisions would otherwise get buried in unrelated docs | create the projects planning stack first, then plan the index/detail/search experience before implementation |
+| `projects-showcase-01-attempt-02` | `resolved` | discovery implementation | the new filters and featured-first sort needed real metadata, but the existing project files only exposed title/date/tags and a couple of links | add a first metadata pass (`status`, `featured`, `featuredOrder`, `appUrl`) now, then schedule a fuller retrofit loop for the remaining strict-section and richer-link work |
+| `projects-showcase-02-attempt-01` | `resolved` | content retrofit validation | checking section drift from the monorepo root masked missing headings because `content.ts` reads from the app package working directory | validate the retrofit from `@portfolio/app`, add a contract test there, and treat the package runtime as the source of truth for future content checks |
+
+## Follow-up Rule
+
+| Field | Value |
+| --- | --- |
+| `new-record-trigger` | add a row when the projects approach changes materially, not for every minor note |
+| `close-condition` | move a record to `resolved` only after the new path ships or the old one is abandoned |

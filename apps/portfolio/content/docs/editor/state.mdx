@@ -2,8 +2,10 @@
 title: State
 description: Compact state records for the editor section.
 date: "2026-03-16"
-updated: "2026-03-16"
+updated: "2026-03-28"
 order: 2
+repoPath: apps/portfolio/content/docs/editor/state.mdx
+taskPhase: editor-workflow-01
 ---
 
 # State
@@ -15,14 +17,14 @@ order: 2
 | `section` | `editor` |
 | `owner` | `editor-section` |
 | `status` | `planned` |
-| `updated` | `2026-03-16` |
+| `updated` | `2026-03-28` |
 
 ## Current Cycle
 
 | Field | Value |
 | --- | --- |
-| `phase` | `editor-01` |
-| `plan` | `editor-01-a` |
+| `phase` | `editor-workflow-01` |
+| `plan` | `editor-workflow-01-a` |
 | `focus` | plan a writing/editor tool that starts from messy real-world source material and compiles down to cleaner EPUB3 output |
 | `constraint` | the editor should be framed as tooling for EPUB3, not a replacement book container format |
 
@@ -30,9 +32,9 @@ order: 2
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | define the authoring pipeline from notion, markdown, and mdx sources into the editor | `workflow` |
-| `2` | decide whether a lexical-based writing UI is worth the build and maintenance cost | `architecture` |
-| `3` | define how custom components and layout controls should compile down to valid EPUB3 | `export` |
+| `1` | `editor-workflow-01-02`: define the authoring pipeline from notion, markdown, and mdx sources into the editor | `workflow` |
+| `2` | `editor-workflow-01-03`: decide whether a lexical-based writing UI is worth the build and maintenance cost | `architecture` |
+| `3` | `editor-workflow-01-04`: define how custom components and layout controls should compile down to valid EPUB3, then decide whether the editor becomes a real build task | `export` |
 
 ## References
 

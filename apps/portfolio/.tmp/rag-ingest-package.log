@@ -1,0 +1,158 @@
+
+> @portfolio/app@0.1.0 rag:ingest C:\Users\benja\Documents\custom_portfolio\apps\portfolio
+> node scripts/rag-ingest-runner.cjs
+
+[rag-runner 2026-03-28T22:19:02.706Z] starting {
+  appRoot: 'C:\\Users\\benja\\Documents\\custom_portfolio\\apps\\portfolio'
+}
+[rag-runner 2026-03-28T22:19:02.710Z] bundling entry {
+  entry: 'C:\\Users\\benja\\Documents\\custom_portfolio\\apps\\portfolio\\scripts\\rag-ingest-entry.ts'
+}
+[rag-runner 2026-03-28T22:19:02.748Z] bundle ready {
+  outfile: 'C:\\Users\\benja\\Documents\\custom_portfolio\\apps\\portfolio\\.tmp\\portfolio-rag-4Ubbsv\\rag-ingest.mjs'
+}
+[rag-ingest 2026-03-28T22:19:06.380Z] starting ingest run {
+  triggeredBy: 'script',
+  payloadDb: 'C:\\Users\\benja\\Documents\\custom_portfolio\\apps\\portfolio\\portfolio.db'
+}
+[rag-ingest 2026-03-28T22:19:06.392Z] payload db cleanup complete
+[⣷] Pulling schema from database...
+[2K[1G[✓] Pulling schema from database...
+[17:19:06] [33mWARN[39m: [36mNo email adapter provided. Email will be written to console. More info at https://payloadcms.com/docs/email/overview.[39m
+[rag-ingest 2026-03-28T22:19:06.819Z] payload client ready
+[rag-ingest 2026-03-28T22:19:06.903Z] ingest run created { runId: '10' }
+[rag-ingest 2026-03-28T22:19:07.196Z] source snapshot loaded { sourceCount: 37 }
+[rag-ingest 2026-03-28T22:19:07.222Z] loaded existing payload state { existingSourceCount: 37, activeRunId: 9 }
+[rag-ingest 2026-03-28T22:19:07.222Z] stale source scan complete { deletedSources: 0 }
+[rag-ingest 2026-03-28T22:19:07.475Z] embedding source chunks {
+  sourceId: 'blog:building-a-file-based-portfolio-with-nextjs-and-mdx',
+  chunkCount: 19
+}
+[rag-ingest 2026-03-28T22:19:09.094Z] embedding source chunks {
+  sourceId: 'blog:building-a-game-cms-enterprise-narrative-platform',
+  chunkCount: 12
+}
+[rag-ingest 2026-03-28T22:19:09.736Z] embedding source chunks {
+  sourceId: 'blog:building-colorfull-ai-technologies-that-scaled',
+  chunkCount: 18
+}
+[rag-ingest 2026-03-28T22:19:10.675Z] embedding source chunks { sourceId: 'blog:building-the-richepub-toolchain', chunkCount: 4 }
+[rag-ingest 2026-03-28T22:19:11.167Z] embedding source chunks { sourceId: 'blog:introducing-richepub', chunkCount: 4 }
+[rag-ingest 2026-03-28T22:19:11.873Z] embedding source chunks {
+  sourceId: 'blog:making-the-site-more-personal-reader-and-repo-structure',
+  chunkCount: 16
+}
+[rag-ingest 2026-03-28T22:19:12.589Z] embedding source chunks { sourceId: 'blog:reading-repub-in-the-browser', chunkCount: 4 }
+[rag-ingest 2026-03-28T22:19:12.981Z] embedding source chunks { sourceId: 'blog:richepub-format-spec', chunkCount: 5 }
+[rag-ingest 2026-03-28T22:19:13.615Z] embedding source chunks { sourceId: 'docs:books/book-structure', chunkCount: 6 }
+[rag-ingest 2026-03-28T22:19:14.046Z] embedding source chunks { sourceId: 'docs:books/mordreds-tale-decisions', chunkCount: 2 }
+[rag-ingest 2026-03-28T22:19:14.742Z] source progress {
+  processedSources: 10,
+  totalSources: 37,
+  indexedChunks: 90,
+  reusedChunks: 0,
+  newlyEmbeddedSources: 10
+}
+[rag-ingest 2026-03-28T22:19:14.752Z] embedding source chunks { sourceId: 'docs:books/mordreds-tale-outline', chunkCount: 16 }
+[rag-ingest 2026-03-28T22:19:15.515Z] embedding source chunks { sourceId: 'docs:books/mordreds-tale-state', chunkCount: 8 }
+[rag-ingest 2026-03-28T22:19:16.113Z] embedding source chunks { sourceId: 'docs:books/mordreds-tale-task-registry', chunkCount: 6 }
+[rag-ingest 2026-03-28T22:19:16.544Z] embedding source chunks { sourceId: 'docs:books/reader', chunkCount: 4 }
+[rag-ingest 2026-03-28T22:19:16.856Z] embedding source chunks { sourceId: 'docs:dialogue-forge/architecture', chunkCount: 2 }
+[rag-ingest 2026-03-28T22:19:17.426Z] embedding source chunks { sourceId: 'docs:dialogue-forge/dialogue-nodes', chunkCount: 11 }
+[rag-ingest 2026-03-28T22:19:17.996Z] embedding source chunks { sourceId: 'docs:dialogue-forge/editing-guide', chunkCount: 6 }
+[rag-ingest 2026-03-28T22:19:18.393Z] embedding source chunks { sourceId: 'docs:dialogue-forge/getting-started', chunkCount: 5 }
+[rag-ingest 2026-03-28T22:19:18.834Z] embedding source chunks { sourceId: 'docs:dialogue-forge/overview', chunkCount: 6 }
+[rag-ingest 2026-03-28T22:19:19.232Z] embedding source chunks { sourceId: 'docs:dialogue-forge/yarn-spinner', chunkCount: 7 }
+[rag-ingest 2026-03-28T22:19:19.812Z] source progress {
+  processedSources: 20,
+  totalSources: 37,
+  indexedChunks: 161,
+  reusedChunks: 0,
+  newlyEmbeddedSources: 20
+}
+[rag-ingest 2026-03-28T22:19:19.821Z] embedding source chunks {
+  sourceId: 'docs:documentation/architecture-conventions',
+  chunkCount: 8
+}
+[rag-ingest 2026-03-28T22:19:20.297Z] embedding source chunks { sourceId: 'docs:documentation/design-styling', chunkCount: 7 }
+[rag-ingest 2026-03-28T22:19:20.674Z] embedding source chunks {
+  sourceId: 'docs:documentation/portfolio-experience-redesign',
+  chunkCount: 10
+}
+[rag-ingest 2026-03-28T22:19:21.111Z] embedding source chunks {
+  sourceId: 'docs:documentation/resume-design-guidelines',
+  chunkCount: 5
+}
+[rag-ingest 2026-03-28T22:19:21.522Z] embedding source chunks { sourceId: 'docs:documentation/vendoring', chunkCount: 7 }
+[rag-ingest 2026-03-28T22:19:21.954Z] embedding source chunks {
+  sourceId: 'docs:magicborn/borrowed-magic-and-the-relic-economy',
+  chunkCount: 6
+}
+[rag-ingest 2026-03-28T22:19:22.350Z] embedding source chunks { sourceId: 'docs:magicborn/house-of-small-mercies', chunkCount: 6 }
+[rag-ingest 2026-03-28T22:19:22.890Z] embedding source chunks {
+  sourceId: 'docs:magicborn/jack-of-taro-and-the-logic-of-worth',
+  chunkCount: 6
+}
+[rag-ingest 2026-03-28T22:19:23.290Z] embedding source chunks { sourceId: 'docs:magicborn/morgana-the-sleeping-root', chunkCount: 6 }
+[rag-ingest 2026-03-28T22:19:23.825Z] embedding source chunks { sourceId: 'docs:repo-planner/getting-started', chunkCount: 3 }
+[rag-ingest 2026-03-28T22:19:24.239Z] source progress {
+  processedSources: 30,
+  totalSources: 37,
+  indexedChunks: 225,
+  reusedChunks: 0,
+  newlyEmbeddedSources: 30
+}
+[rag-ingest 2026-03-28T22:19:24.247Z] embedding source chunks { sourceId: 'docs:repo-planner/integration', chunkCount: 11 }
+[rag-ingest 2026-03-28T22:19:24.902Z] embedding source chunks {
+  sourceId: 'projects:bashful-ai-stable-diffusion-photoshop-plugin',
+  chunkCount: 8
+}
+[rag-ingest 2026-03-28T22:19:25.403Z] embedding source chunks {
+  sourceId: 'projects:colorfull-corporate-meal-delivery-platform',
+  chunkCount: 32
+}
+[rag-ingest 2026-03-28T22:19:27.759Z] embedding source chunks {
+  sourceId: 'projects:cvjson-computer-vision-json-library',
+  chunkCount: 31
+}
+[rag-ingest 2026-03-28T22:19:28.618Z] embedding source chunks {
+  sourceId: 'projects:dialogue-forge-interactive-narrative-builder',
+  chunkCount: 11
+}
+[rag-ingest 2026-03-28T22:19:29.135Z] embedding source chunks {
+  sourceId: 'projects:object-detection-ex-ml-optimization-framework',
+  chunkCount: 14
+}
+[rag-ingest 2026-03-28T22:19:31.491Z] embedding source chunks {
+  sourceId: 'projects:rapidcli-service-oriented-cli-framework',
+  chunkCount: 41
+}
+[rag-ingest 2026-03-28T22:19:32.539Z] source progress {
+  processedSources: 37,
+  totalSources: 37,
+  indexedChunks: 373,
+  reusedChunks: 0,
+  newlyEmbeddedSources: 37
+}
+[rag-ingest 2026-03-28T22:19:32.539Z] writing sidecar search rows { rowCount: 373, runId: '10' }
+[rag-ingest 2026-03-28T22:19:32.746Z] sidecar search rows written
+[rag-ingest 2026-03-28T22:19:32.782Z] previous active run deactivated { activeRunId: 9 }
+[rag-ingest 2026-03-28T22:19:32.813Z] new run chunks activated { runId: '10' }
+[rag-ingest 2026-03-28T22:19:32.951Z] ingest run committed {
+  runId: '10',
+  indexedSources: 37,
+  indexedChunks: 373,
+  reusedChunks: 0,
+  deletedSources: 0
+}
+{
+  "runId": "10",
+  "indexedSources": 37,
+  "indexedChunks": 373,
+  "reusedChunks": 0,
+  "deletedSources": 0
+}
+[rag-runner 2026-03-28T22:19:45.530Z] child process finished { status: 0, signal: null }
+[rag-runner 2026-03-28T22:19:45.533Z] cleaned temp bundle {
+  tempDir: 'C:\\Users\\benja\\Documents\\custom_portfolio\\apps\\portfolio\\.tmp\\portfolio-rag-4Ubbsv'
+}

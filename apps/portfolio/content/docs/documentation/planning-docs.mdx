@@ -2,7 +2,7 @@
 title: Planning Docs
 description: Planning loop records for the documentation section.
 date: "2026-03-16"
-updated: "2026-03-29"
+updated: "2026-03-30"
 order: 1
 repoPath: apps/portfolio/content/docs/documentation/planning-docs.mdx
 ---
@@ -13,11 +13,15 @@ repoPath: apps/portfolio/content/docs/documentation/planning-docs.mdx
 
 | Record | Purpose |
 | --- | --- |
-| Global section | [Global planning](/docs/global/global-planning) — repo-wide model, ids, Mermaid, planning-pack policy |
-| `state` | current cycle, focus, and constraints for the documentation section |
+| Global section | [Planning docs](/docs/global/planning-docs) → [Global planning guide](/docs/global/global-planning) for diagrams, ids, planning-pack policy |
+| [Requirements](/docs/documentation/requirements) | **Monorepo-wide** scope narrative (canonical — not repo-root `REQUIREMENTS.md`) |
+| [Roadmap](/docs/documentation/roadmap) | Section-level status table + **`.planning/`** / **repo-planner** rows |
+| `state` | current cycle, focus, **cross-cutting queue**, constraints for the documentation section |
 | `task-registry` | active and queued documentation-site work |
 | `errors-and-attempts` | notable failed approaches and restructures |
 | `decisions` | stable decisions for docs IA, requirements, and planning behavior |
+| [Route conventions](/docs/documentation/route-conventions) | URL taxonomy: **`/docs`** = MDX only; **`/apps`** = interactive tools; migration plan from `/docs/apps` |
+| [Reader shell + Repo Planner embed](/docs/documentation/reader-repo-planner-embed-architecture) | **repub-builder** shell + **reader** modal store + **shared** cockpit modal; **portfolio** + **docs** context menu entry points |
 
 ## Loop
 
@@ -30,7 +34,7 @@ repoPath: apps/portfolio/content/docs/documentation/planning-docs.mdx
 
 ## Agent context (read order)
 
-For **documentation-section** work, read this page first, then the **[Global](/docs/global/planning-docs)** section (start at [global planning](/docs/global/global-planning)), then [state](/docs/documentation/state), [task registry](/docs/documentation/task-registry), [decisions](/docs/documentation/decisions). For **monorepo-wide** gates, read [.planning/REQUIREMENTS.md](../../../../../.planning/REQUIREMENTS.md) and [.planning/IMPLEMENTATION_PLAN.md](../../../../../.planning/IMPLEMENTATION_PLAN.md), then root **`AGENTS.md`** at the repository root. Full order is specified in that file.
+For **documentation-section** work, read this page first, then the **Global** section: [Planning docs](/docs/global/planning-docs) → [state](/docs/global/state) → [task registry](/docs/global/task-registry) when global IA matters; use the **[Global planning guide](/docs/global/global-planning)** for Mermaid workflows and task-id grammar. Then [requirements](/docs/documentation/requirements), [state](/docs/documentation/state), [task registry](/docs/documentation/task-registry), [decisions](/docs/documentation/decisions). For **monorepo-wide** gates, read root **[AGENTS.md](../../../../../AGENTS.md)**, **[documentation/requirements](/docs/documentation/requirements)**, **[documentation/state](/docs/documentation/state)** (cross-cutting queue), **`.planning/ROADMAP.xml`**, **`.planning/TASK-REGISTRY.xml`**, **`.planning/STATE.xml`**. Repo-root **`REQUIREMENTS.md`** is a **stub pointer** only.
 
 ## Machine-readable frontmatter
 

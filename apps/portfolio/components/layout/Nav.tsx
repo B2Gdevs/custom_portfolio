@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { AnimatePresence, motion } from 'framer-motion';
 import {
   BookOpenText,
   BookText,
@@ -12,14 +11,15 @@ import {
   ChevronLeft,
   ChevronRight,
   Compass,
+  MoreHorizontal,
   Copy,
   FileCode2,
   FileText,
   Github,
   Headphones,
   Home,
+  LayoutGrid,
   LibraryBig,
-  Menu,
   Mic2,
   MoveUpRight,
   Radio,
@@ -27,9 +27,30 @@ import {
   Settings,
   Sparkles,
   WandSparkles,
-  X,
 } from 'lucide-react';
 import type { NavIconKey, NavMenuSection } from '@/lib/site-menus';
+import { PlanningPackSidebarButton } from '@/components/planning/PlanningPackSidebarButton';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+  SidebarTrigger,
+  useSidebar,
+} from '@/components/ui/sidebar';
 
 const EMAIL = 'benjamingarrard5279@gmail.com';
 const GITHUB_URL = 'https://github.com/B2Gdevs';
@@ -51,20 +72,281 @@ const iconMap: Record<NavIconKey, React.ComponentType<{ size?: number; className
   wand: WandSparkles,
 };
 
-function SidebarContent({
+const primaryNavItems: {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  match: (p: string) => boolean;
+}[] = [
+  { href: '/', label: 'Home', icon: Home, match: (p) => p === '/' },
+  {
+    href: '/resumes',
+    label: 'Resumes',
+    icon: FileText,
+    match: (p) => p === '/resumes' || p.startsWith('/resumes/'),
+  },
+  {
+    href: '/projects',
+    label: 'Projects',
+    icon: Compass,
+    match: (p) => p === '/projects' || p.startsWith('/projects/'),
+  },
+  {
+    href: '/docs/apps',
+    label: 'Apps',
+    icon: LayoutGrid,
+    match: (p) => p === '/docs/apps' || p.startsWith('/docs/apps/'),
+  },
+  {
+    href: '/apps/reader',
+    label: 'Books',
+    icon: LibraryBig,
+    match: (p) => p === '/apps/reader' || p.startsWith('/apps/reader/'),
+  },
+  {
+    href: '/listen',
+    label: 'Songs',
+    icon: Headphones,
+    match: (p) => p === '/listen' || p.startsWith('/listen/'),
+  },
+];
+
+function CollapsedPrimaryLinks({ pathname, onLinkClick }: { pathname: string; onLinkClick?: () => void }) {
+  return (
+    <SidebarMenu className="hidden gap-1 group-data-[collapsible=icon]:flex">
+      {primaryNavItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = item.match(pathname);
+        return (
+          <SidebarMenuItem key={item.href}>
+            <SidebarMenuButton
+              isActive={isActive}
+              tooltip={item.label}
+              className="border border-transparent data-active:border-sidebar-ring/50"
+              render={<Link href={item.href} onClick={onLinkClick} />}
+            >
+              <Icon size={17} />
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        );
+      })}
+    </SidebarMenu>
+  );
+}
+
+function SidebarToggleButton() {
+  const { state, toggleSidebar } = useSidebar();
+  const collapsed = state === 'collapsed';
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="icon-sm"
+      onClick={toggleSidebar}
+      className="absolute right-2 top-3 z-20 border-sidebar-border bg-sidebar-accent/40 text-sidebar-foreground hover:bg-sidebar-accent"
+      aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+    >
+      {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+    </Button>
+  );
+}
+
+function sectionHasActiveItem(menu: NavMenuSection, pathname: string): boolean {
+  return menu.items.some((item) => {
+    if (item.external) return false;
+    return pathname === item.href || pathname.startsWith(`${item.href}/`);
+  });
+}
+
+/** Expanded rail: section rows open a dropdown of links; icon rail flattens links with tooltips. */
+function NavMenuSections({
   pathname,
   navMenus,
-  collapsed = false,
-  onNavigate,
+  onLinkClick,
 }: {
   pathname: string;
   navMenus: NavMenuSection[];
-  collapsed?: boolean;
-  onNavigate?: () => void;
+  onLinkClick?: () => void;
 }) {
+  const { state, isMobile } = useSidebar();
+  const railCollapsed = state === 'collapsed';
+
+  if (railCollapsed) {
+    return (
+      <SidebarMenu className="gap-1">
+        {navMenus.flatMap((menu) =>
+          menu.items.map((item) => {
+            const ItemIcon = iconMap[item.icon];
+            const isActive =
+              !item.external &&
+              (pathname === item.href || pathname.startsWith(`${item.href}/`));
+            const key = `${menu.id}-${item.label}-${item.href}`;
+            const tip = `${menu.label}: ${item.label}`;
+
+            if (item.external) {
+              return (
+                <SidebarMenuItem key={key}>
+                  <SidebarMenuButton
+                    tooltip={tip}
+                    className="border border-transparent"
+                    render={
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={onLinkClick}
+                      />
+                    }
+                  >
+                    <ItemIcon size={17} />
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            }
+
+            return (
+              <SidebarMenuItem key={key}>
+                <SidebarMenuButton
+                  isActive={isActive}
+                  tooltip={tip}
+                  className="border border-transparent data-active:border-sidebar-ring/50"
+                  render={<Link href={item.href} onClick={onLinkClick} />}
+                >
+                  <ItemIcon size={17} />
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })
+        )}
+      </SidebarMenu>
+    );
+  }
+
+  return (
+    <SidebarGroup className="p-0">
+      <SidebarMenu className="gap-1 px-1">
+        {navMenus.map((menu) => {
+          const SectionIcon = iconMap[menu.icon];
+          const sectionActive = sectionHasActiveItem(menu, pathname);
+
+          return (
+            <DropdownMenu key={menu.id}>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={sectionActive}
+                  className="h-auto min-h-10 flex-wrap py-2 data-[popup-open]:bg-sidebar-accent data-[popup-open]:text-sidebar-accent-foreground"
+                  render={<DropdownMenuTrigger />}
+                >
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-sidebar-border/60 bg-sidebar-accent/25">
+                    <SectionIcon size={16} className="text-accent" />
+                  </span>
+                  <span className="min-w-0 flex-1 text-left">
+                    <span className="section-kicker block text-sidebar-foreground">{menu.label}</span>
+                    <span
+                      className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-sidebar-foreground/55"
+                      title={menu.description}
+                    >
+                      {menu.description}
+                    </span>
+                  </span>
+                  <MoreHorizontal className="ml-auto size-4 shrink-0 text-sidebar-foreground/50" aria-hidden />
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <DropdownMenuContent
+                side={isMobile ? 'bottom' : 'right'}
+                align={isMobile ? 'end' : 'start'}
+                sideOffset={isMobile ? 6 : 8}
+                className="min-w-56 rounded-lg border-border bg-popover text-popover-foreground"
+              >
+                {menu.items.map((item) => {
+                  const ItemIcon = iconMap[item.icon];
+                  const isActive =
+                    !item.external &&
+                    (pathname === item.href || pathname.startsWith(`${item.href}/`));
+                  const key = `${menu.id}-${item.label}-${item.href}`;
+
+                  const itemClass = cn(
+                    isActive && 'bg-accent/15 font-medium text-accent-foreground'
+                  );
+
+                  if (item.external) {
+                    return (
+                      <DropdownMenuItem
+                        key={key}
+                        className={itemClass}
+                        render={(props) => (
+                          <a
+                            {...props}
+                            href={item.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            title={item.description}
+                            onClick={(e) => {
+                              onLinkClick?.();
+                              props.onClick?.(e);
+                            }}
+                            className={cn(
+                              'flex w-full cursor-pointer items-center gap-2',
+                              itemClass,
+                              props.className
+                            )}
+                          >
+                            <ItemIcon size={15} className="shrink-0 opacity-90" />
+                            <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                            <MoveUpRight size={13} className="shrink-0 opacity-60" />
+                          </a>
+                        )}
+                      />
+                    );
+                  }
+
+                  return (
+                    <DropdownMenuItem
+                      key={key}
+                      className={itemClass}
+                      render={(props) => (
+                        <Link
+                          {...props}
+                          href={item.href}
+                          title={item.description}
+                          onClick={(e) => {
+                            onLinkClick?.();
+                            props.onClick?.(e);
+                          }}
+                          className={cn(
+                            'flex w-full cursor-pointer items-center gap-2',
+                            itemClass,
+                            props.className
+                          )}
+                        >
+                          <ItemIcon size={15} className="shrink-0 opacity-90" />
+                          <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                        </Link>
+                      )}
+                    />
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        })}
+      </SidebarMenu>
+    </SidebarGroup>
+  );
+}
+
+function PortfolioSidebarInner({ pathname, navMenus }: { pathname: string; navMenus: NavMenuSection[] }) {
   const [copied, setCopied] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { state, isMobile, setOpenMobile } = useSidebar();
+  const iconOnly = state === 'collapsed';
+
+  const onLinkClick = () => {
+    if (isMobile) setOpenMobile(false);
+  };
 
   useEffect(() => {
     return () => {
@@ -92,142 +374,16 @@ function SidebarContent({
     scrollTimeoutRef.current = setTimeout(() => setIsScrolling(false), 750);
   };
 
-  if (collapsed) {
-    const collapsedItems = [
-      {
-        href: '/',
-        label: 'Home',
-        icon: Home,
-        isActive: pathname === '/',
-      },
-      {
-        href: '/resumes',
-        label: 'Resumes',
-        icon: FileText,
-        isActive: pathname === '/resumes' || pathname.startsWith('/resumes/'),
-      },
-      {
-        href: '/projects',
-        label: 'Projects',
-        icon: Compass,
-        isActive: pathname === '/projects' || pathname.startsWith('/projects/'),
-      },
-      {
-        href: '/books',
-        label: 'Books',
-        icon: LibraryBig,
-        isActive: pathname === '/books' || pathname.startsWith('/books/'),
-      },
-      {
-        href: '/listen',
-        label: 'Songs',
-        icon: Headphones,
-        isActive: pathname === '/listen' || pathname.startsWith('/listen/'),
-      },
-      ...navMenus.flatMap((menu) =>
-        menu.items
-          .filter((item) => !item.external)
-          .map((item) => ({
-            href: item.href,
-            label: item.label,
-            icon: iconMap[item.icon],
-            isActive: pathname === item.href || pathname.startsWith(item.href + '/'),
-          }))
-      ),
-    ];
-
-    return (
-      <div className="sidebar-shell flex h-full flex-col items-center">
-        <div className="sidebar-ornament" />
-
-        <div className="relative z-10 flex w-full justify-center border-b border-border/70 px-3 py-5">
-          <Link
-            href="/"
-            onClick={onNavigate}
-            className="rounded-[1.4rem] p-2 transition-colors hover:bg-white/5"
-            aria-label="Go to home"
-            title="Home"
-          >
-            <div className="sidebar-logo-wrap">
-              <Image
-                src="/logo.svg"
-                alt="Logo"
-                width={36}
-                height={36}
-                className="h-9 w-9 rounded-full bg-zinc-900/60 p-1 logo-hover-green"
-              />
-            </div>
-          </Link>
-        </div>
-
-        <div
-          className={`sidebar-scroll-area relative z-10 flex-1 overflow-y-auto px-2 py-5 ${
-            isScrolling ? 'scroll-active' : ''
-          }`}
-          onScroll={handleScroll}
-        >
-          <div className="flex flex-col items-center gap-2">
-            {collapsedItems.map((item) => {
-              const ItemIcon = item.icon;
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={onNavigate}
-                  aria-label={item.label}
-                  title={item.label}
-                  className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition-colors ${
-                    item.isActive
-                      ? 'border-[rgba(213,176,131,0.45)] bg-[rgba(213,176,131,0.14)] text-[#fff3e5]'
-                      : 'border-border/70 bg-dark/60 text-text-muted hover:border-[rgba(213,176,131,0.4)] hover:text-primary'
-                  }`}
-                >
-                  <ItemIcon size={17} />
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="relative z-10 flex w-full flex-col items-center gap-3 border-t border-border/70 px-3 py-5">
-          <button
-            type="button"
-            onClick={handleCopyEmail}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-primary text-secondary transition hover:opacity-90"
-            aria-label={copied ? 'Copied email' : 'Copy email'}
-            title={copied ? 'Copied!' : 'Copy email'}
-          >
-            {copied ? <Check size={16} /> : <Copy size={16} />}
-          </button>
-
-          {process.env.NODE_ENV === 'development' ? (
-            <Link
-              href="/admin"
-              onClick={onNavigate}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/70 bg-dark/60 text-text-muted transition-colors hover:text-primary"
-              aria-label="Admin"
-              title="Admin"
-            >
-              <Settings size={16} />
-            </Link>
-          ) : null}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="sidebar-shell flex h-full flex-col">
-      <div className="sidebar-ornament" />
-
-      <div className="relative z-10 border-b border-border/70 px-5 py-5">
+    <>
+      <SidebarHeader className="relative gap-3 border-b border-sidebar-border/80 p-4">
+        <SidebarToggleButton />
         <Link
           href="/"
-          onClick={onNavigate}
-          className="flex items-center gap-3 rounded-[1.4rem] px-2 py-2 transition-colors hover:bg-white/5"
+          onClick={onLinkClick}
+          className="flex items-center gap-3 rounded-[1.4rem] py-1 pr-10 transition-colors hover:bg-sidebar-accent/30"
         >
-          <div className="sidebar-logo-wrap">
+          <div className="sidebar-logo-wrap shrink-0">
             <Image
               src="/logo.svg"
               alt="Logo"
@@ -236,19 +392,23 @@ function SidebarContent({
               className="h-9 w-9 rounded-full bg-zinc-900/60 p-1 logo-hover-green"
             />
           </div>
-          <div>
-            <span className="block text-xs uppercase tracking-[0.28em] text-text-muted">Ben Garrard</span>
-            <span className="font-display text-xl tracking-tight text-primary">Story, sound, systems</span>
+          <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+            <span className="block text-xs uppercase tracking-[0.28em] text-sidebar-foreground/60">Ben Garrard</span>
+            <span className="font-display text-xl tracking-tight text-sidebar-foreground">Story, sound, systems</span>
           </div>
         </Link>
 
-        <div className="mt-4">
-          <div className="inline-flex flex-wrap items-center gap-1 rounded-2xl border border-border/70 bg-dark/70 p-1 shadow-[0_10px_30px_rgba(0,0,0,0.22)]">
+        <CollapsedPrimaryLinks pathname={pathname} onLinkClick={onLinkClick} />
+
+        <div className="group-data-[collapsible=icon]:hidden">
+          <div className="inline-flex flex-wrap items-center gap-1 rounded-2xl border border-sidebar-border/80 bg-sidebar-accent/30 p-1">
             <Link
               href="/"
-              onClick={onNavigate}
+              onClick={onLinkClick}
               className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
-                pathname === '/' ? 'bg-primary text-secondary' : 'text-text-muted hover:text-primary'
+                pathname === '/'
+                  ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                  : 'text-sidebar-foreground/70 hover:text-sidebar-foreground'
               }`}
             >
               <Home size={14} />
@@ -256,11 +416,11 @@ function SidebarContent({
             </Link>
             <Link
               href="/resumes"
-              onClick={onNavigate}
+              onClick={onLinkClick}
               className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
                 pathname === '/resumes' || pathname.startsWith('/resumes/')
-                  ? 'bg-primary text-secondary'
-                  : 'text-text-muted hover:text-primary'
+                  ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                  : 'text-sidebar-foreground/70 hover:text-sidebar-foreground'
               }`}
             >
               <FileText size={14} />
@@ -268,23 +428,35 @@ function SidebarContent({
             </Link>
             <Link
               href="/projects"
-              onClick={onNavigate}
+              onClick={onLinkClick}
               className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
                 pathname === '/projects' || pathname.startsWith('/projects/')
-                  ? 'bg-primary text-secondary'
-                  : 'text-text-muted hover:text-primary'
+                  ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                  : 'text-sidebar-foreground/70 hover:text-sidebar-foreground'
               }`}
             >
               <Compass size={14} />
               <span>Projects</span>
             </Link>
             <Link
-              href="/books"
-              onClick={onNavigate}
+              href="/docs/apps"
+              onClick={onLinkClick}
               className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
-                pathname === '/books' || pathname.startsWith('/books/')
-                  ? 'bg-primary text-secondary'
-                  : 'text-text-muted hover:text-primary'
+                pathname === '/docs/apps' || pathname?.startsWith('/docs/apps/')
+                  ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                  : 'text-sidebar-foreground/70 hover:text-sidebar-foreground'
+              }`}
+            >
+              <LayoutGrid size={14} />
+              <span>Apps</span>
+            </Link>
+            <Link
+              href="/apps/reader"
+              onClick={onLinkClick}
+              className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
+                pathname === '/apps/reader' || pathname?.startsWith('/apps/reader/')
+                  ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                  : 'text-sidebar-foreground/70 hover:text-sidebar-foreground'
               }`}
             >
               <LibraryBig size={14} />
@@ -292,11 +464,11 @@ function SidebarContent({
             </Link>
             <Link
               href="/listen"
-              onClick={onNavigate}
+              onClick={onLinkClick}
               className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
                 pathname === '/listen' || pathname.startsWith('/listen/')
-                  ? 'bg-primary text-secondary'
-                  : 'text-text-muted hover:text-primary'
+                  ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                  : 'text-sidebar-foreground/70 hover:text-sidebar-foreground'
               }`}
             >
               <Headphones size={14} />
@@ -306,8 +478,8 @@ function SidebarContent({
               href={GITHUB_URL}
               target="_blank"
               rel="noreferrer"
-              onClick={onNavigate}
-              className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium text-text-muted transition-colors hover:text-primary"
+              onClick={onLinkClick}
+              className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium text-sidebar-foreground/70 transition-colors hover:text-sidebar-foreground"
             >
               <Github size={14} />
               <span>GitHub</span>
@@ -315,152 +487,52 @@ function SidebarContent({
           </div>
         </div>
 
-        <div className="mt-4">
-          <Link
-            href="/"
-            onClick={onNavigate}
-            className={`sidebar-home-link ${
-              pathname === '/' ? 'sidebar-link-active' : 'sidebar-link-idle'
-            }`}
-          >
-            <span className="sidebar-icon-badge">
-              <Home size={16} />
-            </span>
-            <span>
-              <span className="block text-sm font-medium text-primary">Home</span>
-              <span className="block text-xs text-text-muted">Front page reading and latest work</span>
-            </span>
-          </Link>
-        </div>
-      </div>
+      </SidebarHeader>
 
-      <div
-        className={`sidebar-scroll-area relative z-10 flex-1 overflow-y-auto px-4 py-5 ${
-          isScrolling ? 'scroll-active' : ''
-        }`}
+      <SidebarContent
+        className={`px-2 py-3 ${isScrolling ? 'scroll-active' : ''}`}
         onScroll={handleScroll}
       >
-        <div className="space-y-5">
-          {navMenus.map((menu) => {
-            const SectionIcon = iconMap[menu.icon];
+        <NavMenuSections pathname={pathname} navMenus={navMenus} onLinkClick={onLinkClick} />
+      </SidebarContent>
 
-            return (
-              <section key={menu.id} className="sidebar-section-card">
-                <div className={`sidebar-section-glow bg-gradient-to-br ${menu.accent}`} />
-                <div className="relative z-10">
-                  <div className="flex items-start gap-3 px-1">
-                    <span className="sidebar-icon-badge mt-0.5">
-                      <SectionIcon size={16} />
-                    </span>
-                    <div>
-                      <p className="section-kicker">{menu.label}</p>
-                      <p className="mt-2 text-sm leading-6 text-text-muted">{menu.description}</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 space-y-2">
-                    {menu.items.map((item) => {
-                      const ItemIcon = iconMap[item.icon];
-                      const isActive =
-                        !item.external &&
-                        (pathname === item.href || pathname.startsWith(item.href + '/'));
-
-                      if (item.external) {
-                        return (
-                          <a
-                            key={item.href}
-                            href={item.href}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={onNavigate}
-                            className="sidebar-item-link sidebar-link-idle"
-                          >
-                            <span className="sidebar-icon-badge">
-                              <ItemIcon size={16} />
-                            </span>
-                            <span className="min-w-0 flex-1">
-                              <span className="block text-sm font-medium text-primary">{item.label}</span>
-                              <span className="mt-1 block text-xs leading-6 text-text-muted">{item.description}</span>
-                            </span>
-                            <MoveUpRight size={14} className="mt-1 shrink-0 text-text-muted" />
-                          </a>
-                        );
-                      }
-
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={onNavigate}
-                          className={`sidebar-item-link ${
-                            isActive ? 'sidebar-link-active' : 'sidebar-link-idle'
-                          }`}
-                        >
-                          <span className="sidebar-icon-badge">
-                            <ItemIcon size={16} />
-                          </span>
-                          <span className="min-w-0 flex-1">
-                            <span className="block text-sm font-medium text-primary">{item.label}</span>
-                            <span className="mt-1 block text-xs leading-6 text-text-muted">{item.description}</span>
-                          </span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              </section>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="relative z-10 border-t border-border/70 px-5 py-5">
-        <button
+      <SidebarFooter className="gap-3 border-t border-sidebar-border/80 p-4">
+        <Button
           type="button"
+          variant="default"
+          className="w-full rounded-full bg-sidebar-primary text-sidebar-primary-foreground hover:opacity-90"
           onClick={handleCopyEmail}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-medium text-secondary transition hover:opacity-90"
         >
           {copied ? <Check size={16} /> : <Copy size={16} />}
-          {copied ? 'Copied!' : 'Copy email'}
-        </button>
+          <span className="ml-2">{copied ? 'Copied!' : 'Copy email'}</span>
+        </Button>
+
+        <PlanningPackSidebarButton collapsed={iconOnly} />
 
         {process.env.NODE_ENV === 'development' ? (
           <Link
             href="/admin"
-            onClick={onNavigate}
-            className="mt-3 inline-flex items-center gap-2 text-xs font-medium text-text-muted transition-colors hover:text-primary"
+            onClick={onLinkClick}
+            className="inline-flex items-center gap-2 text-xs font-medium text-sidebar-foreground/65 transition-colors hover:text-sidebar-foreground"
           >
             <Settings size={16} />
             Admin
           </Link>
         ) : null}
-      </div>
-    </div>
+      </SidebarFooter>
+    </>
   );
 }
 
-export default function Nav({
-  navMenus,
-  collapsed = false,
-  onToggleCollapsed,
-}: {
-  navMenus: NavMenuSection[];
-  collapsed?: boolean;
-  onToggleCollapsed?: () => void;
-}) {
+export default function Nav({ navMenus }: { navMenus: NavMenuSection[] }) {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  if (pathname?.startsWith('/dialogue-forge')) {
-    return null;
-  }
 
   return (
     <>
-      <div className="border-b border-border/80 bg-dark-alt/85 px-4 py-4 backdrop-blur-xl lg:hidden">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="sidebar-logo-wrap">
+      <div className="flex border-b border-border/80 bg-dark-alt/85 px-4 py-4 backdrop-blur-xl lg:hidden">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4">
+          <Link href="/" className="flex min-w-0 items-center gap-3">
+            <div className="sidebar-logo-wrap shrink-0">
               <Image
                 src="/logo.svg"
                 alt="Logo"
@@ -469,78 +541,23 @@ export default function Nav({
                 className="h-8 w-8 rounded-full bg-zinc-900/60 p-1 logo-hover-green"
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <span className="block text-xs uppercase tracking-[0.28em] text-text-muted">Ben Garrard</span>
               <span className="font-display text-lg text-primary">Story, sound, systems</span>
             </div>
           </Link>
 
-          <button
-            type="button"
-            onClick={() => setMobileOpen(true)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-dark text-text-muted transition-colors hover:text-primary"
-          >
-            <Menu size={18} />
-          </button>
+          <SidebarTrigger className="shrink-0 border-border bg-dark text-text-muted hover:bg-dark-elevated hover:text-primary" />
         </div>
       </div>
 
-      <aside
-        className={`hidden overflow-hidden border-r border-border/80 bg-dark-alt/85 transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:sticky lg:top-0 lg:block lg:h-screen lg:backdrop-blur-xl ${
-          collapsed ? 'lg:w-[88px]' : 'lg:w-[320px]'
-        }`}
+      <Sidebar
+        collapsible="icon"
+        className="z-10 border-r border-sidebar-border/80 bg-sidebar/90 backdrop-blur-xl"
       >
-        <div className="relative h-full">
-          <button
-            type="button"
-            onClick={onToggleCollapsed}
-            className={`absolute top-4 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-dark/80 text-text-muted transition-colors hover:text-primary ${
-              collapsed ? 'left-1/2 -translate-x-1/2' : 'right-4'
-            }`}
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-          </button>
-          <AnimatePresence initial={false} mode="wait">
-            <motion.div
-              key={collapsed ? 'collapsed-sidebar' : 'expanded-sidebar'}
-              initial={{ opacity: 0, x: collapsed ? -18 : 18 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: collapsed ? 18 : -18 }}
-              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-              className="h-full"
-            >
-              <SidebarContent pathname={pathname ?? ''} navMenus={navMenus} collapsed={collapsed} />
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </aside>
-
-      {mobileOpen ? (
-        <div className="fixed inset-0 z-[80] lg:hidden">
-          <button
-            type="button"
-            aria-label="Close sidebar"
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setMobileOpen(false)}
-          />
-          <div className="relative h-full w-[88vw] max-w-[360px] border-r border-border bg-dark-alt shadow-[0_30px_120px_rgba(0,0,0,0.5)]">
-            <button
-              type="button"
-              onClick={() => setMobileOpen(false)}
-              className="absolute right-4 top-4 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-dark text-text-muted transition-colors hover:text-primary"
-            >
-              <X size={18} />
-            </button>
-            <SidebarContent
-              pathname={pathname ?? ''}
-              navMenus={navMenus}
-              onNavigate={() => setMobileOpen(false)}
-            />
-          </div>
-        </div>
-      ) : null}
+        <PortfolioSidebarInner pathname={pathname ?? ''} navMenus={navMenus} />
+        <SidebarRail />
+      </Sidebar>
     </>
   );
 }

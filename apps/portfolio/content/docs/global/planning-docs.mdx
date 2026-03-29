@@ -1,14 +1,51 @@
 ---
 title: Planning Docs
-description: Index for repo-wide planning on the public docs site.
-date: "2026-03-29"
-updated: "2026-03-29"
+description: Planning loop records for the Global documentation section (repo-wide IA).
+date: "2026-03-28"
+updated: "2026-03-30"
 order: 1
 repoPath: apps/portfolio/content/docs/global/planning-docs.mdx
 ---
 
 # Planning Docs
 
-Start with **[Global planning](/docs/global/global-planning)** for layers (`.planning` vs section MDX), task id shape, Mermaid workflows, planning-pack downloads, and how [Repo Planner](/docs/repo-planner/planning-docs) fits in.
+## Registry
 
-Section-specific planning (books, documentation, editor, …) still lives under `/docs/<section>/` — see root **`AGENTS.md`** for read order.
+| Record | Purpose |
+| --- | --- |
+| `state` | Current cycle, focus, and constraints for the **Global** section |
+| `task-registry` | Tasks that change global docs IA, cross-links, or repo-wide planning UX |
+| `errors-and-attempts` | Approaches we tried and abandoned for this section |
+| `decisions` | Stable decisions about Global vs section planning layout |
+| **Reference (not in this folder)** | **[Global planning guide](/docs/global/global-planning)** — layers, task id shape, **Mermaid** workflows, planning-pack policy, RepoPlanner boundaries |
+
+## Loop
+
+| Step | Rule |
+| --- | --- |
+| `1` | Update **state** / **task-registry** before changing global IA or `docs.ts` grouping |
+| `2` | Execute one logical task (link sweep, new global reference page, nav behavior) |
+| `3` | Verify docs build and the file tree shows **planning** vs **reference** correctly |
+| `4` | Record outcomes in **state** and mark **task-registry** rows |
+
+## Agent context (read order)
+
+For **Global-section** work (this folder), read this page first, then [state](/docs/global/state), [task registry](/docs/global/task-registry), [decisions](/docs/global/decisions), [errors and attempts](/docs/global/errors-and-attempts) when relevant.
+
+For **diagrams, id grammar, Mermaid, and planning-pack policy**, read the **[Global planning guide](/docs/global/global-planning)** — it is a **reference** page in the same section, not inside the **planning** subtree.
+
+For **monorepo-wide** gates, read root **[AGENTS.md](../../../../../AGENTS.md)**, **[documentation/requirements](/docs/documentation/requirements)**, **[documentation/state](/docs/documentation/state)**, **`.planning/ROADMAP.xml`**, **`.planning/TASK-REGISTRY.xml`**, **`.planning/STATE.xml`**. Repo-root **`REQUIREMENTS.md`** is a stub pointer only.
+
+## Machine-readable frontmatter
+
+| Field | Use |
+| --- | --- |
+| `repoPath` | Repo-relative path to this `.mdx` file. |
+| `taskPhase` | Optional: phase id aligned with [task registry](/docs/global/task-registry) (e.g. `global-site-01`). |
+
+## Section rule
+
+| Field | Value |
+| --- | --- |
+| `namespace` | `global` — docs folder key for this section |
+| `task-id` | Prefer `global-site-<phase>-<task>` for work owned by this section |

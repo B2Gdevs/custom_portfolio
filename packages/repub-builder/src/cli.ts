@@ -16,12 +16,13 @@ function help(): void {
 Usage:
   repub build [project-dir]     Build .repub from Vite project (default: cwd)
   repub read <file.repub>       Serve reader and open in browser
-  repub epub <folder> [--output out.epub]  Pack folder of .md/.mdx into EPUB
+  repub epub <folder> [--planning <dir>]... [--output out.epub]  Pack folder of .md/.mdx into EPUB
 
 Options:
   --skip-install   (build) Skip npm install before build
   --skip-build     (build) Skip Vite build; use existing dist/
   --output <path>  (epub) Output file path
+  --planning <dir> (epub) Repeatable; bundle .md/.mdx/.xml/.toml/.txt from each tree as spine appendix (excluded from TOC)
   --help, -h       Show this help
   --version, -v    Show version
 `);
@@ -64,16 +65,50 @@ async function main(): Promise<void> {
   }
 
   if (sub === 'epub') {
-    const folderArg = argv[1];
+    const planningDirs: string[] = [];
+    let outputPath: string | undefined;
+    const positional: string[] = [];
+    for (let i = 1; i < argv.length; i += 1) {
+      const a = argv[i];
+      if (a === '--output') {
+        const next = argv[i + 1];
+        if (!next) {
+          console.error('repub epub: --output requires a path');
+          process.exit(1);
+        }
+        outputPath = path.resolve(next);
+        i += 1;
+        continue;
+      }
+      if (a === '--planning') {
+        const next = argv[i + 1];
+        if (!next) {
+          console.error('repub epub: --planning requires a directory');
+          process.exit(1);
+        }
+        planningDirs.push(path.resolve(next));
+        i += 1;
+        continue;
+      }
+      if (a.startsWith('-')) {
+        console.error(`Unknown option: ${a}`);
+        process.exit(1);
+      }
+      positional.push(a);
+    }
+    const folderArg = positional[0];
     if (!folderArg) {
       console.error('repub epub requires <folder>');
       process.exit(1);
     }
     const folder = path.resolve(folderArg);
-    const outIdx = argv.indexOf('--output');
-    const outputPath = outIdx >= 0 && argv[outIdx + 1] ? path.resolve(argv[outIdx + 1]) : path.join(folder, 'book.epub');
+    const resolvedOutput = outputPath ?? path.join(folder, 'book.epub');
     const { runEpub } = await import('./epub.js');
-    await runEpub(folder, outputPath);
+    await runEpub(
+      folder,
+      resolvedOutput,
+      planningDirs.length > 0 ? { planningDirs } : undefined,
+    );
     return;
   }
 

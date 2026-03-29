@@ -57,5 +57,6 @@ Pin upgrades intentionally: `cd vendor/repo-planner && git fetch && git checkout
 
 ### Host usage in this repo
 
-- Root scripts: `pnpm planning`, `pnpm planning:snapshot`, `pnpm planning:init`, `pnpm planning:checklist`, `pnpm planning:ui` (local report viewer). See [Repo Planner integration](/docs/repo-planner/integration).
+- Root scripts: `pnpm planning`, `pnpm planning:snapshot`, `pnpm planning:init`, `pnpm planning:init:force` (overwrite bootstrap XML/templates; keeps `AGENTS.md` if you use `--no-agents-md` via script), `pnpm planning:checklist`, `pnpm planning:ui` (local report viewer). See [Repo Planner integration](/docs/repo-planner/integration).
+- **Portfolio app dependency:** `@portfolio/app` lists **`repo-planner`: `file:../../vendor/repo-planner`** so Next can **`transpilePackages: ['repo-planner']`** and import `PlanningCockpit` on **`/docs/apps/repo-planner`**.
 - Planning root: `.planning/` at the monorepo root; optional `REPOPLANNER_PROJECT_ROOT` when running CLI from another cwd.

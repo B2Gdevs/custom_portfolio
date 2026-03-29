@@ -1,0 +1,26 @@
+---
+title: Route and URLs
+description: How the Listen surface fits the site URL taxonomy.
+date: "2026-03-28"
+updated: "2026-03-28"
+order: 10
+repoPath: apps/portfolio/content/docs/listen/route-and-urls.mdx
+---
+
+# Route and URLs
+
+## Canonical
+
+| Path | Role |
+| --- | --- |
+| **`/listen`** | Public **Listen** index: music tracks, BandLab embeds/links, presets, filters, and unlock UI for gated groups. |
+
+## Relationship to `/apps/*`
+
+[Route conventions](/docs/documentation/route-conventions) reserve **`/apps/*`** for **interactive tools** (reader, Dialogue Forge, repo planner). **Listen** is treated as a **content discovery surface** (like **`/blog`** and **`/projects`**), not a packaged “app” in that sense.
+
+If Listen later grows heavy interactive tooling (e.g. a full DAW-adjacent lab), a follow-up phase may introduce **`/apps/listen`** with a **308** from `/listen` — **out of scope** for `listen-surface-01`.
+
+## Implementation note
+
+The Next.js route file lives under **`apps/portfolio/app/listen/`**. No change required for v1 unless an ADR explicitly moves the canonical path.

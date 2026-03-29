@@ -1,8 +1,31 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { ConditionalLayout } from '@/components/layout/ConditionalLayout';
+import { ContentCommandPaletteHotkey } from '@/components/content/ContentCommandPaletteHotkey';
+import { SiteLayout } from '@/components/layout/SiteLayout';
+import { ModalRoot } from '@/components/modals/ModalRoot';
+import { SiteCopilot } from '@/components/site/SiteCopilot';
 import { getAllContent } from '@/lib/content';
 import { buildSiteMenus } from '@/lib/site-menus';
+import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Serif } from 'next/font/google';
+import { cn } from '@/lib/utils';
+
+const fontSans = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-sans',
+});
+
+const fontSerif = IBM_Plex_Serif({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-serif',
+});
+
+const fontMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-mono',
+});
 
 export const metadata: Metadata = {
   title: 'Ben Garrard | Story, Sound, and Systems',
@@ -24,12 +47,34 @@ export default function RootLayout({
     blogPosts: getAllContent('blog'),
   });
 
+  const siteChatEnabled =
+    Boolean(process.env.OPENAI_API_KEY?.trim()) && process.env.NEXT_PUBLIC_SITE_CHAT !== '0';
+
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      className={cn(
+        'dark font-sans',
+        fontSans.variable,
+        fontSerif.variable,
+        fontMono.variable,
+      )}
+      suppressHydrationWarning
+    >
       <body>
-        <ConditionalLayout navMenus={navMenus}>
+        <SiteLayout navMenus={navMenus}>
           {children}
-        </ConditionalLayout>
+        </SiteLayout>
+        <ContentCommandPaletteHotkey />
+        <ModalRoot />
+        {siteChatEnabled ? (
+          <div
+            data-testid="site-copilot-shell"
+            className="fixed bottom-6 right-6 z-[130] pointer-events-none [&_*]:pointer-events-auto"
+          >
+            <SiteCopilot />
+          </div>
+        ) : null}
       </body>
     </html>
   );

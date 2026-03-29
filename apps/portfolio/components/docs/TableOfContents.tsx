@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
 
 interface Heading {
   id: string;
@@ -9,14 +8,24 @@ interface Heading {
   level: number;
 }
 
-export default function TableOfContents() {
-  const [headings, setHeadings] = useState<Heading[]>([]);
+export default function TableOfContents({
+  headings: providedHeadings,
+  selector = 'article h2, article h3, article h4',
+}: {
+  headings?: Heading[];
+  selector?: string;
+}) {
+  const [domHeadings, setDomHeadings] = useState<Heading[]>([]);
   const [activeId, setActiveId] = useState<string>('');
+  const headings = providedHeadings && providedHeadings.length > 0 ? providedHeadings : domHeadings;
 
   useEffect(() => {
-    const headingElements = Array.from(
-      document.querySelectorAll('article h2, article h3, article h4')
-    ).map((el) => ({
+    if (providedHeadings && providedHeadings.length > 0) {
+      return;
+    }
+
+    const nodes = Array.from(document.querySelectorAll(selector));
+    const headingElements = nodes.map((el) => ({
       id: el.id || el.textContent?.toLowerCase().replace(/\s+/g, '-') || '',
       text: el.textContent || '',
       level: parseInt(el.tagName.charAt(1)),
@@ -24,13 +33,13 @@ export default function TableOfContents() {
 
     // Add IDs to headings if they don't have them
     headingElements.forEach((heading, index) => {
-      const element = document.querySelectorAll('article h2, article h3, article h4')[index];
+      const element = nodes[index];
       if (element && !element.id) {
         element.id = heading.id;
       }
     });
 
-    queueMicrotask(() => setHeadings(headingElements));
+    queueMicrotask(() => setDomHeadings(headingElements));
 
     // Intersection Observer for active heading
     const observer = new IntersectionObserver(
@@ -50,7 +59,7 @@ export default function TableOfContents() {
     });
 
     return () => observer.disconnect();
-  }, []);
+  }, [providedHeadings, selector]);
 
   if (headings.length === 0) return null;
 

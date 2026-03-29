@@ -2,6 +2,9 @@
 title: "Bashful.ai: Bringing Stable Diffusion to Adobe Photoshop"
 description: "Launching a generative AI Photoshop plugin when Stable Diffusion was first released, evolving from a local installation tool to a cloud-powered platform with 100+ monthly active users."
 date: "2023-03-15"
+status: "shipped"
+featured: true
+featuredOrder: 3
 tags: ["AI", "Photoshop", "Plugin", "Stable Diffusion", "Cloud Platform"]
 images:
   - "/images/projects/bashful/bashful_the_photoshop_plugin.png"
@@ -10,6 +13,12 @@ images:
   - "/images/projects/bashful/9QnnnwwW26doRvvWfl8BY35KV4.png"
 featuredImage: "/images/projects/bashful/featured.svg"
 githubUrl: "https://github.com/bashfarm/bash_photoshop"
+liveUrl: "https://bashful.ai"
+links:
+  - label: "Bashful Documentation"
+    href: "https://docs.bashful.ai/bashful-ai-powered-photoshop-plugin/bashful-free-plugin-for-photoshop/local-ai-image-generation"
+    description: "Installation and product documentation."
+searchKeywords: ["photoshop ai plugin", "stable diffusion cloud platform", "creative tooling", "bashful"]
 media:
   - type: "documentation"
     url: "https://docs.bashful.ai/bashful-ai-powered-photoshop-plugin/bashful-free-plugin-for-photoshop/local-ai-image-generation"
@@ -19,9 +28,23 @@ media:
     title: "Local AI Installation Tutorial"
 ---
 
+## Links & Downloads
+
+- [Live Site](https://bashful.ai) for the public product surface.
+- [GitHub](https://github.com/bashfarm/bash_photoshop) for the plugin code.
+- [Documentation](https://docs.bashful.ai/bashful-ai-powered-photoshop-plugin/bashful-free-plugin-for-photoshop/local-ai-image-generation) for setup and usage guidance.
+
 ## Overview
 
 When Stable Diffusion first burst onto the scene as an open-source text-to-image model, we saw an opportunity to bridge the gap between cutting-edge AI and the creative workflows designers already knew and loved. The result was Bashful.ai—a Photoshop plugin that brought the power of Stable Diffusion directly into Adobe's ecosystem, eventually evolving into a comprehensive cloud platform that democratized AI image generation for creative professionals.
+
+## Role & Context
+
+This was a founder-led product and engineering effort built during the first major wave of public Stable Diffusion interest. The job was to translate a fast-moving open-source model ecosystem into a usable creative tool for designers who did not want to become ML infrastructure experts just to generate images.
+
+## Tradeoffs
+
+The project repeatedly traded control for accessibility. Local installs gave users maximum ownership but created steep setup friction. A cloud platform reduced that friction dramatically, but it required additional infrastructure, support, and product work to keep the experience reliable and affordable.
 
 ## The Genesis: From Plugin to Platform
 
@@ -41,7 +64,7 @@ However, we quickly discovered that local Stable Diffusion installations were a 
 
 - **Discord Community**: Built and nurtured an active Discord community where users provide feedback, share tips, and help each other maximize the tool's potential.
 
-## Technical Architecture
+## Implementation
 
 The platform evolved into a sophisticated stack combining modern web technologies with cloud infrastructure:
 
@@ -55,7 +78,12 @@ The platform evolved into a sophisticated stack combining modern web technologie
 
 - **Version Control**: Git workflows ensure code quality and collaborative development.
 
-## Challenges and Solutions
+## Examples & Media
+
+- The Photoshop screenshots and the local-installation tutorial show how the product met users inside an existing creative workflow.
+- The documentation and community artifacts are examples of the support layer that made the tool usable beyond early adopters.
+
+## Tradeoffs
 
 One of our biggest challenges was the transition from local to cloud architecture. Users initially struggled with local Stable Diffusion installations—GPU requirements, dependency conflicts, and configuration complexity created significant friction. Our solution was to build a cloud service that abstracted away all the technical complexity.
 
@@ -86,7 +114,7 @@ Through strategic, light-touch marketing and word-of-mouth, we grew to over 100 
 - **Git**: Version control and collaboration
 - **Confluence & GitBook**: Documentation and knowledge management
 
-## Outcome
+## Outcomes
 
 Bashful.ai successfully brought Stable Diffusion to the Photoshop ecosystem, removing barriers that prevented designers from accessing cutting-edge AI image generation. We transformed from a simple plugin into a full cloud platform, growing to 100+ monthly active users and building a passionate community.
 

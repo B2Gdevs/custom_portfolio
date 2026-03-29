@@ -1,0 +1,22 @@
+---
+title: Decisions
+description: Compact decision records for the projects section.
+date: "2026-03-28"
+updated: "2026-03-28"
+order: 5
+---
+
+# Decisions
+
+| Id | Status | Summary | Consequence |
+| --- | --- | --- | --- |
+| `PROJECTS-DOCS-PLANNING-FIRST` | `accepted` | projects should have a section-local planning loop before the showcase UX is reworked | projects work can now be tracked without borrowing blog or documentation registries |
+| `PROJECTS-BLOG-UX-ALIGNMENT` | `accepted` | projects should align with the blog discovery/readability pass where shared primitives help, but not collapse into a generic one-size-fits-all content page | search, sorting, filters, and command-palette behavior can be shared, while project proof/media metadata stays project-specific |
+| `PROJECTS-CMDK-BLOG-PROJECTS-FIRST` | `accepted` | the first command-palette search pass should only cover blog and projects content | the search surface stays narrow enough to ship quickly while still covering the two long-form content areas being redesigned |
+| `PROJECTS-MOBILE-FILTER-DRAWER` | `accepted` | projects discovery filters should collapse into a drawer on mobile instead of inline chips or a permanently open rail | the mobile surface stays focused and mirrors the chosen blog interaction model |
+| `PROJECTS-SEARCH-HIGHLIGHT-RESULTS-ONLY` | `accepted` | search should highlight snippets and results, but opening a project page should not add temporary in-page keyword marks | project reading stays clean while results still explain why a hit matched |
+| `PROJECTS-DEFAULT-SORT-FEATURED` | `accepted` | the default projects sort should prefer featured or manually curated order | the project index can emphasize the strongest or most relevant work instead of treating every item as a time-based archive |
+| `PROJECTS-REPO-AND-APP-LINKS` | `accepted` | project pages should consistently expose GitHub repositories, associated site app routes, external demos, and downloads near the top of the page, with internal app links as the first concrete target | readers can move from story to proof quickly and the metadata model has a clear first implementation target |
+| `PROJECTS-DETAIL-TOC` | `accepted` | long-form project pages should expose a table of contents while being read | project writeups become easier to scan and the TOC becomes part of the standard project chrome |
+| `PROJECTS-FILTERS-TAGS-STATUS` | `accepted` | the first projects filter pass should use tags and status as the explicit filter taxonomy | the showcase can support meaningful filtering without requiring a complex custom schema before the redesign ships |
+| `PROJECTS-LITERAL-SECTION-HEADINGS` | `accepted` | the strict projects template should use literal section headings: `Links & Downloads`, `Overview`, `Role & Context`, `Tradeoffs`, `Implementation`, `Outcomes`, and `Examples & Media` | authors get a stable contract and the TOC/search extraction can rely on predictable section names |

@@ -2,20 +2,47 @@
 title: "Dialogue Forge: Interactive Narrative Builder"
 description: "A chat-based dialogue system with branching choices and persistent memory, designed for creating and testing narrative experiences in real-time."
 date: "2024-12-18"
+status: "active"
+featured: true
+featuredOrder: 1
 tags: ["Interactive Fiction", "Dialogue System", "React", "State Management", "Side Project"]
 images:
   - "/images/projects/dialogue-forge/featured.svg"
 featuredImage: "/images/projects/dialogue-forge/featured.svg"
-liveUrl: "/dialogue-forge"
+liveUrl: "/apps/dialogue-forge"
+appUrl: "/apps/dialogue-forge"
+appLabel: "Open Dialogue Forge"
+links:
+  - label: "Dialogue Forge Docs"
+    href: "/docs/dialogue-forge"
+    description: "Implementation notes and planning for the tool."
+searchKeywords: ["branching dialogue", "interactive fiction editor", "yarn spinner", "narrative tool"]
 media:
   - type: "documentation"
     url: "/docs/dialogue-forge/getting-started"
     title: "Dialogue Forge Documentation"
 ---
 
+## Links & Downloads
+
+- [Open Dialogue Forge](/apps/dialogue-forge) to try the current app.
+- [Dialogue Forge Docs](/docs/dialogue-forge) for planning and technical notes.
+
 ## Overview
 
 Dialogue Forge is an experimental tool for building and testing branching dialogue systems. It presents a ChatGPT-like interface where you converse with an AI character, but your responses are pre-defined choices that you craft as you play. The system remembers your choices and adapts the narrative accordingly.
+
+## Role & Context
+
+This project is an internal narrative-tool exploration rather than a client product. The role here is product design plus implementation strategy: define the authoring workflow, pressure-test the data model, and keep the tool close enough to real game production constraints that it can later plug into a broader worldbuilding pipeline.
+
+## Tradeoffs
+
+The central tradeoff is between total control and practical leverage. Building everything custom would maximize flexibility, but it would slow down iteration. Leaning on narrative runtimes like Ink or Yarn Spinner constrains the data model somewhat, but it dramatically improves portability and reduces the amount of editor and runtime infrastructure that has to be invented from scratch.
+
+## Implementation
+
+The current implementation work is focused on proving the workflow: a chat-like authoring surface, branching choices, conditional state, and a path from web prototype to engine-ready narrative files.
 
 ## Core Concept
 
@@ -105,9 +132,18 @@ Example dialogue with game integration:
 
 We'll use `yarnspinner-js` for the web prototype, then the same `.yarn` files work directly in Unreal.
 
+## Outcomes
+
+The immediate outcome is a clear technical recommendation: Yarn Spinner plus a custom UI is the best fit for the current direction because it keeps the prototype portable while preserving a strong path into game-engine integration later.
+
+## Examples & Media
+
+- The sample dialogue app demonstrates the conversational authoring direction.
+- The documentation and comparison notes are the main artifacts that explain how the system should evolve.
+
 ## Try It
 
-🎮 **[Launch Dialogue Forge →](/dialogue-forge)** — Play through the sample dialogue and explore the editor panel.
+🎮 **[Launch Dialogue Forge →](/apps/dialogue-forge)** — Play through the sample dialogue and explore the editor panel.
 
 ## Status
 

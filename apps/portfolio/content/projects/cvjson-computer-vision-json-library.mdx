@@ -2,17 +2,33 @@
 title: "CVJSON: Streamlining Computer Vision Data Handling"
 description: "An open-source Python library I created to simplify working with COCO-formatted JSON data for object detection, reducing redundant utility scripting and accelerating computer vision research workflows."
 date: "2018-08-20"
+status: "library"
+featured: false
+featuredOrder: 5
 tags: ["Open Source", "Python", "Computer Vision", "Library", "Research"]
 images:
   - "/images/projects/cvjson/cvjson_documenation.png"
 featuredImage: "/images/projects/cvjson/cvjson_documenation.png"
+links:
+  - label: "Bitbucket Source"
+    href: "https://bitbucket.org/mayachitrainc/cvjson/src/master/"
+    description: "Repository and installation source."
+searchKeywords: ["coco json library", "computer vision tooling", "python dataset library", "cvjson"]
 ---
+
+## Links & Downloads
+
+- [Bitbucket Source](https://bitbucket.org/mayachitrainc/cvjson/src/master/) for installation and source access.
 
 ## Overview
 
 During my research work on object detection and machine learning optimization, I found myself repeatedly writing utility scripts to parse, manipulate, and analyze COCO-formatted JSON annotation files. Recognizing that this was a common pain point across the computer vision research community, I created CVJSON—a Python library that extends dictionaries to provide intuitive, powerful methods for working with COCO-formatted data.
 
 The library eliminates redundant utility scripting and provides a standardized way for researchers to interact with object detection annotations, making computer vision workflows significantly more efficient and collaborative.
+
+## Role & Context
+
+I built CVJSON during research-heavy computer vision work where annotation wrangling kept consuming time that should have gone to experiments. The role here was toolmaker: identify the repeated pain points, collapse them into a reusable library, and make the workflow sharable instead of leaving it trapped in one-off scripts.
 
 ## The Problem
 
@@ -22,6 +38,14 @@ Working with COCO-formatted JSON files for object detection research presents se
 - **Complex Data Structures**: Navigating nested JSON structures with images, annotations, and categories is error-prone
 - **Lack of Standardization**: Different researchers implement different approaches, making code sharing and collaboration difficult
 - **Missing Convenience Methods**: Common operations like getting class distributions, average bounding box areas, or image-to-annotation mappings require custom implementations
+
+## Tradeoffs
+
+The core tradeoff was between keeping the interface close to raw JSON and adding a more opinionated convenience layer. CVJSON chose a hybrid approach so researchers could still access the underlying dictionary structure while gaining higher-level methods for the operations they repeated constantly.
+
+## Implementation
+
+The sections below cover the library shape, the convenience methods, the lookup structures, and the documentation and distribution choices that made the package useful beyond one project.
 
 ## Solution: CVJSON Library
 
@@ -195,7 +219,12 @@ pip install cvjson/
 - **Sphinx**: Documentation generation
 - **COCO Format**: Full support for COCO object detection annotation structure
 
-## Challenges and Design Decisions
+## Examples & Media
+
+- The documentation screenshot is the main visual artifact showing how the library was packaged for real use.
+- The installation snippet and feature breakdown are examples of how the library reduced repeated data-wrangling work.
+
+## Tradeoffs
 
 ### Challenge 1: Balancing Flexibility and Simplicity
 
@@ -215,7 +244,7 @@ pip install cvjson/
 
 **Solution**: The library validates required fields while gracefully handling optional ones, providing helpful error messages when critical data is missing.
 
-## Outcome
+## Outcomes
 
 CVJSON successfully streamlined my computer vision research workflow, reducing the time spent on data manipulation from hours to minutes. The library's intuitive interface and powerful convenience methods made it easy to focus on research questions rather than data wrangling.
 

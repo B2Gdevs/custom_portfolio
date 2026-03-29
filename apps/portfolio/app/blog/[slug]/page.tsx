@@ -6,6 +6,10 @@ import { mdxOptions } from '@/lib/mdx-options';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import Image from 'next/image';
+import TableOfContents from '@/components/docs/TableOfContents';
+import { ContentTopLinks } from '@/components/content/ContentTopLinks';
+import { RequiredSectionsNotice } from '@/components/content/RequiredSectionsNotice';
+import { buildContentLinkGroups } from '@/lib/content-view-models';
 
 export async function generateStaticParams() {
   const posts = getAllContent('blog');
@@ -25,83 +29,94 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   const components = getMDXComponents({});
   const heroImage = post.meta.featuredImage || post.meta.image;
   const galleryImages = post.meta.images || [];
+  const linkGroups = buildContentLinkGroups(post.meta);
 
   return (
-    <article className="max-w-4xl mx-auto px-6 py-20">
-      {/* Hero Image */}
-      {heroImage && (
-        <div className="mb-12 rounded-xl overflow-hidden border border-border shadow-xl">
-          <div className="relative w-full h-96 md:h-[500px]">
-            <Image
-              src={heroImage}
-              alt={post.meta.title}
-              fill
-              className="object-cover"
-              priority
-            />
+    <article className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+      {heroImage ? (
+        <div className="mb-10 overflow-hidden rounded-[2rem] border border-border/70 shadow-xl">
+          <div className="relative h-80 w-full md:h-[480px]">
+            <Image src={heroImage} alt={post.meta.title} fill className="object-cover" priority />
           </div>
         </div>
-      )}
+      ) : null}
 
-      <header className="mb-12">
-        <h1 className="text-5xl font-bold text-primary mb-4">{post.meta.title}</h1>
-        {post.meta.date && (
-          <time className="text-text-muted text-lg block mb-4">
-            {format(new Date(post.meta.date), 'MMMM d, yyyy')}
-          </time>
-        )}
-        {post.meta.description && (
-          <p className="text-xl text-text-muted mb-6">{post.meta.description}</p>
-        )}
-        {post.meta.tags && (
-          <div className="flex gap-2 flex-wrap">
-            {post.meta.tags.map((tag) => (
-              <span
-                key={tag}
-                className="brutal-border bg-dark-alt px-3 py-1 text-sm"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </header>
-      
-      {/* Image Gallery */}
-      {galleryImages.length > 1 && (
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-primary mb-6">Gallery</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {galleryImages.map((img: string, idx: number) => (
-              <div
-                key={idx}
-                className="relative aspect-video rounded-lg overflow-hidden border border-border shadow-md hover:shadow-xl transition-shadow group"
-              >
-                <Image
-                  src={img}
-                  alt={`${post.meta.title} - Image ${idx + 1}`}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                />
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="min-w-0 space-y-8">
+          <header className="rounded-[2rem] border border-border/70 bg-dark-alt/60 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.16)]">
+            <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Blog</p>
+            <h1 className="mt-3 font-serif text-4xl text-primary sm:text-5xl">{post.meta.title}</h1>
+            {post.meta.date ? (
+              <time className="mt-4 block text-sm text-text-muted">
+                {format(new Date(post.meta.date), 'MMMM d, yyyy')}
+              </time>
+            ) : null}
+            {post.meta.description ? (
+              <p className="mt-4 max-w-3xl text-lg text-text-muted">{post.meta.description}</p>
+            ) : null}
+            <div className="mt-5 flex flex-wrap gap-2">
+              {(post.meta.tags ?? []).map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full border border-border/70 px-3 py-1 text-xs text-text-muted"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </header>
+
+          <ContentTopLinks
+            heading="Downloads & Resources"
+            appLinks={linkGroups.appLinks}
+            downloads={linkGroups.downloads}
+            links={linkGroups.links}
+          />
+
+          {process.env.NODE_ENV !== 'production' ? (
+            <RequiredSectionsNotice type="blog" missing={post.missingRequiredSections} />
+          ) : null}
+
+          {galleryImages.length > 1 ? (
+            <section className="rounded-[2rem] border border-border/70 bg-dark-alt/55 p-6">
+              <h2 className="font-serif text-2xl text-primary">Gallery</h2>
+              <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+                {galleryImages.map((img: string, idx: number) => (
+                  <div
+                    key={idx}
+                    className="group relative aspect-video overflow-hidden rounded-2xl border border-border shadow-md transition-shadow hover:shadow-xl"
+                  >
+                    <Image
+                      src={img}
+                      alt={`${post.meta.title} - Image ${idx + 1}`}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
+            </section>
+          ) : null}
+
+          <div className="rounded-[2rem] border border-border/70 bg-dark-alt/40 p-6 sm:p-8">
+            <div className="prose prose-lg max-w-none">
+              <MDXRemote source={post.content} components={components} options={mdxOptions} />
+            </div>
+          </div>
+
+          <div className="border-t border-border/70 pt-8">
+            <Link href="/blog" className="text-accent font-semibold hover:underline">
+              ← Back to Blog
+            </Link>
           </div>
         </div>
-      )}
-      
-      <div className="prose prose-lg max-w-none">
-        <MDXRemote source={post.content} components={components} options={mdxOptions} />
-      </div>
-      
-      <div className="mt-12 pt-8 border-t-4 border-primary">
-        <Link
-          href="/blog"
-          className="text-accent font-semibold hover:underline"
-        >
-          ← Back to Blog
-        </Link>
+
+        <aside className="hidden lg:block">
+          <div className="sticky top-24 rounded-[2rem] border border-border/70 bg-dark-alt/60 p-5">
+            <TableOfContents headings={post.headings} />
+          </div>
+        </aside>
       </div>
     </article>
   );
 }
-

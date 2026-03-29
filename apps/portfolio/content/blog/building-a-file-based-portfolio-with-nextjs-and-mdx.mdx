@@ -4,9 +4,32 @@ description: "How I built a sleek portfolio site with a development-only admin i
 date: "2025-01-20"
 tags: ["Next.js", "MDX", "Portfolio", "Content Management", "Migration"]
 image: "/images/projects/portfolio/portfolio-hero.png"
+links:
+  - label: "Documentation Requirements"
+    href: "/docs/documentation/requirements"
+    description: "Current repo-level product and architecture rules."
+  - label: "Projects Archive"
+    href: "/projects"
+    description: "The project surface fed by the file-based content system."
+searchKeywords: ["file-based cms", "nextjs mdx portfolio", "content architecture", "migration workflow"]
 ---
 
-When I decided to rebuild my portfolio, I wanted something that combined the simplicity of file-based content with the power of modern web frameworks. The result is a Next.js 16 portfolio with MDX support, a development-only admin interface, and a seamless migration path from legacy systems.
+## Downloads & Resources
+
+- [Documentation Requirements](/docs/documentation/requirements) for the current repo-level product and architecture rules.
+- [Projects Archive](/projects) to see the same file-based content model on the public site.
+
+## Introduction
+
+When I decided to rebuild my portfolio, I wanted something that combined the simplicity of file-based content with the power of modern web frameworks. The result is a Next.js 16 portfolio with MDX support, a development-only admin interface, and a migration path from legacy systems that stays understandable in plain files.
+
+## Tradeoffs
+
+The upside of this approach is clarity: MDX files live in Git, builds stay static, and there is no CMS or content database to babysit. The tradeoff is that authoring discipline matters more, because schema drift, image organization, and content migrations have to be handled explicitly instead of hidden behind an admin panel.
+
+## What Was Done
+
+This write-up covers the actual mechanics behind the portfolio rebuild: file-based content loading, a development-only admin surface, the migration from the previous site, and the image handling that made the new MDX pages feel intentional instead of stitched together.
 
 ## The Architecture: File-Based Content Management
 
@@ -258,6 +281,15 @@ The final portfolio features:
 2. **Environment-based security works**: Development-only features are simple and effective
 3. **MDX is amazing**: The ability to use React components in markdown is game-changing
 4. **Migration is straightforward**: When content is structured, moving it is just file operations
+
+## Conclusion
+
+The file-based portfolio path held up because it optimized for ownership instead of abstraction. The site became easier to version, easier to migrate, and easier to understand, which mattered more than having a polished admin for a personal archive.
+
+## Examples
+
+- The directory layout and frontmatter examples in this post show the exact content contract the site was built around.
+- The image-gallery and MDX component snippets show how the presentation layer stayed reusable even though the source stayed simple.
 
 ## What's Next?
 

@@ -2,17 +2,18 @@
 title: Task Registry
 description: Compact task records for the editor section.
 date: "2026-03-16"
-updated: "2026-03-16"
+updated: "2026-03-28"
 order: 3
+repoPath: apps/portfolio/content/docs/editor/task-registry.mdx
 ---
 
 # Task Registry
 
-## Phase `editor-01`
+## Phase `editor-workflow-01`
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
-| `editor-01-01` | `done` | create a section-local planning loop for the editor direction inside the docs tree | `-` | `pnpm exec next build` |
-| `editor-01-02` | `planned` | map the current source-material reality: notion exports, markdown, mdx, and other possible author inputs | `editor-01-01` | `pnpm exec next build` |
-| `editor-01-03` | `planned` | outline a lexical-based editor and component system that compiles to EPUB3-compatible markup | `editor-01-02` | `pnpm exec next build` |
-| `editor-01-04` | `planned` | decide whether the editor should remain a planning target or become an actual build task | `editor-01-03` | `pnpm exec next build` |
+| `editor-workflow-01-01` | `done` | create a section-local planning loop for the editor direction inside the docs tree | `-` | `pnpm exec next build` |
+| `editor-workflow-01-02` | `planned` | map the current source-material reality: notion exports, markdown, mdx, and other possible author inputs | `editor-workflow-01-01` | `pnpm exec next build` |
+| `editor-workflow-01-03` | `planned` | outline a lexical-based editor and component system that compiles to EPUB3-compatible markup | `editor-workflow-01-02` | `pnpm exec next build` |
+| `editor-workflow-01-04` | `planned` | decide whether the editor should remain a planning target or become an actual build task | `editor-workflow-01-03` | `pnpm exec next build` |

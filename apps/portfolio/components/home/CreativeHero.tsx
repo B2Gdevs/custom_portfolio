@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight, BookOpenText } from 'lucide-react';
+import { PlanningPackHeroLink } from '@/components/planning/PlanningPackHeroLink';
 import type { FeaturedBookShowcase } from '@/lib/featured-book';
 
 export default function CreativeHero({ featuredBook }: { featuredBook: FeaturedBookShowcase }) {
@@ -13,8 +14,8 @@ export default function CreativeHero({ featuredBook }: { featuredBook: FeaturedB
         <div className="max-w-3xl">
           <p className="section-kicker">{featuredBook.heroEyebrow}</p>
           <h1 className="font-display text-5xl leading-[0.92] tracking-[-0.03em] text-primary md:text-7xl">
-            Start with the book.
-            <span className="mt-3 block text-text-muted">Everything else can wait a moment.</span>
+            My Tales of Magicborn.
+            <span className="mt-3 block text-text-muted">Code, Music, and Magic.</span>
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-text-muted md:text-xl">
@@ -23,7 +24,7 @@ export default function CreativeHero({ featuredBook }: { featuredBook: FeaturedB
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              href={`/books/${featuredBook.slug}/read`}
+              href={`/apps/reader?book=${encodeURIComponent(featuredBook.slug)}`}
               className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-secondary transition-transform hover:-translate-y-0.5"
             >
               <BookOpenText size={18} />
@@ -37,19 +38,28 @@ export default function CreativeHero({ featuredBook }: { featuredBook: FeaturedB
               <ArrowRight size={16} />
             </Link>
           </div>
+          <div className="mt-3">
+            <PlanningPackHeroLink />
+          </div>
 
           <div className="mt-10 grid gap-4 text-sm text-text-muted sm:grid-cols-3">
             <div className="story-metric">
               <span className="story-metric-value">{featuredBook.chapterCount || '3'}</span>
-              <span>chapter arcs staged</span>
+              <span>Projects Listed</span>
             </div>
             <div className="story-metric">
               <span className="story-metric-value">{featuredBook.pageCount || '70+'}</span>
-              <span>pages ready to read</span>
+              <span>Blog Posts Written</span>
             </div>
             <div className="story-metric">
               <span className="story-metric-value">Now</span>
-              <span>{featuredBook.status}</span>
+                <span>Songs Written</span>
+            </div>
+          </div>
+          <div className="mt-10 grid gap-4 text-sm text-text-muted sm:grid-cols-3">
+            <div className="story-metric">
+              <span className="story-metric-value">Now</span>
+              <span>Books Written</span>
             </div>
           </div>
         </div>
@@ -64,12 +74,6 @@ export default function CreativeHero({ featuredBook }: { featuredBook: FeaturedB
                 <h2 className="font-display text-4xl text-secondary md:text-5xl">{featuredBook.title}</h2>
                 <p className="mt-4 text-sm leading-7 text-secondary/80">{featuredBook.description}</p>
               </div>
-            </div>
-            <div className="story-note">
-              <p className="section-kicker text-[0.68rem]">Current focus</p>
-              <p className="mt-3 text-sm leading-7 text-text">
-                The site now opens like a threshold into the world: story first, songs in orbit, technical depth farther in.
-              </p>
             </div>
           </div>
         </div>

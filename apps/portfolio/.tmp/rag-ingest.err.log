@@ -1,0 +1,12 @@
+SqliteError: Only integers are allows for primary key values on rag_chunk_vectors
+    at convertError (C:\Users\benja\Documents\custom_portfolio\node_modules\.pnpm\libsql@0.5.29\node_modules\libsql\index.js:59:12)
+    at Statement.run (C:\Users\benja\Documents\custom_portfolio\node_modules\.pnpm\libsql@0.5.29\node_modules\libsql\index.js:335:13)
+    at file:///C:/Users/benja/Documents/custom_portfolio/apps/portfolio/.tmp/portfolio-rag-PcjBb5/rag-ingest.mjs:622:17
+    at C:\Users\benja\Documents\custom_portfolio\node_modules\.pnpm\libsql@0.5.29\node_modules\libsql\index.js:149:26
+    at replaceRunChunks (file:///C:/Users/benja/Documents/custom_portfolio/apps/portfolio/.tmp/portfolio-rag-PcjBb5/rag-ingest.mjs:625:3)
+    at ingestRagCorpus (file:///C:/Users/benja/Documents/custom_portfolio/apps/portfolio/.tmp/portfolio-rag-PcjBb5/rag-ingest.mjs:1133:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async main (file:///C:/Users/benja/Documents/custom_portfolio/apps/portfolio/.tmp/portfolio-rag-PcjBb5/rag-ingest.mjs:1200:19) {
+  code: 'SQLITE_ERROR',
+  rawCode: 1
+}

@@ -1,0 +1,48 @@
+---
+title: Planning Docs
+description: Compact planning index for the Magicborn worldbuilding section.
+date: "2026-03-28"
+updated: "2026-03-28"
+order: 1
+repoPath: apps/portfolio/content/docs/magicborn/planning-docs.mdx
+---
+
+# Planning Docs
+
+## Planning Index
+
+| Page | Record Set | Purpose |
+| --- | --- | --- |
+| [State](/docs/magicborn/state) | `state-records` | Current phase, owner, next queue, and working references. |
+| [Task Registry](/docs/magicborn/task-registry) | `task-records` | Ordered work items with status, dependencies, and verification steps. |
+| [Errors and Attempts](/docs/magicborn/errors-and-attempts) | `attempt-records` | Failed approaches, cautions, and still-open problem tracks. |
+| [Decisions](/docs/magicborn/decisions) | `decision-records` | Accepted section decisions and consequences for lore and retrieval. |
+
+## Section Scope
+
+| Field | Value |
+| --- | --- |
+| `section` | `magicborn` |
+| `source` | `apps/portfolio/content/docs/magicborn/` |
+| `format` | canon dossiers with short-story-style openings for the world of Magicborn |
+| `role` | public lore/canon surface that can also feed site chat retrieval |
+| `boundary` | world, characters, places, factions, magic, and canon notes live here; raw manuscript chapters do not |
+
+## Record Rules
+
+| Field | Rule |
+| --- | --- |
+| `priority` | Planning pages sort before general lore docs. |
+| `shape` | Use compact tables, explicit ids, and short values instead of long prose notes. |
+| `page-schema` | Prefer grouped canon dossiers: opening vignette, canon registry, known facts, tensions, and source anchors. |
+| `rag-scope` | Pages in this section are retrieval-eligible unless later marked private or draft-only. |
+| `manuscript-boundary` | Do not use this section as a substitute for chapter drafts under `books/`. |
+| `agent-loop` | Read this page, then [state](/docs/magicborn/state), then [task registry](/docs/magicborn/task-registry), then root planning docs for repo-wide gates. |
+
+## Id Rule
+
+| Field | Value |
+| --- | --- |
+| `phase-id` | use `magicborn-world-<phase>` for worldbuilding phases |
+| `task-id` | use `magicborn-world-<phase>-<task>` for executable work |
+| `attempt-id` | use `magicborn-world-<phase>-attempt-<task>` for notable course corrections |

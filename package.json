@@ -38,12 +38,16 @@
     "package:org:setup": "./scripts/setup-org-secrets.sh",
     "package:org:update": "./scripts/update-org-npm-token.sh",
     "build:books": "pnpm --filter @portfolio/repub-builder run build && node scripts/build-books.cjs",
-    "planning": "node vendor/repo-planner/scripts/loop-cli.mjs",
-    "planning:init": "node vendor/repo-planner/scripts/loop-cli.mjs init --no-agents-md",
-    "planning:snapshot": "node vendor/repo-planner/scripts/loop-cli.mjs snapshot",
-    "planning:checklist": "node vendor/repo-planner/scripts/loop-cli.mjs setup checklist",
-    "planning:report-view": "node vendor/repo-planner/scripts/loop-cli.mjs report view",
-    "planning:ui": "node vendor/repo-planner/scripts/loop-cli.mjs report view"
+    "planning": "node scripts/run-planning-cli.mjs",
+    "planning:init": "node scripts/run-planning-cli.mjs init --minimal --no-agents-md",
+    "planning:init:force": "node scripts/run-planning-cli.mjs init --force --minimal --no-agents-md",
+    "planning:init:full": "node scripts/run-planning-cli.mjs init --no-agents-md",
+    "planning:init:full:force": "node scripts/run-planning-cli.mjs init --force --no-agents-md",
+    "planning:snapshot": "node scripts/run-planning-cli.mjs snapshot",
+    "planning:checklist": "node scripts/run-planning-cli.mjs setup checklist",
+    "planning:report-view": "node scripts/run-planning-cli.mjs report view",
+    "planning:ui": "node scripts/run-planning-cli.mjs report view",
+    "vendors:commit-push": "node scripts/commit-push-vendors-and-root.cjs"
   },
   "devDependencies": {
     "@iarna/toml": "^2.2.5",

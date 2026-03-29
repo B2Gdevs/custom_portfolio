@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <roadmap>
   <phase id="01">
-    <goal>Phase 01 — establish requirements and deliver the first planned vertical slice.</goal>
-    <requirements>REQ-01</requirements>
+    <goal>Keep `.planning/*.xml` aligned with documentation section requirements/state/roadmap MDX and section task registries; agents read root AGENTS.md first.</goal>
+    <status>active</status>
     <depends></depends>
-    <status>planned</status>
-    <links>
-      <plan>.planning/phases/01-greenfield/01-01-PLAN.xml</plan>
-      <summary>.planning/phases/01-greenfield/01-01-SUMMARY.xml</summary>
-    </links>
   </phase>
   <doc-flow>
-    <doc name="TASK-REGISTRY.xml">List tasks with keywords + statuses.</doc>
-    <doc name="STATE.xml">Current phase pointer + next action.</doc>
-    <doc name="REQUIREMENTS.xml">Product / PRD references (CDATA docs).</doc>
+    <doc name="documentation/requirements.mdx">Monorepo requirements narrative (public docs).</doc>
+    <doc name="documentation/state.mdx">Cross-cutting queue + documentation section state.</doc>
+    <doc name="documentation/roadmap.mdx">Human-readable section / root overview table.</doc>
+    <doc name="REQUIREMENTS.md">Repo-root stub pointer only — not canonical prose.</doc>
+    <doc name=".planning/REQUIREMENTS.xml">Stub for XML-only tools; points at documentation paths.</doc>
+    <doc name=".planning/ROADMAP.xml">Phase timeline for RepoPlanner.</doc>
+    <doc name=".planning/TASK-REGISTRY.xml">Task graph and status.</doc>
+    <doc name=".planning/AGENTS.md">Root planning section playbook (XML layer).</doc>
   </doc-flow>
 </roadmap>

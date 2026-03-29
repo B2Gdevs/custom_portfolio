@@ -1,0 +1,24 @@
+---
+title: Decisions
+description: Compact decision records for the Magicborn worldbuilding section.
+date: "2026-03-28"
+updated: "2026-03-28"
+order: 5
+---
+
+# Decisions
+
+| Id | Status | Summary | Consequence |
+| --- | --- | --- | --- |
+| `MAGICBORN-DOCS-SHORT-STORY-LORE` | `accepted` | Magicborn docs should read like short story fragments, lore scenes, or compact canon notes instead of dry encyclopedia entries | the section can stay readable to visitors while still serving as worldbuilding input for chat |
+| `MAGICBORN-DOCS-WORLDBUILDING-NOT-MANUSCRIPT` | `accepted` | the section is for world, character, faction, and setting material, not raw novel chapters | lore stays distinct from manuscript drafts and avoids accidental ingestion of reader-facing chapter text |
+| `MAGICBORN-DOCS-RAG-ELIGIBLE` | `accepted` | public `magicborn` docs are part of the approved retrieval corpus for site chat | citations can link back to lore pages as first-class sources |
+| `MAGICBORN-DOCS-CANON-DOSSIERS` | `accepted` | worldbuilding pages should be grouped canon dossiers, not one-off lore scenes | each page can stay semantically coherent for readers while producing cleaner retrieval chunks |
+| `MAGICBORN-DOCS-DERIVED-SOURCE-ANCHORS` | `accepted` | lore dossiers may derive from manuscript canon, but they must carry explicit source anchors back to the originating chapter/page material | the ingestion corpus can use worldbuilding summaries without treating raw chapter files as the public RAG store |
+
+## Decision Rule
+
+| Field | Value |
+| --- | --- |
+| `id-shape` | uppercase section key plus short decision name |
+| `status-set` | `accepted`, `superseded`, `proposed` |

@@ -3,11 +3,36 @@ title: "Making the Site More Personal: Reader, Books, and Repo Structure"
 description: "How we repositioned the portfolio around the book and the in-app reader, and how the repo is now structured—books, planning docs, and a single source of truth."
 date: "2026-03-16"
 tags: ["Portfolio", "Reader", "Books", "Redesign", "Monorepo"]
+links:
+  - label: "Books Planning Docs"
+    href: "/docs/books/planning-docs"
+    description: "Books, reader, and publishing planning behind the public surface."
+  - label: "Documentation Requirements"
+    href: "/docs/documentation/requirements"
+    description: "Repo-wide requirements and section relationships."
+searchKeywords: ["portfolio redesign", "reader experience", "repo structure", "books first"]
 ---
 
 We’ve been shifting this site from “developer portfolio first” to something that leads with the creative work: the book, the reader, and the world behind it. That meant rethinking the information architecture, building an in-app EPUB reader and a full books pipeline, and tightening how the repo and its documentation are organized. This post walks through what we did, how it’s wired, and where you can find the planning docs and implementation details if you want to go deeper.
 
 ---
+
+## Downloads & Resources
+
+- [Books Planning Docs](/docs/books/planning-docs) for the books, reader, and publishing roadmap.
+- [Documentation Requirements](/docs/documentation/requirements) for repo-wide scope, section boundaries, and implementation rules.
+
+## Introduction
+
+This post explains the creative-first repositioning of the site, the reader and books pipeline that made it real, and the repo structure that keeps the planning and implementation traceable.
+
+## Tradeoffs
+
+The central tradeoff in this pass was emphasis. Pushing the creative work to the front made the site more honest, but it also meant demoting the familiar developer-portfolio patterns and making the archive feel like supporting context instead of the headline.
+
+## What Was Done
+
+The sections below cover the major moves behind that repositioning: the information architecture changes, the reader and books pipeline, the repo and planning layout, and the implementation highlights that made the new framing real.
 
 ## Why we changed direction
 
@@ -22,7 +47,7 @@ Our design source of truth puts it like this:
 That hierarchy drove everything: the new hero, the “Start reading” CTA, the embedded reader on the home page, the music lane, and the way projects/blog/docs are framed as the **archive**—the workshop behind the creative work—instead of the main event.
 
 <Callout type="tip" title="Planning docs">
-The full IA, content order, and visual direction live in our planning repo. You can read the experience redesign doc and requirements in the docs area linked below.
+IA, content order, and visual direction live in section planning pages (e.g. [books](/docs/books/planning-docs)). **Monorepo-wide** scope is in [Documentation — Requirements](/docs/documentation/requirements); the **XML loop** is under **`.planning/`** — see root **`AGENTS.md`**.
 </Callout>
 
 ---
@@ -37,7 +62,7 @@ We reworked the home page and primary nav around that hierarchy.
 
 1. **Opening scene / hero** — Full-bleed, atmospheric hero centered on the current book. Primary CTA: “Start reading.” Secondary: “Enter the archive” or “See technical work.” The supporting line introduces the site as writer, builder, and musician rather than leading with a job title.
 
-2. **Read now** — Featured book card with cover art, short synopsis, and a direct embedded reader preview. One current book on the home page; additional books live at `/books`. The reader mounts when you hit the CTA so you can start reading without leaving the landing page.
+2. **Read now** — Featured book card with cover art, short synopsis, and a direct embedded reader preview. One current book on the home page; the **reader library** lives at **`/apps/reader`**. The reader mounts when you hit the CTA so you can start reading without leaving the landing page.
 
 3. **World / premise strip** — Short narrative that explains the book world, themes, or release status. Placeholder copy is fine here until the final text is ready.
 
@@ -73,7 +98,7 @@ We wanted reading to be **immediate**: one click from the homepage into the book
 ### Where you read
 
 - **Homepage “read now” block** — The primary CTA loads the featured book into an embedded reader on the same page. No separate app, no extra navigation.
-- **Dedicated reading route** — `/books/<slug>/read` gives you a full-page reading view for any book that has a built EPUB.
+- **Dedicated reading route** — `/apps/reader?book=<slug>` gives you a full-page reading view for any book that has a built EPUB (older `/books/<slug>/read` URLs redirect).
 - **Progress** — Reading position is persisted in `localStorage` by slug. You can leave and come back without losing your place.
 
 The portfolio uses **react-reader** (epub.js) for the in-app experience. The same `.epub` file is served at `/books/<slug>/book.epub` for download, so you can open it in any EPUB reader if you prefer.
@@ -103,7 +128,7 @@ That builds the `repub-builder` package, then runs `scripts/build-books.cjs`, wh
 
 ### Under the hood: repub-builder and book-components
 
-- **repub-builder** — CLI with subcommands `repub build`, `repub read`, `repub epub`. Install from this repo only (no npm publish). See `packages/repub-builder/README.md`. The `repub epub` command compiles `.mdx` with `@mdx-js/mdx` and the book-components; plain `.md` uses marked.
+- **repub-builder** — CLI with subcommands `repub build`, `repub read`, `repub epub`. Use **`pnpm exec repub`** from the workspace (or **`pnpm dlx`** once documented); **npm publish** is planned — see [Documentation — Requirements](/docs/documentation/requirements). The `repub epub` command compiles `.mdx` with `@mdx-js/mdx` and the book-components; plain `.md` uses marked.
 
 - **book-components** — MDX authoring components: `BookRoot`, `Chapter`, `Section`, `ChapterTitle`, `PartDivider`, `Callout`, `Blockquote`, `Figure`, `CodeBlock`, `BookMeta`. They’re wired so that `repub epub` produces the HTML that goes into the EPUB.
 
@@ -119,7 +144,7 @@ If you want the full requirements and vendoring details, they’re in the planni
 
 ## How this repo is structured
 
-The repo is a **monorepo** with a single place for “what we’re building and why.”
+The repo is a **monorepo** with a clear place for “what we’re building and why.” **As of March 2026**, agents start at repo-root **`AGENTS.md`**; **monorepo-wide** narrative and cross-cutting queue live in the **Documentation** section ([requirements](/docs/documentation/requirements), [state](/docs/documentation/state)), and **`.planning/`** holds the **RepoPlanner XML** loop (`ROADMAP.xml`, `TASK-REGISTRY.xml`, `STATE.xml`, …). Repo-root **`REQUIREMENTS.md`** is a **stub pointer** — not where long-form scope is edited anymore.
 
 ### Top-level layout
 
@@ -131,7 +156,7 @@ The repo is a **monorepo** with a single place for “what we’re building and 
 | `books/` | Source for each book (`books/<slug>/`). |
 | `vendor/` | Git submodules: Kookit, Koodo Reader (forks; .repub when wired). |
 | `scripts/` | Root scripts, e.g. `build-books.cjs`, `download-releases.cjs`. |
-| `.planning/` | Source of truth for requirements, implementation plan, redesign, vendoring. |
+| `.planning/` | **Root planning section** (RepoPlanner XML: roadmap, task registry, state) — same *workflow* as docs sections, different *format*. |
 
 Example directory tree (simplified):
 
@@ -150,23 +175,30 @@ repo root
 ├── scripts/
 │   ├── build-books.cjs
 │   └── download-releases.cjs
+├── AGENTS.md                 # Agent entry: planning model + verification gates
+├── REQUIREMENTS.md           # Stub pointer → docs section (not canonical narrative)
 └── .planning/
-    ├── REQUIREMENTS.md
-    ├── IMPLEMENTATION_PLAN.md
-    ├── *.xml                     # RepoPlanner loop (STATE, TASK-REGISTRY, …) alongside .md
-    └── VENDORING.md              # Pointer → docs site vendoring page
+    ├── *.xml                   # RepoPlanner loop (STATE, TASK-REGISTRY, ROADMAP, …)
+    ├── AGENTS.md               # XML-layer playbook (companion to root AGENTS.md)
+    └── planning-config.toml
 ```
 
-### The .planning directory
+### Planning layout (root `.planning/` + docs sections)
 
-`.planning/` is where we keep scope, gates, and next steps:
+- **`AGENTS.md`** (repo root) — **Start here** for the loop: how **`.planning/`** maps to **`content/docs/<section>/`** (same workflow; XML vs MDX).
+- **`documentation/requirements.mdx`** — **Monorepo scope** narrative (books, reader, AI, CLI direction, etc.).
+- **`documentation/state.mdx`** — **Cross-cutting queue** and documentation-section cycle.
+- **`documentation/roadmap.mdx`** — Human-readable overview across sections + **`.planning/`**.
+- **`.planning/*.xml`** + **`.planning/AGENTS.md`** — RepoPlanner machine state and playbook; **`pnpm planning*`** wraps **`vendor/repo-planner/scripts/loop-cli.mjs`**.
+- **Per-section** planning — Each `docs/<section>/` has **`planning-docs.mdx` → `state.mdx` → `task-registry.mdx` → `decisions.mdx`** (e.g. [books planning](/docs/books/planning-docs)).
+- **Repo-root `REQUIREMENTS.md`** — **Pointer only**; do not treat it as the source of truth for scope.
+- **Vendoring** — Full submodule docs: **Documentation → Vendoring**.
 
-- **REQUIREMENTS.md** — Books source of truth, tooling, reader behavior, portfolio experience redesign, docs IA, verification gates, releases.
-- **IMPLEMENTATION_PLAN.md** — Ralph Wiggum loop state: done, in progress, next. Links to REQUIREMENTS, architecture/design docs on the docs site, vendoring.
-- **RepoPlanner XML** — Parallel agent-loop artifacts (`STATE.xml`, `TASK-REGISTRY.xml`, …) via `vendor/repo-planner` and `pnpm planning*`.
-- **VENDORING.md** — Short pointer; full submodule docs live under **Documentation → Vendoring** on the site.
+**Loop:** read **`AGENTS.md`**, then the layer you touch (**`.planning` XML** and/or **section** registry + **documentation** requirements/state), pick one task, implement, verify (`pnpm install`, `pnpm run build`, `pnpm run lint`), update registries, commit.
 
-We use a simple loop: read the plan, pick one task, implement, verify (`pnpm install`, `pnpm run build`, `pnpm run lint`), update the plan, commit.
+<DocLinkCard href="/docs/documentation/requirements" title="Documentation — Requirements" description="Canonical monorepo requirements narrative." />
+<DocLinkCard href="/docs/documentation/state" title="Documentation — State" description="Cross-cutting queue and docs-section cycle." />
+<DocLinkCard href="/docs/global/global-planning" title="Global planning guide" description="Task id shape, Mermaid workflows, planning-pack policy." />
 
 ### Documentation IA
 
@@ -190,10 +222,19 @@ The implementation plan tracks what’s done. Here’s a condensed list of the w
 - **Portfolio redesign phases 1–4:** Book-first hero, “read now” section with embedded reader, Listen route with BandLab embeds, Projects/Blog/Docs hub and styled sidebar.
 - **Books reader:** EPUB-only in-app reader (react-reader/epub.js); homepage reader loads on demand from the CTA; book list shows “coming soon” for books without a built EPUB; progress in localStorage by slug.
 - **Repub and tooling:** repub-builder CLI (`repub epub`), book-components wired for MDX; Koodo and Kookit vendored as submodules; release workflows and download script for repub-builder, repub-reader, and Koodo builds.
-- **Docs and planning:** Section-first docs with Planning Docs folder; XML-style planning pages (state, task registry, decisions, errors-and-attempts); cleanup of obsolete docs; `.planning/` as single source of truth.
+- **Docs and planning:** Section-first docs with Planning Docs folder; XML-style planning pages (state, task registry, decisions, errors-and-attempts); cleanup of obsolete docs; **`.planning/`** for root XML loop plus **documentation** requirements/state for monorepo narrative; root **`AGENTS.md`** as the agent contract.
 - **Resume hub:** `/resumes` and printable resume pages; scrollbar polish across site and docs.
 
 Before any release we require: `pnpm install`, `pnpm run build`, and `pnpm run lint` all pass. Lint is not optional.
+
+## Conclusion
+
+This redesign mattered because it changed the story the site tells before anyone reads a single line of code. The portfolio is more coherent when the book and world come first and the technical archive stays visible as the workshop behind them.
+
+## Examples
+
+- The home-page flow in this post is the clearest example of the new hierarchy in practice.
+- The repo and planning-layout sections are examples of how the creative-first story still depends on a disciplined technical structure underneath.
 
 ---
 

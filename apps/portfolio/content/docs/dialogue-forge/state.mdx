@@ -2,8 +2,10 @@
 title: State
 description: Compact state records for the Dialogue Forge section.
 date: "2026-03-15"
-updated: "2026-03-16"
+updated: "2026-03-28"
 order: 2
+repoPath: apps/portfolio/content/docs/dialogue-forge/state.mdx
+taskPhase: dialogue-forge-docs-01
 ---
 
 # State
@@ -15,14 +17,14 @@ order: 2
 | `section` | `dialogue-forge` |
 | `owner` | `dialogue-forge-section` |
 | `status` | `active` |
-| `updated` | `2026-03-16` |
+| `updated` | `2026-03-28` |
 
 ## Current Cycle
 
 | Field | Value |
 | --- | --- |
-| `phase` | `dialogue-forge-01` |
-| `plan` | `dialogue-forge-01-a` |
+| `phase` | `dialogue-forge-docs-01` |
+| `plan` | `dialogue-forge-docs-01-a` |
 | `focus` | keep docs aligned with the shipped editor |
 | `constraint` | avoid speculative implementation writing |
 
@@ -30,15 +32,15 @@ order: 2
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | keep the docs aligned with the shipped Dialogue Forge app | `docs-audit` |
-| `2` | expand planning records before reviving deeper implementation work | `planning` |
-| `3` | record exporter and editor decisions inside section docs instead of scattering them | `decision-capture` |
+| `1` | `dialogue-forge-docs-01-02`: keep the docs aligned with the shipped Dialogue Forge app | `docs-audit` |
+| `2` | `dialogue-forge-docs-01-03`: expand planning records before reviving deeper implementation work | `planning` |
+| `3` | `dialogue-forge-docs-01-04`: capture exporter and editor decisions in section docs under the same id scheme before broader docs expansion | `decision-capture` |
 
 ## References
 
 | Id | Path | Purpose |
 | --- | --- | --- |
-| `app-route` | `apps/portfolio/app/dialogue-forge/page.tsx` | shipped web surface |
+| `app-route` | `apps/portfolio/app/apps/dialogue-forge/page.tsx` | shipped web surface (**`/apps/dialogue-forge`**) |
 | `section-docs` | `apps/portfolio/content/docs/dialogue-forge/` | current planning records |
 | `package-root` | `packages/dialogue-forge/` | tool and data-model implementation |
 

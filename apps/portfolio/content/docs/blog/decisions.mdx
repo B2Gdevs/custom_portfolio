@@ -2,7 +2,7 @@
 title: Decisions
 description: Compact decision records for the blog section.
 date: "2026-03-16"
-updated: "2026-03-16"
+updated: "2026-03-28"
 order: 5
 ---
 
@@ -13,3 +13,12 @@ order: 5
 | `BLOG-DOCS-PLANNING-FIRST` | `accepted` | blog planning lives inside the docs tree before blog implementation changes ship | publishing and front-page routing changes should update these records first |
 | `BLOG-PUBLIC-DESTINATION` | `accepted` | the blog is one of the main public destinations we should direct people toward | homepage routing and IA should keep the blog easy to discover |
 | `BLOG-RICHEPUB-ARCHIVE` | `accepted` | the RichEPub posts should now read as an archived format experiment rather than an active product direction | public writing should point readers toward EPUB3 tooling, editor design, and workflow lessons instead of a new container format |
+| `BLOG-DISCOVERY-FIRST` | `accepted` | the next blog pass should focus on discovery and reading UX before more content volume is added | search, filters, sort, command-palette results, and article chrome should be stabilized before scaling the archive |
+| `BLOG-CMDK-BLOG-PROJECTS-FIRST` | `accepted` | the first command-palette search pass should only cover blog and projects content | search scope stays narrow enough to ship quickly without designing a whole-site search taxonomy first |
+| `BLOG-MOBILE-FILTER-DRAWER` | `accepted` | blog discovery filters should collapse into a drawer on mobile instead of inline chips | the mobile surface stays focused and does not burn vertical space before the archive list |
+| `BLOG-SEARCH-HIGHLIGHT-RESULTS-ONLY` | `accepted` | search should highlight snippets/results, but opening an article should not add temporary in-page keyword marks | article reading stays clean while results still show why a hit matched |
+| `BLOG-REPEATABLE-ARTICLE-SHAPE` | `accepted` | blog posts should use a strict repeatable structure with resources/downloads first, topic intro, tradeoffs or pros-cons/conflict, implementation or what-was-done, conclusion, then examples | readers can learn the article rhythm quickly and authors have a firm content contract to follow |
+| `BLOG-ARTICLE-TOC` | `accepted` | long-form blog posts should expose a table of contents while being read | article navigation and scanning improve and the TOC becomes part of the standard article chrome |
+| `BLOG-DEFAULT-SORT-NEWEST` | `accepted` | the default blog sort should be newest first | the archive remains current by default and fits the expected behavior for a public blog |
+| `BLOG-FILTERS-TAGS-YEAR` | `accepted` | the first blog filter pass should use tags and year as the explicit filter taxonomy | the content model can stay lean while still supporting a useful archive search surface |
+| `BLOG-LITERAL-SECTION-HEADINGS` | `accepted` | the strict blog template should use literal section headings: `Downloads & Resources`, `Introduction`, `Tradeoffs`, `What Was Done`, `Conclusion`, and `Examples` | authors get a stable contract and the TOC/search extraction can rely on predictable section names |

@@ -2,23 +2,83 @@
 title: Task Registry
 description: Compact task records for the documentation section.
 date: "2026-03-16"
-updated: "2026-03-16"
+updated: "2026-03-30"
+taskPhase: documentation-site-06
+repoPath: apps/portfolio/content/docs/documentation/task-registry.mdx
 order: 3
 ---
 
 # Task Registry
 
-## Phase `documentation-01`
+## Phase `documentation-site-01`
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
-| `documentation-01-01` | `done` | create a section-local planning loop for documentation-site work | `-` | `pnpm exec next build` |
-| `documentation-01-02` | `done` | capture the documentation site's overall requirements inside the docs tree | `documentation-01-01` | `pnpm exec next build` |
-| `documentation-01-03` | `planned` | improve docs section navigation and planning-doc discoverability | `documentation-01-01` | `pnpm exec next build` |
+| `documentation-site-01-01` | `done` | create a section-local planning loop for documentation-site work | `-` | `pnpm exec next build` |
+| `documentation-site-01-02` | `done` | capture the documentation site's overall requirements inside the docs tree | `documentation-site-01-01` | `pnpm exec next build` |
+| `documentation-site-01-03` | `planned` | improve docs section navigation and planning-doc discoverability | `documentation-site-01-01` | `pnpm exec next build` |
 
-## Phase `documentation-02`
+## Phase `documentation-site-02`
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
-| `documentation-02-01` | `done` | add a roadmap page with per-section status and next steps tied back to planning docs | `documentation-01-02` | `pnpm exec next build` |
-| `documentation-02-02` | `done` | keep documentation requirements in a stable reference doc instead of scattering them through status records | `documentation-01-02` | `pnpm exec next build` |
+| `documentation-site-02-01` | `done` | add a roadmap page with per-section status and next steps tied back to planning docs | `documentation-site-01-02` | `pnpm exec next build` |
+| `documentation-site-02-02` | `done` | keep documentation requirements in a stable reference doc instead of scattering them through status records | `documentation-site-01-02` | `pnpm exec next build` |
+| `documentation-site-02-03` | `planned` | expose the repo-level product-boundary and architecture-conventions planning docs from the documentation section without duplicating their source of truth | `documentation-site-02-02` | `pnpm exec next build` |
+
+## Phase `documentation-site-03` (planning portal & agent hierarchy)
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `documentation-site-03-01` | `done` | align root `AGENTS.md`, `.planning` docs, and section planning MDX with shared read order; document `repoPath` / `taskPhase` on key planning pages | `documentation-site-02-02` | `pnpm run build` |
+| `documentation-site-03-02` | `done` | add `public/planning-pack/demo/*.md` template set + generic planning-agent `AGENTS.md` (example-only) | `documentation-site-03-01` | files present; `pnpm run build` |
+| `documentation-site-03-03` | `done` | build script: section planning MDX → `public/planning-pack/site/*.md` + `manifest.json` (excludes `.planning`) | `documentation-site-03-01` | `pnpm run build` |
+| `documentation-site-03-04` | `done` | modal registry + Zustand; planning pack modal (tabs, thumbnails, hover actions, expand reader) | `documentation-site-03-02`, `documentation-site-03-03` | manual UX pass |
+| `documentation-site-03-05` | `done` | gallery shows only existing files; no UI for missing per-section `AGENTS.md` | `documentation-site-03-04` | n/a |
+
+## Phase `documentation-site-04` (section onboarding)
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `documentation-site-04-01` | `planned` | add `magicborn` as a first-class docs section with the same planning-doc stack used by other active sections | `documentation-site-02-02` | docs content present |
+| `documentation-site-04-02` | `planned` | keep documentation roadmap and requirements aligned as `magicborn` becomes part of the public worldbuilding and RAG source map | `documentation-site-04-01` | planning docs updated |
+| `documentation-site-04-03` | `planned` | onboard `projects` as a first-class planning section so public project UX and schema work can be tracked beside blog and books instead of in ad hoc notes | `documentation-site-02-02` | docs content present |
+
+## Phase `documentation-site-05` (shadcn site theming)
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `documentation-site-05-01` | `done` | record decisions: single token source in `globals.css` (`:root` / `.dark`), IBM Plex stacks, legacy Tailwind aliases (`text-text`, `bg-dark`, `text-accent-*` chart mapping) | `-` | this registry + `decisions.mdx` |
+| `documentation-site-05-02` | `done` | apply theme: `layout.tsx` (`dark` + `next/font` IBM Plex Sans/Serif/Mono), merge user oklch palette + `@theme inline` + `@layer base`, keep green prose link palette | `documentation-site-05-01` | `pnpm run build` (no dev server lock on `.next`) |
+| `documentation-site-05-03` | `done` | align prose / scrollbars / EPUB reader CSS variables with semantic tokens; fix invalid utilities (e.g. `hover:bg-text-primary`) | `documentation-site-05-02` | visual smoke on docs + reader |
+
+## Phase `documentation-site-06` (URL taxonomy + `/apps` hub)
+
+Aligned with [Route conventions](/docs/documentation/route-conventions). **Do not** break `/apps/reader` while migrating.
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `documentation-site-06-01` | `done` | publish **Route conventions** MDX + registry/decision links (this phase) | `-` | `/docs/documentation/route-conventions` renders |
+| `documentation-site-06-02` | `planned` | move **Apps hub** from `app/docs/apps/page.tsx` to **`app/apps/page.tsx`**; **`next.config`** redirects: `/docs/apps` → `/apps`, `/docs/apps/:path*` → `/apps/:path*`; extend `/docs/tools` redirect to `/apps` | `documentation-site-06-01` | `pnpm run build`, manual hit old URLs |
+| `documentation-site-06-03` | `planned` | move **`repo-planner`** page to `app/apps/repo-planner/page.tsx`; update **Nav**, **DocsFileTreeNav**, **RepoPlannerModal**, **RepoPlannerCockpitClient**, and MDX links (global, repo-planner, vendoring) | `documentation-site-06-02` | `pnpm run build`, grep for stale `/docs/apps` |
+| `documentation-site-06-04` | `planned` | optional: add **lint or CI grep** guard for forbidden pattern `docs/apps` in source (allow-list MDX history if needed) | `documentation-site-06-03` | grep / review |
+| `documentation-site-06-05` | `done` | **Dialogue Forge** → **`/apps/dialogue-forge`**; **308** from `/dialogue-forge`; update project MDX, tests, apps hub link; **remove `/books` pages** + **redirects** per [Route conventions](/docs/documentation/route-conventions) | `documentation-site-06-01` | `pnpm run build` |
+
+## Phase `documentation-site-07` (monorepo CLI ergonomics)
+
+**Goal:** first-class **terminal UX** for **two separate CLIs** — **RepoPlanner** (`loop-cli`, submodule **`vendor/repo-planner`**) and **`@portfolio/repub-builder`** (`repub`). **Decisions** (see [requirements](/docs/documentation/requirements) CLI table): **Ink** for rich TTY; **breaking argv** allowed; **document `pnpm dlx` / `npx`-style usage** for v1 (npm publish later); **`engines.node` ≥ 22** when publishing; **Next.js-only** story for published **RepoPlanner UI** embed; implementation lands in **submodule** for planner CLI.
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `documentation-site-07-01` | `planned` | **RepoPlanner:** upstream **`loop-cli.mjs`** + help/version/subcommands + **Ink** where appropriate; bump **submodule**; root **`pnpm planning`** stays a thin wrapper with **`REPOPLANNER_REPORTS_DIR`**; document **`pnpm dlx`** / invocation from repo | `documentation-site-06-01` | `pnpm planning -- --help`; docs in [integration](/docs/repo-planner/integration) |
+| `documentation-site-07-02` | `planned` | **repub-builder:** `repub --help`, subcommand help (`build` / `read` / `epub`), **Ink** TTY UX; **`engines.node` ≥ 22**; **`package.json` `bin`** + README **`pnpm dlx`** recipes; **publish to npm later** (remove `private` when ready) | `-` | `pnpm exec repub --help` from workspace |
+
+## Phase `documentation-site-08` (reader shell + cockpit embed + docs context)
+
+**Goal:** **One** embeddable **Repo Planner cockpit modal body**; **portfolio** `ModalRoot` + **repub-builder** **reader modal store** both open it; **docs** file-tree **context menu** on planning folders opens cockpit with an agreed payload. See [Reader shell + Repo Planner embed architecture](/docs/documentation/reader-repo-planner-embed-architecture).
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `documentation-site-08-01` | `done` | publish architecture MDX + Mermaid; link from integration + planning-docs | `-` | page renders |
+| `documentation-site-08-02` | `planned` | **docs FileTree:** context action “Planning cockpit” / “Open in cockpit” on folders with `folderArchivePrefix` or section planning roots; `openModal(REPO_PLANNER_MODAL_ID, payload)` | `documentation-site-08-01`, `books-reader-03-06` | manual smoke |
+| `documentation-site-08-03` | `planned` | **portfolio:** refactor `RepoPlannerModal` to consume **shared** body export from **repub-builder** (or agreed facade); remove duplicate layout | `books-reader-03-06` | `pnpm run build` |

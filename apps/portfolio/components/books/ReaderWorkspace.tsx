@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { ArrowLeft, BookOpen, Download, FolderUp, RotateCcw } from 'lucide-react';
 import type { BookEntry } from '@/lib/books';
 import EpubViewer from '@/components/books/EpubViewerLazy';
+import { ReaderPlanningStrip } from '@/components/books/ReaderPlanningStrip';
+import { readerAppHref } from '@/lib/reader-routes';
 
 interface UploadedBookSource {
   buffer: ArrayBuffer;
@@ -26,20 +28,33 @@ function formatUploadedTitle(fileName: string) {
 export default function ReaderWorkspace({
   books,
   initialBook,
+  initialAt,
+  initialCfi,
 }: {
   books: BookEntry[];
   initialBook?: BookEntry;
+  initialAt?: string;
+  initialCfi?: string;
 }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadedBook, setUploadedBook] = useState<UploadedBookSource | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [planningStripOpen, setPlanningStripOpen] = useState(false);
 
   const activeTitle = uploadedBook?.title ?? initialBook?.title ?? 'Open an EPUB';
   const activeKicker = uploadedBook ? 'Local EPUB' : 'Reader';
   const hasBuiltInBook = Boolean(initialBook?.hasEpub);
   const downloadHref = hasBuiltInBook ? `/books/${initialBook!.slug}/book.epub` : null;
   const downloadName = hasBuiltInBook ? `${initialBook!.slug}.epub` : null;
+
+  const deeplinkLocation = useMemo(() => {
+    const cfi = initialCfi?.trim();
+    if (cfi) return cfi;
+    const at = initialAt?.trim();
+    if (at) return at;
+    return undefined;
+  }, [initialAt, initialCfi]);
 
   const viewerSource = useMemo(() => {
     if (uploadedBook) {
@@ -99,11 +114,11 @@ export default function ReaderWorkspace({
           <div className="flex min-w-0 flex-1 flex-wrap items-end gap-x-3 gap-y-2">
             <div className="flex min-w-0 items-center gap-2.5 pb-2">
               <Link
-                href="/books"
+                href="/apps/reader"
                 className="inline-flex items-center gap-2 rounded-full border border-[rgba(140,102,67,0.2)] bg-[rgba(255,255,255,0.02)] px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:border-[rgba(213,176,131,0.45)] hover:text-[#f6e8d8]"
               >
                 <ArrowLeft size={15} />
-                Back to Books
+                Library
               </Link>
               <div className="min-w-0">
                 <p className="section-kicker">{activeKicker}</p>
@@ -153,7 +168,7 @@ export default function ReaderWorkspace({
                   return (
                     <Link
                       key={entry.slug}
-                      href={`/books/${entry.slug}/read`}
+                      href={readerAppHref({ book: entry.slug })}
                       role="tab"
                       aria-selected={isActive}
                       className={`inline-flex items-center rounded-full border px-2.5 py-1 text-sm font-medium transition-colors ${
@@ -224,13 +239,20 @@ export default function ReaderWorkspace({
           </div>
         ) : null}
       </div>
+      <ReaderPlanningStrip
+        bookSlug={initialBook?.slug}
+        open={planningStripOpen}
+        onToggle={() => setPlanningStripOpen((v) => !v)}
+      />
       <div className="flex-1 min-h-0 px-3 pb-3 pt-3 md:px-4 md:pb-4">
         <div className="mx-auto h-full max-w-[120rem] overflow-hidden rounded-[2rem] border border-[rgba(140,102,67,0.18)] bg-[rgba(15,10,8,0.84)] shadow-[0_34px_120px_rgba(0,0,0,0.36)]">
           {viewerSource ? (
             <EpubViewer
+              key={deeplinkLocation ? `dl:${deeplinkLocation}` : `sk:${viewerSource.storageKey}`}
               epubUrl={viewerSource.epubUrl}
               epubData={viewerSource.epubData}
               storageKey={viewerSource.storageKey}
+              initialLocation={deeplinkLocation}
               className="h-full"
               layoutMode="reader"
             />

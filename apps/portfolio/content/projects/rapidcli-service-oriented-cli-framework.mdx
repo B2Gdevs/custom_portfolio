@@ -2,6 +2,9 @@
 title: "RapidCLI: Service-Oriented Architecture CLI Framework"
 description: "A powerful CLI framework I designed at Moveworks to streamline interactions with microservices, enabling rapid debugging, system monitoring, and cross-service operations for customer success engineers."
 date: "2022-05-10"
+status: "production"
+featured: true
+featuredOrder: 4
 tags: ["CLI", "Microservices", "DevOps", "Python", "Tooling"]
 images:
   - "/images/projects/rapidcli/RapidCLI.png"
@@ -11,13 +14,22 @@ images:
   - "/images/projects/rapidcli/Q3ZGFsF47nn1xkwgCXdC59rrS5Q.png"
   - "/images/projects/rapidcli/SblGn8k3Qg75vpeDupcPyDYs.png"
 featuredImage: "/images/projects/rapidcli/RapidCLI.png"
+searchKeywords: ["internal cli framework", "microservices debugging", "developer tooling", "moveworks rapidcli"]
 ---
+
+## Links & Downloads
+
+- RapidCLI was an internal framework, so the public artifacts here are the write-up and screenshots rather than a downloadable release.
 
 ## Overview
 
 At Moveworks, where I worked as a Customer Success Engineer, I faced the daily challenge of navigating a complex microservices architecture while debugging customer issues, monitoring systems, and performing operations across multiple services. The existing tools were fragmented, requiring engineers to jump between different CLIs, dashboards, and APIs. This inefficiency led me to design and build RapidCLI—a unified Service-Oriented Architecture (SOA) CLI framework that standardized interactions across our entire service ecosystem.
 
 RapidCLI transformed how our team worked with the platform, reducing debugging time, standardizing operations, and making complex multi-service workflows accessible through a single, intuitive interface.
+
+## Role & Context
+
+I built RapidCLI while working in Customer Success Engineering at Moveworks, where the job required deep operational fluency across a complex microservices platform. The role here was infrastructure translator: collapse scattered internal tooling into a single interface that could help engineers debug, inspect, and operate the system faster.
 
 ## The Challenge
 
@@ -37,6 +49,14 @@ The existing approach required engineers to:
 - Switch between different authentication mechanisms
 
 This fragmentation led to slower debugging cycles, inconsistent operations, and a steep learning curve for new team members.
+
+## Tradeoffs
+
+The main tradeoff was between service-specific power and a shared interface. A unified CLI risks flattening away special cases, but it also reduces the cognitive overhead of memorizing a different tool for every service. RapidCLI aimed to keep the abstraction thin enough to stay useful without hiding the underlying system realities.
+
+## Implementation
+
+The sections below cover the command model, plugin-style architecture, monitoring integrations, workflow automation, and the CLI ergonomics that made the framework practical for daily use.
 
 ## Solution: RapidCLI Framework
 
@@ -224,7 +244,12 @@ RapidCLI doesn't replace existing tools—it unifies them:
 - **Python/Pandas**: Export data for custom analysis
 - **Service APIs**: Standardized access to all microservices
 
-## Challenges and Solutions
+## Examples & Media
+
+- The screenshots and command examples are the clearest examples of how the framework reduced friction for debugging and operations.
+- The trace, logs, metrics, and workflow snippets show the actual shape of the CLI abstractions rather than describing them abstractly.
+
+## Tradeoffs
 
 ### Challenge 1: Service Discovery
 
@@ -260,7 +285,7 @@ RapidCLI prioritizes developer experience:
 - **Examples**: Built-in examples for common use cases
 - **Interactive Mode**: For complex operations, an interactive mode guides users
 
-## Outcome
+## Outcomes
 
 RapidCLI significantly improved the productivity of the Customer Success Engineering team at Moveworks. What previously required navigating multiple tools and writing custom scripts could now be accomplished with a few intuitive commands.
 

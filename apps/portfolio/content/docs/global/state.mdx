@@ -1,0 +1,44 @@
+---
+title: State
+description: Current cycle and focus for the Global documentation section (repo-wide planning IA).
+date: "2026-03-28"
+updated: "2026-03-28"
+order: 2
+repoPath: apps/portfolio/content/docs/global/state.mdx
+taskPhase: global-site-01
+---
+
+# State
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `global` |
+| `owner` | `monorepo` |
+| `status` | `active` |
+| `updated` | `2026-03-28` |
+
+## Current cycle
+
+| Field | Value |
+| --- | --- |
+| `phase` | `global-site-01` |
+| `focus` | **Global** docs section matches other sections: **planning** cluster (`planning-docs` → `state` → `task-registry` → `decisions`) vs **reference** pages (e.g. [Global planning guide](/docs/global/global-planning) with Mermaid and pack policy). Root **`AGENTS.md`** read order stays aligned. |
+| `constraint` | Section planning MDX is first for **global-section** maintenance; repo **`.planning/*.xml`** stays canonical for **monorepo** machine state. |
+
+## Next queue
+
+| Priority | Action |
+| --- | --- |
+| `1` | Keep [task registry](/docs/global/task-registry) honest when global IA or cross-section links change |
+| `2` | Optional: zip ingest + multiple **server** project roots in cockpit ([integration](/docs/repo-planner/integration#cockpit-product-direction-planned)) |
+| `3` | When new reference pages are added under `global/`, ensure they stay **outside** the planning folder in the docs tree |
+
+## References
+
+| Id | Path |
+| --- | --- |
+| `docs-global` | `apps/portfolio/content/docs/global/` |
+| `docs-lib` | `apps/portfolio/lib/docs.ts` |
+| `agents-root` | `AGENTS.md` (repo root) |

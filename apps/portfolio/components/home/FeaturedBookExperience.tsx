@@ -20,7 +20,9 @@ export default function FeaturedBookExperience({
   }, [books, featuredBook.slug]);
   const [selectedBookSlug, setSelectedBookSlug] = useState(featuredBook.slug);
   const selectedBook = readerBooks.find((book) => book.slug === selectedBookSlug) ?? readerBooks[0];
-  const readerHref = selectedBook?.hasEpub ? `/books/${selectedBook.slug}/read` : '/books';
+  const readerHref = selectedBook?.hasEpub
+    ? `/apps/reader?book=${encodeURIComponent(selectedBook.slug)}`
+    : '/apps/reader';
   const downloadHref = selectedBook?.hasEpub ? `/books/${selectedBook.slug}/book.epub` : null;
 
   return (
@@ -51,7 +53,7 @@ export default function FeaturedBookExperience({
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              href={`/books/${featuredBook.slug}/read`}
+              href={`/apps/reader?book=${encodeURIComponent(featuredBook.slug)}`}
               className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-secondary transition-opacity hover:opacity-90"
             >
               Go to the reader
@@ -69,20 +71,6 @@ export default function FeaturedBookExperience({
 
         <div className="story-card p-6 md:p-8">
           <p className="section-kicker">Reader</p>
-          <h3 className="mt-2 font-display text-3xl text-primary">Read here on the front page</h3>
-          <p className="mt-4 text-sm leading-7 text-text-muted">
-            The homepage should stage the book and route into the real reader surface. The dedicated book reader page is the stable runtime, so the front page now works as the launch surface instead of mounting a second reader instance here.
-          </p>
-          <div className="mt-8 grid gap-4 text-sm text-text-muted sm:grid-cols-2">
-            <div className="rounded-2xl border border-border bg-dark px-4 py-4">
-              <div className="story-metric-value">{featuredBook.chapterCount || '3'}</div>
-              <p className="mt-2">Structured chapter directories already exist in the repo.</p>
-            </div>
-            <div className="rounded-2xl border border-border bg-dark px-4 py-4">
-              <div className="story-metric-value">{featuredBook.pageCount || '70+'}</div>
-              <p className="mt-2">Markdown pages are already flowing through the EPUB build pipeline.</p>
-            </div>
-          </div>
 
           <div className="mt-8">
             <p className="section-kicker">Book selector</p>
