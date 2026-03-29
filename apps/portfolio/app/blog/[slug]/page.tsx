@@ -10,6 +10,7 @@ import TableOfContents from '@/components/docs/TableOfContents';
 import { ContentTopLinks } from '@/components/content/ContentTopLinks';
 import { RequiredSectionsNotice } from '@/components/content/RequiredSectionsNotice';
 import { buildContentLinkGroups } from '@/lib/content-view-models';
+import { ArrowLeft } from 'lucide-react';
 
 export async function generateStaticParams() {
   const posts = getAllContent('blog');
@@ -33,6 +34,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <article className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+      <div className="mb-6">
+        <Link href="/blog" className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline">
+          <ArrowLeft size={16} />
+          <span>Back to Blog</span>
+        </Link>
+      </div>
+
       {heroImage ? (
         <div className="mb-10 overflow-hidden rounded-[2rem] border border-border/70 shadow-xl">
           <div className="relative h-80 w-full md:h-[480px]">
@@ -105,8 +113,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </div>
 
           <div className="border-t border-border/70 pt-8">
-            <Link href="/blog" className="text-accent font-semibold hover:underline">
-              ← Back to Blog
+            <Link href="/blog" className="inline-flex items-center gap-2 text-accent font-semibold hover:underline">
+              <ArrowLeft size={16} />
+              <span>Back to Blog</span>
             </Link>
           </div>
         </div>
@@ -120,3 +129,4 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     </article>
   );
 }
+

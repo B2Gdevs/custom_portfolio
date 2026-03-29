@@ -13,4 +13,4 @@
 
 ## Archive
 
-Merge any remaining useful prose from **`.planning-archive/2026-03-29-pre-barebones/`** into **`documentation/requirements.mdx`**, section registries, and **`.planning/*.xml`**.
+**`.planning-archive/`** was **removed** after migration. See **[`documentation/requirements.mdx`](apps/portfolio/content/docs/documentation/requirements.mdx)** (**Planning archive** section) and git history for the old snapshot.

@@ -86,16 +86,22 @@ const primaryNavItems: {
     match: (p) => p === '/resumes' || p.startsWith('/resumes/'),
   },
   {
+    href: '/docs',
+    label: 'Docs',
+    icon: ScrollText,
+    match: (p) => p === '/docs' || p.startsWith('/docs/'),
+  },
+  {
     href: '/projects',
     label: 'Projects',
     icon: Compass,
     match: (p) => p === '/projects' || p.startsWith('/projects/'),
   },
   {
-    href: '/docs/apps',
+    href: '/apps',
     label: 'Apps',
     icon: LayoutGrid,
-    match: (p) => p === '/docs/apps' || p.startsWith('/docs/apps/'),
+    match: (p) => p === '/apps' || p.startsWith('/apps/'),
   },
   {
     href: '/apps/reader',
@@ -427,6 +433,18 @@ function PortfolioSidebarInner({ pathname, navMenus }: { pathname: string; navMe
               <span>Resumes</span>
             </Link>
             <Link
+              href="/docs"
+              onClick={onLinkClick}
+              className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
+                pathname === '/docs' || pathname.startsWith('/docs/')
+                  ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                  : 'text-sidebar-foreground/70 hover:text-sidebar-foreground'
+              }`}
+            >
+              <ScrollText size={14} />
+              <span>Docs</span>
+            </Link>
+            <Link
               href="/projects"
               onClick={onLinkClick}
               className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
@@ -439,10 +457,10 @@ function PortfolioSidebarInner({ pathname, navMenus }: { pathname: string; navMe
               <span>Projects</span>
             </Link>
             <Link
-              href="/docs/apps"
+              href="/apps"
               onClick={onLinkClick}
               className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
-                pathname === '/docs/apps' || pathname?.startsWith('/docs/apps/')
+                pathname === '/apps' || pathname?.startsWith('/apps/')
                   ? 'bg-sidebar-primary text-sidebar-primary-foreground'
                   : 'text-sidebar-foreground/70 hover:text-sidebar-foreground'
               }`}

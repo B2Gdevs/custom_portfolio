@@ -1,6 +1,6 @@
 ---
 title: Decisions
-description: Stable decisions for Listen — URL, catalog, and simple locks.
+description: Stable decisions for Listen -- URL, catalog, and simple locks.
 date: "2026-03-28"
 updated: "2026-03-28"
 order: 5
@@ -9,34 +9,50 @@ repoPath: apps/portfolio/content/docs/listen/decisions.mdx
 
 # Decisions
 
-## `LISTEN-URL-01` — Canonical public path
+## `LISTEN-URL-01` -- Canonical public path
 
 | Field | Value |
 | --- | --- |
 | **Decision** | **`/listen`** remains the **canonical** URL for the listening room and preset gallery in v1. |
-| **Rationale** | Matches **blog** and **projects** as **browsable content indices** at the site root, not interactive “tools” under `/apps/*`. |
+| **Rationale** | Matches **blog** and **projects** as **browsable content indices** at the site root, not interactive "tools" under `/apps/*`. |
 | **Consequences** | [Route conventions](/docs/documentation/route-conventions) must list `/listen` explicitly so agents do not assume all non-doc surfaces belong under `/apps`. |
 
-## `LISTEN-DATA-01` — One catalog, two kinds
+## `LISTEN-DATA-01` -- One catalog, two kinds
 
 | Field | Value |
 | --- | --- |
 | **Decision** | **Tracks** and **BandLab presets** live in **one** in-repo catalog (TypeScript or MDX-backed later) with a **`kind`** discriminator and shared facet fields for filtering. |
-| **Rationale** | One index page, one filter model, one unlock model — presets are first-class rows, not a separate orphan list. |
+| **Rationale** | One index page, one filter model, one unlock model -- presets are first-class rows, not a separate orphan list. |
 | **Consequences** | Presets need stable **slugs**, human titles, optional descriptions, and **BandLab** URLs the same way tracks do. |
 
-## `LISTEN-LOCK-01` — Group passwords, no accounts
+## `LISTEN-LOCK-01` -- Group passwords, no accounts
 
 | Field | Value |
 | --- | --- |
 | **Decision** | Locked items reference a **`lockGroup`** string. Each group has **one shared password** configured **server-side** (e.g. env JSON map `LISTEN_LOCK_GROUPS='{"early":"secret"}'` or one var per group). The client submits the password to a **Route Handler**; on success the server sets a **httpOnly, SameSite=Lax** cookie scoped to Listen unlock (name pattern e.g. `listen_unlock_<group>` or a single signed cookie listing groups). |
 | **Rationale** | You can hand one password to collaborators; no user database; good enough for demos and small circles. |
-| **Consequences** | Not DRM — anyone with the cookie or password can share access; document that in planning if needed. **Do not** ship plaintext secrets to the client. |
+| **Consequences** | Not DRM -- anyone with the cookie or password can share access; document that in planning if needed. **Do not** ship plaintext secrets to the client. |
 
-## `LISTEN-UX-01` — Parity with blog / projects discovery
+## `LISTEN-UX-01` -- Parity with blog / projects discovery
 
 | Field | Value |
 | --- | --- |
 | **Decision** | Filter rail, keyword search, and sort behavior should **feel the same** as blog and projects (reuse shared components where possible). |
 | **Rationale** | One discovery language across the site. |
 | **Consequences** | May require small generalizations to `ContentIndexClient` or a thin Listen-specific wrapper with the same props patterns. |
+
+## `LISTEN-IDENTITY-01` -- Shared shell, distinct listening-room identity
+
+| Field | Value |
+| --- | --- |
+| **Decision** | Listen should reuse the same core content-surface primitives as blog and projects, but keep a listening-room identity through section-specific theme tokens, mini logo, and media-first sidebar treatment. |
+| **Rationale** | Shared components reduce drift and maintenance cost, but Listen still needs to read like a distinct music/preset destination rather than a cloned article archive. |
+| **Consequences** | The shared shell must expose identity slots instead of hard-coding one visual language; Listen-specific chrome stays declarative. |
+
+## `LISTEN-IDENTITY-02` -- Mini logo in sidebar
+
+| Field | Value |
+| --- | --- |
+| **Decision** | Listen should expose a small repeatable section mark in its sidebar or rail so users can identify the surface immediately. |
+| **Rationale** | Audio/preset pages need a strong orientation cue once discovery primitives are shared with blog and projects. |
+| **Consequences** | Mini-logo design becomes part of the section identity system and should be tracked alongside theme tokens, not bolted on later. |

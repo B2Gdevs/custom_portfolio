@@ -2,13 +2,13 @@
 title: State
 description: RepoPlanner integration state for the portfolio monorepo.
 date: "2026-03-29"
-updated: "2026-03-30"
+updated: "2026-03-29"
 order: 4
 repoPath: apps/portfolio/content/docs/repo-planner/state.mdx
-taskPhase: repo-planner-integration-01
+taskPhase: repo-planner-integration-03
 ---
 
-# Repo Planner — State
+# Repo Planner -- State
 
 ## Registry
 
@@ -24,19 +24,20 @@ taskPhase: repo-planner-integration-01
 | Field | Value |
 | --- | --- |
 | `phase` | `repo-planner-integration-01` |
-| `focus` | **Export-first embed:** default **403** on **`apply`** + **CLI POST**; GET reads committed **`.planning/`**; docs explain greenfield init vs portfolio **`.md`** loop; upstream track **client-only** cockpit + export |
+| `focus` | **`repo-planner-integration-03`:** vendor **`PlanningCockpit`** in the live pane + **XML/pack** adapters (**workspace shell shipped** via **`repo-planner/host`**) -- [task registry](/docs/repo-planner/task-registry) phase **`03`** |
 | `constraint` | **`PLANNING_COCKPIT_ALLOW_SERVER_WRITES=1`** only when operators want server writes from the browser; no in-site planning LLM |
 
 ## Next queue
 
 | Priority | Action |
 | --- | --- |
-| `1` | Finish merging archive narrative into **[documentation/requirements](/docs/documentation/requirements)**; keep **`REQUIREMENTS.xml`** stub aligned; **`.planning/*.xml`** roadmap-first |
-| `2` | Optional: client-side or isolated **upload pack / .zip .planning** viewer — read-only, ephemeral only |
-| `3` | Upstream: hide or no-op **Chat** tab in embed; optional **`repo-planner-integration-01-10`** (install-routes, zip ingest) |
-| `4` | Bump `vendor/repo-planner` when upstream improves components (real shadcn vs stubs) |
-| `5` | Execute `repo-planner-integration-01-08` — pack-parity `.planning` + move doc-template prose to AGENTS/skills |
-| `6` | **`repo-planner-integration-01-13`** + **`documentation-site-07-01`**: formal CLI (`--help`, subcommands, `npx` / global); see [integration](/docs/repo-planner/integration) **Planned: formal CLI** |
+| `1` | Execute **`repo-planner-integration-03`** (cockpit body, data plane, shell export) -- [task registry](/docs/repo-planner/task-registry) |
+| `2` | Keep **`REQUIREMENTS.xml`** stub aligned with **[documentation/requirements](/docs/documentation/requirements)**; **`.planning/*.xml`** roadmap-first (archive folder removed; see requirements **Planning archive**) |
+| `3` | Optional: read-only **upload pack / `.planning` zip** viewer (ephemeral) -- **`01-06`** |
+| `4` | Upstream: hide or no-op **Chat** tab in embed; optional **`repo-planner-integration-01-10`** (install-routes, zip ingest) |
+| `5` | Bump `vendor/repo-planner` when upstream improves components (real shadcn vs stubs) |
+| `6` | Execute `repo-planner-integration-01-08` -- pack-parity `.planning` + move doc-template prose to AGENTS/skills |
+| `7` | **`repo-planner-integration-01-13`** + **`documentation-site-07-01`**: formal CLI -- [getting started](/docs/repo-planner/getting-started), [decisions](/docs/repo-planner/decisions) **`REPOPLAN-CLI-01`** |
 
 ## References
 
@@ -45,4 +46,4 @@ taskPhase: repo-planner-integration-01
 | `submodule` | `vendor/repo-planner` |
 | `cli` | `vendor/repo-planner/scripts/loop-cli.mjs` |
 | `root-scripts` | `package.json` (repository root) |
-| `tool-page` | `apps/portfolio/app/docs/apps/repo-planner/page.tsx` |
+| `tool-page` | `apps/portfolio/app/apps/repo-planner/page.tsx` |

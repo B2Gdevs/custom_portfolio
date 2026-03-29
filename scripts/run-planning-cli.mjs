@@ -14,7 +14,8 @@ if (!process.env.REPOPLANNER_REPORTS_DIR?.trim()) {
   process.env.REPOPLANNER_REPORTS_DIR = ".planning-reports";
 }
 
-const result = spawnSync(process.execPath, [cli, ...process.argv.slice(2)], {
+const forwardedArgv = process.argv.slice(2).filter((a) => a !== "--");
+const result = spawnSync(process.execPath, [cli, ...forwardedArgv], {
   stdio: "inherit",
   env: process.env,
 });

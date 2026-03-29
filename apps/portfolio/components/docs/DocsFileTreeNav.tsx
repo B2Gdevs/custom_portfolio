@@ -90,7 +90,7 @@ export function DocsFileTreeNav({ docs }: DocsFileTreeNavProps) {
   );
 
   const overviewActive = pathname === '/docs';
-  const appsActive = pathname === '/docs/apps' || pathname?.startsWith('/docs/apps/');
+  const appsActive = pathname === '/apps' || pathname?.startsWith('/apps/');
   const querySuffix = searchParams.toString();
 
   return (
@@ -106,7 +106,7 @@ export function DocsFileTreeNav({ docs }: DocsFileTreeNavProps) {
           Overview
         </Link>
         <Link
-          href={querySuffix ? `/docs/apps?${querySuffix}` : '/docs/apps'}
+          href="/apps"
           className={`flex items-center gap-1.5 rounded-md px-1.5 py-1.5 text-[13px] font-medium leading-tight transition-colors ${
             appsActive ? 'bg-white/10 text-primary' : 'text-text-muted hover:bg-white/5 hover:text-primary'
           }`}

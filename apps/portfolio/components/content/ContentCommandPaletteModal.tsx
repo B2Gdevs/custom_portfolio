@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Command, FileText, FolderKanban, Search, X } from 'lucide-react';
+import { Command, FileText, FolderKanban, Headphones, Search, X } from 'lucide-react';
 import type { ModalShellProps } from '@/lib/modal-types';
 import type { DiscoverySearchHit } from '@/lib/content-discovery';
 import { HighlightedText } from '@/components/content/HighlightedText';
@@ -17,6 +17,7 @@ type SearchResponse = {
 const GROUP_LABELS = {
   blog: 'Blog',
   projects: 'Projects',
+  listen: 'Listen',
 } as const;
 
 function groupHits(hits: DiscoverySearchHit[]) {
@@ -31,18 +32,35 @@ function groupHits(hits: DiscoverySearchHit[]) {
 export function ContentCommandPaletteModal({ onClose, payload }: ModalShellProps) {
   const router = useRouter();
   const [query, setQuery] = useState(typeof payload?.initialQuery === 'string' ? payload.initialQuery : '');
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
   const [results, setResults] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 120);
+
+    return () => window.clearTimeout(timeout);
+  }, [query]);
+
+  useEffect(() => {
     const controller = new AbortController();
+
     async function loadResults() {
+      if (!debouncedQuery.trim()) {
+        setResults({ query: '', hits: [] });
+        setLoading(false);
+        setError(null);
+        return;
+      }
+
       setLoading(true);
       setError(null);
 
       const params = new URLSearchParams();
-      params.set('q', query);
+      params.set('q', debouncedQuery);
 
       try {
         const response = await fetch(`/api/content/search?${params.toString()}`, {
@@ -66,7 +84,7 @@ export function ContentCommandPaletteModal({ onClose, payload }: ModalShellProps
     void loadResults();
 
     return () => controller.abort();
-  }, [query]);
+  }, [debouncedQuery]);
 
   const grouped = groupHits(results?.hits ?? []);
 
@@ -81,7 +99,7 @@ export function ContentCommandPaletteModal({ onClose, payload }: ModalShellProps
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Search blog and projects"
+        aria-label="Search blog, projects, and listen"
         className="relative z-[211] mt-[10vh] flex max-h-[78vh] w-full max-w-3xl flex-col overflow-hidden rounded-[2rem] border border-border/80 bg-[#171412]/95 shadow-[0_30px_80px_rgba(0,0,0,0.45)]"
         onClick={(event) => event.stopPropagation()}
       >
@@ -93,11 +111,11 @@ export function ContentCommandPaletteModal({ onClose, payload }: ModalShellProps
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Search</p>
-                <h2 className="font-serif text-2xl text-primary">Blog + Projects</h2>
+                <h2 className="font-serif text-2xl text-primary">Blog + Projects + Listen</h2>
               </div>
               <div className="hidden items-center gap-2 rounded-full border border-border/80 bg-dark-alt/70 px-3 py-1 text-xs text-text-muted sm:inline-flex">
                 <Command size={14} />
-                <span>⌘K / Ctrl+K</span>
+                <span>Cmd+K / Ctrl+K</span>
               </div>
             </div>
           </div>
@@ -111,25 +129,31 @@ export function ContentCommandPaletteModal({ onClose, payload }: ModalShellProps
             autoFocus
             value={query}
             onChange={(event) => setQuery(event.currentTarget.value)}
-            placeholder="Search posts, projects, sections, and keywords..."
+            placeholder="Search posts, projects, tracks, presets, and keywords..."
             className="h-12 rounded-2xl border-border/80 bg-dark-alt/80 px-4 text-base"
-            aria-label="Search blog and projects"
+            aria-label="Search blog, projects, and listen"
           />
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {loading ? (
-            <p className="text-sm text-text-muted">Searching…</p>
+            <p className="text-sm text-text-muted">Searching...</p>
           ) : error ? (
             <p className="text-sm text-red-400">{error}</p>
           ) : grouped.length === 0 ? (
-            <p className="text-sm text-text-muted">No matching blog posts or projects yet.</p>
+            <p className="text-sm text-text-muted">No matching posts, projects, or listen rows yet.</p>
           ) : (
             <div className="space-y-6">
               {grouped.map(([kind, hits]) => (
                 <section key={kind} className="space-y-3">
                   <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-text-muted">
-                    {kind === 'projects' ? <FolderKanban size={14} /> : <FileText size={14} />}
+                    {kind === 'projects' ? (
+                      <FolderKanban size={14} />
+                    ) : kind === 'listen' ? (
+                      <Headphones size={14} />
+                    ) : (
+                      <FileText size={14} />
+                    )}
                     <span>{GROUP_LABELS[kind as keyof typeof GROUP_LABELS]}</span>
                   </div>
                   <div className="space-y-2">

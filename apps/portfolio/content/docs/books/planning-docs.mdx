@@ -38,7 +38,7 @@ The **`@portfolio/repub-builder`** CLI packs `books/<slug>/` into EPUB. Extra pl
 
 | Mechanism | Detail |
 | --- | --- |
-| CLI | `repub epub <book-folder> --planning <absolute-or-relative-dir>` — repeat `--planning` for multiple roots. |
+| CLI | `repub epub <book-folder> --planning <absolute-or-relative-dir>` -- repeat `--planning` for multiple roots. |
 | `pnpm run build:books` | Reads optional **`epubPlanningDirs`** in each `book.json` (paths **relative to that book folder**), resolves them, and passes `--planning` for each existing directory. |
 | Files included | Recursive `.md`, `.mdx`, `.xml`, `.toml`, `.txt` under each root; skips `node_modules`, `.git`, `dist`, `.next`, `__pycache__`. |
 | Mordred's Tale | `books/mordreds_tale/book.json` lists `../../apps/portfolio/content/docs/books/planning` so site planning MDX for that stream ships inside the built EPUB. |
@@ -64,9 +64,10 @@ Verify with **`pnpm run build:books`** and open the output under `apps/portfolio
 | `shape` | Use fixed fields, short values, and explicit ids instead of prose blocks. |
 | `update-trigger` | Change these records before or with any books workflow change. |
 | `follow-on-docs` | Reader and implementation docs come after the planning stack. |
-| `reader-extensions` | Shipped reader/AI scope: P0-P3b, AI-v0 shipped; Payload + `sqlite-vec` RAG under AI-v1a–AI-v1d; `magicborn` as public lore corpus; **P5** planning-folder EPUB supplement shipped (`repub epub --planning` / `epubPlanningDirs`); **P4** annotation merge at build time still planned. Monorepo narrative: [documentation/requirements](/docs/documentation/requirements). Details and task ids: [task registry](/docs/books/task-registry). |
+| `reader-extensions` | Shipped reader/AI scope: P0-P3b, AI-v0 shipped; Payload + `sqlite-vec` RAG under AI-v1a-AI-v1d; `magicborn` as public lore corpus; **P5** planning-folder EPUB supplement shipped (`repub epub --planning` / `epubPlanningDirs`); **P4** annotation merge at build time still planned. Monorepo narrative: [documentation/requirements](/docs/documentation/requirements). Details and task ids: [task registry](/docs/books/task-registry). |
 | `agent-loop` | Follow `AGENTS.md`: read planning state, pick one books task, implement, verify, then update planning records. |
-| `book-planning` | Per-book planning (e.g. Mordred's Tale) uses **state** (roadmap + queue), **task registry**, and **decisions** — no separate outline page; arc lives in state and locks in decisions. |
+| `book-planning` | Per-book planning (e.g. Mordred's Tale) uses **state** (roadmap + queue), **task registry**, and **decisions** -- no separate outline page; arc lives in state and locks in decisions. |
+| `reader-shell-passes` | Current planning focus for `books-reader-03`: (1) library metadata contract, (2) built-in shelf with covers always visible, (3) workspace state split for built-in vs local reading -- **shipped**, (4) `@portfolio/repub-builder` runtime export, (5) shared modal/strip follow-on work. |
 
 ## Phases, task ids, and frontmatter
 
@@ -83,4 +84,4 @@ Shape matches [global planning](/docs/global/global-planning): **`<books>-<strea
 - **`repoPath`:** Optional YAML frontmatter on any planning `.mdx` file: repo-relative path to this file (this page sets `repoPath: apps/portfolio/content/docs/books/planning-docs.mdx`). Not shown in the article body.
 - **`taskPhase`:** Optional frontmatter when a page is owned by a single phase (e.g. a future `books-ai-01-kickoff.mdx`). Omit on shared indexes like [task registry](/docs/books/task-registry).
 
-Read order for **books** work: root **`AGENTS.md`** → this page → [Planning docs](/docs/global/planning-docs) / [Global planning guide](/docs/global/global-planning) (optional) → [state](/docs/books/state) → [task registry](/docs/books/task-registry) → linked book-specific pages; monorepo scope → [documentation/requirements](/docs/documentation/requirements).
+Read order for **books** work: root **`AGENTS.md`** -> this page -> [Planning docs](/docs/global/planning-docs) / [Global planning guide](/docs/global/global-planning) (optional) -> [state](/docs/books/state) -> [task registry](/docs/books/task-registry) -> linked book-specific pages; monorepo scope -> [documentation/requirements](/docs/documentation/requirements).

@@ -9,8 +9,28 @@ export function ContentCommandPaletteHotkey() {
   const activeId = useModalStore((state) => state.activeId);
 
   useEffect(() => {
+    const isEditableTarget = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLElement)) return false;
+      if (target.isContentEditable) return true;
+      const tag = target.tagName.toLowerCase();
+      return tag === 'input' || tag === 'textarea' || tag === 'select';
+    };
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'k') {
+        const printableKey =
+          event.key.length === 1 &&
+          !event.altKey &&
+          !event.ctrlKey &&
+          !event.metaKey &&
+          !isEditableTarget(event.target);
+
+        if (!printableKey || activeId === CONTENT_SEARCH_MODAL_ID) {
+          return;
+        }
+
+        event.preventDefault();
+        openModal(CONTENT_SEARCH_MODAL_ID, { initialQuery: event.key });
         return;
       }
 

@@ -944,8 +944,12 @@ export default function DialogueForgePage() {
       <header className="border-b border-[#1a1a2e] bg-[#0d0d14]/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="px-4 py-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/projects/dialogue-forge-interactive-narrative-builder" className="text-gray-400 hover:text-white">
-              <ArrowLeft size={18} />
+            <Link
+              href="/projects/dialogue-forge-interactive-narrative-builder"
+              className="inline-flex items-center gap-2 rounded-full border border-[#2a2a3e] px-3 py-1.5 text-sm text-gray-300 transition hover:border-[#e94560] hover:text-white"
+            >
+              <ArrowLeft size={16} />
+              <span>Back to Project</span>
             </Link>
             <input
               type="text"

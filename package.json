@@ -47,6 +47,7 @@
     "planning:checklist": "node scripts/run-planning-cli.mjs setup checklist",
     "planning:report-view": "node scripts/run-planning-cli.mjs report view",
     "planning:ui": "node scripts/run-planning-cli.mjs report view",
+    "planning:embed-packs": "node scripts/run-planning-cli.mjs pack embed-build -o apps/portfolio/public/planning-embed/builtin-packs.json --docs-dir apps/portfolio/content/docs/repo-planner",
     "vendors:commit-push": "node scripts/commit-push-vendors-and-root.cjs"
   },
   "devDependencies": {
@@ -60,7 +61,7 @@
     "marked": "^15.0.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "pnpm": {
     "overrides": {

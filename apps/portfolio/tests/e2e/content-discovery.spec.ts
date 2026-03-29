@@ -9,9 +9,9 @@ test.describe('Blog and projects discovery', () => {
     await expect(page.getByText('Making the Site More Personal')).toBeVisible();
 
     await page.keyboard.press('Control+K');
-    await expect(page.getByRole('dialog', { name: 'Search blog and projects' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Search blog, projects, and listen' })).toBeVisible();
 
-    await page.getByRole('textbox', { name: 'Search blog and projects' }).fill('dialogue');
+    await page.getByRole('textbox', { name: 'Search blog, projects, and listen' }).fill('dialogue');
     await page.getByRole('button', { name: /Dialogue Forge: Interactive Narrative Builder/i }).click();
 
     await expect(page).toHaveURL(/\/projects\/dialogue-forge-interactive-narrative-builder$/);
@@ -27,9 +27,17 @@ test.describe('Blog and projects discovery', () => {
 
     await page.goto('/projects/dialogue-forge-interactive-narrative-builder');
     await expect(page.getByText('ON THIS PAGE')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Back to Projects' }).first()).toBeVisible();
     const topLinksSection = page.locator('section').filter({
       has: page.getByRole('heading', { name: 'Links & Downloads' }),
     });
     await expect(topLinksSection.getByRole('link', { name: 'Open Dialogue Forge' })).toBeVisible();
+  });
+
+  test('shows the dialogue forge app shell with a visible way back to the project page', async ({ page }) => {
+    await page.goto('/apps/dialogue-forge');
+
+    await expect(page.getByRole('link', { name: 'Back to Project' })).toBeVisible();
+    await expect(page.getByDisplayValue('Example: The Mysterious Stranger')).toBeVisible();
   });
 });

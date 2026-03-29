@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <roadmap>
   <phase id="01">
-    <goal>Keep `.planning/*.xml` aligned with documentation section requirements/state/roadmap MDX and section task registries; agents read root AGENTS.md first.</goal>
+    <goal>Phase 01 (closed 2026-03-28): `.planning-archive` removed after migration into public docs; monorepo CLI baseline (`pnpm planning -- --version`, `engines.node &gt;= 22`, documented `pnpm dlx` / workspace exec). Ongoing: keep `.planning/*.xml` aligned with section requirements/state/task-registry MDX; agents read root AGENTS.md first.</goal>
     <status>active</status>
     <depends></depends>
   </phase>
@@ -9,7 +9,7 @@
     <doc name="documentation/requirements.mdx">Monorepo requirements narrative (public docs).</doc>
     <doc name="documentation/state.mdx">Cross-cutting queue + documentation section state.</doc>
     <doc name="documentation/roadmap.mdx">Human-readable section / root overview table.</doc>
-    <doc name="REQUIREMENTS.md">Repo-root stub pointer only — not canonical prose.</doc>
+    <doc name="REQUIREMENTS.md">Repo-root stub pointer only -- not canonical prose.</doc>
     <doc name=".planning/REQUIREMENTS.xml">Stub for XML-only tools; points at documentation paths.</doc>
     <doc name=".planning/ROADMAP.xml">Phase timeline for RepoPlanner.</doc>
     <doc name=".planning/TASK-REGISTRY.xml">Task graph and status.</doc>

@@ -4,7 +4,7 @@
   <current-phase>01</current-phase>
   <current-plan>bootstrap</current-plan>
   <status>active</status>
-  <next-action>Task 01-06 is done. Next loop: review the new blog/projects shell in the browser, refine the article/project contract where it still feels too skeletal, and decide how far cross-linking between blog, projects, and app routes should go.</next-action>
+  <next-action>Task 01-07 is done. Resume the URL taxonomy and apps hub work, or pick the next documentation/planning task from TASK-REGISTRY.xml after build and lint stay green.</next-action>
   <references>
     <reference>AGENTS.md (repo root)</reference>
     <reference>apps/portfolio/content/docs/documentation/requirements.mdx</reference>

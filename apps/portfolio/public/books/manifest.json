@@ -2,12 +2,15 @@
   {
     "slug": "mordreds_legacy",
     "title": "Mordreds Legacy",
+    "status": "coming-soon",
     "hasEpub": false
   },
   {
     "slug": "mordreds_tale",
     "title": "Mordred's Tale",
+    "author": "Ben Garrard",
     "description": "A dark fantasy novel. Morgana, Jack, and the threads of fate.",
+    "status": "available",
     "hasEpub": true
   }
 ]

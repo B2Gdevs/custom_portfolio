@@ -4,7 +4,10 @@ import path from 'path';
 export interface BookEntry {
   slug: string;
   title: string;
+  author?: string;
   description?: string;
+  coverImage?: string;
+  status?: 'available' | 'coming-soon';
   hasEpub: boolean;
 }
 

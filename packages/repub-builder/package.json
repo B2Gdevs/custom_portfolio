@@ -20,6 +20,9 @@
     "directory": "packages/repub-builder"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "keywords": [
     "repub",
     "richepub",

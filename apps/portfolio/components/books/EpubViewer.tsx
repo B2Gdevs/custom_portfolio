@@ -26,8 +26,10 @@ import {
   sha256Hex,
   type PortfolioAnnotation,
 } from '@/lib/epub-annotations';
-
-const STORAGE_PREFIX = 'epub-location-';
+import {
+  EPUB_LOCATION_STORAGE_PREFIX as STORAGE_PREFIX,
+  persistStoredReaderProgress,
+} from '@/lib/reader-progress';
 const READER_HEADER_H = 52;
 const READER_FOOTER_H = 44;
 const READER_SPREAD_MIN_WIDTH = 1050;
@@ -684,21 +686,29 @@ export default function EpubViewer({
 
       let resolvedPage: number | null = null;
       const currentCfi = nextLocation.start?.cfi;
+      let resolvedProgress: number | null = null;
 
       if (generatedPageTotal > 0 && currentCfi) {
         const percentage = renditionRef.current?.book.locations.percentageFromCfi(currentCfi) ?? 0;
+        resolvedProgress = percentage;
         resolvedPage = Math.min(
           generatedPageTotal,
           Math.max(1, Math.round(percentage * Math.max(generatedPageTotal - 1, 1)) + 1)
         );
       } else if (nextLocation.start?.displayed?.page) {
         resolvedPage = nextLocation.start.displayed.page;
+        if (fallbackTotal > 0) {
+          resolvedProgress = Math.min(1, Math.max(0, nextLocation.start.displayed.page / fallbackTotal));
+        }
       }
 
       setCurrentPage(resolvedPage);
       setPageDraft(resolvedPage ? String(resolvedPage) : '');
+      if (storageKey) {
+        persistStoredReaderProgress(storageKey, resolvedProgress);
+      }
     },
-    [tocItems]
+    [storageKey, tocItems]
   );
 
   const handleTocChanged = useCallback(

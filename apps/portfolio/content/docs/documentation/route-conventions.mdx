@@ -1,6 +1,6 @@
 ---
 title: Route conventions
-description: URL taxonomy — /docs for MDX, /apps for tools; repub-builder owns reader runtime long-term.
+description: URL taxonomy -- /docs for MDX, /apps for tools; repub-builder owns reader runtime long-term.
 date: "2026-03-28"
 updated: "2026-03-28"
 order: 8
@@ -17,10 +17,10 @@ This page is the **planning source of truth** for site URL shape. Implementation
 | Principle | Rule |
 | --- | --- |
 | **Content vs chrome** | **`/docs/*`** serves **MDX documentation** (planning, guides, longform). It is not the home for runnable tools. |
-| **Interactive apps** | **`/apps/*`** is the **reader, Dialogue Forge, repo planner, and future tool** namespace. Hub at **`/apps`** (replacing `/docs/apps` when that migration lands). |
+| **Interactive apps** | **`/apps/*`** is the **reader, Dialogue Forge, repo planner, and future tool** namespace. Hub at **`/apps`**. Do not keep duplicate published routes under **`/docs/apps`**. |
 | **No top-level tool exceptions** | **Deprecated:** **`/dialogue-forge`**, **`/books`** listing/read routes. Use **`/apps/dialogue-forge`** and **`/apps/reader`**; old URLs **redirect** (308). |
 | **Top-level content indices** | **`/blog`**, **`/projects`**, **`/listen`** stay at the site root as **browsable catalogs** (MDX or data-driven listings), not under **`/apps/*`**. **`/listen`** covers music tracks and BandLab presets; planning: [listen route-and-urls](/docs/listen/route-and-urls). |
-| **Static reading assets** | Built EPUBs and **`manifest.json`** stay under **`/books/<slug>/…`** as **files** in `public/books/` (not React routes). Do not confuse with removed **`/books` pages**. |
+| **Static reading assets** | Built EPUBs and **`manifest.json`** stay under **`/books/<slug>/...`** as **files** in `public/books/` (not React routes). Do not confuse with removed **`/books` pages**. |
 | **APIs** | **`/api/*`** only. Optional future: **documented route handlers** colocated with **`@portfolio/repub-builder`** for embedders (CopilotKit-style), shipped as part of the same package story. |
 | **Admin** | **`/admin/*`** remains internal / operator surfaces. |
 | **Redirects** | Keep **permanent redirects** from removed paths; log notable external links in [errors-and-attempts](/docs/documentation/errors-and-attempts) if needed. |
@@ -29,11 +29,11 @@ This page is the **planning source of truth** for site URL shape. Implementation
 
 | Path | Kind | Notes |
 | --- | --- | --- |
-| `/docs`, `/docs/[...slug]` | Content | MDX tree. Section **`docs/dialogue-forge`** is **documentation** only — not the running editor. |
-| `/apps` | App hub | Gallery (target location; today may still be `/docs/apps` until `documentation-site-06-02`). |
-| `/apps/reader` | App | **Reader shell** — library/overview + reading workspace + in-shell navigation. Query params **`?book=&at=&cfi=`** until path-based deep links are specced. |
-| `/apps/dialogue-forge` | App | **Only** shipped Dialogue Forge surface. **`/dialogue-forge` → 308 here.** |
-| `/apps/repo-planner` | App | Embedded PlanningCockpit (target; today often `/docs/apps/repo-planner`). |
+| `/docs`, `/docs/[...slug]` | Content | MDX tree. Section **`docs/dialogue-forge`** is **documentation** only -- not the running editor. |
+| `/apps` | App hub | Gallery for interactive tools. This is the canonical published URL. |
+| `/apps/reader` | App | **Reader shell** -- library/overview + reading workspace + in-shell navigation. Query params **`*book=&at=&cfi=`** until path-based deep links are specced. |
+| `/apps/dialogue-forge` | App | **Only** shipped Dialogue Forge surface. **`/dialogue-forge` -> 308 here.** |
+| `/apps/repo-planner` | App | Embedded PlanningCockpit. Do not mirror it under `/docs/apps/repo-planner`. |
 
 ## Shipped redirects (Next `next.config`)
 
@@ -41,30 +41,31 @@ This page is the **planning source of truth** for site URL shape. Implementation
 | --- | --- |
 | `/dialogue-forge` | `/apps/dialogue-forge` |
 | `/books` | `/apps/reader` |
-| `/books/:slug/read` | `/apps/reader?book=:slug` |
+| `/books/:slug/read` | `/apps/reader*book=:slug` |
 | `/books/upload/read` | `/apps/reader` |
 
 ## Reader shell, Kookit, and `@portfolio/repub-builder`
 
 | Topic | Decision |
 | --- | --- |
-| **Kookit** (`vendor/kookit`) | **Reference for navigation / chrome patterns** when designing the EPUB **reader shell** (how a serious reader moves between library and book). It is **not** the product UI we ship; we **do not** label it “just a util” in planning — it informs **UX and technical navigation** choices inside **`/apps/reader`**. |
-| **`@portfolio/repub-builder` today** | **Build-time** pipeline: CLI (`repub`, `repub epub`), manuscript → EPUB used by `scripts/build-books.cjs`, plus RichEPub/Vite packaging. **Not** the same folder as `components/books/*` today, but it is the **monorepo home for EPUB/repub concerns**. |
-| **Target architecture** | **Extend `repub-builder`** (or a single clearly named export subtree, e.g. `@portfolio/repub-builder/next` / `runtime`) to ship **React reader shell + workspace** and, where needed, **optional Next.js route handler helpers** for consumers — similar in spirit to how **CopilotKit** packages app integration. Avoid a separate mystery **`reader-shell`** package unless we split for bundle size with an explicit ADR. |
+| **Kookit** (`vendor/kookit`) | **Reference for navigation / chrome patterns** when designing the EPUB **reader shell** (how a serious reader moves between library and book). It is **not** the product UI we ship; we **do not** label it "just a util" in planning -- it informs **UX and technical navigation** choices inside **`/apps/reader`**. |
+| **`@portfolio/repub-builder` today** | **Build-time** pipeline: CLI (`repub`, `repub epub`), manuscript -> EPUB used by `scripts/build-books.cjs`, plus RichEPub/Vite packaging. **Not** the same folder as `components/books/*` today, but it is the **monorepo home for EPUB/repub concerns**. |
+| **Target architecture** | **Extend `repub-builder`** (or a single clearly named export subtree, e.g. `@portfolio/repub-builder/next` / `runtime`) to ship **React reader shell + workspace** and, where needed, **optional Next.js route handler helpers** for consumers -- similar in spirit to how **CopilotKit** packages app integration. Avoid a separate mystery **`reader-shell`** package unless we split for bundle size with an explicit ADR. |
 | **Portfolio app** | Imports the **stable public API** from that package; **`apps/portfolio`** remains the demo host, not the only consumer long term. |
 
 ## Remaining migration checklist
 
 | Item | Task id |
 | --- | --- |
-| Move **`/docs/apps`** hub → **`/apps`**, redirects, Nav + docs sidebar | `documentation-site-06-02`, `06-03` |
+| Move **`/docs/apps`** hub -> **`/apps`**, remove duplicate routes, Nav + docs sidebar | `documentation-site-06-02`, `06-03` |
+| Add explicit **Docs** entry to the site side nav and stop treating apps as docs children in the docs file tree | `documentation-site-06-06` |
 | Optional CI grep for stale `/docs/apps` or `/dialogue-forge` in `href`s | `documentation-site-06-04` |
-| Reader **library overview** + package re-exports | `books-reader-03-02`–`03-04` |
+| Reader **library overview** + package re-exports | `books-reader-03-02`-`03-04` |
 
 ## Open questions (smaller)
 
-1. **Path-based reader URLs** — Add **`/apps/reader/[bookSlug]`** for shareable links, or stay query-only for v1?
-2. **Republish `repub-builder` API surface** — Exact export map (`main` vs `exports["./next"]`) once the first runtime PR lands.
+1. **Path-based reader URLs** -- Add **`/apps/reader/[bookSlug]`** for shareable links, or stay query-only for v1*
+2. **Republish `repub-builder` API surface** -- Exact export map (`main` vs `exports["./next"]`) once the first runtime PR lands.
 
 ## Related records
 
@@ -73,6 +74,6 @@ This page is the **planning source of truth** for site URL shape. Implementation
 | [Documentation decisions](/docs/documentation/decisions) | `DOCUMENTATION-APPS-URL-TOP-LEVEL`, `DOCUMENTATION-ROUTES-SINGLE-SOURCE`, `DOCUMENTATION-DIALOGUE-FORGE-APPS-URL` |
 | [Books decisions](/docs/books/decisions) | `BOOKS-READER-LIBRARY-SHELL`, `BOOKS-READER-RUNTIME-REPUB-PACKAGE`, `BOOKS-HOMEPAGE-LAUNCHPAD` |
 | [Global planning guide](/docs/global/global-planning) | Operator links migrate to `/apps/*` |
-| [Repo Planner integration](/docs/repo-planner/integration) | Update paths when repo planner moves |
+| [Repo Planner planning docs](/docs/repo-planner/planning-docs) | Update paths when repo planner moves |
 | [Reader shell + Repo Planner embed](/docs/documentation/reader-repo-planner-embed-architecture) | Shared cockpit modal, reader modal store, docs context menu |
 | [Listen route and URLs](/docs/listen/route-and-urls) | Canonical **`/listen`** and relation to **`/apps/*`** |

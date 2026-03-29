@@ -83,4 +83,59 @@ describe('content discovery utilities', () => {
     expect(segments.some((segment) => segment.highlighted)).toBe(true);
     expect(segments.map((segment) => segment.text).join('')).toBe('Interactive narrative builder');
   });
+
+  it('filters listen items by genre and catalog kind', () => {
+    const listenItems: DiscoveryItem[] = [
+      {
+        kind: 'listen',
+        slug: 'a',
+        href: '/listen#a',
+        title: 'Track A',
+        description: 'One',
+        date: '2026-01-02',
+        updated: '2026-01-02',
+        year: '2026',
+        tags: [],
+        listenCatalogKind: 'track',
+        genre: 'Rock',
+        mood: 'Calm',
+        era: '2026',
+        searchKeywords: [],
+        plainText: 'one',
+        headings: [],
+        links: [],
+        downloads: [],
+        appLinks: [],
+      },
+      {
+        kind: 'listen',
+        slug: 'b',
+        href: '/listen#b',
+        title: 'Preset B',
+        description: 'Two',
+        date: '2026-01-01',
+        updated: '2026-01-01',
+        year: '2026',
+        tags: [],
+        listenCatalogKind: 'preset',
+        genre: 'Preset',
+        mood: 'Bright',
+        era: '2026',
+        searchKeywords: [],
+        plainText: 'two',
+        headings: [],
+        links: [],
+        downloads: [],
+        appLinks: [],
+      },
+    ];
+
+    const byGenre = filterDiscoveryItems(listenItems, { genre: 'Rock', sort: 'newest' });
+    expect(byGenre).toHaveLength(1);
+    expect(byGenre[0]?.slug).toBe('a');
+
+    const presetsOnly = filterDiscoveryItems(listenItems, { listenCatalogKind: 'preset', sort: 'newest' });
+    expect(presetsOnly).toHaveLength(1);
+    expect(presetsOnly[0]?.slug).toBe('b');
+  });
 });

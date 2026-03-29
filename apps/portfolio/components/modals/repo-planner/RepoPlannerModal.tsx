@@ -25,7 +25,7 @@ export function RepoPlannerModal({ onClose, payload }: ModalShellProps) {
         aria-label="Repo Planner cockpit"
         className={cn(
           'relative z-[201] flex max-h-[92vh] w-full flex-col overflow-hidden rounded-2xl border border-border bg-dark-alt shadow-[0_24px_80px_rgba(0,0,0,0.55)]',
-          wide ? 'max-w-6xl xl:max-w-[88rem]' : 'max-w-6xl',
+          wide ? 'max-w-6xl xl:max-w-[88rem]' : 'max-w-6xl'
         )}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
@@ -36,10 +36,10 @@ export function RepoPlannerModal({ onClose, payload }: ModalShellProps) {
             <h2 className="font-display text-xl text-primary sm:text-2xl">Planning cockpit</h2>
             <p className="mt-1 max-w-2xl text-xs text-text-muted sm:text-sm">
               Same client as{' '}
-              <Link href="/docs/apps/repo-planner" className="text-accent underline" onClick={onClose}>
-                Docs → Apps → Repo Planner
+              <Link href="/apps/repo-planner" className="text-accent underline" onClick={onClose}>
+                Apps - Repo Planner
               </Link>
-              . From the reader you can open this modal with the book’s planning links and an embedded EPUB tab.
+              . From the reader you can open this modal with the book&apos;s planning links and an embedded EPUB tab.
             </p>
           </div>
           <button

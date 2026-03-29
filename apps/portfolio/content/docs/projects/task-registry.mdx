@@ -31,3 +31,11 @@ repoPath: apps/portfolio/content/docs/projects/task-registry.mdx
 | --- | --- | --- | --- | --- |
 | `projects-showcase-02-01` | `done` | retrofit the existing project MDX files to the literal section headings and top-link metadata the new project chrome now expects | `projects-integration-01-02` | `pnpm run build`, `pnpm run lint` |
 | `projects-showcase-02-02` | `done` | deepen project metadata beyond the initial status and featured fields so future filtering and app/demo linking can stay declarative | `projects-showcase-02-01` | `pnpm run build`, `pnpm run lint` |
+
+## Phase `projects-identity-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `projects-identity-01-01` | `done` | define how projects use the shared content-surface shell while keeping project-specific visual identity, mini logo, and proof-oriented sidebar treatment | `projects-showcase-02-02`, `documentation-site-09-01` | planning docs updated |
+| `projects-identity-01-02` | `done` | apply the projects identity contract to the index and detail pages without forking the shared discovery/detail primitives | `projects-identity-01-01` | `pnpm run build`, `pnpm run lint` |
+| `projects-identity-01-03` | `done` | wire the projects surface into the shared type-to-search / command-palette behavior and animated icon treatment once the shared `documentation-site-09-03` / `09-04` work lands | `projects-identity-01-02`, `documentation-site-09-03`, `documentation-site-09-04` | `pnpm run build`, manual project archive/detail search smoke |

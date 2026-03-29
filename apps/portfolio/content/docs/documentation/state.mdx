@@ -2,7 +2,7 @@
 title: State
 description: Compact state records for the documentation section.
 date: "2026-03-16"
-updated: "2026-03-28"
+updated: "2026-03-29"
 repoPath: apps/portfolio/content/docs/documentation/state.mdx
 taskPhase: documentation-site-06
 order: 2
@@ -24,20 +24,22 @@ order: 2
 | Field | Value |
 | --- | --- |
 | `phase` | `documentation-site-06` (URL taxonomy) + ongoing `documentation-site-03` / `04` |
-| `plan` | **[Route conventions](/docs/documentation/route-conventions)**: `/apps` owns interactive tools; `/docs/apps` migrates off the MDX tree; reader **library shell** planned under **books** `books-reader-03` |
-| `focus` | execute `documentation-site-06-02`–`06-03` when ready; keep planning modal + pack pipeline; onboard `magicborn` / `projects` per `documentation-site-04` |
+| `plan` | **[Route conventions](/docs/documentation/route-conventions)**: `/apps` owns interactive tools; `/docs/apps` migrates off the MDX tree; the next cross-cutting pass also needs an explicit Docs destination in the site side nav, a cleaner separation between docs navigation and app navigation, a `/resumes` gallery surface, and hardened shared command-palette behavior before identity polish lands for blog/projects/listen |
+| `focus` | with the `/apps` cleanup, resume gallery, and shared content-surface identity pass shipped, move next to planning IA cleanup (`documentation-site-10`) and any remaining stale docs-route references while keeping the planning modal + pack pipeline moving |
 | `constraint` | section planning MDX is first for **section** work; root `.planning` stays canonical for **monorepo** gates; see root `AGENTS.md` |
 
 ## Next Queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | `documentation-site-06-02`–`06-03`: **`/apps` hub** + repo-planner route move + link sweep ([route conventions](/docs/documentation/route-conventions)) | `ia` |
+| `1` | `documentation-site-10-01` / `10-02` / `10-03`: roadmap-first planning workflow, section `planning/` folders, and phase-local one-off plans under `planning/plans/` | `planning-ia` |
 | `2` | `documentation-site-03-01` through `documentation-site-03-05`: planning portal phases (demo pack, real export pipeline, modal UI, optional section `AGENTS.md`) | `feature` |
 | `3` | `documentation-site-02-03`: surface architecture / product-boundary `.planning` docs from docs section | `ia` |
 | `4` | `documentation-site-04-01` / `documentation-site-04-02`: onboard `magicborn` as a first-class docs section and keep its planning pages aligned with the RAG source map | `ia` |
 | `5` | `documentation-site-04-03`: onboard `projects` as a first-class planning section for showcase UX and schema work | `ia` |
 | `6` | `documentation-site-07-01` / `07-02` + `repo-planner-integration-01-13`: formal CLIs (Ink, **two** packages, submodule upstream, **`pnpm dlx`** docs first) | `tooling` |
+| `7` | `documentation-site-09-02`: registry tracking for `@lucide-animated` and `@magicui` so future component adoption stays documented | `design-system` |
+| `8` | optional `documentation-site-06-04`: CI/grep guard for stale `/docs/apps` references outside redirect docs history | `ia` |
 
 ## Cross-cutting queue
 
@@ -45,15 +47,19 @@ Monorepo-wide items that are not (yet) a full `.planning` task row. Mirror or cl
 
 | Status | Item |
 | --- | --- |
-| `open` | Merge remaining narrative from `.planning-archive/2026-03-29-pre-barebones/` into **[requirements](/docs/documentation/requirements)**, section registries, and **`.planning/*.xml`**. |
-| `open` | Advance `books-ai-01-05` → `books-ai-01-07` assistant evaluation — [books task registry](/docs/books/task-registry). |
+| `done` | **`.planning-archive/`** removed (2026-03-28); migration pointers recorded in **[requirements](/docs/documentation/requirements)** (**Planning archive** section) and **`.planning/ROADMAP.xml`** / **`.planning/TASK-REGISTRY.xml`** phase 01 closure. |
+| `open` | Advance `books-ai-01-05` -> `books-ai-01-07` assistant evaluation -- [books task registry](/docs/books/task-registry). |
 | `done` | EPUB planning supplement (`repub epub --planning`, `epubPlanningDirs`, `pnpm run build:books`); `.planning` task `01-04` + [books task registry](/docs/books/task-registry). |
 | `done` | Shared app logging layer (chat / RAG / structured debug). |
-| `open` | Live AI `429 insufficient_quota` mismatch — [books state](/docs/books/state). |
-| `open` | Blog + projects discovery pass — blog/projects section registries. |
-| `open` | **Listen** surface — phase **`listen-surface-01`**: catalog + filters + group passwords; [listen task registry](/docs/listen/task-registry). |
-| `open` | **CLI ergonomics:** `documentation-site-07-01` / `07-02` — Ink, **two CLIs**, submodule bumps, **`pnpm dlx`** docs; publish repub + planners later per [requirements](/docs/documentation/requirements) CLI table. |
-| `open` | **Reader shell + cockpit embed:** shared modal body, **reader** modal store, **docs** context menu — [embed architecture](/docs/documentation/reader-repo-planner-embed-architecture); **`documentation-site-08`**, **`books-reader-03-06`**, **`repo-planner-integration-02`**. |
+| `done` | Planning/operator docs now follow an ASCII-first punctuation policy; public-facing prose remains free to keep richer typography. |
+| `open` | Live AI `429 insufficient_quota` mismatch -- [books state](/docs/books/state). |
+| `open` | Blog + projects discovery pass -- blog/projects section registries. |
+| `done` | **Listen** surface -- **`listen-surface-01`** implemented (`/listen`, unlock API, Cmd+K); [listen task registry](/docs/listen/task-registry). |
+| `open` | **CLI ergonomics:** `documentation-site-07-01` / `07-02` -- Ink, **two CLIs**, submodule bumps, **`pnpm dlx`** docs; publish repub + planners later per [requirements](/docs/documentation/requirements) CLI table. |
+| `open` | **Reader shell + cockpit embed:** shared modal body, **reader** modal store, **docs** context menu -- [embed architecture](/docs/documentation/reader-repo-planner-embed-architecture); **`documentation-site-08`**, **`books-reader-03-06`**, **`repo-planner-integration-02`**. |
+| `open` | **Repo Planner full cockpit + XML/pack plane + shell upstream:** **`repo-planner-integration-03`** -- [repo-planner task registry](/docs/repo-planner/task-registry) phase **`03`** (vendor `PlanningCockpit`, data adapters, **`REPOPLAN-SHELL-01`**). |
+| `open` | **Shared content surfaces:** align `listen`, `blog`, and `projects` on one reusable shell with per-section mini logos and theme identity -- `documentation-site-09`, section registries below. |
+| `open` | **Planning IA reset:** migrate toward literal section `planning/` folders, roadmap-first living records, and phase-local `planning/plans/` documents instead of top-level implementation-plan drift -- `documentation-site-10`, `repo-planner-integration-01-15`. |
 
 ## References
 

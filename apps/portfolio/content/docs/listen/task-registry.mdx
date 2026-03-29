@@ -13,14 +13,22 @@ repoPath: apps/portfolio/content/docs/listen/task-registry.mdx
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
-| `listen-surface-01-01` | `planned` | **Catalog model:** extend or replace `music.ts` with a typed list of **items** where each row is `kind: "track" \| "preset"`, shares **filter facets** (e.g. genre, mood, era, free tags), optional **BandLab** links, and optional **`lockGroup`** (slug) when the row is gated | `-` | types compile; sample rows cover at least one locked track and one locked preset |
-| `listen-surface-01-02` | `planned` | **Discovery UX:** `/listen` uses the same **filter rail + search + sort** behavior as blog/projects (reuse **`ContentIndexClient`** or shared primitives from `blog-discovery-01` / projects index) so the mental model stays one system | `listen-surface-01-01` | manual UX pass in dev; `pnpm run build`, `pnpm run lint` |
-| `listen-surface-01-03` | `planned` | **Unlock:** server-verified **shared password per `lockGroup`** (env map or single secret multi-group table — see [decisions](/docs/listen/decisions)); after success, set a **session-scoped cookie** (or equivalent) so embeds and play links work without re-prompting every navigation; locked cards show title/teaser only until unlocked | `listen-surface-01-01` | unlock flow works in dev; secrets not in client bundle |
-| `listen-surface-01-04` | `planned` | **IA:** register **`listen`** in docs section meta; ensure **nav / footer** point at `/listen` where appropriate; optional command-palette scope for Listen hits | `listen-surface-01-02` | `pnpm run build` |
-| `listen-surface-01-05` | `planned` | **Route conventions:** update [route conventions](/docs/documentation/route-conventions) with **`/listen`** as an explicit **top-level content index** (alongside blog/projects), not an `/apps/*` tool; add redirect note only if a second path is introduced later | `listen-surface-01-04` | doc reviewed |
+| `listen-surface-01-01` | `done` | **Catalog model:** `listen-catalog.ts` -- rows are **`catalogKind: "track" \| "preset"`** with genre, mood, era, BandLab URLs, optional **`lockGroup`**; `music.ts` exposes **public tracks only** for the home section | `-` | `pnpm run build` |
+| `listen-surface-01-02` | `done` | **Discovery UX:** **`ListenIndexClient`** on `/listen` -- sidebar filters (type, genre, mood, era, tags), search, sort (newest / oldest / title), mobile sheet; uses **`filterDiscoveryItems`** with **`kind: "listen"`** | `listen-surface-01-01` | `pnpm run build`, `pnpm run lint` |
+| `listen-surface-01-03` | `done` | **Unlock:** **`POST /api/listen/unlock`** + **`LISTEN_LOCK_GROUPS`** JSON; **httpOnly** cookie per group; **`router.refresh()`** after success | `listen-surface-01-01` | secrets server-only; locked rows omit embed / BandLab link until unlocked |
+| `listen-surface-01-04` | `done` | **IA:** command palette + **`/api/content/search`** include Listen hits; nav already had **`/listen`** | `listen-surface-01-02` | `pnpm run build` |
+| `listen-surface-01-05` | `done` | **Route conventions** already list **`/listen`** (prior doc pass) | `listen-surface-01-04` | -- |
 
 ## Later (unscheduled)
 
 | Id | Status | Note |
 | --- | --- | --- |
 | `listen-surface-02-*` | `idea` | optional **`/apps/listen`** only if Listen becomes primarily interactive tooling; v1 stays **`/listen`** per [route-and-urls](/docs/listen/route-and-urls) |
+
+## Phase `listen-surface-02`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `listen-surface-02-01` | `done` | define how Listen uses the shared content-surface shell while keeping a distinct listening-room theme, mini logo, and media-first sidebar treatment | `listen-surface-01-05`, `documentation-site-09-01` | planning docs updated |
+| `listen-surface-02-02` | `done` | apply the Listen identity contract to `/listen` without breaking the shared discovery primitives already used by blog and projects | `listen-surface-02-01` | `pnpm run build`, `pnpm run lint` |
+| `listen-surface-02-03` | `done` | wire Listen into the shared type-to-search / command-palette behavior and animated icon treatment after the shared `documentation-site-09-03` / `09-04` pass | `listen-surface-02-02`, `documentation-site-09-03`, `documentation-site-09-04` | `pnpm run build`, manual listen search smoke |

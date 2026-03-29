@@ -8,6 +8,7 @@ const ROOT = process.cwd();
 const BOOKS_ROOT = path.join(ROOT, 'books');
 const OUT_ROOT = path.join(ROOT, 'apps', 'portfolio', 'public', 'books');
 const REPUB_CLI = path.join(ROOT, 'packages', 'repub-builder', 'dist', 'cli.js');
+const COVER_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp'];
 
 function removeStaleRepubArtifacts(targetDir) {
   if (!fs.existsSync(targetDir)) return;
@@ -55,8 +56,31 @@ function loadBookMeta(bookDir, slug) {
     title: data.title || slug,
     author: data.author || '',
     description: data.description || '',
+    coverImage: typeof data.coverImage === 'string' ? data.coverImage : '',
     epubPlanningDirs,
   };
+}
+
+function resolveCoverAsset(bookDir, outDir, slug, meta) {
+  const requested = typeof meta.coverImage === 'string' ? meta.coverImage.trim() : '';
+  const candidates = [];
+
+  if (requested) {
+    candidates.push(path.resolve(bookDir, requested));
+  }
+
+  for (const ext of COVER_EXTENSIONS) {
+    candidates.push(path.join(bookDir, `cover${ext}`));
+  }
+
+  const source = candidates.find((candidate) => fs.existsSync(candidate));
+  if (!source) return undefined;
+
+  const ext = path.extname(source).toLowerCase() || '.png';
+  const targetName = `cover${ext}`;
+  const targetPath = path.join(outDir, targetName);
+  fs.copyFileSync(source, targetPath);
+  return `/books/${slug}/${targetName}`;
 }
 
 function runRepub(sub, bookDir, outputPath, epubPlanningDirs = []) {
@@ -118,6 +142,7 @@ async function main() {
     const outDir = path.join(OUT_ROOT, slug);
     if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
     removeStaleRepubArtifacts(outDir);
+    const coverImage = resolveCoverAsset(bookDir, outDir, slug, meta);
     const epubPath = path.join(outDir, 'book.epub');
     const hasSourceFiles = hasBookSourceFiles(bookDir);
     const hasEpub = hasSourceFiles
@@ -131,7 +156,10 @@ async function main() {
     manifest.push({
       slug,
       title: meta.title,
+      author: meta.author || undefined,
       description: meta.description || undefined,
+      coverImage,
+      status: hasEpub ? 'available' : 'coming-soon',
       hasEpub: !!hasEpub,
     });
   }

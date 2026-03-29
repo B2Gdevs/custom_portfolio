@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node scripts/build-planning-pack.cjs && concurrently -n books,next -c green,cyan \"node scripts/watch-books-dev.cjs\" \"next dev --webpack\"",
-    "build": "node scripts/build-planning-pack.cjs && next build --webpack",
+    "dev": "node scripts/build-planning-pack.cjs && node scripts/build-planning-embed-packs.cjs && concurrently -n books,next -c green,cyan \"node scripts/watch-books-dev.cjs\" \"next dev --webpack\"",
+    "build": "node scripts/build-planning-pack.cjs && node scripts/build-planning-embed-packs.cjs && next build --webpack",
+    "planning:embed-packs": "node scripts/build-planning-embed-packs.cjs",
     "build:epub": "node scripts/build-epub.cjs",
     "start": "next start",
     "lint": "eslint",

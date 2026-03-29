@@ -11,7 +11,7 @@ order: 4
 
 **Goal**: Basic chat UI with hardcoded dialogue
 
-- [x] App route: `app/apps/dialogue-forge/page.tsx` → **`/apps/dialogue-forge`** (legacy `/dialogue-forge` → 308)
+- [x] App route: `app/apps/dialogue-forge/page.tsx` -> **`/apps/dialogue-forge`** (legacy `/dialogue-forge` -> 308)
 - [ ] Build `ChatInterface` component with message list
 - [ ] Build `MessageBubble` component (AI vs player styling)
 - [ ] Build `ChoiceSelector` component for displaying options
@@ -59,15 +59,15 @@ order: 4
 
 ## Technical Decisions
 
-### Why Not a Visual Graph Editor?
+### Why Not a Visual Graph Editor*
 
 The core insight is that dialogue *feels* different when you read it vs when you draw it. By forcing the creator to experience the dialogue, we ensure better pacing and more natural conversations.
 
-### Why localStorage?
+### Why localStorage*
 
 Simplicity. This is a side project meant for rapid prototyping. Cloud storage can come later if needed.
 
-### Why in the Portfolio Codebase?
+### Why in the Portfolio Codebase*
 
 - Shared styling and components
 - Easy to showcase as a project

@@ -1,10 +1,17 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { ExternalLink, FileCog } from 'lucide-react';
+import {
+  builtinEmbedPackToPlanningPack,
+  PlanningCockpitDashboard,
+  RepoPlannerWorkspaceShell,
+} from 'repo-planner/host';
 import type { BookPlanningContext } from '@/lib/repo-planner/book-planning-context';
-import { PlanningCockpitDashboard } from '@/components/repo-planner/PlanningCockpitDashboard';
-import { RepoPlannerWorkspaceShell } from '@/components/repo-planner/RepoPlannerWorkspaceShell';
+import type { BuiltinEmbedPacksPayload } from 'repo-planner/planning-pack';
+import type { PlanningPack } from '@/lib/repo-planner-workspace-storage';
+import { readerAppHref } from '@/lib/reader-routes';
 
 function EmbeddedCockpitPlaceholder() {
   return (
@@ -14,8 +21,9 @@ function EmbeddedCockpitPlaceholder() {
         <h2 className="mt-3 text-2xl font-semibold text-white">Live repository pane</h2>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">
           Planning APIs for this monorepo (<code className="rounded bg-black/30 px-1">/api/planning-state</code>, etc.)
-          power the dashboard when <strong className="text-slate-200">This repository</strong> is selected. Upload packs
-          and export JSON from the left rail — that logic lives in the cockpit client, not the shell.
+          power the dashboard when <strong className="text-slate-200">This repository</strong> is selected. Use the
+          sidebar to open <strong className="text-slate-200">built-in packs</strong> (init + docs) or add files from
+          disk.
         </p>
       </div>
 
@@ -26,8 +34,7 @@ function EmbeddedCockpitPlaceholder() {
           </div>
           <h3 className="text-base font-semibold text-white">Modular packs</h3>
           <p className="mt-2 text-sm leading-6 text-slate-300">
-            Add planning files from disk into a browser-only workspace; associate the same flow with EPUBs via the
-            reader strip (modal opens this dashboard + optional embedded reader).
+            Built-in packs are generated at dev/build time; uploaded packs stay in the browser until you export JSON.
           </p>
         </div>
 
@@ -44,13 +51,13 @@ function EmbeddedCockpitPlaceholder() {
 
       <div className="flex flex-wrap gap-3">
         <Link
-          href="/docs/repo-planner/integration"
+          href="/docs/repo-planner/decisions"
           className="inline-flex items-center rounded-full border border-slate-700 px-4 py-2 text-sm font-medium text-white transition hover:border-amber-300 hover:text-amber-200"
         >
-          Read integration notes
+          Read embed decisions
         </Link>
         <Link
-          href="/docs/apps/repo-planner"
+          href="/apps/repo-planner"
           className="inline-flex items-center rounded-full border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:text-white"
         >
           Open full Apps page
@@ -69,9 +76,32 @@ function EmbeddedCockpitPlaceholder() {
 }
 
 export function RepoPlannerCockpitClient({ bookContext }: { bookContext?: BookPlanningContext }) {
+  const [builtinPacks, setBuiltinPacks] = useState<PlanningPack[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/planning-embed/builtin-packs.json')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((payload: BuiltinEmbedPacksPayload | null) => {
+        if (cancelled || !payload?.packs?.length) return;
+        setBuiltinPacks(payload.packs.map((p) => builtinEmbedPackToPlanningPack(p)));
+      })
+      .catch(() => {
+        /* optional asset — cockpit still works */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <RepoPlannerWorkspaceShell className="p-3 sm:p-4">
-      <PlanningCockpitDashboard livePane={<EmbeddedCockpitPlaceholder />} bookContext={bookContext} />
+      <PlanningCockpitDashboard
+        livePane={<EmbeddedCockpitPlaceholder />}
+        bookContext={bookContext}
+        readerAppHref={({ book }) => readerAppHref({ book })}
+        builtinPacks={builtinPacks}
+      />
     </RepoPlannerWorkspaceShell>
   );
 }

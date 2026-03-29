@@ -2,12 +2,12 @@
 title: Task Registry
 description: RepoPlanner alignment tasks for the portfolio monorepo.
 date: "2026-03-29"
-updated: "2026-03-30"
+updated: "2026-03-28"
 order: 5
 repoPath: apps/portfolio/content/docs/repo-planner/task-registry.mdx
 ---
 
-# Repo Planner — Task Registry
+# Repo Planner -- Task Registry
 
 ## Phase `repo-planner-integration-01`
 
@@ -17,15 +17,17 @@ repoPath: apps/portfolio/content/docs/repo-planner/task-registry.mdx
 | `repo-planner-integration-01-02` | `done` | Root `pnpm planning*` scripts + CLI deps at workspace root | `01-01` | `pnpm planning -- --help` |
 | `repo-planner-integration-01-03` | `done` | Docs section `repo-planner/` + [Global planning guide](/docs/global/global-planning) IA | `01-02` | `pnpm run build` |
 | `repo-planner-integration-01-04` | `done` | Bootstrap RepoPlanner XML via `pnpm planning:init` (alongside existing `.md`) | `01-02` | `.planning/STATE.xml` exists |
-| `repo-planner-integration-01-05` | `planned` | Migrate narrative requirements from MD → XML or generated MD; update `AGENTS.md` read order | `01-04` | agents use one canonical path |
+| `repo-planner-integration-01-05` | `planned` | Migrate narrative requirements from MD -> XML or generated MD; update `AGENTS.md` read order | `01-04` | agents use one canonical path |
 | `repo-planner-integration-01-06` | `planned` | Optional read-only upload viewer for pack / `.planning` zip (ephemeral) | `01-03` | no prod write path |
-| `repo-planner-integration-01-07` | `done` | Docs **Apps** hub (`/docs/apps`) + sidebar link; integration page documents gaps and file roles | `01-03` | `/docs/apps` renders |
+| `repo-planner-integration-01-07` | `done` | Docs **Apps** hub (`/docs/apps`) + sidebar link; section docs describe scripts, embed, file roles | `01-03` | `/docs/apps` renders |
 | `repo-planner-integration-01-08` | `planned` | Slim `.planning` to pack parity; move template/prose noise to `AGENTS.md` / skills / docs MDX per CLI minimum | `01-04` | inventory vs `loop-cli` init |
-| `repo-planner-integration-01-09` | `done` | **`/docs/apps/repo-planner`** embeds `PlanningCockpit`; `repo-planner` `file:` dep + `transpilePackages`; `planning:init:force`; docs + `AGENTS` updated | `01-07` | page + build typecheck for package |
+| `repo-planner-integration-01-09` | `done` | **`repo-planner`** `file:` dep + `transpilePackages`; embedded page mounts cockpit workspace + placeholder live pane; full vendor **`PlanningCockpit`** body + **shell upstreaming** → **`repo-planner-integration-03`** -- [Decisions](/docs/repo-planner/decisions) **`REPOPLAN-SHELL-01`** | `01-07` | page + build typecheck for package |
 | `repo-planner-integration-01-10` | `planned` | **Upstream RepoPlanner:** client-side edit model + export; optional zip ingest; deprecate or gate **`planning-edits/apply`** for embeds; improve **`install-routes.mjs`** for `apps/portfolio` layout | `01-09` | design note in upstream + portfolio bump |
-| `repo-planner-integration-01-11` | `done` | **Bare `.planning` reset:** archive to `.planning-archive/2026-03-29-pre-barebones/`; default **`pnpm planning:init`** = **`--minimal`**; vendor **`--minimal`** + **`migratePhaseMarkdown`** tolerates missing `phases/` | `01-09` | `pnpm planning snapshot` + checklist pass |
-| `repo-planner-integration-01-12` | `done` | **Cockpit workspace (MVP):** **This repository** (live GET bundle) + **Add pack from files** (.md/.xml/.toml), **`localStorage`** persistence, **Export workspace JSON** — see [Apps → Repo Planner](/docs/apps/repo-planner). True multi-root server projects + zip ingest remain future. | `01-09` | build + manual smoke |
-| `repo-planner-integration-01-13` | `planned` | **Formal CLI + distribution:** implement [documentation-site-07-01](/docs/documentation/task-registry) — upstream **`loop-cli.mjs`** help/argv/version, optional rich TTY output, and a **`bin`** / **publish** story so **`npx`** and **global install** work; keep **`scripts/run-planning-cli.mjs`** as a thin wrapper or merge env defaults into the published entry | `01-02` | `npx` / `pnpm planning` doc matrix in [integration](/docs/repo-planner/integration) |
+| `repo-planner-integration-01-11` | `done` | **Bare `.planning` reset:** prior tree was archived under **`.planning-archive/2026-03-29-pre-barebones/`** (folder **removed** after doc migration); default **`pnpm planning:init`** = **`--minimal`**; vendor **`--minimal`** + **`migratePhaseMarkdown`** tolerates missing `phases/` | `01-09` | `pnpm planning snapshot` + checklist pass |
+| `repo-planner-integration-01-12` | `done` | **Interim cockpit workspace (MVP) in the host app:** **This repository** (live GET bundle) + **Add pack from files** (.md/.xml/.toml), **`localStorage`**, **Export workspace JSON** -- [Apps → Repo Planner](/apps/repo-planner). **Not the long-term owner** of chrome: migrate to **`repo-planner`** export per **`REPOPLAN-SHELL-01`**. True multi-root server projects + zip ingest remain future. | `01-09` | build + manual smoke |
+| `repo-planner-integration-01-14` | `done` | **Cockpit crash fix:** harden **`parseWorkspaceState`** -- sanitize **`PlanningPack.files`**, drop orphan pack projects, reset active project; defensive **`Array.isArray`** in dashboard. See [errors and attempts](/docs/repo-planner/errors-and-attempts). | `01-12` | `pnpm --filter @portfolio/app test:unit`, manual `/docs/apps/repo-planner` |
+| `repo-planner-integration-01-13` | `planned` | **Formal CLI + distribution:** implement [documentation-site-07-01](/docs/documentation/task-registry) -- upstream **`loop-cli.mjs`** help/argv/version, optional rich TTY output, and a **`bin`** / **publish** story so **`npx`** and **global install** work; keep **`scripts/run-planning-cli.mjs`** as a thin wrapper or merge env defaults into the published entry | `01-02` | `pnpm dlx` / `pnpm planning` doc matrix in [getting started](/docs/repo-planner/getting-started) + [decisions](/docs/repo-planner/decisions) **`REPOPLAN-CLI-01`** |
+| `repo-planner-integration-01-15` | `planned` | align RepoPlanner docs and workflow with the roadmap-first loop: section `planning/` folders, phase-local `planning/plans/`, and de-emphasis of standalone implementation-plan files as living records | `01-03`, `01-11` | docs alignment across global/docs/repo-planner; no conflicting guidance |
 
 ## Phase `repo-planner-integration-02` (publishable embed + host contracts)
 
@@ -33,9 +35,85 @@ repoPath: apps/portfolio/content/docs/repo-planner/task-registry.mdx
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
-| `repo-planner-integration-02-01` | `planned` | **INSTALL / consumer doc:** required **Tailwind content** paths, **`transpilePackages`**, **`cn`**, shadcn alias expectations; optional **`exports`** map for subpaths | `01-09` | doc PR upstream + link from integration |
-| `repo-planner-integration-02-02` | `planned` | **Decouple** portfolio-only types from cockpit entry: **`BookPlanningContext`** / modal payload types live in **host** or **repub-builder**, passed as **props** — cockpit stays agnostic | `02-01` | typecheck embed + modal |
-| `repo-planner-integration-02-03` | `planned` | **npm publish** story (scope, `peerDependencies`, version cadence) — coordinate with **`documentation-site-07`** | `01-13`, `02-01` | publish dry-run or tarball |
+| `repo-planner-integration-02-01` | `planned` | **INSTALL / consumer doc:** required **Tailwind content** paths, **`transpilePackages`**, **`cn`**, shadcn alias expectations; optional **`exports`** map for subpaths | `01-09` | doc PR upstream + link from [getting started](/docs/repo-planner/getting-started) |
+| `repo-planner-integration-02-02` | `planned` | **Decouple** portfolio-only types from cockpit entry: **`BookPlanningContext`** / modal payload types live in **host** or **repub-builder**, passed as **props** -- cockpit stays agnostic | `02-01` | typecheck embed + modal |
+| `repo-planner-integration-02-03` | `planned` | **npm publish** story (scope, `peerDependencies`, version cadence) -- coordinate with **`documentation-site-07`** | `01-13`, `02-01` | publish dry-run or tarball |
+
+## Phase `repo-planner-integration-03` (vendor cockpit body + data plane + shell upstream)
+
+**Problem today:** [`/apps/repo-planner`](/apps/repo-planner) uses a **placeholder** live pane; workspace chrome is still **host-owned** (`PlanningCockpitDashboard` / `RepoPlannerWorkspaceShell`) while **`REPOPLAN-SHELL-01`** says **upload / pack switcher / export / init downloads** belong in the **`repo-planner`** package long term.
+
+**Desired:**
+
+- **Vendor `PlanningCockpit`** depth (metrics, %, charts, tasks, phases, state) composed in the live pane -- source: [`planning-cockpit.tsx`](https://github.com/MagicbornStudios/RepoPlanner/blob/main/components/organisms/planning-cockpit.tsx).
+- **Host-mountable workspace shell** exported from **`repo-planner`** so the portfolio page is a thin **import + layout** (interim host shell until then).
+- **Display** can use **parsed XML / on-disk reports** where possible so the UI is not defined by CLI spawn per poll for **read**; **writes** stay gated ([decisions](/docs/repo-planner/decisions) **`REPOPLAN-EMBED-01`**).
+- **Pack mode** feeds the **same bundle shape** as live repo (parse `TASK-REGISTRY.xml`, `STATE.xml`, `ROADMAP.xml`, report `.md` in pack).
+- **Init template downloads** + **planning pack modal** copy per **`REPOPLAN-PACK-MODAL-01`**.
+
+### Data contract (conceptual)
+
+Vendor UI expects a **bundle** (see `Bundle` in `planning-cockpit.tsx`): `snapshot`, `openTasks`, `openQuestions`, `context.summary.phases`, `agentsWithTasks`, etc. Host implements something like **`CockpitDataSource`**: `getBundle()`, `getMetrics()`, `getLatestReport()`, polling policy.
+
+| Source | `getBundle()` | `getMetrics()` | Report markdown |
+| --- | --- | --- | --- |
+| **Live monorepo** | `/api/planning-state` (today: CLI JSON) → later XML reader route | `/api/planning-metrics` | `/api/planning-reports/latest` |
+| **Uploaded pack** | Client or **`POST /api/planning-pack/parse`** → same JSON shape | Synthetic series or honest empty | First `*.md` in pack or summary from XML |
+
+**Open:** pack metrics placeholder vs counts-from-XML only → task **`03-04`**.
+
+### Feature parity (track against vendor `planning-cockpit.tsx`)
+
+| Area | Feature | Live repo | Pack |
+| --- | --- | --- | --- |
+| Overview | Completion %, counts, open questions, agents | target | target (XML counts) |
+| Overview | Metrics line chart | target | partial / empty |
+| Work | Tasks, phases, open questions | target | target |
+| State | Snapshot, agents with tasks | target | target |
+| Tools | Terminal (CLI POST) | only when server writes allowed | hide or N/A |
+| Chat | Planning chat | stub / hidden | same |
+
+### Phase exit gates
+
+| Gate | Check |
+| --- | --- |
+| **UX** | **This repository** shows **tabs + metrics + tasks** (not placeholder) |
+| **Pack** | Uploaded pack shows **consistent cockpit** or documented degraded mode |
+| **Shell** | Workspace chrome **imported from `repo-planner`** OR documented interim with issue link |
+| **Build** | `pnpm run build` + `pnpm run lint` |
+| **Docs** | Rows below marked **`done`** where applicable |
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `repo-planner-integration-03-00` | `done` | **Package:** **`repo-planner/host`** exports **`PlanningCockpitDashboard`** + **`RepoPlannerWorkspaceShell`** (+ `planning.css`); portfolio embed imports `repo-planner/host` — chrome lives in submodule | `01-12` | `pnpm run build`; cockpit page loads |
+| `repo-planner-integration-03-01` | `planned` | Define **`CockpitDataSource`** (or equivalent) in host **`lib/repo-planner/`** (or `cockpit-data/`): `getBundle`, `getMetrics`, `getLatestReport`, polling; map to vendor **`Bundle`** / metrics types -- **this section** + TypeScript types are the doc surface (no separate plan page) | `-` | `tsc`; adapter interfaces committed |
+| `repo-planner-integration-03-02` | `planned` | **Compose** vendor **`PlanningCockpit`** in live pane for **This repository**: upstream **`fetch` injection** or host wrapper; preserve layout padding | `03-01`, `01-09` | manual `/apps/repo-planner` shows tabs + charts |
+| `repo-planner-integration-03-03` | `planned` | **Read path:** **`GET`** builds **same bundle JSON** from **`.planning/*.xml`** (+ optional `.planning-reports`) **without** CLI spawn every poll | `03-01` | parity smoke vs `/api/planning-state` |
+| `repo-planner-integration-03-04` | `planned` | **Pack mode:** parse uploaded **`TASK-REGISTRY.xml` / `STATE.xml` / `ROADMAP.xml`** (+ report md) into bundle + metrics; honest empty states for history | `03-01`, `01-12` | switch project → cockpit reflects pack |
+| `repo-planner-integration-03-05` | `planned` | **Init templates:** downloadable **minimal** tree (same intent as **`pnpm planning:init --minimal`**) via static assets or **`/api/planning-templates/*`** from documented **`vendor/repo-planner`** paths | `01-11` | download + unzip matches [getting started](/docs/repo-planner/getting-started) |
+| `repo-planner-integration-03-06` | `planned` | **Planning pack modal:** RepoPlanner-aligned copy; link **[RepoPlanner GitHub](https://github.com/MagicbornStudios/RepoPlanner)** + [decisions](/docs/repo-planner/decisions) **`REPOPLAN-PACK-MODAL-01`** / [getting started](/docs/repo-planner/getting-started) | `01-03` | modal copy review |
+| `repo-planner-integration-03-07` | `planned` | **Upstream:** refactor **`planning-cockpit.tsx`** for **`dataSource` / `apiBase`** props; fold with **`03-00`** where possible | `03-02` | upstream issue or PR linked from [planning-docs](/docs/repo-planner/planning-docs) |
+
+### Modularity sequence (optional upstream PR first)
+
+| Step | Outcome |
+| --- | --- |
+| Vendor: **`usePlanningCockpitData({ fetchState, … })`** or **`dataSource` props | URLs not hard-coded to `/api/planning-state` only |
+| Host: wrapper passes existing routes | live row works |
+| Host: pack adapter over **`WorkspaceStateV1`** | pack tab works |
+| Replace placeholder | **`active.kind === 'live'`** uses composed cockpit |
+
+Until upstream accepts injection, a **thin fork** of data-fetch lines only is acceptable if **`file:`** dep makes merges easy.
+
+## Phase `repo-planner-integration-04` (build-time built-in packs + gallery ownership)
+
+**Goal:** Preload **init** + **docs** (and future) packs from a static JSON built at dev/build; **`repo-planner`** owns **`PlanningPackGallery`** and pack types; the portfolio owns **modal chrome** only. Aligns with **`REPOPLAN-PACK-MODAL-01`**.
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `repo-planner-integration-04-01` | `done` | Root **`pnpm planning:embed-packs`** (**`planning pack embed-build`**) + thin **`build-planning-embed-packs.cjs`** (same shared **`embed-builtin-packs-build.mjs`**) → **`public/planning-embed/builtin-packs.json`**; wired after **`build-planning-pack.cjs`** on **`dev`** / **`build`** | `01-12` | `pnpm planning:embed-packs`; JSON present after build |
+| `repo-planner-integration-04-02` | `done` | **`repo-planner`** exports **`PlanningPackGallery`** via **`repo-planner/planning-pack`**; **`builtinEmbedPackToPlanningPack`**; workspace **`surfaceBuiltinPackId`** + cockpit **`builtinPacks`** sidebar; client modules that re-export through barrels carry **`"use client"`** where needed for Next Flight | `04-01`, `02-01` (partial) | `pnpm run build`; modal + cockpit show built-ins |
+| `repo-planner-integration-04-03` | `done` | **`loop-cli`** **`pack embed-build`** + shared **`scripts/lib/embed-builtin-packs-build.mjs`** (package export **`repo-planner/embed-builtin-packs-build`**); portfolio script imports the module | `01-13`, `04-01` | `pnpm planning pack embed-build --help`; `pnpm planning:embed-packs` |
 
 ## Registry rules
 

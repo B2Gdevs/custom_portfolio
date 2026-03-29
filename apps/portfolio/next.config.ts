@@ -23,8 +23,8 @@ const nextConfig: NextConfig = {
   transpilePackages: ['repo-planner'],
   async redirects() {
     return [
-      { source: '/docs/tools', destination: '/docs/apps', permanent: false },
-      { source: '/docs/tools/:path*', destination: '/docs/apps/:path*', permanent: false },
+      { source: '/docs/tools', destination: '/apps', permanent: false },
+      { source: '/docs/tools/:path*', destination: '/apps/:path*', permanent: false },
       { source: '/dialogue-forge', destination: '/apps/dialogue-forge', permanent: true },
       { source: '/books/upload/read', destination: '/apps/reader', permanent: true },
       { source: '/books/:bookSlug/read', destination: '/apps/reader?book=:bookSlug', permanent: true },

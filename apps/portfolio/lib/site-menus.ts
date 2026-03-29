@@ -70,7 +70,7 @@ export function buildSiteMenus({
       accent: 'from-[#d9b17b]/35 to-transparent',
       items: [
         {
-          label: 'Start Mordred\'s Tale',
+          label: "Start Mordred's Tale",
           description: 'Jump straight into the in-browser reader.',
           href: '/apps/reader?book=mordreds_tale',
           icon: 'book-open',
@@ -104,9 +104,9 @@ export function buildSiteMenus({
           external: true,
         },
         {
-          label: 'Greed 3.0',
-          description: 'Open the second BandLab track page.',
-          href: 'https://www.bandlab.com/track/1637d69f-33d5-f011-819b-6045bd3096b1?revId=1437d69f-33d5-f011-819b-6045bd3096b1',
+          label: "Don't Let Me Be Forgotten",
+          description: 'Open the current public BandLab release.',
+          href: 'https://www.bandlab.com/track/8e892de4-51b7-f011-8196-0022484a3197?revId=8b892de4-51b7-f011-8196-0022484a3197',
           icon: 'radio',
           external: true,
         },
@@ -150,6 +150,27 @@ export function buildSiteMenus({
           href: 'https://github.com/B2Gdevs',
           icon: 'file-code',
           external: true,
+        },
+      ],
+    },
+    {
+      id: 'docs',
+      label: 'Docs',
+      description: 'Architecture notes, planning records, and section documentation.',
+      icon: 'scroll',
+      accent: 'from-[#8a7aa8]/24 to-transparent',
+      items: [
+        {
+          label: 'Documentation Hub',
+          description: 'Browse the docs tree and planning records.',
+          href: '/docs',
+          icon: 'scroll',
+        },
+        {
+          label: 'Apps Hub',
+          description: 'Open the interactive tools gallery.',
+          href: '/apps',
+          icon: 'sparkles',
         },
       ],
     },

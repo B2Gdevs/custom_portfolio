@@ -46,3 +46,11 @@ repoPath: apps/portfolio/content/docs/blog/task-registry.mdx
 | --- | --- | --- | --- | --- |
 | `blog-discovery-02-01` | `done` | retrofit the existing blog archive to the literal section headings and top-of-page resource metadata the new shell now expects | `blog-discovery-01-04` | `pnpm run build`, `pnpm run lint` |
 | `blog-discovery-02-02` | `done` | add missing post-level metadata for cleaner search snippets, related resources, and more consistent archive cards | `blog-discovery-02-01` | `pnpm run build`, `pnpm run lint` |
+
+## Phase `blog-identity-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `blog-identity-01-01` | `done` | define how the blog uses the shared content-surface shell while keeping a recognizably blog-specific theme, mini logo, and sidebar treatment | `blog-discovery-02-02`, `documentation-site-09-01` | planning docs updated |
+| `blog-identity-01-02` | `done` | apply the blog identity contract to the archive and article pages without breaking the shared discovery/detail primitives | `blog-identity-01-01` | `pnpm run build`, `pnpm run lint` |
+| `blog-identity-01-03` | `done` | wire the blog surface into the shared type-to-search / command-palette behavior and section-specific animated icon treatment once the shared `documentation-site-09-03` / `09-04` work lands | `blog-identity-01-02`, `documentation-site-09-03`, `documentation-site-09-04` | `pnpm run build`, manual article/archive search smoke |

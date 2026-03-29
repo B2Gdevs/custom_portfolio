@@ -1,6 +1,6 @@
 ---
 title: Planning Docs
-description: Planning loop records for the Listen surface — tracks, BandLab presets, filters, and simple lock groups.
+description: Planning loop records for the Listen surface -- tracks, BandLab presets, filters, and simple lock groups.
 date: "2026-03-28"
 updated: "2026-03-28"
 order: 1
@@ -34,13 +34,21 @@ repoPath: apps/portfolio/content/docs/listen/planning-docs.mdx
 | `phase-id` | `listen-surface-<phase>` |
 | `task-id` | `listen-surface-<phase>-<task>` |
 
+## Streams
+
+| Stream | Purpose |
+| --- | --- |
+| `surface` | catalog/discovery UX, unlock flow, and shared shell behavior |
+| `identity` | listen-specific theme treatment, mini logo, and orientation cues within the shared content-surface system |
+
 ## Code anchors (today)
 
 | Area | Path |
 | --- | --- |
 | Public page | `apps/portfolio/app/listen/page.tsx` |
-| Track data | `apps/portfolio/lib/music.ts` (`MusicTrack`, `getMusicTracks`) |
-| Discovery pattern (blog / projects) | `ContentIndexClient`, `getAllContentEntries`, `toDiscoveryItem` |
+| Catalog | `apps/portfolio/lib/listen-catalog.ts` (`getListenCatalog`); public home tracks via `apps/portfolio/lib/music.ts` (`getMusicTracks`) |
+| Discovery UI | `ListenIndexClient`, `lib/content-discovery` (kind `listen`) |
+| Unlock | `POST /api/listen/unlock`, `LISTEN_LOCK_GROUPS`, `lib/listen-unlock.ts` |
 
 ## Related
 
