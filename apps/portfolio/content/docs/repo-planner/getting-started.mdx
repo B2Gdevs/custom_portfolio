@@ -17,7 +17,7 @@ You do not have to use this monorepo's layout to benefit from a **planning loop*
 
 - **XML-shaped** templates under `.planning/templates/` (bundled inside the submodule when you run **full** init).
 - **`loop-cli.mjs`** — snapshot, task updates, reports, `setup checklist`, `init` for greenfield bootstrap.
-- **Cockpit UI** — embeddable in Next (see upstream **INSTALL.md**). **Policy** for this site: [decisions](/docs/repo-planner/decisions).
+- **Cockpit UI** — embeddable in Next (see upstream **INSTALL.md**). **Policy** for this site: [decisions](/docs/repo-planner/planning/decisions).
 
 ## Submodule
 
@@ -38,7 +38,7 @@ Defined in root **`package.json`**:
 | Script | Purpose |
 | --- | --- |
 | `pnpm planning` | **`scripts/run-planning-cli.mjs`** → `loop-cli.mjs` (sets **`REPOPLANNER_REPORTS_DIR=.planning-reports`** unless overridden) |
-| `pnpm planning:init` | `init --minimal --no-agents-md` — **`.planning/`** = XML + **`planning-config.toml`** + **`.planning/AGENTS.md`**; may create repo-root **`REQUIREMENTS.md`** stub if missing; **canonical** narrative = **[documentation/requirements](/docs/documentation/requirements)** + **[documentation/state](/docs/documentation/state)**; **no** `IMPLEMENTATION_PLAN.md`; **no** `.planning/templates`, `phases/`, `reports/`, narrative `.md` under `.planning/` |
+| `pnpm planning:init` | `init --minimal --no-agents-md` — **`.planning/`** = XML + **`planning-config.toml`** + **`.planning/AGENTS.md`**; may create repo-root **`REQUIREMENTS.md`** stub if missing; **canonical** narrative = **[documentation/requirements](/docs/documentation/requirements)** + **[documentation/state](/docs/documentation/planning/state)**; **no** `IMPLEMENTATION_PLAN.md`; **no** `.planning/templates`, `phases/`, `reports/`, narrative `.md` under `.planning/` |
 | `pnpm planning:init:force` | Same with `--force` (overwrites bootstrap files in `.planning/`) |
 | `pnpm planning:init:full` | Upstream-style init (`templates/`, `phases/01-greenfield/`, `reports/.gitkeep`, `.planning/README.md`) — use only when you need RepoPlanner templates locally |
 | `pnpm planning:init:full:force` | Full init with `--force` |
@@ -59,7 +59,7 @@ pnpm planning snapshot
 pnpm planning:ui
 ```
 
-Pass **`--root <path>`** or set **`REPOPLANNER_PROJECT_ROOT`** if the CLI must resolve a different project root than **`process.cwd()`**. Set **`REPOPLANNER_REPORTS_DIR`** (relative to project root or absolute) for **`usage.jsonl`** / report **`latest.md`** — this monorepo defaults to **`.planning-reports/`** via **`scripts/run-planning-cli.mjs`** and **`next.config.ts`**. See [decisions](/docs/repo-planner/decisions) **`REPOPLAN-REPORTS-01`**.
+Pass **`--root <path>`** or set **`REPOPLANNER_PROJECT_ROOT`** if the CLI must resolve a different project root than **`process.cwd()`**. Set **`REPOPLANNER_REPORTS_DIR`** (relative to project root or absolute) for **`usage.jsonl`** / report **`latest.md`** — this monorepo defaults to **`.planning-reports/`** via **`scripts/run-planning-cli.mjs`** and **`next.config.ts`**. See [decisions](/docs/repo-planner/planning/decisions) **`REPOPLAN-REPORTS-01`**.
 
 **Brownfield / minimal bootstrap:**
 
@@ -72,7 +72,7 @@ Creates **`.planning/`** for **XML** + **`planning-config.toml`** + **`.planning
 ## MDX section docs vs XML
 
 - **Public narrative + section registries:** `apps/portfolio/content/docs/<section>/planning/*.mdx` for planning records, with non-planning reference docs beside that folder.
-- **Structured agent loop (RepoPlanner):** `.planning/*.xml` + `planning-config.toml` after **`pnpm planning:init`**. **Monorepo narrative + cross-cutting queue:** **[documentation/requirements](/docs/documentation/requirements)** and **[documentation/state](/docs/documentation/state)**.
+- **Structured agent loop (RepoPlanner):** `.planning/*.xml` + `planning-config.toml` after **`pnpm planning:init`**. **Monorepo narrative + cross-cutting queue:** **[documentation/requirements](/docs/documentation/requirements)** and **[documentation/state](/docs/documentation/planning/state)**.
 
 ## Planning files: what to use when
 
@@ -81,7 +81,7 @@ Creates **`.planning/`** for **XML** + **`planning-config.toml`** + **`.planning
 | **`ROADMAP.xml`** | Product / theme timeline — milestones and phases as the cockpit expects. |
 | **`TASK-REGISTRY.xml`** | Tasks — goals, keywords, verification commands, status. |
 | **`STATE.xml`** | Pointer — `current-phase`, `next-action`, optional agent registry. |
-| **[documentation/requirements](/docs/documentation/requirements)** + **[documentation/state](/docs/documentation/state)** | **Monorepo narrative + cross-cutting queue** (canonical). Repo-root **`REQUIREMENTS.md`** is a short pointer only. |
+| **[documentation/requirements](/docs/documentation/requirements)** + **[documentation/state](/docs/documentation/planning/state)** | **Monorepo narrative + cross-cutting queue** (canonical). Repo-root **`REQUIREMENTS.md`** is a short pointer only. |
 | **`.planning-reports/`** | **Local only** — CLI usage + generated reports when **`REPOPLANNER_REPORTS_DIR`** / root **`pnpm`** scripts are used. |
 
 **Phases folder** exists only after **`pnpm planning:init:full`**. Default **minimal** layout has **no** `.planning/phases/`.
@@ -98,7 +98,7 @@ Creates **`.planning/`** for **XML** + **`planning-config.toml`** + **`.planning
 
 **Local-only:** **`.planning-reports/`** (gitignored). **Former archive:** **`.planning-archive/`** was removed after migration; see **[documentation requirements](/docs/documentation/requirements)** (**Planning archive** section).
 
-**What went wrong in an early `--minimal` pass** (fixed in this repo): narrative **`REQUIREMENTS.md` / `IMPLEMENTATION_PLAN.md`** inside **`.planning/`** broke the bare tree; **`usage.jsonl`** recreated **`reports/`**. Mitigations: **`runPlanningInitMinimal`**, **`REPOPLANNER_REPORTS_DIR`**, **`run-planning-cli.mjs`** defaults — detail in [errors and attempts](/docs/repo-planner/errors-and-attempts).
+**What went wrong in an early `--minimal` pass** (fixed in this repo): narrative **`REQUIREMENTS.md` / `IMPLEMENTATION_PLAN.md`** inside **`.planning/`** broke the bare tree; **`usage.jsonl`** recreated **`reports/`**. Mitigations: **`runPlanningInitMinimal`**, **`REPOPLANNER_REPORTS_DIR`**, **`run-planning-cli.mjs`** defaults — detail in [errors and attempts](/docs/repo-planner/planning/errors-and-attempts).
 
 ## Standalone cockpit (operators)
 
@@ -109,7 +109,7 @@ Creates **`.planning/`** for **XML** + **`planning-config.toml`** + **`.planning
 
 ## Embedded cockpit on this site
 
-[`/apps/repo-planner`](/apps/repo-planner) mounts the vendored UI with **read-only server** defaults: **GET** routes may read committed **`.planning/`**; **`POST /api/planning-edits/apply`** and **`POST /api/planning-cli/run`** return **403** unless **`PLANNING_COCKPIT_ALLOW_SERVER_WRITES=1`**. No portfolio-hosted planning LLM. **Workspace chrome** (pack upload, project switcher, export) is **interim host code** today; target is an export from **`repo-planner`** — [Decisions](/docs/repo-planner/decisions) **`REPOPLAN-SHELL-01`**, **`REPOPLAN-EMBED-01`**.
+[`/apps/repo-planner`](/apps/repo-planner) mounts the vendored UI with **read-only server** defaults: **GET** routes may read committed **`.planning/`**; **`POST /api/planning-edits/apply`** and **`POST /api/planning-cli/run`** return **403** unless **`PLANNING_COCKPIT_ALLOW_SERVER_WRITES=1`**. No portfolio-hosted planning LLM. **Workspace chrome** (pack upload, project switcher, export) is **interim host code** today; target is an export from **`repo-planner`** — [Decisions](/docs/repo-planner/planning/decisions) **`REPOPLAN-SHELL-01`**, **`REPOPLAN-EMBED-01`**.
 
 | Piece | Location |
 | --- | --- |
@@ -119,7 +119,7 @@ Creates **`.planning/`** for **XML** + **`planning-config.toml`** + **`.planning
 | Transpile + env | `next.config.ts` — `transpilePackages`, **`REPOPLANNER_PROJECT_ROOT`**, **`REPOPLANNER_REPORTS_DIR`** |
 | APIs | `app/api/planning-*` + `lib/repo-planner/` |
 
-Full **code map** and production notes: [Planning docs — Host embed](/docs/repo-planner/planning-docs#host-embed-on-this-site).
+Full **code map** and production notes: [Planning docs — Host embed](/docs/repo-planner/planning/planning-docs#host-embed-on-this-site).
 
 ### Gaps snapshot
 
@@ -128,15 +128,15 @@ Full **code map** and production notes: [Planning docs — Host embed](/docs/rep
 | **CLI in this repo** | **Done** — root `pnpm planning*`; **planned** Ink + **`pnpm dlx`** + publish: **`documentation-site-07-01`**, **`repo-planner-integration-01-13`**. |
 | **XML bootstrap** | **Done** — **`pnpm planning:init`** minimal; **`planning:init:full`** for upstream templates. |
 | **Upstream `web/` in submodule** | **Optional** — use embedded page or standalone clone with **`REPOPLANNER_PROJECT_ROOT`**. |
-| **Pack parity (site vs RepoPlanner)** | Related but not identical until aligned — see [task registry](/docs/repo-planner/task-registry). |
+| **Pack parity (site vs RepoPlanner)** | Related but not identical until aligned — see [task registry](/docs/repo-planner/planning/task-registry). |
 
 ## Planned: formal CLI (`pnpm dlx` first, publish later)
 
-**Target:** two CLIs — **RepoPlanner** (submodule) and **`repub`** — with **`pnpm dlx`** docs first. Decisions: **[documentation/requirements](/docs/documentation/requirements)**; tasks: **`documentation-site-07-01`**, **`repo-planner-integration-01-13`** — [documentation task registry](/docs/documentation/task-registry), [repo-planner task registry](/docs/repo-planner/task-registry).
+**Target:** two CLIs — **RepoPlanner** (submodule) and **`repub`** — with **`pnpm dlx`** docs first. Decisions: **[documentation/requirements](/docs/documentation/requirements)**; tasks: **`documentation-site-07-01`**, **`repo-planner-integration-01-13`** — [documentation task registry](/docs/documentation/planning/task-registry), [repo-planner task registry](/docs/repo-planner/planning/task-registry).
 
 ## Further reading
 
 - Upstream **[INSTALL.md](https://github.com/MagicbornStudios/RepoPlanner/blob/main/INSTALL.md)** (path aliases, CSS tokens).
 - [Vendoring](/docs/documentation/vendoring) — submodule commands.
-- [Planning docs index](/docs/repo-planner/planning-docs) — section loop and host embed.
-- [Decisions](/docs/repo-planner/decisions) — embed and shell boundaries.
+- [Planning docs index](/docs/repo-planner/planning/planning-docs) — section loop and host embed.
+- [Decisions](/docs/repo-planner/planning/decisions) — embed and shell boundaries.

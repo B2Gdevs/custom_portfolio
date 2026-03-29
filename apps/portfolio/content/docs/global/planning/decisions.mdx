@@ -1,0 +1,21 @@
+---
+title: Decisions
+description: Stable decisions for the Global docs section and repo-wide planning IA.
+date: "2026-03-28"
+updated: "2026-03-28"
+order: 4
+repoPath: apps/portfolio/content/docs/global/planning/decisions.mdx
+taskPhase: global-site-01
+---
+
+# Decisions
+
+| Id | Status | Decision | Impact |
+| --- | --- | --- | --- |
+| `global-site-dec-01` | `accepted` | **Global planning guide** (`global-planning.mdx`) is a **reference** doc, not part of the collapsed **planning** subtree. The planning loop for this section lives in **planning-docs** -> **state** -> **task-registry** -> **decisions**, same as Books, Documentation, etc. | Sidebar: `global/planning/*.mdx` vs `global-planning.mdx` as sibling file; `isPlanningDocSlug` excludes `global-planning`. |
+| `global-site-dec-02` | `accepted` | Mermaid diagrams and long-form "human index" prose stay on the **Global planning guide** so **planning-docs** stays a compact registry + loop table. | Agents read **planning-docs** first for structure, **global-planning** for diagrams and id grammar. |
+
+## References
+
+- [Planning docs](/docs/global/planning/planning-docs)
+- [Global planning guide](/docs/global/global-planning)

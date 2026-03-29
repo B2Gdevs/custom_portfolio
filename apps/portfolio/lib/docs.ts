@@ -49,27 +49,32 @@ const DOC_SECTION_META: Record<string, DocSectionMeta> = {
     description: 'Planning docs for the docs site itself, including structure, requirements, and section-level improvements.',
     order: 4,
   },
+  projects: {
+    label: 'Projects',
+    description: 'Planning docs for project discovery, showcase structure, and metadata conventions.',
+    order: 5,
+  },
   editor: {
     label: 'Editor',
     description: 'Planning docs for a writing/editor workflow that can compile authored content down to clean EPUB3.',
-    order: 5,
+    order: 6,
   },
   magicborn: {
     label: 'Magicborn',
     description:
       'Worldbuilding and canon dossiers; planned RAG corpus alongside site docs and books planning.',
-    order: 6,
+    order: 7,
   },
   listen: {
     label: 'Listen',
     description:
       'Planning for /listen — tracks, BandLab presets, discovery filters, and simple group-password locks.',
-    order: 7,
+    order: 8,
   },
   'repo-planner': {
     label: 'Repo Planner',
     description: 'Vendored RepoPlanner CLI, submodule, local cockpit policy, and integration tasks.',
-    order: 8,
+    order: 9,
   },
 };
 
@@ -91,7 +96,7 @@ function getSectionMeta(sectionKey: string): DocSectionMeta {
   );
 }
 
-/** Sort order for docs in a section and for files under the virtual `planning/` folder in the file tree. */
+/** Sort order for docs in a section and for files under a section `planning/` folder. */
 export function getDocPriority(slug: string): number {
   const leaf = slug.split('/').pop() || slug;
 
@@ -116,7 +121,7 @@ export function getDocPriority(slug: string): number {
 
 export function isPlanningDocSlug(slug: string): boolean {
   const parts = slug.split('/').filter(Boolean);
-  if (parts[0] === 'books' && parts[1] === 'planning') return true;
+  if (parts[1] === 'planning') return true;
   const leaf = parts[parts.length - 1] || slug;
   return (
     leaf === 'planning-docs' ||

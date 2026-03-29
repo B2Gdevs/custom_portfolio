@@ -5,7 +5,7 @@ date: "2026-03-16"
 tags: ["Portfolio", "Reader", "Books", "Redesign", "Monorepo"]
 links:
   - label: "Books Planning Docs"
-    href: "/docs/books/planning-docs"
+    href: "/docs/books/planning/planning-docs"
     description: "Books, reader, and publishing planning behind the public surface."
   - label: "Documentation Requirements"
     href: "/docs/documentation/requirements"
@@ -19,7 +19,7 @@ We’ve been shifting this site from “developer portfolio first” to somethin
 
 ## Downloads & Resources
 
-- [Books Planning Docs](/docs/books/planning-docs) for the books, reader, and publishing roadmap.
+- [Books Planning Docs](/docs/books/planning/planning-docs) for the books, reader, and publishing roadmap.
 - [Documentation Requirements](/docs/documentation/requirements) for repo-wide scope, section boundaries, and implementation rules.
 
 ## Introduction
@@ -47,7 +47,7 @@ Our design source of truth puts it like this:
 That hierarchy drove everything: the new hero, the “Start reading” CTA, the embedded reader on the home page, the music lane, and the way projects/blog/docs are framed as the **archive**—the workshop behind the creative work—instead of the main event.
 
 <Callout type="tip" title="Planning docs">
-IA, content order, and visual direction live in section planning pages (e.g. [books](/docs/books/planning-docs)). **Monorepo-wide** scope is in [Documentation — Requirements](/docs/documentation/requirements); the **XML loop** is under **`.planning/`** — see root **`AGENTS.md`**.
+IA, content order, and visual direction live in section planning pages (e.g. [books](/docs/books/planning/planning-docs)). **Monorepo-wide** scope is in [Documentation — Requirements](/docs/documentation/requirements); the **XML loop** is under **`.planning/`** — see root **`AGENTS.md`**.
 </Callout>
 
 ---
@@ -137,14 +137,14 @@ That builds the `repub-builder` package, then runs `scripts/build-books.cjs`, wh
 If you want the full requirements and vendoring details, they’re in the planning docs:
 
 <DocLinkCard href="/docs/books/book-structure" title="Book structure" description="Formal manuscript conventions: chapters, metadata, EPUB emission." />
-<DocLinkCard href="/docs/books/state" title="Books section state" description="Current cycle, focus, and next queue for the books pipeline." />
-<DocLinkCard href="/docs/books/planning-docs" title="Books planning docs" description="Planning docs index for the books section." />
+<DocLinkCard href="/docs/books/planning/state" title="Books section state" description="Current cycle, focus, and next queue for the books pipeline." />
+<DocLinkCard href="/docs/books/planning/planning-docs" title="Books planning docs" description="Planning docs index for the books section." />
 
 ---
 
 ## How this repo is structured
 
-The repo is a **monorepo** with a clear place for “what we’re building and why.” **As of March 2026**, agents start at repo-root **`AGENTS.md`**; **monorepo-wide** narrative and cross-cutting queue live in the **Documentation** section ([requirements](/docs/documentation/requirements), [state](/docs/documentation/state)), and **`.planning/`** holds the **RepoPlanner XML** loop (`ROADMAP.xml`, `TASK-REGISTRY.xml`, `STATE.xml`, …). Repo-root **`REQUIREMENTS.md`** is a **stub pointer** — not where long-form scope is edited anymore.
+The repo is a **monorepo** with a clear place for “what we’re building and why.” **As of March 2026**, agents start at repo-root **`AGENTS.md`**; **monorepo-wide** narrative and cross-cutting queue live in the **Documentation** section ([requirements](/docs/documentation/requirements), [state](/docs/documentation/planning/state)), and **`.planning/`** holds the **RepoPlanner XML** loop (`ROADMAP.xml`, `TASK-REGISTRY.xml`, `STATE.xml`, …). Repo-root **`REQUIREMENTS.md`** is a **stub pointer** — not where long-form scope is edited anymore.
 
 ### Top-level layout
 
@@ -187,17 +187,17 @@ repo root
 
 - **`AGENTS.md`** (repo root) — **Start here** for the loop: how **`.planning/`** maps to **`content/docs/<section>/`** (same workflow; XML vs MDX).
 - **`documentation/requirements.mdx`** — **Monorepo scope** narrative (books, reader, AI, CLI direction, etc.).
-- **`documentation/state.mdx`** — **Cross-cutting queue** and documentation-section cycle.
+- **`documentation/planning/state.mdx`** — **Cross-cutting queue** and documentation-section cycle.
 - **`documentation/roadmap.mdx`** — Human-readable overview across sections + **`.planning/`**.
 - **`.planning/*.xml`** + **`.planning/AGENTS.md`** — RepoPlanner machine state and playbook; **`pnpm planning*`** wraps **`vendor/repo-planner/scripts/loop-cli.mjs`**.
-- **Per-section** planning — Each `docs/<section>/` has **`planning-docs.mdx` → `state.mdx` → `task-registry.mdx` → `decisions.mdx`** (e.g. [books planning](/docs/books/planning-docs)).
+- **Per-section** planning — Each `docs/<section>/planning/` has **`planning-docs.mdx` → `state.mdx` → `task-registry.mdx` → `decisions.mdx`** (e.g. [books planning](/docs/books/planning/planning-docs)).
 - **Repo-root `REQUIREMENTS.md`** — **Pointer only**; do not treat it as the source of truth for scope.
 - **Vendoring** — Full submodule docs: **Documentation → Vendoring**.
 
 **Loop:** read **`AGENTS.md`**, then the layer you touch (**`.planning` XML** and/or **section** registry + **documentation** requirements/state), pick one task, implement, verify (`pnpm install`, `pnpm run build`, `pnpm run lint`), update registries, commit.
 
 <DocLinkCard href="/docs/documentation/requirements" title="Documentation — Requirements" description="Canonical monorepo requirements narrative." />
-<DocLinkCard href="/docs/documentation/state" title="Documentation — State" description="Cross-cutting queue and docs-section cycle." />
+<DocLinkCard href="/docs/documentation/planning/state" title="Documentation — State" description="Cross-cutting queue and docs-section cycle." />
 <DocLinkCard href="/docs/global/global-planning" title="Global planning guide" description="Task id shape, Mermaid workflows, planning-pack policy." />
 
 ### Documentation IA
@@ -210,8 +210,8 @@ The **docs** area on the site is organized by **section** (e.g. `books/`, `dialo
 We removed obsolete sections (e.g. old `richepub`, `book-editor` docs) and made real section folders the unit of organization. More sections can be added as the site grows.
 
 <DocLinkCard href="/docs" title="Documentation hub" description="Browse all sections: books, dialogue-forge, documentation, and more." />
-<DocLinkCard href="/docs/books/decisions" title="Books decisions" description="Record of key decisions for the books pipeline and reader." />
-<DocLinkCard href="/docs/books/task-registry" title="Books task registry" description="Task registry for the books section." />
+<DocLinkCard href="/docs/books/planning/decisions" title="Books decisions" description="Record of key decisions for the books pipeline and reader." />
+<DocLinkCard href="/docs/books/planning/task-registry" title="Books task registry" description="Task registry for the books section." />
 
 ---
 

@@ -23,6 +23,7 @@ const SECTION_LABELS = {
   editor: 'Editor',
   magicborn: 'Magicborn',
   listen: 'Listen',
+  projects: 'Projects',
   'repo-planner': 'Repo Planner',
 };
 
@@ -36,15 +37,11 @@ function formatSectionLabel(sectionKey) {
 }
 
 function isPlanningDocSlug(slug) {
-  const leaf = slug.split('/').pop() || slug;
-  return (
-    leaf === 'planning-docs' ||
-    leaf === 'global-planning' ||
-    leaf === 'state' ||
-    leaf === 'task-registry' ||
-    leaf === 'errors-and-attempts' ||
-    leaf === 'decisions'
-  );
+  const parts = slug.split('/');
+  if (parts[1] === 'planning') return true;
+
+  const leaf = parts[parts.length - 1] || slug;
+  return leaf === 'global-planning' || leaf === 'roadmap' || leaf === 'requirements';
 }
 
 function walkDocs(dir, baseRel, acc) {
@@ -62,8 +59,8 @@ function walkDocs(dir, baseRel, acc) {
   return acc;
 }
 
-function ensureDir(p) {
-  fs.mkdirSync(p, { recursive: true });
+function ensureDir(targetPath) {
+  fs.mkdirSync(targetPath, { recursive: true });
 }
 
 function rmrf(dir) {
@@ -81,6 +78,7 @@ function buildSiteEntries() {
 
   for (const { full, slug } of files) {
     if (!isPlanningDocSlug(slug)) continue;
+
     const raw = fs.readFileSync(full, 'utf8');
     const { data, content } = matter(raw);
     const sectionKey = slug.split('/')[0] || 'general';
@@ -91,7 +89,7 @@ function buildSiteEntries() {
     const header = [
       '<!--',
       `  Exported from: content/docs/${slug}.mdx`,
-      '  Generated — edit the MDX source, not this file.',
+      '  Generated - edit the MDX source, not this file.',
       `  title: ${data.title || slug}`,
       `  slug: ${slug}`,
       '  -->',
@@ -112,8 +110,8 @@ function buildSiteEntries() {
   }
 
   entries.sort((a, b) => {
-    const sec = a.section.localeCompare(b.section);
-    if (sec !== 0) return sec;
+    const sectionDiff = a.section.localeCompare(b.section);
+    if (sectionDiff !== 0) return sectionDiff;
     return a.slug.localeCompare(b.slug);
   });
 
@@ -122,13 +120,16 @@ function buildSiteEntries() {
 
 function buildDemoEntries() {
   if (!fs.existsSync(DEMO_DIR)) return [];
+
   const entries = [];
   for (const name of fs.readdirSync(DEMO_DIR)) {
     if (!name.endsWith('.md')) continue;
+
     const full = path.join(DEMO_DIR, name);
     const raw = fs.readFileSync(full, 'utf8');
     const { data } = matter(raw);
     const base = name.replace(/\.md$/, '');
+
     entries.push({
       id: `demo-${base.replace(/[^a-z0-9-]/gi, '-')}`,
       title: typeof data.title === 'string' ? data.title : base.replace(/-/g, ' '),
@@ -139,6 +140,7 @@ function buildDemoEntries() {
       slug: `demo/${base}`,
     });
   }
+
   entries.sort((a, b) => a.title.localeCompare(b.title));
   return entries;
 }
@@ -157,9 +159,7 @@ function main() {
   ensureDir(path.dirname(OUT_MANIFEST));
   fs.writeFileSync(OUT_MANIFEST, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
 
-  console.log(
-    `[build-planning-pack] ${demo.length} demo + ${site.length} site entries → public/planning-pack/manifest.json`,
-  );
+  console.log(`[build-planning-pack] ${demo.length} demo + ${site.length} site entries -> public/planning-pack/manifest.json`);
 }
 
 main();

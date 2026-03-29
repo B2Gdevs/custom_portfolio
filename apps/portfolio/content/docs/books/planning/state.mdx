@@ -1,0 +1,77 @@
+---
+title: State
+description: Compact state records for the books section.
+date: "2026-03-15"
+updated: "2026-03-28"
+order: 2
+repoPath: apps/portfolio/content/docs/books/planning/state.mdx
+taskPhase: books-reader-03
+---
+
+# State
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `books` |
+| `owner` | `books-section` |
+| `status` | `active` |
+| `updated` | `2026-03-29` |
+
+## Current Cycle
+
+| Field | Value |
+| --- | --- |
+| `phase` | `books-reader-02` + **`books-reader-03` (planned)** + `books-publishing-01` + `books-ai-01` |
+| `plan` | **Reader shell + library UX** (`books-reader-03`) and site-wide **`/apps` hub** ([Route conventions](/docs/documentation/route-conventions)) are active; `/apps/reader` now opens on a true built-in shelf with repo books first, manifest-backed metadata, Empty-cover fallback art, real progress chips (`New`, `%`, `Done`, `Coming soon`), local EPUB import demoted to a secondary utility card, and an explicit workspace state model for `library` / `built-in-reading` / `local-reading`; the next reader work is package/runtime extraction and shared modal ownership, not more hidden boolean state inside the app shell; reader annotations, export, planning strip, and site AI chat are **shipped**; the first Payload-backed RAG ingest completes successfully into the sidecar SQLite search index, retrieval returns cited chunks from docs/projects/blog/`magicborn`, the public chat shell now runs on assistant-ui with a Claude-style modal composition, and scoped logging now traces `/api/chat`, client send flow, and RAG ingest with env-driven verbosity, but the live dev app still shows an unresolved OpenAI `429 insufficient_quota` mismatch after a key update even though isolated direct requests succeed with the same `.env` |
+| `focus` | treat `books-ai-01-10` as the active AI maintenance blocker: investigate why the running Next process still produces quota errors after the key update before assuming the quota issue is resolved or changing RAG behavior |
+| `constraint` | **Plan-first and discuss-before-code:** record AI errors/attempts and decisions as the backend shifts shape; do not hide ingestion/runtime blockers outside the planning docs |
+
+## Next Queue
+
+| Priority | Action | Type |
+| --- | --- | --- |
+| `1` | `books-ai-01-10`: investigate the live runtime `429 insufficient_quota` mismatch after the API-key update; direct calls succeed but `/api/chat` in the running app still fails | `ai-maintenance` |
+| `2` | `books-reader-03-01`, `03-04`, `03-06`, `03-07`: formalize the reader shell contract further, extract the runtime toward **`@portfolio/repub-builder`**, and move shared cockpit/planning-strip ownership off app-local modal assumptions now that the shelf and workspace state model are shipped | `reader` |
+| `3` | `books-reader-02-01`: P4 build-time merge of exported annotations into `pnpm run build:books` output | `reader` |
+| `4` | `books-publishing-01-01` / `books-publishing-01-02`: publishing/editions records and next visible book EPUB when manuscript is ready | `publishing` |
+| `5` | when adding new `books/<slug>/` titles, set `book.json` `epubPlanningDirs` if that book has a docs planning subtree to bundle | `publishing` |
+
+## References
+
+| Id | Path | Purpose |
+| --- | --- | --- |
+| `books-root` | `books/mordreds_tale/` | authored source of truth |
+| `home-page` | `apps/portfolio/app/page.tsx` | primary site reading entry |
+| `reader-embed` | `apps/portfolio/components/books/BookReaderEmbed.tsx` | embedded reader surface |
+| `viewer` | `apps/portfolio/components/books/EpubViewer.tsx` | EPUB runtime, annotations UI, export/repack |
+| `reader-workspace` | `apps/portfolio/components/books/ReaderWorkspace.tsx` | current shell and local-file fallback state that needs a real built-in shelf pass |
+| `books-lib` | `apps/portfolio/lib/books.ts` | current manifest reader; needs richer library metadata for cover-forward shelf UI |
+| `epub-annotations` | `apps/portfolio/lib/epub-annotations.ts` | IndexedDB, schema, JSON and annotated-EPUB zip |
+| `reader-planning-strip` | `apps/portfolio/components/books/ReaderPlanningStrip.tsx` | read-only planning links on dedicated read route |
+| `site-copilot` | `apps/portfolio/components/site/SiteCopilot.tsx` | floating site chat shell |
+| `chat-api` | `apps/portfolio/app/api/chat/route.ts` | assistant-ui-backed public chat route with server-side RAG grounding |
+| `logging-lib` | `apps/portfolio/lib/logging.ts` | shared env-driven structured logging for client/server flows |
+| `rag-search-api` | `apps/portfolio/app/api/rag/search/route.ts` | read-only retrieval API returning cited chunks |
+| `rag-ingest-runner` | `apps/portfolio/scripts/rag-ingest-runner.cjs` | script-first ingest entry with bundle-time env loading |
+| `rag-ingest-service` | `apps/portfolio/lib/rag/ingest.ts` | Payload-backed source/chunk/run ingest and sidecar DB commit logic |
+| `rag-search-db` | `apps/portfolio/lib/rag/search-db.ts` | sidecar SQLite FTS5 + `sqlite-vec` search index |
+| `db-config` | `apps/portfolio/drizzle.config.ts` | current SQLite database path and Drizzle config |
+| `db-schema` | `apps/portfolio/lib/db/schema.ts` | existing SQLite schema surface to reconcile with Payload plans |
+| `epub-builder` | `packages/repub-builder/src/epub.ts` | EPUB image rewrite and chapter packaging |
+| `koodo-book-cover` | `vendor/koodo-reader/src/components/bookCoverItem/component.tsx` | cover-first shelf reference: prominent cover, status chip, metadata stack |
+| `koodo-book-card` | `vendor/koodo-reader/src/components/bookCardItem/component.tsx` | compact card/list reference for tighter library density |
+| `koodo-navigation-panel` | `vendor/koodo-reader/src/containers/panels/navigationPanel/component.tsx` | in-reader cover/header reference for built-in reading state |
+| `books-structure-doc` | `apps/portfolio/content/docs/books/book-structure.mdx` | formal source and EPUB structure rules |
+| `book-output` | `apps/portfolio/public/books/` | generated reading artifacts |
+| `front-page-reader` | `apps/portfolio/components/home/FeaturedBookExperience.tsx` | user-triggered reader mount path |
+| `route-conventions` | `apps/portfolio/content/docs/documentation/route-conventions.mdx` | `/apps` vs `/docs`; reader shell planning |
+
+## Human Input
+
+| Trigger | Action |
+| --- | --- |
+| publishing flow changes | update `current cycle` and `references` first |
+| reader UX changes | record the new focus before implementation |
+| new requirements appear | add them in the books docs planning pages before execution |

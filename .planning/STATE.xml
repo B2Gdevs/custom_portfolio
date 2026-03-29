@@ -4,11 +4,11 @@
   <current-phase>01</current-phase>
   <current-plan>bootstrap</current-plan>
   <status>active</status>
-  <next-action>Task 01-07 is done. Resume the URL taxonomy and apps hub work, or pick the next documentation/planning task from TASK-REGISTRY.xml after build and lint stay green.</next-action>
+  <next-action>Planning IA reset is done. Pick the next reader/embed task: books-reader-03 or documentation-site-08, with repo-planner-integration-02 close behind.</next-action>
   <references>
     <reference>AGENTS.md (repo root)</reference>
     <reference>apps/portfolio/content/docs/documentation/requirements.mdx</reference>
-    <reference>apps/portfolio/content/docs/documentation/state.mdx</reference>
+    <reference>apps/portfolio/content/docs/documentation/planning/state.mdx</reference>
     <reference>.planning/AGENTS.md</reference>
     <reference>.planning/ROADMAP.xml</reference>
     <reference>.planning/TASK-REGISTRY.xml</reference>

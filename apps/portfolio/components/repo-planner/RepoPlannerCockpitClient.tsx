@@ -51,7 +51,7 @@ function EmbeddedCockpitPlaceholder() {
 
       <div className="flex flex-wrap gap-3">
         <Link
-          href="/docs/repo-planner/decisions"
+          href="/docs/repo-planner/planning/decisions"
           className="inline-flex items-center rounded-full border border-slate-700 px-4 py-2 text-sm font-medium text-white transition hover:border-amber-300 hover:text-amber-200"
         >
           Read embed decisions

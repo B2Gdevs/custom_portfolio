@@ -1,0 +1,56 @@
+---
+title: Task Registry
+description: Compact task records for the blog section.
+date: "2026-03-16"
+updated: "2026-03-28"
+order: 3
+repoPath: apps/portfolio/content/docs/blog/planning/task-registry.mdx
+---
+
+# Task Registry
+
+## Phase `blog-content-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `blog-content-01-01` | `done` | create a section-local planning loop for the blog inside the docs tree | `-` | `pnpm exec next build` |
+| `blog-content-01-02` | `done` | define the blog as a primary public destination from the front page | `blog-content-01-01` | `pnpm exec next build` |
+| `blog-content-01-03` | `planned` | decide how build logs, essays, and planning-adjacent posts should be categorized | `blog-content-01-01` | `pnpm exec next build` |
+
+## Phase `blog-content-02`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `blog-content-02-01` | `done` | rewrite the RichEPub posts around the EPUB3-first conclusion and remove stale claims about `.repub` as the active path | `blog-content-01-02` | `pnpm exec next build` |
+| `blog-content-02-02` | `done` | align blog copy with the new editor planning section so the public narrative points at tooling instead of a new book container | `blog-content-02-01` | `pnpm exec next build` |
+
+## Phase `blog-content-03`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `blog-content-03-01` | `planned` | build a stable publishing pattern for long-form build logs and workshop notes | `blog-content-01-03` | planning docs updated |
+| `blog-content-03-02` | `planned` | decide which editor-planning milestones should turn into public blog updates versus staying internal to docs | `blog-content-03-01` | planning docs updated |
+
+## Phase `blog-discovery-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `blog-discovery-01-01` | `done` | implement the blog index UX: left sidebar or filter rail on desktop, mobile drawer filters, keyword search, newest-first sort, and empty/loading states that feel consistent with the docs surface without copying it blindly | `blog-content-01-02` | `pnpm run build`, `pnpm run lint` |
+| `blog-discovery-01-02` | `done` | implement command-palette integration for blog search hits with scope limited to blog/projects first, plus result grouping and snippet highlighting without in-page keyword marks after navigation | `blog-discovery-01-01` | `pnpm --filter @portfolio/app test:e2e`, `pnpm run build`, `pnpm run lint` |
+| `blog-discovery-01-03` | `done` | implement a strict article contract: downloads/resources first, intro, tradeoffs/pros-cons or conflict, what was done, conclusion, examples after the conclusion, and an in-article TOC | `blog-discovery-01-01` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
+| `blog-discovery-01-04` | `done` | implement the shared primitives that blog and projects should reuse for discovery, structured metadata, and content-page chrome | `blog-discovery-01-02`, `blog-discovery-01-03` | `pnpm --filter @portfolio/app test:unit`, `pnpm --filter @portfolio/app test:e2e`, `pnpm run build`, `pnpm run lint` |
+
+## Phase `blog-discovery-02`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `blog-discovery-02-01` | `done` | retrofit the existing blog archive to the literal section headings and top-of-page resource metadata the new shell now expects | `blog-discovery-01-04` | `pnpm run build`, `pnpm run lint` |
+| `blog-discovery-02-02` | `done` | add missing post-level metadata for cleaner search snippets, related resources, and more consistent archive cards | `blog-discovery-02-01` | `pnpm run build`, `pnpm run lint` |
+
+## Phase `blog-identity-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `blog-identity-01-01` | `done` | define how the blog uses the shared content-surface shell while keeping a recognizably blog-specific theme, mini logo, and sidebar treatment | `blog-discovery-02-02`, `documentation-site-09-01` | planning docs updated |
+| `blog-identity-01-02` | `done` | apply the blog identity contract to the archive and article pages without breaking the shared discovery/detail primitives | `blog-identity-01-01` | `pnpm run build`, `pnpm run lint` |
+| `blog-identity-01-03` | `done` | wire the blog surface into the shared type-to-search / command-palette behavior and section-specific animated icon treatment once the shared `documentation-site-09-03` / `09-04` work lands | `blog-identity-01-02`, `documentation-site-09-03`, `documentation-site-09-04` | `pnpm run build`, manual article/archive search smoke |

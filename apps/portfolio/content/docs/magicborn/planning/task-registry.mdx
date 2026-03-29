@@ -1,0 +1,36 @@
+---
+title: Task Registry
+description: Compact task records for the Magicborn worldbuilding section.
+date: "2026-03-28"
+updated: "2026-03-28"
+order: 3
+repoPath: apps/portfolio/content/docs/magicborn/planning/task-registry.mdx
+---
+
+# Task Registry
+
+## Phase `magicborn-world-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `magicborn-world-01-01` | `done` | establish `magicborn` as a first-class docs section with the standard planning-doc stack | `-` | docs content present |
+| `magicborn-world-01-02` | `done` | define the canon-dossier page shape so public worldbuilding pages read cleanly and chunk cleanly | `magicborn-world-01-01` | planning docs updated |
+| `magicborn-world-01-03` | `done` | define the first public lore categories for Magicborn and seed the section with orthogonal dossiers | `magicborn-world-01-02` | planning docs updated |
+| `magicborn-world-01-04` | `done` | define source metadata and citation rules so chat can surface snippets and link back to the right lore pages | `magicborn-world-01-02` | planning docs updated |
+| `magicborn-world-01-05` | `done` | align `magicborn` with the books AI ingestion boundary and explicitly exclude raw manuscript chapters from direct ingest | `magicborn-world-01-03`, `magicborn-world-01-04` | planning docs updated |
+
+## Phase `magicborn-world-02`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `magicborn-world-02-01` | `planned` | expand dossiers beyond Mordred's Tale seed material into additional factions, places, and canon moments as they are stabilized | `magicborn-world-01-05` | planning docs updated |
+| `magicborn-world-02-02` | `planned` | define which lore pages are public, draft-only, or private before broader ingestion begins | `magicborn-world-01-05` | planning docs updated |
+| `magicborn-world-02-03` | `planned` | maintain source-anchor hygiene when manuscript canon shifts so lore pages remain derivations instead of stale mirrors | `magicborn-world-01-05` | planning docs updated |
+
+## Registry Rules
+
+| Field | Value |
+| --- | --- |
+| `ordering` | rows stay in intended execution order |
+| `status-set` | `planned`, `in-progress`, `done`, `blocked` |
+| `verification` | use content presence or build commands once implementation begins |

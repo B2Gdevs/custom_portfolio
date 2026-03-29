@@ -1,0 +1,45 @@
+---
+title: State
+description: Compact state records for the editor section.
+date: "2026-03-16"
+updated: "2026-03-28"
+order: 2
+repoPath: apps/portfolio/content/docs/editor/planning/state.mdx
+taskPhase: editor-workflow-01
+---
+
+# State
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `editor` |
+| `owner` | `editor-section` |
+| `status` | `planned` |
+| `updated` | `2026-03-28` |
+
+## Current Cycle
+
+| Field | Value |
+| --- | --- |
+| `phase` | `editor-workflow-01` |
+| `plan` | `editor-workflow-01-a` |
+| `focus` | plan a writing/editor tool that starts from messy real-world source material and compiles down to cleaner EPUB3 output |
+| `constraint` | the editor should be framed as tooling for EPUB3, not a replacement book container format |
+
+## Next Queue
+
+| Priority | Action | Type |
+| --- | --- | --- |
+| `1` | `editor-workflow-01-02`: define the authoring pipeline from notion, markdown, and mdx sources into the editor | `workflow` |
+| `2` | `editor-workflow-01-03`: decide whether a lexical-based writing UI is worth the build and maintenance cost | `architecture` |
+| `3` | `editor-workflow-01-04`: define how custom components and layout controls should compile down to valid EPUB3, then decide whether the editor becomes a real build task | `export` |
+
+## References
+
+| Id | Path | Purpose |
+| --- | --- | --- |
+| `blog-root` | `apps/portfolio/content/blog/` | public narrative about the archived RichEPub experiment |
+| `books-docs` | `apps/portfolio/content/docs/books/` | current EPUB3 reader and book-pipeline planning context |
+| `docs-roadmap` | `apps/portfolio/content/docs/documentation/roadmap.mdx` | section-level status rollup |

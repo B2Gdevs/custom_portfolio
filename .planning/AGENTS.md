@@ -16,7 +16,7 @@ Companion to **repository root** [`AGENTS.md`](../AGENTS.md). Read **root `AGENT
 | **`ERRORS-AND-ATTEMPTS.xml`** | Failure / attempt log | Section **`errors-and-attempts.mdx`** |
 
 **Canonical monorepo requirements narrative:** [`documentation/requirements.mdx`](../apps/portfolio/content/docs/documentation/requirements.mdx).  
-**Cross-cutting queue:** [`documentation/state.mdx`](../apps/portfolio/content/docs/documentation/state.mdx) (table).  
+**Cross-cutting queue:** [`documentation/planning/state.mdx`](../apps/portfolio/content/docs/documentation/planning/state.mdx) (table).  
 **Do not** author long prose in **repo-root `REQUIREMENTS.md`** or recreate **`.planning/REQUIREMENTS.md`**.
 
 ## Trigger phrases -> what to do

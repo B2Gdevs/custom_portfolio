@@ -10,7 +10,7 @@ taskPhase: documentation-site-06
 
 # Route conventions
 
-This page is the **planning source of truth** for site URL shape. Implementation tasks: [documentation section task registry](/docs/documentation/task-registry) phase **`documentation-site-06`**, plus [books task registry](/docs/books/task-registry) phase **`books-reader-03`** for the reader shell.
+This page is the **planning source of truth** for site URL shape. Implementation tasks: [documentation section task registry](/docs/documentation/planning/task-registry) phase **`documentation-site-06`**, plus [books task registry](/docs/books/planning/task-registry) phase **`books-reader-03`** for the reader shell.
 
 ## Principles
 
@@ -23,7 +23,7 @@ This page is the **planning source of truth** for site URL shape. Implementation
 | **Static reading assets** | Built EPUBs and **`manifest.json`** stay under **`/books/<slug>/...`** as **files** in `public/books/` (not React routes). Do not confuse with removed **`/books` pages**. |
 | **APIs** | **`/api/*`** only. Optional future: **documented route handlers** colocated with **`@portfolio/repub-builder`** for embedders (CopilotKit-style), shipped as part of the same package story. |
 | **Admin** | **`/admin/*`** remains internal / operator surfaces. |
-| **Redirects** | Keep **permanent redirects** from removed paths; log notable external links in [errors-and-attempts](/docs/documentation/errors-and-attempts) if needed. |
+| **Redirects** | Keep **permanent redirects** from removed paths; log notable external links in [errors-and-attempts](/docs/documentation/planning/errors-and-attempts) if needed. |
 
 ## Canonical app map
 
@@ -71,9 +71,9 @@ This page is the **planning source of truth** for site URL shape. Implementation
 
 | Record | Why |
 | --- | --- |
-| [Documentation decisions](/docs/documentation/decisions) | `DOCUMENTATION-APPS-URL-TOP-LEVEL`, `DOCUMENTATION-ROUTES-SINGLE-SOURCE`, `DOCUMENTATION-DIALOGUE-FORGE-APPS-URL` |
-| [Books decisions](/docs/books/decisions) | `BOOKS-READER-LIBRARY-SHELL`, `BOOKS-READER-RUNTIME-REPUB-PACKAGE`, `BOOKS-HOMEPAGE-LAUNCHPAD` |
+| [Documentation decisions](/docs/documentation/planning/decisions) | `DOCUMENTATION-APPS-URL-TOP-LEVEL`, `DOCUMENTATION-ROUTES-SINGLE-SOURCE`, `DOCUMENTATION-DIALOGUE-FORGE-APPS-URL` |
+| [Books decisions](/docs/books/planning/decisions) | `BOOKS-READER-LIBRARY-SHELL`, `BOOKS-READER-RUNTIME-REPUB-PACKAGE`, `BOOKS-HOMEPAGE-LAUNCHPAD` |
 | [Global planning guide](/docs/global/global-planning) | Operator links migrate to `/apps/*` |
-| [Repo Planner planning docs](/docs/repo-planner/planning-docs) | Update paths when repo planner moves |
+| [Repo Planner planning docs](/docs/repo-planner/planning/planning-docs) | Update paths when repo planner moves |
 | [Reader shell + Repo Planner embed](/docs/documentation/reader-repo-planner-embed-architecture) | Shared cockpit modal, reader modal store, docs context menu |
 | [Listen route and URLs](/docs/listen/route-and-urls) | Canonical **`/listen`** and relation to **`/apps/*`** |

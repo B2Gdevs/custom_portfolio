@@ -42,16 +42,16 @@ Narrative for **cross-section** product scope lives **here**, not in repo-root *
 
 | Topic | Requirement |
 | --- | --- |
-| **Books / EPUB** | Optional **planning supplement** trees: `repub epub ... --planning <dir>` and `book.json` **`epubPlanningDirs`** via `@portfolio/repub-builder` and `scripts/build-books.cjs` -- detail in [books planning-docs](/docs/books/planning-docs). |
-| **Reader + site** | Books, reader, EPUB pipeline, annotations, and site AI: phased roadmap and discipline in **[books planning-docs](/docs/books/planning-docs)** and **[books task registry](/docs/books/task-registry)**; product boundary and persistence in **[architecture conventions](/docs/documentation/architecture-conventions)**. |
+| **Books / EPUB** | Optional **planning supplement** trees: `repub epub ... --planning <dir>` and `book.json` **`epubPlanningDirs`** via `@portfolio/repub-builder` and `scripts/build-books.cjs` -- detail in [books planning-docs](/docs/books/planning/planning-docs). |
+| **Reader + site** | Books, reader, EPUB pipeline, annotations, and site AI: phased roadmap and discipline in **[books planning-docs](/docs/books/planning/planning-docs)** and **[books task registry](/docs/books/planning/task-registry)**; product boundary and persistence in **[architecture conventions](/docs/documentation/architecture-conventions)**. |
 | **Site AI** | Chat should ground on repo-backed RAG, **Sources** panel with snippets and deep links; public chat read-only; repo content is source of truth. |
-| **Listen** | **`/listen`** -- unified catalog for **audio tracks** and **BandLab presets**, discovery UX aligned with blog/projects, **group-based shared passwords** for locked rows (no per-user accounts in v1). Planning: [listen planning-docs](/docs/listen/planning-docs). |
+| **Listen** | **`/listen`** -- unified catalog for **audio tracks** and **BandLab presets**, discovery UX aligned with blog/projects, **group-based shared passwords** for locked rows (no per-user accounts in v1). Planning: [listen planning-docs](/docs/listen/planning/planning-docs). |
 | **Shared content surfaces** | `listen`, `blog`, and `projects` should converge on shared discovery/detail primitives, but each surface keeps its own theme language and section mark so users can orient themselves instantly. |
 | **Planning workflow** | The living loop should be roadmap-first and foldered: `planning/` contains planning docs, while one-off phase plans live under `planning/plans/` and never replace roadmap/state/task-registry as source of truth. |
 
 ## Planning archive (removed)
 
-The snapshot **`.planning-archive/2026-03-29-pre-barebones/`** was **deleted** after folding pointers into this page and section registries. **Do not** recreate it; use git history for the old tree. **Where the content went:** books reader / AI / RAG tables -- **[books planning-docs](/docs/books/planning-docs)**; product boundary and service-extraction posture -- **[architecture conventions](/docs/documentation/architecture-conventions)**; planning portal and modal pipeline -- **documentation** task registry **`documentation-site-03`**.
+The snapshot **`.planning-archive/2026-03-29-pre-barebones/`** was **deleted** after folding pointers into this page and section registries. **Do not** recreate it; use git history for the old tree. **Where the content went:** books reader / AI / RAG tables -- **[books planning-docs](/docs/books/planning/planning-docs)**; product boundary and service-extraction posture -- **[architecture conventions](/docs/documentation/architecture-conventions)**; planning portal and modal pipeline -- **documentation** task registry **`documentation-site-03`**.
 
 ## CLI productization (decisions, 2026-03-30)
 

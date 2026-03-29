@@ -62,7 +62,7 @@
       <depends>01-03</depends>
     </task>
     <task id="01-08" agent-id="" status="done">
-      <goal>Repo Planner phase 04: build-time `builtin-packs.json` from `.planning` + docs MDX; `repo-planner` exports `PlanningPackGallery` (data-in props); portfolio modal shell only; cockpit preloads init + docs packs; root `pnpm planning:embed-packs`; hook into app dev/build. Registry: repo-planner-integration-04 in apps/portfolio/content/docs/repo-planner/task-registry.mdx.</goal>
+      <goal>Repo Planner phase 04: build-time `builtin-packs.json` from `.planning` + docs MDX; `repo-planner` exports `PlanningPackGallery` (data-in props); portfolio modal shell only; cockpit preloads init + docs packs; root `pnpm planning:embed-packs`; hook into app dev/build. Registry: repo-planner-integration-04 in apps/portfolio/content/docs/repo-planner/planning/task-registry.mdx.</goal>
       <keywords>repo-planner,planning-pack,embed,builtin,cockpit</keywords>
       <commands>
         <command>pnpm planning pack embed-build --help</command>
@@ -79,6 +79,15 @@
         <command>pnpm run lint</command>
       </commands>
       <depends></depends>
+    </task>
+    <task id="01-09" agent-id="" status="done">
+      <goal>Planning IA reset: move section planning docs into literal `planning/` folders, align root/operator guidance on roadmap/state/task-registry/decisions as the living loop, sweep stale flat links, and verify the planning-pack/build pipeline still resolves the new paths.</goal>
+      <keywords>planning,ia,foldering,docs,repo-planner</keywords>
+      <commands>
+        <command>pnpm run build</command>
+        <command>pnpm run lint</command>
+      </commands>
+      <depends>01-07</depends>
     </task>
   </phase>
 </task-registry>

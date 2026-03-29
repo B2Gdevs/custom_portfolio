@@ -7,7 +7,7 @@
   </phase>
   <doc-flow>
     <doc name="documentation/requirements.mdx">Monorepo requirements narrative (public docs).</doc>
-    <doc name="documentation/state.mdx">Cross-cutting queue + documentation section state.</doc>
+    <doc name="documentation/planning/state.mdx">Cross-cutting queue + documentation section state.</doc>
     <doc name="documentation/roadmap.mdx">Human-readable section / root overview table.</doc>
     <doc name="REQUIREMENTS.md">Repo-root stub pointer only -- not canonical prose.</doc>
     <doc name=".planning/REQUIREMENTS.xml">Stub for XML-only tools; points at documentation paths.</doc>

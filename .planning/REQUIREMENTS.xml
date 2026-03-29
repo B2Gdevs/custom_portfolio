@@ -6,7 +6,7 @@
 # Requirements (stub)
 
 Canonical monorepo requirements: documentation section requirements.mdx.
-Cross-cutting queue: documentation/state.mdx.
+Cross-cutting queue: documentation/planning/state.mdx.
 Overview: documentation/roadmap.mdx.
 
 Repo root REQUIREMENTS.md is a stub pointer only.

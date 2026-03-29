@@ -14,7 +14,7 @@ const apps = [
     note: (
       <>
         Docs for the toolchain live under{' '}
-        <Link href="/docs/dialogue-forge/planning-docs" className="text-accent underline">
+        <Link href="/docs/dialogue-forge/planning/planning-docs" className="text-accent underline">
           Docs - dialogue-forge
         </Link>
         . State stays local to this browser tab.
@@ -32,7 +32,7 @@ const apps = [
     note: (
       <>
         Planning and embed notes live in{' '}
-        <Link href="/docs/repo-planner/planning-docs" className="text-accent underline">
+        <Link href="/docs/repo-planner/planning/planning-docs" className="text-accent underline">
           Repo Planner docs
         </Link>
         . The browser workspace remains read-only against the repo by default.

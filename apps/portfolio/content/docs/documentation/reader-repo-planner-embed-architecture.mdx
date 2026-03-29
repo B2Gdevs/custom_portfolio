@@ -12,7 +12,7 @@ taskPhase: documentation-site-08
 
 **Intent:** Treat **`@portfolio/repub-builder`** (reader **shell** + EPUB runtime) and **`repo-planner`** (Planning **cockpit** UI) as **first-class libraries** other apps import. The **portfolio** remains a **host** that wires env, routes, and **second entry points** (e.g. docs file-tree context menu) into the **same** cockpit experience the reader uses.
 
-This page complements [Route conventions](/docs/documentation/route-conventions), [Repo Planner -- Planning docs](/docs/repo-planner/planning-docs), and [books task registry](/docs/books/task-registry) phase **`books-reader-03`**.
+This page complements [Route conventions](/docs/documentation/route-conventions), [Repo Planner -- Planning docs](/docs/repo-planner/planning/planning-docs), and [books task registry](/docs/books/planning/task-registry) phase **`books-reader-03`**.
 
 ## Layer model
 
@@ -58,7 +58,7 @@ flowchart TB
 2. **Add `readerModalStore`** in **repub-builder** (or under `src/reader/modal-store.ts`) -- same API shape as needed: `openRepoPlanner`, `close`, optional `activeId` union for future reader-only modals.
 3. **Reader shell** mounts **`ReaderModalRoot`** (small) next to workspace -- only subscribes to `readerModalStore`; does not replace site-wide `ModalRoot`.
 4. **Portfolio** `modal-registry` registers **`RepoPlannerModal`** that re-exports or wraps the **same body**; strip duplicate layout code from `components/modals/repo-planner/RepoPlannerModal.tsx` to a one-liner re-export if possible.
-5. **Docs** -- extend file-tree context menu with "Open in planning cockpit" -> build payload from `folderArchivePrefix` / section path; document payload contract here and in [Repo Planner planning docs](/docs/repo-planner/planning-docs).
+5. **Docs** -- extend file-tree context menu with "Open in planning cockpit" -> build payload from `folderArchivePrefix` / section path; document payload contract here and in [Repo Planner planning docs](/docs/repo-planner/planning/planning-docs).
 
 ## Publishability checklist (both major projects)
 
@@ -73,9 +73,9 @@ flowchart TB
 
 | Phase | Where |
 | --- | --- |
-| Reader shell + repub runtime | [books -- `books-reader-03`](/docs/books/task-registry) -- extend with embed/modal rows (see below) |
-| Cockpit embed + publish | [repo-planner -- `repo-planner-integration-02`](/docs/repo-planner/task-registry) |
-| Host wiring + docs context menu | [documentation -- `documentation-site-08`](/docs/documentation/task-registry) |
+| Reader shell + repub runtime | [books -- `books-reader-03`](/docs/books/planning/task-registry) -- extend with embed/modal rows (see below) |
+| Cockpit embed + publish | [repo-planner -- `repo-planner-integration-02`](/docs/repo-planner/planning/task-registry) |
+| Host wiring + docs context menu | [documentation -- `documentation-site-08`](/docs/documentation/planning/task-registry) |
 
 ## Open questions (need your answers)
 
@@ -87,4 +87,4 @@ flowchart TB
 
 ---
 
-When these are decided, update [decisions](/docs/documentation/decisions) with ids **`DOCUMENTATION-READER-COCKPIT-EMBED-*`** and mirror consequences under [books/decisions](/docs/books/decisions) if the reader shell owns the behavior.
+When these are decided, update [decisions](/docs/documentation/planning/decisions) with ids **`DOCUMENTATION-READER-COCKPIT-EMBED-*`** and mirror consequences under [books/decisions](/docs/books/planning/decisions) if the reader shell owns the behavior.

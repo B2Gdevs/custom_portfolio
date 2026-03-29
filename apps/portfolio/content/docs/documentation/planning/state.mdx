@@ -1,0 +1,77 @@
+---
+title: State
+description: Compact state records for the documentation section.
+date: "2026-03-16"
+updated: "2026-03-30"
+repoPath: apps/portfolio/content/docs/documentation/planning/state.mdx
+taskPhase: documentation-site-10
+order: 2
+---
+
+# State
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `documentation` |
+| `owner` | `docs-section` |
+| `status` | `active` |
+| `updated` | `2026-03-30` |
+
+## Current Cycle
+
+| Field | Value |
+| --- | --- |
+| `phase` | `documentation-site-10` (planning IA and foldering) + ongoing `documentation-site-03` / `04` / `08` |
+| `plan` | the planning loop now treats `roadmap` / `state` / `task-registry` / `decisions` as living records under literal section `planning/` folders; the next cross-cutting work is to keep the shared planning modal + pack pipeline moving on top of that cleaned structure |
+| `focus` | planning IA reset is shipped: section planning docs live under physical `planning/` folders, stale flat links were cleaned up, and the next work returns to the reader/embed and repo-planner cockpit pipeline |
+| `constraint` | section planning MDX is first for **section** work; root `.planning` stays canonical for **monorepo** gates; see root `AGENTS.md` |
+
+## Next Queue
+
+| Priority | Action | Type |
+| --- | --- | --- |
+| `1` | `documentation-site-08-02` / `08-03`: docs file-tree "open in cockpit" wiring plus shared Repo Planner modal body follow-through with reader/embed work | `feature` |
+| `2` | `documentation-site-03-01` through `documentation-site-03-05`: planning portal phases (demo pack, real export pipeline, modal UI, optional section `AGENTS.md`) | `feature` |
+| `3` | `documentation-site-02-03`: surface architecture / product-boundary `.planning` docs from docs section | `ia` |
+| `4` | `documentation-site-04-01` / `04-02`: onboard `magicborn` as a first-class docs section and keep its planning pages aligned with the RAG source map | `ia` |
+| `5` | `documentation-site-04-03`: onboard `projects` as a first-class planning section for showcase UX and schema work | `ia` |
+| `6` | `documentation-site-07-01` / `07-02` + `repo-planner-integration-01-13`: formal CLIs (Ink, **two** packages, submodule upstream, **`pnpm dlx`** docs first) | `tooling` |
+| `7` | `documentation-site-09-02`: registry tracking for `@lucide-animated` and `@magicui` so future component adoption stays documented | `design-system` |
+| `8` | optional `documentation-site-06-04`: CI/grep guard for stale `/docs/apps` references outside redirect docs history | `ia` |
+
+## Cross-cutting queue
+
+Monorepo-wide items that are not (yet) a full `.planning` task row. Mirror or close them in **`.planning/TASK-REGISTRY.xml`** when they become single units of work.
+
+| Status | Item |
+| --- | --- |
+| `done` | **`.planning-archive/`** removed (2026-03-28); migration pointers recorded in **[requirements](/docs/documentation/requirements)** (**Planning archive** section) and **`.planning/ROADMAP.xml`** / **`.planning/TASK-REGISTRY.xml`** phase 01 closure. |
+| `open` | Advance `books-ai-01-05` -> `books-ai-01-07` assistant evaluation -- [books task registry](/docs/books/planning/task-registry). |
+| `done` | EPUB planning supplement (`repub epub --planning`, `epubPlanningDirs`, `pnpm run build:books`); `.planning` task `01-04` + [books task registry](/docs/books/planning/task-registry). |
+| `done` | Shared app logging layer (chat / RAG / structured debug). |
+| `done` | Planning/operator docs now follow an ASCII-first punctuation policy; public-facing prose remains free to keep richer typography. |
+| `open` | Live AI `429 insufficient_quota` mismatch -- [books state](/docs/books/planning/state). |
+| `open` | Blog + projects discovery pass -- blog/projects section registries. |
+| `done` | **Listen** surface -- **`listen-surface-01`** implemented (`/listen`, unlock API, Cmd+K); [listen task registry](/docs/listen/planning/task-registry). |
+| `open` | **CLI ergonomics:** `documentation-site-07-01` / `07-02` -- Ink, **two CLIs**, submodule bumps, **`pnpm dlx`** docs; publish repub + planners later per [requirements](/docs/documentation/requirements) CLI table. |
+| `open` | **Reader shell + cockpit embed:** shared modal body, **reader** modal store, **docs** context menu -- [embed architecture](/docs/documentation/reader-repo-planner-embed-architecture); **`documentation-site-08`**, **`books-reader-03-06`**, **`repo-planner-integration-02`**. |
+| `open` | **Repo Planner full cockpit + XML/pack plane + shell upstream:** **`repo-planner-integration-03`** -- [repo-planner task registry](/docs/repo-planner/planning/task-registry) phase **`03`** (vendor `PlanningCockpit`, data adapters, **`REPOPLAN-SHELL-01`**). |
+| `open` | **Shared content surfaces:** align `listen`, `blog`, and `projects` on one reusable shell with per-section mini logos and theme identity -- `documentation-site-09`, section registries below. |
+| `done` | **Planning IA reset:** literal section `planning/` folders are live, section docs/links now point at those paths, and one-off plans belong under `planning/plans/` instead of top-level implementation-plan drift -- `documentation-site-10`. |
+
+## References
+
+| Id | Path | Purpose |
+| --- | --- | --- |
+| `docs-root` | `apps/portfolio/content/docs/` | authored documentation source |
+| `docs-page` | `apps/portfolio/app/docs/page.tsx` | documentation landing page |
+| `docs-layout` | `apps/portfolio/components/docs/DocsLayout.tsx` | docs navigation and section layout |
+| `docs-lib` | `apps/portfolio/lib/docs.ts` | docs grouping and planning-doc detection |
+| `route-conventions` | `apps/portfolio/content/docs/documentation/route-conventions.mdx` | `/docs` vs `/apps` taxonomy and migration checklist |
+| `reader-repo-planner-embed` | `apps/portfolio/content/docs/documentation/reader-repo-planner-embed-architecture.mdx` | repub-builder shell + repo-planner cockpit + portfolio host wiring |
+| `docs-roadmap` | `apps/portfolio/content/docs/documentation/roadmap.mdx` | section-level overview of status and next work |
+| `agents-root` | `AGENTS.md` (repo root) | Ralph loop + mandatory read order for agents |
+| `planning-reqs` | [requirements.mdx](/docs/documentation/requirements) (this section) | monorepo requirements + planning-pack rules |
+| `site-theme` | `apps/portfolio/app/globals.css`, `apps/portfolio/app/layout.tsx` | shadcn oklch tokens, `@theme inline`, IBM Plex, `dark` root class |
