@@ -2,7 +2,7 @@
 title: Task Registry
 description: Compact task records for the books section.
 date: "2026-03-15"
-updated: "2026-03-30"
+updated: "2026-04-07"
 repoPath: apps/portfolio/content/docs/books/planning/task-registry.mdx
 order: 3
 ---
@@ -51,6 +51,14 @@ Legacy-looking ids such as `books-ai-01-04` are **not** a separate scheme: **`ai
 | --- | --- | --- | --- | --- |
 | `books-publishing-01-01` | `planned` | expand planning records around publishing, editions, and progression | `books-reader-01-15` | `pnpm run build:books` |
 | `books-publishing-01-02` | `planned` | build a live EPUB for the next visible book once the manuscript is ready | `books-publishing-01-01` | `pnpm run build:books`, `pnpm run build` |
+
+## Phase `books-publishing-02` (Mordred's Tale trilogy packaging)
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `books-publishing-02-01` | `done` | split Tale packaging inputs into trilogy slugs (`mordreds_tale_part_1`, `_part_2`, `_part_3`) with chapter-range folders and book metadata | `-` | folder diff under `books/`, `pnpm run build:books` |
+| `books-publishing-02-02` | `done` | align section planning state to trilogy reading order and slugs | `books-publishing-02-01` | [books state](/docs/books/planning/state#world-chronology-and-reading-order) |
+| `books-publishing-02-03` | `planned` | expand Part III manuscript scope beyond Ch15 scaffold so `boughfall` is a full book and not only a seed EPUB | `books-publishing-02-01` | chapter plan + `pnpm run build:books` |
 
 ## Phase `books-ai-00`
 

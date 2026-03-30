@@ -1,0 +1,10 @@
+{
+  "title": "Mordred's Tale — Part I: Wells of Tarro",
+  "author": "Ben Garrard",
+  "description": "Origins, households, and hidden economies. Morgana and Jack set the world; Mordred and Enid grow inside it until magic returns.",
+  "genres": ["Fantasy", "Dark fantasy", "Epic fantasy"],
+  "epubPlanningDirs": [
+    "../../apps/portfolio/content/docs/books/planning",
+    "../../apps/portfolio/content/docs/books/mordreds-tale/planning"
+  ]
+}

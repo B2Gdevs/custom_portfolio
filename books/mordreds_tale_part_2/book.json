@@ -1,0 +1,10 @@
+{
+  "title": "Mordred's Tale — Part II: Smoke and Crowns",
+  "author": "Ben Garrard",
+  "description": "War in Hallinghorn, returning magic, and kinship under pressure. Mordred rises while crowns bargain over wells and blood.",
+  "genres": ["Fantasy", "Dark fantasy", "War fantasy"],
+  "epubPlanningDirs": [
+    "../../apps/portfolio/content/docs/books/planning",
+    "../../apps/portfolio/content/docs/books/mordreds-tale/planning"
+  ]
+}

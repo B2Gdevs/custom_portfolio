@@ -2,7 +2,7 @@
 title: Mordred's Tale — Task Registry
 description: Writing and story tasks — beat-lock pass (Ch6–14) before Ch3 return; draft to completion; polish later.
 date: "2026-03-18"
-updated: "2026-03-30"
+updated: "2026-04-07"
 order: 8
 ---
 
@@ -70,6 +70,13 @@ Work **chapter-by-chapter** with Q&A; lock one path per **Alternatives** block; 
 | `mt-polish-02` | `deferred` | continuity pass (timeline, relics, names, Jack past vs present) | `mt-polish-01` | read-through |
 | `mt-polish-03` | `deferred` | prose balance (dialogue vs description) | `mt-polish-02` | read-through |
 | `mt-polish-04` | `deferred` | Ch3 page 1 (The Changed World) — typos, Morgana interiority | `mt-polish-01` | read-through |
+
+## Phase `mt-trilogy-packaging-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `mt-trilogy-packaging-01-01` | `done` | establish split-input folders and metadata for Part I / II / III EPUB output slugs | — | `pnpm run build:books`, verify `public/books/mordreds_tale_part_{1,2,3}/book.epub` |
+| `mt-trilogy-packaging-01-02` | `planned` | map future chapter additions to part lanes (especially Part III growth beyond Ch15 seed) while preserving full-source canonical drafting lane | `mt-trilogy-packaging-01-01` | state + spine update |
 
 ## Registry Rules
 

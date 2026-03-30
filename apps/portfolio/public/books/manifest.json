@@ -34,5 +34,44 @@
     ],
     "status": "available",
     "hasEpub": true
+  },
+  {
+    "slug": "mordreds_tale_part_1",
+    "title": "Mordred's Tale — Part I: Wells of Tarro",
+    "author": "Ben Garrard",
+    "description": "Origins, households, and hidden economies. Morgana and Jack set the world; Mordred and Enid grow inside it until magic returns.",
+    "genres": [
+      "Fantasy",
+      "Dark fantasy",
+      "Epic fantasy"
+    ],
+    "status": "available",
+    "hasEpub": true
+  },
+  {
+    "slug": "mordreds_tale_part_2",
+    "title": "Mordred's Tale — Part II: Smoke and Crowns",
+    "author": "Ben Garrard",
+    "description": "War in Hallinghorn, returning magic, and kinship under pressure. Mordred rises while crowns bargain over wells and blood.",
+    "genres": [
+      "Fantasy",
+      "Dark fantasy",
+      "War fantasy"
+    ],
+    "status": "available",
+    "hasEpub": true
+  },
+  {
+    "slug": "mordreds_tale_part_3",
+    "title": "Mordred's Tale — Part III: Boughfall",
+    "author": "Ben Garrard",
+    "description": "Giants, survival, and statecraft after the tree is neglected. Power hardens into law while the world refuses to stay cut.",
+    "genres": [
+      "Fantasy",
+      "Dark fantasy",
+      "Political fantasy"
+    ],
+    "status": "available",
+    "hasEpub": true
   }
 ]
