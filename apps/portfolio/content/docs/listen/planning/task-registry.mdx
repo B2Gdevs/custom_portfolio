@@ -38,4 +38,4 @@ repoPath: apps/portfolio/content/docs/listen/planning/task-registry.mdx
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
 | `listen-access-01-01` | `done` | define and start the DB-backed BandLab catalog model plus entitlement-gated visibility rules for private rows | `global-auth-01-01` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
-| `listen-access-01-02` | `planned` | replace the current shared-password unlock assumption with authenticated owner-session access for private rows while keeping public rows open | `listen-access-01-01`, `global-auth-01-02` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
+| `listen-access-01-02` | `done` | replace the current shared-password unlock assumption with authenticated owner-session access for private rows while keeping public rows open | `listen-access-01-01`, `global-auth-01-02` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |

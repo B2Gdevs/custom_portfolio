@@ -33,11 +33,7 @@ function shouldIncludeEntry(
   entry: ListenCatalogEntry,
   access: ListenCatalogBootstrap['access'],
 ) {
-  return (
-    entry.visibility === 'public' ||
-    access.canViewPrivate ||
-    Boolean(entry.lockGroup)
-  );
+  return entry.visibility === 'public' || access.canViewPrivate;
 }
 
 function normalizeTags(value: ListenCatalogRecordDoc['extraTags']) {

@@ -49,6 +49,14 @@ repoPath: apps/portfolio/content/docs/listen/planning/decisions.mdx
 | **Rationale** | Listen should reuse the same auth/tenant contract as Books instead of carrying `lockGroup` semantics into the long-term catalog model. |
 | **Consequences** | File-backed `lockGroup` rows remain transitional; DB-backed rows do not need a shared-password group to express private access. |
 
+## `LISTEN-LOCK-03` -- Private rows are auth-only, not password-unlocked
+
+| Field | Value |
+| --- | --- |
+| **Decision** | Private Listen rows should not render to anonymous viewers and should never expose a shared-password unlock form. They appear only for authenticated viewers with the shared `listen:private` entitlement. |
+| **Rationale** | The private-media path should match the same owner-session model used by Books instead of keeping a second access story alive in the UI. |
+| **Consequences** | Shared-password unlock remains only for explicitly public `lockGroup` previews; private media now requires auth-backed visibility from the start. |
+
 ## `LISTEN-UX-01` -- Parity with blog / projects discovery
 
 | Field | Value |

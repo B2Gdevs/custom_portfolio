@@ -5,7 +5,7 @@ date: "2026-03-28"
 updated: "2026-03-30"
 order: 2
 repoPath: apps/portfolio/content/docs/listen/planning/state.mdx
-taskPhase: listen-access-01
+taskPhase: listen-surface-03
 ---
 
 # State
@@ -23,18 +23,18 @@ taskPhase: listen-access-01
 
 | Field | Value |
 | --- | --- |
-| `phase` | `listen-surface-03` maintenance + `listen-access-01` |
-| `plan` | the public listening-room surface is shipped; the first DB-backed catalog slice is now in place, and the next pass is to finish moving private owner-only tracks and presets off shared-password unlocks and onto the same authenticated session/entitlement model the reader uses |
-| `focus` | keep `/listen` public, let DB-backed rows participate in the catalog now, and remove long-term shared-password assumptions for private media next |
+| `phase` | `listen-surface-03` maintenance |
+| `plan` | the public listening-room surface is shipped, the DB-backed catalog bootstrap is in place, and private owner-only rows now depend on the shared authenticated session instead of shared-password unlocks |
+| `focus` | keep `/listen` public, seed real DB-backed tracks and presets, and tighten the long-lived Listen data/admin workflow on top of the shared auth layer |
 | `constraint` | no public signup; private media should reuse the Global auth layer instead of inventing a Listen-only access scheme |
 
 ## Next queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | `listen-access-01-02`: migrate private access off shared-password unlock groups and onto authenticated owner sessions | `feature` |
-| `2` | seed and backfill real DB-backed Listen rows once the owner-session gate replaces transitional unlock groups | `content` |
-| `3` | continue catalog copy/data cleanup only when it supports the new backend-backed model | `content` |
+| `1` | plan the next Listen data phase around seeding and backfilling real DB-backed rows now that the access model is stable | `planning` |
+| `2` | continue catalog copy/data cleanup only when it supports the backend-backed model | `content` |
+| `3` | add admin/editor workflow only after the row model and backfill plan are explicit | `feature` |
 
 ## References
 

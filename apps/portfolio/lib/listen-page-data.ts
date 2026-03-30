@@ -67,31 +67,27 @@ export async function buildListenPageRows({
 }): Promise<ListenPageRow[]> {
   const { access, entries } = await getListenBootstrap(cookieHeader);
   const unlockedGroups = getUnlockedListenGroups(cookieStore, entries);
-  return entries.map((entry) => {
-    const hasLegacyLock = Boolean(entry.lockGroup);
+  return entries.flatMap((entry) => {
+    if (entry.visibility === 'private' && !access.canViewPrivate) {
+      return [];
+    }
+
     const unlocked = !entry.lockGroup || unlockedGroups.has(entry.lockGroup);
-    const mediaPublic =
-      entry.visibility === 'public'
-        ? unlocked
-        : access.canViewPrivate || (hasLegacyLock && unlocked);
+    const mediaPublic = entry.visibility === 'private' ? access.canViewPrivate : unlocked;
     const embedSrc = resolveListenEmbedSrc({
       catalogKind: entry.catalogKind,
       embedUrl: entry.embedUrl,
       bandlabUrl: entry.bandlabUrl,
     });
 
-    return {
-      item: toListenDiscoveryItem(entry, { mediaPublic }),
-      locked:
-        entry.visibility === 'private'
-          ? !(access.canViewPrivate || (hasLegacyLock && unlocked))
-          : Boolean(entry.lockGroup && !unlocked),
-      lockGroup:
-        entry.visibility === 'private' && !access.canViewPrivate && !hasLegacyLock
-          ? null
-          : (entry.lockGroup ?? null),
-      embedUrl: mediaPublic ? embedSrc : '',
-      bandlabUrl: mediaPublic ? entry.bandlabUrl : '',
-    };
+    return [
+      {
+        item: toListenDiscoveryItem(entry, { mediaPublic }),
+        locked: entry.visibility === 'public' ? Boolean(entry.lockGroup && !unlocked) : false,
+        lockGroup: entry.visibility === 'public' ? (entry.lockGroup ?? null) : null,
+        embedUrl: mediaPublic ? embedSrc : '',
+        bandlabUrl: mediaPublic ? entry.bandlabUrl : '',
+      },
+    ];
   });
 }

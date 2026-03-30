@@ -264,7 +264,7 @@ export function ListenIndexClient({ rows }: { rows: ListenPageRow[] }) {
               </div>
               <h1 className="mt-3 font-serif text-4xl text-primary sm:text-5xl">Songs in the same weather system</h1>
               <p className="mt-3 text-base text-text-muted sm:text-lg">
-                Tracks and BandLab presets in one catalog. Some rows stay gated until you enter the shared password.
+                Tracks and BandLab presets in one catalog. Public rows stay open, and owner-only media appears only when the signed-in session allows it.
               </p>
             </div>
             <div className="flex gap-3 lg:w-[26rem]">
