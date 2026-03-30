@@ -1,0 +1,36 @@
+---
+title: Requirements
+description: Section requirements for Dialogue Forge docs, editor behavior, and export-path documentation.
+date: "2026-03-30"
+updated: "2026-03-30"
+repoPath: apps/portfolio/content/docs/dialogue-forge/requirements.mdx
+order: 6
+---
+
+# Requirements
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `dialogue-forge` |
+| `scope` | `tool-docs`, `editor-behavior`, `exports` |
+| `status` | `active` |
+| `owner` | `dialogue-forge-section` |
+
+## Core Requirements
+
+| Id | Requirement | Why |
+| --- | --- | --- |
+| `DF-REQ-01` | Dialogue Forge docs must describe the shipped tool, not speculative branches that are no longer real | section docs should stay trustworthy for operators and readers |
+| `DF-REQ-02` | exporter, editor, and data-model notes should stay linked to the current app route and package implementation | the docs need a direct path back to the code that owns behavior |
+| `DF-REQ-03` | planning records for Dialogue Forge should stay local to this section so tool work can evolve without being buried in general documentation | the section behaves like a small product with its own sequence of docs tasks |
+| `DF-REQ-04` | architecture and decision capture should happen in section records before deeper implementation prose expands again | the section needs a stable planning backbone before more feature docs are written |
+
+## Section Boundaries
+
+| Topic | Rule |
+| --- | --- |
+| `tool-scope` | cover editor behavior, export paths, data shape, and current docs for the shipped app |
+| `speculation` | avoid documenting abandoned or hypothetical features as if they already exist |
+| `planning` | keep roadmap, state, task registry, decisions, and errors-and-attempts inside this section |

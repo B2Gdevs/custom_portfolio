@@ -1,0 +1,21 @@
+---
+title: Kickoff -- global-auth-01
+description: Shared auth, tenant, and entitlement foundation for gated site features.
+date: "2026-03-29"
+updated: "2026-03-29"
+repoPath: apps/portfolio/content/docs/global/planning/plans/global-auth-01/PLAN.mdx
+taskPhase: global-auth-01
+---
+
+# Kickoff: `global-auth-01`
+
+| Field | Value |
+| --- | --- |
+| `goal` | Establish one shared auth and entitlement layer for gated site features before Books and Listen add backend-backed persistence or private media access. |
+| `scope` | Payload auth-enabled users, tenant/org seed, owner seed, long-lived session policy, local auto-login for development, and shared helpers for permission checks. |
+| `non-goals` | public signup, social auth, multi-tenant self-service onboarding, full billing, or public ACL management. |
+| `definition-of-done` | owner login works, one tenant/org is seeded, local development can auto-login safely, session helpers expose authenticated user plus entitlements, and automated tests cover the session and gating helpers. |
+| `tests-required` | unit coverage for session parsing, owner seed behavior, and permission helpers; build/lint must pass. |
+| `dependencies` | current Payload integration, existing RAG collections, and books/listen planners consuming the new policy instead of older lock systems. |
+| `open-questions` | exact entitlement field shape beyond owner-only v1; whether admin-panel mounting lands in this phase or the next one; how far BandLab private asset storage should go before books persistence is wired. |
+| `first-tasks` | `global-auth-01-01`, `global-auth-01-02`, `global-auth-01-03` |

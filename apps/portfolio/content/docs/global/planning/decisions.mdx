@@ -2,7 +2,7 @@
 title: Decisions
 description: Stable decisions for the Global docs section and repo-wide planning IA.
 date: "2026-03-28"
-updated: "2026-03-28"
+updated: "2026-03-30"
 order: 4
 repoPath: apps/portfolio/content/docs/global/planning/decisions.mdx
 taskPhase: global-site-01
@@ -12,8 +12,11 @@ taskPhase: global-site-01
 
 | Id | Status | Decision | Impact |
 | --- | --- | --- | --- |
-| `global-site-dec-01` | `accepted` | **Global planning guide** (`global-planning.mdx`) is a **reference** doc, not part of the collapsed **planning** subtree. The planning loop for this section lives in **planning-docs** -> **state** -> **task-registry** -> **decisions**, same as Books, Documentation, etc. | Sidebar: `global/planning/*.mdx` vs `global-planning.mdx` as sibling file; `isPlanningDocSlug` excludes `global-planning`. |
-| `global-site-dec-02` | `accepted` | Mermaid diagrams and long-form "human index" prose stay on the **Global planning guide** so **planning-docs** stays a compact registry + loop table. | Agents read **planning-docs** first for structure, **global-planning** for diagrams and id grammar. |
+| `global-site-dec-01` | `accepted` | **Global planning guide** (`global-planning.mdx`) is a **reference** doc, not part of the collapsed **planning** subtree. The Global planning section itself remains a normal section with requirements, roadmap, state, task-registry, decisions, and a compact playbook. | Sidebar keeps `global/planning/*.mdx` and `global-planning.mdx` distinct without hiding the Global section's planning records. |
+| `global-site-dec-02` | `accepted` | The **Global** section is the human-first planning entrypoint for this repo; agents read it before picking a section or consulting `.planning/*.xml`. | Humans and agents share one visible workflow entrypoint on the docs site. |
+| `global-site-dec-03` | `accepted` | New, ambiguous, or stale phases should use a lightweight kickoff record before broad implementation starts. | Agents must clarify scope, non-goals, risks, tests, and first tasks before doing large work. |
+| `global-site-dec-04` | `accepted` | Executable behavior is not `done` without automated tests. Docs-only or content-only phases still need concrete verification commands, but they cannot waive test requirements for shipped behavior. | Definition of done now includes tests as a hard gate for implementation phases. |
+| `global-auth-dec-01` | `accepted` | The site has no public signup in v1. One owner account and one tenant/org are seeded locally, anonymous visitors may still browse public surfaces, and gated features are unlocked by shared auth plus entitlements rather than section-specific passwords. | Books and Listen can add private or write-capable features without inventing separate access models. |
 
 ## References
 

@@ -2,7 +2,7 @@
 title: Decisions
 description: Compact decision records for the Magicborn worldbuilding section.
 date: "2026-03-28"
-updated: "2026-03-28"
+updated: "2026-03-29"
 order: 5
 ---
 
@@ -15,6 +15,7 @@ order: 5
 | `MAGICBORN-DOCS-RAG-ELIGIBLE` | `accepted` | public `magicborn` docs are part of the approved retrieval corpus for site chat | citations can link back to lore pages as first-class sources |
 | `MAGICBORN-DOCS-CANON-DOSSIERS` | `accepted` | worldbuilding pages should be grouped canon dossiers, not one-off lore scenes | each page can stay semantically coherent for readers while producing cleaner retrieval chunks |
 | `MAGICBORN-DOCS-DERIVED-SOURCE-ANCHORS` | `accepted` | lore dossiers may derive from manuscript canon, but they must carry explicit source anchors back to the originating chapter/page material | the ingestion corpus can use worldbuilding summaries without treating raw chapter files as the public RAG store |
+| `MAGICBORN-IN-WORLD-SPOILERY` | `accepted` | the section may include **in-world documents** (statutes, ledgers, confessions) that are **fully spoilery** relative to the unpublished book; frontmatter may carry `spoilerLevel` for humans | book planning remains authoritative for sequencing; lore can still surface endgame facts for author/chat tooling |
 
 ## Decision Rule
 

@@ -43,6 +43,8 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -101,7 +103,10 @@ const primaryNavItems: {
     href: '/apps',
     label: 'Apps',
     icon: LayoutGrid,
-    match: (p) => p === '/apps' || p.startsWith('/apps/'),
+    match: (p) =>
+      p !== '/apps/reader' &&
+      !p.startsWith('/apps/reader/') &&
+      (p === '/apps' || p.startsWith('/apps/')),
   },
   {
     href: '/apps/reader',
@@ -460,7 +465,10 @@ function PortfolioSidebarInner({ pathname, navMenus }: { pathname: string; navMe
               href="/apps"
               onClick={onLinkClick}
               className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
-                pathname === '/apps' || pathname?.startsWith('/apps/')
+                pathname &&
+                pathname !== '/apps/reader' &&
+                !pathname.startsWith('/apps/reader/') &&
+                (pathname === '/apps' || pathname.startsWith('/apps/'))
                   ? 'bg-sidebar-primary text-sidebar-primary-foreground'
                   : 'text-sidebar-foreground/70 hover:text-sidebar-foreground'
               }`}
@@ -511,6 +519,34 @@ function PortfolioSidebarInner({ pathname, navMenus }: { pathname: string; navMe
         className={`px-2 py-3 ${isScrolling ? 'scroll-active' : ''}`}
         onScroll={handleScroll}
       >
+        {pathname === '/apps/reader' || pathname.startsWith('/apps/reader/') ? (
+          <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+            <SidebarGroupLabel>Reader</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-0.5">
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    isActive
+                    className="border border-transparent data-active:border-sidebar-ring/50"
+                    render={<Link href="/apps/reader" onClick={onLinkClick} />}
+                  >
+                    <LibraryBig size={17} />
+                    <span>Shelf</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    className="border border-transparent data-active:border-sidebar-ring/50"
+                    render={<Link href="/apps" onClick={onLinkClick} />}
+                  >
+                    <LayoutGrid size={17} />
+                    <span>All apps</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ) : null}
         <NavMenuSections pathname={pathname} navMenus={navMenus} onLinkClick={onLinkClick} />
       </SidebarContent>
 

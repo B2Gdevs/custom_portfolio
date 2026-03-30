@@ -1,0 +1,10 @@
+{
+  "title": "Magicborn: The Rune Path",
+  "author": "Ben Garrard",
+  "description": "Kael’s road out of Tarro’s service — a hidden route between kingdoms, strength earned in steps, and runes carved for the next person who runs.",
+  "genres": ["Fantasy", "Dark fantasy"],
+  "epubPlanningDirs": [
+    "../../apps/portfolio/content/docs/books/planning",
+    "../../apps/portfolio/content/docs/books/magicborn-rune-path/planning"
+  ]
+}

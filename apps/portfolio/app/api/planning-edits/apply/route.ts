@@ -24,7 +24,9 @@ function resolvePlanningPath(relativePath: string, planningDir: string, root: st
     return null;
   }
 
-  const base = normalized.startsWith('.planning/') ? normalized : `.planning/${normalized}`;
+  const planningDirRelative = path.relative(root, planningDir).replace(/\\/g, '/');
+  const prefixedPath = planningDirRelative ? `${planningDirRelative}/` : '';
+  const base = normalized.startsWith(prefixedPath) ? normalized : `${prefixedPath}${normalized}`;
   const absolute = path.join(root, base);
   const relative = path.relative(planningDir, absolute);
   if (relative.startsWith('..') || path.isAbsolute(relative)) {

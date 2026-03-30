@@ -26,7 +26,7 @@ interface DocSectionMeta {
 const DOC_SECTION_META: Record<string, DocSectionMeta> = {
   global: {
     label: 'Global',
-    description: 'Repo-wide planning loop (planning-docs, state, task registry) plus reference guides (e.g. global planning diagrams).',
+    description: 'Human-first entrypoint for the repo-wide planning loop, plus reference guides for planning grammar, ownership, and diagrams.',
     order: 0,
   },
   books: {
@@ -96,34 +96,63 @@ function getSectionMeta(sectionKey: string): DocSectionMeta {
   );
 }
 
+/** Per-title fiction streams: `books/<slug>/planning/` with standard leaf names (`state`, `task-registry`, `decisions`). */
+export const BOOK_STREAM_ORDER = ['magicborn-rune-path', 'mordreds-legacy', 'mordreds-tale'] as const;
+const BOOK_PLANNING_STREAMS = new Set<string>(BOOK_STREAM_ORDER);
+
 /** Sort order for docs in a section and for files under a section `planning/` folder. */
 export function getDocPriority(slug: string): number {
-  const leaf = slug.split('/').pop() || slug;
+  const parts = slug.split('/').filter(Boolean);
+  const leaf = parts[parts.length - 1] || slug;
 
-  if (leaf === 'planning-docs') return 0;
-  if (leaf === 'state') return 2;
-  if (leaf === 'task-registry') return 3;
-  if (leaf === 'errors-and-attempts') return 4;
-  if (leaf === 'decisions') return 5;
-  if (leaf === 'requirements') return 6;
-  if (leaf === 'roadmap') return 7;
+  if (leaf === 'requirements') return 0;
+  if (slug === 'magicborn/in-world') return 1;
+  if (leaf === 'roadmap') return 1;
+  if (leaf === 'planning-docs') return 2;
+
+  if (parts[0] === 'books' && parts[1] === 'planning' && parts[2] === 'plans' && parts.length >= 4) {
+    return 15;
+  }
+
+  if (
+    parts[0] === 'books' &&
+    parts.length === 4 &&
+    parts[2] === 'planning' &&
+    BOOK_PLANNING_STREAMS.has(parts[1]!)
+  ) {
+    const si = BOOK_STREAM_ORDER.indexOf(parts[1] as (typeof BOOK_STREAM_ORDER)[number]);
+    const typeOffset =
+      leaf === 'state' ? 0 : leaf === 'task-registry' ? 1 : leaf === 'decisions' ? 2 : 3;
+    if (si >= 0 && typeOffset <= 2) {
+      return 40 + si * 3 + typeOffset;
+    }
+  }
+
+  if (leaf === 'state') return 3;
+  if (leaf === 'task-registry') return 4;
+  if (leaf === 'errors-and-attempts') return 5;
+  if (leaf === 'decisions') return 6;
   if (leaf === 'index') return 8;
   if (leaf === 'overview') return 9;
   if (leaf === 'getting-started') return 10;
-  /** Stream-specific planning under `books/planning/` (e.g. Mordred's Tale). */
-  if (leaf.startsWith('mordreds-tale-')) {
-    if (leaf.includes('state')) return 20;
-    if (leaf.includes('task-registry')) return 21;
-    if (leaf.includes('decisions')) return 22;
-  }
   return 11;
 }
 
 export function isPlanningDocSlug(slug: string): boolean {
   const parts = slug.split('/').filter(Boolean);
-  if (parts[1] === 'planning') return true;
+  if (parts.length >= 2 && parts[1] === 'planning') return true;
+  if (
+    parts[0] === 'books' &&
+    parts.length >= 4 &&
+    parts[2] === 'planning' &&
+    BOOK_PLANNING_STREAMS.has(parts[1]!)
+  ) {
+    return true;
+  }
   const leaf = parts[parts.length - 1] || slug;
   return (
+    leaf === 'requirements' ||
+    leaf === 'roadmap' ||
     leaf === 'planning-docs' ||
     leaf === 'state' ||
     leaf === 'task-registry' ||

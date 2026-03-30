@@ -1,7 +1,19 @@
 [planning]
 sprintSize = 5
 currentProfile = "human"
-conventionsPaths = ["AGENTS.md", "REQUIREMENTS.md", ".planning/AGENTS.md"]
+conventionsPaths = [
+  "AGENTS.md",
+  ".planning/AGENTS.md",
+  "apps/portfolio/content/docs/documentation/requirements.mdx",
+  "apps/portfolio/content/docs/documentation/planning/state.mdx",
+  "apps/portfolio/content/docs/documentation/roadmap.mdx",
+]
+
+[[planning.roots]]
+id = "global"
+path = "."
+planningDir = ".planning"
+discover = false
 
 [profiles.human]
 description = "Default human view."

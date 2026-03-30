@@ -51,13 +51,13 @@ const catalog: ListenCatalogEntry[] = [
   {
     slug: 'dont-let-me-be-forgotten',
     catalogKind: 'track',
-    title: "Don't Let Me Be Forgotten",
+    title: 'Love in the Grave',
     genre: 'Alternative',
     duration: '3:04',
     mood: 'Melancholic, aching, exposed',
     era: 'Public release',
     description:
-      'A publicly listed BandLab track now surfaced directly in the listening room so the catalog reflects real released material instead of filler rows.',
+      'A slow-burn alternative piece: grief, memory, and the weight of wanting to be held when the world moves on without you.',
     bandlabUrl:
       'https://www.bandlab.com/track/8e892de4-51b7-f011-8196-0022484a3197?revId=8b892de4-51b7-f011-8196-0022484a3197',
     embedUrl: 'https://www.bandlab.com/embed/?id=8b892de4-51b7-f011-8196-0022484a3197',
@@ -84,14 +84,14 @@ const catalog: ListenCatalogEntry[] = [
   {
     slug: 'bandlab-effect-preset-8f8d1ca2196640c1aeaac13e51383e11',
     catalogKind: 'preset',
-    title: 'BandLab effect preset',
+    title: 'Polished shelf chain',
     genre: 'Preset',
     mood: 'Polished, produced',
     era: 'BandLab preset',
     description:
-      'Live BandLab effect preset link for the listening room. This replaces the old fake preset examples so the preset catalog only shows real entries.',
+      'A BandLab effect-preset chain for lift, air, and glue on vocals or melodic parts when you want presence without harshness.',
     bandlabUrl:
-      'https://www.bandlab.com/effect-presets/8f8d1ca2196640c1aeaac13e51383e11-f2c5c742fd0dc06b2d34bdc566088897-ba899842044846578cc27cb33b3e185c-user',
+      'https://www.bandlab.com/effect-presets/8f8d1ca2196640c1aeaac13e51383e11-b62e01a253b848829eebaffa3aa676fc-6f5153d425ed421588dc168449324f74-user',
     embedUrl: '',
     date: '2026-03-20',
     extraTags: ['BandLab', 'Effect preset'],

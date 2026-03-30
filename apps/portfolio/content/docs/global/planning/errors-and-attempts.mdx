@@ -13,5 +13,7 @@ taskPhase: global-site-01
 | When | Attempt | Outcome |
 | --- | --- | --- |
 | pre-`global-site-01` | Single **Global planning** page mixing registry copy, Mermaid, and pack policy | Hard to mirror the **planning-docs -> state -> task-registry** pattern used in other sections; split for parity. |
+| `2026-03-29` | Wire Payload auth directly into Next `app/api/auth/*` routes for the first foundation slice | Webpack pulled `payload` / `@payloadcms/db-sqlite` / `libsql` artifacts into the route bundle and broke `pnpm run build`. Keep the first slice at collections + seed + dev auto-login, then return to host-facing auth routes as `global-auth-01-03` with a safer server boundary. |
+| `2026-03-30` | Resolve the host auth surface by keeping `tsx` package resolution inside the route bundle | Webpack then chased `tsx` internals (`esbuild` type files) and failed again. The stable fix was a subprocess worker boundary using filesystem paths (`node_modules/tsx/dist/cli.mjs`) so route bundles stay free of Payload and `tsx` package graphs. |
 
 _Add rows when something worth avoiding comes up._

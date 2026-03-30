@@ -6,6 +6,7 @@
     "dev": "node scripts/build-planning-pack.cjs && node scripts/build-planning-embed-packs.cjs && concurrently -n books,next -c green,cyan \"node scripts/watch-books-dev.cjs\" \"next dev --webpack\"",
     "build": "node scripts/build-planning-pack.cjs && node scripts/build-planning-embed-packs.cjs && next build --webpack",
     "planning:embed-packs": "node scripts/build-planning-embed-packs.cjs",
+    "planning:embed-book-pack": "node scripts/build-book-planning-embed-pack.cjs",
     "build:epub": "node scripts/build-epub.cjs",
     "start": "next start",
     "lint": "eslint",
@@ -15,7 +16,8 @@
     "rag:ingest": "node scripts/rag-ingest-runner.cjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "auth:seed": "tsx --tsconfig tsconfig.json scripts/seed-auth-owner.ts"
   },
   "dependencies": {
     "@assistant-ui/react": "^0.12.21",
@@ -27,6 +29,7 @@
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@next/mdx": "^16.0.8",
+    "@portfolio/repub-builder": "workspace:*",
     "@payloadcms/db-sqlite": "^3.80.0",
     "better-sqlite3": "^12.5.0",
     "class-variance-authority": "^0.7.1",

@@ -5,7 +5,7 @@ date: "2026-03-28"
 updated: "2026-03-30"
 order: 2
 repoPath: apps/portfolio/content/docs/listen/planning/state.mdx
-taskPhase: listen-surface-02
+taskPhase: listen-access-01
 ---
 
 # State
@@ -23,17 +23,18 @@ taskPhase: listen-surface-02
 
 | Field | Value |
 | --- | --- |
-| `phase` | `listen-surface-02` (identity + shared search pass landed) |
-| `plan` | **`listen-surface-01`** and **`listen-surface-02`** shipped: real BandLab catalog rows, shared content-surface shell, listening-room identity, and type-to-open search behavior |
-| `focus` | grow **`listen-catalog.ts`** with real releases and presets, tighten copy, and add optional e2e for the unlock flow |
-| `constraint` | keep unlock **simple** (shared secrets per lock group, browser session); do not scope OAuth or per-user ACLs in v1 |
+| `phase` | `listen-surface-03` maintenance + `listen-access-01` |
+| `plan` | the public listening-room surface is shipped; the next pass is to prepare private owner-only tracks and presets for the same auth/entitlement system the reader now depends on, while keeping `/listen` as the public route |
+| `focus` | move BandLab songs and presets toward database-backed records and replace long-term shared-password assumptions with owner auth plus entitlements |
+| `constraint` | no public signup; private media should reuse the Global auth layer instead of inventing a Listen-only access scheme |
 
 ## Next queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | add more real BandLab rows and retire any remaining placeholder content | `content` |
-| `2` | optional e2e around unlock + listen search smoke once the wider route/nav pass settles | `test` |
+| `1` | `listen-access-01-01`: define the DB-backed BandLab data model and entitlement-gated private visibility contract | `feature` |
+| `2` | `listen-access-01-02`: migrate private access off shared-password unlock groups and onto authenticated owner sessions | `feature` |
+| `3` | continue catalog copy/data cleanup only when it supports the new backend-backed model | `content` |
 
 ## References
 
@@ -43,3 +44,4 @@ taskPhase: listen-surface-02
 | `music-lib` | `apps/portfolio/lib/music.ts` | current home-page track source |
 | `catalog-lib` | `apps/portfolio/lib/listen-catalog.ts` | canonical listen catalog rows |
 | `route-conventions` | `content/docs/documentation/route-conventions.mdx` | URL taxonomy |
+| `payload-config` | `apps/portfolio/payload.config.ts` | shared auth and future media collections |

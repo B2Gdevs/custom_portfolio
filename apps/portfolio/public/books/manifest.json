@@ -1,15 +1,37 @@
 [
   {
+    "slug": "magicborn_rune_path",
+    "title": "Magicborn: The Rune Path",
+    "author": "Ben Garrard",
+    "description": "Kael’s road out of Tarro’s service — a hidden route between kingdoms, strength earned in steps, and runes carved for the next person who runs.",
+    "genres": [
+      "Fantasy",
+      "Dark fantasy"
+    ],
+    "status": "available",
+    "hasEpub": true
+  },
+  {
     "slug": "mordreds_legacy",
-    "title": "Mordreds Legacy",
-    "status": "coming-soon",
-    "hasEpub": false
+    "title": "Mordred's Legacy",
+    "author": "Ben Garrard",
+    "description": "A dark fantasy sequel. Alun, the child who does not remember, and the world that will not let him forget.",
+    "genres": [
+      "Fantasy",
+      "Dark fantasy"
+    ],
+    "status": "available",
+    "hasEpub": true
   },
   {
     "slug": "mordreds_tale",
     "title": "Mordred's Tale",
     "author": "Ben Garrard",
     "description": "A dark fantasy novel. Morgana, Jack, and the threads of fate.",
+    "genres": [
+      "Fantasy",
+      "Dark fantasy"
+    ],
     "status": "available",
     "hasEpub": true
   }

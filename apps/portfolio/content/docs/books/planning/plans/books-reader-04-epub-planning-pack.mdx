@@ -1,0 +1,66 @@
+---
+title: EPUB planning pack manifest (books-reader-04)
+description: Contract for planning appendix items inside repo-built EPUBs and cockpit injection.
+date: "2026-03-29"
+repoPath: apps/portfolio/content/docs/books/planning/plans/books-reader-04-epub-planning-pack.mdx
+order: 1
+---
+
+# EPUB planning pack manifest (`books-reader-04-01`)
+
+## Location
+
+- **Path in zip:** `META-INF/portfolio-planning-pack.json`
+- **Version field:** top-level `planningPackManifestVersion: 1` (integer). Parsers should reject or best-effort unknown major versions.
+
+## Shape (v1)
+
+```json
+{
+  "planningPackManifestVersion": 1,
+  "entries": [
+    {
+      "href": "OEBPS/plan-planning-state.xhtml",
+      "virtualPath": "docs/books/planning/state.mdx",
+      "title": "planning: State",
+      "sourceKind": "mdx"
+    }
+  ]
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `href` | Path of the appendix XHTML inside the EPUB zip (matches epub-gen layout under `OEBPS/`). |
+| `virtualPath` | Stable path shown in the cockpit file tree; should mirror site embed prefix where possible (`docs/books/planning/...`). |
+| `title` | Human title from the appendix header (front matter or file label). |
+| `sourceKind` | `md` \| `mdx` \| `raw` — hints how the body was produced; runtime extraction may still yield plain text with HTML lossiness for md/mdx. |
+
+## Virtual path rules (emit)
+
+When a planning root directory lies under `.../content/docs/`, the emitter sets:
+
+`virtualPath = 'docs/' + <path under content/docs, no leading slash> + '/' + <file relative to planning root>`
+
+(e.g. `docs/books/planning/state.mdx`) with forward slashes. Otherwise:
+
+`virtualPath = planning/<basename(planningRoot)>/<relative path>`
+
+## Runtime discovery order (`books-reader-04-02`)
+
+1. **Manifest-first:** if `META-INF/portfolio-planning-pack.json` parses as v1, use its `entries` in order.
+2. **Fallback (legacy EPUBs):** zip entries whose path matches `OEBPS/plan-*.xhtml` (case-insensitive), sorted by path. For each file, `virtualPath` is derived from the `.planning-appendix-path` paragraph in the XHTML when present; else `planning/epub/<basename(href)>`.
+
+## Cockpit pack identity
+
+One **`PlanningPack`** (or one embed pack) per catalog title:
+
+- **Id:** `book-<slug>-planning` (slug = host `readingTargetId`, e.g. `mordreds_tale` → `book-mordreds_tale-planning`).
+
+## Content fidelity (v1)
+
+Appendix bodies are **XHTML** in the zip. Extraction for the inspector uses **lossy** plain text: strip tags, decode basic entities, preserve some block breaks. Raw files use `<pre>` content with entity decoding. This is acceptable for v1; richer markdown round-trips are optional later.
+
+## Empty / missing planning
+
+If the book build has **no** `epubPlanningDirs` (or empty trees), the emitter **omits** the manifest file. Runtimes treat that as **no** embedded planning pack.

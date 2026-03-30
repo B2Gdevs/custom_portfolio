@@ -1,0 +1,70 @@
+---
+title: Requirements
+description: Section requirements for RepoPlanner in this monorepo, including workflow steering, structured editing, and host boundaries.
+date: "2026-03-29"
+updated: "2026-03-29"
+repoPath: apps/portfolio/content/docs/repo-planner/requirements.mdx
+order: 6
+---
+
+# Requirements
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `repo-planner` |
+| `scope` | `cli`, `embed`, `planning-data`, `workflow-ui` |
+| `status` | `active` |
+| `owner` | `monorepo` |
+
+## Core Requirements
+
+| Id | Requirement | Why |
+| --- | --- | --- |
+| `REPOPLAN-REQ-01` | RepoPlanner should align with the repo's roadmap-first planning loop instead of reviving standalone implementation-plan drift | the tool needs to reinforce the planning model actually used in this repo |
+| `REPOPLAN-REQ-02` | the public portfolio embed should remain read-only by default and avoid casual server-side repo writes | operators can export and commit locally without turning the site into a write surface |
+| `REPOPLAN-REQ-03` | the data plane should understand root `.planning/*.xml` and section planning packs with one consistent bundle shape | live repo mode and uploaded packs should feed the same cockpit model |
+| `REPOPLAN-REQ-04` | RepoPlanner work in this repo should stay tied to the vendored submodule and documented host contracts | upstream changes and host glue need a clear ownership path |
+| `REPOPLAN-REQ-05` | CLI productization should treat RepoPlanner and `repub` as separate tools even when both are documented from the same monorepo | the commands solve different problems and should not collapse into one mega-CLI |
+| `REPOPLAN-REQ-06` | RepoPlanner should help agents pick a phase quickly by surfacing active phases, percent complete, estimated effort, dependencies, and missing verification data | agents should not need to reread the whole planning tree just to choose the next good phase |
+| `REPOPLAN-REQ-07` | RepoPlanner should scaffold kickoff and closeout flows around the planning records when appropriate (**vague**, **stale**, or **estimated hours above policy cutoff** — see [decisions](/docs/repo-planner/planning/decisions) **`REPOPLAN-KICKOFF-01`**), instead of requiring kickoff for every phase or encouraging freeform drift | the tool should reinforce the roadmap/state/task-registry/decisions loop already used in this repo |
+| `REPOPLAN-REQ-08` | executable behavior cannot be marked done in RepoPlanner workflows unless automated tests are present in the phase verification path | the UI and CLI should enforce the repo's hard rule for definition of done |
+| `REPOPLAN-REQ-09` | RepoPlanner should make global-vs-section ownership legible when agents create or pick phases | the tool should help users place work correctly, not just edit files faster |
+| `REPOPLAN-REQ-10` | The embed must treat **Pack** and **Live** as explicit modes: Pack uses built-in or uploaded pack data; Live uses server APIs that read the mounted repo | operators should never confuse local pack data with the server's `.planning/` tree |
+| `REPOPLAN-REQ-11` | Cockpit chrome should follow a dashboard layout: persistent left file tree at the primary breakpoint, top toolbar for import and grouped export actions, and labels that change with mode | matches the shell the portfolio is converging on |
+| `REPOPLAN-REQ-12` | Parsing and bundle shape for XML/MD/MDX in the embed should stay aligned with the same rules as `loop-cli` and shared `planning-parse-core` so cockpit and CLI disagree only when data differs, not when parsers diverge | one behavioral contract for planning files |
+| `REPOPLAN-REQ-13` | Snapshot should prioritize structured steering data over raw document text: ranked active/planned phases, blocking warnings, ownership hints, progress, missing DoD fields, missing tests, stale pointers, orphan tasks, and current sprint status | operators need help choosing and closing work, not a second document reader |
+| `REPOPLAN-REQ-14` | `AGENTS.md` should appear in RepoPlanner as a condensed workflow reminder and deep link, not as a fully inlined document inside the snapshot | the tool should reinforce the loop without drowning the operator in prose |
+| `REPOPLAN-REQ-15` | Planning records should be editable through form-based structured inputs wherever the schema is known: phase metadata, task rows, DoD fields, verification, status, dependencies, ownership, sprint membership, and phase open questions | the cockpit should feel like a planner, not a raw markdown/xml editor |
+| `REPOPLAN-REQ-16` | File tree remains the source-of-truth navigation metaphor, but the main pane should render parsed data as cards, lists, tables, badges, sprint views, and percentages instead of page-like prose by default | planning files are storage and navigation units; workflow decisions need higher-level views |
+| `REPOPLAN-REQ-17` | Visual semantics should stay consistent across CLI, cockpit, and docs: shared status colors, badges, icons, warning hierarchy, and effort labels | agents need to recognize urgency, risk, and ownership quickly |
+| `REPOPLAN-REQ-18` | Repo-specific workflow rules must be configurable host policy, while RepoPlanner stays a reusable product that can support looser or different planning contracts outside this portfolio repo | this monorepo helps shape the product, but should not hard-code every portfolio rule into upstream defaults |
+| `REPOPLAN-REQ-19` | Recommendation scoring should favor strategic importance, boost executable phases that still need tests, apply a shrinking penalty to Global work, treat many unresolved phase questions as planning entropy, use weighted task effort, and use created/updated timestamps only as tie-breakers or small boosts | ranking should match how work is actually chosen in this repo |
+| `REPOPLAN-REQ-20` | Sprint support should be first-class in snapshot and forms: open active/planned phases only, grouped by current sprint, with sprint defined automatically from phase ordering unless host policy says otherwise | the tool should show planning windows, not just isolated rows |
+| `REPOPLAN-REQ-21` | IDs should be immutable in the normal editing flow after creation; any rename must be an advanced migration action that rewrites references and is unavailable in read-only Live mode | ids are references, not casual labels |
+| `REPOPLAN-REQ-22` | Pack or local editing flows should autosave client-side with debounced writes and visible save-state feedback; Live mode remains read-only and never implies persistent browser edits to the mounted repo | operators want low-friction editing without confusing it for live repo mutation |
+| `REPOPLAN-REQ-23` | RepoPlanner should support visible open questions per phase so agents can record what they want answered without blocking work; questions remain phase-scoped, stay inspectable, use a single text field, use only `open` and `answered` (decision recorded) states, contribute equally to planning entropy, and stay in created order | planning should capture agent uncertainty instead of hiding it in chat history |
+| `REPOPLAN-REQ-24` | Snapshot and scoring must read only planning trees declared in config. Conventionally the global root points at the repo's primary machine loop; each root lists a directory name to treat as the planning folder. Config may define multiple roots and descendant discovery rules | monorepos often have one root `.planning` plus section planners; discovery rules belong in config, not implicit magic |
+
+## Snapshot Contract
+
+| Area | Display |
+| --- | --- |
+| `phase recommendation` | ranked list of active/planned phases with score, why-now reasons, blockers, ownership target, sprint, and direct links to roadmap/state/task rows |
+| `workflow reminder` | compact AGENTS summary card: read order, **when kickoff is required** (vague / stale / **estimated hours** over policy max), tests-required-for-done rule, and a deep link to the full file |
+| `risk lane` | badges for missing tests, missing DoD, blocked dependencies, stale phases, orphan tasks, stale state pointers, and unresolved phase open questions |
+| `progress lane` | completion percent, open task counts, phase age, recent activity, effort label, and sprint progress |
+| `ownership lane` | whether work belongs in Global, a section, or both, with the file targets that should be edited |
+| `detail pane` | structured lists, forms, percentages, sprint views, and task tables by default; raw file text stays hidden in normal RepoPlanner flows |
+
+## Section Boundaries
+
+| Topic | Rule |
+| --- | --- |
+| `submodule` | implementation changes land in `vendor/repo-planner`, then this repo consumes the bump |
+| `embed` | portfolio owns host layout and routes; long-term cockpit chrome belongs in the package |
+| `planning` | use section-local roadmap, state, task registry, decisions, and errors-and-attempts for RepoPlanner integration work |
+| `root-loop` | root `.planning/*.xml` remains the machine-readable monorepo layer that RepoPlanner reads and visualizes |
+| `global-entrypoint` | Global docs remain the human-first workflow surface; RepoPlanner should summarize and accelerate that loop, not replace its rules |
+| `host-policy` | portfolio-specific hard rules such as tests-required-for-done must be configurable policy flags or adapters, not invisible upstream assumptions |

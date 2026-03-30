@@ -1,0 +1,36 @@
+---
+title: Requirements
+description: Section requirements for the editor direction, source-material workflow, and EPUB3 output boundary.
+date: "2026-03-30"
+updated: "2026-03-30"
+repoPath: apps/portfolio/content/docs/editor/requirements.mdx
+order: 6
+---
+
+# Requirements
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `editor` |
+| `scope` | `workflow`, `authoring-ui`, `epub-output` |
+| `status` | `planned` |
+| `owner` | `editor-section` |
+
+## Core Requirements
+
+| Id | Requirement | Why |
+| --- | --- | --- |
+| `EDITOR-REQ-01` | the editor direction should start from messy real-world source material such as Notion exports, markdown, and MDX | the tool only matters if it matches the actual authoring inputs in this repo |
+| `EDITOR-REQ-02` | the output boundary is still valid EPUB3, not a brand-new book container | the editor must support the existing books pipeline instead of replacing it with a parallel format |
+| `EDITOR-REQ-03` | any writing UI or component system proposal must be evaluated against maintenance cost and EPUB compatibility before implementation | the section is still planning and should not drift into expensive speculative build work |
+| `EDITOR-REQ-04` | editor planning should stay separate from books execution until the workflow is concrete enough to become a real build task | this keeps research and productized book work from blocking each other |
+
+## Section Boundaries
+
+| Topic | Rule |
+| --- | --- |
+| `inputs` | map real source inputs first: Notion, markdown, MDX, and adjacent author data |
+| `outputs` | compile toward EPUB3-compatible markup and existing book delivery flows |
+| `implementation` | remain a planning target until the workflow and UI justify active product work |

@@ -99,6 +99,7 @@ export function FileTree({
 export type FileTreeFolderProps = HTMLAttributes<HTMLDivElement> & {
   path: string;
   name: string;
+  href?: string;
   /** Full label for tooltip (e.g. virtual repo path). */
   tooltipLabel?: string;
   /** Relative path under `content/docs` for ZIP download. */
@@ -108,6 +109,7 @@ export type FileTreeFolderProps = HTMLAttributes<HTMLDivElement> & {
 export function FileTreeFolder({
   path,
   name,
+  href,
   tooltipLabel,
   folderArchivePrefix,
   className,
@@ -119,18 +121,12 @@ export function FileTreeFolder({
   const isSelected = selectedPath === path;
 
   const triggerClass = cn(
-    'flex w-full items-center gap-0.5 rounded px-1.5 py-1 text-left text-text-muted transition-colors hover:bg-white/5 hover:text-primary',
+    'flex items-center gap-0.5 rounded px-1.5 py-1 text-left text-text-muted transition-colors hover:bg-white/5 hover:text-primary',
     isSelected && 'bg-white/10 text-primary'
   );
 
-  const row = (
-    <CollapsibleTrigger className={triggerClass}>
-      <ChevronRightIcon
-        className={cn(
-          'size-3.5 shrink-0 text-text-muted transition-transform',
-          isExpanded && 'rotate-90'
-        )}
-      />
+  const iconAndLabel = (
+    <>
       <FileTreeIcon>
         {isExpanded ? (
           <FolderOpenIcon className="size-3.5 text-accent" />
@@ -139,7 +135,40 @@ export function FileTreeFolder({
         )}
       </FileTreeIcon>
       <FileTreeName className="text-text">{name}</FileTreeName>
-    </CollapsibleTrigger>
+    </>
+  );
+
+  const row = (
+    <div className={cn('flex items-center gap-0.5 rounded', isSelected && 'bg-white/10')}>
+      <button
+        type="button"
+        onClick={() => setPathOpen(path, !isExpanded)}
+        aria-label={isExpanded ? `Collapse ${name}` : `Expand ${name}`}
+        className={cn(triggerClass, 'w-auto shrink-0 px-1')}
+      >
+        <ChevronRightIcon
+          className={cn(
+            'size-3.5 shrink-0 text-text-muted transition-transform',
+            isExpanded && 'rotate-90'
+          )}
+        />
+      </button>
+      {href ? (
+        <Link
+          href={href}
+          className={cn(triggerClass, 'min-w-0 flex-1')}
+          role="treeitem"
+          aria-selected={isSelected}
+          tabIndex={0}
+        >
+          {iconAndLabel}
+        </Link>
+      ) : (
+        <CollapsibleTrigger className={cn(triggerClass, 'min-w-0 flex-1')}>
+          {iconAndLabel}
+        </CollapsibleTrigger>
+      )}
+    </div>
   );
 
   const tip = tooltipLabel ?? name;

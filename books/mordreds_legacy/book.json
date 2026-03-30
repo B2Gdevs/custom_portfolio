@@ -1,0 +1,10 @@
+{
+  "title": "Mordred's Legacy",
+  "author": "Ben Garrard",
+  "description": "A dark fantasy sequel. Alun, the child who does not remember, and the world that will not let him forget.",
+  "genres": ["Fantasy", "Dark fantasy"],
+  "epubPlanningDirs": [
+    "../../apps/portfolio/content/docs/books/planning",
+    "../../apps/portfolio/content/docs/books/mordreds-legacy/planning"
+  ]
+}

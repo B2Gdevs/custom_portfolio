@@ -53,6 +53,12 @@ export default function FeaturedBookExperience({
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
+              href="/apps/reader"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-dark-alt px-5 py-3 text-sm font-medium text-primary transition-colors hover:border-accent hover:text-accent"
+            >
+              Browse library
+            </Link>
+            <Link
               href={`/apps/reader?book=${encodeURIComponent(featuredBook.slug)}`}
               className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-secondary transition-opacity hover:opacity-90"
             >

@@ -1,0 +1,33 @@
+---
+title: Roadmap
+description: Phase overview for the books section.
+date: "2026-03-29"
+updated: "2026-03-30"
+order: 1
+repoPath: apps/portfolio/content/docs/books/planning/roadmap.mdx
+---
+
+# Roadmap
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `books` |
+| `status` | `active` |
+| `scope` | reader shell, publishing, and books-side AI |
+
+## Phases
+
+| Phase | Status | Focus | Next |
+| --- | --- | --- | --- |
+| `books-reader-01` | `done` | establish the dedicated reader as the main reading surface and ship annotations/export basics | maintain only |
+| `books-reader-02` | `planned` | merge exported annotations into built book output and keep planning supplements stable | execute `books-reader-02-01` |
+| `books-reader-03` | `done` | turn `/apps/reader` into a stable library shell and extract runtime ownership cleanly | maintain only |
+| `books-reader-05` | `active` | move the reader onto real backend persistence, gated editing, auth-aware settings, and a more polished workspace | execute `books-reader-05-02` |
+| `books-publishing-01` | `planned` | expand edition and publishing records and ship the next visible EPUB | back burner while reader/backend work lands |
+| `books-ai-01` | `planned` | stabilize the Payload plus sqlite-vec RAG path and resolve the live quota mismatch | back burner while reader/backend work lands |
+
+## Magicborn line (fiction)
+
+Cross-title **reading order**, **chapter beat tables**, and **TB-*** open questions live in [section State](/docs/books/planning/state#magicborn-line-world-order-and-chapter-beats), not in ad hoc planning filenames. **Locks:** [`BOOKS-WORLD-CHRONOLOGY`](/docs/books/planning/decisions). **Work queue:** phase **`books-cross-title-01`** in [task registry](/docs/books/planning/task-registry).

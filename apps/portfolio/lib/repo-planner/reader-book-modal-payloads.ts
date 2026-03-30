@@ -1,18 +1,23 @@
-import type { BookPlanningLink } from '@/lib/repo-planner/book-planning-context';
+import type { ReaderPlanningCockpitPayload } from '@portfolio/repub-builder/reader';
 
-/** Planning MDX routes for Mordred's Tale (books section). */
-export const MORDREDS_TALE_PLANNING_LINKS: BookPlanningLink[] = [
-  { href: '/docs/books/planning/mordreds-tale-state', label: 'State' },
-  { href: '/docs/books/planning/mordreds-tale-task-registry', label: 'Tasks' },
-  { href: '/docs/books/planning/mordreds-tale-decisions', label: 'Decisions' },
-];
-
-/** Payload for `openModal(REPO_PLANNER_MODAL_ID, …)` from the EPUB reader strip. */
-export function mordredsTaleRepoPlannerModalPayload() {
+/** Payload for reader **`readerModalStore`** / global Repo Planner modal from the EPUB reader strip. */
+export function mordredsTaleRepoPlannerModalPayload(): ReaderPlanningCockpitPayload {
   return {
-    bookSlug: 'mordreds_tale',
-    bookTitle: "Mordred's Tale",
-    planningLinks: MORDREDS_TALE_PLANNING_LINKS,
-    embedReader: true as const,
+    readingTargetId: 'mordreds_tale',
+    surfaceLabel: "Mordred's Tale",
+  };
+}
+
+export function mordredsLegacyRepoPlannerModalPayload(): ReaderPlanningCockpitPayload {
+  return {
+    readingTargetId: 'mordreds_legacy',
+    surfaceLabel: "Mordred's Legacy",
+  };
+}
+
+export function magicbornRunePathRepoPlannerModalPayload(): ReaderPlanningCockpitPayload {
+  return {
+    readingTargetId: 'magicborn_rune_path',
+    surfaceLabel: 'Magicborn: The Rune Path',
   };
 }

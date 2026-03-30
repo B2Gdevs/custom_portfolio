@@ -5,7 +5,7 @@ displayTitle: false
 ---
 
 ![Page 1](/books/mordreds_tale/images/ch03-p001.png)
-The palisade gates opened to reveal a settlement transformed.
+The palisade gates of Tarro opened to reveal a city still spoken of as a settlement by envoys who did not want to admit how fast a kingdom could grow.
 Morgana stepped through, the child pressed against her chest, and stopped. This was not the small huts the slaves used to live in. Stone buildings rose three stories high along paved streets. A fountain stood in the central square, water flowing freely—an impossible luxury in a world without magic, yet there it was. Scaffolding marked new construction everywhere she looked. Merchants called out their wares. Children ran laughing between the buildings.
 
 
@@ -64,17 +64,15 @@ Morgana listened.
 
 
 
-"The Pantheon's stopped moving one day.  In fact, the gods that ruled for the entirety of human existence…became mortal, unmoving, and did not survive at the hands of the slaves that they had kept personally in a single day. 
+"The Pantheon stopped moving one day. The gods who ruled for the whole span anyone could remember became mortal, unmoving — and most did not survive what the people they'd chained did to them. Not every story ended the same way. You're proof of that. 
 
 
 
-Creatures spilled out of the place you call home.  And all of the weapons, tools, and things we relied on were mere chunks of metal or just a sharp blade.  Fortunately most of us were able to survive, but fending of those beasts was difficult.
+Creatures spilled out of the place you call home. And all of the weapons, tools, and things we relied on were mere chunks of metal or just a sharp blade. Fortunately most of us were able to survive, but fending off those beasts was difficult.
 
 
 
-We rebuilt what we could with the survivors, distant kingdoms even sent emissaries to check on the gods, and wanted to know why their city no longer functioned like it did before.  Magic…a resource that we didn’t know how pervasive in our lives it actually was.  Disappeared. 
-
-”  
+We rebuilt what we could with the survivors. Distant kingdoms sent emissaries to ask why their cities no longer worked the way they had before. Magic — a resource we didn't know how deep it ran in our lives — disappeared from the air. What's left is what people can squeeze into dead metal, for a little while."  
 
 
 
@@ -118,4 +116,4 @@ They reached a stone building with simple but clean rooms. A bed, table, hearth.
 
 When they left, Morgana sat with the child. He was warm against her chest, and while he touched her, she felt whole. Strong. When she set him in the cradle, that strength faded—not gone, but diminished. Mortal.
 She needed to understand this connection. Needed to understand what had happened to her during those lost years.
-But first, she needed to learn about this new world. This city being built. And whoever ruled it with enough power to make dead magic live again.
+But first, she needed to learn about this new world — this kingdom called Tarro, still half-dressed as a settlement. And whoever ruled it with enough power to make dead magic live again.

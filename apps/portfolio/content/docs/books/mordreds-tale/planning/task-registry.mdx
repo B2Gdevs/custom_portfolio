@@ -1,0 +1,99 @@
+---
+title: Mordred's Tale — Task Registry
+description: Writing and story tasks — beat-lock pass (Ch6–14) before Ch3 return; draft to completion; polish later.
+date: "2026-03-18"
+updated: "2026-03-30"
+order: 8
+---
+
+# Mordred's Tale — Task Registry
+
+## Cross-title
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `mt-tri-01` | `done` | Tale rows on [section State — Magicborn line](/docs/books/planning/state#magicborn-line-world-order-and-chapter-beats) (world order + Ch1–14 summary); deep sheets stay on [state](/docs/books/mordreds-tale/planning/state) | — | [`books-cross-title-01-01`](/docs/books/planning/task-registry) |
+
+## Phase `mt-beats-pass-01` — Beat-lock before Ch3 return (Ch6–14 workshop)
+
+Work **chapter-by-chapter** with Q&A; lock one path per **Alternatives** block; promote answered questions to [decisions](/docs/books/mordreds-tale/planning/decisions) or strike; add **moral jeopardy / shock / survival** bullets per chapter ([`MT-MAGICBORN-SERIES-FEEL`](/docs/books/mordreds-tale/planning/decisions)). **Definition of done** for each row: that chapter’s beat sheet on [state](/docs/books/mordreds-tale/planning/state) lists **Locked for draft** choices (and any explicit **restraint** calls).
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `mt-beats-01-ch06` | `done` | **Ch6 — Second Well:** lock POV + primary beats + Owain/Morgana procedure tone; pick alternatives or mark deferred; note moral/emotional charges | — | [state](/docs/books/mordreds-tale/planning/state) Ch6 **Locked for draft** + [decisions](/docs/books/mordreds-tale/planning/decisions) (`MT-CH6-*`, Tanya pattern, Enid cover, violence preference) |
+| `mt-beats-01-ch07` | `done` | **Ch7 — Devil in the Register:** registry/Jack-near-miss/bark-off; legal ownership of Mordred; Merris stance | `mt-beats-01-ch06` | [state](/docs/books/mordreds-tale/planning/state) Ch7 **Locked for draft** + [decisions](/docs/books/mordreds-tale/planning/decisions) `MT-CH7-*`, `MT-FQ-01-REGISTRY-*` |
+| `mt-beats-01-ch08` | `done` | **Ch8 — Geraint’s Sister:** Enid birth thread; household poison; Jack warmth wrong; parallel vs skip alternatives | `mt-beats-01-ch07` | [state](/docs/books/mordreds-tale/planning/state) Ch8 **Locked for draft** + [`MT-CH8-POV-OWAIN`](/docs/books/mordreds-tale/planning/decisions) |
+| `mt-beats-01-ch09` | `planned` | **Ch9 — Core Opens:** castle meeting + Merlin curtain; Morgana location at boom; Jack at core yes/no | `mt-beats-01-ch08` | **Locked for draft** |
+| `mt-beats-01-ch10` | `planned` | **Ch10 — Hallinghorn Smoke:** war cold open; Jack alive/role; southern friends named | `mt-beats-01-ch09` | **Locked for draft** |
+| `mt-beats-01-ch11` | `planned` | **Ch11 — Meadow Proof:** duel beats; spare/coalition seeds; Jack on field | `mt-beats-01-ch10` | **Locked for draft** |
+| `mt-beats-01-ch12` | `planned` | **Ch12 — Carriage:** paternity pressure; reveal timing vs alternatives | `mt-beats-01-ch11` | **Locked for draft** |
+| `mt-beats-01-ch13` | `planned` | **Ch13 — Coalition Bench:** Jack fate; Morgana fate at bench; institutions not utopia | `mt-beats-01-ch12` | **Locked for draft** |
+| `mt-beats-01-ch14` | `planned` | **Ch14 / epilogue — Two From the Bough:** giant coda vs slim end vs defer; Jack vs giants | `mt-beats-01-ch13` | **Locked for draft** |
+| `mt-beats-01-closeout` | `planned` | **FQ sweep** (`FQ-01`–`FQ-08`); refresh **full chapter spine** status column; confirm Ch4–5 beat rows match locked tail | `mt-beats-01-ch14` | state **Next Queue** + spine table updated |
+
+## Phase `mt-act-i` — Finish Act I (chapter-at-a-time drafting)
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `mt-act1-01` | `done` | draft **full Chapter 3** in one pass (not page-by-page): Morgana eastern quarters, council pressure, imprisonment payoff, Jack intercut/re-align by Act I end; Mordred orphanage route set; introduce Owain (subordinate) | — | chapter done checklist, `pnpm run build:books` |
+| `mt-act1-02` | `blocked` | rework **Chapter 3** pass 2 (still chapter scope): continuity, emotional arc, scene transitions, tone; **after** beat closeout + Ch4–5 rework ([`MT-BOOK1-BEATS-PASS-BEFORE-CH3`](/docs/books/mordreds-tale/planning/decisions)) | `mt-act2-01-ch5-rework` | chapter done checklist |
+| `mt-act1-03` | `blocked` | lock Act I handoff from Chapter 3 to Act II opener conditions (orphanage + Midas setup) | `mt-act1-02` | chapter done checklist |
+
+## Phase `mt-act-ii` — Act II: Their lives (chapter-at-a-time drafting)
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `mt-act2-00` | `planned` | lock Act II **Ch7–9** trims from **beat sheets** on [state](/docs/books/mordreds-tale/planning/state) once Ch6 is checklist-clean | `mt-act2-01-ch6` | state chapter map + decisions aligned |
+| `mt-act2-01-ch4` | `done` | draft **Chapter 4** in one pass (pages **85–91**): gate, **Merris**, **bark**, **Midas relic** believed dead, handlers plan **murder**, **Keth** turns gold, Merris **covers** | `mt-act1-01` | chapter done checklist, `pnpm run build:books` |
+| `mt-act2-01-ch4-rework` | `blocked` | one **chapter-level** rework pass on Ch4 (continuity with Ch3 clay cord where known, POV balance, checklist); **after** `mt-beats-01-closeout` | `mt-beats-01-closeout` | chapter done checklist |
+| `mt-act2-01-ch5` | `done` | draft **Chapter 5** (pages **92–99**): **House** withholds **Mordred**; **Jack** + **Morgana** charge failure; **Tell me** / violence; **realization**; **Owain** order | `mt-act2-01-ch4` | chapter done checklist, `pnpm run build:books` |
+| `mt-act2-01-ch5-rework` | `blocked` | chapter-level rework Ch5 (tone, Derrick beat, Owain interiority); **after** Ch4 rework | `mt-act2-01-ch4-rework` | chapter done checklist |
+| `mt-act2-01-ch6` | `blocked` | draft **Ch6** — beat sheet *The Second Well*; POV + coercion/pregnancy landing per [state](/docs/books/mordreds-tale/planning/state); requires **Ch6 locked** + Ch5 rework done | `mt-beats-01-ch06`, `mt-act2-01-ch5-rework` | checklist + `pnpm run build:books` |
+| `mt-act2-01-ch7` | `in-progress` | draft **Ch7** — *Devil in the Register*; Mordred age-up + Jack **near-miss**; scaffold **108–115** landed — rework for age/timeline | `mt-act2-01-ch6` | checklist + build |
+| `mt-act2-01-ch8` | `in-progress` | draft **Ch8** — *Geraint’s Sister*; Enid birth / household; scaffold **116–123** landed — rework vs Ch5–7 timeline | `mt-act2-01-ch7` | checklist + build |
+| `mt-act2-01-ch9` | `planned` | draft **Ch9** — *The Core Opens*; castle + Merlin curtain | `mt-act2-01-ch8` | checklist + build |
+| `mt-act2-01` | `planned` | Act II complete when Ch9 passes rework gate | `mt-act2-01-ch9` | chapter done checklist, `pnpm run build:books` |
+
+## Phase `mt-act-iii` — Act III: War, conflict, their place (chapter-at-a-time drafting)
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `mt-act3-00` | `planned` | lock Act III chapter list + beat map: meadow **duel**, carriage/**terms**, **coalition throne** (`MT-ACT-III-COALITION-THRONE`), optional **giant coda** / epilogue (`MT-BOOK1-GIANTS-CODA`); name **southern bench** allies | `mt-act2-01` | state **full chapter spine** + decisions |
+| `mt-act3-01` | `planned` | draft Act III chapter-by-chapter (full chapter draft then one chapter-level rework pass); include coalition endgame; add **coda** chapters if epilogue path chosen | `mt-act3-00` | chapter done checklist, `pnpm run build:books` |
+
+## Phase `mt-polish` — Later (deferred)
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `mt-polish-01` | `deferred` | line edit and typo pass (all chapters) | `mt-act3-01` | read-through |
+| `mt-polish-02` | `deferred` | continuity pass (timeline, relics, names, Jack past vs present) | `mt-polish-01` | read-through |
+| `mt-polish-03` | `deferred` | prose balance (dialogue vs description) | `mt-polish-02` | read-through |
+| `mt-polish-04` | `deferred` | Ch3 page 1 (The Changed World) — typos, Morgana interiority | `mt-polish-01` | read-through |
+
+## Registry Rules
+
+| Field | Value |
+| --- | --- |
+| `ordering` | rows in intended execution order |
+| `status-set` | `planned`, `in-progress`, `done`, `blocked`, `deferred` |
+| `verification` | manuscript reads; book build succeeds when applicable |
+| `priority` | **Beat-lock Ch6–14** → Ch4–5 rework → **Ch3** close → Act II tail draft (Ch6+) → Act III → polish. |
+
+## Per-chapter loop (draft and rework)
+
+Repeat for each manuscript chapter after beats exist: **recap** (prior chapter ending + knowledge + hooks) → **draft** → **structure/scene read** (agent + you; moral/shock/survival pass per [`MT-MAGICBORN-SERIES-FEEL`](/docs/books/mordreds-tale/planning/decisions)) → **one rework** → **checklist gate** → next chapter. Capture recurring Q&A in [state](/docs/books/mordreds-tale/planning/state) beat rows or new decision rows.
+
+## Chapter Done Checklist (Definition of Done)
+
+| Check | Pass Criteria |
+| --- | --- |
+| `1-beats-landed` | All required roadmap beats for the chapter are present in scene form (not notes). |
+| `2-scene-causality` | Each scene clearly causes the next or creates pressure for the next. No orphan scene. |
+| `3-character-motive` | POV character motive is explicit in each scene; decisions are understandable even when flawed. |
+| `4-canon-consistency` | Timeline, magic rules, and named-character facts match decisions and state roadmap. |
+| `5-act-handoff` | Chapter ending creates a clean handoff into the next chapter/act objective. |
+| `6-dialogue-interiority-balance` | Chapter includes dialogue and interior reaction beats; no long unreadable exposition blocks. |
+| `7-placeholder-policy` | No `TODO` placeholders except wording-level polish notes. Missing plot beats are not allowed. |
+| `8-read-through` | One full read-through complete; awkward transitions and obvious logic gaps fixed. |
+| `9-build-check` | `pnpm run build:books` passes after chapter save when applicable. |
+| `10-workshop-notes` | Optional during draft: **suggestions / controversy / dilemma** notes captured (state or decisions) so polish phase does not lose intent. |

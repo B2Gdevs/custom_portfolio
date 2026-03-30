@@ -23,14 +23,14 @@ describe('retrieveRagContext', () => {
     const semanticHits = [
       {
         chunkId: 1,
-        sourceId: 'docs:magicborn/morgana-the-sleeping-root',
+        sourceId: 'docs:magicborn/in-world/mordreds-tale/morgana-the-sleeping-root',
         sourceKind: 'magicborn' as const,
         sourceScope: 'magicborn',
         title: 'Morgana, the Sleeping Root',
         heading: 'Known Facts',
         anchor: 'known-facts',
-        publicUrl: '/docs/magicborn/morgana-the-sleeping-root',
-        sourcePath: 'apps/portfolio/content/docs/magicborn/morgana-the-sleeping-root.mdx',
+        publicUrl: '/docs/magicborn/in-world/mordreds-tale/morgana-the-sleeping-root',
+        sourcePath: 'apps/portfolio/content/docs/magicborn/in-world/mordreds-tale/morgana-the-sleeping-root.mdx',
         content: 'Morgana powers relics.',
         snippet: 'Morgana powers relics.',
         distance: 0.2,

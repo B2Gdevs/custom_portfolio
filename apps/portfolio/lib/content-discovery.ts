@@ -88,24 +88,30 @@ function getDateTimestamp(dateString: string | undefined): number {
 
 function buildSearchBlob(item: DiscoveryItem): string {
   return [
-    item.title,
-    item.description,
-    item.tags.join(' '),
+    item.title ?? '',
+    item.description ?? '',
+    item.href ?? '',
+    item.slug ?? '',
+    (item.tags ?? []).join(' '),
     item.status ?? '',
     item.genre ?? '',
     item.mood ?? '',
     item.era ?? '',
     item.listenCatalogKind ?? '',
-    item.searchKeywords.join(' '),
-    item.headings.map((heading) => heading.text).join(' '),
-    item.plainText,
+    (item.searchKeywords ?? []).join(' '),
+    item.headings.map((heading) => heading.text ?? '').join(' '),
+    item.plainText ?? '',
   ]
     .join(' ')
     .toLowerCase();
 }
 
 function getSnippetSource(item: DiscoveryItem): string {
-  return [item.description, item.headings.map((heading) => heading.text).join(' '), item.plainText]
+  return [
+    item.description,
+    item.headings.map((heading) => heading.text ?? '').join(' '),
+    item.plainText ?? '',
+  ]
     .filter(Boolean)
     .join(' ');
 }
@@ -120,7 +126,7 @@ export function getDiscoveryFilterOptions(items: DiscoveryItem[]) {
   const listenKinds = new Set<'track' | 'preset'>();
 
   for (const item of items) {
-    for (const tag of item.tags) tags.add(tag);
+    for (const tag of item.tags ?? []) tags.add(tag);
     if (item.year) years.add(item.year);
     if (item.status) statuses.add(item.status);
     if (item.kind === 'listen') {
@@ -159,7 +165,7 @@ export function filterDiscoveryItems(items: DiscoveryItem[], filters: DiscoveryF
   const sort = filters.sort ?? null;
 
   const filtered = items.filter((item) => {
-    if (activeTags.size > 0 && !item.tags.some((tag) => activeTags.has(normalize(tag)))) {
+    if (activeTags.size > 0 && !(item.tags ?? []).some((tag) => activeTags.has(normalize(tag)))) {
       return false;
     }
 
@@ -222,12 +228,14 @@ export function scoreDiscoveryItem(item: DiscoveryItem, query: string): number {
   const tokens = tokenize(query);
   if (tokens.length === 0) return 0;
 
-  const title = item.title.toLowerCase();
-  const description = item.description.toLowerCase();
-  const tags = item.tags.join(' ').toLowerCase();
-  const headings = item.headings.map((heading) => heading.text).join(' ').toLowerCase();
-  const keywords = item.searchKeywords.join(' ').toLowerCase();
-  const body = item.plainText.toLowerCase();
+  const title = (item.title ?? '').toLowerCase();
+  const description = (item.description ?? '').toLowerCase();
+  const tags = (item.tags ?? []).join(' ').toLowerCase();
+  const headings = item.headings.map((heading) => heading.text ?? '').join(' ').toLowerCase();
+  const keywords = (item.searchKeywords ?? []).join(' ').toLowerCase();
+  const body = (item.plainText ?? '').toLowerCase();
+  const href = (item.href ?? '').toLowerCase();
+  const slug = (item.slug ?? '').toLowerCase();
   const status = (item.status ?? '').toLowerCase();
   const genre = (item.genre ?? '').toLowerCase();
   const mood = (item.mood ?? '').toLowerCase();
@@ -237,6 +245,7 @@ export function scoreDiscoveryItem(item: DiscoveryItem, query: string): number {
   for (const token of tokens) {
     if (title.includes(token)) score += 9;
     if (headings.includes(token)) score += 6;
+    if (href.includes(token) || slug.includes(token)) score += 8;
     if (tags.includes(token) || status.includes(token)) score += 4;
     if (genre.includes(token) || mood.includes(token) || era.includes(token)) score += 4;
     if (keywords.includes(token)) score += 4;
@@ -295,14 +304,26 @@ export function searchDiscoveryItems(items: DiscoveryItem[], query: string, limi
 }
 
 export function highlightTextSegments(text: string, query: string): Array<{ text: string; highlighted: boolean }> {
+  const safeText = typeof text === 'string' ? text : String(text ?? '');
   const tokens = Array.from(new Set(tokenize(query))).sort((a, b) => b.length - a.length);
-  if (tokens.length === 0 || !text) {
-    return [{ text, highlighted: false }];
+  if (tokens.length === 0 || !safeText) {
+    return [{ text: safeText, highlighted: false }];
   }
 
   const escaped = tokens.map((token) => token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-  const matcher = new RegExp(`(${escaped.join('|')})`, 'ig');
-  const parts = text.split(matcher).filter(Boolean);
+  const body = escaped.join('|');
+  if (!body) {
+    return [{ text: safeText, highlighted: false }];
+  }
+
+  let matcher: RegExp;
+  try {
+    matcher = new RegExp(`(${body})`, 'ig');
+  } catch {
+    return [{ text: safeText, highlighted: false }];
+  }
+
+  const parts = safeText.split(matcher).filter(Boolean);
   return parts.map((part) => ({
     text: part,
     highlighted: includesAnyToken(part.toLowerCase(), tokens),

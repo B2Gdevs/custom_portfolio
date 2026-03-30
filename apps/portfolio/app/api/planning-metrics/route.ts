@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { NextResponse } from 'next/server';
-import { getPlanningDir } from '@/lib/repo-planner/project-root';
+import { getReportsDir } from '@/lib/repo-planner/project-root';
 
 export const runtime = 'nodejs';
 
@@ -26,7 +26,7 @@ type UsageRow = { at: string; command: string };
 
 export async function GET(request: Request) {
   try {
-    const reportsDir = path.join(getPlanningDir(), 'reports');
+    const reportsDir = getReportsDir();
     const { searchParams } = new URL(request.url);
     const tail = Math.min(500, Math.max(0, parseInt(searchParams.get('tail') ?? '100', 10) || 100));
     const includeUsage = searchParams.get('usage') !== 'false';

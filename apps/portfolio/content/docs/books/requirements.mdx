@@ -1,0 +1,43 @@
+---
+title: Requirements
+description: Section requirements for the books section, reader shell, EPUB pipeline, and books-side AI work.
+date: "2026-03-29"
+updated: "2026-03-29"
+repoPath: apps/portfolio/content/docs/books/requirements.mdx
+order: 6
+---
+
+# Requirements
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `books` |
+| `scope` | `reader`, `publishing`, `ai` |
+| `status` | `active` |
+| `owner` | `books-section` |
+
+## Core Requirements
+
+| Id | Requirement | Why |
+| --- | --- | --- |
+| `BOOKS-REQ-01` | the books section should stay centered on EPUB3 as the public reading and delivery format | the site reader, build pipeline, and download story need one reliable public artifact |
+| `BOOKS-REQ-02` | `/apps/reader` should act as the real library and reading shell for built-in books, local EPUBs, and future runtime exports | the books surface should behave like a product, not a loose set of routes |
+| `BOOKS-REQ-03` | reader annotations, export, and **planning-strip** behavior should remain compatible with the **`@portfolio/repub-builder`** boundary; the strip **ships with** the reader workspace and uses **`readerModalStore`** (not global site modal state) per **`BOOKS-READER-PLANNING-STRIP-PACKAGE-READER-MODAL-STORE`** | reader chrome stays embeddable; cockpit opens consistently via reader-scoped store |
+| `BOOKS-REQ-04` | books AI should ground on repo-backed docs and lore with citations, while raw manuscript chapters remain out of default ingest scope | public chat should stay explainable and avoid treating drafts as canon |
+| `BOOKS-REQ-05` | planning supplements bundled into EPUBs should stay optional and additive through `--planning` / `epubPlanningDirs` | planning context is useful in the artifact, but it should not redefine the book format |
+| `BOOKS-REQ-06` | **`ReaderWorkspace`**, **`EpubViewer`**, and **most reader/shelf chrome** should be **implemented and exported from `@portfolio/repub-builder`**, with **`apps/portfolio`** supplying books manifest, routes, and env only; **v1** ships for **this host only** (**`BOOKS-READER-V1-PORTFOLIO-HOST-ONLY`**) | keeps one runtime for the reference host; aligns with **`BOOKS-READER-RUNTIME-REPUB-PACKAGE`**, **`BOOKS-READER-DASHBOARD-CHROME`**, **`BOOKS-READER-MOVE-EPUBVIEWER-WITH-WORKSPACE`** |
+| `BOOKS-REQ-07` | the reader workspace should support a backend-backed library for repo books, explicitly uploaded EPUB records, saved annotations, and reader settings while preserving anonymous local reading/import as a fallback | the reader is moving from demo shell to real product surface and needs persistence without breaking casual reading or turning every import into a server mutation |
+| `BOOKS-REQ-08` | editing and write-back features inside the reader must be entitlement-gated; authenticated owner flows can write to the database, anonymous visitors stay read-only | direct in-reader editing is useful, but it cannot be public by default |
+
+## Section Boundaries
+
+| Topic | Rule |
+| --- | --- |
+| `format` | EPUB3 is the public runtime target; do not reintroduce RichEPub as the default product direction |
+| `reader-shell` | library, reading, local-file modes, and **dashboard-style reader workspace** live under the books section; **implementation** moves into **`@portfolio/repub-builder`** exports while **IA and requirements** stay here |
+| `reader-auth` | authenticated owner features depend on the shared Global auth/tenant/entitlement layer; do not add books-specific login or lock flows |
+| `ai` | books AI work can depend on documentation and magicborn records, but manuscript text remains a separate decision boundary |
+| `planning` | use section-local roadmap, state, task registry, decisions, and errors-and-attempts; one-off plans belong under `planning/plans/` |
+| `magicborn-line-fiction` | cross-title order, chapter beat tables, and open questions for *Tale* / *Rune Path* / *Legacy* live in **[section State](/docs/books/planning/state#magicborn-line-world-order-and-chapter-beats)** and **[section task registry](/docs/books/planning/task-registry)** (`books-cross-title-*`); do not add parallel ad hoc planning filenames under `planning/` |

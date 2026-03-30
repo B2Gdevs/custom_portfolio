@@ -2,9 +2,11 @@ import {
   buildDiscoverySnippet,
   filterDiscoveryItems,
   highlightTextSegments,
+  scoreDiscoveryItem,
   searchDiscoveryItems,
 } from '@/lib/content-discovery';
 import type { DiscoveryItem } from '@/lib/content-discovery';
+import { getListenSearchDiscoveryItems } from '@/lib/listen-search';
 
 const items: DiscoveryItem[] = [
   {
@@ -137,5 +139,30 @@ describe('content discovery utilities', () => {
     const presetsOnly = filterDiscoveryItems(listenItems, { listenCatalogKind: 'preset', sort: 'newest' });
     expect(presetsOnly).toHaveLength(1);
     expect(presetsOnly[0]?.slug).toBe('b');
+  });
+
+  it('matches listen catalog rows when the query looks like the /listen path', () => {
+    const listen = getListenSearchDiscoveryItems();
+    const hits = searchDiscoveryItems(listen, '/listen', 20);
+
+    expect(hits.length).toBeGreaterThan(0);
+    for (const hit of hits) {
+      expect(() => highlightTextSegments(hit.item.title, '/listen')).not.toThrow();
+      expect(() =>
+        highlightTextSegments(hit.snippet || hit.item.description, '/listen')
+      ).not.toThrow();
+    }
+  });
+
+  it('does not throw when scoring items with missing optional text fields', () => {
+    const partial = {
+      ...items[0],
+      plainText: undefined,
+      description: undefined,
+      tags: undefined,
+      searchKeywords: undefined,
+    } as unknown as DiscoveryItem;
+
+    expect(() => scoreDiscoveryItem(partial, '/')).not.toThrow();
   });
 });

@@ -4,9 +4,13 @@
   <current-phase>01</current-phase>
   <current-plan>bootstrap</current-plan>
   <status>active</status>
-  <next-action>Planning IA reset is done. Pick the next reader/embed task: books-reader-03 or documentation-site-08, with repo-planner-integration-02 close behind.</next-action>
+  <next-action>The shared auth foundation and the first Books reader backend contract are now in place: owner seed, tenant/org seed, long-lived sessions, entitlement/viewer helpers, host-facing login/logout/session routes, reader library/settings collections, and a read-only workspace bootstrap path that keeps local EPUB import local until explicit upload. Next, let Books execute books-reader-05-02 on top of that layer, then migrate Listen private media to the same access model.</next-action>
   <references>
     <reference>AGENTS.md (repo root)</reference>
+    <reference>apps/portfolio/content/docs/global/requirements.mdx</reference>
+    <reference>apps/portfolio/content/docs/global/planning/roadmap.mdx</reference>
+    <reference>apps/portfolio/content/docs/global/planning/state.mdx</reference>
+    <reference>apps/portfolio/content/docs/global/planning/task-registry.mdx</reference>
     <reference>apps/portfolio/content/docs/documentation/requirements.mdx</reference>
     <reference>apps/portfolio/content/docs/documentation/planning/state.mdx</reference>
     <reference>.planning/AGENTS.md</reference>

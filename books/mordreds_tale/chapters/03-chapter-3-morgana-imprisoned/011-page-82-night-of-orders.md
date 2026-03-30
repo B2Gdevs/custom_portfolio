@@ -14,7 +14,7 @@ Guards filled the room like a sudden weather.
 
 Derrick was not among them. Marcus was not among them. The judge was not among them.
 
-A captain with a scar through his brow read from a strip of sealed parchment as if the words could sanitize what they meant. “By order of the united councils — for the security of the settlement — you will be moved to secure holding.”
+A captain with a scar through his brow read from a strip of sealed parchment as if the words could sanitize what they meant. “By order of the united councils — for the security of Tarro — you will be moved to secure holding.”
 
 Morgana stood with the child in her arms. Her voice came out steady only because steadiness was a weapon. “On what charge?”
 
@@ -34,4 +34,4 @@ For a moment, Morgana saw a human being inside the uniform.
 
 She took the blanket anyway.
 
-Outside, wagons waited. Torches painted the walls in jumping orange. The settlement’s prosperity suddenly looked like what it was: a thin skin over teeth.
+Outside, wagons waited. Torches painted the walls in jumping orange. Tarro’s prosperity suddenly looked like what it was: a thin skin over teeth.

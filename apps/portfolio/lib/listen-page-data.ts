@@ -1,3 +1,4 @@
+import { resolveListenEmbedSrc } from '@/lib/bandlab-embed';
 import { getListenCatalog } from '@/lib/listen-catalog';
 import { listenGroupCookieName } from '@/lib/listen-unlock';
 import { toListenDiscoveryItem, type ListenPageRow } from '@/lib/listen-items';
@@ -22,11 +23,17 @@ export function buildListenPageRows(cookieStore: CookieReader): ListenPageRow[] 
   return getListenCatalog().map((entry) => {
     const unlocked = !entry.lockGroup || unlockedGroups.has(entry.lockGroup);
     const item = toListenDiscoveryItem(entry, { mediaPublic: unlocked });
+    const embedSrc = resolveListenEmbedSrc({
+      catalogKind: entry.catalogKind,
+      embedUrl: entry.embedUrl,
+      bandlabUrl: entry.bandlabUrl,
+    });
+
     return {
       item,
       locked: Boolean(entry.lockGroup && !unlocked),
       lockGroup: entry.lockGroup ?? null,
-      embedUrl: unlocked ? entry.embedUrl : '',
+      embedUrl: unlocked ? embedSrc : '',
       bandlabUrl: unlocked ? entry.bandlabUrl : '',
     };
   });

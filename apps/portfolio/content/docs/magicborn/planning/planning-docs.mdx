@@ -2,7 +2,7 @@
 title: Planning Docs
 description: Compact planning index for the Magicborn worldbuilding section.
 date: "2026-03-28"
-updated: "2026-03-28"
+updated: "2026-03-29"
 order: 1
 repoPath: apps/portfolio/content/docs/magicborn/planning/planning-docs.mdx
 ---
@@ -13,6 +13,8 @@ repoPath: apps/portfolio/content/docs/magicborn/planning/planning-docs.mdx
 
 | Page | Record Set | Purpose |
 | --- | --- | --- |
+| [Requirements](/docs/magicborn/requirements) | `requirements-records` | Section scope, canon boundaries, and retrieval rules for Magicborn lore. |
+| [Roadmap](/docs/magicborn/planning/roadmap) | `roadmap-records` | Phase-level view of section growth beyond the seed dossiers. |
 | [State](/docs/magicborn/planning/state) | `state-records` | Current phase, owner, next queue, and working references. |
 | [Task Registry](/docs/magicborn/planning/task-registry) | `task-records` | Ordered work items with status, dependencies, and verification steps. |
 | [Errors and Attempts](/docs/magicborn/planning/errors-and-attempts) | `attempt-records` | Failed approaches, cautions, and still-open problem tracks. |
@@ -24,7 +26,7 @@ repoPath: apps/portfolio/content/docs/magicborn/planning/planning-docs.mdx
 | --- | --- |
 | `section` | `magicborn` |
 | `source` | `apps/portfolio/content/docs/magicborn/` |
-| `format` | canon dossiers with short-story-style openings for the world of Magicborn |
+| `format` | **Planning** pages stay technical. **Lore** lives as in-world documents and archival dossiers under [`/docs/magicborn/in-world`](/docs/magicborn/in-world), grouped by **primary book**. |
 | `role` | public lore/canon surface that can also feed site chat retrieval |
 | `boundary` | world, characters, places, factions, magic, and canon notes live here; raw manuscript chapters do not |
 
@@ -37,7 +39,29 @@ repoPath: apps/portfolio/content/docs/magicborn/planning/planning-docs.mdx
 | `page-schema` | Prefer grouped canon dossiers: opening vignette, canon registry, known facts, tensions, and source anchors. |
 | `rag-scope` | Pages in this section are retrieval-eligible unless later marked private or draft-only. |
 | `manuscript-boundary` | Do not use this section as a substitute for chapter drafts under `books/`. |
-| `agent-loop` | Read this page, then [state](/docs/magicborn/planning/state), then [task registry](/docs/magicborn/planning/task-registry), then root planning docs for repo-wide gates. |
+| `agent-loop` | Read [requirements](/docs/magicborn/requirements), [roadmap](/docs/magicborn/planning/roadmap), [state](/docs/magicborn/planning/state), and [task registry](/docs/magicborn/planning/task-registry) first. Open this page when you need the local playbook or schema summary. |
+
+## In-world archive (by book)
+
+See the section index: [**In-world archive**](/docs/magicborn/in-world).
+
+| Shelf | Folder | Contents |
+| --- | --- | --- |
+| **Mordred's Tale** | `in-world/mordreds-tale/` | dossiers + Tale statutes / notices / confession |
+| **Mordred's Legacy** | `in-world/mordreds-legacy/` | stump-era chronicle |
+| **Magicborn: The Rune Path** | `in-world/magicborn-rune-path/` | dungeon / Host statutes (e.g. relic custody) |
+
+| Page | Kind | Notes |
+| --- | --- | --- |
+| [Morgana, the Sleeping Root](/docs/magicborn/in-world/mordreds-tale/morgana-the-sleeping-root) | dossier | mother, well-conduit, captivity |
+| [Jack of Taro and the Logic of Worth](/docs/magicborn/in-world/mordreds-tale/jack-of-taro-and-the-logic-of-worth) | dossier | hunt, Tarro, brokerage |
+| [Borrowed Magic and the Relic Economy](/docs/magicborn/in-world/mordreds-tale/borrowed-magic-and-the-relic-economy) | dossier | post-Fall charge, markets |
+| [The House of Small Mercies](/docs/magicborn/in-world/mordreds-tale/house-of-small-mercies) | dossier | church, bark, gate myth |
+| [First Article of the Sealed Tongue](/docs/magicborn/in-world/mordreds-tale/first-article-sealed-tongue) | in-world statute | `MT-LAW-SEALED-TONGUE` |
+| [Register Fragment — House Gate](/docs/magicborn/in-world/mordreds-tale/register-fragment-house-of-small-mercies) | in-world notice | adventurer registry voice |
+| [Penitent Narrative — The Bright Word](/docs/magicborn/in-world/mordreds-tale/penitent-narrative-the-bright-word) | in-world confession | **full spoilers**; Enid arc |
+| [Two from the Bough](/docs/magicborn/in-world/mordreds-legacy/two-from-the-bough-chronicle) | in-world chronicle | **full spoilers**; giants + stump + Tarro dungeon era |
+| [Statute — Dungeon Relic Custody](/docs/magicborn/in-world/magicborn-rune-path/statute-tarro-dungeon-relic-custody) | in-world statute | `MRP-LAW-DUNGEON-RELIC-CUSTODY`; armory checkout / capital return |
 
 ## Id Rule
 

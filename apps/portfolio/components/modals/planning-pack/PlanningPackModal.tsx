@@ -87,9 +87,17 @@ export function PlanningPackModal({ onClose }: ModalShellProps) {
             <p className="text-xs uppercase tracking-[0.2em] text-text-muted">Planning pack</p>
             <h2 className="font-display text-2xl text-primary">Download and preview</h2>
             <p className="mt-1 max-w-xl text-sm text-text-muted">
-              Starter templates (demo) and exported planning pages from this site&apos;s documentation
-              sections. Repository <code className="text-accent">.planning</code> files are not included
-              in this gallery.
+              Starter templates and exported planning pages that follow RepoPlanner conventions. See{' '}
+              <a
+                href="https://github.com/MagicbornStudios/RepoPlanner"
+                target="_blank"
+                rel="noreferrer"
+                className="text-accent hover:underline"
+              >
+                RepoPlanner on GitHub
+              </a>{' '}
+              for the upstream project. Repository <code className="text-accent">.planning</code> files are
+              not included in this gallery.
             </p>
           </div>
           <button

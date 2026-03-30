@@ -89,5 +89,24 @@
       </commands>
       <depends>01-07</depends>
     </task>
+    <task id="01-10" agent-id="" status="done">
+      <goal>Standardize the agent loop around a Global-first human entrypoint, kickoff records for vague phases, explicit definition of done, and tests-required-for-done for executable behavior; seed RepoPlanner planning for workflow-aware snapshot, kickoff scaffolding, done gates, and ownership guidance.</goal>
+      <keywords>planning,global,definition-of-done,tests,repo-planner,workflow</keywords>
+      <commands>
+        <command>pnpm run build</command>
+        <command>pnpm run lint</command>
+      </commands>
+      <depends>01-09</depends>
+    </task>
+    <task id="01-11" agent-id="" status="done">
+      <goal>Establish the shared auth foundation for gated site features: Payload auth-enabled owner user, tenant/org seed, long-lived session policy, local auto-login in development, and entitlement helpers that Books and Listen can consume.</goal>
+      <keywords>auth,payload,tenant,entitlements,reader,listen</keywords>
+      <commands>
+        <command>pnpm --filter @portfolio/app test:unit</command>
+        <command>pnpm run build</command>
+        <command>pnpm run lint</command>
+      </commands>
+      <depends>01-10</depends>
+    </task>
   </phase>
 </task-registry>

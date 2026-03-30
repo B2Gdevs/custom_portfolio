@@ -1,0 +1,29 @@
+---
+title: Roadmap
+description: Phase overview for the RepoPlanner section.
+date: "2026-03-30"
+updated: "2026-03-30"
+order: 1
+repoPath: apps/portfolio/content/docs/repo-planner/planning/roadmap.mdx
+---
+
+# Roadmap
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `repo-planner` |
+| `status` | `active` |
+| `scope` | CLI, embedded cockpit, host contracts, and planning-pack data flow |
+
+## Phases
+
+| Phase | Status | Focus | Next |
+| --- | --- | --- | --- |
+| `repo-planner-integration-01` | `done` | finish the monorepo alignment pass: roadmap-first docs, minimal `.planning`, CLI docs, embed boundaries, preview uploads, and route-installer cleanup | maintain only |
+| `repo-planner-integration-02` | `done` | turn the embed into a cleaner package-level host contract that other apps can import | maintain only |
+| `repo-planner-integration-03` | `done` | replace the placeholder live pane with the real cockpit body, explicit **Pack** vs **Live** modes, shared pack/live bundle plumbing, and package-owned dashboard chrome (sidebar, toolbar, init downloads, drag-and-drop, contrast pass) | maintain only |
+| `repo-planner-integration-04` | `done` | build and ship built-in planning-pack generation plus package-owned gallery components | maintain only |
+| `repo-planner-integration-05` | `done` | make the workflow loop first-class: sprint-aware snapshot scoring, kickoff scaffolding, done gates, and ownership guidance for global vs section planning | maintain only |
+| `repo-planner-integration-06` | `done` | turn planning files into structured cockpit views and form-based editing with badges, icons, percentages, autosave, immutable ids, and reusable host policy controls | maintain the structured inspector, phase-question flows, and pack-only migration path |

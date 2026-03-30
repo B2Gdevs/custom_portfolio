@@ -90,11 +90,17 @@ export function SiteLayout({
     window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(sidebarCollapsed));
   }, [sidebarCollapsed, sidebarReady]);
 
+  /** Reader has its own rail; never show the site chrome sidebar expanded on reader routes (no effect/setState loop). */
+  const siteSidebarOpen = !isReaderAppRoute && !sidebarCollapsed;
+
   return (
     <TooltipProvider delay={0}>
       <SidebarProvider
-        open={!sidebarCollapsed}
-        onOpenChange={(open) => setSidebarCollapsed(!open)}
+        open={siteSidebarOpen}
+        onOpenChange={(open) => {
+          if (isReaderAppRoute) return;
+          setSidebarCollapsed(!open);
+        }}
         className="min-h-svh w-full"
         style={
           {
@@ -106,7 +112,8 @@ export function SiteLayout({
         <Nav navMenus={navMenus} />
         <SidebarInset
           className={cn(
-            'min-h-svh bg-transparent',
+            'min-h-svh',
+            isReaderAppRoute ? 'bg-background' : 'bg-transparent',
             isBookReadRoute ? 'lg:h-screen lg:overflow-hidden' : ''
           )}
         >

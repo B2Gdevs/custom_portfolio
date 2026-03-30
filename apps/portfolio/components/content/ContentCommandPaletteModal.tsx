@@ -20,6 +20,13 @@ const GROUP_LABELS = {
   listen: 'Listen',
 } as const;
 
+function groupLabel(kind: string): string {
+  if (kind === 'blog' || kind === 'projects' || kind === 'listen') {
+    return GROUP_LABELS[kind];
+  }
+  return kind;
+}
+
 function groupHits(hits: DiscoverySearchHit[]) {
   const groups = new Map<string, DiscoverySearchHit[]>();
   for (const hit of hits) {
@@ -154,7 +161,7 @@ export function ContentCommandPaletteModal({ onClose, payload }: ModalShellProps
                     ) : (
                       <FileText size={14} />
                     )}
-                    <span>{GROUP_LABELS[kind as keyof typeof GROUP_LABELS]}</span>
+                    <span>{groupLabel(kind)}</span>
                   </div>
                   <div className="space-y-2">
                     {hits.map((hit) => (
@@ -177,7 +184,7 @@ export function ContentCommandPaletteModal({ onClose, payload }: ModalShellProps
                             </p>
                           </div>
                           <span className="rounded-full border border-border/70 px-2 py-1 text-[11px] uppercase tracking-[0.18em] text-text-muted">
-                            {GROUP_LABELS[kind as keyof typeof GROUP_LABELS]}
+                            {groupLabel(kind)}
                           </span>
                         </div>
                       </button>

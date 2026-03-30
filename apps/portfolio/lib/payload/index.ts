@@ -1,13 +1,16 @@
-import { getPayload } from 'payload';
-import config from '@/payload.config';
+import 'server-only';
+import type { Payload } from 'payload';
 
-let payloadPromise: ReturnType<typeof getPayload> | null = null;
+let payloadPromise: Promise<Payload> | null = null;
 
-export function getPayloadClient() {
+export async function getPayloadClient() {
   if (!payloadPromise) {
-    payloadPromise = getPayload({
-      config,
-    });
+    payloadPromise = Promise.all([import('payload'), import('@/payload.config')]).then(
+      ([payloadModule, configModule]) =>
+        payloadModule.getPayload({
+          config: configModule.default,
+        }),
+    );
   }
 
   return payloadPromise;

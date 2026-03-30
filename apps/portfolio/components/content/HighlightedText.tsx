@@ -11,7 +11,7 @@ export function HighlightedText({
   query: string;
   highlightClassName?: string;
 }) {
-  const segments = highlightTextSegments(text, query);
+  const segments = highlightTextSegments(typeof text === 'string' ? text : String(text ?? ''), query);
 
   return (
     <>

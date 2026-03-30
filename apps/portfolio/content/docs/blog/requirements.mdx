@@ -1,0 +1,38 @@
+---
+title: Requirements
+description: Section requirements for the blog as a public destination and long-form writing surface.
+date: "2026-03-29"
+updated: "2026-03-29"
+repoPath: apps/portfolio/content/docs/blog/requirements.mdx
+order: 6
+---
+
+# Requirements
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `blog` |
+| `scope` | `content`, `discovery`, `identity` |
+| `status` | `active` |
+| `owner` | `blog-section` |
+
+## Core Requirements
+
+| Id | Requirement | Why |
+| --- | --- | --- |
+| `BLOG-REQ-01` | the blog should remain a first-class public destination, not a secondary archive behind projects or docs | public writing is part of the product, not only supporting material |
+| `BLOG-REQ-02` | posts should follow the strict article contract with stable section headings and a strong top-of-page resources area | readers and tooling both benefit from predictable article structure |
+| `BLOG-REQ-03` | planning-heavy essays should cite real roadmap, state, task-registry, decisions, and errors-and-attempts records when that is the argument | the blog should show the working system we actually use instead of generic workflow prose |
+| `BLOG-REQ-04` | blog discovery should share search and content-shell primitives with projects and listen while keeping a recognizably blog-specific identity | the site should feel coherent without flattening every section into one look |
+| `BLOG-REQ-05` | the section must keep a clear boundary between public blog writing and internal planning records that belong in docs | blog posts can discuss workflow, but docs remain the source of operational truth |
+
+## Section Boundaries
+
+| Topic | Rule |
+| --- | --- |
+| `public-writing` | publish long-form essays, build logs, and workshop notes that are useful to readers on their own |
+| `docs-boundary` | when a topic becomes primarily operational, point to docs instead of duplicating the full planning record inside the post |
+| `identity` | keep the shared content shell, but preserve blog-specific tone, mini-logo treatment, and archive behavior |
+| `planning` | section roadmap, state, task registry, decisions, and errors-and-attempts are the planning source of truth for blog work |

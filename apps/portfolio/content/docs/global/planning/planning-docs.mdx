@@ -13,6 +13,8 @@ repoPath: apps/portfolio/content/docs/global/planning/planning-docs.mdx
 
 | Record | Purpose |
 | --- | --- |
+| [Requirements](/docs/global/requirements) | section scope and Global-specific planning IA requirements |
+| [Roadmap](/docs/global/planning/roadmap) | active and completed Global-section phases |
 | `state` | Current cycle, focus, and constraints for the **Global** section |
 | `task-registry` | Tasks that change global docs IA, cross-links, or repo-wide planning UX |
 | `errors-and-attempts` | Approaches we tried and abandoned for this section |
@@ -23,18 +25,40 @@ repoPath: apps/portfolio/content/docs/global/planning/planning-docs.mdx
 
 | Step | Rule |
 | --- | --- |
-| `1` | Update **state** / **task-registry** before changing global IA or `docs.ts` grouping |
-| `2` | Execute one logical task (link sweep, new global reference page, nav behavior) |
-| `3` | Verify docs build and the file tree shows **planning** vs **reference** correctly |
-| `4` | Record outcomes in **state** and mark **task-registry** rows |
+| `1` | Start here for the human-facing planning loop, then read the relevant section and `.planning` only as needed |
+| `2` | Pick one phase, then one task inside it |
+| `3` | If the phase is new, vague, or stale, create or refresh a kickoff record before implementation |
+| `4` | Execute until the phase reaches its definition of done, not just until a partial patch exists |
+| `5` | For executable behavior, tests are required before a row can move to `done` |
+| `6` | Record outcomes in **state**, **task-registry**, **decisions**, and **errors-and-attempts** |
+
+## Kickoff template
+
+Use this when a phase is new, underdefined, or has gone stale. Store it under `planning/plans/<phase-id>/KICKOFF.mdx` when the phase needs more than a short note in `state.mdx`.
+
+```md
+## Kickoff: `books-reader-04`
+
+| Field | Value |
+| --- | --- |
+| `goal` | Ship searchable annotations in the reader with export support. |
+| `why-now` | Reader work is blocked on annotation visibility and export behavior. |
+| `scope` | Reader UI, annotation persistence, export flow, regression coverage. |
+| `non-goals` | Sync service, multi-device accounts, collaboration. |
+| `definition-of-done` | Feature ships end to end, tests cover behavior, build/lint pass, planning records updated. |
+| `tests-required` | unit tests for persistence and selector logic; e2e or integration smoke for reader flow. |
+| `dependencies` | `books-reader-03`, any shared modal work in `documentation-site-08`. |
+| `open-questions` | export format, conflict behavior, storage limits. |
+| `first-tasks` | `books-reader-04-01`, `04-02`, `04-03`. |
+```
 
 ## Agent context (read order)
 
-For **Global-section** work (this folder), read this page first, then [state](/docs/global/planning/state), [task registry](/docs/global/planning/task-registry), [decisions](/docs/global/planning/decisions), [errors and attempts](/docs/global/planning/errors-and-attempts) when relevant.
+For **Global-section** work (this folder), read [requirements](/docs/global/requirements), [roadmap](/docs/global/planning/roadmap), [state](/docs/global/planning/state), [task registry](/docs/global/planning/task-registry), and [decisions](/docs/global/planning/decisions) first. Open this page when you need the local playbook, link map, or section rules.
 
 For **diagrams, id grammar, Mermaid, and planning-pack policy**, read the **[Global planning guide](/docs/global/global-planning)** -- it is a **reference** page in the same section, not inside the **planning** subtree.
 
-For **monorepo-wide** gates, read root **[AGENTS.md](../../../../../AGENTS.md)**, **[documentation/requirements](/docs/documentation/requirements)**, **[documentation/state](/docs/documentation/planning/state)**, **`.planning/ROADMAP.xml`**, **`.planning/TASK-REGISTRY.xml`**, **`.planning/STATE.xml`**. Repo-root **`REQUIREMENTS.md`** is a stub pointer only.
+For **monorepo-wide** gates, read root **[AGENTS.md](../../../../../AGENTS.md)**, **[documentation/requirements](/docs/documentation/requirements)**, **[documentation/state](/docs/documentation/planning/state)**, **`.planning/ROADMAP.xml`**, **`.planning/TASK-REGISTRY.xml`**, and **`.planning/STATE.xml`**. Repo-root **`REQUIREMENTS.md`** is a stub pointer only.
 
 ## Machine-readable frontmatter
 

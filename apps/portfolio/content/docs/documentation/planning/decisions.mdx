@@ -2,7 +2,7 @@
 title: Decisions
 description: Compact decision records for the documentation section.
 date: "2026-03-16"
-updated: "2026-03-28"
+updated: "2026-03-31"
 order: 5
 ---
 
@@ -24,5 +24,5 @@ order: 5
 | `DOCUMENTATION-SHADCN-REGISTRIES-TRACKED` | `accepted` | external shadcn registries such as `@lucide-animated` and `@magicui` may be tracked as approved sources for future UI passes without being installed immediately | vendoring/docs should record the commands and intended use so future implementation can pull them in intentionally instead of ad hoc |
 | `DOCUMENTATION-SECTION-PLANNING-FOLDER` | `accepted` | each section should physically group planning docs under a literal `planning/` or `.planning/` folder instead of scattering them at section root | packs, section navigation, and agent read-order become easier to explain and render |
 | `DOCUMENTATION-ROADMAP-FIRST-LOOP` | `accepted` | roadmap, state, task registry, and decisions are the living records; any one-off implementation plan should be phase-local and stored under `planning/plans/`, never as the top-level planning source of truth | planning behavior should stop generating competing `implementation-plan` documents at section root or under `.planning` |
-| `DOCUMENTATION-COCKPIT-SINGLE-BODY` | `proposed` | **One** implemented **Repo Planner cockpit modal body** (PlanningCockpit + dashboard), imported by **portfolio** `ModalRoot` and by **`@portfolio/repub-builder`** reader shell; **two open paths** (global store vs **reader** modal store), not two diverging UIs | finalize after answers in [embed architecture](/docs/documentation/reader-repo-planner-embed-architecture); tasks **`documentation-site-08-*`**, **`books-reader-03-06`** |
+| `DOCUMENTATION-COCKPIT-SINGLE-BODY` | `proposed` | **One** implemented **Repo Planner cockpit modal body** (PlanningCockpit + dashboard), imported by **portfolio** `ModalRoot` and rendered inside **`ReaderModalRoot`** (**`readerModalStore`**) in **`@portfolio/repub-builder`**; **reader planning strip** is **in-package** and opens via **reader** store only (**`BOOKS-READER-PLANNING-STRIP-PACKAGE-READER-MODAL-STORE`**) | finalize after answers in [embed architecture](/docs/documentation/reader-repo-planner-embed-architecture); tasks **`documentation-site-08-*`**, **`books-reader-03-06`**, **`books-reader-03-07`** |
 | `DOCUMENTATION-REPUB-REPOPLANNER-MAJOR-PACKAGES` | `accepted` | **`@portfolio/repub-builder`** and **`repo-planner`** are **major publishable** verticals; portfolio is a **reference host** that composes them | publish **`exports`**, **peerDependencies**, and **consumer docs** per **`repo-planner-integration-02`** and **`documentation-site-07`** |

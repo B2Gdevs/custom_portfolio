@@ -1,6 +1,6 @@
 # `.planning/AGENTS.md` -- root planning section (XML)
 
-Companion to **repository root** [`AGENTS.md`](../AGENTS.md). Read **root `AGENTS.md` first**; it explains how **`.planning/`** maps to section **`planning/`** folders (same workflow, different format).
+Companion to **repository root** [`AGENTS.md`](../AGENTS.md). Read **root `AGENTS.md` first**; it explains how the **Global docs section** is the human-first planning entrypoint and how **`.planning/`** maps to section **`planning/`** folders as the machine layer.
 
 ## What this folder is
 
@@ -16,7 +16,9 @@ Companion to **repository root** [`AGENTS.md`](../AGENTS.md). Read **root `AGENT
 | **`ERRORS-AND-ATTEMPTS.xml`** | Failure / attempt log | Section **`errors-and-attempts.mdx`** |
 
 **Canonical monorepo requirements narrative:** [`documentation/requirements.mdx`](../apps/portfolio/content/docs/documentation/requirements.mdx).  
+**Section requirements narratives:** `apps/portfolio/content/docs/<section>/requirements.mdx`.  
 **Cross-cutting queue:** [`documentation/planning/state.mdx`](../apps/portfolio/content/docs/documentation/planning/state.mdx) (table).  
+**Human-first global loop:** [`global/requirements.mdx`](../apps/portfolio/content/docs/global/requirements.mdx), [`global/planning/roadmap.mdx`](../apps/portfolio/content/docs/global/planning/roadmap.mdx), [`global/planning/state.mdx`](../apps/portfolio/content/docs/global/planning/state.mdx), [`global/planning/task-registry.mdx`](../apps/portfolio/content/docs/global/planning/task-registry.mdx), [`global/planning/decisions.mdx`](../apps/portfolio/content/docs/global/planning/decisions.mdx), and [`global-planning.mdx`](../apps/portfolio/content/docs/global/global-planning.mdx).  
 **Do not** author long prose in **repo-root `REQUIREMENTS.md`** or recreate **`.planning/REQUIREMENTS.md`**.
 
 ## Trigger phrases -> what to do
@@ -24,8 +26,8 @@ Companion to **repository root** [`AGENTS.md`](../AGENTS.md). Read **root `AGENT
 | User says (examples) | Your first reads | Then |
 | --- | --- | --- |
 | *Plan this*, *roadmap this* | **`ROADMAP.xml`**, **`TASK-REGISTRY.xml`**, **[documentation/requirements.mdx](../apps/portfolio/content/docs/documentation/requirements.mdx)** | Add/change **phases** or **tasks**; align **[documentation/roadmap.mdx](../apps/portfolio/content/docs/documentation/roadmap.mdx)** when the overview table should change |
-| *What's next?* | **`STATE.xml`** (`next-action`), **`TASK-REGISTRY.xml`**, relevant **section** `planning/task-registry.mdx` | Pick **one** task; implement; set **`done`**; refresh `next-action` |
-| *Requirements*, *scope* | **[documentation/requirements.mdx](../apps/portfolio/content/docs/documentation/requirements.mdx)** + affected **section** pages | Edit MDX; keep **`REQUIREMENTS.xml`** stub paths accurate |
+| *What's next?* | **Global** + relevant **section** `state` / `task-registry`, then **`STATE.xml`** (`next-action`) and **`TASK-REGISTRY.xml`** | Pick **one** phase, then one task; implement; set **`done`** only after verification and tests where behavior changed; refresh `next-action` |
+| *Requirements*, *scope* | **[documentation/requirements.mdx](../apps/portfolio/content/docs/documentation/requirements.mdx)** + affected **section** **`requirements.mdx`** / **`planning/roadmap.mdx`** | Edit MDX; keep **`REQUIREMENTS.xml`** stub paths accurate |
 | *Decisions* | **`DECISIONS.xml`** | Append **Decision** atoms |
 | *Planning loop* | Root **`AGENTS.md`**, then **this file** | Verify -> commit |
 
@@ -55,7 +57,13 @@ Edit **`@_status`**: `planned` | `in-progress` | `done` | `blocked`.
 ## `STATE.xml`
 
 - **`next-action`** -- one concrete next step for agents.
-- **`references`** -- root **`AGENTS.md`**, **this file**, **`documentation/requirements.mdx`**, key **`.xml`** paths. Treat **`IMPLEMENTATION_PLAN.md`** as a legacy pointer only.
+- **`references`** -- root **`AGENTS.md`**, **this file**, **Global docs planning**, **`documentation/requirements.mdx`**, key **`.xml`** paths. If an older clone still has **`IMPLEMENTATION_PLAN.md`**, migrate or delete it; it is not part of the living loop.
+
+## Done gate
+
+- **Executable behavior is not done without tests.**
+- If a phase is still missing tests, split or continue it; do not mark the row `done`.
+- Use Global + section planning to define the phase **definition of done** before relying on CLI or cockpit summaries.
 
 ## Optional CLI
 
@@ -65,6 +73,8 @@ Edit **`@_status`**: `planned` | `in-progress` | `done` | `blocked`.
 
 Keep the **operational layer** ASCII-first: **`.planning/*.xml`**, **this file**, and operator/planning docs such as requirements, state, decisions, and repo-planner section docs should prefer ASCII punctuation (`--`, `->`, `...`, plain quotes). Public-facing prose, narrative content, and polished article copy may keep Unicode typography where it improves readability.
 
+When a task changes **portfolio or app UI strings** (navigation, catalogs, modals, on-site MDX visible to visitors), also read root **`AGENTS.md`**, section **Public site copy** (editorial / utility / orienting registers and examples), and ship prose that matches that guide -- not implementation notes copied from task descriptions.
+
 ## Forbidden (minimal layout)
 
-Do **not** commit **`.planning/REQUIREMENTS.md`** or narrative **`.md`** here except **this** `AGENTS.md`. **`.planning/IMPLEMENTATION_PLAN.md`** is a temporary compatibility pointer, not the living loop. Upstream templates live under **`vendor/repo-planner/.planning/templates/`** for **full** init only.
+Do **not** commit **`.planning/REQUIREMENTS.md`** or narrative **`.md`** here except **this** `AGENTS.md`. Do **not** keep **`.planning/IMPLEMENTATION_PLAN.md`** in the minimal tree. Upstream templates live under **`vendor/repo-planner/.planning/templates/`** for **full** init only.

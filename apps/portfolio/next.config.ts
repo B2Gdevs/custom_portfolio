@@ -20,7 +20,7 @@ if (process.env.REPOPLANNER_REPORTS_DIR === undefined) {
 const nextConfig: NextConfig = {
   distDir: process.env.PORTFOLIO_DIST_DIR || '.next',
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-  transpilePackages: ['repo-planner'],
+  transpilePackages: ['repo-planner', '@portfolio/repub-builder'],
   async redirects() {
     return [
       { source: '/docs/tools', destination: '/apps', permanent: false },
@@ -29,6 +29,66 @@ const nextConfig: NextConfig = {
       { source: '/books/upload/read', destination: '/apps/reader', permanent: true },
       { source: '/books/:bookSlug/read', destination: '/apps/reader?book=:bookSlug', permanent: true },
       { source: '/books', destination: '/apps/reader', permanent: true },
+      {
+        source: '/docs/books/planning/mordreds-tale-state',
+        destination: '/docs/books/mordreds-tale/planning/state',
+        permanent: true,
+      },
+      {
+        source: '/docs/books/planning/mordreds-tale-task-registry',
+        destination: '/docs/books/mordreds-tale/planning/task-registry',
+        permanent: true,
+      },
+      {
+        source: '/docs/books/planning/mordreds-tale-decisions',
+        destination: '/docs/books/mordreds-tale/planning/decisions',
+        permanent: true,
+      },
+      {
+        source: '/docs/books/planning/mordreds-legacy-state',
+        destination: '/docs/books/mordreds-legacy/planning/state',
+        permanent: true,
+      },
+      {
+        source: '/docs/books/planning/mordreds-legacy-task-registry',
+        destination: '/docs/books/mordreds-legacy/planning/task-registry',
+        permanent: true,
+      },
+      {
+        source: '/docs/books/planning/mordreds-legacy-decisions',
+        destination: '/docs/books/mordreds-legacy/planning/decisions',
+        permanent: true,
+      },
+      {
+        source: '/docs/books/planning/magicborn-rune-path-state',
+        destination: '/docs/books/magicborn-rune-path/planning/state',
+        permanent: true,
+      },
+      {
+        source: '/docs/books/planning/magicborn-rune-path-task-registry',
+        destination: '/docs/books/magicborn-rune-path/planning/task-registry',
+        permanent: true,
+      },
+      {
+        source: '/docs/books/planning/magicborn-rune-path-decisions',
+        destination: '/docs/books/magicborn-rune-path/planning/decisions',
+        permanent: true,
+      },
+      {
+        source: '/docs/books/planning/mordreds-tale/:path*',
+        destination: '/docs/books/mordreds-tale/planning/:path*',
+        permanent: true,
+      },
+      {
+        source: '/docs/books/planning/mordreds-legacy/:path*',
+        destination: '/docs/books/mordreds-legacy/planning/:path*',
+        permanent: true,
+      },
+      {
+        source: '/docs/books/planning/magicborn-rune-path/:path*',
+        destination: '/docs/books/magicborn-rune-path/planning/:path*',
+        permanent: true,
+      },
     ];
   },
   experimental: {
@@ -66,9 +126,30 @@ const nextConfig: NextConfig = {
     };
 
     if (isServer) {
+      const existingExternals = config.externals ?? [];
+      config.externals = [
+        ...(Array.isArray(existingExternals) ? existingExternals : [existingExternals]),
+        ({ request }: { request?: string }, callback: (error?: Error | null, result?: string) => void) => {
+          if (
+            request &&
+            (
+              request === 'payload' ||
+              request.startsWith('payload/') ||
+              request === '@payloadcms/db-sqlite' ||
+              request.startsWith('@payloadcms/db-sqlite/') ||
+              request === 'libsql' ||
+              request.startsWith('@libsql/')
+            )
+          ) {
+            return callback(null, `commonjs ${request}`);
+          }
+
+          callback();
+        },
+      ];
       config.module.rules.push({
         test: /(README\.md|LICENSE)$/i,
-        include: /node_modules[\\\/](?:\.pnpm[\\\/])?(?:@libsql|libsql)/,
+        include: /node_modules[\\\/].*(?:@libsql|libsql)/,
         type: 'asset/source',
       });
       config.plugins.push(
@@ -79,8 +160,11 @@ const nextConfig: NextConfig = {
             const isLibsqlDocArtifact =
               (ctx.includes('/@libsql/') || ctx.includes('/libsql/')) &&
               (res.endsWith('/README.md') || res.endsWith('/LICENSE'));
+            const isLibsqlNativeArtifact =
+              (ctx.includes('/@libsql/') || ctx.includes('/libsql/')) &&
+              res.endsWith('.node');
 
-            return isLibsqlDocArtifact;
+            return isLibsqlDocArtifact || isLibsqlNativeArtifact;
           },
         }),
       );

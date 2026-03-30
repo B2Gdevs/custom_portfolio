@@ -1,15 +1,38 @@
-<*xml version="1.0" encoding="UTF-8"*>
+<?xml version="1.0" encoding="UTF-8"?>
 <planning-references>
-  <doc>
+  <doc kind="canonical-requirements">
     <path>apps/portfolio/content/docs/documentation/requirements.mdx</path>
     <content><![CDATA[
-# Requirements (stub)
-
-Canonical monorepo requirements: documentation section requirements.mdx.
-Cross-cutting queue: documentation/planning/state.mdx.
-Overview: documentation/roadmap.mdx.
-
-Repo root REQUIREMENTS.md is a stub pointer only.
+Canonical monorepo requirements narrative.
+Use this as the human-readable source of truth for repo-wide scope, workflow rules, and planning policy.
+]]></content>
+  </doc>
+  <doc kind="cross-cutting-queue">
+    <path>apps/portfolio/content/docs/documentation/planning/state.mdx</path>
+    <content><![CDATA[
+Cross-cutting queue for shared monorepo work.
+Use this when the next action spans multiple sections or changes shared policy.
+]]></content>
+  </doc>
+  <doc kind="human-overview">
+    <path>apps/portfolio/content/docs/documentation/roadmap.mdx</path>
+    <content><![CDATA[
+Human-readable section and root overview table.
+Use this to understand section status before choosing a planner-specific queue.
+]]></content>
+  </doc>
+  <doc kind="global-loop">
+    <path>apps/portfolio/content/docs/global/planning/state.mdx</path>
+    <content><![CDATA[
+Global planning state for the docs-first loop.
+Read with global roadmap, task registry, and decisions when the work is cross-section or workflow-related.
+]]></content>
+  </doc>
+  <doc kind="legacy-stub">
+    <path>REQUIREMENTS.md</path>
+    <content><![CDATA[
+Repo-root REQUIREMENTS.md is a stub pointer only.
+Do not duplicate long-form requirements prose there.
 ]]></content>
   </doc>
 </planning-references>

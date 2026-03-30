@@ -2,7 +2,9 @@
   "title": "Mordred's Tale",
   "author": "Ben Garrard",
   "description": "A dark fantasy novel. Morgana, Jack, and the threads of fate.",
+  "genres": ["Fantasy", "Dark fantasy"],
   "epubPlanningDirs": [
-    "../../apps/portfolio/content/docs/books/planning"
+    "../../apps/portfolio/content/docs/books/planning",
+    "../../apps/portfolio/content/docs/books/mordreds-tale/planning"
   ]
 }

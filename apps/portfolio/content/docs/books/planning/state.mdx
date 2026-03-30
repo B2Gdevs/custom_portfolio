@@ -2,10 +2,10 @@
 title: State
 description: Compact state records for the books section.
 date: "2026-03-15"
-updated: "2026-03-28"
+updated: "2026-03-30"
 order: 2
 repoPath: apps/portfolio/content/docs/books/planning/state.mdx
-taskPhase: books-reader-03
+taskPhase: books-reader-05
 ---
 
 # State
@@ -23,20 +23,20 @@ taskPhase: books-reader-03
 
 | Field | Value |
 | --- | --- |
-| `phase` | `books-reader-02` + **`books-reader-03` (planned)** + `books-publishing-01` + `books-ai-01` |
-| `plan` | **Reader shell + library UX** (`books-reader-03`) and site-wide **`/apps` hub** ([Route conventions](/docs/documentation/route-conventions)) are active; `/apps/reader` now opens on a true built-in shelf with repo books first, manifest-backed metadata, Empty-cover fallback art, real progress chips (`New`, `%`, `Done`, `Coming soon`), local EPUB import demoted to a secondary utility card, and an explicit workspace state model for `library` / `built-in-reading` / `local-reading`; the next reader work is package/runtime extraction and shared modal ownership, not more hidden boolean state inside the app shell; reader annotations, export, planning strip, and site AI chat are **shipped**; the first Payload-backed RAG ingest completes successfully into the sidecar SQLite search index, retrieval returns cited chunks from docs/projects/blog/`magicborn`, the public chat shell now runs on assistant-ui with a Claude-style modal composition, and scoped logging now traces `/api/chat`, client send flow, and RAG ingest with env-driven verbosity, but the live dev app still shows an unresolved OpenAI `429 insufficient_quota` mismatch after a key update even though isolated direct requests succeed with the same `.env` |
-| `focus` | treat `books-ai-01-10` as the active AI maintenance blocker: investigate why the running Next process still produces quota errors after the key update before assuming the quota issue is resolved or changing RAG behavior |
-| `constraint` | **Plan-first and discuss-before-code:** record AI errors/attempts and decisions as the backend shifts shape; do not hide ingestion/runtime blockers outside the planning docs |
+| `phase` | `books-reader-05` + `books-reader-02` follow-up |
+| `plan` | **Reader shell groundwork is shipped**: **`ReaderWorkspace`** + **`EpubViewer`**, shelf search and filters, planning strip, reader modal store, and book-scoped planning packs. The auth-aware reader foundation is now in place too: backend reader collections, a shared workspace bootstrap contract, explicit upload-only persistence boundaries, and anonymous fallback rules. The next cycle moves into actual DB-backed annotations, progress sync, and gated editing while keeping anonymous reading available. |
+| `focus` | treat the reader as the primary product lane: the shared auth dependency from `global-auth-01` and the backend workspace contract are now ready, so the next work is real server-backed annotations/progress, gated write paths, and search/workspace polish before returning to AI or publishing |
+| `constraint` | anonymous reading and local EPUB import stay available, but write-capable behavior and DB persistence must go through the shared auth/entitlement layer; local import alone must not auto-upload a book or mutate backend records |
 
 ## Next Queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | `books-ai-01-10`: investigate the live runtime `429 insufficient_quota` mismatch after the API-key update; direct calls succeed but `/api/chat` in the running app still fails | `ai-maintenance` |
-| `2` | `books-reader-03-01`, `03-04`, `03-06`, `03-07`: formalize the reader shell contract further, extract the runtime toward **`@portfolio/repub-builder`**, and move shared cockpit/planning-strip ownership off app-local modal assumptions now that the shelf and workspace state model are shipped | `reader` |
-| `3` | `books-reader-02-01`: P4 build-time merge of exported annotations into `pnpm run build:books` output | `reader` |
-| `4` | `books-publishing-01-01` / `books-publishing-01-02`: publishing/editions records and next visible book EPUB when manuscript is ready | `publishing` |
-| `5` | when adding new `books/<slug>/` titles, set `book.json` `epubPlanningDirs` if that book has a docs planning subtree to bundle | `publishing` |
+| `1` | `books-reader-05-02`: persist annotations and reading progress to the database for entitled sessions while preserving anonymous local fallback | `reader` |
+| `2` | `books-reader-05-03`: gated in-reader editing and write-back flow | `reader` |
+| `3` | `books-reader-05-04`: reader search, workspace polish, and backend-backed library details | `reader` |
+| `4` | `books-reader-02-01`: merge exported annotations into **`build:books`** / **repub artifact** output | `reader` |
+| `5` | AI and publishing remain back burner until the reader/backend pass is stable | `queue-policy` |
 
 ## References
 
@@ -45,11 +45,11 @@ taskPhase: books-reader-03
 | `books-root` | `books/mordreds_tale/` | authored source of truth |
 | `home-page` | `apps/portfolio/app/page.tsx` | primary site reading entry |
 | `reader-embed` | `apps/portfolio/components/books/BookReaderEmbed.tsx` | embedded reader surface |
-| `viewer` | `apps/portfolio/components/books/EpubViewer.tsx` | EPUB runtime, annotations UI, export/repack |
-| `reader-workspace` | `apps/portfolio/components/books/ReaderWorkspace.tsx` | current shell and local-file fallback state that needs a real built-in shelf pass |
+| `viewer` | `packages/repub-builder/src/reader/EpubViewer.tsx` | EPUB runtime, annotations UI, export/repack (**re-export** from `apps/portfolio/lib/epub-annotations.ts` for legacy imports) |
+| `reader-workspace` | `packages/repub-builder/src/reader/ReaderWorkspace.tsx` + thin `apps/portfolio/components/books/ReaderWorkspace.tsx` | library + reading shell + **v1 dashboard** sidebar; host wires **`Link`** + planning cockpit |
 | `books-lib` | `apps/portfolio/lib/books.ts` | current manifest reader; needs richer library metadata for cover-forward shelf UI |
 | `epub-annotations` | `apps/portfolio/lib/epub-annotations.ts` | IndexedDB, schema, JSON and annotated-EPUB zip |
-| `reader-planning-strip` | `apps/portfolio/components/books/ReaderPlanningStrip.tsx` | read-only planning links on dedicated read route |
+| `reader-planning-strip` | `packages/repub-builder/src/reader/ReaderPlanningStrip.tsx` | **`readerModalStore`** only (**`BOOKS-READER-PLANNING-STRIP-PACKAGE-READER-MODAL-STORE`**) -- [embed architecture](/docs/documentation/reader-repo-planner-embed-architecture) |
 | `site-copilot` | `apps/portfolio/components/site/SiteCopilot.tsx` | floating site chat shell |
 | `chat-api` | `apps/portfolio/app/api/chat/route.ts` | assistant-ui-backed public chat route with server-side RAG grounding |
 | `logging-lib` | `apps/portfolio/lib/logging.ts` | shared env-driven structured logging for client/server flows |
@@ -59,19 +59,31 @@ taskPhase: books-reader-03
 | `rag-search-db` | `apps/portfolio/lib/rag/search-db.ts` | sidecar SQLite FTS5 + `sqlite-vec` search index |
 | `db-config` | `apps/portfolio/drizzle.config.ts` | current SQLite database path and Drizzle config |
 | `db-schema` | `apps/portfolio/lib/db/schema.ts` | existing SQLite schema surface to reconcile with Payload plans |
-| `epub-builder` | `packages/repub-builder/src/epub.ts` | EPUB image rewrite and chapter packaging |
-| `koodo-book-cover` | `vendor/koodo-reader/src/components/bookCoverItem/component.tsx` | cover-first shelf reference: prominent cover, status chip, metadata stack |
-| `koodo-book-card` | `vendor/koodo-reader/src/components/bookCardItem/component.tsx` | compact card/list reference for tighter library density |
-| `koodo-navigation-panel` | `vendor/koodo-reader/src/containers/panels/navigationPanel/component.tsx` | in-reader cover/header reference for built-in reading state |
+| `payload-config` | `apps/portfolio/payload.config.ts` | auth, collections, and SQLite-backed Payload runtime |
+| `reader-workspace-contract` | `apps/portfolio/lib/reader/workspace-contract.ts` | shared settings/access/library record contract and anonymous fallback rules |
+| `reader-workspace-bootstrap` | `apps/portfolio/lib/reader/workspace-bootstrap.ts`, `apps/portfolio/app/api/reader/workspace/route.ts` | auth-aware workspace bootstrap for later client hydration |
+| `reader-collections` | `apps/portfolio/lib/payload/collections/readerLibraryRecords.ts`, `apps/portfolio/lib/payload/collections/readerSettings.ts` | backend reader library/settings foundation for entitled sessions |
+| `repub-reader-runtime` | **`@portfolio/repub-builder/reader`** (`packages/repub-builder/src/reader/index.ts`) | **ReaderWorkspace**, **`EpubViewer`**, shelf, **`readerModalStore`**, **`ReaderModalRoot`**; consumed by **`apps/portfolio`** via **`transpilePackages`** + site **`SidebarTrigger`** |
 | `books-structure-doc` | `apps/portfolio/content/docs/books/book-structure.mdx` | formal source and EPUB structure rules |
 | `book-output` | `apps/portfolio/public/books/` | generated reading artifacts |
 | `front-page-reader` | `apps/portfolio/components/home/FeaturedBookExperience.tsx` | user-triggered reader mount path |
 | `route-conventions` | `apps/portfolio/content/docs/documentation/route-conventions.mdx` | `/apps` vs `/docs`; reader shell planning |
+| `magicborn-line-beats` | this page -- [Magicborn line](#magicborn-line-world-order-and-chapter-beats) | cross-title reading order, chapter beat tables, TB-* open questions |
 
-## Human Input
+## Magicborn line: world order and chapter beats
 
-| Trigger | Action |
-| --- | --- |
-| publishing flow changes | update `current cycle` and `references` first |
-| reader UX changes | record the new focus before implementation |
-| new requirements appear | add them in the books docs planning pages before execution |
+Section-level fiction coordination for the three Magicborn-line titles. **Locks:** [`BOOKS-WORLD-CHRONOLOGY`](/docs/books/planning/decisions), [`MRP-PREQUEL-END`](/docs/books/magicborn-rune-path/planning/decisions), [`ML-KAEL-AGE-AT-ALUN`](/docs/books/mordreds-legacy/planning/decisions). **Cross-title tasks:** phase **`books-cross-title-01`** in [section task registry](/docs/books/planning/task-registry).
+
+### World chronology and reading order
+
+| Order | Book | Slug | Note |
+| --- | --- | --- | --- |
+| `1` | **Mordred's Tale** | `mordreds_tale` | Book 1 -- Morgana, Jack, Mordred origin through coalition / optional giant coda |
+| `2` | **Magicborn: The Rune Path** | `magicborn_rune_path` | **Kael prequel** -- opens **17**; ends **still running** (fugitive on the Path); **not** a sequel to Tale |
+| `3` | **Mordred's Legacy** | `mordreds_legacy` | Book 2 -- **Alun** POV; **Kael 42** at first meeting |
+
+**Gap (~25y):** between Rune Path **ending** (Kael running) and Legacy **opening** (Kael 42) remains **deliberately flexible** until [`mrp-outline-02-02`](/docs/books/magicborn-rune-path/planning/task-registry) + [`ml-book2-02-03`](/docs/books/mordreds-legacy/planning/task-registry) are answered.
+
+### Planning note: POV stickiness
+
+**Legacy-only craft choice (not chronology):** whether **Acts II-III** stay **Alun-only** tight third, or add **occasional adult POV** (e.g. Kael) for institutional counterweight. Tracked as [`ML-POV-STICKINESS`](/docs/books/mordreds-legacy/planning/decisions) (`proposed`). Unrelated to reading order.

@@ -53,6 +53,7 @@ describe('reader workspace state', () => {
     expect(state.bookSlug).toBe('mordreds_tale');
     expect(state.canDownload).toBe(true);
     expect(state.localFileName).toBe('local-book.epub');
-    expect(state.viewerSource.kind).toBe('local');
+    expect(state.viewerSource).not.toBeNull();
+    expect(state.viewerSource!.kind).toBe('local');
   });
 });

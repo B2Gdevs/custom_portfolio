@@ -22,7 +22,7 @@ Jack stepped close. Too close.
 
 Morgana’s vision swam. “He’s not yours.”
 
-Jack’s smile was thin. “Everything in this settlement is mine.”
+Jack’s smile was thin. “Everything in Tarro that matters answers to me.”
 
 The wagon that carried Mordred away was plain wood, painted with a symbol Morgana didn’t recognize — a house with open hands. Someone pressed a cheap clay amulet into a matron’s palm “for luck,” strung on a cord too rough for an infant’s skin.
 

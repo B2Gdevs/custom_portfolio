@@ -2,7 +2,7 @@
 title: Planning Docs
 description: Index for RepoPlanner in this monorepo -- CLI, submodule, embed policy, and planning loop files.
 date: "2026-03-29"
-updated: "2026-03-29"
+updated: "2026-03-30"
 order: 1
 repoPath: apps/portfolio/content/docs/repo-planner/planning/planning-docs.mdx
 ---
@@ -13,34 +13,52 @@ repoPath: apps/portfolio/content/docs/repo-planner/planning/planning-docs.mdx
 
 | Page | Purpose |
 | --- | --- |
+| [Requirements](/docs/repo-planner/requirements) | Section scope, embed boundaries, and CLI/product expectations |
+| [Roadmap](/docs/repo-planner/planning/roadmap) | Phase-level view of the RepoPlanner integration work |
 | [Apps hub](/apps) | Operator gallery |
 | [Repo Planner tool](/apps/repo-planner) | Embedded cockpit + live read APIs |
 | [Getting started](/docs/repo-planner/getting-started) | Submodule, root scripts, planning file roles, standalone operators |
-| [Decisions](/docs/repo-planner/planning/decisions) | ADRs: shell ownership, read-only embed, reports dir, routes, CLI story |
+| [Decisions](/docs/repo-planner/planning/decisions) | ADRs: shell ownership, read-only embed, Pack vs Live, ephemeral preview uploads, kickoff effort = **estimated hours** (**`REPOPLAN-KICKOFF-01`**), config-declared planning roots (**`REPOPLAN-ROOTS-01`**), reports dir, routes, CLI story, workflow stance |
 | [Reader shell + Repo Planner embed](/docs/documentation/reader-repo-planner-embed-architecture) | **repub-builder** reader shell, shared cockpit modal, docs context menu |
 | [State](/docs/repo-planner/planning/state) | Current focus / queue for this section |
 | [Task registry](/docs/repo-planner/planning/task-registry) | Executable tasks (`repo-planner-integration-*`) |
 | [Errors and attempts](/docs/repo-planner/planning/errors-and-attempts) | Cockpit / CLI failures and mitigations |
 
-Repo-wide loop: **[Global -- Planning docs](/docs/global/planning/planning-docs)**; diagrams and id grammar: **[Global planning guide](/docs/global/global-planning)**. **Monorepo requirements** (including CLI decisions): **[Documentation -- Requirements](/docs/documentation/requirements)**. **Roadmap-style overview:** **[Documentation -- Roadmap](/docs/documentation/roadmap)**.
+For **RepoPlanner-section** work, read [requirements](/docs/repo-planner/requirements), [roadmap](/docs/repo-planner/planning/roadmap), [state](/docs/repo-planner/planning/state), [task registry](/docs/repo-planner/planning/task-registry), and [decisions](/docs/repo-planner/planning/decisions) first. Open this page when you need the local playbook, the code map, or the embed policy summary.
+
+Repo-wide loop: **[Global -- Planning docs](/docs/global/planning/planning-docs)**; diagrams and id grammar: **[Global planning guide](/docs/global/global-planning)**. **Monorepo requirements** (including CLI decisions): **[Documentation -- Requirements](/docs/documentation/requirements)**. **Cross-section overview:** **[Documentation -- Roadmap](/docs/documentation/roadmap)**.
 
 ## Workflow stance
 
 - **Roadmap, state, task registry, and decisions** are the living records.
 - Any one-off phase plan should live under a section planning folder such as `planning/plans/<phase-id>/`.
-- `IMPLEMENTATION_PLAN.md` should be treated as a legacy compatibility pointer only, not the default planning artifact for new work.
+- `IMPLEMENTATION_PLAN.md` should not exist in the minimal root tree; if an older clone still has it, migrate the useful content into roadmap/state/task-registry/decisions or section plans and delete the file.
 - RepoPlanner should align with the same structure instead of encouraging parallel "plan vs task registry" workflows.
 
 ## Host embed on this site
 
-**Intent:** Browser edits stay **local / export → git**; the server does not persist casual cockpit mutations. Full detail: [Decisions](/docs/repo-planner/planning/decisions) **`REPOPLAN-EMBED-01`**, **`REPOPLAN-SHELL-01`**.
+**Intent:** Browser edits stay **local / export → git**; the server does not persist casual cockpit mutations. Full detail: [Decisions](/docs/repo-planner/planning/decisions) **`REPOPLAN-EMBED-01`**, **`REPOPLAN-SHELL-01`**, **`REPOPLAN-MODES-01`**.
+
+**Modes:** **Pack** (gallery + uploads; client-side bundle where possible) vs **Live** (GET APIs reading this repo’s **`.planning/`**). That mode split, toolbar shell, init download flow, and contrast pass are now shipped in phase `repo-planner-integration-03`; workflow support is now shipped in phase `repo-planner-integration-05`, and follow-on work moves into structured editing (`06`).
 
 | Surface | Default behavior |
 | --- | --- |
-| **GET** planning APIs | Read committed **`.planning/`** (today often CLI-backed JSON; XML read path planned -- [task registry](/docs/repo-planner/planning/task-registry) **`03-03`**) |
+| **GET** planning APIs | Read committed planning files through the shared config/root resolver (`planning-config.toml` roots; repo-root **`.planning/`** fallback only when config does not declare roots). Live bundle JSON is built directly from XML / planning files rather than CLI spawn per poll |
 | **`POST /api/planning-edits/apply`**, **`POST /api/planning-cli/run`** | **403** unless **`PLANNING_COCKPIT_ALLOW_SERVER_WRITES=1`** |
 | **Planning chat / in-site LLM** | **Out of scope** -- **`POST /api/ai/planning-chat`** returns **501** unless you wire a backend |
-| **Workspace chrome** (project switcher, pack upload, export, init downloads) | **Target:** owned by the **`repo-planner`** package and imported; portfolio only mounts and supplies routes/env (**`REPOPLAN-SHELL-01`**). **Today:** interim implementation still lives under **`apps/portfolio`** until upstream exports a host shell. |
+| **Workspace chrome** (project switcher, pack upload, export, init downloads) | Owned by the **`repo-planner`** package and imported; portfolio mounts the shell and supplies routes/env (**`REPOPLAN-SHELL-01`**). Live and Pack now share the same vendored **`PlanningCockpit`** body through the shared data-source contract rather than keeping a host-only fallback pane. |
+
+## Workflow support shipped
+
+- Snapshot ranking, current-sprint context, and the compact `AGENTS.md` reminder now come from one shared workflow engine across CLI, Live, and Pack.
+- `workflow kickoff`, `workflow done-gate`, and `workflow ownership` now expose the same phase steering data the cockpit uses.
+- Kickoff output now includes a reusable block template, with a committed example at `planning/plans/repo-planner-integration-05/PLAN.mdx`.
+- Executable work cannot be marked done through the CLI without tests on the verification path.
+- The cockpit dashboard now surfaces workflow cards for recommendation, kickoff state, done-gate warnings, ownership guidance, open questions, and collapsed answered-question history.
+- The Pack overview tab now surfaces workflow summary cards and host-policy badges instead of only raw file KPIs.
+- The inspector now renders structured requirement, roadmap, state, decisions, kickoff, task-registry, and `-PLAN.xml` phase-plan views with host-policy badges and locked-id guidance rather than defaulting to raw markdown/XML.
+- Phase-question answers now use a non-AI inline composer that can create a decision record, backfill the linked reference, and keep answered history collapsed in the same inspector surface.
+- Advanced id migration now exists only for writable local packs and rewrites stable string-id references across pack files; Live mode and short numeric/root ids stay locked.
 
 ### Code map (Next.js app)
 
@@ -62,4 +80,4 @@ Repo-wide loop: **[Global -- Planning docs](/docs/global/planning/planning-docs)
 
 ### Production notes
 
-**GET** handlers may **`spawn`** the CLI for **`simulate loop --json`** -- confirm the host allows short-lived processes and that **`.planning/`** is present in the deploy artifact if you want live data. With default **read-only** POST policy, HTTP does not write **`.planning/`**.
+**GET** handlers now read planning files directly through the shared resolver instead of spawning the CLI for each poll. Confirm the configured planning root(s) and reports dir are present in the deploy artifact if you want Live data. With default **read-only** POST policy, HTTP does not write planning files.

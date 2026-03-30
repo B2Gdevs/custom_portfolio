@@ -1,0 +1,30 @@
+---
+title: Reader workspace shell and styling
+description: Rail, shelf planning entry, and opaque surfaces vs global layout CSS.
+date: "2026-03-29"
+repoPath: apps/portfolio/content/docs/books/planning/plans/reader-workspace-shell-and-styling.mdx
+order: 2
+---
+
+## Goals
+
+- **Rail:** Library-only by default; optional host links via `readerShellNavLinks`. Brand block (“Reader / Workspace”) navigates to the reader library (same as Library).
+- **Shelf:** Built-in titles with a host-provided planning payload show **Planning cockpit** on the card; modal uses the same payload as the in-reader strip (EPUB injection applies only when that book is open in the viewer).
+- **Surfaces:** Reader routes use `SidebarInset` `bg-background` so the shell matches site shadcn tokens. Catalog field is `type="text"` + `role="searchbox"` (not `type="search"`) to avoid WebKit’s extra search affordances beside the app’s magnifier icon.
+- **Theme:** Reader chrome uses the same Tailwind semantic classes as the rest of the portfolio (`border-border`, `bg-card`, `text-muted-foreground`, etc.). The old **ember / ink** toggle was a separate palette; it has been removed so the reader always follows the site theme.
+- **Genres:** `genres` in each book’s `book.json` are copied into `public/books/manifest.json` by `scripts/build-books.cjs` and shown on shelf cards (replacing “Built in” / “Queued” pills).
+
+## Implementation map
+
+| Concern | Location |
+| --- | --- |
+| Default empty extra rail links | `packages/repub-builder/src/reader/ReaderWorkspaceSidebar.tsx` |
+| Brand → library | Same (header `Link` to `readerAppHref(readerAppPath)`) |
+| Card → modal | `ReaderShelfCard` + `getPlanningStripConfig` in `ReaderWorkspace` |
+| Inset background on `/apps/reader` | `apps/portfolio/components/layout/SiteLayout.tsx` |
+| Search / theme tokens | `packages/repub-builder/src/reader/reader-chrome-theme.ts` |
+| `data-reader-workspace` + input clip | `ReaderWorkspace` root + `apps/portfolio/app/globals.css` |
+
+## Follow-ups
+
+- Optional: wire shelf **filter chips** to genres (today they still reflect reading progress / availability).

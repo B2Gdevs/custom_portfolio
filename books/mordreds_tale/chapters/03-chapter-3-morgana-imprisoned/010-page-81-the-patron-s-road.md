@@ -20,7 +20,7 @@ At night, when the pendant cooled, he thought of the sleeping woman in the deep 
 
 Then the messages changed.
 
-A courier from the eastern settlements arrived with mud on his boots and panic in his voice. “The woman,” he rasped. “The one they brought in. Pantheon blood. There’s talk she’s not… stable. There’s talk she’s *useful.*”
+A courier from the eastern roads arrived with mud on his boots and panic in his voice. “The woman,” he rasped. “The one they brought into Tarro. Pantheon blood. There’s talk she’s not… stable. There’s talk she’s *useful.*”
 
 Jack went still.
 

@@ -1,7 +1,6 @@
 'use client';
 
 import type { Dispatch, ReactNode, SetStateAction } from 'react';
-import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { Filter, Headphones, Lock, Radio, Search, SlidersHorizontal, Waves } from 'lucide-react';
@@ -13,14 +12,19 @@ import {
   getDiscoveryFilterOptions,
 } from '@/lib/content-discovery';
 import { HighlightedText } from '@/components/content/HighlightedText';
+import { BandLabListenEmbed } from '@/components/listen/BandLabListenEmbed';
 import { ListenUnlockForm } from '@/components/listen/ListenUnlockForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { CONTENT_SEARCH_MODAL_ID } from '@/lib/modal-ids';
 import type { ListenPageRow } from '@/lib/listen-items';
+import { listenPresetCardBorderAccent } from '@/lib/listen-card-accent';
 import { useModalStore } from '@/stores/modalStore';
 import { cn } from '@/lib/utils';
+
+const bandlabCtaClassName =
+  'inline-flex items-center gap-2 rounded-full border border-accent/60 bg-accent/10 px-4 py-2 text-sm text-primary transition hover:bg-accent/20';
 
 type SortOption = { value: string; label: string };
 
@@ -313,12 +317,21 @@ export function ListenIndexClient({ rows }: { rows: ListenPageRow[] }) {
           ) : (
             results.map((row) => {
               const { item, locked, lockGroup, embedUrl, bandlabUrl } = row;
-              const snippet = buildDiscoverySnippet(item, filters.query ?? '');
+              const queryTrimmed = filters.query?.trim() ?? '';
+              const snippet = queryTrimmed ? buildDiscoverySnippet(item, filters.query ?? '') : '';
               const itemDate = item.updated ?? item.date;
               const isPreset = item.listenCatalogKind === 'preset';
+              const showBandlabLink = !locked && Boolean(bandlabUrl);
+              const showHeaderBandlabCta = showBandlabLink && Boolean(embedUrl);
+              const showInlineBandlabCta = showBandlabLink && !embedUrl;
 
               return (
-                <article key={item.slug} id={item.slug} className="story-card overflow-hidden scroll-mt-28">
+                <article
+                  key={item.slug}
+                  id={item.slug}
+                  className="story-card overflow-hidden scroll-mt-28"
+                  style={isPreset ? listenPresetCardBorderAccent(item.slug) : undefined}
+                >
                   <div className="border-b border-border/70 p-6">
                     <div className="mb-3 flex flex-wrap items-center gap-2 text-[0.72rem] uppercase tracking-[0.3em] text-text-muted">
                       <span className="inline-flex items-center gap-1.5">
@@ -366,22 +379,32 @@ export function ListenIndexClient({ rows }: { rows: ListenPageRow[] }) {
                         <p className="mt-3 max-w-2xl text-sm leading-7 text-text-muted">
                           <HighlightedText text={item.description} query={filters.query ?? ''} />
                         </p>
-                        {snippet ? (
+                        {queryTrimmed && snippet ? (
                           <p className="mt-3 text-sm leading-7 text-text-muted">
                             <HighlightedText text={snippet} query={filters.query ?? ''} />
                           </p>
                         ) : null}
-                      </div>
-                      {!locked && bandlabUrl ? (
-                        <div className="shrink-0 lg:ml-6">
-                          <Link
+                        {showInlineBandlabCta ? (
+                          <a
                             href={bandlabUrl}
                             target="_blank"
-                            rel="noreferrer noopener"
-                            className="inline-flex items-center gap-2 rounded-full border border-accent/60 bg-accent/10 px-4 py-2 text-sm text-primary transition hover:bg-accent/20"
+                            rel="noopener noreferrer"
+                            className={cn(bandlabCtaClassName, 'mt-4 w-full justify-center sm:w-auto')}
                           >
                             Open on BandLab
-                          </Link>
+                          </a>
+                        ) : null}
+                      </div>
+                      {showHeaderBandlabCta ? (
+                        <div className="shrink-0 lg:ml-6">
+                          <a
+                            href={bandlabUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={bandlabCtaClassName}
+                          >
+                            Open on BandLab
+                          </a>
                         </div>
                       ) : null}
                     </div>
@@ -390,20 +413,16 @@ export function ListenIndexClient({ rows }: { rows: ListenPageRow[] }) {
                   </div>
 
                   {!locked && embedUrl ? (
-                    <div className="bg-black/20 p-4">
-                      <iframe
-                        src={embedUrl}
-                        title={`${item.title} embed`}
-                        className="h-44 w-full rounded-2xl border border-border bg-dark"
-                        loading="lazy"
-                        allow="autoplay; encrypted-media; clipboard-write"
-                      />
-                    </div>
+                    <BandLabListenEmbed
+                      src={embedUrl}
+                      title={`${item.title} — BandLab`}
+                      variant={isPreset ? 'preset' : 'track'}
+                    />
                   ) : null}
 
-                  {!locked && !embedUrl && bandlabUrl ? (
+                  {showInlineBandlabCta ? (
                     <div className="border-t border-border/60 px-6 py-4 text-sm text-text-muted">
-                      No embed for this row. Use the BandLab link above.
+                      No embedded player here; use Open on BandLab to hear it.
                     </div>
                   ) : null}
 

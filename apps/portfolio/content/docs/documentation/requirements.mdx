@@ -2,7 +2,7 @@
 title: Requirements
 description: Section requirements for the documentation site and its planning workflow.
 date: "2026-03-16"
-updated: "2026-03-28"
+updated: "2026-03-30"
 repoPath: apps/portfolio/content/docs/documentation/requirements.mdx
 order: 6
 ---
@@ -22,19 +22,21 @@ order: 6
 
 | Id | Requirement | Why |
 | --- | --- | --- |
-| `DOC-REQ-01` | each active section should own its planning loop inside the docs tree | planning state should live next to the public implementation context |
+| `DOC-REQ-01` | each active section should own `requirements.mdx` plus a section-local planning loop inside the docs tree | section scope and phase state should live next to the public implementation context |
 | `DOC-REQ-02` | the docs area should expose a roadmap with section-level status and next steps | readers need a short overview before drilling into section records |
 | `DOC-REQ-03` | planning docs and reference docs should remain clearly separated in section navigation | day-to-day planning should stay compact without burying reference material |
 | `DOC-REQ-04` | docs copy should be compact, field-based, and easy to render into structured UI later | these pages are living records, not prose essays |
 | `DOC-REQ-05` | section planning MDX is the first stop for **section** work; **root `.planning/*.xml`** + **root `AGENTS.md`** for **monorepo** gates -- same workflow, two layers | matches root [`AGENTS.md`](../../../../../AGENTS.md) |
 | `DOC-REQ-06` | planning MDX may include `repoPath` and `taskPhase` frontmatter for local search; values must stay repo-accurate | agents and humans find files without guessing route-to-path mapping |
 | `DOC-REQ-07` | planning pack modal: demo `.md` plus build-time exports of section planning MDX only; `.planning` not public; open from nav/hero via Zustand modal registry (`documentation-site-03-04`) | planning packs policy also summarized in [global planning](/docs/global/global-planning) |
-| `DOC-REQ-08` | the docs IA should expose `magicborn` as a first-class section for public worldbuilding material written in short story form | world/lore writing needs a stable public home and a clear ingestion source for site chat |
+| `DOC-REQ-08` | the docs IA should expose `magicborn` as a first-class section; **lore** routes under **`/docs/magicborn/in-world/<book>/`** with an [`in-world` index](/docs/magicborn/in-world), while **planning** stays under `planning/` | fiction-first archive grouped by novel; file tree nests subfolders; RAG/chat keep stable slugs per file |
 | `DOC-REQ-09` | active public content areas like `blog` and `projects` should have section-local planning docs when their UX, IA, or schema is being actively redesigned | content-structure decisions should not get buried in unrelated documentation pages |
 | `DOC-REQ-10` | operator-facing planning docs should prefer ASCII punctuation, while public-facing prose may keep richer Unicode typography | shell, CLI, XML, and generated planning artifacts should stay readable across terminals without flattening the site's published copy |
 | `DOC-REQ-11` | long-form discovery surfaces like `listen`, `blog`, and `projects` should share one reusable content-shell system while keeping per-section identity through theme tokens, sidebar treatment, and mini logos | the site should feel coherent without collapsing distinct sections into one generic page shell |
 | `DOC-REQ-12` | each docs section should keep its planning records inside a literal `planning/` or `.planning/` folder instead of mixing planning files with general reference docs at the section root | planning packs, navigation, and agent behavior stay more legible when planning records are physically grouped |
 | `DOC-REQ-13` | roadmap, state, task registry, and decisions are the living planning records; one-off implementation plans should be phase-local documents stored under a section planning folder (for example `planning/plans/<phase-id>/...`) | agents should not keep generating free-floating "implementation plan" files that compete with the loop |
+| `DOC-REQ-14` | every active docs section should expose a real `planning/roadmap.mdx` and section `requirements.mdx`, even when cross-section rollups also exist in the documentation section | each section behaves like a miniature project and needs its own scope and phase map |
+| `DOC-REQ-15` | implementation phases must define a clear definition of done and cannot be marked done without automated tests for executable behavior | the planning loop should close phases with evidence, not optimism |
 
 ## Monorepo scope (canonical narrative)
 
@@ -42,20 +44,21 @@ Narrative for **cross-section** product scope lives **here**, not in repo-root *
 
 | Topic | Requirement |
 | --- | --- |
-| **Books / EPUB** | Optional **planning supplement** trees: `repub epub ... --planning <dir>` and `book.json` **`epubPlanningDirs`** via `@portfolio/repub-builder` and `scripts/build-books.cjs` -- detail in [books planning-docs](/docs/books/planning/planning-docs). |
-| **Reader + site** | Books, reader, EPUB pipeline, annotations, and site AI: phased roadmap and discipline in **[books planning-docs](/docs/books/planning/planning-docs)** and **[books task registry](/docs/books/planning/task-registry)**; product boundary and persistence in **[architecture conventions](/docs/documentation/architecture-conventions)**. |
+| **Books / EPUB** | Optional **planning supplement** trees: `repub epub ... --planning <dir>` and `book.json` **`epubPlanningDirs`** via `@portfolio/repub-builder` and `scripts/build-books.cjs` -- detail in [books requirements](/docs/books/requirements) and [books roadmap](/docs/books/planning/roadmap). |
+| **Reader + site** | Books now prioritize an auth-backed reader workspace: backend-stored EPUB/library records, gated annotation persistence, entitlement-gated in-reader editing, and reader polish/search on top of the existing EPUB runtime. Shared auth policy starts in **Global** before section delivery continues in **[books roadmap](/docs/books/planning/roadmap)** and **[books task registry](/docs/books/planning/task-registry)**. |
 | **Site AI** | Chat should ground on repo-backed RAG, **Sources** panel with snippets and deep links; public chat read-only; repo content is source of truth. |
-| **Listen** | **`/listen`** -- unified catalog for **audio tracks** and **BandLab presets**, discovery UX aligned with blog/projects, **group-based shared passwords** for locked rows (no per-user accounts in v1). Planning: [listen planning-docs](/docs/listen/planning/planning-docs). |
+| **Listen** | **`/listen`** -- unified catalog for **audio tracks** and **BandLab presets**, with future private owner-only rows and BandLab data moving into the database through the same auth/entitlement layer used by Books. Planning: [listen requirements](/docs/listen/requirements), [listen roadmap](/docs/listen/planning/roadmap), and [listen task registry](/docs/listen/planning/task-registry). |
+| **Auth / tenancy** | No public signup in v1. One owner user and one tenant/org are seeded locally, anonymous visitors may still browse public surfaces, and gated features use long-lived sessions plus entitlement checks. Global planning owns the shared policy and section planners consume it. |
 | **Shared content surfaces** | `listen`, `blog`, and `projects` should converge on shared discovery/detail primitives, but each surface keeps its own theme language and section mark so users can orient themselves instantly. |
-| **Planning workflow** | The living loop should be roadmap-first and foldered: `planning/` contains planning docs, while one-off phase plans live under `planning/plans/` and never replace roadmap/state/task-registry as source of truth. |
+| **Planning workflow** | The living loop should be roadmap-first and foldered: each section owns `requirements.mdx` plus `planning/roadmap`, `planning/state`, `planning/task-registry`, and `planning/decisions`, while one-off phase plans live under `planning/plans/` and never replace the loop. New or stale phases should use a lightweight kickoff, and executable behavior is not done without tests. |
 
 ## Planning archive (removed)
 
-The snapshot **`.planning-archive/2026-03-29-pre-barebones/`** was **deleted** after folding pointers into this page and section registries. **Do not** recreate it; use git history for the old tree. **Where the content went:** books reader / AI / RAG tables -- **[books planning-docs](/docs/books/planning/planning-docs)**; product boundary and service-extraction posture -- **[architecture conventions](/docs/documentation/architecture-conventions)**; planning portal and modal pipeline -- **documentation** task registry **`documentation-site-03`**.
+The snapshot **`.planning-archive/2026-03-29-pre-barebones/`** was **deleted** after folding pointers into this page and section registries. **Do not** recreate it; use git history for the old tree. **Where the content went:** books reader / AI / RAG tables -- **[books requirements](/docs/books/requirements)**, **[books roadmap](/docs/books/planning/roadmap)**, and **[books task registry](/docs/books/planning/task-registry)**; product boundary and service-extraction posture -- **[architecture conventions](/docs/documentation/architecture-conventions)**; planning portal and modal pipeline -- **documentation** task registry **`documentation-site-03`**.
 
 ## CLI productization (decisions, 2026-03-30)
 
-Tracked as **`documentation-site-07`** / **`repo-planner-integration-01-13`**. **Phase 01 baseline (shipped):** **`pnpm planning -- --version`** (repo-planner package version; root wrapper strips stray **`--`**), **`pnpm --filter @portfolio/repub-builder run repub -- --version`**, and **`engines.node` >= 22** on the workspace root, **`@portfolio/repub-builder`**, and **`vendor/repo-planner`**. **Still open under 07 / 01-13:** Ink TTY polish, **`bin`** publish story, **`pnpm dlx`** matrix in READMEs.
+Tracked as **`documentation-site-07`** plus RepoPlanner section follow-up. **Phase 01 baseline (shipped):** **`pnpm planning -- --version`** (repo-planner package version; root wrapper strips stray **`--`**), **`pnpm --filter @portfolio/repub-builder run repub -- --version`**, **`engines.node` >= 22** on the workspace root, **`@portfolio/repub-builder`**, and **`vendor/repo-planner`**, plus the vendored package now exposing a formal **`repo-planner`** bin for **`pnpm exec repo-planner`**. **Still open under `documentation-site-07`:** Ink TTY polish and the broader publish / `pnpm dlx` matrix for both CLIs.
 
 **Owner intent:**
 

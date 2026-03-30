@@ -4,6 +4,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   resolve: {
     alias: {
+      '@/vendor/repo-planner': path.resolve(__dirname, '../../vendor/repo-planner'),
       '@': path.resolve(__dirname, '.'),
     },
   },

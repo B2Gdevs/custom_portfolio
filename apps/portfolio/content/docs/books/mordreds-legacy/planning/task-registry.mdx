@@ -1,0 +1,48 @@
+---
+title: Mordred's Legacy — Task Registry
+description: Executable tasks for Book 2 — outline, manuscript, continuity with Kael prequel.
+date: "2026-03-31"
+updated: "2026-03-29"
+order: 12
+---
+
+# Mordred's Legacy — Task Registry
+
+## Cross-title
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `ml-tri-01` | `done` | Legacy Ch1–12 scaffold + open questions on [section State — Magicborn line](/docs/books/planning/state#magicborn-line-world-order-and-chapter-beats) | — | [`books-cross-title-01-01`](/docs/books/planning/task-registry) |
+
+## Phase `ml-outline-01` (Ch1 + plumbing)
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `ml-outline-01-01` | `planned` | tighten **Act I** optional polish only (Ch1 complete) | — | [state](/docs/books/mordreds-legacy/planning/state) |
+| `ml-outline-01-02` | `planned` | name **parents** + confirm **Kael** rank/title at **42** | — | decisions + state |
+| `ml-outline-01-03` | `done` | add `books/mordreds_legacy/` + `book.json` + Ch1 opening + `epubPlanningDirs` | — | `pnpm run build:books` |
+
+## Phase `ml-book2-02` (Book 2 body outline)
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `ml-book2-02-00` | `done` | **Chapter map v0** for Legacy + Rune Path on [section State — Magicborn line](/docs/books/planning/state#magicborn-line-world-order-and-chapter-beats) | — | [`BOOKS-WORLD-CHRONOLOGY`](/docs/books/planning/decisions); [`books-cross-title-01-01`](/docs/books/planning/task-registry) |
+| `ml-book2-02-01` | `planned` | **Act II** beat sheet (8–12): camp hierarchy, church-crown pressure, dungeon-adjacent set piece, **midpoint** (Alun obeys/breaks) — refine Ch2–7 rows in [section State — Magicborn line](/docs/books/planning/state#magicborn-line-world-order-and-chapter-beats) | — | [state](/docs/books/mordreds-legacy/planning/state) Act II row |
+| `ml-book2-02-02` | `planned` | **Act III** beat sheet: climax axis (Alun as asset vs person), Kael's order vs conscience, **ending** landing | `ml-book2-02-01` | state |
+| `ml-book2-02-03` | `planned` | align Legacy beats with [**Rune Path**](/docs/books/magicborn-rune-path/planning/state) **end-state** + **inter-book gap** ([`MRP-TIMELINE`](/docs/books/magicborn-rune-path/planning/decisions)) — what Kael can plausibly remember or hide | `mrp-outline-02-01` | decisions cross-link |
+| `ml-book2-02-04` | `planned` | lock **POV** rule for Acts II–III — [`ML-POV-STICKINESS`](/docs/books/mordreds-legacy/planning/decisions) | `ml-book2-02-01` | decisions |
+
+## Phase `ml-book2-03` (manuscript after outline)
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `ml-book2-03-01` | `planned` | draft **Ch2** (Act II entry) | `ml-book2-02-01` | `pnpm run build:books` |
+| `ml-book2-03-02` | `planned` | milestone: **first Act II climax** chapters drafted | `ml-book2-03-01` | build + read-aloud |
+| `ml-book2-03-03` | `planned` | milestone: **Act III** draft complete | `ml-book2-02-02`, `ml-book2-03-02` | build |
+
+## Registry Rules
+
+| Field | Value |
+| --- | --- |
+| `ordering` | outline tasks before long manuscript pushes |
+| `status-set` | `planned`, `in-progress`, `done`, `blocked`, `deferred` |

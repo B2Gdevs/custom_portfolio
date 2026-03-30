@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { EpubViewerLazy } from '@portfolio/repub-builder/reader';
 import type { BookEntry } from '@/lib/books';
-import EpubViewer from '@/components/books/EpubViewerLazy';
 
 interface BookReaderEmbedProps {
   slug: string;
@@ -54,7 +54,7 @@ export default function BookReaderEmbed({
   return (
     <div className={containerClassName}>
       <div className={viewerClassName}>
-        <EpubViewer
+        <EpubViewerLazy
           epubUrl={`/books/${slug}/book.epub`}
           title={title}
           storageKey={slug}

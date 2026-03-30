@@ -1,23 +1,25 @@
 ---
 title: Getting started
-description: Submodule, root CLI scripts, planning file roles, and standalone operator flow for RepoPlanner in this monorepo.
+description: Submodule, root CLI scripts, package bin, planning file roles, and standalone operator flow for RepoPlanner in this monorepo.
 date: "2026-03-29"
-updated: "2026-03-29"
+updated: "2026-03-30"
 order: 2
 repoPath: apps/portfolio/content/docs/repo-planner/getting-started.mdx
 ---
 
-# Repo Planner — Getting started
+# Repo Planner - Getting started
 
-You do not have to use this monorepo's layout to benefit from a **planning loop**: keep a visible **state**, an ordered **task registry**, and a **roadmap** (or phase list). Agents and humans read the same files; ids stay stable in chat and commits.
+You do not have to use this monorepo's layout to benefit from a planning loop: keep visible requirements, a roadmap, a state pointer, and an ordered task registry. Agents and humans read the same files; ids stay stable in chat and commits.
+
+In this repo, the **Global** docs section is the human-first workflow surface. RepoPlanner's job is to summarize and accelerate that loop, not replace it with a parallel planning model.
 
 ## Reference implementation
 
 [MagicbornStudios/RepoPlanner](https://github.com/MagicbornStudios/RepoPlanner) provides:
 
-- **XML-shaped** templates under `.planning/templates/` (bundled inside the submodule when you run **full** init).
-- **`loop-cli.mjs`** — snapshot, task updates, reports, `setup checklist`, `init` for greenfield bootstrap.
-- **Cockpit UI** — embeddable in Next (see upstream **INSTALL.md**). **Policy** for this site: [decisions](/docs/repo-planner/planning/decisions).
+- XML-shaped templates under `.planning/templates/` when you run **full** init.
+- The `repo-planner` CLI entrypoint backed by `loop-cli.mjs` for snapshot, task updates, reports, `setup checklist`, and greenfield bootstrap.
+- An embeddable cockpit UI for Next hosts. Policy for this site lives in [decisions](/docs/repo-planner/planning/decisions).
 
 ## Submodule
 
@@ -31,112 +33,188 @@ Update intentionally: `cd vendor/repo-planner && git fetch && git checkout <ref>
 git submodule update --init --recursive vendor/repo-planner
 ```
 
-## Root scripts (repository root)
+## Root scripts
 
-Defined in root **`package.json`**:
+Defined in the repository root `package.json`:
 
 | Script | Purpose |
 | --- | --- |
-| `pnpm planning` | **`scripts/run-planning-cli.mjs`** → `loop-cli.mjs` (sets **`REPOPLANNER_REPORTS_DIR=.planning-reports`** unless overridden) |
-| `pnpm planning:init` | `init --minimal --no-agents-md` — **`.planning/`** = XML + **`planning-config.toml`** + **`.planning/AGENTS.md`**; may create repo-root **`REQUIREMENTS.md`** stub if missing; **canonical** narrative = **[documentation/requirements](/docs/documentation/requirements)** + **[documentation/state](/docs/documentation/planning/state)**; **no** `IMPLEMENTATION_PLAN.md`; **no** `.planning/templates`, `phases/`, `reports/`, narrative `.md` under `.planning/` |
-| `pnpm planning:init:force` | Same with `--force` (overwrites bootstrap files in `.planning/`) |
-| `pnpm planning:init:full` | Upstream-style init (`templates/`, `phases/01-greenfield/`, `reports/.gitkeep`, `.planning/README.md`) — use only when you need RepoPlanner templates locally |
+| `pnpm planning` | `scripts/run-planning-cli.mjs` -> `repo-planner` CLI, with `REPOPLANNER_REPORTS_DIR=.planning-reports` by default |
+| `pnpm planning:init` | `init --minimal --no-agents-md` - `.planning/` = XML + `planning-config.toml` + `.planning/AGENTS.md`; may create repo-root `REQUIREMENTS.md` stub if missing; canonical narrative = [documentation requirements](/docs/documentation/requirements) + [documentation state](/docs/documentation/planning/state); no `IMPLEMENTATION_PLAN.md`; no `.planning/templates`, `phases/`, `reports/`, or narrative `.md` under `.planning/` |
+| `pnpm planning:init:force` | Same with `--force` |
+| `pnpm planning:init:full` | Upstream-style init with templates and phase folders for cases where you need the full bootstrap locally |
 | `pnpm planning:init:full:force` | Full init with `--force` |
 | `pnpm planning:snapshot` | Snapshot / agent context |
 | `pnpm planning:checklist` | `setup checklist` |
-| `pnpm planning:ui` / `pnpm planning:report-view` | **Local** report viewer (default port from CLI) |
-| `pnpm planning:embed-packs` | **`planning pack embed-build`** with this repo’s **`-o`** / **`--docs-dir`** → **`apps/portfolio/public/planning-embed/builtin-packs.json`** (cockpit built-in packs). App **dev** / **build** also run **`apps/portfolio/scripts/build-planning-embed-packs.cjs`**, which calls the same **`vendor/repo-planner/scripts/lib/embed-builtin-packs-build.mjs`** implementation. |
-| `pnpm planning pack embed-build` | **`--help`** for flags. Requires **`-o, --out <file>`**; optional **`--docs-dir`**, **`--planning-dir`**, **`--docs-path-prefix`**. Node API: **`repo-planner/embed-builtin-packs-build`** (`runPlanningEmbedBuildSync`, `buildEmbedBuiltinPacksPayload`). |
-| `pnpm planning -- --version` | Prints **`vendor/repo-planner/package.json`** `version` (root wrapper strips a stray **`--`** from **`pnpm`** forwarding). Same as **`pnpm run planning -- --version`**. |
+| `pnpm planning:ui` / `pnpm planning:report-view` | Local report viewer |
+| `pnpm planning:embed-packs` | `planning pack embed-build` for `apps/portfolio/public/planning-embed/builtin-packs.json` |
+| `pnpm planning -- --version` | Prints the vendored package version |
 
-**CLI dependencies** (`commander`, `fast-xml-parser`, `@iarna/toml`, `ejs`, `gray-matter`) are installed at the **workspace root** (and **`gray-matter`** is listed under **`vendor/repo-planner`** for clarity) so `node` can resolve them when executing the submodule script.
+CLI dependencies (`commander`, `fast-xml-parser`, `@iarna/toml`, `ejs`, `gray-matter`) are installed at the workspace root so Node can resolve them when executing the vendored script.
+
+## Formal CLI entrypoints
+
+RepoPlanner now ships a package bin named `repo-planner`.
+
+Use these surfaces intentionally:
+
+- `pnpm planning ...` is the default operator command in this monorepo because it injects the reports-dir default and always targets this checkout.
+- `pnpm exec repo-planner ...` works anywhere the vendored package is installed as a dependency.
+- `pnpm dlx repo-planner ...` and global installs are the intended publish surface once the package is published outside this repo; they should use the same bin entry and command help as the local wrapper.
+
+## Publish story
+
+RepoPlanner now carries a concrete publish contract instead of hand-waving around "later":
+
+| Topic | Contract |
+| --- | --- |
+| package name | `repo-planner` |
+| artifact style | source-first package; hosts transpile package source instead of expecting a precompiled JS bundle |
+| peer ownership | React, Next, and UI runtime packages stay in `peerDependencies` so the host controls those versions |
+| bootstrap assets | `.planning/` ships in the tarball because CLI init depends on those assets |
+| version cadence | patch = bug/docs/package fix; minor = additive exports/commands; major = breaking CLI or host-contract change |
+
+Verification for this phase is a package tarball dry-run from `vendor/repo-planner`:
+
+```bash
+pnpm pack --dry-run
+```
+
+## Consumer contract
+
+When another app embeds RepoPlanner, the required contract should be explicit:
+
+| Concern | Expectation |
+| --- | --- |
+| `Next.js` | add `repo-planner` to `transpilePackages` |
+| `Tailwind` | include vendored or installed RepoPlanner source in content scanning |
+| `CSS` | import `repo-planner/planning.css` once |
+| `Imports` | use package subpaths such as `repo-planner`, `repo-planner/host`, `repo-planner/planning-pack`, and `repo-planner/cockpit-host-context` |
+| `Utilities` | RepoPlanner ships its own `cn` helper and package-local primitives; hosts should not rely on `@/vendor/repo-planner` or app-local utility aliases for package internals |
+| `Host APIs` | provide state / metrics / latest-report routes and point them at the configured planning root |
+
+The vendored upstream docs for this live in [INSTALL.md](https://github.com/MagicbornStudios/RepoPlanner/blob/main/INSTALL.md).
+
+### Route installer
+
+RepoPlanner also ships `vendor/repo-planner/scripts/install-routes.mjs`.
+
+Use it against a Next app root, not a random package folder:
+
+```bash
+node vendor/repo-planner/scripts/install-routes.mjs --app-dir=apps/portfolio --dry-run
+```
+
+The installer now writes package-import re-export routes such as `repo-planner/api/planning-state/route`, understands the `apps/portfolio` layout, and defaults to read-only GET routes. Only opt into `planning-cli/run` or `planning-edits/apply` when the host explicitly wants mutable/browser-triggered operations.
+
+```bash
+node vendor/repo-planner/scripts/install-routes.mjs \
+  --app-dir=apps/portfolio \
+  --include-cli-run \
+  --include-edits-apply
+```
 
 ### Quick commands
 
 ```bash
 pnpm planning setup checklist
 pnpm planning snapshot
-pnpm planning:ui
+pnpm exec repo-planner --help
 ```
 
-Pass **`--root <path>`** or set **`REPOPLANNER_PROJECT_ROOT`** if the CLI must resolve a different project root than **`process.cwd()`**. Set **`REPOPLANNER_REPORTS_DIR`** (relative to project root or absolute) for **`usage.jsonl`** / report **`latest.md`** — this monorepo defaults to **`.planning-reports/`** via **`scripts/run-planning-cli.mjs`** and **`next.config.ts`**. See [decisions](/docs/repo-planner/planning/decisions) **`REPOPLAN-REPORTS-01`**.
+Pass `--root <path>` or set `REPOPLANNER_PROJECT_ROOT` if the CLI must resolve a different project root than `process.cwd()`. Set `REPOPLANNER_REPORTS_DIR` (relative to project root or absolute) for `usage.jsonl` / `latest.md`; this monorepo defaults to `.planning-reports/` via `scripts/run-planning-cli.mjs` and `next.config.ts`. See [decisions](/docs/repo-planner/planning/decisions) `REPOPLAN-REPORTS-01`.
 
-**Brownfield / minimal bootstrap:**
+## Minimal bootstrap
 
 ```bash
 pnpm planning:init
 ```
 
-Creates **`.planning/`** for **XML** + **`planning-config.toml`** + **`.planning/AGENTS.md`**. Execution lives in **`ROADMAP.xml`** / **`TASK-REGISTRY.xml`** / **`STATE.xml`** — not `IMPLEMENTATION_PLAN.md`. Stub **`REQUIREMENTS.xml`** points at documentation paths.
+Creates `.planning/` for XML + `planning-config.toml` + `.planning/AGENTS.md`. Execution lives in `ROADMAP.xml` / `TASK-REGISTRY.xml` / `STATE.xml`, not `IMPLEMENTATION_PLAN.md`. `REQUIREMENTS.xml` is a stub that points at the documentation-first narrative sources.
 
 ## MDX section docs vs XML
 
-- **Public narrative + section registries:** `apps/portfolio/content/docs/<section>/planning/*.mdx` for planning records, with non-planning reference docs beside that folder.
-- **Structured agent loop (RepoPlanner):** `.planning/*.xml` + `planning-config.toml` after **`pnpm planning:init`**. **Monorepo narrative + cross-cutting queue:** **[documentation/requirements](/docs/documentation/requirements)** and **[documentation/state](/docs/documentation/planning/state)**.
+- Public narrative + section registries: `apps/portfolio/content/docs/<section>/planning/*.mdx` for planning records, with non-planning reference docs beside that folder.
+- Structured agent loop (RepoPlanner): `.planning/*.xml` + `planning-config.toml` after `pnpm planning:init`.
+- Monorepo narrative + cross-cutting queue: [documentation requirements](/docs/documentation/requirements), [documentation state](/docs/documentation/planning/state), and [documentation roadmap](/docs/documentation/roadmap).
 
 ## Planning files: what to use when
 
 | File | Role |
 | --- | --- |
-| **`ROADMAP.xml`** | Product / theme timeline — milestones and phases as the cockpit expects. |
-| **`TASK-REGISTRY.xml`** | Tasks — goals, keywords, verification commands, status. |
-| **`STATE.xml`** | Pointer — `current-phase`, `next-action`, optional agent registry. |
-| **[documentation/requirements](/docs/documentation/requirements)** + **[documentation/state](/docs/documentation/planning/state)** | **Monorepo narrative + cross-cutting queue** (canonical). Repo-root **`REQUIREMENTS.md`** is a short pointer only. |
-| **`.planning-reports/`** | **Local only** — CLI usage + generated reports when **`REPOPLANNER_REPORTS_DIR`** / root **`pnpm`** scripts are used. |
+| `ROADMAP.xml` | Product / theme timeline |
+| `TASK-REGISTRY.xml` | Tasks, verification commands, status |
+| `STATE.xml` | Current pointer: `current-phase`, `next-action`, optional agent registry |
+| [documentation requirements](/docs/documentation/requirements) + [documentation state](/docs/documentation/planning/state) + [documentation roadmap](/docs/documentation/roadmap) | Canonical monorepo narrative and cross-cutting queue |
+| `.planning-reports/` | Local-only CLI usage and generated reports |
 
-**Phases folder** exists only after **`pnpm planning:init:full`**. Default **minimal** layout has **no** `.planning/phases/`.
+`phases/` exists only after `pnpm planning:init:full`. The default minimal layout has no `.planning/phases/`.
 
-## Bare `.planning` (default) vs full upstream init
+## Target workflow support
 
-**Contract:** **`.planning/`** is the **root planning section** (XML + **`planning-config.toml`** + **`.planning/AGENTS.md`**). **Human** monorepo narrative lives in **documentation** MDX + **`.planning/*.xml`** for machine loop.
+RepoPlanner is being shaped to help agents do four things faster:
+
+| Need | Target support |
+| --- | --- |
+| Pick a phase | Snapshot surfaces active phases, recommended next phase(s), percent complete, effort, dependencies, missing DoD fields, missing tests, orphaned tasks, and stale state. Inputs come only from config-declared planning roots. |
+| Start a vague phase | Kickoff scaffolding runs when a phase is vague, stale, or over the host's estimated-hours threshold. |
+| Close a phase correctly | Done gate checks tests, verification commands, and planning updates. Executable work is not done without tests. |
+| Place work correctly | Ownership guidance explains when work belongs in Global/root planning versus a section planner. |
+
+Concrete behavior for those surfaces lives in phase `repo-planner-integration-05`.
+
+## Snapshot and cockpit shape
+
+Recommended workflow surface:
+
+| Area | What should show |
+| --- | --- |
+| `Top recommendation lane` | next best phases with score, why-now reasons, blockers, effort label, ownership target, and direct links |
+| `Rules reminder` | compact `AGENTS.md` summary card: read order, kickoff trigger, tests-required-for-done, link to full source |
+| `Warnings` | missing tests, missing DoD fields, stale state pointers, stale phases, orphan tasks, blocked dependencies |
+| `Main inspector` | structured requirements, roadmap, state, task, decision, and kickoff panels as lists, cards, badges, and tables |
+
+The file tree remains useful because it preserves source-of-truth file boundaries, but the work surface should primarily use parsed data rather than page-style prose rendering.
+
+## Bare `.planning` vs full upstream init
+
+**Contract:** `.planning/` is the root planning section (XML + `planning-config.toml` + `.planning/AGENTS.md`). Human monorepo narrative lives in documentation MDX; `.planning/*.xml` is the machine loop.
 
 **Default `pnpm planning:init`** creates:
 
-| Under **`.planning/`** | At **repo root** | Omitted (use **`pnpm planning:init:full`**) |
+| Under `.planning/` | At repo root | Omitted by default |
 | --- | --- | --- |
-| `planning-config.toml`, `STATE.xml`, `TASK-REGISTRY.xml`, `ROADMAP.xml`, `DECISIONS.xml`, `ERRORS-AND-ATTEMPTS.xml`, `REQUIREMENTS.xml` (stub → documentation paths), **`AGENTS.md`** | **`REQUIREMENTS.md`** stub only if bootstrap creates it | `.planning/templates/`, `.planning/phases/`, `.planning/README.md` |
+| `planning-config.toml`, `STATE.xml`, `TASK-REGISTRY.xml`, `ROADMAP.xml`, `DECISIONS.xml`, `ERRORS-AND-ATTEMPTS.xml`, `REQUIREMENTS.xml`, `AGENTS.md` | `REQUIREMENTS.md` stub only if bootstrap creates it | `.planning/templates/`, `.planning/phases/`, `.planning/README.md`, `.planning/IMPLEMENTATION_PLAN.md`, `.planning/reports/` |
 
-**Local-only:** **`.planning-reports/`** (gitignored). **Former archive:** **`.planning-archive/`** was removed after migration; see **[documentation requirements](/docs/documentation/requirements)** (**Planning archive** section).
+Local-only reports live in `.planning-reports/` (gitignored).
 
-**What went wrong in an early `--minimal` pass** (fixed in this repo): narrative **`REQUIREMENTS.md` / `IMPLEMENTATION_PLAN.md`** inside **`.planning/`** broke the bare tree; **`usage.jsonl`** recreated **`reports/`**. Mitigations: **`runPlanningInitMinimal`**, **`REPOPLANNER_REPORTS_DIR`**, **`run-planning-cli.mjs`** defaults — detail in [errors and attempts](/docs/repo-planner/planning/errors-and-attempts).
+## Standalone cockpit
 
-## Standalone cockpit (operators)
-
-1. Clone [MagicbornStudios/RepoPlanner](https://github.com/MagicbornStudios/RepoPlanner) (or use upstream release / desktop binary).
-2. Install dependencies for the **web** app when present (path per upstream README).
-3. Point at **this** repository: `REPOPLANNER_PROJECT_ROOT=/absolute/path/to/custom_portfolio` then start the dev server from the RepoPlanner repo.
-4. Edit in the cockpit, **export**, and commit from git.
+1. Clone [MagicbornStudios/RepoPlanner](https://github.com/MagicbornStudios/RepoPlanner) or use a release build.
+2. Install dependencies for the web app when present.
+3. Point it at this repository with `REPOPLANNER_PROJECT_ROOT=/absolute/path/to/custom_portfolio`.
+4. Edit in the cockpit, export, and commit from git.
 
 ## Embedded cockpit on this site
 
-[`/apps/repo-planner`](/apps/repo-planner) mounts the vendored UI with **read-only server** defaults: **GET** routes may read committed **`.planning/`**; **`POST /api/planning-edits/apply`** and **`POST /api/planning-cli/run`** return **403** unless **`PLANNING_COCKPIT_ALLOW_SERVER_WRITES=1`**. No portfolio-hosted planning LLM. **Workspace chrome** (pack upload, project switcher, export) is **interim host code** today; target is an export from **`repo-planner`** — [Decisions](/docs/repo-planner/planning/decisions) **`REPOPLAN-SHELL-01`**, **`REPOPLAN-EMBED-01`**.
+[`/apps/repo-planner`](/apps/repo-planner) mounts the vendored UI with read-only server defaults: GET routes may read committed `.planning/`; `POST /api/planning-edits/apply` and `POST /api/planning-cli/run` return `403` unless `PLANNING_COCKPIT_ALLOW_SERVER_WRITES=1`. No portfolio-hosted planning LLM. Treat **Pack** and **Live** as explicit, distinct modes so labels and empty states stay honest.
 
 | Piece | Location |
 | --- | --- |
 | Route | `apps/portfolio/app/apps/repo-planner/page.tsx` |
 | Client | `apps/portfolio/components/repo-planner/RepoPlannerCockpitClient.tsx` |
-| Package | `package.json` → `"repo-planner": "file:../../vendor/repo-planner"` |
-| Transpile + env | `next.config.ts` — `transpilePackages`, **`REPOPLANNER_PROJECT_ROOT`**, **`REPOPLANNER_REPORTS_DIR`** |
+| Package | `apps/portfolio/package.json` -> `"repo-planner": "file:../../vendor/repo-planner"` |
+| Transpile + env | `next.config.ts` -> `transpilePackages`, `REPOPLANNER_PROJECT_ROOT`, `REPOPLANNER_REPORTS_DIR` |
 | APIs | `app/api/planning-*` + `lib/repo-planner/` |
 
-Full **code map** and production notes: [Planning docs — Host embed](/docs/repo-planner/planning/planning-docs#host-embed-on-this-site).
+Pack mode now supports two upload behaviors:
 
-### Gaps snapshot
-
-| Topic | Status |
-| --- | --- |
-| **CLI in this repo** | **Done** — root `pnpm planning*`; **planned** Ink + **`pnpm dlx`** + publish: **`documentation-site-07-01`**, **`repo-planner-integration-01-13`**. |
-| **XML bootstrap** | **Done** — **`pnpm planning:init`** minimal; **`planning:init:full`** for upstream templates. |
-| **Upstream `web/` in submodule** | **Optional** — use embedded page or standalone clone with **`REPOPLANNER_PROJECT_ROOT`**. |
-| **Pack parity (site vs RepoPlanner)** | Related but not identical until aligned — see [task registry](/docs/repo-planner/planning/task-registry). |
-
-## Planned: formal CLI (`pnpm dlx` first, publish later)
-
-**Target:** two CLIs — **RepoPlanner** (submodule) and **`repub`** — with **`pnpm dlx`** docs first. Decisions: **[documentation/requirements](/docs/documentation/requirements)**; tasks: **`documentation-site-07-01`**, **`repo-planner-integration-01-13`** — [documentation task registry](/docs/documentation/planning/task-registry), [repo-planner task registry](/docs/repo-planner/planning/task-registry).
+- `Import` creates an editable local pack persisted in browser storage.
+- `Preview upload` opens a read-only ephemeral pack JSON or `.planning` zip with no production write path and no saved browser workspace mutation.
 
 ## Further reading
 
-- Upstream **[INSTALL.md](https://github.com/MagicbornStudios/RepoPlanner/blob/main/INSTALL.md)** (path aliases, CSS tokens).
-- [Vendoring](/docs/documentation/vendoring) — submodule commands.
-- [Planning docs index](/docs/repo-planner/planning/planning-docs) — section loop and host embed.
-- [Decisions](/docs/repo-planner/planning/decisions) — embed and shell boundaries.
+- Upstream [INSTALL.md](https://github.com/MagicbornStudios/RepoPlanner/blob/main/INSTALL.md)
+- [Vendoring](/docs/documentation/vendoring)
+- [Planning docs index](/docs/repo-planner/planning/planning-docs)
+- [Decisions](/docs/repo-planner/planning/decisions)

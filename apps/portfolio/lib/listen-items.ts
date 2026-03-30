@@ -26,7 +26,9 @@ export function toListenDiscoveryItem(
     era: entry.era,
     duration: entry.duration,
     searchKeywords: [...(entry.extraTags ?? []), entry.catalogKind],
-    plainText: [entry.description, entry.genre, entry.mood, entry.era, mediaBlob].filter(Boolean).join(' '),
+    // Exclude description: getSnippetSource() already prepends item.description; duplicating it
+    // caused doubled paragraphs on /listen. Search still indexes description via buildSearchBlob().
+    plainText: [entry.genre, entry.mood, entry.era, mediaBlob].filter(Boolean).join(' '),
     headings: [],
     links: [],
     downloads: [],

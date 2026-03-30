@@ -2,7 +2,7 @@
 title: Task Registry
 description: Compact task records for the books section.
 date: "2026-03-15"
-updated: "2026-03-28"
+updated: "2026-03-30"
 repoPath: apps/portfolio/content/docs/books/planning/task-registry.mdx
 order: 3
 ---
@@ -18,6 +18,7 @@ All ids here use **`<books>-<stream>-<phase>-<task>`** (see [Global planning gui
 | `reader` | EPUB reading surfaces, annotations, read-page planning strip |
 | `publishing` | Editions and which book EPUBs are live |
 | `ai` | Site chat + RAG roadmap: **`books-ai-00`** = shipped CopilotKit (task `books-ai-00-01`); **`books-ai-01`** = forward Payload / `sqlite-vec` / ingest / citations queue |
+| `cross-title` | Magicborn-line fiction across *Tale* / *Rune Path* / *Legacy*: world order + chapter beats + TB-* questions in [section State](/docs/books/planning/state#magicborn-line-world-order-and-chapter-beats) |
 
 Legacy-looking ids such as `books-ai-01-04` are **not** a separate scheme: **`ai`** is the stream name, same as **`reader`** in `books-reader-01-16`.
 
@@ -61,22 +62,40 @@ Legacy-looking ids such as `books-ai-01-04` are **not** a separate scheme: **`ai
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
-| `books-reader-02-01` | `planned` | P4: merge exported annotations into `build:books` output for fixed author editions | `books-reader-01-17` | `pnpm run build:books` |
+| `books-reader-02-01` | `planned` | P4: merge exported annotations into `build:books` output for fixed **repub reading artifacts** (same emitted **`book.epub`** / future bundle per [decisions](/docs/books/planning/decisions) **`BOOKS-REPUB-ARTIFACT`**) | `books-reader-01-17` | `pnpm run build:books` |
 | `books-reader-02-02` | `done` | bundle planning trees into the EPUB spine: `repub epub ... --planning <dir>` (repeatable) plus per-book `book.json` `epubPlanningDirs` (paths relative to the book folder); walks `.md`/`.mdx`/`.xml`/`.toml`/`.txt` (skips `node_modules`, `.git`, `dist`, `.next`); appendix items are excluded from the generated TOC | `-` | `pnpm run build:books` |
 
-## Phase `books-reader-03` (reader shell + library UX)
+## Phase `books-reader-04` (repub artifact + book-scoped cockpit packs)
 
-**Goal:** One **reader app shell** with an **overview / library** step (book grid or list, "open local EPUB", clear navigation between shelf and reading). **`/books` HTML routes are removed** (308 -> `/apps/reader`); catalog UX lives in the shell. **Package boundary:** ship a stable **runtime export from `@portfolio/repub-builder`** (see [Route conventions](/docs/documentation/route-conventions) and **`BOOKS-READER-RUNTIME-REPUB-PACKAGE`**). **Kookit** (`vendor/kookit`): **navigation / reader-chrome inspiration** for the shell, not something we dismiss as "only utils."
+**Goal:** **Reader workspace** and **Repo Planner cockpit** treat each **repo-built title** as a **repub reading artifact**: EPUB3 **plus** planning supplement already embedded at build time (**`books-reader-02-02`**), later **annotations** (**`books-reader-02-01`**). **No** reliance on **`/docs/...`** for title planning inside the reader; site **`builtin-packs.json`** stays **monorepo-wide** only. See [embed architecture](/docs/documentation/reader-repo-planner-embed-architecture) and **`BOOKS-READER-PLANNING-PACK-FROM-BOOK-ARTIFACT`**.
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
-| `books-reader-03-01` | `planned` | RFC in planning docs or short ADR: shell responsibilities vs `ReaderWorkspace` / `EpubViewer`, public API surface for the package, navigation states (shelf ↔ read ↔ local file) | `-` | decision recorded; linked from [Route conventions](/docs/documentation/route-conventions) |
+| `books-reader-04-01` | `done` | **Spec** optional **`META-INF/`** manifest listing embedded planning appendix paths + version; align with **`PlanningPack`** / embed JSON shape for cockpit injection | `books-reader-02-02`, `books-reader-03-06` | [Spec](/docs/books/planning/plans/books-reader-04-epub-planning-pack); emitter in **`repub epub`**; `pnpm run build` |
+| `books-reader-04-02` | `done` | **Runtime:** when **`readingTargetId`** is active, derive **per-book `builtinPacks`** from the **loaded EPUB** (zip + manifest / fallback `plan-*.xhtml`); JSON **`book-packs/<slug>.json`** as fallback only | `books-reader-04-01`, `repo-planner-integration-04-02` | manual: open cockpit from strip shows book planning; `pnpm run build`; `pnpm --filter @portfolio/repub-builder test` |
+
+## Phase `books-reader-05` (backend-backed workspace + gated editing)
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `books-reader-05-01` | `done` | define and implement the auth-aware reader foundation: backend library records, explicit upload boundaries for EPUB persistence, owner entitlements, reader settings contract, and anonymous fallback rules without changing the public reading baseline | `global-auth-01-01`, `books-reader-03-10` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
+| `books-reader-05-02` | `planned` | persist annotations and reading progress to the database for authenticated entitled sessions while keeping IndexedDB/local export fallback for anonymous use | `books-reader-05-01`, `books-reader-01-17` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
+| `books-reader-05-03` | `planned` | add gated in-reader editing and write-back paths for owner sessions only | `books-reader-05-01`, `books-reader-05-02` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
+| `books-reader-05-04` | `planned` | polish the reader workspace UI around the backend-backed model: better shelf details, search, actions, and auth/settings affordances | `books-reader-05-01` | `pnpm run build`, `pnpm run lint` |
+
+## Phase `books-reader-03` (reader shell + library UX)
+
+**Goal:** One **reader app shell** with an **overview / library** step (book grid or list, "open local EPUB", clear navigation between shelf and reading). **`/books` HTML routes are removed** (308 -> `/apps/reader`); catalog UX lives in the shell. **Implementation home:** **`ReaderWorkspace`**, **`EpubViewer`** (lazy boundary), and **most reader/workspace/shelf chrome** move into **`@portfolio/repub-builder`** in the **same extraction track** and are imported by **`apps/portfolio`** only for **v1** (**`BOOKS-READER-V1-PORTFOLIO-HOST-ONLY`**). **`/apps/reader`** stays a thin route that passes manifest, links, and env. **UX target (locked):** **shadcn dashboard** -- **sidebar** = Library / current book / Settings (**no** team switcher); **SidebarInset** = **searchable EPUB catalog** (Unity **Asset Store-style** density: search, filters, scannable grid) **or** **`EpubViewer`**; **toolbar** = breadcrumb/title, planning-strip toggle, theme, download when relevant, **EPUB upload** (picker + **drag-and-drop**). **Theme:** bundled in package, **visually matches** portfolio reader palette (**`BOOKS-READER-THEME-BUNDLED-PARITY`**). **URLs:** **query params** for v1 (**`BOOKS-READER-QUERY-URL-V1`**). **Package boundary:** stable **runtime export** from `@portfolio/repub-builder` (see [Route conventions](/docs/documentation/route-conventions) and **`BOOKS-READER-RUNTIME-REPUB-PACKAGE`**). **Kookit** (`vendor/kookit`): **navigation / reader-chrome inspiration** for the shell, not something we dismiss as "only utils."
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `books-reader-03-01` | `done` | RFC or short ADR: **`ReaderWorkspace` + `EpubViewer` move together**; **`ReaderShelfCard`** and related shelf primitives; **public props + callbacks** for the portfolio host; **dashboard regions** per **`BOOKS-READER-DASHBOARD-CHROME`**; **shadcn peer vs bundled** note (**`BOOKS-READER-SHADCN-IN-REPUB-BUILDER`**); **export map** subpath | `-` | ADR table on [Route conventions](/docs/documentation/route-conventions); `pnpm run build`; `pnpm --filter @portfolio/app test:unit` |
 | `books-reader-03-02` | `done` | implement **library overview** inside `/apps/reader` when no `book` query (or explicit `*view=library`): cards for `getBooks()`, CTA for local EPUB, matches Kookit-inspired clarity | `books-reader-03-01` | manual UX pass; `pnpm run build` |
 | `books-reader-03-03` | `done` | **Remove `/books` app routes**; **`next.config` redirects** to `/apps/reader`; keep static **`/books/<slug>/book.epub`** under `public/books/` | `-` | `pnpm run build`; hit `/books` -> reader |
-| `books-reader-03-04` | `planned` | extract shell (layout + library route + shared chrome) into **`@portfolio/repub-builder` runtime export** (subpath TBD); app imports only stable exports | `books-reader-03-02` | `pnpm run build`, typecheck package |
-| `books-reader-03-05` | `planned` | align **Nav** "Books" / "Apps" active states and **homepage** CTAs with the shell entry (no duplicate catalog UX) | `books-reader-03-03`, `documentation-site-06-02` | smoke on nav + home |
-| `books-reader-03-06` | `planned` | **Shared cockpit modal body** in **repub-builder** export: extract inner `RepoPlannerCockpitClient` shell from today's `RepoPlannerModal`; add **`readerModalStore`** + **`ReaderModalRoot`** in reader shell; **portfolio** registry imports same body | `books-reader-03-01` | `pnpm run build`; reader + site modal |
-| `books-reader-03-07` | `planned` | **Reader planning strip** uses **reader** modal store (not global `useModalStore`) so embed works without site `ModalRoot` | `books-reader-03-06` | manual reader smoke |
+| `books-reader-03-04` | `done` | **Shipped:** runtime **`@portfolio/repub-builder/reader`**, shelf search, **DnD + picker**, **site `SidebarTrigger`** in toolbar (no package duplicate sidebar), Asset Store-style **catalog filters** (All / Ready / Coming soon / Reading / New / Done), toolbar **ember vs ink** theme (localStorage), **`ReaderShelfCard`** respects chrome theme | `books-reader-03-01`, `books-reader-03-02` | `pnpm run build`; `pnpm --filter @portfolio/app test:unit` |
+| `books-reader-03-05` | `done` | align **Nav** "Books" / "Apps" active states (Apps not active on **`/apps/reader`**) and **homepage** "Browse library" + reader CTAs | `books-reader-03-03`, `documentation-site-06-02` | smoke on nav + home; `pnpm run build` |
+| `books-reader-03-06` | `done` | **`readerModalStore`** + **`ReaderModalRoot`** in reader shell; host passes **`renderPlanningCockpit`** → **`RepoPlannerCockpitClient`** (portfolio); **global `RepoPlannerModal`** still separate shell -- optional **single shared body** export later | `books-reader-03-01` | `pnpm run build`; reader cockpit from strip |
+| `books-reader-03-07` | `done` | **`ReaderPlanningStrip`** in package; **`openPlanningCockpit`** on **`readerModalStore`** only (**no** global **`useModalStore`** on strip); portfolio **`ReaderPlanningStrip.tsx`** removed | `books-reader-03-06` | manual reader smoke |
 | `books-reader-03-08` | `done` | extend the generated books manifest and `BookEntry` model with library-facing metadata: cover asset or fallback key, author, description, and status hints so `/apps/reader` can render a real built-in shelf without EPUB introspection at runtime | `books-reader-03-01` | `pnpm run build:books`, `pnpm run build` |
 | `books-reader-03-09` | `done` | redesign the `/apps/reader` default surface as a Koodo-inspired built-in shelf: always-visible repo books first, prominent covers, EmptyCover fallback art, progress-first status chips (`New`, `%`, `Done`, `Coming soon`), and local EPUB import as a secondary utility card/action | `books-reader-03-02`, `books-reader-03-08` | manual UX pass, `pnpm run build` |
 | `books-reader-03-10` | `done` | formalize the reader workspace state model for library, built-in reading, and local-file reading so the eventual `@portfolio/repub-builder` runtime export has a clean public API | `books-reader-03-04`, `books-reader-03-09` | `pnpm --filter @portfolio/app test:unit`, `pnpm run lint`; full `pnpm run build` currently blocked by unrelated repo-planner module-resolution errors |
@@ -97,6 +116,15 @@ Work after `books-ai-00` and alongside `books-reader-02` / `books-publishing-01`
 | `books-ai-01-08` | `done` | add unit and e2e coverage for the public chat shell, RAG retrieval routes, and admin auth boundary | `books-ai-01-05`, `books-ai-01-06` | unit tests, e2e tests, `pnpm run build`, `pnpm run lint` |
 | `books-ai-01-09` | `done` | add scoped structured logging for the assistant-ui chat path and RAG ingest flow so request, retrieval, upstream, and error handling are easy to inspect without permanent ad hoc debug logs | `books-ai-01-07`, `books-ai-01-08` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
 | `books-ai-01-10` | `planned` | investigate the live runtime mismatch where `/api/chat` still returns OpenAI `429 insufficient_quota` after an API-key update, even though isolated direct requests with the same `.env` succeed | `books-ai-01-09` | reproduce in live dev server, inspect env/process boundary, confirm with targeted smoke logs |
+
+## Phase `books-cross-title-01` (Magicborn line)
+
+**Goal:** Keep cross-title fiction planning in **section** `state` / `task-registry` / `decisions` — no parallel `planning/*.mdx` pages outside the standard set.
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `books-cross-title-01-01` | `done` | World order + per-book chapter beat tables + TB-* questions live under [State — Magicborn line](/docs/books/planning/state#magicborn-line-world-order-and-chapter-beats); per-title deep sheets stay on stream **state** pages | `-` | planning IA review |
+| `books-cross-title-01-02` | `planned` | Close TB-* questions → tighten State tables → sync stream state pages and manuscript | `books-cross-title-01-01` | fiction session notes + State diff |
 
 ## Registry Rules
 

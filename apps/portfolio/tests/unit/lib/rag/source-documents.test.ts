@@ -4,14 +4,14 @@ describe('getRagSourceDocuments', () => {
   it('includes magicborn dossiers as retrieval sources', () => {
     const documents = getRagSourceDocuments();
     const morgana = documents.find(
-      (document) => document.sourceId === 'docs:magicborn/morgana-the-sleeping-root',
+      (document) => document.sourceId === 'docs:magicborn/in-world/mordreds-tale/morgana-the-sleeping-root',
     );
 
     expect(morgana).toBeDefined();
     expect(morgana).toMatchObject({
       kind: 'magicborn',
       scope: 'magicborn',
-      publicUrl: '/docs/magicborn/morgana-the-sleeping-root',
+      publicUrl: '/docs/magicborn/in-world/mordreds-tale/morgana-the-sleeping-root',
     });
   });
 

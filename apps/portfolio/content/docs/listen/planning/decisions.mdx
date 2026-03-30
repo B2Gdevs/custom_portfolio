@@ -33,6 +33,14 @@ repoPath: apps/portfolio/content/docs/listen/planning/decisions.mdx
 | **Rationale** | You can hand one password to collaborators; no user database; good enough for demos and small circles. |
 | **Consequences** | Not DRM -- anyone with the cookie or password can share access; document that in planning if needed. **Do not** ship plaintext secrets to the client. |
 
+## `LISTEN-LOCK-02` -- Shared auth supersedes long-term group passwords
+
+| Field | Value |
+| --- | --- |
+| **Decision** | Long-term private Listen access should move onto the same authenticated owner session and entitlement checks used by Books, not remain a standalone shared-password system. |
+| **Rationale** | One owner login should unlock private media and reader write features consistently, and BandLab data is moving toward DB-backed records anyway. |
+| **Consequences** | The current group-password flow is transitional only; new private media work should target the Global auth layer first. |
+
 ## `LISTEN-UX-01` -- Parity with blog / projects discovery
 
 | Field | Value |

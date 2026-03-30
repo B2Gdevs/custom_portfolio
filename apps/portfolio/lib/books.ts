@@ -7,6 +7,7 @@ export interface BookEntry {
   author?: string;
   description?: string;
   coverImage?: string;
+  genres?: string[];
   status?: 'available' | 'coming-soon';
   hasEpub: boolean;
 }

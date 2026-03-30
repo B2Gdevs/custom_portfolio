@@ -1,0 +1,38 @@
+---
+title: Requirements
+description: Section requirements for the projects showcase, metadata model, and project-to-app linking.
+date: "2026-03-29"
+updated: "2026-03-29"
+repoPath: apps/portfolio/content/docs/projects/requirements.mdx
+order: 6
+---
+
+# Requirements
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `projects` |
+| `scope` | `showcase`, `integration`, `identity` |
+| `status` | `active` |
+| `owner` | `projects-section` |
+
+## Core Requirements
+
+| Id | Requirement | Why |
+| --- | --- | --- |
+| `PROJECTS-REQ-01` | the projects section should emphasize proof-of-work, outcomes, and context rather than generic portfolio blurbs | the value of the section is concrete delivery detail |
+| `PROJECTS-REQ-02` | projects should keep a declarative metadata model for GitHub repos, demos, downloads, and first-class app routes | cross-linking should be maintainable and not hard-coded per project |
+| `PROJECTS-REQ-03` | projects should share discovery and detail primitives with blog and listen while keeping project-specific proof and sidebar treatment visible | section reuse should not erase project identity |
+| `PROJECTS-REQ-04` | project pages should link outward to related blog posts and apps when they describe the same work | the site should feel like one connected archive instead of isolated surfaces |
+| `PROJECTS-REQ-05` | section planning should stay local to project discovery and schema work instead of being buried inside documentation notes | the showcase can evolve independently as its own miniature product |
+
+## Section Boundaries
+
+| Topic | Rule |
+| --- | --- |
+| `proof` | preserve implementation detail, role, outcomes, and media; avoid collapsing projects into short marketing cards |
+| `shared-shell` | reuse shared content-surface pieces where useful, but keep project-specific metadata and linking rules |
+| `apps` | internal app routes should be treated as first-class project destinations when relevant |
+| `planning` | roadmap, state, task registry, decisions, and errors-and-attempts own project planning records |

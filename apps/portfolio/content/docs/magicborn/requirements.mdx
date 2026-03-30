@@ -1,0 +1,40 @@
+---
+title: Requirements
+description: Section requirements for Magicborn worldbuilding, canon dossiers, and retrieval-ready lore docs.
+date: "2026-03-30"
+updated: "2026-03-29"
+repoPath: apps/portfolio/content/docs/magicborn/requirements.mdx
+order: 6
+---
+
+# Requirements
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `magicborn` |
+| `scope` | `worldbuilding`, `canon`, `retrieval` |
+| `status` | `active` |
+| `owner` | `magicborn-section` |
+
+## Core Requirements
+
+| Id | Requirement | Why |
+| --- | --- | --- |
+| `MAGICBORN-REQ-01` | the section should publish canon dossiers that read well for humans and chunk cleanly for retrieval | the same pages need to support readers and grounded chat experiences |
+| `MAGICBORN-REQ-02` | lore pages must stay clearly separate from raw manuscript chapters and drafting material | public canon and draft prose should not collapse into one source set |
+| `MAGICBORN-REQ-03` | each dossier should keep source anchors and canon provenance visible when details derive from books or later notes | worldbuilding pages need to stay auditable as the fiction changes |
+| `MAGICBORN-REQ-04` | section growth should favor orthogonal dossiers for factions, places, characters, and canon events over one giant encyclopedia page | retrieval and browsing both work better with stable, focused records |
+| `MAGICBORN-REQ-05` | Magicborn planning should stay section-local with its own roadmap, state, task registry, and decisions | worldbuilding can grow independently from books and site work most of the time |
+| `MAGICBORN-REQ-06` | **Lore** URLs live under **`in-world/<primary-book>/`** (and optional shared statutes filed under the book they first serve); **planning** stays under `planning/`; **meta** pages (`requirements`, [`in-world` index](/docs/magicborn/in-world)) stay at section root | visitors and RAG see a **fiction-first** archive grouped by novel; the docs file tree nests subfolders |
+
+## Section Boundaries
+
+| Topic | Rule |
+| --- | --- |
+| `canon` | world, characters, places, factions, magic, and canon notes live here — prefer **in-world** voice (statutes, chronicles, notices) or **archival dossier** voice with an explicit frame line |
+| `manuscript` | raw chapters, drafts, and private writing experiments stay outside this section |
+| `retrieval` | pages are retrieval-eligible unless a later section rule marks them draft-only or private |
+| `cross-links` | books and documentation may reference this section, but Magicborn owns the lore record itself |
+| `in-world index` | canonical map: [`/docs/magicborn/in-world`](/docs/magicborn/in-world) |

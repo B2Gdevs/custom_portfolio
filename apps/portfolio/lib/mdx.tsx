@@ -7,6 +7,7 @@ import YouTubeEmbed from '@/components/projects/YouTubeEmbed';
 import BookReaderEmbed from '@/components/books/BookReaderEmbed';
 import Callout from '@/components/blog/Callout';
 import DocLinkCard from '@/components/blog/DocLinkCard';
+import { PlanningPackInlineButton } from '@/components/planning/PlanningPackInlineButton';
 
 function reactNodeToPlainText(node: ReactNode): string {
   if (node == null || typeof node === 'boolean') return '';
@@ -173,6 +174,9 @@ function buildMDXComponents(components: MDXComponents): MDXComponents {
     ),
     DocLinkCard: (props: { href: string; title: string; description?: string }) => (
       <DocLinkCard href={props.href} title={props.title} description={props.description} />
+    ),
+    PlanningPackButton: (props: { label?: string }) => (
+      <PlanningPackInlineButton label={props.label} />
     ),
     ...components,
   };

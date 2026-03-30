@@ -104,8 +104,8 @@ export function buildSiteMenus({
           external: true,
         },
         {
-          label: "Don't Let Me Be Forgotten",
-          description: 'Open the current public BandLab release.',
+          label: 'Love in the Grave',
+          description: 'Open the BandLab track page.',
           href: 'https://www.bandlab.com/track/8e892de4-51b7-f011-8196-0022484a3197?revId=8b892de4-51b7-f011-8196-0022484a3197',
           icon: 'radio',
           external: true,

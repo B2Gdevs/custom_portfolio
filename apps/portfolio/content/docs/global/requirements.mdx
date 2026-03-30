@@ -1,0 +1,43 @@
+---
+title: Requirements
+description: Section requirements for the Global docs area and repo-wide planning IA.
+date: "2026-03-30"
+updated: "2026-03-30"
+repoPath: apps/portfolio/content/docs/global/requirements.mdx
+order: 6
+---
+
+# Requirements
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `global` |
+| `scope` | `planning-ia`, `cross-links`, `reference-guides` |
+| `status` | `active` |
+| `owner` | `monorepo` |
+
+## Core Requirements
+
+| Id | Requirement | Why |
+| --- | --- | --- |
+| `GLOBAL-REQ-01` | the Global section must be the human-first entrypoint for the planning loop across this repo | every agent and human should know to start in one visible place on the docs site before diving into a section or the XML layer |
+| `GLOBAL-REQ-02` | planning reference docs must keep section `requirements.mdx` and `planning/roadmap.mdx` visible as first-class records | each docs section is treated like a small project with its own scope and phase map |
+| `GLOBAL-REQ-03` | task-id grammar, namespace rules, and cross-reference conventions must stay stable across sections | humans, grep, and tools need ids that parse the same way everywhere |
+| `GLOBAL-REQ-04` | planning-pack and RepoPlanner boundary docs must stay explicit about what is public, read-only, and operator-only | the public site should not imply server-side write access to the repo |
+| `GLOBAL-REQ-05` | Global docs should keep planning records and non-planning reference pages clearly separated in navigation and copy | users need to understand what is a live record versus a guide or explainer |
+| `GLOBAL-REQ-06` | every implementation phase must define a clear definition of done before serious execution starts | agents need a stable closure target, not just a vague roadmap label |
+| `GLOBAL-REQ-07` | executable behavior cannot be marked done without automated tests | verification needs to prove the behavior, not just assert that the code compiles |
+| `GLOBAL-REQ-08` | new, ambiguous, or stale phases should use a lightweight kickoff record before implementation | agents should clarify scope, non-goals, risks, and first tasks before doing broad work |
+| `GLOBAL-REQ-09` | auth, tenant, and entitlement policy for gated site features should live in one shared monorepo layer before sections build private or write-capable product features on top of it | books, listen, admin, and future tools need one permission model instead of section-specific access hacks |
+
+## Section Boundaries
+
+| Topic | Rule |
+| --- | --- |
+| `reference` | keep diagrams, conventions, and planning-pack policy in Global reference pages |
+| `execution` | section task movement belongs in section `planning/` folders and root `.planning/*.xml` |
+| `requirements` | monorepo-wide requirements remain in [documentation requirements](/docs/documentation/requirements); Global owns the explanatory reference layer |
+| `roadmap` | Global roadmap tracks Global-section IA work only, not every repo-wide feature |
+| `global-entrypoint` | Global planning docs explain the workflow all agents should follow before selecting a section or repo-wide phase |

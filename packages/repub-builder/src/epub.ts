@@ -4,7 +4,14 @@ import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import matter from 'gray-matter';
 import { marked } from 'marked';
+import JSZip from 'jszip';
 import { mdxToHtml } from './mdxToHtml.js';
+import {
+  PORTFOLIO_PLANNING_PACK_MANIFEST_ZIP_PATH,
+  type PlanningPackManifestEntryV1,
+  type PlanningPackManifestSourceKind,
+  type PortfolioPlanningPackManifestV1,
+} from './planning-pack-manifest.js';
 
 const require = createRequire(import.meta.url);
 const Epub = require('epub-gen');
@@ -651,23 +658,44 @@ export interface RunEpubOptions {
   planningDirs?: string[];
 }
 
+function virtualPathForPlanningFile(planningRootAbs: string, fileAbs: string): string {
+  const rel = path.relative(planningRootAbs, fileAbs);
+  const posixRel = rel.split(path.sep).join('/');
+  const norm = planningRootAbs.replace(/\\/g, '/');
+  const needle = '/content/docs/';
+  const idx = norm.lastIndexOf(needle);
+  if (idx !== -1) {
+    return `docs/${norm.slice(idx + needle.length)}/${posixRel}`;
+  }
+  return `planning/${path.basename(planningRootAbs)}/${posixRel}`;
+}
+
+function sourceKindForPlanningFile(fileAbs: string): PlanningPackManifestSourceKind {
+  const ext = path.extname(fileAbs).toLowerCase();
+  if (ext === '.mdx') return 'mdx';
+  if (ext === '.md') return 'md';
+  return 'raw';
+}
+
 async function buildPlanningAppendixContent(
   bookFolder: string,
   planningRoots: string[],
-): Promise<
-  Array<{
+): Promise<{
+  content: Array<{
     title: string;
     data: string;
     filename: string;
     excludeFromToc?: boolean;
-  }>
-> {
+  }>;
+  manifestEntries: PlanningPackManifestEntryV1[];
+}> {
   const items: Array<{
     title: string;
     data: string;
     filename: string;
     excludeFromToc?: boolean;
   }> = [];
+  const manifestEntries: PlanningPackManifestEntryV1[] = [];
   const usedFilenames = new Set<string>();
 
   for (const rootRaw of planningRoots) {
@@ -732,6 +760,13 @@ async function buildPlanningAppendixContent(
   `.trim();
       }
 
+      manifestEntries.push({
+        href: `OEBPS/${stem}.xhtml`,
+        virtualPath: virtualPathForPlanningFile(root, fileAbs),
+        title,
+        sourceKind: sourceKindForPlanningFile(fileAbs),
+      });
+
       items.push({
         title,
         filename: stem,
@@ -741,7 +776,19 @@ async function buildPlanningAppendixContent(
     }
   }
 
-  return items;
+  return { content: items, manifestEntries };
+}
+
+async function injectPortfolioPlanningPackManifest(
+  epubPath: string,
+  manifest: PortfolioPlanningPackManifestV1,
+): Promise<void> {
+  const zip = await JSZip.loadAsync(fs.readFileSync(epubPath));
+  zip.file(PORTFOLIO_PLANNING_PACK_MANIFEST_ZIP_PATH, JSON.stringify(manifest, null, 2), {
+    compression: 'DEFLATE',
+  });
+  const out = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
+  fs.writeFileSync(epubPath, out);
 }
 
 function wrapPageHtml({
@@ -866,9 +913,17 @@ export async function runEpub(
     .map((d) => path.resolve(d))
     .filter((d) => fs.existsSync(d));
 
+  let planningManifest: PortfolioPlanningPackManifestV1 | null = null;
+
   if (planningRoots.length > 0) {
     const appendix = await buildPlanningAppendixContent(folder, planningRoots);
-    content.push(...appendix);
+    content.push(...appendix.content);
+    if (appendix.manifestEntries.length > 0) {
+      planningManifest = {
+        planningPackManifestVersion: 1,
+        entries: appendix.manifestEntries,
+      };
+    }
   }
 
   const outDir = path.dirname(outputPath);
@@ -885,5 +940,8 @@ export async function runEpub(
   };
 
   await new Epub(option, outputPath).promise;
+  if (planningManifest) {
+    await injectPortfolioPlanningPackManifest(outputPath, planningManifest);
+  }
   console.log('EPUB:', outputPath);
 }

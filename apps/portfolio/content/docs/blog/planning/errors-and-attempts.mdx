@@ -2,7 +2,7 @@
 title: Errors and Attempts
 description: Compact attempt records for the blog section.
 date: "2026-03-16"
-updated: "2026-03-28"
+updated: "2026-03-29"
 order: 4
 ---
 
@@ -12,5 +12,6 @@ order: 4
 | --- | --- | --- | --- | --- |
 | `blog-content-01-attempt-01` | `resolved` | section planning setup | the blog section had no local planning loop while books and dialogue forge did | add compact planning-doc pages directly under `docs/blog` |
 | `blog-content-02-attempt-01` | `resolved` | RichEPub narrative | the early posts framed a custom runtime format as necessary even though EPUB3 covers most of the needed document model | rewrite the posts as an archived experiment and move the active work toward better EPUB3 authoring tooling |
+| `blog-content-03-attempt-01` | `resolved` | agent-workflow writing | plan-only docs stored in the repo and linked from prompts were less effective than a living artifact stack with narrow responsibilities | anchor future workflow writing to roadmap, state, task-registry, decisions, and errors-and-attempts instead of one big plan |
 | `blog-discovery-01-attempt-01` | `resolved` | discovery implementation | the new archive/search work exposed an app-shell regression where `SiteLayout` still referenced `isBookReadRoute`, causing client-side crashes in browser tests | restore a compatible alias in `SiteLayout`, clear the stale `.next` lock between Playwright reruns, and continue verification on the new archive flow |
 | `blog-discovery-02-attempt-01` | `resolved` | content retrofit validation | ad hoc scanning from the repo root reported no missing sections because `content.ts` resolves `process.cwd()/content`, which only works from the app package root | add the contract regression test under `@portfolio/app`, run validation from the app package context, and keep future drift detection aligned with the real runtime |

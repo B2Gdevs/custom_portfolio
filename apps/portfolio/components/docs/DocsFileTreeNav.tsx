@@ -37,6 +37,7 @@ function DocTreeBranch({ node, querySuffix }: { node: DocFileTreeNode; querySuff
       key={node.treePath}
       path={node.treePath}
       name={node.name}
+      href={node.href ? (querySuffix ? `${node.href}?${querySuffix}` : node.href) : undefined}
       tooltipLabel={node.treePath}
       folderArchivePrefix={docTreePathToArchivePrefix(node.treePath)}
     >

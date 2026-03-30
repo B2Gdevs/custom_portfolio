@@ -964,6 +964,12 @@ nextjs-portal:not(:empty) {
   --radius-4xl: calc(var(--radius) + 16px);
 }
 
+/* Reader workspace: avoid site-wide preflight quirks making catalog search feel “empty”. */
+[data-reader-workspace] input[type='search'],
+[data-reader-workspace] input[type='text'] {
+  background-clip: padding-box;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

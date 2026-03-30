@@ -2,7 +2,7 @@
 title: Errors and Attempts
 description: Compact attempt records for the books section.
 date: "2026-03-15"
-updated: "2026-03-28"
+updated: "2026-03-29"
 order: 4
 ---
 
@@ -41,6 +41,7 @@ order: 4
 | `books-ai-01-attempt-08` | `resolved` | post-migration cleanup | leaving a deprecated `/api/copilotkit` compatibility route kept two public chat paths in the repo even after the assistant-ui cutover | remove the route, drop its tests, and treat assistant-ui + `/api/chat` as the only supported public chat stack |
 | `books-ai-01-attempt-09` | `resolved` | first assistant-ui `/api/chat` debug pass after hard cutover | the route could fail as a black box during upstream 502s because there was no request id, retrieval timing, upstream status/body preview, or client-side send logging, while RAG ingest still used one-off console logs | add a shared env-driven structured logger, wire it through the client chat flow and `/api/chat`, keep a small in-memory recent-log buffer for inspection, and route existing ingest logs through the same logger |
 | `books-ai-01-attempt-10` | `active` | live assistant-ui chat after replacing the API key | the running Next app still logged `429 insufficient_quota` for both embeddings and chat completions (`requestId` `9398561e-9156-4b47-b8f5-91f45b58c20a`) even after the key was updated, while isolated direct requests with the same `.env` succeeded outside the app path | treat this as a runtime env/process mismatch or request-context issue until disproven; keep the exact logs in planning, do not mark the quota issue resolved, and investigate the live server process boundary before changing retrieval or UI behavior |
+| `books-cross-title-attempt-01` | `resolved` | Magicborn-line cross-title beats | a one-off `tri-book-chronology-and-chapter-beats.mdx` page drifted from the section planning artifact set | fold beats and TB-* questions into [section State](/docs/books/planning/state#magicborn-line-world-order-and-chapter-beats); track work under **`books-cross-title-01`** in [task registry](/docs/books/planning/task-registry); document boundary in [requirements](/docs/books/requirements) |
 
 ## Follow-up Rule
 

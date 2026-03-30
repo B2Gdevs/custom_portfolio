@@ -41,6 +41,11 @@ function loadBookMeta(bookDir, slug) {
     ? data.epubPlanningDirs
     : [];
   const epubPlanningDirs = [];
+  const rawGenres = Array.isArray(data.genres) ? data.genres : [];
+  const genres = [];
+  for (const g of rawGenres) {
+    if (typeof g === 'string' && g.trim()) genres.push(g.trim());
+  }
   for (const rel of rawPlanning) {
     if (typeof rel !== 'string' || !rel.trim()) continue;
     const abs = path.resolve(bookDir, rel.trim());
@@ -57,6 +62,7 @@ function loadBookMeta(bookDir, slug) {
     author: data.author || '',
     description: data.description || '',
     coverImage: typeof data.coverImage === 'string' ? data.coverImage : '',
+    genres,
     epubPlanningDirs,
   };
 }
@@ -159,6 +165,7 @@ async function main() {
       author: meta.author || undefined,
       description: meta.description || undefined,
       coverImage,
+      genres: meta.genres.length ? meta.genres : undefined,
       status: hasEpub ? 'available' : 'coming-soon',
       hasEpub: !!hasEpub,
     });

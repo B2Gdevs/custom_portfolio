@@ -1,0 +1,39 @@
+---
+title: Requirements
+description: Section requirements for the Listen surface, catalog model, and lock behavior.
+date: "2026-03-29"
+updated: "2026-03-29"
+repoPath: apps/portfolio/content/docs/listen/requirements.mdx
+order: 6
+---
+
+# Requirements
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `listen` |
+| `scope` | `catalog`, `unlock`, `identity` |
+| `status` | `active` |
+| `owner` | `listen-section` |
+
+## Core Requirements
+
+| Id | Requirement | Why |
+| --- | --- | --- |
+| `LISTEN-REQ-01` | `/listen` should remain a first-class discovery surface for tracks and BandLab presets | music needs a public home that is not hidden under tools or docs |
+| `LISTEN-REQ-02` | the catalog should be file-authored and explicit about type, genre, mood, era, and lock-group metadata | the section needs a stable source of truth for search and filtering |
+| `LISTEN-REQ-03` | private tracks and BandLab presets should move to the shared auth/entitlement layer rather than long-term shared-password unlock groups | the same owner login should gate private media and future reader write features consistently |
+| `LISTEN-REQ-04` | listen should share content-surface primitives with blog and projects while keeping a listening-room identity and media-first emphasis | section reuse should not erase orientation |
+| `LISTEN-REQ-05` | placeholder rows should be retired as real releases and presets are added | the section needs to read like a live catalog, not a mockup |
+| `LISTEN-REQ-06` | listen catalog data should be able to move from file-authored rows into database-backed records without losing the public listening-room surface | private owner-only rows and richer metadata need a real store once the auth layer exists |
+
+## Section Boundaries
+
+| Topic | Rule |
+| --- | --- |
+| `route` | `/listen` is the canonical public route; do not move it under `/apps` unless the surface becomes primarily interactive tooling |
+| `unlock` | private access should depend on the shared auth/entitlement layer; avoid public signup or multi-user ACL sprawl in v1 |
+| `catalog` | `listen-catalog.ts` remains the canonical authored row set |
+| `planning` | roadmap, state, task registry, and decisions track section work; tests and errors remain optional records |

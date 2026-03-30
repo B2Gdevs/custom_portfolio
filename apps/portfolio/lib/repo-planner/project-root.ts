@@ -1,4 +1,136 @@
+import { existsSync, readFileSync, readdirSync, type Dirent } from 'node:fs';
 import path from 'node:path';
+import TOML from '@iarna/toml';
+
+const DEFAULT_PLANNING_DIR_NAME = '.planning';
+const DEFAULT_REPORTS_DIR = '.planning-reports';
+const DISCOVERY_IGNORED_DIRS = new Set([
+  '.git',
+  '.next',
+  '.turbo',
+  '.vscode',
+  '.idea',
+  'node_modules',
+  'coverage',
+  'dist',
+  'vendor',
+]);
+
+type RawPlanningRoot = {
+  id?: unknown;
+  name?: unknown;
+  path?: unknown;
+  root?: unknown;
+  workspaceRoot?: unknown;
+  planningDir?: unknown;
+  planningDirName?: unknown;
+  discover?: unknown;
+  discoverDescendants?: unknown;
+};
+
+type RawPlanningConfig = {
+  planning?: {
+    roots?: RawPlanningRoot[];
+    reportsDir?: unknown;
+    sprintSize?: unknown;
+    currentProfile?: unknown;
+    conventionsPaths?: unknown;
+  };
+  profiles?: Record<string, unknown>;
+};
+
+export type ResolvedPlanningRoot = {
+  id: string;
+  source: 'config' | 'default';
+  workspaceRoot: string;
+  planningDirName: string;
+  planningDir: string;
+  discover: boolean;
+  exists: boolean;
+};
+
+function asNonEmptyString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+function asBoolean(value: unknown): boolean {
+  return value === true;
+}
+
+function normalizePlanningDir(workspaceRoot: string, rawPlanningDir: string | null) {
+  const planningDir = rawPlanningDir ?? DEFAULT_PLANNING_DIR_NAME;
+  if (path.isAbsolute(planningDir)) {
+    return {
+      planningDir,
+      planningDirName: path.basename(planningDir) || DEFAULT_PLANNING_DIR_NAME,
+    };
+  }
+
+  return {
+    planningDir: path.resolve(workspaceRoot, planningDir),
+    planningDirName: path.basename(planningDir) || DEFAULT_PLANNING_DIR_NAME,
+  };
+}
+
+function readRepoPlannerConfigInternal(root: string): RawPlanningConfig {
+  const configPath = path.join(root, DEFAULT_PLANNING_DIR_NAME, 'planning-config.toml');
+  if (!existsSync(configPath)) {
+    return {};
+  }
+
+  try {
+    return TOML.parse(readFileSync(configPath, 'utf8')) as unknown as RawPlanningConfig;
+  } catch {
+    return {};
+  }
+}
+
+function discoverPlanningRoots(
+  projectRoot: string,
+  workspaceRoot: string,
+  planningDirName: string,
+  baseId: string,
+): ResolvedPlanningRoot[] {
+  const discovered: ResolvedPlanningRoot[] = [];
+  const seen = new Set<string>();
+
+  const walk = (dirPath: string) => {
+    let entries: Dirent[];
+    try {
+      entries = readdirSync(dirPath, { withFileTypes: true });
+    } catch {
+      return;
+    }
+
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      if (DISCOVERY_IGNORED_DIRS.has(entry.name)) continue;
+
+      const absolute = path.join(dirPath, entry.name);
+      if (entry.name === planningDirName) {
+        if (seen.has(absolute)) continue;
+        seen.add(absolute);
+        const discoveredWorkspaceRoot = path.dirname(absolute);
+        const relativeWorkspaceRoot = path.relative(projectRoot, discoveredWorkspaceRoot).replace(/\\/g, '/');
+        discovered.push({
+          id: relativeWorkspaceRoot ? `${baseId}:${relativeWorkspaceRoot}` : baseId,
+          source: 'config',
+          workspaceRoot: discoveredWorkspaceRoot,
+          planningDirName,
+          planningDir: absolute,
+          discover: true,
+          exists: true,
+        });
+        continue;
+      }
+
+      walk(absolute);
+    }
+  };
+
+  walk(workspaceRoot);
+  return discovered;
+}
 
 export function getProjectRoot(): string {
   const raw = process.env.REPOPLANNER_PROJECT_ROOT || process.cwd();
@@ -15,19 +147,129 @@ export function getCliPath(): string {
   return path.join(root, 'vendor', 'repo-planner', 'scripts', 'loop-cli.mjs');
 }
 
-export function getPlanningDir(): string {
-  return path.join(getProjectRoot(), '.planning');
+export function getRepoPlannerConfigPath(): string {
+  return path.join(getProjectRoot(), DEFAULT_PLANNING_DIR_NAME, 'planning-config.toml');
 }
 
-/** Env for `spawn` of `loop-cli.mjs` — pins project root and externalizes reports from `.planning/reports`. */
+export function readRepoPlannerConfig(): RawPlanningConfig {
+  return readRepoPlannerConfigInternal(getProjectRoot());
+}
+
+export function resolvePlanningRoots(): ResolvedPlanningRoot[] {
+  const projectRoot = getProjectRoot();
+  const parsed = readRepoPlannerConfigInternal(projectRoot);
+  const roots = Array.isArray(parsed.planning?.roots) ? parsed.planning?.roots : [];
+
+  if (!roots.length) {
+    const planningDir = path.join(projectRoot, DEFAULT_PLANNING_DIR_NAME);
+    return [
+      {
+        id: 'global',
+        source: 'default',
+        workspaceRoot: projectRoot,
+        planningDirName: DEFAULT_PLANNING_DIR_NAME,
+        planningDir,
+        discover: false,
+        exists: existsSync(planningDir),
+      },
+    ];
+  }
+
+  const resolved: ResolvedPlanningRoot[] = [];
+  const seen = new Set<string>();
+
+  for (const [index, rawRoot] of roots.entries()) {
+    const workspaceRootRaw =
+      asNonEmptyString(rawRoot.path) ??
+      asNonEmptyString(rawRoot.root) ??
+      asNonEmptyString(rawRoot.workspaceRoot) ??
+      '.';
+    const workspaceRoot = path.resolve(projectRoot, workspaceRootRaw);
+    const { planningDir, planningDirName } = normalizePlanningDir(
+      workspaceRoot,
+      asNonEmptyString(rawRoot.planningDir) ?? asNonEmptyString(rawRoot.planningDirName),
+    );
+    const discover = asBoolean(rawRoot.discover) || asBoolean(rawRoot.discoverDescendants);
+    const id =
+      asNonEmptyString(rawRoot.id) ??
+      asNonEmptyString(rawRoot.name) ??
+      `root-${index + 1}`;
+
+    const addRoot = (candidate: ResolvedPlanningRoot) => {
+      if (seen.has(candidate.planningDir)) return;
+      seen.add(candidate.planningDir);
+      resolved.push(candidate);
+    };
+
+    addRoot({
+      id,
+      source: 'config',
+      workspaceRoot,
+      planningDirName,
+      planningDir,
+      discover,
+      exists: existsSync(planningDir),
+    });
+
+    if (discover) {
+      for (const discoveredRoot of discoverPlanningRoots(projectRoot, workspaceRoot, planningDirName, id)) {
+        addRoot(discoveredRoot);
+      }
+    }
+  }
+
+  return resolved.length
+    ? resolved
+    : [
+        {
+          id: 'global',
+          source: 'default',
+          workspaceRoot: projectRoot,
+          planningDirName: DEFAULT_PLANNING_DIR_NAME,
+          planningDir: path.join(projectRoot, DEFAULT_PLANNING_DIR_NAME),
+          discover: false,
+          exists: existsSync(path.join(projectRoot, DEFAULT_PLANNING_DIR_NAME)),
+        },
+      ];
+}
+
+export function getPrimaryPlanningRoot(): ResolvedPlanningRoot {
+  return resolvePlanningRoots()[0] ?? {
+    id: 'global',
+    source: 'default',
+    workspaceRoot: getProjectRoot(),
+    planningDirName: DEFAULT_PLANNING_DIR_NAME,
+    planningDir: path.join(getProjectRoot(), DEFAULT_PLANNING_DIR_NAME),
+    discover: false,
+    exists: existsSync(path.join(getProjectRoot(), DEFAULT_PLANNING_DIR_NAME)),
+  };
+}
+
+export function getPlanningDir(): string {
+  return getPrimaryPlanningRoot().planningDir;
+}
+
+export function getReportsDir(): string {
+  const root = getProjectRoot();
+  const envValue = process.env.REPOPLANNER_REPORTS_DIR?.trim();
+  if (envValue) {
+    return path.isAbsolute(envValue) ? envValue : path.resolve(root, envValue);
+  }
+
+  const configValue = asNonEmptyString(readRepoPlannerConfigInternal(root).planning?.reportsDir);
+  if (configValue) {
+    return path.isAbsolute(configValue) ? configValue : path.resolve(root, configValue);
+  }
+
+  return path.join(root, DEFAULT_REPORTS_DIR);
+}
+
+/** Env for `spawn` of `loop-cli.mjs` — pins project root and keeps reports external to `.planning/`. */
 export function getRepoPlannerChildEnv(): NodeJS.ProcessEnv {
   const root = getProjectRoot();
-  const raw = process.env.REPOPLANNER_REPORTS_DIR?.trim();
-  const reportsDir = raw || path.join(root, '.planning-reports');
-  const reportsResolved = path.isAbsolute(reportsDir) ? reportsDir : path.resolve(root, reportsDir);
   return {
     ...process.env,
     REPOPLANNER_PROJECT_ROOT: root,
-    REPOPLANNER_REPORTS_DIR: reportsResolved,
+    REPOPLANNER_REPORTS_DIR: getReportsDir(),
   };
 }

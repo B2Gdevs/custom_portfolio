@@ -2,10 +2,10 @@
 title: Task Registry
 description: Executable tasks for the Global docs section and repo-wide planning IA.
 date: "2026-03-28"
-updated: "2026-03-28"
+updated: "2026-03-30"
 order: 3
 repoPath: apps/portfolio/content/docs/global/planning/task-registry.mdx
-taskPhase: global-site-01
+taskPhase: global-site-02
 ---
 
 # Task Registry
@@ -17,6 +17,22 @@ taskPhase: global-site-01
 | `global-site-01-01` | `done` | **Global** section uses same planning layout as other sections (`planning-docs`, `state`, `task-registry`, `decisions`); [Global planning guide](/docs/global/global-planning) is a **reference** page (graphs, layers, pack policy) | `-` | docs tree shows `global/planning/` + `global-planning.mdx` sibling |
 | `global-site-01-02` | `done` | Cross-link sweep: section `planning-docs` / books / repo-planner point at Global **planning docs** + **global planning guide** where needed | `01-01` | grep + build |
 | `global-site-01-03` | `done` | Cockpit workspace: **This repository** + uploaded packs, `localStorage`, export JSON -- [`/docs/apps/repo-planner`](/docs/apps/repo-planner) | `-` | shell + dynamic `PlanningCockpit` |
+
+## Phase `global-site-02`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `global-site-02-01` | `done` | make the Global docs section the human-first planning entrypoint and align root `AGENTS.md` / `.planning/AGENTS.md` with that read order | `global-site-01-01` | `pnpm run build`, `pnpm run lint` |
+| `global-site-02-02` | `done` | define the standard phase loop: kickoff for underdefined phases, explicit definition of done, and tests required for done on executable behavior | `global-site-02-01` | `pnpm run build`, `pnpm run lint` |
+| `global-site-02-03` | `done` | plan the next RepoPlanner feature phase around workflow-aware snapshot, kickoff scaffolding, done gates, and global-vs-section guidance | `global-site-02-02` | `pnpm run build`, `pnpm run lint` |
+
+## Phase `global-auth-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `global-auth-01-01` | `done` | establish Payload auth foundations for the site: auth-enabled users, tenant/org seed, owner seed, long-lived session cookie policy, no public signup, and local auto-login for development | `global-site-02-02` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
+| `global-auth-01-02` | `done` | add shared tenant and entitlement helpers so books/listen/admin features can ask one permission layer whether private or write-capable behavior is allowed | `global-auth-01-01` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
+| `global-auth-01-03` | `done` | expose the auth foundation to the portfolio host: login, logout, me/session checks, and owner-aware gating helpers without opening public signup | `global-auth-01-01` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
 
 ## Registry rules
 

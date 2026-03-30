@@ -2,7 +2,7 @@
 title: Route conventions
 description: URL taxonomy -- /docs for MDX, /apps for tools; repub-builder owns reader runtime long-term.
 date: "2026-03-28"
-updated: "2026-03-28"
+updated: "2026-03-31"
 order: 8
 repoPath: apps/portfolio/content/docs/documentation/route-conventions.mdx
 taskPhase: documentation-site-06
@@ -50,7 +50,16 @@ This page is the **planning source of truth** for site URL shape. Implementation
 | --- | --- |
 | **Kookit** (`vendor/kookit`) | **Reference for navigation / chrome patterns** when designing the EPUB **reader shell** (how a serious reader moves between library and book). It is **not** the product UI we ship; we **do not** label it "just a util" in planning -- it informs **UX and technical navigation** choices inside **`/apps/reader`**. |
 | **`@portfolio/repub-builder` today** | **Build-time** pipeline: CLI (`repub`, `repub epub`), manuscript -> EPUB used by `scripts/build-books.cjs`, plus RichEPub/Vite packaging. **Not** the same folder as `components/books/*` today, but it is the **monorepo home for EPUB/repub concerns**. |
-| **Target architecture** | **Extend `repub-builder`** (or a single clearly named export subtree, e.g. `@portfolio/repub-builder/next` / `runtime`) to ship **React reader shell + workspace** and, where needed, **optional Next.js route handler helpers** for consumers -- similar in spirit to how **CopilotKit** packages app integration. Avoid a separate mystery **`reader-shell`** package unless we split for bundle size with an explicit ADR. |
+| **Target architecture** | **Shipped:** **`@portfolio/repub-builder/reader`** exports **`ReaderWorkspace`**, **`EpubViewer`**, shelf, **`readerModalStore`**, planning strip + modal root, catalog **filters**, **ember/ink** chrome theme (persisted), etc.; **`apps/portfolio`** uses a thin **`components/books/ReaderWorkspace.tsx`** host + **`transpilePackages`**. **Shell:** site **`SidebarProvider` / `SidebarInset`** + **`SidebarTrigger`** in the reader toolbar (**no** duplicate package sidebar). Optional **`./next` helpers** remain future work. |
+
+## ADR: Reader runtime package boundary (`books-reader-03-01`)
+
+| Decision | Detail |
+| --- | --- |
+| **Coupling** | **`ReaderWorkspace`** and **`EpubViewer`** ship together from **`@portfolio/repub-builder/reader`** so hosts never embed the viewer without the surrounding workspace state (library, tabs, uploads, planning strip). |
+| **Host contract** | Portfolio passes **`ReaderLink`**, optional **`readerToolbarStart`**, **`getPlanningStripConfig`**, **`renderPlanningCockpit`**, and manifest-derived **`books`**; paths default to **`/apps/reader`** and **`/books/<slug>/book.epub`**. |
+| **Styling** | Reader chrome is **bundled Tailwind classes** in the package (**`BOOKS-READER-THEME-BUNDLED-PARITY`**); the host does not fork shelf card markup for theme — optional **`ember` / `ink`** toggle is internal to **`ReaderWorkspace`**. |
+| **shadcn** | Dashboard primitives that must match the site (**`SidebarTrigger`**) are **injected by the host**; the package does not bundle **`@/components/ui/sidebar`**. |
 | **Portfolio app** | Imports the **stable public API** from that package; **`apps/portfolio`** remains the demo host, not the only consumer long term. |
 
 ## Remaining migration checklist
@@ -60,11 +69,11 @@ This page is the **planning source of truth** for site URL shape. Implementation
 | Move **`/docs/apps`** hub -> **`/apps`**, remove duplicate routes, Nav + docs sidebar | `documentation-site-06-02`, `06-03` |
 | Add explicit **Docs** entry to the site side nav and stop treating apps as docs children in the docs file tree | `documentation-site-06-06` |
 | Optional CI grep for stale `/docs/apps` or `/dialogue-forge` in `href`s | `documentation-site-06-04` |
-| Reader **library overview** + package re-exports | `books-reader-03-02`-`03-04` |
+| Reader **library overview** + **`@portfolio/repub-builder/reader`** + **catalog filters** + **theme toggle** + **site sidebar parity** | `books-reader-03-02`, **`books-reader-03-01` (ADR above)**, **`books-reader-03-04` (done)**, **`books-reader-03-05` (done)** |
 
 ## Open questions (smaller)
 
-1. **Path-based reader URLs** -- Add **`/apps/reader/[bookSlug]`** for shareable links, or stay query-only for v1*
+1. **Path-based reader URLs** -- **v1:** **query-only** per **`BOOKS-READER-QUERY-URL-V1`**. Optional later: **`/apps/reader/[bookSlug]`** for shareable links
 2. **Republish `repub-builder` API surface** -- Exact export map (`main` vs `exports["./next"]`) once the first runtime PR lands.
 
 ## Related records
