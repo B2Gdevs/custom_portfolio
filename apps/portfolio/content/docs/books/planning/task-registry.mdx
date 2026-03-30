@@ -79,7 +79,7 @@ Legacy-looking ids such as `books-ai-01-04` are **not** a separate scheme: **`ai
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
 | `books-reader-05-01` | `done` | define and implement the auth-aware reader foundation: backend library records, explicit upload boundaries for EPUB persistence, owner entitlements, reader settings contract, and anonymous fallback rules without changing the public reading baseline | `global-auth-01-01`, `books-reader-03-10` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
-| `books-reader-05-02` | `planned` | persist annotations and reading progress to the database for authenticated entitled sessions while keeping IndexedDB/local export fallback for anonymous use | `books-reader-05-01`, `books-reader-01-17` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
+| `books-reader-05-02` | `done` | persist annotations and reading progress to the database for authenticated entitled sessions while keeping IndexedDB/local export fallback for anonymous use | `books-reader-05-01`, `books-reader-01-17` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
 | `books-reader-05-03` | `planned` | add gated in-reader editing and write-back paths for owner sessions only | `books-reader-05-01`, `books-reader-05-02` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
 | `books-reader-05-04` | `planned` | polish the reader workspace UI around the backend-backed model: better shelf details, search, actions, and auth/settings affordances | `books-reader-05-01` | `pnpm run build`, `pnpm run lint` |
 

@@ -20,6 +20,13 @@ export {
 } from './reader-progress';
 export { readerAppHref } from './reader-routes';
 export {
+  mergePersistedAnnotations,
+  type ReaderPersistedState,
+  type ReaderPersistenceAdapter,
+  type ReaderPersistenceLoadInput,
+  type ReaderPersistenceSaveInput,
+} from './reader-persistence';
+export {
   resolveReaderWorkspaceState,
   type ReaderWorkspaceState,
   type UploadedBookSource,

@@ -28,8 +28,13 @@ import {
 } from './epub-annotations';
 import {
   EPUB_LOCATION_STORAGE_PREFIX as STORAGE_PREFIX,
+  readStoredReaderProgress,
   persistStoredReaderProgress,
 } from './reader-progress';
+import {
+  mergePersistedAnnotations,
+  type ReaderPersistenceAdapter,
+} from './reader-persistence';
 const READER_HEADER_H = 52;
 const READER_FOOTER_H = 44;
 const READER_SPREAD_MIN_WIDTH = 1050;
@@ -113,10 +118,13 @@ export interface EpubViewerProps {
   initialLocation?: string | number;
   className?: string;
   layoutMode?: 'compact' | 'reader';
+  bookSlug?: string | null;
+  sourceKind?: 'built-in' | 'local';
   /** Highlights and notes (reader layout only by default). */
   annotationsEnabled?: boolean;
   /** Fires when EPUB bytes are ready (fetched URL or `epubData`). */
   onEpubLoaded?: (info: { buffer: ArrayBuffer; storageKey?: string }) => void;
+  persistenceAdapter?: ReaderPersistenceAdapter | null;
 }
 
 const READER_THEME_RULES = {
@@ -500,8 +508,11 @@ export default function EpubViewer({
   initialLocation,
   className = '',
   layoutMode = 'compact',
+  bookSlug = null,
+  sourceKind = 'built-in',
   annotationsEnabled = layoutMode === 'reader',
   onEpubLoaded,
+  persistenceAdapter = null,
 }: EpubViewerProps) {
   const [location, setLocation] = useState<string | number>(0);
   const [epubBuffer, setEpubBuffer] = useState<ArrayBuffer | null>(null);
@@ -513,6 +524,7 @@ export default function EpubViewer({
   const [currentPage, setCurrentPage] = useState<number | null>(null);
   const [totalPages, setTotalPages] = useState<number | null>(null);
   const [pageDraft, setPageDraft] = useState('');
+  const [currentProgress, setCurrentProgress] = useState<number | null>(null);
   const [contentHash, setContentHash] = useState<string | null>(null);
   const [annotations, setAnnotations] = useState<PortfolioAnnotation[]>([]);
   const [annotationsHydrated, setAnnotationsHydrated] = useState(!storageKey);
@@ -599,6 +611,11 @@ export default function EpubViewer({
   }, [storageKey, initialLocation]);
 
   useEffect(() => {
+    if (!storageKey || typeof window === 'undefined') return;
+    setCurrentProgress(readStoredReaderProgress(storageKey));
+  }, [storageKey]);
+
+  useEffect(() => {
     if (!storageKey || typeof location !== 'string') return;
     try {
       window.localStorage.setItem(STORAGE_PREFIX + storageKey, location);
@@ -648,23 +665,72 @@ export default function EpubViewer({
     }
     let cancelled = false;
     setAnnotationsHydrated(false);
-    void loadAnnotationsFromIndexedDb(storageKey, contentHash).then((list) => {
+    void Promise.all([
+      loadAnnotationsFromIndexedDb(storageKey, contentHash),
+      persistenceAdapter?.loadState({
+        storageKey,
+        contentHash,
+      }) ?? Promise.resolve(null),
+    ]).then(([localAnnotations, remoteState]) => {
       if (cancelled) return;
-      setAnnotations(list);
+      const mergedAnnotations = mergePersistedAnnotations(
+        localAnnotations,
+        remoteState?.annotations ?? [],
+      );
+      setAnnotations(mergedAnnotations);
+      void saveAnnotationsToIndexedDb(storageKey, contentHash, mergedAnnotations);
+
+      const localProgress = readStoredReaderProgress(storageKey);
+      const nextProgress = localProgress ?? remoteState?.progress ?? null;
+      setCurrentProgress(nextProgress);
+      if (nextProgress != null) {
+        persistStoredReaderProgress(storageKey, nextProgress);
+      }
+
+      if (
+        !initialLocation &&
+        typeof window !== 'undefined' &&
+        !window.localStorage.getItem(STORAGE_PREFIX + storageKey) &&
+        remoteState?.location
+      ) {
+        setLocation(remoteState.location);
+      }
+
       setAnnotationsHydrated(true);
     });
     return () => {
       cancelled = true;
     };
-  }, [storageKey, contentHash, annotationsEnabled]);
+  }, [storageKey, contentHash, annotationsEnabled, persistenceAdapter, initialLocation]);
 
   useEffect(() => {
     if (!annotationsHydrated || !storageKey || !contentHash) return;
     const id = window.setTimeout(() => {
       void saveAnnotationsToIndexedDb(storageKey, contentHash, annotations);
+      if (persistenceAdapter && sourceKind === 'built-in') {
+        void persistenceAdapter.saveState({
+          storageKey,
+          contentHash,
+          bookSlug,
+          sourceKind,
+          location: typeof location === 'string' ? location : null,
+          progress: currentProgress,
+          annotations,
+        });
+      }
     }, 500);
     return () => window.clearTimeout(id);
-  }, [annotations, annotationsHydrated, storageKey, contentHash]);
+  }, [
+    annotations,
+    annotationsHydrated,
+    storageKey,
+    contentHash,
+    persistenceAdapter,
+    sourceKind,
+    bookSlug,
+    location,
+    currentProgress,
+  ]);
 
   useEffect(() => {
     if (!renditionApplyKey || !annotationsEnabled || !annotationsHydrated) return;
@@ -717,6 +783,7 @@ export default function EpubViewer({
 
       setCurrentPage(resolvedPage);
       setPageDraft(resolvedPage ? String(resolvedPage) : '');
+      setCurrentProgress(resolvedProgress);
       if (storageKey) {
         persistStoredReaderProgress(storageKey, resolvedProgress);
       }

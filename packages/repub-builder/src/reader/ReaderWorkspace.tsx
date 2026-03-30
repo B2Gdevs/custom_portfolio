@@ -51,6 +51,7 @@ import type {
   ReaderLinkComponent,
   ReaderPlanningStripConfig,
 } from './types';
+import type { ReaderPersistenceAdapter } from './reader-persistence';
 import { Input } from '@/components/ui/input';
 
 export type ReaderWorkspaceProps = {
@@ -73,6 +74,7 @@ export type ReaderWorkspaceProps = {
   readerToolbarStart?: ReactNode;
   /** Optional links below Library when the host wants global nav in the rail (default: none). */
   readerShellNavLinks?: ReaderShellNavLink[];
+  readerPersistenceAdapter?: ReaderPersistenceAdapter | null;
 };
 
 const READER_NAV_EXPANDED_KEY = 'reader-workspace-nav-expanded';
@@ -129,6 +131,7 @@ export default function ReaderWorkspace({
   repoPlannerAppHref = '/apps/repo-planner',
   readerToolbarStart,
   readerShellNavLinks,
+  readerPersistenceAdapter = null,
 }: ReaderWorkspaceProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadedBook, setUploadedBook] = useState<UploadedBookSource | null>(null);
@@ -494,6 +497,9 @@ export default function ReaderWorkspace({
                   epubUrl={viewerSource.kind === 'built-in' ? viewerSource.epubUrl : undefined}
                   epubData={viewerSource.kind === 'local' ? viewerSource.epubData : undefined}
                   storageKey={viewerSource.storageKey}
+                  bookSlug={workspaceState.bookSlug}
+                  sourceKind={viewerSource.kind}
+                  persistenceAdapter={viewerSource.kind === 'built-in' ? readerPersistenceAdapter : null}
                   initialLocation={deeplinkLocation}
                   className="h-full"
                   layoutMode="reader"
