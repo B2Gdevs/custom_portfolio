@@ -125,6 +125,7 @@ export interface EpubViewerProps {
   /** Fires when EPUB bytes are ready (fetched URL or `epubData`). */
   onEpubLoaded?: (info: { buffer: ArrayBuffer; storageKey?: string }) => void;
   persistenceAdapter?: ReaderPersistenceAdapter | null;
+  preferPagedReader?: boolean;
 }
 
 const READER_THEME_RULES = {
@@ -513,6 +514,7 @@ export default function EpubViewer({
   annotationsEnabled = layoutMode === 'reader',
   onEpubLoaded,
   persistenceAdapter = null,
+  preferPagedReader = true,
 }: EpubViewerProps) {
   const [location, setLocation] = useState<string | number>(0);
   const [epubBuffer, setEpubBuffer] = useState<ArrayBuffer | null>(null);
@@ -807,11 +809,15 @@ export default function EpubViewer({
       renditionRef.current = rendition;
       const applyLayout = () => {
         const useSpread =
+          preferPagedReader &&
           layoutMode === 'reader' &&
           (readerRootRef.current?.clientWidth ?? 0) >= READER_SPREAD_MIN_WIDTH;
 
-        rendition.flow('paginated');
-        rendition.spread(useSpread ? 'always' : 'none', READER_SPREAD_MIN_WIDTH);
+        rendition.flow(preferPagedReader ? 'paginated' : 'scrolled-doc');
+        rendition.spread(
+          preferPagedReader && useSpread ? 'always' : 'none',
+          READER_SPREAD_MIN_WIDTH,
+        );
       };
 
       rendition.themes.register('portfolio-reader', READER_THEME_RULES);
@@ -872,7 +878,7 @@ export default function EpubViewer({
         };
       }
     },
-    [annotationsEnabled, layoutMode, syncReaderPosition]
+    [annotationsEnabled, layoutMode, preferPagedReader, syncReaderPosition]
   );
 
   const handleStepPage = useCallback((direction: 'prev' | 'next') => {
@@ -1228,9 +1234,9 @@ export default function EpubViewer({
             tocChanged={(nextToc) => handleTocChanged(nextToc as ReaderNavItem[])}
             getRendition={(rendition) => handleRendition(rendition as ReaderRendition)}
             epubOptions={{
-              flow: 'paginated',
+              flow: preferPagedReader ? 'paginated' : 'scrolled-doc',
               manager: 'default',
-              spread: layoutMode === 'reader' ? 'auto' : 'none',
+              spread: preferPagedReader && layoutMode === 'reader' ? 'auto' : 'none',
               minSpreadWidth: READER_SPREAD_MIN_WIDTH,
               snap: true,
             }}

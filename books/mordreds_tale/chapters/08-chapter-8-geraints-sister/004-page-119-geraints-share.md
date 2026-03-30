@@ -4,9 +4,9 @@ title: "Geraint's Share"
 displayTitle: false
 ---
 
-Geraint learned jealousy before he learned fairness.
+**Seasons later**, when **Geraint** was toddling and **Enid** had already learned which adults softened for her, the boy learned jealousy before he learned fairness.
 
-Owain saw it in the way the boy hovered when Jack’s gifts arrived — soft cloth, a silver rattle absurd for an infant, a nurse’s coin left on the table like an apology without words.
+Owain saw it in the way Geraint hovered when Jack’s gifts arrived — soft cloth, a silver rattle absurd for an infant, a nurse’s coin left on the table like an apology without words.
 
 "For the little one," Jack always said.
 

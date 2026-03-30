@@ -47,6 +47,10 @@ import {
 } from './reader-workspace-state';
 import type {
   ReaderBookEntry,
+  ReaderWorkspaceAccessState,
+  ReaderWorkspaceLibraryRecord,
+  ReaderWorkspaceSettingsState,
+  ReaderWorkspaceUploadInput,
   ReaderPlanningCockpitPayload,
   ReaderLinkComponent,
   ReaderPlanningStripConfig,
@@ -75,9 +79,19 @@ export type ReaderWorkspaceProps = {
   /** Optional links below Library when the host wants global nav in the rail (default: none). */
   readerShellNavLinks?: ReaderShellNavLink[];
   readerPersistenceAdapter?: ReaderPersistenceAdapter | null;
+  workspaceAccess?: ReaderWorkspaceAccessState | null;
+  workspaceSettings?: ReaderWorkspaceSettingsState | null;
+  workspaceLibraryRecords?: ReaderWorkspaceLibraryRecord[];
+  onSaveWorkspaceSettings?: (settings: ReaderWorkspaceSettingsState) => Promise<void>;
+  onUploadImportedBook?: (input: ReaderWorkspaceUploadInput) => Promise<void>;
 };
 
 const READER_NAV_EXPANDED_KEY = 'reader-workspace-nav-expanded';
+const DEFAULT_WORKSPACE_SETTINGS: ReaderWorkspaceSettingsState = {
+  defaultWorkspaceView: 'library',
+  preferPagedReader: true,
+  showProgressBadges: true,
+};
 
 function slugifyFileName(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -132,6 +146,11 @@ export default function ReaderWorkspace({
   readerToolbarStart,
   readerShellNavLinks,
   readerPersistenceAdapter = null,
+  workspaceAccess = null,
+  workspaceSettings = null,
+  workspaceLibraryRecords = [],
+  onSaveWorkspaceSettings,
+  onUploadImportedBook,
 }: ReaderWorkspaceProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadedBook, setUploadedBook] = useState<UploadedBookSource | null>(null);
@@ -150,6 +169,25 @@ export default function ReaderWorkspace({
   const [readerNavExpanded, setReaderNavExpanded] = useState(true);
   const [readerNavHydrated, setReaderNavHydrated] = useState(false);
   const [readerMobileNavOpen, setReaderMobileNavOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsDraft, setSettingsDraft] = useState<ReaderWorkspaceSettingsState>(
+    workspaceSettings ?? DEFAULT_WORKSPACE_SETTINGS,
+  );
+  const [settingsSaveState, setSettingsSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [uploadPanelOpen, setUploadPanelOpen] = useState(false);
+  const [uploadDraft, setUploadDraft] = useState<{
+    title: string;
+    author: string;
+    description: string;
+    visibility: 'private' | 'public';
+  }>({
+    title: '',
+    author: '',
+    description: '',
+    visibility: 'private',
+  });
+  const [uploadSaveState, setUploadSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [uploadFeedback, setUploadFeedback] = useState<string | null>(null);
   const shelfFilterInitRef = useRef(false);
 
   useEffect(() => {
@@ -171,6 +209,29 @@ export default function ReaderWorkspace({
       /* ignore */
     }
   }, [readerNavExpanded, readerNavHydrated]);
+
+  useEffect(() => {
+    setSettingsDraft(workspaceSettings ?? DEFAULT_WORKSPACE_SETTINGS);
+  }, [workspaceSettings]);
+
+  useEffect(() => {
+    if (!uploadedBook) {
+      setUploadPanelOpen(false);
+      setUploadSaveState('idle');
+      setUploadDraft({
+        title: '',
+        author: '',
+        description: '',
+        visibility: 'private',
+      });
+      return;
+    }
+
+    setUploadDraft((current) => ({
+      ...current,
+      title: current.title || uploadedBook.title,
+    }));
+  }, [uploadedBook]);
 
   const catalogGenres = useMemo(() => collectDistinctGenres(books), [books]);
 
@@ -272,27 +333,12 @@ export default function ReaderWorkspace({
     [typeQueued, shelfQ],
   );
 
-  const shelfSummary = useMemo(() => {
-    const n = filteredBuiltIn.length + filteredQueued.length;
-    if (shelfQ) {
-      return `${n} match${n === 1 ? '' : 'es'}`;
-    }
-    if (shelfCatalogFilter !== 'all') {
-      return `${n} title${n === 1 ? '' : 's'} tagged “${shelfCatalogFilter}”`;
-    }
-    return `${builtInBooks.length} available now, ${queuedBooks.length} queued behind manuscript and build work.`;
-  }, [
-    builtInBooks.length,
-    filteredBuiltIn.length,
-    filteredQueued.length,
-    queuedBooks.length,
-    shelfCatalogFilter,
-    shelfQ,
-  ]);
-
   const planningConfig = getPlanningStripConfig?.(workspaceState.bookSlug ?? undefined) ?? null;
 
   const t = readerChrome;
+  const savedUploadCount = workspaceLibraryRecords.filter((record) => record.sourceKind === 'uploaded').length;
+  const canSaveSettings = Boolean(workspaceAccess?.canEdit && onSaveWorkspaceSettings);
+  const canUploadImportedBook = Boolean(uploadedBook && workspaceAccess?.canUpload && onUploadImportedBook);
 
   const ingestEpubFile = useCallback(async (file: File) => {
     if (!file.name.toLowerCase().endsWith('.epub')) {
@@ -353,6 +399,44 @@ export default function ReaderWorkspace({
     setLibraryDragActive(false);
     const file = e.dataTransfer.files?.[0];
     if (file) await ingestEpubFile(file);
+  };
+
+  const handleSaveWorkspaceSettings = async () => {
+    if (!onSaveWorkspaceSettings) return;
+
+    setSettingsSaveState('saving');
+    try {
+      await onSaveWorkspaceSettings(settingsDraft);
+      setSettingsSaveState('saved');
+    } catch {
+      setSettingsSaveState('error');
+    }
+  };
+
+  const handleUploadImportedBook = async () => {
+    if (!onUploadImportedBook || !uploadedBook) return;
+
+    setUploadSaveState('saving');
+    setUploadFeedback(null);
+
+    try {
+      const file = new File([uploadedBook.buffer], uploadedBook.fileName, {
+        type: 'application/epub+zip',
+      });
+      await onUploadImportedBook({
+        file,
+        title: uploadDraft.title.trim() || uploadedBook.title,
+        author: uploadDraft.author.trim() || null,
+        description: uploadDraft.description.trim() || null,
+        visibility: uploadDraft.visibility,
+      });
+      setUploadSaveState('saved');
+      setUploadPanelOpen(false);
+      setUploadFeedback('Saved to the backend library. This local reading session stays open.');
+    } catch {
+      setUploadSaveState('error');
+      setUploadFeedback('That EPUB could not be uploaded right now.');
+    }
   };
 
   const Link = ReaderLink;
@@ -438,6 +522,24 @@ export default function ReaderWorkspace({
                   <Upload size={15} aria-hidden />
                   {isUploading ? 'Importing…' : 'Import EPUB'}
                 </button>
+                {canSaveSettings ? (
+                  <button
+                    type="button"
+                    onClick={() => setSettingsOpen((value) => !value)}
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${t.pillButton}`}
+                  >
+                    {settingsOpen ? 'Close settings' : 'Workspace settings'}
+                  </button>
+                ) : null}
+                {canUploadImportedBook ? (
+                  <button
+                    type="button"
+                    onClick={() => setUploadPanelOpen((value) => !value)}
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${t.pillButton}`}
+                  >
+                    {uploadPanelOpen ? 'Close upload' : 'Upload to library'}
+                  </button>
+                ) : null}
                 {uploadedBook && hasBuiltInBook ? (
                   <button
                     type="button"
@@ -482,6 +584,183 @@ export default function ReaderWorkspace({
                 </p>
               </div>
             ) : null}
+            {workspaceAccess?.authenticated ? (
+              <div className="mx-auto max-w-[120rem] px-4 pb-2 text-xs text-muted-foreground md:px-5">
+                Owner workspace {workspaceAccess.autoLoggedIn ? 'auto-login' : 'session'} active. {savedUploadCount}{' '}
+                saved upload{savedUploadCount === 1 ? '' : 's'} in the backend library.
+              </div>
+            ) : null}
+            {settingsOpen && canSaveSettings ? (
+              <div className="mx-auto max-w-[120rem] px-4 pb-3 md:px-5">
+                <div className="rounded-2xl border border-border bg-background/70 p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="section-kicker">Workspace settings</p>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        These settings save only for entitled owner sessions. Public readers stay on the local defaults.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void handleSaveWorkspaceSettings()}
+                      disabled={settingsSaveState === 'saving'}
+                      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${t.pillButton}`}
+                    >
+                      {settingsSaveState === 'saving' ? 'Saving…' : 'Save settings'}
+                    </button>
+                  </div>
+                  <div className="mt-4 grid gap-3 md:grid-cols-3">
+                    <label className="space-y-1 text-sm">
+                      <span className="font-medium text-foreground">Default workspace view</span>
+                      <select
+                        value={settingsDraft.defaultWorkspaceView}
+                        onChange={(event) =>
+                          setSettingsDraft((current) => ({
+                            ...current,
+                            defaultWorkspaceView:
+                              event.target.value === 'continue-reading' ? 'continue-reading' : 'library',
+                          }))
+                        }
+                        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground"
+                      >
+                        <option value="library">Library</option>
+                        <option value="continue-reading">Continue reading</option>
+                      </select>
+                    </label>
+                    <label className="flex items-center gap-3 rounded-xl border border-border bg-background px-3 py-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={settingsDraft.preferPagedReader}
+                        onChange={(event) =>
+                          setSettingsDraft((current) => ({
+                            ...current,
+                            preferPagedReader: event.target.checked,
+                          }))
+                        }
+                      />
+                      <span>
+                        <span className="block font-medium text-foreground">Prefer paged reader</span>
+                        <span className="text-muted-foreground">
+                          Use the book-like spread layout when the viewport allows it.
+                        </span>
+                      </span>
+                    </label>
+                    <label className="flex items-center gap-3 rounded-xl border border-border bg-background px-3 py-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={settingsDraft.showProgressBadges}
+                        onChange={(event) =>
+                          setSettingsDraft((current) => ({
+                            ...current,
+                            showProgressBadges: event.target.checked,
+                          }))
+                        }
+                      />
+                      <span>
+                        <span className="block font-medium text-foreground">Show progress badges</span>
+                        <span className="text-muted-foreground">
+                          Keep shelf progress and status chips visible in the library.
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+                  {settingsSaveState === 'saved' ? (
+                    <p className="mt-3 text-xs text-emerald-300">Workspace settings saved.</p>
+                  ) : null}
+                  {settingsSaveState === 'error' ? (
+                    <p className="mt-3 text-xs text-destructive">Workspace settings could not be saved.</p>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+            {uploadPanelOpen && uploadedBook && canUploadImportedBook ? (
+              <div className="mx-auto max-w-[120rem] px-4 pb-3 md:px-5">
+                <div className="rounded-2xl border border-border bg-background/70 p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="section-kicker">Explicit upload</p>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        This creates a backend library record. Importing alone does not upload anything.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void handleUploadImportedBook()}
+                      disabled={uploadSaveState === 'saving'}
+                      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${t.pillButton}`}
+                    >
+                      {uploadSaveState === 'saving' ? 'Uploading…' : 'Upload EPUB'}
+                    </button>
+                  </div>
+                  <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    <label className="space-y-1 text-sm">
+                      <span className="font-medium text-foreground">Title</span>
+                      <Input
+                        value={uploadDraft.title}
+                        onChange={(event) =>
+                          setUploadDraft((current) => ({
+                            ...current,
+                            title: event.target.value,
+                          }))
+                        }
+                        placeholder="Uploaded EPUB"
+                      />
+                    </label>
+                    <label className="space-y-1 text-sm">
+                      <span className="font-medium text-foreground">Author</span>
+                      <Input
+                        value={uploadDraft.author}
+                        onChange={(event) =>
+                          setUploadDraft((current) => ({
+                            ...current,
+                            author: event.target.value,
+                          }))
+                        }
+                        placeholder="Author"
+                      />
+                    </label>
+                    <label className="space-y-1 text-sm md:col-span-2">
+                      <span className="font-medium text-foreground">Description</span>
+                      <textarea
+                        value={uploadDraft.description}
+                        onChange={(event) =>
+                          setUploadDraft((current) => ({
+                            ...current,
+                            description: event.target.value,
+                          }))
+                        }
+                        rows={3}
+                        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground"
+                        placeholder="Private workspace upload"
+                      />
+                    </label>
+                    <label className="space-y-1 text-sm">
+                      <span className="font-medium text-foreground">Visibility</span>
+                      <select
+                        value={uploadDraft.visibility}
+                        onChange={(event) =>
+                          setUploadDraft((current) => ({
+                            ...current,
+                            visibility: event.target.value === 'public' ? 'public' : 'private',
+                          }))
+                        }
+                        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground"
+                      >
+                        <option value="private">Private</option>
+                        <option value="public">Public</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+            {uploadFeedback ? (
+              <div className="mx-auto max-w-[120rem] px-4 pb-3 md:px-5">
+                <p className={`text-xs ${uploadSaveState === 'error' ? 'text-destructive' : 'text-emerald-300'}`}>
+                  {uploadFeedback}
+                </p>
+              </div>
+            ) : null}
           </div>
           <ReaderPlanningStrip
             config={planningConfig}
@@ -500,6 +779,7 @@ export default function ReaderWorkspace({
                   bookSlug={workspaceState.bookSlug}
                   sourceKind={viewerSource.kind}
                   persistenceAdapter={viewerSource.kind === 'built-in' ? readerPersistenceAdapter : null}
+                  preferPagedReader={settingsDraft.preferPagedReader}
                   initialLocation={deeplinkLocation}
                   className="h-full"
                   layoutMode="reader"
@@ -568,11 +848,12 @@ export default function ReaderWorkspace({
                                 book={book}
                                 status={status}
                                 isActive={isActive}
-                                readerHref={readerAppHref(readerAppPath, { book: book.slug })}
-                                ReaderLink={ReaderLink}
-                                planningCockpitPayload={
-                                  book.hasEpub ? getPlanningStripConfig?.(book.slug)?.cockpitPayload : undefined
-                                }
+                              readerHref={readerAppHref(readerAppPath, { book: book.slug })}
+                              ReaderLink={ReaderLink}
+                              showStatusBadge={settingsDraft.showProgressBadges}
+                              planningCockpitPayload={
+                                book.hasEpub ? getPlanningStripConfig?.(book.slug)?.cockpitPayload : undefined
+                              }
                               />
                             );
                           })}
@@ -584,6 +865,7 @@ export default function ReaderWorkspace({
                               isActive={false}
                               readerHref={readerAppHref(readerAppPath, { book: book.slug })}
                               ReaderLink={ReaderLink}
+                              showStatusBadge={settingsDraft.showProgressBadges}
                             />
                           ))}
                         </div>

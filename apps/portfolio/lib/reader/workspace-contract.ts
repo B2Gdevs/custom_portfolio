@@ -2,6 +2,7 @@ import type { AuthFeatureAccess } from '@/lib/auth/permissions';
 
 export const READER_LIBRARY_COLLECTION_SLUG = 'reader-library-records';
 export const READER_SETTINGS_COLLECTION_SLUG = 'reader-settings';
+export const READER_LIBRARY_VISIBILITY_VALUES = ['private', 'public'] as const;
 
 export type ReaderWorkspaceDefaultView = 'library' | 'continue-reading';
 export type ReaderWorkspaceStorageMode = 'local-only' | 'hybrid';
@@ -33,6 +34,7 @@ export type ReaderLibraryRecord = {
   author: string | null;
   description: string | null;
   coverImageUrl: string | null;
+  epubUrl: string | null;
   sourceKind: ReaderLibrarySourceKind;
   sourceFileName: string | null;
   visibility: ReaderLibraryVisibility;
@@ -131,6 +133,7 @@ export function normalizeReaderLibraryRecord(
     author: asString(doc?.author),
     description: asString(doc?.description),
     coverImageUrl: asString(doc?.coverImageUrl),
+    epubUrl: asString(doc?.epubUrl),
     sourceKind: doc?.sourceKind === 'built-in' ? 'built-in' : 'uploaded',
     sourceFileName: asString(doc?.sourceFileName),
     visibility: doc?.visibility === 'public' ? 'public' : 'private',

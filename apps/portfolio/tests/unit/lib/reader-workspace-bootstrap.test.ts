@@ -123,6 +123,7 @@ describe('reader workspace bootstrap', () => {
           author: null,
           description: null,
           coverImageUrl: null,
+          epubUrl: null,
           sourceKind: 'uploaded',
           sourceFileName: 'uploaded.epub',
           visibility: 'private',

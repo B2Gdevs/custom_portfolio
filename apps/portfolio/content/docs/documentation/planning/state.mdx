@@ -32,7 +32,7 @@ order: 2
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | `books-reader-05-03`: gated in-reader editing and explicit write-back paths on top of the new sync layer | `feature` |
+| `1` | `books-reader-05-04`: reader search, workspace polish, and richer backend-backed library details on top of the new write paths | `feature` |
 | `2` | `listen-access-01-01`: move private BandLab access away from shared passwords and into the same auth/entitlement model | `feature` |
 | `3` | maintain the Global auth docs and routes only when Books/Listen discover a real gap | `cross-cutting` |
 | `4` | maintain `documentation-site-08` / `09` / `07` only when they unblock the auth-backed product work | `tooling` |
@@ -51,7 +51,7 @@ Monorepo-wide items that are not (yet) a full `.planning` task row. Mirror or cl
 | `open` | Blog + projects discovery pass -- blog/projects section registries. |
 | `done` | **Listen** surface -- **`listen-surface-01`** implemented (`/listen`, catalog, Cmd+K); [listen task registry](/docs/listen/planning/task-registry). |
 | `open` | **CLI ergonomics:** `documentation-site-07-01` / `07-02` -- Ink, **two CLIs**, submodule bumps, and the remaining publish / `pnpm dlx` docs polish per [requirements](/docs/documentation/requirements) CLI table. |
-| `open` | **Reader backend pass:** auth-backed reader workspace and DB-backed reading-state sync are in place; the remaining work is gated editing, explicit upload/write paths, and workspace polish -- [books task registry](/docs/books/planning/task-registry). |
+| `open` | **Reader backend pass:** auth-backed reader workspace, DB-backed reading-state sync, owner-only settings save, and explicit local-EPUB upload are now in place; the remaining work is workspace polish and richer backend-backed library details -- [books task registry](/docs/books/planning/task-registry). |
 | `open` | **Listen private media pass:** move private BandLab rows and presets into DB-backed data plus owner entitlements instead of shared-password unlock groups -- [listen task registry](/docs/listen/planning/task-registry). |
 | `open` | **Shared content surfaces:** align `listen`, `blog`, and `projects` on one reusable shell with per-section mini logos and theme identity -- `documentation-site-09`, section registries below. |
 | `done` | **Planning IA reset:** literal section `planning/` folders are live, section docs/links now point at those paths, and one-off plans belong under `planning/plans/` instead of top-level implementation-plan drift -- `documentation-site-10`. |

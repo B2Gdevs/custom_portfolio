@@ -33,6 +33,7 @@ export function ReaderShelfCard({
   readerHref,
   ReaderLink,
   planningCockpitPayload,
+  showStatusBadge = true,
 }: {
   book: ReaderBookEntry;
   status: ReaderShelfStatus;
@@ -40,6 +41,7 @@ export function ReaderShelfCard({
   readerHref: string;
   ReaderLink: ReaderLinkComponent;
   planningCockpitPayload?: ReaderPlanningCockpitPayload | null;
+  showStatusBadge?: boolean;
 }) {
   const openPlanningCockpit = useReaderModalStore((s) => s.openPlanningCockpit);
   const canOpen = book.hasEpub;
@@ -60,11 +62,13 @@ export function ReaderShelfCard({
         <ReaderEmptyCover title={book.title} showTopLabel={false} />
       )}
       <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-3">
-        <span
-          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] shadow-sm ${statusBadgeClasses(status.kind)}`}
-        >
-          {status.label}
-        </span>
+        {showStatusBadge || status.kind === 'coming-soon' ? (
+          <span
+            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] shadow-sm ${statusBadgeClasses(status.kind)}`}
+          >
+            {status.label}
+          </span>
+        ) : null}
         {canOpen ? (
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/80 bg-background/70 text-foreground shadow-sm backdrop-blur-sm">
             <ArrowUpRight size={14} aria-hidden />

@@ -91,6 +91,7 @@ describe('reader workspace contract', () => {
       author: null,
       description: null,
       coverImageUrl: null,
+      epubUrl: null,
       sourceKind: 'uploaded',
       sourceFileName: 'uploaded.epub',
       visibility: 'public',

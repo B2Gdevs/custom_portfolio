@@ -48,6 +48,10 @@ export {
 export type {
   ReaderBookEntry,
   ReaderAppSearch,
+  ReaderWorkspaceAccessState,
+  ReaderWorkspaceLibraryRecord,
+  ReaderWorkspaceSettingsState,
+  ReaderWorkspaceUploadInput,
   ReaderPlanningCockpitPayload,
   ReaderPlanningQuickLink,
   ReaderLinkProps,

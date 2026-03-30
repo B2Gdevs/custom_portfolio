@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload';
+import { READER_LIBRARY_ASSET_COLLECTION_SLUG } from './readerLibraryAssets';
 
 export const readerLibraryRecords: CollectionConfig = {
   slug: 'reader-library-records',
@@ -29,6 +30,15 @@ export const readerLibraryRecords: CollectionConfig = {
     },
     {
       name: 'coverImageUrl',
+      type: 'text',
+    },
+    {
+      name: 'epubAsset',
+      type: 'relationship',
+      relationTo: READER_LIBRARY_ASSET_COLLECTION_SLUG,
+    },
+    {
+      name: 'epubUrl',
       type: 'text',
     },
     {

@@ -87,6 +87,11 @@ export function resolveReaderWorkspaceState(
   }
 
   if (initialBook?.hasEpub) {
+    const epubUrl =
+      initialBook.sourceKind === 'uploaded' && initialBook.remoteEpubUrl
+        ? initialBook.remoteEpubUrl
+        : builtInEpubHref(initialBook.slug);
+
     return {
       mode: 'built-in-reading',
       title: initialBook.title,
@@ -96,7 +101,7 @@ export function resolveReaderWorkspaceState(
       localFileName: null,
       viewerSource: {
         kind: 'built-in',
-        epubUrl: builtInEpubHref(initialBook.slug),
+        epubUrl,
         storageKey: initialBook.slug,
       },
     };

@@ -10,9 +10,9 @@ He took Enid as if he had a right to her weight, and the ease of it made Owain�
 
 "She’s strong," Jack murmured, testing a tiny fist with his thumb.
 
-Tanya stood at the hearth with her shoulders squared like a soldier. Geraint hid behind her skirts and peered out.
+Tanya stood at the hearth with her shoulders squared like a soldier. No second child yet to hide behind her — only the truth of **Enid**, who was everyone’s favorite story and nobody’s clean daughter.
 
-Jack smiled at the boy — brief, bright — then returned his attention to the infant as if Geraint were a footnote.
+Jack’s gaze found the infant and did not pretend to divide its attention fairly.
 
 Owain felt the insult on Tanya’s behalf before he felt it on his own.
 

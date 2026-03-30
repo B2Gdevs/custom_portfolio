@@ -1,0 +1,32 @@
+---
+title: Gated Reader Write-Back Kickoff
+description: Kickoff for owner-only reader upload, settings, and write-back flows.
+date: "2026-03-30"
+updated: "2026-03-30"
+repoPath: apps/portfolio/content/docs/books/planning/plans/books-reader-05-03/PLAN.mdx
+taskPhase: books-reader-05
+---
+
+# Kickoff
+
+## Kickoff: `books-reader-05-03`
+
+| Field | Notes |
+| --- | --- |
+| `goal` | Add the first owner-only write paths inside the reader workspace without changing anonymous reading or auto-uploading local EPUB imports. |
+| `scope` | Explicit local-EPUB upload action, backend-backed reader settings save path, owner-only editing affordances for upload/write flows, and the route/worker boundaries needed to keep Payload out of the Next route bundle. |
+| `non-goals` | Public signup, mandatory login for reading, automatic upload on import, full manuscript editing, or the broader shelf/search polish planned in `books-reader-05-04`. |
+| `dependencies` | `global-auth-01`, `books-reader-05-01`, and `books-reader-05-02`. |
+| `tests required` | Unit coverage for workspace write contracts/services, API route coverage for settings and upload actions, and a reader workspace client test covering owner-only affordances when available. |
+| `definition of done` | Owner sessions can save reader settings and explicitly upload a local EPUB through the reader workspace, anonymous sessions remain local-only, and the UI clearly distinguishes local import from server write-back. |
+| `first tasks` | Add the backend upload/settings contract, expose owner access/settings to the reader shell, add explicit upload and settings actions in the workspace, then update planning records after verification passes. |
+| `open questions` | None; metadata editing beyond the upload/settings path remains follow-up work if the phase closes cleanly. |
+
+## Checklist
+
+- scope captured
+- non-goals captured
+- dependencies captured
+- tests required captured
+- definition of done captured
+- first tasks captured

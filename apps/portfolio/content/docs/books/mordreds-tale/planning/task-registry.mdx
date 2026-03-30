@@ -23,12 +23,12 @@ Work **chapter-by-chapter** with Q&A; lock one path per **Alternatives** block; 
 | `mt-beats-01-ch06` | `done` | **Ch6 — Second Well:** lock POV + primary beats + Owain/Morgana procedure tone; pick alternatives or mark deferred; note moral/emotional charges | — | [state](/docs/books/mordreds-tale/planning/state) Ch6 **Locked for draft** + [decisions](/docs/books/mordreds-tale/planning/decisions) (`MT-CH6-*`, Tanya pattern, Enid cover, violence preference) |
 | `mt-beats-01-ch07` | `done` | **Ch7 — Devil in the Register:** registry/Jack-near-miss/bark-off; legal ownership of Mordred; Merris stance | `mt-beats-01-ch06` | [state](/docs/books/mordreds-tale/planning/state) Ch7 **Locked for draft** + [decisions](/docs/books/mordreds-tale/planning/decisions) `MT-CH7-*`, `MT-FQ-01-REGISTRY-*` |
 | `mt-beats-01-ch08` | `done` | **Ch8 — Geraint’s Sister:** Enid birth thread; household poison; Jack warmth wrong; parallel vs skip alternatives | `mt-beats-01-ch07` | [state](/docs/books/mordreds-tale/planning/state) Ch8 **Locked for draft** + [`MT-CH8-POV-OWAIN`](/docs/books/mordreds-tale/planning/decisions) |
-| `mt-beats-01-ch09` | `planned` | **Ch9 — Core Opens:** castle meeting + Merlin curtain; Morgana location at boom; Jack at core yes/no | `mt-beats-01-ch08` | **Locked for draft** |
-| `mt-beats-01-ch10` | `planned` | **Ch10 — Hallinghorn Smoke:** war cold open; Jack alive/role; southern friends named | `mt-beats-01-ch09` | **Locked for draft** |
-| `mt-beats-01-ch11` | `planned` | **Ch11 — Meadow Proof:** duel beats; spare/coalition seeds; Jack on field | `mt-beats-01-ch10` | **Locked for draft** |
-| `mt-beats-01-ch12` | `planned` | **Ch12 — Carriage:** paternity pressure; reveal timing vs alternatives | `mt-beats-01-ch11` | **Locked for draft** |
-| `mt-beats-01-ch13` | `planned` | **Ch13 — Coalition Bench:** Jack fate; Morgana fate at bench; institutions not utopia | `mt-beats-01-ch12` | **Locked for draft** |
-| `mt-beats-01-ch14` | `planned` | **Ch14 / epilogue — Two From the Bough:** giant coda vs slim end vs defer; Jack vs giants | `mt-beats-01-ch13` | **Locked for draft** |
+| `mt-beats-01-ch09` | `done` | **Ch9 — The Rope** + **Ch10 — The Core Opens** (split after `mt-beats-01-ch08`) | `mt-beats-01-ch08` | **Ch9** page **124**; **Ch10** pages **125–131**; [decisions](/docs/books/mordreds-tale/planning/decisions) `MT-CH9-*` (core), `MT-TANYA-HANGING-ON-PAGE` (rope) |
+| `mt-beats-01-ch10` | `planned` | **Ch11 — Hallinghorn Smoke:** war cold open; Jack alive/role; southern friends named | `mt-beats-01-ch09` | **Locked for draft** |
+| `mt-beats-01-ch11` | `planned` | **Ch12 — Meadow Proof:** duel beats; spare/coalition seeds; Jack on field | `mt-beats-01-ch10` | **Locked for draft** |
+| `mt-beats-01-ch12` | `planned` | **Ch13 — Carriage:** paternity pressure; reveal timing vs alternatives | `mt-beats-01-ch11` | **Locked for draft** |
+| `mt-beats-01-ch13` | `planned` | **Ch14 — Coalition Bench:** Jack fate; Morgana fate at bench; institutions not utopia | `mt-beats-01-ch12` | **Locked for draft** |
+| `mt-beats-01-ch14` | `planned` | **Ch15 / epilogue — Two From the Bough:** giant coda vs slim end vs defer; Jack vs giants | `mt-beats-01-ch13` | **Locked for draft** |
 | `mt-beats-01-closeout` | `planned` | **FQ sweep** (`FQ-01`–`FQ-08`); refresh **full chapter spine** status column; confirm Ch4–5 beat rows match locked tail | `mt-beats-01-ch14` | state **Next Queue** + spine table updated |
 
 ## Phase `mt-act-i` — Finish Act I (chapter-at-a-time drafting)
@@ -43,7 +43,7 @@ Work **chapter-by-chapter** with Q&A; lock one path per **Alternatives** block; 
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
-| `mt-act2-00` | `planned` | lock Act II **Ch7–9** trims from **beat sheets** on [state](/docs/books/mordreds-tale/planning/state) once Ch6 is checklist-clean | `mt-act2-01-ch6` | state chapter map + decisions aligned |
+| `mt-act2-00` | `planned` | lock Act II **Ch7–10** trims from **beat sheets** on [state](/docs/books/mordreds-tale/planning/state) once Ch6 is checklist-clean | `mt-act2-01-ch6` | state chapter map + decisions aligned |
 | `mt-act2-01-ch4` | `done` | draft **Chapter 4** in one pass (pages **85–91**): gate, **Merris**, **bark**, **Midas relic** believed dead, handlers plan **murder**, **Keth** turns gold, Merris **covers** | `mt-act1-01` | chapter done checklist, `pnpm run build:books` |
 | `mt-act2-01-ch4-rework` | `blocked` | one **chapter-level** rework pass on Ch4 (continuity with Ch3 clay cord where known, POV balance, checklist); **after** `mt-beats-01-closeout` | `mt-beats-01-closeout` | chapter done checklist |
 | `mt-act2-01-ch5` | `done` | draft **Chapter 5** (pages **92–99**): **House** withholds **Mordred**; **Jack** + **Morgana** charge failure; **Tell me** / violence; **realization**; **Owain** order | `mt-act2-01-ch4` | chapter done checklist, `pnpm run build:books` |
@@ -51,15 +51,16 @@ Work **chapter-by-chapter** with Q&A; lock one path per **Alternatives** block; 
 | `mt-act2-01-ch6` | `blocked` | draft **Ch6** — beat sheet *The Second Well*; POV + coercion/pregnancy landing per [state](/docs/books/mordreds-tale/planning/state); requires **Ch6 locked** + Ch5 rework done | `mt-beats-01-ch06`, `mt-act2-01-ch5-rework` | checklist + `pnpm run build:books` |
 | `mt-act2-01-ch7` | `in-progress` | draft **Ch7** — *Devil in the Register*; Mordred age-up + Jack **near-miss**; scaffold **108–115** landed — rework for age/timeline | `mt-act2-01-ch6` | checklist + build |
 | `mt-act2-01-ch8` | `in-progress` | draft **Ch8** — *Geraint’s Sister*; Enid birth / household; scaffold **116–123** landed — rework vs Ch5–7 timeline | `mt-act2-01-ch7` | checklist + build |
-| `mt-act2-01-ch9` | `planned` | draft **Ch9** — *The Core Opens*; castle + Merlin curtain | `mt-act2-01-ch8` | checklist + build |
-| `mt-act2-01` | `planned` | Act II complete when Ch9 passes rework gate | `mt-act2-01-ch9` | chapter done checklist, `pnpm run build:books` |
+| `mt-act2-01-ch9` | `planned` | draft **Ch9** — *The Rope*; hanging beat (page **124**) | `mt-act2-01-ch8` | checklist + build |
+| `mt-act2-01-ch10` | `planned` | draft **Ch10** — *The Core Opens*; castle + Merlin curtain (pages **125–131**) | `mt-act2-01-ch9` | checklist + build |
+| `mt-act2-01` | `planned` | Act II complete when **Ch10** passes rework gate | `mt-act2-01-ch10` | chapter done checklist, `pnpm run build:books` |
 
 ## Phase `mt-act-iii` — Act III: War, conflict, their place (chapter-at-a-time drafting)
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
 | `mt-act3-00` | `planned` | lock Act III chapter list + beat map: meadow **duel**, carriage/**terms**, **coalition throne** (`MT-ACT-III-COALITION-THRONE`), optional **giant coda** / epilogue (`MT-BOOK1-GIANTS-CODA`); name **southern bench** allies | `mt-act2-01` | state **full chapter spine** + decisions |
-| `mt-act3-01` | `planned` | draft Act III chapter-by-chapter (full chapter draft then one chapter-level rework pass); include coalition endgame; add **coda** chapters if epilogue path chosen | `mt-act3-00` | chapter done checklist, `pnpm run build:books` |
+| `mt-act3-01` | `in-progress` | draft Act III chapter-by-chapter; **Ch11–15** scaffolds **132–171** landed — rework + checklist | `mt-act3-00` | chapter done checklist, `pnpm run build:books` |
 
 ## Phase `mt-polish` — Later (deferred)
 

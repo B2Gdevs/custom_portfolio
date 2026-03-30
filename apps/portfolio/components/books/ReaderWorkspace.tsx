@@ -4,6 +4,7 @@ import {
   ReaderWorkspace as ReaderWorkspaceBase,
   type ReaderPersistenceAdapter,
   type ReaderPlanningCockpitPayload,
+  type ReaderWorkspaceUploadInput,
 } from '@portfolio/repub-builder/reader';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
@@ -11,8 +12,11 @@ import { RepoPlannerCockpitClient } from '@/components/repo-planner/RepoPlannerC
 import {
   fetchReaderPersistedState,
   fetchReaderWorkspaceBootstrap,
+  saveReaderWorkspaceSettings,
   saveReaderPersistedState,
+  uploadReaderLibraryEpub,
 } from '@/lib/reader/client';
+import type { ReaderWorkspaceBootstrap } from '@/lib/reader/workspace-contract';
 import {
   magicbornRunePathRepoPlannerModalPayload,
   mordredsLegacyRepoPlannerModalPayload,
@@ -38,7 +42,7 @@ export default function ReaderWorkspace({
   initialAt?: string;
   initialCfi?: string;
 }) {
-  const [canPersistReader, setCanPersistReader] = useState(false);
+  const [workspaceBootstrap, setWorkspaceBootstrap] = useState<ReaderWorkspaceBootstrap | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,11 +50,11 @@ export default function ReaderWorkspace({
     void fetchReaderWorkspaceBootstrap()
       .then((workspace) => {
         if (cancelled) return;
-        setCanPersistReader(workspace.access.canPersist);
+        setWorkspaceBootstrap(workspace);
       })
       .catch(() => {
         if (cancelled) return;
-        setCanPersistReader(false);
+        setWorkspaceBootstrap(null);
       });
 
     return () => {
@@ -59,7 +63,7 @@ export default function ReaderWorkspace({
   }, []);
 
   const readerPersistenceAdapter = useMemo<ReaderPersistenceAdapter | null>(() => {
-    if (!canPersistReader) {
+    if (!workspaceBootstrap?.access.canPersist) {
       return null;
     }
 
@@ -81,12 +85,58 @@ export default function ReaderWorkspace({
         });
       },
     };
-  }, [canPersistReader]);
+  }, [workspaceBootstrap?.access.canPersist]);
+
+  const handleSaveWorkspaceSettings = async (
+    input: ReaderWorkspaceBootstrap['settings'],
+  ) => {
+    const saved = await saveReaderWorkspaceSettings(input);
+    if (!saved) {
+      return;
+    }
+
+    setWorkspaceBootstrap((current) =>
+      current
+        ? {
+            ...current,
+            settings: saved,
+          }
+        : current,
+    );
+  };
+
+  const handleUploadImportedBook = async (input: ReaderWorkspaceUploadInput) => {
+    const record = await uploadReaderLibraryEpub({
+      file: input.file,
+      title: input.title,
+      author: input.author ?? null,
+      description: input.description ?? null,
+      visibility: input.visibility,
+    });
+
+    if (!record) {
+      return;
+    }
+
+    setWorkspaceBootstrap((current) =>
+      current
+        ? {
+            ...current,
+            libraryRecords: [record, ...current.libraryRecords],
+          }
+        : current,
+    );
+  };
 
   return (
     <ReaderWorkspaceBase
       books={books}
       readerPersistenceAdapter={readerPersistenceAdapter}
+      workspaceAccess={workspaceBootstrap?.access ?? null}
+      workspaceSettings={workspaceBootstrap?.settings ?? null}
+      workspaceLibraryRecords={workspaceBootstrap?.libraryRecords ?? []}
+      onSaveWorkspaceSettings={handleSaveWorkspaceSettings}
+      onUploadImportedBook={handleUploadImportedBook}
       ReaderLink={Link}
       getPlanningStripConfig={(bookSlug) => {
         if (!bookSlug) return null;

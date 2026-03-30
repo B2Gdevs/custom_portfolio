@@ -24,18 +24,17 @@ taskPhase: books-reader-05
 | Field | Value |
 | --- | --- |
 | `phase` | `books-reader-05` + `books-reader-02` follow-up |
-| `plan` | **Reader shell groundwork is shipped**: **`ReaderWorkspace`** + **`EpubViewer`**, shelf search and filters, planning strip, reader modal store, and book-scoped planning packs. The auth-aware reader foundation and sync layer are now in place too: backend reader collections, a shared workspace bootstrap contract, DB-backed reading state for built-in books, and anonymous/local fallback rules. The next cycle moves into actual gated editing/write-back while keeping the public reading baseline intact. |
-| `focus` | treat the reader as the primary product lane: the shared auth dependency from `global-auth-01`, the backend workspace contract, and server-backed annotation/progress sync are now ready, so the next work is gated in-reader editing, explicit upload/write paths, and search/workspace polish before returning to AI or publishing |
+| `plan` | **Reader shell groundwork is shipped**: **`ReaderWorkspace`** + **`EpubViewer`**, shelf search and filters, planning strip, reader modal store, and book-scoped planning packs. The auth-aware reader foundation and sync layer are now in place too: backend reader collections, a shared workspace bootstrap contract, DB-backed reading state for built-in books, owner-only workspace settings save, and explicit local-EPUB upload to the backend library while anonymous/local fallback rules stay intact. The next cycle moves into the shelf/search polish and richer backend-backed library details on top of those write paths. |
+| `focus` | treat the reader as the primary product lane: the shared auth dependency from `global-auth-01`, the backend workspace contract, server-backed annotation/progress sync, and the first owner-only write paths are now ready, so the next work is reader search, workspace polish, and richer backend-backed library details before returning to AI or publishing |
 | `constraint` | anonymous reading and local EPUB import stay available, but write-capable behavior and DB persistence must go through the shared auth/entitlement layer; local import alone must not auto-upload a book or mutate backend records |
 
 ## Next Queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | `books-reader-05-03`: gated in-reader editing and write-back flow | `reader` |
-| `2` | `books-reader-05-04`: reader search, workspace polish, and backend-backed library details | `reader` |
-| `3` | `books-reader-02-01`: merge exported annotations into **`build:books`** / **repub artifact** output | `reader` |
-| `4` | AI and publishing remain back burner until the reader/backend pass is stable | `queue-policy` |
+| `1` | `books-reader-05-04`: reader search, workspace polish, and backend-backed library details | `reader` |
+| `2` | `books-reader-02-01`: merge exported annotations into **`build:books`** / **repub artifact** output | `reader` |
+| `3` | AI and publishing remain back burner until the reader/backend pass is stable | `queue-policy` |
 
 ## References
 
@@ -59,10 +58,11 @@ taskPhase: books-reader-05
 | `db-config` | `apps/portfolio/drizzle.config.ts` | current SQLite database path and Drizzle config |
 | `db-schema` | `apps/portfolio/lib/db/schema.ts` | existing SQLite schema surface to reconcile with Payload plans |
 | `payload-config` | `apps/portfolio/payload.config.ts` | auth, collections, and SQLite-backed Payload runtime |
-| `reader-workspace-contract` | `apps/portfolio/lib/reader/workspace-contract.ts` | shared settings/access/library record contract and anonymous fallback rules |
+| `reader-workspace-contract` | `apps/portfolio/lib/reader/workspace-contract.ts`, `apps/portfolio/lib/reader/workspace-write.ts` | shared settings/access/library record contract, owner-only write paths, and anonymous fallback rules |
 | `reader-workspace-bootstrap` | `apps/portfolio/lib/reader/workspace-bootstrap.ts`, `apps/portfolio/app/api/reader/workspace/route.ts` | auth-aware workspace bootstrap for later client hydration |
-| `reader-collections` | `apps/portfolio/lib/payload/collections/readerLibraryRecords.ts`, `apps/portfolio/lib/payload/collections/readerSettings.ts` | backend reader library/settings foundation for entitled sessions |
+| `reader-collections` | `apps/portfolio/lib/payload/collections/readerLibraryAssets.ts`, `apps/portfolio/lib/payload/collections/readerLibraryRecords.ts`, `apps/portfolio/lib/payload/collections/readerSettings.ts` | backend reader library/settings/upload foundation for entitled sessions |
 | `reader-reading-state` | `apps/portfolio/lib/reader/reading-state.ts`, `apps/portfolio/app/api/reader/state/route.ts`, `apps/portfolio/lib/payload/collections/readerReadingStates.ts` | DB-backed annotations/progress for entitled built-in reading sessions with local fallback intact |
+| `reader-write-routes` | `apps/portfolio/app/api/reader/workspace/settings/route.ts`, `apps/portfolio/app/api/reader/library/upload/route.ts` | owner-only workspace settings save and explicit EPUB upload worker boundaries |
 | `repub-reader-runtime` | **`@portfolio/repub-builder/reader`** (`packages/repub-builder/src/reader/index.ts`) | **ReaderWorkspace**, **`EpubViewer`**, shelf, **`readerModalStore`**, **`ReaderModalRoot`**; consumed by **`apps/portfolio`** via **`transpilePackages`** + site **`SidebarTrigger`** |
 | `books-structure-doc` | `apps/portfolio/content/docs/books/book-structure.mdx` | formal source and EPUB structure rules |
 | `book-output` | `apps/portfolio/public/books/` | generated reading artifacts |
