@@ -119,7 +119,7 @@ export interface EpubViewerProps {
   className?: string;
   layoutMode?: 'compact' | 'reader';
   bookSlug?: string | null;
-  sourceKind?: 'built-in' | 'local';
+  sourceKind?: 'built-in' | 'uploaded' | 'local';
   /** Highlights and notes (reader layout only by default). */
   annotationsEnabled?: boolean;
   /** Fires when EPUB bytes are ready (fetched URL or `epubData`). */

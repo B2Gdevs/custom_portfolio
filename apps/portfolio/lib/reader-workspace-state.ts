@@ -1,4 +1,5 @@
 export {
+  getReaderBookStorageKey,
   resolveReaderWorkspaceState,
   type ReaderWorkspaceState,
   type UploadedBookSource,

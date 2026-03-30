@@ -5,7 +5,7 @@ date: "2026-03-15"
 updated: "2026-03-30"
 order: 2
 repoPath: apps/portfolio/content/docs/books/planning/state.mdx
-taskPhase: books-reader-05
+taskPhase: books-reader-02
 ---
 
 # State
@@ -17,24 +17,24 @@ taskPhase: books-reader-05
 | `section` | `books` |
 | `owner` | `books-section` |
 | `status` | `active` |
-| `updated` | `2026-03-29` |
+| `updated` | `2026-03-30` |
 
 ## Current Cycle
 
 | Field | Value |
 | --- | --- |
-| `phase` | `books-reader-05` + `books-reader-02` follow-up |
-| `plan` | **Reader shell groundwork is shipped**: **`ReaderWorkspace`** + **`EpubViewer`**, shelf search and filters, planning strip, reader modal store, and book-scoped planning packs. The auth-aware reader foundation and sync layer are now in place too: backend reader collections, a shared workspace bootstrap contract, DB-backed reading state for built-in books, owner-only workspace settings save, and explicit local-EPUB upload to the backend library while anonymous/local fallback rules stay intact. The next cycle moves into the shelf/search polish and richer backend-backed library details on top of those write paths. |
-| `focus` | treat the reader as the primary product lane: the shared auth dependency from `global-auth-01`, the backend workspace contract, server-backed annotation/progress sync, and the first owner-only write paths are now ready, so the next work is reader search, workspace polish, and richer backend-backed library details before returning to AI or publishing |
+| `phase` | `books-reader-02` follow-up after `books-reader-05` closure |
+| `plan` | **Reader shell groundwork is shipped**: **`ReaderWorkspace`** + **`EpubViewer`**, shelf search and filters, planning strip, reader modal store, and book-scoped planning packs. The auth-aware reader foundation, sync layer, and workspace polish are in place too: backend reader collections, a shared workspace bootstrap contract, DB-backed reading state for built-in books, owner-only workspace settings save, explicit local-EPUB upload, saved-upload shelf cards, record-aware deep links, and continue-reading defaults while anonymous/local fallback rules stay intact. The next cycle returns to repub artifact merge work so exported annotations and planning supplements can converge on one emitted reading bundle. |
+| `focus` | treat the reader as the primary product lane: the shared auth dependency from `global-auth-01`, the backend workspace contract, server-backed annotation/progress sync, owner-only write paths, and polished backend-backed shelf are ready, so the next work is merging those annotations back into the emitted repub artifact before AI or publishing comes forward again |
 | `constraint` | anonymous reading and local EPUB import stay available, but write-capable behavior and DB persistence must go through the shared auth/entitlement layer; local import alone must not auto-upload a book or mutate backend records |
 
 ## Next Queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | `books-reader-05-04`: reader search, workspace polish, and backend-backed library details | `reader` |
-| `2` | `books-reader-02-01`: merge exported annotations into **`build:books`** / **repub artifact** output | `reader` |
-| `3` | AI and publishing remain back burner until the reader/backend pass is stable | `queue-policy` |
+| `1` | `books-reader-02-01`: merge exported annotations into **`build:books`** / **repub artifact** output | `reader` |
+| `2` | maintain `books-reader-05` only when the polished backend-backed shelf exposes a concrete bug or missing owner affordance | `reader` |
+| `3` | AI and publishing remain back burner until the reader artifact pass is stable | `queue-policy` |
 
 ## References
 
@@ -44,7 +44,7 @@ taskPhase: books-reader-05
 | `home-page` | `apps/portfolio/app/page.tsx` | primary site reading entry |
 | `reader-embed` | `apps/portfolio/components/books/BookReaderEmbed.tsx` | embedded reader surface |
 | `viewer` | `packages/repub-builder/src/reader/EpubViewer.tsx` | EPUB runtime, annotations UI, export/repack (**re-export** from `apps/portfolio/lib/epub-annotations.ts` for legacy imports) |
-| `reader-workspace` | `packages/repub-builder/src/reader/ReaderWorkspace.tsx` + thin `apps/portfolio/components/books/ReaderWorkspace.tsx` | library + reading shell + **v1 dashboard** sidebar; host wires **`Link`** + planning cockpit |
+| `reader-workspace` | `packages/repub-builder/src/reader/ReaderWorkspace.tsx`, `apps/portfolio/components/books/ReaderWorkspace.tsx`, `apps/portfolio/lib/reader/workspace-library.ts` | library + reading shell + **v1 dashboard** sidebar; host wires **`Link`**, backend upload shelf records, and planning cockpit |
 | `books-lib` | `apps/portfolio/lib/books.ts` | current manifest reader; needs richer library metadata for cover-forward shelf UI |
 | `epub-annotations` | `apps/portfolio/lib/epub-annotations.ts` | IndexedDB, schema, JSON and annotated-EPUB zip |
 | `reader-planning-strip` | `packages/repub-builder/src/reader/ReaderPlanningStrip.tsx` | **`readerModalStore`** only (**`BOOKS-READER-PLANNING-STRIP-PACKAGE-READER-MODAL-STORE`**) -- [embed architecture](/docs/documentation/reader-repo-planner-embed-architecture) |

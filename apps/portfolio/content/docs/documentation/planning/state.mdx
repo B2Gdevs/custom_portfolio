@@ -24,15 +24,15 @@ order: 2
 | Field | Value |
 | --- | --- |
 | `phase` | `documentation-site-10` maintenance + cross-cutting auth-backed reader planning |
-| `plan` | planning IA reset is shipped; the next cross-cutting work is the shared auth foundation that Books and Listen now depend on, while Documentation keeps the global-first workflow and overview tables aligned with that new queue |
-| `focus` | stop steering agents toward repo-planner workflow debt first; prioritize global auth/tenant foundations, Books reader persistence, and Listen private catalog migration while RepoPlanner sits in maintain-only mode |
+| `plan` | planning IA reset is shipped; the shared auth foundation and Books reader workspace polish are now in place, while Documentation keeps the global-first workflow and overview tables aligned with the next artifact and private-media queues |
+| `focus` | stop steering agents toward repo-planner workflow debt first; prioritize Books reader artifact merge and Listen private catalog migration while RepoPlanner and Global auth sit in maintain-only mode |
 | `constraint` | section planning MDX is first for **section** work; root `.planning` stays canonical for **monorepo** gates; see root `AGENTS.md` |
 
 ## Next Queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | `books-reader-05-04`: reader search, workspace polish, and richer backend-backed library details on top of the new write paths | `feature` |
+| `1` | `books-reader-02-01`: merge exported annotations into the emitted repub artifact now that the reader workspace and backend shelf model are stable | `feature` |
 | `2` | `listen-access-01-01`: move private BandLab access away from shared passwords and into the same auth/entitlement model | `feature` |
 | `3` | maintain the Global auth docs and routes only when Books/Listen discover a real gap | `cross-cutting` |
 | `4` | maintain `documentation-site-08` / `09` / `07` only when they unblock the auth-backed product work | `tooling` |
@@ -51,7 +51,7 @@ Monorepo-wide items that are not (yet) a full `.planning` task row. Mirror or cl
 | `open` | Blog + projects discovery pass -- blog/projects section registries. |
 | `done` | **Listen** surface -- **`listen-surface-01`** implemented (`/listen`, catalog, Cmd+K); [listen task registry](/docs/listen/planning/task-registry). |
 | `open` | **CLI ergonomics:** `documentation-site-07-01` / `07-02` -- Ink, **two CLIs**, submodule bumps, and the remaining publish / `pnpm dlx` docs polish per [requirements](/docs/documentation/requirements) CLI table. |
-| `open` | **Reader backend pass:** auth-backed reader workspace, DB-backed reading-state sync, owner-only settings save, and explicit local-EPUB upload are now in place; the remaining work is workspace polish and richer backend-backed library details -- [books task registry](/docs/books/planning/task-registry). |
+| `done` | **Reader backend pass:** auth-backed reader workspace, DB-backed reading-state sync, owner-only settings save, explicit local-EPUB upload, saved-upload shelf cards, record-aware deep links, and continue-reading defaults are now in place -- [books task registry](/docs/books/planning/task-registry). |
 | `open` | **Listen private media pass:** move private BandLab rows and presets into DB-backed data plus owner entitlements instead of shared-password unlock groups -- [listen task registry](/docs/listen/planning/task-registry). |
 | `open` | **Shared content surfaces:** align `listen`, `blog`, and `projects` on one reusable shell with per-section mini logos and theme identity -- `documentation-site-09`, section registries below. |
 | `done` | **Planning IA reset:** literal section `planning/` folders are live, section docs/links now point at those paths, and one-off plans belong under `planning/plans/` instead of top-level implementation-plan drift -- `documentation-site-10`. |

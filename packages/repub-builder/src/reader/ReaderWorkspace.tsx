@@ -42,6 +42,7 @@ import {
 } from './reader-progress';
 import { readerAppHref } from './reader-routes';
 import {
+  getReaderBookStorageKey,
   resolveReaderWorkspaceState,
   type UploadedBookSource,
 } from './reader-workspace-state';
@@ -117,7 +118,8 @@ function loadProgressMap(books: ReaderBookEntry[]): ReaderProgressMap {
   if (typeof window === 'undefined') return {};
 
   return books.reduce<ReaderProgressMap>((acc, entry) => {
-    acc[entry.slug] = readStoredReaderProgress(entry.slug);
+    const storageKey = getReaderBookStorageKey(entry);
+    acc[storageKey] = readStoredReaderProgress(storageKey);
     return acc;
   }, {});
 }
@@ -188,6 +190,7 @@ export default function ReaderWorkspace({
   });
   const [uploadSaveState, setUploadSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [uploadFeedback, setUploadFeedback] = useState<string | null>(null);
+  const [autoSelectedBook, setAutoSelectedBook] = useState<ReaderBookEntry | null>(null);
   const shelfFilterInitRef = useRef(false);
 
   useEffect(() => {
@@ -278,20 +281,25 @@ export default function ReaderWorkspace({
     [builtInEpubHref],
   );
 
+  const selectedInitialBook = uploadedBook ? initialBook : initialBook ?? autoSelectedBook ?? undefined;
+
   const workspaceState = useMemo(
-    () => resolveReaderWorkspaceState({ initialBook, uploadedBook }, workspaceOptions),
-    [initialBook, uploadedBook, workspaceOptions],
+    () => resolveReaderWorkspaceState({ initialBook: selectedInitialBook, uploadedBook }, workspaceOptions),
+    [selectedInitialBook, uploadedBook, workspaceOptions],
   );
   const activeTitle = workspaceState.title;
   const activeKicker = workspaceState.kicker;
-  const hasBuiltInBook = workspaceState.mode === 'built-in-reading' || workspaceState.canDownload;
   const isLibraryView = workspaceState.mode === 'library';
-  const downloadHref =
-    workspaceState.bookSlug && workspaceState.canDownload
-      ? builtInEpubHref?.(workspaceState.bookSlug) ?? `/books/${workspaceState.bookSlug}/book.epub`
-      : null;
-  const downloadName =
-    workspaceState.bookSlug && workspaceState.canDownload ? `${workspaceState.bookSlug}.epub` : null;
+  const downloadTargetBook = uploadedBook ? initialBook : selectedInitialBook;
+  const downloadHref = downloadTargetBook?.hasEpub
+    ? downloadTargetBook.sourceKind === 'uploaded'
+      ? downloadTargetBook.remoteEpubUrl ?? null
+      : builtInEpubHref?.(downloadTargetBook.slug) ?? `/books/${downloadTargetBook.slug}/book.epub`
+    : null;
+  const downloadName = downloadTargetBook
+    ? `${slugifyFileName(downloadTargetBook.title || downloadTargetBook.slug) || 'book'}.epub`
+    : null;
+  const hasReturnTarget = Boolean(uploadedBook && selectedInitialBook);
 
   const deeplinkLocation = useMemo(() => {
     const cfi = initialCfi?.trim();
@@ -311,7 +319,18 @@ export default function ReaderWorkspace({
     setEpubPlanningForCockpit(null);
   }, [viewerSource?.kind, viewerSource?.storageKey]);
 
-  const { builtIn: builtInBooks, queued: queuedBooks } = useMemo(() => partitionShelfBooks(books), [books]);
+  const builtInSourceBooks = useMemo(
+    () => books.filter((entry) => entry.sourceKind !== 'uploaded'),
+    [books],
+  );
+  const uploadedLibraryBooks = useMemo(
+    () => books.filter((entry) => entry.sourceKind === 'uploaded'),
+    [books],
+  );
+  const { builtIn: builtInBooks, queued: queuedBooks } = useMemo(
+    () => partitionShelfBooks(builtInSourceBooks),
+    [builtInSourceBooks],
+  );
 
   const shelfGenreChips = useMemo(
     () => [{ id: 'all' as const, label: 'All' }, ...catalogGenres.map((g) => ({ id: g, label: g }))],
@@ -332,6 +351,35 @@ export default function ReaderWorkspace({
     () => typeQueued.filter((b) => shelfMatches(b, shelfQ)),
     [typeQueued, shelfQ],
   );
+  const filteredUploaded = useMemo(
+    () => uploadedLibraryBooks.filter((b) => shelfMatches(b, shelfQ)),
+    [uploadedLibraryBooks, shelfQ],
+  );
+
+  useEffect(() => {
+    if (uploadedBook || initialBook || settingsDraft.defaultWorkspaceView !== 'continue-reading') {
+      setAutoSelectedBook(null);
+      return;
+    }
+
+    const candidate =
+      books.find((book) => {
+        if (!book.hasEpub) return false;
+        const storageKey = getReaderBookStorageKey(book);
+        const progress = progressByBook[storageKey];
+        return hasSavedLocation(storageKey) || (progress != null && progress > 0);
+      }) ?? null;
+
+    setAutoSelectedBook((current) => {
+      if (
+        current?.slug === candidate?.slug &&
+        current?.recordId === candidate?.recordId
+      ) {
+        return current;
+      }
+      return candidate;
+    });
+  }, [books, initialBook, progressByBook, settingsDraft.defaultWorkspaceView, uploadedBook]);
 
   const planningConfig = getPlanningStripConfig?.(workspaceState.bookSlug ?? undefined) ?? null;
 
@@ -441,7 +489,7 @@ export default function ReaderWorkspace({
 
   const Link = ReaderLink;
 
-  const catalogTotal = builtInBooks.length + queuedBooks.length;
+  const catalogTotal = builtInBooks.length + uploadedLibraryBooks.length + queuedBooks.length;
   const emptyShelfMessage =
     catalogTotal === 0
       ? 'No books in the catalog yet.'
@@ -540,7 +588,7 @@ export default function ReaderWorkspace({
                     {uploadPanelOpen ? 'Close upload' : 'Upload to library'}
                   </button>
                 ) : null}
-                {uploadedBook && hasBuiltInBook ? (
+                {hasReturnTarget ? (
                   <button
                     type="button"
                     onClick={() => {
@@ -553,7 +601,7 @@ export default function ReaderWorkspace({
                     Return to Library Book
                   </button>
                 ) : null}
-                {!uploadedBook && hasBuiltInBook ? (
+                {!uploadedBook && downloadHref ? (
                   <a
                     href={downloadHref ?? undefined}
                     download={downloadName ?? undefined}
@@ -777,8 +825,12 @@ export default function ReaderWorkspace({
                   epubData={viewerSource.kind === 'local' ? viewerSource.epubData : undefined}
                   storageKey={viewerSource.storageKey}
                   bookSlug={workspaceState.bookSlug}
-                  sourceKind={viewerSource.kind}
-                  persistenceAdapter={viewerSource.kind === 'built-in' ? readerPersistenceAdapter : null}
+                  sourceKind={selectedInitialBook?.sourceKind === 'uploaded' ? 'uploaded' : viewerSource.kind}
+                  persistenceAdapter={
+                    viewerSource.kind === 'built-in' && selectedInitialBook?.sourceKind !== 'uploaded'
+                      ? readerPersistenceAdapter
+                      : null
+                  }
                   preferPagedReader={settingsDraft.preferPagedReader}
                   initialLocation={deeplinkLocation}
                   className="h-full"
@@ -793,6 +845,50 @@ export default function ReaderWorkspace({
                   onDrop={onLibraryDrop}
                 >
                   <div className="mx-auto max-w-[112rem] space-y-6">
+                    <section className="grid gap-4 lg:grid-cols-[minmax(0,1.75fr)_22rem]">
+                      <div className="rounded-[1.8rem] border border-border bg-background/60 p-5">
+                        <p className="section-kicker">Library</p>
+                        <h2 className="mt-2 font-display text-[2.1rem] leading-none text-foreground md:text-[2.5rem]">
+                          Reader workspace
+                        </h2>
+                        <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
+                          Built-in editions stay first in the shelf. Imported EPUBs remain local until you explicitly
+                          upload them, and saved backend uploads return here as their own library cards.
+                        </p>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <span className="rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground">
+                            {builtInBooks.length} built-in
+                          </span>
+                          <span className="rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground">
+                            {uploadedLibraryBooks.length} saved upload{uploadedLibraryBooks.length === 1 ? '' : 's'}
+                          </span>
+                          <span className="rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground">
+                            {queuedBooks.length} queued
+                          </span>
+                          {autoSelectedBook ? (
+                            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                              Continue reading will reopen {autoSelectedBook.title}
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+                      <div className="rounded-[1.8rem] border border-border bg-background/60 p-5">
+                        <p className="section-kicker">Access</p>
+                        <h3 className="mt-2 font-display text-[1.7rem] leading-none text-foreground">
+                          {workspaceAccess?.authenticated ? 'Owner session active' : 'Local reading mode'}
+                        </h3>
+                        <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                          {workspaceAccess?.authenticated
+                            ? `Signed in with ${workspaceAccess.autoLoggedIn ? 'auto-login' : 'a saved session'}. Settings, sync, and explicit uploads are available.`
+                            : 'Anonymous visitors can still read built-in books and import local EPUBs, but nothing is uploaded or saved to the backend.'}
+                        </p>
+                        <div className="mt-4 space-y-2 text-xs text-muted-foreground">
+                          <p>Saved uploads in backend library: {savedUploadCount}</p>
+                          <p>Default opening behavior: {settingsDraft.defaultWorkspaceView === 'continue-reading' ? 'Continue reading' : 'Library'}</p>
+                          <p>Local imports require explicit upload before a database record is created.</p>
+                        </div>
+                      </div>
+                    </section>
                     <section className="space-y-4">
                       <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
                         <div className="relative">
@@ -831,43 +927,114 @@ export default function ReaderWorkspace({
                         })}
                       </div>
 
-                      {filteredBuiltIn.length === 0 && filteredQueued.length === 0 ? (
+                      {filteredBuiltIn.length === 0 &&
+                      filteredUploaded.length === 0 &&
+                      filteredQueued.length === 0 ? (
                         <p className={`rounded-2xl border border-dashed px-4 py-8 text-center text-sm ${t.emptyState}`}>
                           {emptyShelfMessage}
                         </p>
                       ) : (
-                        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                          {filteredBuiltIn.map((book) => {
-                            const storedProgress = progressByBook[book.slug] ?? null;
-                            const status = resolveReaderShelfStatus(book.hasEpub, storedProgress);
-                            const isActive = hasSavedLocation(book.slug);
+                        <div className="space-y-6">
+                          {filteredUploaded.length > 0 ? (
+                            <section className="space-y-3">
+                              <div className="flex flex-wrap items-end justify-between gap-3">
+                                <div>
+                                  <p className="section-kicker">Backend library</p>
+                                  <h3 className="mt-2 font-display text-[1.7rem] leading-none text-foreground">
+                                    Saved uploads
+                                  </h3>
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  Owner-only uploads stored in the backend and reopened from the reader workspace.
+                                </p>
+                              </div>
+                              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                                {filteredUploaded.map((book) => {
+                                  const storageKey = getReaderBookStorageKey(book);
+                                  const storedProgress = progressByBook[storageKey] ?? null;
+                                  const status = resolveReaderShelfStatus(book.hasEpub, storedProgress);
+                                  const isActive = hasSavedLocation(storageKey);
 
-                            return (
-                              <ReaderShelfCard
-                                key={book.slug}
-                                book={book}
-                                status={status}
-                                isActive={isActive}
-                              readerHref={readerAppHref(readerAppPath, { book: book.slug })}
-                              ReaderLink={ReaderLink}
-                              showStatusBadge={settingsDraft.showProgressBadges}
-                              planningCockpitPayload={
-                                book.hasEpub ? getPlanningStripConfig?.(book.slug)?.cockpitPayload : undefined
-                              }
-                              />
-                            );
-                          })}
-                          {filteredQueued.map((book) => (
-                            <ReaderShelfCard
-                              key={book.slug}
-                              book={book}
-                              status={resolveReaderShelfStatus(false, null)}
-                              isActive={false}
-                              readerHref={readerAppHref(readerAppPath, { book: book.slug })}
-                              ReaderLink={ReaderLink}
-                              showStatusBadge={settingsDraft.showProgressBadges}
-                            />
-                          ))}
+                                  return (
+                                    <ReaderShelfCard
+                                      key={book.recordId ?? book.slug}
+                                      book={book}
+                                      status={status}
+                                      isActive={isActive}
+                                      readerHref={readerAppHref(readerAppPath, {
+                                        record: book.recordId ?? book.slug,
+                                      })}
+                                      ReaderLink={ReaderLink}
+                                      showStatusBadge={settingsDraft.showProgressBadges}
+                                    />
+                                  );
+                                })}
+                              </div>
+                            </section>
+                          ) : null}
+
+                          {filteredBuiltIn.length > 0 ? (
+                            <section className="space-y-3">
+                              <div className="flex flex-wrap items-end justify-between gap-3">
+                                <div>
+                                  <p className="section-kicker">Library</p>
+                                  <h3 className="mt-2 font-display text-[1.7rem] leading-none text-foreground">
+                                    Built books
+                                  </h3>
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  Repo-built reading editions with progress-aware shelf cards.
+                                </p>
+                              </div>
+                              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                                {filteredBuiltIn.map((book) => {
+                                  const storageKey = getReaderBookStorageKey(book);
+                                  const storedProgress = progressByBook[storageKey] ?? null;
+                                  const status = resolveReaderShelfStatus(book.hasEpub, storedProgress);
+                                  const isActive = hasSavedLocation(storageKey);
+
+                                  return (
+                                    <ReaderShelfCard
+                                      key={book.slug}
+                                      book={book}
+                                      status={status}
+                                      isActive={isActive}
+                                      readerHref={readerAppHref(readerAppPath, { book: book.slug })}
+                                      ReaderLink={ReaderLink}
+                                      showStatusBadge={settingsDraft.showProgressBadges}
+                                      planningCockpitPayload={
+                                        book.hasEpub ? getPlanningStripConfig?.(book.slug)?.cockpitPayload : undefined
+                                      }
+                                    />
+                                  );
+                                })}
+                              </div>
+                            </section>
+                          ) : null}
+
+                          {filteredQueued.length > 0 ? (
+                            <section className="space-y-3">
+                              <div>
+                                <p className="section-kicker">Queue</p>
+                                <h3 className="mt-2 font-display text-[1.7rem] leading-none text-foreground">
+                                  Coming soon
+                                </h3>
+                              </div>
+                              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                                {filteredQueued.map((book) => (
+                                  <ReaderShelfCard
+                                    key={book.slug}
+                                    book={book}
+                                    status={resolveReaderShelfStatus(false, null)}
+                                    isActive={false}
+                                    readerHref={readerAppHref(readerAppPath, { book: book.slug })}
+                                    ReaderLink={ReaderLink}
+                                    showStatusBadge={settingsDraft.showProgressBadges}
+                                  />
+                                ))}
+                              </div>
+                            </section>
+                          ) : null}
                         </div>
                       )}
                     </section>

@@ -5,15 +5,16 @@ import ReaderWorkspace from '@/components/books/ReaderWorkspace';
 export default async function ReaderAppPage({
   searchParams,
 }: {
-  searchParams: Promise<{ book?: string; at?: string; cfi?: string }>;
+  searchParams: Promise<{ book?: string; record?: string; at?: string; cfi?: string }>;
 }) {
-  const { book, at, cfi } = await searchParams;
+  const { book, record, at, cfi } = await searchParams;
   const books = getBooks();
 
   if (!book) {
     return (
       <ReaderWorkspace
         books={books}
+        initialRecordId={record}
         initialAt={at}
         initialCfi={cfi}
       />

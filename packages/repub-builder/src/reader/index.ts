@@ -27,6 +27,7 @@ export {
   type ReaderPersistenceSaveInput,
 } from './reader-persistence';
 export {
+  getReaderBookStorageKey,
   resolveReaderWorkspaceState,
   type ReaderWorkspaceState,
   type UploadedBookSource,

@@ -32,7 +32,7 @@ type ReaderWorkspaceLibraryState = {
 type ReaderWorkspaceBuiltInReadingState = {
   mode: 'built-in-reading';
   title: string;
-  kicker: 'Built-in reading';
+  kicker: 'Built-in reading' | 'Saved upload';
   bookSlug: string;
   canDownload: true;
   viewerSource: ReaderWorkspaceViewerSource & { kind: 'built-in' };
@@ -57,6 +57,14 @@ export type ReaderWorkspaceState =
 export type ResolveReaderWorkspaceOptions = {
   builtInEpubHref?: (slug: string) => string;
 };
+
+export function getReaderBookStorageKey(
+  book: Pick<ReaderBookEntry, 'slug' | 'sourceKind' | 'recordId'>,
+) {
+  return book.sourceKind === 'uploaded'
+    ? `uploaded-record:${book.recordId ?? book.slug}`
+    : book.slug;
+}
 
 export function resolveReaderWorkspaceState(
   {
@@ -87,22 +95,23 @@ export function resolveReaderWorkspaceState(
   }
 
   if (initialBook?.hasEpub) {
+    const sourceKind = initialBook.sourceKind === 'uploaded' ? 'uploaded' : 'built-in';
     const epubUrl =
-      initialBook.sourceKind === 'uploaded' && initialBook.remoteEpubUrl
+      sourceKind === 'uploaded' && initialBook.remoteEpubUrl
         ? initialBook.remoteEpubUrl
         : builtInEpubHref(initialBook.slug);
 
     return {
       mode: 'built-in-reading',
       title: initialBook.title,
-      kicker: 'Built-in reading',
+      kicker: sourceKind === 'uploaded' ? 'Saved upload' : 'Built-in reading',
       bookSlug: initialBook.slug,
       canDownload: true,
       localFileName: null,
       viewerSource: {
         kind: 'built-in',
         epubUrl,
-        storageKey: initialBook.slug,
+        storageKey: getReaderBookStorageKey(initialBook),
       },
     };
   }

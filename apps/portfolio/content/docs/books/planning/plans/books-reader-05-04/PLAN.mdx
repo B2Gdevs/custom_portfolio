@@ -1,0 +1,20 @@
+---
+title: Plan
+description: Kickoff for books-reader-05-04.
+date: "2026-03-30"
+updated: "2026-03-30"
+repoPath: apps/portfolio/content/docs/books/planning/plans/books-reader-05-04/PLAN.mdx
+taskPhase: books-reader-05
+---
+
+# Kickoff: `books-reader-05-04`
+
+| Field | Notes |
+| --- | --- |
+| `goal` | Turn the backend-backed reader workspace into a coherent library product: surface saved uploads in the shelf, make them openable from the workspace route, honor the saved workspace posture more clearly, and tighten the owner/session affordances without weakening anonymous local reading. |
+| `scope` | Backend library records appear as shelf cards; route/deep-link support exists for uploaded records; search and shelf sections understand built-in vs saved uploads vs queued titles; the workspace honors `continue-reading` defaults when no explicit target is requested; owner session/state messaging is polished. |
+| `non-goals` | Full manuscript editing, public auth gating, automatic upload on import, backend sync for local ad hoc files, or `books-reader-02-01` repub artifact merge work. |
+| `dependencies` | `books-reader-05-01`, `books-reader-05-02`, `books-reader-05-03`, `global-auth-01-*` |
+| `tests required` | Unit coverage for route/state/helpers around uploaded records and continue-reading selection; build/lint remain required. |
+| `definition of done` | Uploaded backend records are visible and openable from the shelf, local import remains local unless explicitly uploaded, the continue-reading setting is no longer dead configuration, and the planning/state records move the queue forward with verification recorded. |
+| `open questions` | None at kickoff. |

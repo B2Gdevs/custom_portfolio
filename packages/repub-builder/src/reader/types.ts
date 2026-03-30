@@ -3,6 +3,7 @@ import type { AnchorHTMLAttributes, ComponentType } from 'react';
 /** Minimal book row for the reader shell (matches portfolio `BookEntry` subset). */
 export type ReaderBookEntry = {
   slug: string;
+  recordId?: string | null;
   title: string;
   author?: string;
   description?: string;
@@ -56,6 +57,7 @@ export type ReaderWorkspaceUploadInput = {
 
 export type ReaderAppSearch = {
   book?: string;
+  record?: string;
   at?: string;
   cfi?: string;
 };

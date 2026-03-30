@@ -1,4 +1,4 @@
-import { resolveReaderWorkspaceState } from '@/lib/reader-workspace-state';
+import { getReaderBookStorageKey, resolveReaderWorkspaceState } from '@/lib/reader-workspace-state';
 import type { BookEntry } from '@/lib/books';
 
 const builtInBook: BookEntry = {
@@ -10,6 +10,23 @@ const builtInBook: BookEntry = {
 };
 
 describe('reader workspace state', () => {
+  it('builds distinct storage keys for uploaded records', () => {
+    expect(
+      getReaderBookStorageKey({
+        slug: 'mordreds_tale',
+        sourceKind: 'built-in',
+      }),
+    ).toBe('mordreds_tale');
+
+    expect(
+      getReaderBookStorageKey({
+        slug: 'uploaded-record-library-1',
+        recordId: 'library-1',
+        sourceKind: 'uploaded',
+      }),
+    ).toBe('uploaded-record:library-1');
+  });
+
   it('resolves the library state when no source is active', () => {
     expect(resolveReaderWorkspaceState({})).toEqual({
       mode: 'library',
@@ -55,5 +72,32 @@ describe('reader workspace state', () => {
     expect(state.localFileName).toBe('local-book.epub');
     expect(state.viewerSource).not.toBeNull();
     expect(state.viewerSource!.kind).toBe('local');
+  });
+
+  it('resolves uploaded backend records through their remote EPUB URL and record storage key', () => {
+    const state = resolveReaderWorkspaceState({
+      initialBook: {
+        slug: 'uploaded-record-library-1',
+        recordId: 'library-1',
+        title: 'Uploaded EPUB',
+        hasEpub: true,
+        sourceKind: 'uploaded',
+        remoteEpubUrl: '/api/media/file/uploaded.epub',
+      },
+    });
+
+    expect(state).toEqual({
+      mode: 'built-in-reading',
+      title: 'Uploaded EPUB',
+      kicker: 'Saved upload',
+      bookSlug: 'uploaded-record-library-1',
+      canDownload: true,
+      localFileName: null,
+      viewerSource: {
+        kind: 'built-in',
+        epubUrl: '/api/media/file/uploaded.epub',
+        storageKey: 'uploaded-record:library-1',
+      },
+    });
   });
 });

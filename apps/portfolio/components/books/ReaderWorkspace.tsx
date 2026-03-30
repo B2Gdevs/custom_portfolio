@@ -16,6 +16,10 @@ import {
   saveReaderPersistedState,
   uploadReaderLibraryEpub,
 } from '@/lib/reader/client';
+import {
+  mapWorkspaceLibraryRecordsToReaderBooks,
+  resolveInitialReaderBook,
+} from '@/lib/reader/workspace-library';
 import type { ReaderWorkspaceBootstrap } from '@/lib/reader/workspace-contract';
 import {
   magicbornRunePathRepoPlannerModalPayload,
@@ -39,6 +43,7 @@ export default function ReaderWorkspace({
 }: {
   books: BookEntry[];
   initialBook?: BookEntry;
+  initialRecordId?: string;
   initialAt?: string;
   initialCfi?: string;
 }) {
@@ -61,6 +66,26 @@ export default function ReaderWorkspace({
       cancelled = true;
     };
   }, []);
+
+  const uploadedLibraryBooks = useMemo(
+    () => mapWorkspaceLibraryRecordsToReaderBooks(workspaceBootstrap?.libraryRecords ?? []),
+    [workspaceBootstrap?.libraryRecords],
+  );
+
+  const combinedBooks = useMemo(
+    () => [...books, ...uploadedLibraryBooks],
+    [books, uploadedLibraryBooks],
+  );
+
+  const resolvedInitialBook = useMemo(
+    () =>
+      resolveInitialReaderBook({
+        uploadedBooks: uploadedLibraryBooks,
+        initialBook: rest.initialBook,
+        initialRecordId: rest.initialRecordId,
+      }),
+    [uploadedLibraryBooks, rest.initialBook, rest.initialRecordId],
+  );
 
   const readerPersistenceAdapter = useMemo<ReaderPersistenceAdapter | null>(() => {
     if (!workspaceBootstrap?.access.canPersist) {
@@ -130,13 +155,14 @@ export default function ReaderWorkspace({
 
   return (
     <ReaderWorkspaceBase
-      books={books}
+      books={combinedBooks}
       readerPersistenceAdapter={readerPersistenceAdapter}
       workspaceAccess={workspaceBootstrap?.access ?? null}
       workspaceSettings={workspaceBootstrap?.settings ?? null}
       workspaceLibraryRecords={workspaceBootstrap?.libraryRecords ?? []}
       onSaveWorkspaceSettings={handleSaveWorkspaceSettings}
       onUploadImportedBook={handleUploadImportedBook}
+      initialBook={resolvedInitialBook}
       ReaderLink={Link}
       getPlanningStripConfig={(bookSlug) => {
         if (!bookSlug) return null;
@@ -154,7 +180,8 @@ export default function ReaderWorkspace({
           }
         />
       )}
-      {...rest}
+      initialAt={rest.initialAt}
+      initialCfi={rest.initialCfi}
     />
   );
 }
