@@ -43,7 +43,7 @@ Aligned with [books -- decisions](/docs/books/planning/decisions): **`BOOKS-READ
 
 ## Repub file (formal reading artifact) -- target
 
-Today the CLI already distinguishes **RichEPub** (`.repub` via **`repub build`**) from **EPUB3** (via **`repub epub`**). The **direction** is to treat the **portfolio reading unit** for a built title as a **repub reading bundle** (working name **repub file**): at minimum **EPUB3** plus a declared set of **embedded planning supplements** and, when **`books-reader-02-01`** lands, **author annotations** merged at build time. The **reader workspace** should **discover** that bundle when loading **`/books/<slug>/book.epub`** (or a future **`.repub`** drop-in) and feed **cockpit + annotations** from the same artifact — not from unrelated site docs URLs.
+Today the CLI already distinguishes **RichEPub** (`.repub` via **`repub build`**) from **EPUB3** (via **`repub epub`**). The **direction** is to treat the **portfolio reading unit** for a built title as a **repub reading bundle** (working name **repub file**): at minimum **EPUB3** plus a declared set of **embedded planning supplements** and **author annotations** merged at build time. The **reader workspace** should **discover** that bundle when loading **`/books/<slug>/book.epub`** (or a future **`.repub`** drop-in) and feed **cockpit + annotations** from the same artifact — not from unrelated site docs URLs.
 
 Manifest: **`META-INF/portfolio-planning-pack.json`** (see spec link above). Optional sidecar JSON is still a documented optimization only.
 

@@ -1,0 +1,21 @@
+---
+title: books-reader-02-01 Plan
+description: Kickoff for merging exported annotations into the built repub artifact.
+date: "2026-03-30"
+updated: "2026-03-30"
+repoPath: apps/portfolio/content/docs/books/planning/plans/books-reader-02-01/PLAN.mdx
+taskPhase: books-reader-02-01
+---
+
+# Kickoff
+
+| Field | Notes |
+| --- | --- |
+| `goal` | Make author annotation exports part of the emitted `book.epub` artifact so repo-built titles can ship with a canonical annotation baseline. |
+| `scope` | Add explicit per-book annotation export input to `book.json`, feed it through `build:books` and `repub epub`, rewrite the embedded payload with the rebuilt artifact hash, and hydrate embedded annotations at runtime before remote/local overlays. |
+| `non-goals` | No new upload UI, no backend write-path changes, no changes to anonymous/local import rules, no manuscript-editing features. |
+| `dependencies` | `books-reader-01-17` export/import shape and `BOOKS-REPUB-ARTIFACT`. |
+| `open questions` | None. |
+| `tests required` | Builder/package tests for annotation payload embedding and runtime embedded-annotation loading; `pnpm run build:books`. |
+| `definition of done` | A book can declare an annotation export file, `build:books` emits it into `META-INF/portfolio-annotations.json` with the new artifact hash, the reader loads those embedded annotations as baseline state, and verification passes. |
+| `first tasks` | Extend `book.json` metadata support, add CLI/build plumbing, embed rewritten annotation payloads in `runEpub`, load embedded annotations in `EpubViewer`, add tests. |

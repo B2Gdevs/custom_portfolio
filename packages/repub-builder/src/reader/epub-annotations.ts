@@ -24,6 +24,17 @@ export type PortfolioAnnotationsFile = {
   annotations: PortfolioAnnotation[];
 };
 
+async function normalizeEpubBufferForHash(buffer: ArrayBuffer): Promise<ArrayBuffer> {
+  try {
+    const zip = await JSZip.loadAsync(buffer);
+    if (!zip.file(PORTFOLIO_ANNOTATIONS_JSON_PATH)) return buffer;
+    delete zip.files[PORTFOLIO_ANNOTATIONS_JSON_PATH];
+    return zip.generateAsync({ type: 'arraybuffer', compression: 'DEFLATE' });
+  } catch {
+    return buffer;
+  }
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
@@ -60,7 +71,8 @@ export function parseAnnotationsFile(raw: unknown): PortfolioAnnotationsFile | n
 }
 
 export async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', buffer);
+  const normalized = await normalizeEpubBufferForHash(buffer);
+  const digest = await crypto.subtle.digest('SHA-256', normalized);
   return Array.from(new Uint8Array(digest))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
@@ -138,6 +150,19 @@ export function annotationsToExportPayload(
 
 export function serializeAnnotationsExport(payload: PortfolioAnnotationsFile): string {
   return `${JSON.stringify(payload, null, 2)}\n`;
+}
+
+export async function loadEmbeddedAnnotationsFromEpub(
+  epubBuffer: ArrayBuffer,
+): Promise<PortfolioAnnotationsFile | null> {
+  try {
+    const zip = await JSZip.loadAsync(epubBuffer);
+    const raw = await zip.file(PORTFOLIO_ANNOTATIONS_JSON_PATH)?.async('string');
+    if (!raw) return null;
+    return parseAnnotationsFile(JSON.parse(raw) as unknown);
+  } catch {
+    return null;
+  }
 }
 
 export async function embedAnnotationsInEpub(

@@ -19,6 +19,7 @@ import { ReactReader, ReactReaderStyle } from 'react-reader';
 import {
   annotationsToExportPayload,
   embedAnnotationsInEpub,
+  loadEmbeddedAnnotationsFromEpub,
   loadAnnotationsFromIndexedDb,
   parseAnnotationsFile,
   saveAnnotationsToIndexedDb,
@@ -665,22 +666,33 @@ export default function EpubViewer({
       setAnnotationsHydrated(true);
       return;
     }
+    const currentBuffer = readyBuffer;
+    if (!currentBuffer) {
+      setAnnotations([]);
+      setAnnotationsHydrated(true);
+      return;
+    }
     let cancelled = false;
     setAnnotationsHydrated(false);
     void Promise.all([
+      loadEmbeddedAnnotationsFromEpub(currentBuffer),
       loadAnnotationsFromIndexedDb(storageKey, contentHash),
       persistenceAdapter?.loadState({
         storageKey,
         contentHash,
       }) ?? Promise.resolve(null),
-    ]).then(([localAnnotations, remoteState]) => {
+    ]).then(([embeddedAnnotations, localAnnotations, remoteState]) => {
       if (cancelled) return;
-      const mergedAnnotations = mergePersistedAnnotations(
-        localAnnotations,
+      const mergedArtifactAnnotations = mergePersistedAnnotations(
         remoteState?.annotations ?? [],
+        embeddedAnnotations?.annotations ?? [],
       );
-      setAnnotations(mergedAnnotations);
-      void saveAnnotationsToIndexedDb(storageKey, contentHash, mergedAnnotations);
+      const mergedPersistedAnnotations = mergePersistedAnnotations(
+        localAnnotations,
+        mergedArtifactAnnotations,
+      );
+      setAnnotations(mergedPersistedAnnotations);
+      void saveAnnotationsToIndexedDb(storageKey, contentHash, mergedPersistedAnnotations);
 
       const localProgress = readStoredReaderProgress(storageKey);
       const nextProgress = localProgress ?? remoteState?.progress ?? null;
@@ -703,7 +715,7 @@ export default function EpubViewer({
     return () => {
       cancelled = true;
     };
-  }, [storageKey, contentHash, annotationsEnabled, persistenceAdapter, initialLocation]);
+  }, [readyBuffer, storageKey, contentHash, annotationsEnabled, persistenceAdapter, initialLocation]);
 
   useEffect(() => {
     if (!annotationsHydrated || !storageKey || !contentHash) return;

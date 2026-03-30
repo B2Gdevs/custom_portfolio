@@ -62,7 +62,7 @@ Legacy-looking ids such as `books-ai-01-04` are **not** a separate scheme: **`ai
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
-| `books-reader-02-01` | `planned` | P4: merge exported annotations into `build:books` output for fixed **repub reading artifacts** (same emitted **`book.epub`** / future bundle per [decisions](/docs/books/planning/decisions) **`BOOKS-REPUB-ARTIFACT`**) | `books-reader-01-17` | `pnpm run build:books` |
+| `books-reader-02-01` | `done` | P4: merge exported annotations into `build:books` output for fixed **repub reading artifacts** (same emitted **`book.epub`** / future bundle per [decisions](/docs/books/planning/decisions) **`BOOKS-REPUB-ARTIFACT`**) | `books-reader-01-17` | `pnpm --filter @portfolio/repub-builder test`, `pnpm run build:books` |
 | `books-reader-02-02` | `done` | bundle planning trees into the EPUB spine: `repub epub ... --planning <dir>` (repeatable) plus per-book `book.json` `epubPlanningDirs` (paths relative to the book folder); walks `.md`/`.mdx`/`.xml`/`.toml`/`.txt` (skips `node_modules`, `.git`, `dist`, `.next`); appendix items are excluded from the generated TOC | `-` | `pnpm run build:books` |
 
 ## Phase `books-reader-04` (repub artifact + book-scoped cockpit packs)

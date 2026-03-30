@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { createHash } from 'crypto';
 import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import matter from 'gray-matter';
@@ -12,6 +13,12 @@ import {
   type PlanningPackManifestSourceKind,
   type PortfolioPlanningPackManifestV1,
 } from './planning-pack-manifest.js';
+import {
+  PORTFOLIO_ANNOTATIONS_JSON_PATH,
+  parseAnnotationsFile,
+  serializeAnnotationsExport,
+  type PortfolioAnnotationsFile,
+} from './reader/epub-annotations.js';
 
 const require = createRequire(import.meta.url);
 const Epub = require('epub-gen');
@@ -656,6 +663,28 @@ function collectPlanningFilePaths(rootDir: string): string[] {
 
 export interface RunEpubOptions {
   planningDirs?: string[];
+  annotationsFile?: string;
+}
+
+function sha256HexForBuffer(buffer: Buffer): string {
+  return createHash('sha256').update(buffer).digest('hex');
+}
+
+async function canonicalizeEpubBufferForAnnotationsHash(buffer: Buffer): Promise<Buffer> {
+  const zip = await JSZip.loadAsync(buffer);
+  if (!zip.file(PORTFOLIO_ANNOTATIONS_JSON_PATH)) return buffer;
+  delete zip.files[PORTFOLIO_ANNOTATIONS_JSON_PATH];
+  return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
+}
+
+function loadAnnotationsExportFile(annotationsFile?: string): PortfolioAnnotationsFile | null {
+  if (!annotationsFile) return null;
+  const raw = JSON.parse(fs.readFileSync(annotationsFile, 'utf8')) as unknown;
+  const parsed = parseAnnotationsFile(raw);
+  if (!parsed) {
+    throw new Error(`Invalid annotations export file: ${annotationsFile}`);
+  }
+  return parsed;
 }
 
 function virtualPathForPlanningFile(planningRootAbs: string, fileAbs: string): string {
@@ -791,6 +820,38 @@ async function injectPortfolioPlanningPackManifest(
   fs.writeFileSync(epubPath, out);
 }
 
+async function injectPortfolioAnnotations(
+  epubPath: string,
+  annotations: PortfolioAnnotationsFile,
+): Promise<void> {
+  const sourceZip = await JSZip.loadAsync(fs.readFileSync(epubPath));
+  delete sourceZip.files[PORTFOLIO_ANNOTATIONS_JSON_PATH];
+  const baseOut = await sourceZip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
+  const provisionalZip = await JSZip.loadAsync(baseOut);
+  provisionalZip.file(PORTFOLIO_ANNOTATIONS_JSON_PATH, serializeAnnotationsExport(annotations), {
+    compression: 'DEFLATE',
+  });
+  const provisionalOut = await provisionalZip.generateAsync({
+    type: 'nodebuffer',
+    compression: 'DEFLATE',
+  });
+  const canonicalHash = sha256HexForBuffer(
+    await canonicalizeEpubBufferForAnnotationsHash(provisionalOut),
+  );
+
+  const nextPayload: PortfolioAnnotationsFile = {
+    ...annotations,
+    contentSha256: canonicalHash,
+  };
+
+  const finalZip = await JSZip.loadAsync(baseOut);
+  finalZip.file(PORTFOLIO_ANNOTATIONS_JSON_PATH, serializeAnnotationsExport(nextPayload), {
+    compression: 'DEFLATE',
+  });
+  const finalOut = await finalZip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
+  fs.writeFileSync(epubPath, finalOut);
+}
+
 function wrapPageHtml({
   chapterMeta,
   title,
@@ -912,6 +973,9 @@ export async function runEpub(
   const planningRoots = (options?.planningDirs ?? [])
     .map((d) => path.resolve(d))
     .filter((d) => fs.existsSync(d));
+  const annotationsExport = options?.annotationsFile
+    ? loadAnnotationsExportFile(path.resolve(options.annotationsFile))
+    : null;
 
   let planningManifest: PortfolioPlanningPackManifestV1 | null = null;
 
@@ -942,6 +1006,9 @@ export async function runEpub(
   await new Epub(option, outputPath).promise;
   if (planningManifest) {
     await injectPortfolioPlanningPackManifest(outputPath, planningManifest);
+  }
+  if (annotationsExport) {
+    await injectPortfolioAnnotations(outputPath, annotationsExport);
   }
   console.log('EPUB:', outputPath);
 }

@@ -4,7 +4,7 @@
   <current-phase>01</current-phase>
   <current-plan>bootstrap</current-plan>
   <status>active</status>
-  <next-action>The shared auth foundation and the polished backend-backed reader workspace are now in place: owner seed, tenant/org seed, long-lived sessions, entitlement/viewer helpers, host-facing login/logout/session routes, reader library/settings/reading-state collections, owner-only workspace settings save, explicit local-EPUB upload, saved-upload shelf cards, and continue-reading defaults that still keep local import local until the user chooses write-back. Next, let Books execute books-reader-02-01 to merge annotations into the emitted repub artifact, then migrate Listen private media to the same access model.</next-action>
+  <next-action>The shared auth foundation, the polished backend-backed reader workspace, and the repub artifact merge are now in place: owner seed, tenant/org seed, long-lived sessions, entitlement/viewer helpers, host-facing login/logout/session routes, reader library/settings/reading-state collections, owner-only workspace settings save, explicit local-EPUB upload, saved-upload shelf cards, continue-reading defaults, planning supplement embedding, and committed author annotations folded back into the emitted EPUB artifact. Next, define the next Books reader phase explicitly, then migrate Listen private media to the same access model.</next-action>
   <references>
     <reference>AGENTS.md (repo root)</reference>
     <reference>apps/portfolio/content/docs/global/requirements.mdx</reference>

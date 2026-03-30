@@ -16,13 +16,14 @@ function help(): void {
 Usage:
   repub build [project-dir]     Build .repub from Vite project (default: cwd)
   repub read <file.repub>       Serve reader and open in browser
-  repub epub <folder> [--planning <dir>]... [--output out.epub]  Pack folder of .md/.mdx into EPUB
+  repub epub <folder> [--planning <dir>]... [--annotations <file>] [--output out.epub]  Pack folder of .md/.mdx into EPUB
 
 Options:
   --skip-install   (build) Skip npm install before build
   --skip-build     (build) Skip Vite build; use existing dist/
   --output <path>  (epub) Output file path
   --planning <dir> (epub) Repeatable; bundle .md/.mdx/.xml/.toml/.txt from each tree as spine appendix (excluded from TOC)
+  --annotations <file> (epub) Optional exported annotation JSON to embed into META-INF/portfolio-annotations.json
   --help, -h       Show this help
   --version, -v    Show version
 `);
@@ -66,6 +67,7 @@ async function main(): Promise<void> {
 
   if (sub === 'epub') {
     const planningDirs: string[] = [];
+    let annotationsFile: string | undefined;
     let outputPath: string | undefined;
     const positional: string[] = [];
     for (let i = 1; i < argv.length; i += 1) {
@@ -90,6 +92,16 @@ async function main(): Promise<void> {
         i += 1;
         continue;
       }
+      if (a === '--annotations') {
+        const next = argv[i + 1];
+        if (!next) {
+          console.error('repub epub: --annotations requires a file');
+          process.exit(1);
+        }
+        annotationsFile = path.resolve(next);
+        i += 1;
+        continue;
+      }
       if (a.startsWith('-')) {
         console.error(`Unknown option: ${a}`);
         process.exit(1);
@@ -107,7 +119,9 @@ async function main(): Promise<void> {
     await runEpub(
       folder,
       resolvedOutput,
-      planningDirs.length > 0 ? { planningDirs } : undefined,
+      planningDirs.length > 0 || annotationsFile
+        ? { planningDirs, annotationsFile }
+        : undefined,
     );
     return;
   }

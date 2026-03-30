@@ -3,6 +3,7 @@
   "author": "Ben Garrard",
   "description": "A dark fantasy novel. Morgana, Jack, and the threads of fate.",
   "genres": ["Fantasy", "Dark fantasy"],
+  "epubAnnotationsFile": "./repub-author-annotations.json",
   "epubPlanningDirs": [
     "../../apps/portfolio/content/docs/books/planning",
     "../../apps/portfolio/content/docs/books/mordreds-tale/planning"

@@ -40,7 +40,10 @@ function loadBookMeta(bookDir, slug) {
   const rawPlanning = Array.isArray(data.epubPlanningDirs)
     ? data.epubPlanningDirs
     : [];
+  const rawAnnotationsFile =
+    typeof data.epubAnnotationsFile === 'string' ? data.epubAnnotationsFile.trim() : '';
   const epubPlanningDirs = [];
+  let epubAnnotationsFile;
   const rawGenres = Array.isArray(data.genres) ? data.genres : [];
   const genres = [];
   for (const g of rawGenres) {
@@ -57,6 +60,16 @@ function loadBookMeta(bookDir, slug) {
       );
     }
   }
+  if (rawAnnotationsFile) {
+    const abs = path.resolve(bookDir, rawAnnotationsFile);
+    if (fs.existsSync(abs)) {
+      epubAnnotationsFile = abs;
+    } else {
+      console.warn(
+        `book.json epubAnnotationsFile: path missing for "${slug}", skipping: ${abs}`,
+      );
+    }
+  }
   return {
     title: data.title || slug,
     author: data.author || '',
@@ -64,6 +77,7 @@ function loadBookMeta(bookDir, slug) {
     coverImage: typeof data.coverImage === 'string' ? data.coverImage : '',
     genres,
     epubPlanningDirs,
+    epubAnnotationsFile,
   };
 }
 
@@ -89,10 +103,13 @@ function resolveCoverAsset(bookDir, outDir, slug, meta) {
   return `/books/${slug}/${targetName}`;
 }
 
-function runRepub(sub, bookDir, outputPath, epubPlanningDirs = []) {
+function runRepub(sub, bookDir, outputPath, epubPlanningDirs = [], epubAnnotationsFile) {
   const args = [REPUB_CLI, sub, bookDir];
   for (const d of epubPlanningDirs) {
     args.push('--planning', d);
+  }
+  if (epubAnnotationsFile) {
+    args.push('--annotations', epubAnnotationsFile);
   }
   args.push('--output', outputPath);
   const result = spawnSync(process.execPath, args, {
@@ -152,7 +169,7 @@ async function main() {
     const epubPath = path.join(outDir, 'book.epub');
     const hasSourceFiles = hasBookSourceFiles(bookDir);
     const hasEpub = hasSourceFiles
-      ? runRepub('epub', bookDir, epubPath, meta.epubPlanningDirs)
+      ? runRepub('epub', bookDir, epubPath, meta.epubPlanningDirs, meta.epubAnnotationsFile)
       : false;
     if (!hasSourceFiles) {
       console.log(`Skipping EPUB for ${slug}: no markdown source yet.`);

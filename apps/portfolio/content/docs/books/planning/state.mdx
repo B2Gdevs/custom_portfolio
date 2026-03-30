@@ -23,18 +23,18 @@ taskPhase: books-reader-02
 
 | Field | Value |
 | --- | --- |
-| `phase` | `books-reader-02` follow-up after `books-reader-05` closure |
-| `plan` | **Reader shell groundwork is shipped**: **`ReaderWorkspace`** + **`EpubViewer`**, shelf search and filters, planning strip, reader modal store, and book-scoped planning packs. The auth-aware reader foundation, sync layer, and workspace polish are in place too: backend reader collections, a shared workspace bootstrap contract, DB-backed reading state for built-in books, owner-only workspace settings save, explicit local-EPUB upload, saved-upload shelf cards, record-aware deep links, and continue-reading defaults while anonymous/local fallback rules stay intact. The next cycle returns to repub artifact merge work so exported annotations and planning supplements can converge on one emitted reading bundle. |
-| `focus` | treat the reader as the primary product lane: the shared auth dependency from `global-auth-01`, the backend workspace contract, server-backed annotation/progress sync, owner-only write paths, and polished backend-backed shelf are ready, so the next work is merging those annotations back into the emitted repub artifact before AI or publishing comes forward again |
+| `phase` | `books-reader-02` closed after the artifact merge pass |
+| `plan` | **Reader shell groundwork is shipped**: **`ReaderWorkspace`** + **`EpubViewer`**, shelf search and filters, planning strip, reader modal store, and book-scoped planning packs. The auth-aware reader foundation, sync layer, workspace polish, and the repub artifact merge are now in place too: backend reader collections, a shared workspace bootstrap contract, DB-backed reading state for built-in books, owner-only workspace settings save, explicit local-EPUB upload, saved-upload shelf cards, continue-reading defaults, planning appendix embedding, and committed author-annotation exports folded back into the emitted EPUB artifact. |
+| `focus` | keep the reader as the primary product lane, but stop pretending there is still an open artifact-merge task: the current repub artifact now bundles planning supplements plus author-annotation baseline data while anonymous/local fallback rules stay intact; the next reader work needs a fresh planned phase rather than more ad hoc follow-up on `books-reader-02` |
 | `constraint` | anonymous reading and local EPUB import stay available, but write-capable behavior and DB persistence must go through the shared auth/entitlement layer; local import alone must not auto-upload a book or mutate backend records |
 
 ## Next Queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | `books-reader-02-01`: merge exported annotations into **`build:books`** / **repub artifact** output | `reader` |
-| `2` | maintain `books-reader-05` only when the polished backend-backed shelf exposes a concrete bug or missing owner affordance | `reader` |
-| `3` | AI and publishing remain back burner until the reader artifact pass is stable | `queue-policy` |
+| `1` | plan the next dedicated reader phase before more implementation; `books-reader-02` and `books-reader-05` are closed | `reader-planning` |
+| `2` | maintain `books-reader-05` only when the polished backend-backed shelf or artifact-backed reader exposes a concrete bug or missing owner affordance | `reader` |
+| `3` | AI and publishing remain back burner until a new reader phase is defined | `queue-policy` |
 
 ## References
 
