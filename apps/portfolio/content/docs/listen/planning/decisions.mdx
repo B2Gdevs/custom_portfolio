@@ -2,7 +2,7 @@
 title: Decisions
 description: Stable decisions for Listen -- URL, catalog, and simple locks.
 date: "2026-03-28"
-updated: "2026-03-28"
+updated: "2026-03-30"
 order: 5
 repoPath: apps/portfolio/content/docs/listen/planning/decisions.mdx
 ---
@@ -40,6 +40,14 @@ repoPath: apps/portfolio/content/docs/listen/planning/decisions.mdx
 | **Decision** | Long-term private Listen access should move onto the same authenticated owner session and entitlement checks used by Books, not remain a standalone shared-password system. |
 | **Rationale** | One owner login should unlock private media and reader write features consistently, and BandLab data is moving toward DB-backed records anyway. |
 | **Consequences** | The current group-password flow is transitional only; new private media work should target the Global auth layer first. |
+
+## `LISTEN-DATA-02` -- DB rows use public/private visibility
+
+| Field | Value |
+| --- | --- |
+| **Decision** | Payload-backed Listen catalog rows should use a direct `visibility: public | private` model plus tenant ownership, and private DB rows should be visible only to authenticated viewers with the shared `listen:private` entitlement. |
+| **Rationale** | Listen should reuse the same auth/tenant contract as Books instead of carrying `lockGroup` semantics into the long-term catalog model. |
+| **Consequences** | File-backed `lockGroup` rows remain transitional; DB-backed rows do not need a shared-password group to express private access. |
 
 ## `LISTEN-UX-01` -- Parity with blog / projects discovery
 

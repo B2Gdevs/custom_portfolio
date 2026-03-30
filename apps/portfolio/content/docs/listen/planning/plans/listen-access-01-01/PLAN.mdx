@@ -1,0 +1,22 @@
+---
+title: listen-access-01-01 Plan
+description: Kickoff for the first DB-backed Listen access slice.
+date: "2026-03-30"
+updated: "2026-03-30"
+order: 1
+repoPath: apps/portfolio/content/docs/listen/planning/plans/listen-access-01-01/PLAN.mdx
+taskPhase: listen-access-01-01
+---
+
+# Kickoff
+
+| Field | Notes |
+| --- | --- |
+| `goal` | Establish a real Payload-backed Listen catalog model and a shared auth-aware visibility contract for private BandLab rows. |
+| `scope` | Add a Listen catalog collection, define public/private visibility and tenant ownership, expose a bootstrap/read helper for `/listen`, and keep the current file-backed rows as fallback/seed-style content. |
+| `non-goals` | No full private-media migration, no removal of the current shared-password unlock route yet, no admin seeding UI, and no live upload/edit surface for Listen in this slice. |
+| `dependencies` | `global-auth-01-01`, `global-auth-01-02`, current `/listen` discovery surface. |
+| `open questions` | None. |
+| `tests required` | Unit coverage for the auth-aware Listen bootstrap/visibility rules plus repo build/lint gates. |
+| `definition of done` | Listen has a Payload collection for BandLab catalog rows, `/listen` can consume DB-backed rows through one shared bootstrap contract, and private DB rows are hidden unless the authenticated viewer has `listen:private`. |
+| `first tasks` | Add the collection and contract types, wire Payload config, add a bootstrap helper with auth-aware filtering, connect `/listen` page data to the helper, add tests. |

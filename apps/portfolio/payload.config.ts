@@ -8,6 +8,7 @@ import {
 import { ragSources } from './lib/payload/collections/ragSources';
 import { ragChunks } from './lib/payload/collections/ragChunks';
 import { ragIngestRuns } from './lib/payload/collections/ragIngestRuns';
+import { listenCatalogRecords } from './lib/payload/collections/listenCatalogRecords';
 import { readerLibraryRecords } from './lib/payload/collections/readerLibraryRecords';
 import { readerLibraryAssets } from './lib/payload/collections/readerLibraryAssets';
 import { readerReadingStates } from './lib/payload/collections/readerReadingStates';
@@ -39,6 +40,7 @@ export default buildConfig({
   collections: [
     tenants,
     users,
+    listenCatalogRecords,
     readerLibraryAssets,
     readerLibraryRecords,
     readerReadingStates,

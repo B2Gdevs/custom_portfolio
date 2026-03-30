@@ -1,0 +1,20 @@
+---
+title: Errors And Attempts
+description: Build notes and dead ends for Listen planning work.
+date: "2026-03-30"
+updated: "2026-03-30"
+order: 6
+repoPath: apps/portfolio/content/docs/listen/planning/errors-and-attempts.mdx
+---
+
+# Errors And Attempts
+
+## `listen-access-01-01` -- direct Payload imports broke the Next build
+
+| Field | Value |
+| --- | --- |
+| `status` | `resolved` |
+| `symptom` | importing the auth-aware Listen bootstrap helper directly into `/listen` pulled Payload/libsql server dependencies into the Next route bundle and broke `pnpm run build` |
+| `attempt` | wired `/listen` straight to the DB-aware helper because the read path looked equivalent to the reader workspace bootstrap |
+| `fix` | moved the DB-backed catalog read behind a small worker boundary so the page stays on a safe JSON/bootstrap contract |
+| `follow-up` | reuse the same worker-boundary rule for future Payload-backed public surfaces unless the Next server boundary changes |

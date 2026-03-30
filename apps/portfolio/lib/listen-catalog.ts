@@ -1,8 +1,10 @@
 export type ListenCatalogKind = 'track' | 'preset';
+export type ListenCatalogVisibility = 'public' | 'private';
 
 export interface ListenCatalogEntry {
   slug: string;
   catalogKind: ListenCatalogKind;
+  visibility: ListenCatalogVisibility;
   title: string;
   genre: string;
   mood: string;
@@ -21,6 +23,7 @@ const catalog: ListenCatalogEntry[] = [
   {
     slug: 'demon-child-see-it-my-way',
     catalogKind: 'track',
+    visibility: 'public',
     title: 'Demon Child - (See it My Way)',
     genre: 'Rock',
     duration: '2:50',
@@ -36,6 +39,7 @@ const catalog: ListenCatalogEntry[] = [
   {
     slug: 'greed-3',
     catalogKind: 'track',
+    visibility: 'public',
     title: 'Greed 3.0',
     genre: 'Hip Hop',
     duration: '2:10',
@@ -51,6 +55,7 @@ const catalog: ListenCatalogEntry[] = [
   {
     slug: 'dont-let-me-be-forgotten',
     catalogKind: 'track',
+    visibility: 'public',
     title: 'Love in the Grave',
     genre: 'Alternative',
     duration: '3:04',
@@ -67,6 +72,7 @@ const catalog: ListenCatalogEntry[] = [
   {
     slug: 'private-shared-track',
     catalogKind: 'track',
+    visibility: 'private',
     title: 'Private shared track',
     genre: 'Private track',
     duration: 'Private',
@@ -84,6 +90,7 @@ const catalog: ListenCatalogEntry[] = [
   {
     slug: 'bandlab-effect-preset-8f8d1ca2196640c1aeaac13e51383e11',
     catalogKind: 'preset',
+    visibility: 'public',
     title: 'Polished shelf chain',
     genre: 'Preset',
     mood: 'Polished, produced',

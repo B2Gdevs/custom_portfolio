@@ -24,16 +24,16 @@ taskPhase: listen-access-01
 | Field | Value |
 | --- | --- |
 | `phase` | `listen-surface-03` maintenance + `listen-access-01` |
-| `plan` | the public listening-room surface is shipped; the next pass is to prepare private owner-only tracks and presets for the same auth/entitlement system the reader now depends on, while keeping `/listen` as the public route |
-| `focus` | move BandLab songs and presets toward database-backed records and replace long-term shared-password assumptions with owner auth plus entitlements |
+| `plan` | the public listening-room surface is shipped; the first DB-backed catalog slice is now in place, and the next pass is to finish moving private owner-only tracks and presets off shared-password unlocks and onto the same authenticated session/entitlement model the reader uses |
+| `focus` | keep `/listen` public, let DB-backed rows participate in the catalog now, and remove long-term shared-password assumptions for private media next |
 | `constraint` | no public signup; private media should reuse the Global auth layer instead of inventing a Listen-only access scheme |
 
 ## Next queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | `listen-access-01-01`: define the DB-backed BandLab data model and entitlement-gated private visibility contract | `feature` |
-| `2` | `listen-access-01-02`: migrate private access off shared-password unlock groups and onto authenticated owner sessions | `feature` |
+| `1` | `listen-access-01-02`: migrate private access off shared-password unlock groups and onto authenticated owner sessions | `feature` |
+| `2` | seed and backfill real DB-backed Listen rows once the owner-session gate replaces transitional unlock groups | `content` |
 | `3` | continue catalog copy/data cleanup only when it supports the new backend-backed model | `content` |
 
 ## References

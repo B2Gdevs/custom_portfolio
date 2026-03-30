@@ -24,15 +24,15 @@ taskPhase: global-site-02
 | Field | Value |
 | --- | --- |
 | `phase` | `global-site-02` maintenance |
-| `focus` | `global-auth-01` is now shipped end to end for v1, and Books has consumed it through a polished backend-backed reader shelf plus the repub artifact merge. Global can stay in maintenance while Books defines its next reader phase and Listen consumes the same access layer next. |
+| `focus` | `global-auth-01` is now shipped end to end for v1, Books has consumed it through a polished backend-backed reader shelf plus the repub artifact merge, and Listen has started the DB-backed catalog pass. Global can stay in maintenance while Listen finishes migrating private media onto the shared access layer. |
 | `constraint` | Global should define the shared access model once; section planners should consume it instead of inventing separate lock or auth systems |
 
 ## Next queue
 
 | Priority | Action |
 | --- | --- |
-| `1` | define the next Books reader phase now that the backend-backed workspace and artifact merge are both shipped |
-| `2` | `listen-access-01-01`: move private BandLab access onto the same auth/entitlement model |
+| `1` | `listen-access-01-02`: move private BandLab access onto the same auth/entitlement model and retire transitional unlock assumptions |
+| `2` | define the next Books reader phase now that the backend-backed workspace and artifact merge are both shipped |
 | `3` | keep `global-site-02` guidance aligned as the auth-backed section work lands |
 
 ## References

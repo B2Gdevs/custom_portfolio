@@ -24,16 +24,16 @@ order: 2
 | Field | Value |
 | --- | --- |
 | `phase` | `documentation-site-10` maintenance + cross-cutting reader/access planning |
-| `plan` | planning IA reset is shipped; the shared auth foundation, Books reader workspace polish, and Books repub artifact merge are now in place, while Documentation keeps the global-first workflow and overview tables aligned with the next explicit reader-planning cycle and private-media queue |
-| `focus` | stop steering agents toward repo-planner workflow debt first; prioritize defining the next reader phase and Listen private catalog migration while RepoPlanner and Global auth sit in maintain-only mode |
+| `plan` | planning IA reset is shipped; the shared auth foundation, Books reader workspace polish, Books repub artifact merge, and the first DB-backed Listen catalog slice are now in place, while Documentation keeps the global-first workflow aligned with the remaining private-media migration |
+| `focus` | stop steering agents toward repo-planner workflow debt first; keep Books in maintain-only mode until a new explicit reader phase is defined, and prioritize Listen private-media migration next |
 | `constraint` | section planning MDX is first for **section** work; root `.planning` stays canonical for **monorepo** gates; see root `AGENTS.md` |
 
 ## Next Queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | define the next dedicated Books reader phase now that artifact merge and backend shelf work are both closed | `planning` |
-| `2` | `listen-access-01-01`: move private BandLab access away from shared passwords and into the same auth/entitlement model | `feature` |
+| `1` | `listen-access-01-02`: move private BandLab access away from shared passwords and into the same auth/entitlement model | `feature` |
+| `2` | define the next dedicated Books reader phase now that artifact merge and backend shelf work are both closed | `planning` |
 | `3` | maintain the Global auth docs and routes only when Books/Listen discover a real gap | `cross-cutting` |
 | `4` | maintain `documentation-site-08` / `09` / `07` only when they unblock the auth-backed product work | `tooling` |
 

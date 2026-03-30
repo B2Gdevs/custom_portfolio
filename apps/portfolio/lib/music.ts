@@ -15,7 +15,7 @@ export interface MusicTrack {
 
 function entryToPublicTrack(entry: ListenCatalogEntry): MusicTrack | null {
   if (entry.catalogKind !== 'track') return null;
-  if (entry.lockGroup) return null;
+  if (entry.visibility !== 'public' || entry.lockGroup) return null;
   return {
     slug: entry.slug,
     title: entry.title,
