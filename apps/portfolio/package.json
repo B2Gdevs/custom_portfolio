@@ -10,6 +10,7 @@
     "build:epub": "node scripts/build-epub.cjs",
     "books:publish": "tsx --tsconfig tsconfig.json scripts/publish-book-artifacts.ts",
     "media:publish": "tsx --tsconfig tsconfig.json scripts/publish-public-media.ts",
+    "site:publish:downloads": "tsx --tsconfig tsconfig.json scripts/publish-site-download-assets.ts",
     "start": "next start",
     "lint": "eslint",
     "test:unit": "vitest run",

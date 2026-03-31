@@ -1,17 +1,54 @@
 import { promises as fs } from 'node:fs';
+import { isResumeOwnerRequest } from '@/lib/auth/resume-owner-gate';
 import { getResumeBySlug, resolveResumeHtmlPath } from '@/lib/resumes';
+import { findSiteDownloadAssets, pickResumeHtmlAsset, resolveSiteDownloadAssetUrl } from '@/lib/site-download-assets';
 
 export const runtime = 'nodejs';
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  if (!(await isResumeOwnerRequest(request))) {
+    return new Response('Unauthorized', {
+      status: 401,
+      headers: { 'content-type': 'text/plain; charset=utf-8' },
+    });
+  }
+
   const { slug } = await params;
   const resume = getResumeBySlug(slug);
 
   if (!resume) {
     return new Response('Resume not found.', { status: 404 });
+  }
+
+  const assets = await findSiteDownloadAssets({
+    downloadKind: 'resume',
+    contentScope: 'resume',
+    contentSlug: resume.slug,
+  });
+  const htmlAsset = pickResumeHtmlAsset(assets);
+
+  if (htmlAsset) {
+    const assetUrl = resolveSiteDownloadAssetUrl(htmlAsset);
+    if (assetUrl) {
+      const assetResponse = await fetch(new URL(assetUrl, request.url), {
+        cache: 'no-store',
+      }).catch(() => null);
+
+      if (assetResponse?.ok) {
+        const html = await assetResponse.text();
+
+        return new Response(html, {
+          headers: {
+            'content-type': 'application/octet-stream',
+            'content-disposition': `attachment; filename="${htmlAsset.filename ?? resume.fileName}"`,
+            'cache-control': 'public, max-age=0, must-revalidate',
+          },
+        });
+      }
+    }
   }
 
   const htmlPath = resolveResumeHtmlPath(resume.fileName);

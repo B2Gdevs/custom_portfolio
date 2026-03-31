@@ -49,6 +49,9 @@ skills-lock.json
 # debug
 .logs/*
 !.logs/README.md
+apps/portfolio/.logs/
+# Codex / local CLI captures next to the app package
+apps/portfolio/.codex*.log
 # Shell/IDE redirects of `next dev` / `next start` (not Next's `.next/` dir, not app JSONL logs)
 .next-dev-*.log
 .next-start-*.log

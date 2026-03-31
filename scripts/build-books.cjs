@@ -8,13 +8,92 @@ const { spawnSync } = require('child_process');
 const ROOT = process.cwd();
 const BOOK_BUILD_CACHE_PATH = path.join(ROOT, '.tmp', 'book-build-cache.json');
 /** Bump when fingerprint inputs change so stale entries rebuild. */
-const BOOK_BUILD_CACHE_VERSION = 1;
+const BOOK_BUILD_CACHE_VERSION = 2;
 const BOOKS_ROOT = path.join(ROOT, 'books');
 const OUT_ROOT = path.join(ROOT, 'apps', 'portfolio', 'public', 'books');
 const REPUB_CLI = path.join(ROOT, 'vendor', 'repub-builder', 'dist', 'cli.js');
+const REPUB_PKG_JSON = path.join(ROOT, 'vendor', 'repub-builder', 'package.json');
 const COVER_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp'];
 const BUILD_TMP_ROOT = path.join(ROOT, '.tmp', 'book-build');
 const AUTO_PUBLISH_FLAG = (process.env.BOOK_ARTIFACTS_AUTO_PUBLISH || '').trim().toLowerCase();
+
+/** npm-style ANSI (respects NO_COLOR, FORCE_COLOR=0, non-TTY). */
+const A = {
+  reset: '\x1b[0m',
+  dim: '\x1b[2m',
+  bold: '\x1b[1m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  cyan: '\x1b[36m',
+  red: '\x1b[31m',
+  gray: '\x1b[90m',
+  magenta: '\x1b[35m',
+};
+
+function colorOn() {
+  if (process.env.NO_COLOR || process.env.FORCE_COLOR === '0') return false;
+  return Boolean(process.stdout && process.stdout.isTTY);
+}
+
+function paint(code, s) {
+  if (!colorOn()) return s;
+  return `${code}${s}${A.reset}`;
+}
+
+function label() {
+  return paint(A.gray, 'book-build');
+}
+
+function logRow(iconPaint, icon, slug, rest) {
+  const left = `${label()} ${iconPaint(icon)} ${paint(A.cyan, slug)}`;
+  const tail = rest ? ` ${paint(A.dim, rest)}` : '';
+  console.log(`${left}${tail}`);
+}
+
+function logDetail(msg) {
+  const m = msg.trim();
+  if (!m) return;
+  console.log(`${label()} ${paint(A.dim, '·')} ${paint(A.dim, m)}`);
+}
+
+function logWarn(msg) {
+  console.warn(`${label()} ${paint(A.yellow, 'warn')} ${msg}`);
+}
+
+function logErr(msg) {
+  console.error(`${label()} ${paint(A.red, 'ERR!')} ${msg}`);
+}
+
+function quietRepubStdout(text) {
+  if (!text) return '';
+  const out = [];
+  for (const line of text.split(/\r?\n/)) {
+    const t = line.trim();
+    if (!t) continue;
+    if (/^Generating Template Files/i.test(t)) continue;
+    if (/^Downloading Images/i.test(t)) continue;
+    if (/^Making Cover/i.test(t)) continue;
+    if (/^Generating Epub Files/i.test(t)) continue;
+    if (/^About to finish/i.test(t)) continue;
+    if (t === 'Done.') continue;
+    if (/^Warning \(content\[/i.test(t)) {
+      out.push(line);
+      continue;
+    }
+    if (/^Zipping temp dir to/i.test(t)) continue;
+    if (/^Done zipping/i.test(t)) continue;
+    if (/^EPUB:\s*/i.test(t)) {
+      const rel = t.replace(/^EPUB:\s*/i, '').trim();
+      const norm = rel.replace(/\\/g, '/');
+      const m = norm.match(/public\/books\/([^/]+)\/book\.epub/i);
+      if (m) out.push(`wrote public/books/${m[1]}/book.epub`);
+      else out.push(`wrote ${path.basename(rel)}`);
+      continue;
+    }
+    out.push(line);
+  }
+  return out.join('\n');
+}
 
 function shouldAutoPublishArtifacts() {
   return ['1', 'true', 'yes', 'on'].includes(AUTO_PUBLISH_FLAG);
@@ -89,9 +168,7 @@ function loadBookMeta(bookDir, slug) {
     if (fs.existsSync(abs)) {
       epubPlanningDirs.push(abs);
     } else {
-      console.warn(
-        `book.json epubPlanningDirs: path missing for "${slug}", skipping: ${abs}`,
-      );
+      logWarn(`book.json epubPlanningDirs: path missing for "${slug}", skipping: ${abs}`);
     }
   }
   if (rawAnnotationsFile) {
@@ -99,9 +176,7 @@ function loadBookMeta(bookDir, slug) {
     if (fs.existsSync(abs)) {
       epubAnnotationsFile = abs;
     } else {
-      console.warn(
-        `book.json epubAnnotationsFile: path missing for "${slug}", skipping: ${abs}`,
-      );
+      logWarn(`book.json epubAnnotationsFile: path missing for "${slug}", skipping: ${abs}`);
     }
   }
   return {
@@ -140,6 +215,54 @@ function shouldForceBookRebuild() {
   return ['1', 'true', 'yes', 'on'].includes(v);
 }
 
+function isTruthyEnv(v) {
+  return ['1', 'true', 'yes', 'on'].includes(String(v || '').trim().toLowerCase());
+}
+
+function shortMissReason(forceRebuild, epubOnDisk, cachedFp, inputFingerprint) {
+  const tags = [];
+  if (forceRebuild) tags.push('force');
+  if (!epubOnDisk) tags.push('no-epub');
+  if (cachedFp !== inputFingerprint) tags.push(cachedFp ? 'stale' : 'no-cache');
+  return tags.join(' · ');
+}
+
+/**
+ * Stable across harmless file touches: use @portfolio/repub-builder version + built cli.js size.
+ * (mtime on cli.js changed on every rebuild and forced CACHE MISS for all books.)
+ */
+function readRepubToolingFingerprint() {
+  const bits = [];
+  try {
+    const pkg = JSON.parse(fs.readFileSync(REPUB_PKG_JSON, 'utf8'));
+    bits.push(`repub-pkg:${pkg.version || '?'}`);
+  } catch {
+    bits.push('repub-pkg:missing');
+  }
+  try {
+    const st = fs.statSync(REPUB_CLI);
+    bits.push(`cli-bytes:${st.size}`);
+  } catch {
+    bits.push('cli:missing');
+  }
+  return bits.join('|');
+}
+
+function countFilesUnderImagesDir(absBookDir) {
+  const imagesDir = path.join(absBookDir, 'images');
+  if (!fs.existsSync(imagesDir)) return 0;
+  let n = 0;
+  function walk(d) {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const full = path.join(d, e.name);
+      if (e.isDirectory()) walk(full);
+      else if (e.isFile()) n += 1;
+    }
+  }
+  walk(imagesDir);
+  return n;
+}
+
 function loadBookBuildCache() {
   try {
     if (!fs.existsSync(BOOK_BUILD_CACHE_PATH)) {
@@ -163,7 +286,18 @@ function saveBookBuildCache(cache) {
 }
 
 /**
- * Stable hash of a directory tree: relative path, size, mtime per file.
+ * Images / large binaries under `images/` are fingerprinted as path + size only.
+ * Repub may re-fetch or touch those files on each EPUB run; including mtime here caused
+ * every dev-server `build-books` pass to miss cache and re-download unnecessarily.
+ */
+function isStableSizeOnlyAsset(relPath) {
+  const n = relPath.replace(/\\/g, '/').toLowerCase();
+  if (n.startsWith('images/') || n.includes('/images/')) return true;
+  return /\.(png|jpe?g|webp|gif|svg|ico|mp3|wav|mp4|webm|pdf|zip|epub)$/i.test(n);
+}
+
+/**
+ * Stable hash of a directory tree: per file, path + size + mtime (text/sources) or path + size (images/binaries).
  */
 function dirFingerprint(absDir) {
   if (!fs.existsSync(absDir)) {
@@ -179,7 +313,11 @@ function dirFingerprint(absDir) {
       } else if (e.isFile()) {
         const rel = path.relative(absDir, full);
         const st = fs.statSync(full);
-        lines.push(`${rel}:${st.size}:${st.mtimeMs}`);
+        if (isStableSizeOnlyAsset(rel)) {
+          lines.push(`${rel}:${st.size}`);
+        } else {
+          lines.push(`${rel}:${st.size}:${st.mtimeMs}`);
+        }
       }
     }
   }
@@ -190,11 +328,7 @@ function dirFingerprint(absDir) {
 
 function computeBookInputFingerprint(slug, bookDir, meta) {
   const parts = [String(BOOK_BUILD_CACHE_VERSION)];
-  try {
-    parts.push(String(fs.statSync(REPUB_CLI).mtimeMs));
-  } catch {
-    parts.push('no-repub-cli');
-  }
+  parts.push(readRepubToolingFingerprint());
   parts.push(dirFingerprint(bookDir));
   const partition = meta.epubPartition;
   if (partition && typeof partition.sourceBook === 'string' && partition.sourceBook.trim()) {
@@ -375,6 +509,30 @@ function resolveCoverAsset(bookDir, outDir, slug, meta) {
   return `/books/${slug}/${targetName}`;
 }
 
+/** epub-gen logs "[Download Success]" for local file copies too — we filter and summarize. */
+function filterEpubGenStdout(raw) {
+  if (!raw) return { text: '', embeddedLocalCount: 0 };
+  const lines = raw.split(/\r?\n/);
+  const out = [];
+  let embeddedLocalCount = 0;
+  for (const line of lines) {
+    if (line.includes('[Download Success]')) {
+      embeddedLocalCount += 1;
+      continue;
+    }
+    if (line.includes('[Success] cover image downloaded successfully!')) {
+      out.push('cover image staged');
+      continue;
+    }
+    if (line.trim() === 'Downloading Images...') {
+      out.push('staging images…');
+      continue;
+    }
+    out.push(line);
+  }
+  return { text: out.join('\n'), embeddedLocalCount };
+}
+
 function runRepub(sub, bookDir, outputPath, epubPlanningDirs = [], epubAnnotationsFile) {
   const args = [REPUB_CLI, sub, bookDir];
   for (const d of epubPlanningDirs) {
@@ -386,9 +544,23 @@ function runRepub(sub, bookDir, outputPath, epubPlanningDirs = [], epubAnnotatio
   args.push('--output', outputPath);
   const result = spawnSync(process.execPath, args, {
     cwd: ROOT,
-    stdio: 'inherit',
+    encoding: 'utf8',
+    maxBuffer: 50 * 1024 * 1024,
+    stdio: ['inherit', 'pipe', 'pipe'],
     shell: false,
   });
+  const combined = `${result.stdout || ''}${result.stderr || ''}`;
+  const { text, embeddedLocalCount } = filterEpubGenStdout(combined);
+  const quiet = quietRepubStdout(text);
+  if (quiet.trim()) {
+    for (const ln of quiet.split(/\r?\n/)) {
+      const t = ln.trim();
+      if (t) logDetail(t);
+    }
+  }
+  if (embeddedLocalCount > 0) {
+    logDetail(`embedded ${embeddedLocalCount} images into EPUB`);
+  }
   return result.status === 0;
 }
 
@@ -414,11 +586,11 @@ function hasBookSourceFiles(bookDir) {
 
 async function main() {
   if (!fs.existsSync(BOOKS_ROOT)) {
-    console.log('No books/ directory at repo root. Skipping.');
+    logDetail('no books/ at repo root — skipping');
     process.exit(0);
   }
   if (!fs.existsSync(REPUB_CLI)) {
-    console.error('repub-builder not built. Run: pnpm run build --workspace=@portfolio/repub-builder');
+    logErr('repub-builder not built. Run: pnpm run build --workspace=@portfolio/repub-builder');
     process.exit(1);
   }
   const slugs = fs
@@ -426,17 +598,26 @@ async function main() {
     .filter((e) => e.isDirectory())
     .map((e) => e.name);
   if (slugs.length === 0) {
-    console.log('No book directories in books/. Skipping.');
+    logDetail('no book directories in books/ — skipping');
     process.exit(0);
   }
+  console.time('book-build');
   const previousManifest = loadExistingManifest();
   const manifest = [];
   const bookCache = loadBookBuildCache();
   const forceRebuild = shouldForceBookRebuild();
+  if (isTruthyEnv(process.env.BOOKS_BUILD_DEBUG)) {
+    logDetail(`toolchain ${readRepubToolingFingerprint()}`);
+    logDetail(
+      'fingerprint: chapter text uses mtime; images use size; set BOOKS_BUILD_DEBUG=1 for hashes',
+    );
+  }
+  let cacheHits = 0;
+  let cacheMisses = 0;
+  let missNoMarkdown = 0;
   removeDirRecursive(BUILD_TMP_ROOT);
   fs.mkdirSync(BUILD_TMP_ROOT, { recursive: true });
   for (const slug of slugs) {
-    console.log('Building book:', slug);
     const bookDir = path.join(BOOKS_ROOT, slug);
     const meta = loadBookMeta(bookDir, slug);
     const outDir = path.join(OUT_ROOT, slug);
@@ -445,30 +626,54 @@ async function main() {
     const coverImage = resolveCoverAsset(bookDir, outDir, slug, meta);
     const epubPath = path.join(outDir, 'book.epub');
     const inputFingerprint = computeBookInputFingerprint(slug, bookDir, meta);
+    const cachedFp = bookCache.books[slug];
+    const epubOnDisk = fs.existsSync(epubPath);
     const cacheHit =
-      !forceRebuild &&
-      bookCache.books[slug] === inputFingerprint &&
-      fs.existsSync(epubPath);
+      !forceRebuild && cachedFp === inputFingerprint && epubOnDisk;
 
     let partitionSource = null;
     let hasEpub = false;
 
     if (cacheHit) {
-      console.log(
-        `  (cache) skipped EPUB rebuild for ${slug} — inputs unchanged. Set BOOKS_FORCE_REBUILD=1 to rebuild all.`,
-      );
+      cacheHits += 1;
+      logRow((s) => paint(A.green, s), '✓', slug, 'up to date');
       hasEpub = true;
     } else {
+      cacheMisses += 1;
+      const missParts = [];
+      if (forceRebuild) missParts.push('BOOKS_FORCE_REBUILD');
+      if (!epubOnDisk) missParts.push('missing public/books/.../book.epub');
+      if (cachedFp !== inputFingerprint) {
+        missParts.push(
+          cachedFp
+            ? 'inputs fingerprint changed (chapter mtime, planning, annotations, repub version, BOOK_BUILD_CACHE_VERSION)'
+            : 'no prior cache entry',
+        );
+      }
+      const short = shortMissReason(forceRebuild, epubOnDisk, cachedFp, inputFingerprint);
+      logRow((s) => paint(A.yellow, s), '→', slug, `rebuild${short ? ` · ${short}` : ''}`);
+      if (isTruthyEnv(process.env.BOOKS_BUILD_DEBUG)) {
+        logDetail(`reason: ${missParts.join('; ')}`);
+        logDetail(`bookDir hash ${dirFingerprint(bookDir)}`);
+        logDetail(
+          `fp ${inputFingerprint.slice(0, 12)}… ← ${cachedFp ? `${cachedFp.slice(0, 12)}…` : 'none'}`,
+        );
+      }
       partitionSource = materializePartitionSource(slug, meta);
       const sourceDir = partitionSource ? partitionSource.dir : bookDir;
+      const imgN = countFilesUnderImagesDir(sourceDir);
+      if (imgN > 0) {
+        logDetail(`${imgN} images/ files on disk (copied into EPUB; not re-downloaded)`);
+      }
       const hasSourceFiles = hasBookSourceFiles(sourceDir);
       hasEpub = hasSourceFiles
         ? runRepub('epub', sourceDir, epubPath, meta.epubPlanningDirs, meta.epubAnnotationsFile)
         : false;
       if (!hasSourceFiles) {
-        console.log(`Skipping EPUB for ${slug}: no markdown source yet.`);
+        missNoMarkdown += 1;
+        logDetail(`${slug}: no markdown source — skipped`);
       } else if (!hasEpub) {
-        console.error(`EPUB failed for ${slug}`);
+        logErr(`EPUB failed for ${slug}`);
       } else {
         bookCache.books[slug] = inputFingerprint;
       }
@@ -486,19 +691,26 @@ async function main() {
       hasEpub: !!hasEpub,
     }, previousManifest.get(slug)));
   }
+  const sumBits = [
+    `${slugs.length} books`,
+    `${cacheHits} up to date`,
+    `${cacheMisses} rebuilt`,
+  ];
+  if (missNoMarkdown) sumBits.push(`${missNoMarkdown} skipped (no source)`);
+  console.log(
+    `${label()} ${paint(A.bold, 'summary')}  ${paint(A.dim, sumBits.join('  ·  '))}`,
+  );
   saveBookBuildCache(bookCache);
   removeDirRecursive(BUILD_TMP_ROOT);
   if (!fs.existsSync(OUT_ROOT)) fs.mkdirSync(OUT_ROOT, { recursive: true });
   const manifestPath = path.join(OUT_ROOT, 'manifest.json');
   fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
-  console.log(
-    'Wrote (autogenerated; do not edit — homepage reads this)',
-    manifestPath,
-  );
+  logDetail(`manifest ${path.relative(ROOT, manifestPath)}`);
+  console.timeEnd('book-build');
 
   if (shouldAutoPublishArtifacts()) {
     const pnpmCommand = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
-    console.log('Auto-publishing built book artifacts to storage...');
+    logDetail('auto-publishing artifacts to storage…');
     const publishResult = spawnSync(
       pnpmCommand,
       [

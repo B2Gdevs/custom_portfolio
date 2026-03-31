@@ -1,5 +1,8 @@
+import { readFileSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+
+const RESULT_MARKER_PREFIX = 'READER_WORKSPACE_JSON_PATH=';
 
 type ReaderWorkspaceWorkerResult = {
   status: number;
@@ -21,7 +24,11 @@ export async function runReaderWorkspaceWorker(payload: {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [resolveTsxCliPath(), resolveWorkerPath()], {
       cwd: process.cwd(),
-      env: process.env,
+      env: {
+        ...process.env,
+        /** Reduce accidental HF/transformers stdout noise in the worker process. */
+        TRANSFORMERS_OFFLINE: process.env.TRANSFORMERS_OFFLINE ?? '1',
+      },
       stdio: ['pipe', 'pipe', 'pipe'],
     });
 
@@ -45,13 +52,27 @@ export async function runReaderWorkspaceWorker(payload: {
       }
 
       try {
-        resolve(JSON.parse(stdout) as ReaderWorkspaceWorkerResult);
+        const markerLine = stdout
+          .split(/\r?\n/)
+          .find((line) => line.startsWith(RESULT_MARKER_PREFIX));
+        if (markerLine) {
+          const filePath = markerLine.slice(RESULT_MARKER_PREFIX.length).trim();
+          const raw = readFileSync(filePath, 'utf8');
+          try {
+            unlinkSync(filePath);
+          } catch {
+            // best-effort cleanup
+          }
+          resolve(JSON.parse(raw) as ReaderWorkspaceWorkerResult);
+          return;
+        }
+        resolve(JSON.parse(stdout.trim()) as ReaderWorkspaceWorkerResult);
       } catch (error) {
         reject(
           new Error(
             `reader workspace worker returned invalid JSON: ${
               error instanceof Error ? error.message : String(error)
-            }`,
+            }; stdout (first 800 chars): ${stdout.slice(0, 800)}`,
           ),
         );
       }

@@ -2,7 +2,7 @@
 title: Errors and Attempts
 description: Compact attempt records for the documentation section.
 date: "2026-03-16"
-updated: "2026-03-29"
+updated: "2026-03-31"
 order: 4
 ---
 
@@ -14,3 +14,5 @@ order: 4
 | `documentation-site-02-attempt-01` | `resolved` | docs status visibility | the docs tree had no single overview showing where each section stands and what is next | add a roadmap page under the documentation section and keep it aligned with section planning records |
 | `documentation-site-10-attempt-01` | `resolved` | planning IA reset | section planning docs lived at section root, old links still pointed at flat routes, and the root compatibility docs still nudged agents toward legacy paths | move planning records into literal `planning/` folders, sweep stale links/paths, and verify with `pnpm run build` plus `pnpm run lint` |
 | `documentation-site-cmdk-listen-01` | `resolved` | Cmd+K / global content search | operators typing **`/listen`** (often after `/` then more keys) saw empty or unstable command-palette results; listen rows were not indexed on **`href`**, and scoring/highlight paths assumed every optional field was present | add **`href`** + **`slug`** to **`buildSearchBlob`**, score **`href`/`slug`**, null-safe **`scoreDiscoveryItem`** / **`getSnippetSource`** / **`filter`**, **`try/catch`** around highlight **`RegExp`**, safe group labels in **`ContentCommandPaletteModal`**; regression tests in **`tests/unit/lib/content-discovery.test.ts`** |
+| `reader-workspace-worker-json-01` | `resolved` | **`/api/reader/workspace`** tsx worker | worker **`stdout`** was not pure JSON — e.g. **`@xenova/transformers`** / model pull spinners wrote **`[⣷] Pulling...`** to stdout, so **`JSON.parse`** failed with invalid token | worker writes payload JSON to a **temp file** and prints only **`READER_WORKSPACE_JSON_PATH=...`**; parent reads file and deletes; runner sets **`TRANSFORMERS_OFFLINE=1`** by default for the child env; fallback still parses raw stdout if no marker |
+| `books-build-epub-log-01` | `resolved` | **`pnpm dev`** / **`build-books.cjs`** | Operators thought **`[Download Success]`** from **epub-gen** meant remote image fetches on every build, and could not tell when the EPUB step was skipped vs re-run | **`scripts/build-books.cjs`** logs **`CACHE HIT`** / **`CACHE MISS (reasons…)`** per slug before repub; one line explains that epub-gen’s **`[Download Success]`** is **local** staging into the EPUB temp tree; EPUB fingerprint uses **size-only** stats (**`BOOK_BUILD_CACHE_VERSION`**) so harmless mtime churn does not invalidate the cache |

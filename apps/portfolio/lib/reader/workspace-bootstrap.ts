@@ -1,5 +1,3 @@
-import 'server-only';
-
 import { getViewerFeatureAccess } from '@/lib/auth/permissions';
 import { getSessionViewer } from '@/lib/auth/session';
 import { getPayloadClient } from '@/lib/payload';

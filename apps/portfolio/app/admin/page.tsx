@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Briefcase, BookOpen } from 'lucide-react';
+import { FileText, Briefcase, BookOpen, Terminal } from 'lucide-react';
 import Link from 'next/link';
 
 // Only allow admin in development
@@ -46,6 +46,14 @@ export default function AdminPage() {
 
   const adminSections = [
     {
+      title: 'Process environment',
+      icon: Terminal,
+      href: '/admin/env',
+      description: 'Masked env snapshot for the running Next server (dev only)',
+      color: 'bg-dark-alt border-2 border-border',
+      count: null as number | null,
+    },
+    {
       title: 'Projects',
       icon: Briefcase,
       href: '/admin/projects',
@@ -80,7 +88,11 @@ export default function AdminPage() {
       >
         <h1 className="text-5xl font-bold text-primary mb-4">Admin Dashboard</h1>
         <p className="text-xl text-text-muted">
-          Manage your content, projects, and documentation
+          Manage your content, projects, and documentation.{' '}
+          <Link href="/login?next=/admin" className="text-accent underline-offset-4 hover:underline">
+            Sign in
+          </Link>{' '}
+          if the dev session is missing.
         </p>
       </motion.div>
 
@@ -96,14 +108,16 @@ export default function AdminPage() {
             >
               <Link
                 href={section.href}
-                className={`${section.color} p-8 text-primary block rounded-2xl border-2 border-border hover:border-border-hover hover:shadow-lg transition-all duration-200 hover:-translate-y-1`}
+                className={`${section.color} block rounded-2xl border-2 border-border p-8 text-primary transition-all duration-200 hover:-translate-y-1 hover:border-border-hover hover:shadow-lg`}
               >
                 <Icon size={48} className="mb-4" />
                 <h2 className="text-2xl font-bold mb-2">{section.title}</h2>
                 <p className="opacity-90 mb-3">{section.description}</p>
-                <div className="text-3xl font-bold">
-                  {loading ? '...' : section.count}
-                </div>
+                {section.count != null ? (
+                  <div className="text-3xl font-bold">{loading ? '...' : section.count}</div>
+                ) : (
+                  <div className="text-sm font-semibold text-text-muted">View</div>
+                )}
               </Link>
             </motion.div>
           );

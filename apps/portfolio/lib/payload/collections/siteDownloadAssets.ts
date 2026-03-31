@@ -32,16 +32,8 @@ export const siteDownloadAssets: CollectionConfig = {
     delete: denyDirectWrites,
   },
   upload: {
+    allowRestrictedFileTypes: true,
     staticDir: resolvePortfolioAppPath('media', 'site-download-assets'),
-    mimeTypes: [
-      'application/pdf',
-      'application/zip',
-      'application/epub+zip',
-      'text/html',
-      'text/markdown',
-      'application/json',
-      'application/octet-stream',
-    ],
   },
   fields: [
     {

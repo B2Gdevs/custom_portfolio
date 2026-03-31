@@ -48,8 +48,11 @@ export default function RootLayout({
     blogPosts: getAllContent('blog'),
   });
 
+  /** Show launcher when chat is not explicitly disabled; key can be server-only — use NEXT_PUBLIC_SITE_CHAT_SHOW=1 to show UI while wiring OPENAI_API_KEY. */
   const siteChatEnabled =
-    Boolean(process.env.OPENAI_API_KEY?.trim()) && process.env.NEXT_PUBLIC_SITE_CHAT !== '0';
+    process.env.NEXT_PUBLIC_SITE_CHAT !== '0' &&
+    (Boolean(process.env.OPENAI_API_KEY?.trim()) ||
+      process.env.NEXT_PUBLIC_SITE_CHAT_SHOW === '1');
 
   const siteShell = (
     <>

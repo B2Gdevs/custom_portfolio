@@ -4,7 +4,7 @@
   <current-phase>03</current-phase>
   <current-plan>global-data-02</current-plan>
   <status>active</status>
-  <next-action>The heavy-blob history cleanup is done and `main` pushes again. The shared provider contract is landed, `@portfolio/repub-builder` builds from the vendored standalone repo, hosted book-artifact and public-media publishers are live, and `/apps` now reads from seeded Supabase-backed `site-app-records` through an SSR-safe worker boundary. Next, continue `global-data-03-01` by wiring the first real `site-download-assets` consumers for public planning-pack bundles and resume/download artifacts, then continue `global-data-03-02` and `global-data-03-03` for project and resume metadata, followed by the owner-only shell refresh in `global-auth-02`.</next-action>
+  <next-action>The heavy-blob history cleanup is done and `main` pushes again. The shared provider contract is landed, `@portfolio/repub-builder` builds from the vendored standalone repo, hosted book-artifact and public-media publishers are live, `/apps` reads from seeded Supabase-backed `site-app-records` through an SSR-safe worker boundary, the planning-pack modal now resolves through a server manifest that can swap in published `site-download-assets` URLs, and `/resumes` HTML routes now prefer published storage-backed files before falling back to repo-local sources. Next, continue `global-data-03-03` and `global-data-03-02` for resume and project metadata while reusing the same download-asset path, followed by the owner-only shell refresh in `global-auth-02`.</next-action>
   <references>
     <reference>AGENTS.md (repo root)</reference>
     <reference>apps/portfolio/content/docs/global/requirements.mdx</reference>

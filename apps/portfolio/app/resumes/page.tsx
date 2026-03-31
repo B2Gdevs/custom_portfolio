@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Download, ExternalLink, Eye, FileText, Printer } from 'lucide-react';
+import { assertResumeOwnerOrRedirect } from '@/lib/auth/resume-owner-gate';
 import { getResumes } from '@/lib/resumes';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -44,7 +45,9 @@ function ResumeAction({
   );
 }
 
-export default function ResumesPage() {
+export default async function ResumesPage() {
+  await assertResumeOwnerOrRedirect();
+
   const resumes = getResumes();
 
   return (

@@ -1,9 +1,14 @@
 import type {
   BuiltinEmbedPack,
   BuiltinEmbedPacksPayload,
+  PlanningPackGalleryTab,
   PlanningPackItem,
   PlanningPackManifest,
 } from 'repo-planner/planning-pack';
+
+const STARTER_TEMPLATE_TAB_ID = 'starter-template';
+const SITE_PACKS_TAB_ID = 'site-planning-packs';
+const INIT_PACK_ID = 'rp-builtin-init';
 
 function slugify(value: string) {
   return value
@@ -33,6 +38,14 @@ function titleFromPath(filePath: string) {
   return filename.slice(0, lastDotIndex) || filename;
 }
 
+function findBuiltinPack(packs: BuiltinEmbedPacksPayload['packs'], packId: string) {
+  return packs.find((pack) => pack.id === packId) ?? null;
+}
+
+function byteLength(value: string) {
+  return new TextEncoder().encode(value).length;
+}
+
 export function builtinPackToPlanningPackItems(
   pack: BuiltinEmbedPack,
   createObjectUrl: (input: { content: string; filename: string }) => string,
@@ -49,6 +62,8 @@ export function builtinPackToPlanningPackItems(
         filename,
       }),
       filename,
+      archivePath: normalizedPath,
+      sizeBytes: byteLength(file.content),
       section: `builtin/${pack.id}`,
       sectionLabel: pack.label,
       slug: slugify(normalizedPath),
@@ -56,25 +71,39 @@ export function builtinPackToPlanningPackItems(
   });
 }
 
-export function mergePlanningPackManifestWithBuiltinPacks(input: {
+export function buildPlanningPackGalleryTabs(input: {
   manifest: PlanningPackManifest | null;
   builtinPayload: BuiltinEmbedPacksPayload | null;
   createObjectUrl: (input: { content: string; filename: string }) => string;
-}): PlanningPackManifest | null {
+}): PlanningPackGalleryTab[] {
   const { manifest, builtinPayload, createObjectUrl } = input;
+  const builtinPacks = builtinPayload?.packs ?? [];
+  const initPack = findBuiltinPack(builtinPacks, INIT_PACK_ID);
 
-  if (!manifest && !builtinPayload) {
-    return null;
-  }
+  const starterItems = initPack
+    ? builtinPackToPlanningPackItems(initPack, createObjectUrl)
+    : (manifest?.demo ?? []);
+  const siteItems = manifest?.site ?? [];
 
-  const builtinItems = (builtinPayload?.packs ?? []).flatMap((pack) =>
-    builtinPackToPlanningPackItems(pack, createObjectUrl),
-  );
-
-  return {
-    version: manifest?.version ?? 1,
-    generatedAt: manifest?.generatedAt ?? builtinPayload?.generatedAt ?? new Date().toISOString(),
-    demo: [...(manifest?.demo ?? []), ...builtinItems],
-    site: manifest?.site ?? [],
-  };
+  return [
+    {
+      id: STARTER_TEMPLATE_TAB_ID,
+      label: 'Starter Planning Pack',
+      icon: '📦',
+      description: '',
+      items: starterItems,
+      mode: 'sections',
+      emptyMessage:
+        'Starter template unavailable. Run `pnpm planning:embed-packs`, `pnpm dev`, or `pnpm run build` to regenerate the init pack.',
+    },
+    {
+      id: SITE_PACKS_TAB_ID,
+      label: 'Site Planning Packs',
+      icon: '📦',
+      description: '',
+      items: siteItems,
+      mode: 'collapsible-sections',
+      emptyMessage: 'This site has no published planning packs yet.',
+    },
+  ];
 }

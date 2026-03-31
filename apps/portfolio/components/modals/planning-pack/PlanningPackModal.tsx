@@ -1,26 +1,23 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { marked } from 'marked';
+import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import {
   type BuiltinEmbedPacksPayload,
   PlanningPackGallery,
-  stripPlanningPackPreviewPreamble,
+  type PlanningPackGalleryTab,
+  type PlanningPackManifest,
 } from 'repo-planner/planning-pack';
 import type { ModalShellProps } from '@/lib/modal-types';
-import type { PlanningPackItem, PlanningPackManifest } from '@/lib/planning-pack-manifest';
-import { mergePlanningPackManifestWithBuiltinPacks } from '@/lib/planning-pack-modal-data';
+import { buildPlanningPackGalleryTabs } from '@/lib/planning-pack-modal-data';
 
-type Tab = 'demo' | 'site';
+const DEFAULT_TAB_ID = 'starter-template';
 
 export function PlanningPackModal({ onClose }: ModalShellProps) {
-  const [manifest, setManifest] = useState<PlanningPackManifest | null>(null);
+  const [tabs, setTabs] = useState<PlanningPackGalleryTab[]>([]);
+  const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>('demo');
-  const [expanded, setExpanded] = useState<PlanningPackItem | null>(null);
-  const [docHtml, setDocHtml] = useState<string>('');
-  const [docLoading, setDocLoading] = useState(false);
+  const [tab, setTab] = useState<string>(DEFAULT_TAB_ID);
 
   useEffect(() => {
     let cancelled = false;
@@ -33,7 +30,7 @@ export function PlanningPackModal({ onClose }: ModalShellProps) {
     };
 
     Promise.all([
-      fetch('/planning-pack/manifest.json')
+      fetch('/api/planning-pack/manifest')
         .then((r) => (r.ok ? (r.json() as Promise<PlanningPackManifest>) : null))
         .catch(() => null),
       fetch('/planning-embed/builtin-packs.json')
@@ -45,19 +42,20 @@ export function PlanningPackModal({ onClose }: ModalShellProps) {
           return;
         }
 
-        const merged = mergePlanningPackManifestWithBuiltinPacks({
+        const nextTabs = buildPlanningPackGalleryTabs({
           manifest: siteManifest,
           builtinPayload,
           createObjectUrl,
         });
 
-        if (!merged) {
+        if (nextTabs.length === 0) {
           throw new Error(
             'Planning pack data missing. Run `pnpm dev` or `pnpm run build` so planning-pack and planning-embed builders run.',
           );
         }
 
-        setManifest(merged);
+        setTabs(nextTabs);
+        setTab(nextTabs[0]?.id ?? DEFAULT_TAB_ID);
         setLoadError(null);
       })
       .catch((e: unknown) => {
@@ -66,6 +64,11 @@ export function PlanningPackModal({ onClose }: ModalShellProps) {
         }
 
         setLoadError(e instanceof Error ? e.message : 'Failed to load planning pack.');
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
       });
 
     return () => {
@@ -73,37 +76,6 @@ export function PlanningPackModal({ onClose }: ModalShellProps) {
       objectUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, []);
-
-  useEffect(() => {
-    if (!expanded) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.stopImmediatePropagation();
-        setExpanded(null);
-      }
-    };
-    window.addEventListener('keydown', onKey, true);
-    return () => window.removeEventListener('keydown', onKey, true);
-  }, [expanded]);
-
-  const renderMarkdown = useCallback((md: string) => marked.parse(md, { async: false, gfm: true }) as string, []);
-
-  const openExpand = useCallback(
-    async (item: PlanningPackItem) => {
-      setExpanded(item);
-      setDocLoading(true);
-      setDocHtml('');
-      try {
-        const r = await fetch(item.file);
-        const text = await r.text();
-        const html = renderMarkdown(text);
-        setDocHtml(html);
-      } finally {
-        setDocLoading(false);
-      }
-    },
-    [renderMarkdown],
-  );
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-8">
@@ -116,16 +88,16 @@ export function PlanningPackModal({ onClose }: ModalShellProps) {
       <div
         role="dialog"
         aria-modal="true"
-        className="relative z-[201] flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border bg-dark-alt shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
+        className="relative z-[201] flex h-[min(88vh,52rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border/80 bg-dark-alt shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
       >
         <header className="flex items-start justify-between gap-4 border-b border-border/80 px-5 py-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-text-muted">Planning pack</p>
-            <h2 className="font-display text-2xl text-primary">Download and preview</h2>
-            <p className="mt-1 max-w-xl text-sm text-text-muted">
-              Starter templates and exported planning pages that follow RepoPlanner conventions. See{' '}
+            <p className="text-xs uppercase tracking-[0.2em] text-text-muted">Planning packs</p>
+            <h2 className="font-display text-2xl text-primary">Example planning packs</h2>
+            <p className="mt-1 max-w-lg text-sm text-text-muted">
+              RepoPlanner starter files and exported site packs. See{' '}
               <a
                 href="https://github.com/MagicbornStudios/RepoPlanner"
                 target="_blank"
@@ -134,8 +106,7 @@ export function PlanningPackModal({ onClose }: ModalShellProps) {
               >
                 RepoPlanner on GitHub
               </a>{' '}
-              for the upstream project. Repository <code className="text-accent">.planning</code> files are
-              not included in this gallery.
+              for the upstream project.
             </p>
           </div>
           <button
@@ -148,19 +119,15 @@ export function PlanningPackModal({ onClose }: ModalShellProps) {
           </button>
         </header>
 
-        <PlanningPackGallery
-          manifest={manifest}
-          loadError={loadError}
-          tab={tab}
-          onTab={setTab}
-          expanded={expanded}
-          docHtml={docHtml}
-          docLoading={docLoading}
-          onCloseExpand={() => setExpanded(null)}
-          onExpand={(item) => void openExpand(item)}
-          renderMarkdown={renderMarkdown}
-          stripForPreview={stripPlanningPackPreviewPreamble}
-        />
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <PlanningPackGallery
+            tabs={tabs}
+            loading={loading}
+            loadError={loadError}
+            tab={tab}
+            onTab={setTab}
+          />
+        </div>
       </div>
     </div>
   );

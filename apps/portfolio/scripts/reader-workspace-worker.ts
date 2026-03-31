@@ -1,5 +1,10 @@
+import { writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { getReaderWorkspaceBootstrap } from '@/lib/reader/workspace-bootstrap';
 import { maybeAutoLoginForDevelopment } from '@/lib/auth/session';
+
+const RESULT_MARKER_PREFIX = 'READER_WORKSPACE_JSON_PATH=';
 
 type WorkerInput = {
   cookieHeader?: string;
@@ -42,16 +47,22 @@ async function main() {
     }),
   );
 
-  process.stdout.write(
-    JSON.stringify({
-      status: 200,
-      body: {
-        ok: true,
-        workspace,
-      },
-      setCookie,
-    }),
+  const payload = JSON.stringify({
+    status: 200,
+    body: {
+      ok: true,
+      workspace,
+    },
+    setCookie,
+  });
+
+  /** Write to a temp file and emit only a single-line marker on stdout so stray logs (e.g. model pull spinners) cannot corrupt JSON. */
+  const outPath = join(
+    tmpdir(),
+    `reader-workspace-${process.pid}-${Date.now()}.json`,
   );
+  writeFileSync(outPath, payload, 'utf8');
+  process.stdout.write(`${RESULT_MARKER_PREFIX}${outPath}\n`);
 }
 
 void main().catch((error) => {

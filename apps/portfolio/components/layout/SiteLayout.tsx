@@ -74,7 +74,8 @@ export function SiteLayout({
     if (sidebarReady || typeof window === 'undefined') return;
 
     const savedPreference = window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
-    const nextCollapsed = savedPreference ? savedPreference === 'true' : isImmersiveReader;
+    /** Default: icon rail (collapsed) on first visit; reader routes stay collapsed. */
+    const nextCollapsed = savedPreference ? savedPreference === 'true' : true;
     const frame = window.requestAnimationFrame(() => {
       setSidebarCollapsed(nextCollapsed);
       setSidebarReady(true);
@@ -90,7 +91,7 @@ export function SiteLayout({
     window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(sidebarCollapsed));
   }, [sidebarCollapsed, sidebarReady]);
 
-  /** Reader has its own rail; never show the site chrome sidebar expanded on reader routes (no effect/setState loop). */
+  /** Reader has its own rail; never show the site chrome sidebar expanded on reader routes. */
   const siteSidebarOpen = !isReaderAppRoute && !sidebarCollapsed;
 
   return (
@@ -109,7 +110,17 @@ export function SiteLayout({
           } as React.CSSProperties
         }
       >
-        <Nav navMenus={navMenus} />
+        <Nav
+          navMenus={navMenus}
+          portfolioSidebarHoverHandlers={
+            !isReaderAppRoute && sidebarCollapsed
+              ? {
+                  /** Expand and persist open until user hits collapse (no expand control when rail is icon-only). */
+                  onMouseEnter: () => setSidebarCollapsed(false),
+                }
+              : undefined
+          }
+        />
         <SidebarInset
           className={cn(
             'min-h-svh',

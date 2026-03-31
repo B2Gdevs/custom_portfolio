@@ -6,6 +6,12 @@ import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypePrettyCode from 'rehype-pretty-code';
 import type { NextConfig } from 'next';
+import { applyMonorepoEnvFromRepoRoot } from './lib/monorepo-env';
+
+const portfolioRoot = path.resolve(__dirname);
+
+/** Root `.env` merged early; app-local non-empty values still win over empty root placeholders. */
+applyMonorepoEnvFromRepoRoot({ portfolioRoot, mode: 'fillUndefinedOrEmpty' });
 
 /** Monorepo root (`.planning/` + `vendor/repo-planner`). Required for RepoPlanner API routes + CLI. */
 const monorepoRoot = path.resolve(__dirname, '../..');
@@ -113,7 +119,6 @@ const nextConfig: NextConfig = {
     'sqlite-vec',
   ],
   webpack: (config, { webpack, isServer }) => {
-    const portfolioRoot = path.resolve(__dirname);
     const requirePortfolio = createRequire(path.join(portfolioRoot, 'package.json'));
     const resolvePkg = (name: string) => path.dirname(requirePortfolio.resolve(`${name}/package.json`));
 

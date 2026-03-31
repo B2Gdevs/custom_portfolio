@@ -23,17 +23,17 @@ taskPhase: global-data-02
 
 | Field | Value |
 | --- | --- |
-| `phase` | `global-data-03-01` is now active while `global-data-01` remains the shared provider baseline and `global-data-02` stays as the storage-policy foundation |
-| `focus` | the blocked heavy-blob history is cleaned and `main` pushes again. `repub-builder` is extracted, the book-artifact and public-media publishers are live, and the app has now started the next public-catalog migration: `site-app-records` and `site-download-assets` exist, `/apps` loads through an SSR-safe worker bridge instead of a hard-coded array, and the hosted app registry is seeded in Supabase. The next execution slice is consuming `site-download-assets` for public planning-pack and resume files without weakening SSR or public SEO. |
+| `phase` | `global-data-03-01` remains active while `global-data-01` stays the shared provider baseline and `global-data-02` stays the storage-policy foundation |
+| `focus` | the blocked heavy-blob history is cleaned and `main` pushes again. `repub-builder` is extracted, the book-artifact and public-media publishers are live, and the public-catalog migration now has its first real `site-download-assets` consumers: `/apps` reads `site-app-records` through the SSR-safe worker bridge, the planning-pack modal reads a server manifest that swaps site-export URLs to published download assets when available, and `/resumes` HTML routes now prefer published storage-backed files before falling back to repo-local sources. The next execution slice is moving resume and project metadata onto dedicated records while reusing the same download-asset path. |
 | `constraint` | repo-memory reduction cannot casually break authored-content SSR. Runtime binaries, generated reading artifacts, and private media can move behind storage/database paths, but route metadata, public page content, and indexable SEO surfaces still need a clear render contract |
 
 ## Next queue
 
 | Priority | Action |
 | --- | --- |
-| `1` | continue `global-data-03-01`: wire the first real `site-download-assets` consumers for public planning-pack bundles and resume/download artifacts so those files stop depending on repo-resident binaries |
-| `2` | continue `global-data-02-03` from the new baseline: remove or replace repo-resident copies of now-published site media where safe, and keep extending the same publish path to the next heavy public classes |
-| `3` | queue `global-data-03-02` and `03-03`: move projects and resume metadata onto Postgres records plus storage-backed relations while keeping long-form editorial copy repo-first where that still reduces maintenance |
+| `1` | continue `global-data-03-03`: move resume metadata onto `resume-records` now that current HTML/download artifacts publish through `site-download-assets` |
+| `2` | continue `global-data-03-02`: move project metadata, ordering, and download/media relations onto `project-records` while keeping long-form bodies repo-first for now |
+| `3` | extend the `site-download-assets` publisher to the next public bundle classes as `/projects`, `/apps`, and future public exports adopt the same storage-backed path |
 | `4` | queue `global-auth-02-01`: refresh the site shell/sidebar around owner-only login and private-surface affordances using the existing auth/session routes instead of inventing a second auth stack |
 
 ## References

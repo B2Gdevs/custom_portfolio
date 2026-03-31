@@ -1,18 +1,15 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MouseEventHandler } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   BookOpenText,
   BookText,
-  Check,
   ChevronLeft,
-  ChevronRight,
   Compass,
   MoreHorizontal,
-  Copy,
   FileCode2,
   FileText,
   Github,
@@ -20,6 +17,7 @@ import {
   Home,
   LayoutGrid,
   LibraryBig,
+  Mail,
   Mic2,
   MoveUpRight,
   Radio,
@@ -54,8 +52,12 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-const EMAIL = 'benjamingarrard5279@gmail.com';
 const GITHUB_URL = 'https://github.com/B2Gdevs';
+/** Public contact link only — no email shown in the UI. Override with NEXT_PUBLIC_CONTACT_HREF. */
+const CONTACT_HREF =
+  typeof process !== 'undefined' && process.env.NEXT_PUBLIC_CONTACT_HREF?.trim()
+    ? process.env.NEXT_PUBLIC_CONTACT_HREF.trim()
+    : GITHUB_URL;
 
 const iconMap: Record<NavIconKey, React.ComponentType<{ size?: number; className?: string }>> = {
   'book-open': BookOpenText,
@@ -124,7 +126,7 @@ const primaryNavItems: {
 
 function CollapsedPrimaryLinks({ pathname, onLinkClick }: { pathname: string; onLinkClick?: () => void }) {
   return (
-    <SidebarMenu className="hidden gap-1 group-data-[collapsible=icon]:flex">
+    <SidebarMenu className="hidden gap-1 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:items-center">
       {primaryNavItems.map((item) => {
         const Icon = item.icon;
         const isActive = item.match(pathname);
@@ -149,6 +151,11 @@ function SidebarToggleButton() {
   const { state, toggleSidebar } = useSidebar();
   const collapsed = state === 'collapsed';
 
+  /** Icon rail has no expand control — hover on the rail expands; only show collapse when expanded. */
+  if (collapsed) {
+    return null;
+  }
+
   return (
     <Button
       type="button"
@@ -156,10 +163,10 @@ function SidebarToggleButton() {
       size="icon-sm"
       onClick={toggleSidebar}
       className="absolute right-2 top-3 z-20 border-sidebar-border bg-sidebar-accent/40 text-sidebar-foreground hover:bg-sidebar-accent"
-      aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-      title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      aria-label="Collapse sidebar"
+      title="Collapse sidebar"
     >
-      {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+      <ChevronLeft size={18} />
     </Button>
   );
 }
@@ -186,7 +193,7 @@ function NavMenuSections({
 
   if (railCollapsed) {
     return (
-      <SidebarMenu className="gap-1">
+      <SidebarMenu className="gap-1 group-data-[collapsible=icon]:items-center">
         {navMenus.flatMap((menu) =>
           menu.items.map((item) => {
             const ItemIcon = iconMap[item.icon];
@@ -349,7 +356,6 @@ function NavMenuSections({
 }
 
 function PortfolioSidebarInner({ pathname, navMenus }: { pathname: string; navMenus: NavMenuSection[] }) {
-  const [copied, setCopied] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { state, isMobile, setOpenMobile } = useSidebar();
@@ -366,16 +372,6 @@ function PortfolioSidebarInner({ pathname, navMenus }: { pathname: string; navMe
       }
     };
   }, []);
-
-  const handleCopyEmail = async () => {
-    try {
-      await navigator.clipboard.writeText(EMAIL);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // Clipboard not available.
-    }
-  };
 
   const handleScroll = () => {
     setIsScrolling(true);
@@ -551,15 +547,19 @@ function PortfolioSidebarInner({ pathname, navMenus }: { pathname: string; navMe
       </SidebarContent>
 
       <SidebarFooter className="gap-3 border-t border-sidebar-border/80 p-4">
-        <Button
-          type="button"
-          variant="default"
-          className="w-full rounded-full bg-sidebar-primary text-sidebar-primary-foreground hover:opacity-90"
-          onClick={handleCopyEmail}
+        <a
+          href={CONTACT_HREF}
+          target="_blank"
+          rel="noreferrer"
+          title="Get in touch"
+          className={cn(
+            'inline-flex w-full items-center justify-center gap-2 rounded-full bg-sidebar-primary px-4 py-2.5 text-sm font-medium text-sidebar-primary-foreground transition hover:opacity-90',
+            'group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:min-w-0 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center'
+          )}
         >
-          {copied ? <Check size={16} /> : <Copy size={16} />}
-          <span className="ml-2">{copied ? 'Copied!' : 'Copy email'}</span>
-        </Button>
+          <Mail className="size-4 shrink-0" aria-hidden />
+          <span className="group-data-[collapsible=icon]:sr-only">Get in touch</span>
+        </a>
 
         <PlanningPackSidebarButton collapsed={iconOnly} />
 
@@ -578,7 +578,16 @@ function PortfolioSidebarInner({ pathname, navMenus }: { pathname: string; navMe
   );
 }
 
-export default function Nav({ navMenus }: { navMenus: NavMenuSection[] }) {
+export default function Nav({
+  navMenus,
+  portfolioSidebarHoverHandlers,
+}: {
+  navMenus: NavMenuSection[];
+  portfolioSidebarHoverHandlers?: {
+    onMouseEnter?: MouseEventHandler<HTMLDivElement>;
+    onMouseLeave?: MouseEventHandler<HTMLDivElement>;
+  };
+}) {
   const pathname = usePathname();
 
   return (
@@ -608,6 +617,7 @@ export default function Nav({ navMenus }: { navMenus: NavMenuSection[] }) {
       <Sidebar
         collapsible="icon"
         className="z-10 border-r border-sidebar-border/80 bg-sidebar/90 backdrop-blur-xl"
+        {...portfolioSidebarHoverHandlers}
       >
         <PortfolioSidebarInner pathname={pathname ?? ''} navMenus={navMenus} />
         <SidebarRail />
