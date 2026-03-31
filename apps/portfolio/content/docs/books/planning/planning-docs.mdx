@@ -26,21 +26,25 @@ For **section structure** in Global, read [Planning docs](/docs/global/planning/
 
 ## Book: Mordred's Tale
 
-Stream planning lives under **`books/planning/<stream>/`** using the **same filenames** as section planning: `state.mdx`, `task-registry.mdx`, `decisions.mdx` (no `mordreds-tale-state` style prefixes on the leaf file).
+Stream planning lives under **`content/docs/books/<slug>/planning/`** using the **same base filenames** as section planning: `roadmap.mdx`, `state.mdx`, `task-registry.mdx`, `decisions.mdx`, plus a fiction-only **`AGENTS.md`** (not routed as MDX—agents read it in-repo).
 
 | Page | Record Set | Purpose |
 | --- | --- | --- |
+| [Mordred's Tale — Roadmap](/docs/books/mordreds-tale/planning/roadmap) | `mordreds-tale/planning/roadmap` | Phase-level sequence (`mt-*` phases); executable ids stay on the task registry. |
 | [Mordred's Tale — State](/docs/books/mordreds-tale/planning/state) | `mordreds-tale/planning/state` | Story roadmap (acts, beats), narrative fronts, manuscript position, next writing queue. |
 | [Mordred's Tale — Task Registry](/docs/books/mordreds-tale/planning/task-registry) | `mordreds-tale/planning/task-registry` | Writing and story tasks (draft to completion first; polish phase later). |
 | [Mordred's Tale — Decisions](/docs/books/mordreds-tale/planning/decisions) | `mordreds-tale/planning/decisions` | Story and writing decisions (style, timeline, POV). |
+| `AGENTS.md` | `mordreds-tale/planning/AGENTS.md` | **Fiction-only** agent read order and loop (beats, prose, spillover)—not software defaults. |
 
 ## Book 2: Mordred's Legacy (sequel to *Mordred's Tale*)
 
 | Page | Record Set | Purpose |
 | --- | --- | --- |
+| [Mordred's Legacy — Roadmap](/docs/books/mordreds-legacy/planning/roadmap) | `mordreds-legacy/planning/roadmap` | Phase sequence (`ml-outline-01`, `ml-book2-02`, `ml-book2-03`). |
 | [Mordred's Legacy — State](/docs/books/mordreds-legacy/planning/state) | `mordreds-legacy/planning/state` | **Book 2** act scaffold, Alun POV, Kael at **42**, Tarro / dungeon-era politics. |
 | [Mordred's Legacy — Decisions](/docs/books/mordreds-legacy/planning/decisions) | `mordreds-legacy/planning/decisions` | `ML-*` locks (POV, armor, execution beat, series order vs Kael prequel). |
 | [Mordred's Legacy — Task Registry](/docs/books/mordreds-legacy/planning/task-registry) | `mordreds-legacy/planning/task-registry` | Outline + manuscript tasks under `books/mordreds_legacy/`. |
+| `AGENTS.md` | `mordreds-legacy/planning/AGENTS.md` | Fiction-only loop for Book 2 + cross-links to *Rune Path*. |
 
 ## Kael prequel: *Magicborn: The Rune Path* (before Book 2 in chronology)
 
@@ -48,9 +52,11 @@ Not **Book 3** as a sequel; chronologically a **prequel** to **Book 2** by many 
 
 | Page | Record Set | Purpose |
 | --- | --- | --- |
+| [Magicborn: The Rune Path — Roadmap](/docs/books/magicborn-rune-path/planning/roadmap) | `magicborn-rune-path/planning/roadmap` | Phase sequence (`mrp-outline-01`, `mrp-outline-02`, `mrp-draft-01`). |
 | [Magicborn: The Rune Path — State](/docs/books/magicborn-rune-path/planning/state) | `magicborn-rune-path/planning/state` | Young Kael (opens **17**), Host / dungeon / Path; bridges toward **Legacy**. |
 | [Magicborn: The Rune Path — Decisions](/docs/books/magicborn-rune-path/planning/decisions) | `magicborn-rune-path/planning/decisions` | `MRP-*` locks (conceit, POV, timeline vs Legacy, rune rules). |
 | [Magicborn: The Rune Path — Task Registry](/docs/books/magicborn-rune-path/planning/task-registry) | `magicborn-rune-path/planning/task-registry` | Outline and manuscript under `books/magicborn_rune_path/`. |
+| `AGENTS.md` | `magicborn-rune-path/planning/AGENTS.md` | Fiction-only loop; gap-year coordination with Legacy. |
 
 ## EPUB build: planning supplement
 
@@ -60,6 +66,7 @@ The **`@portfolio/repub-builder`** CLI packs `books/<slug>/` into EPUB. Extra pl
 | --- | --- |
 | CLI | **`repub epub <book-folder>`** (first positional = manuscript / book source tree; there is **no** `--input` flag today) plus repeatable **`--planning <dir>`** for each planning root to embed as appendix. Example: `repub epub ./books/mordreds_tale --planning ./apps/portfolio/content/docs/books/planning --output ./out.epub`. |
 | `pnpm run build:books` | Reads optional **`epubPlanningDirs`** in each `book.json` (paths **relative to that book folder**), resolves them, and passes `--planning` for each existing directory. |
+| Planning pack (`pnpm dev` / `pnpm run build`) | **`build-planning-pack.cjs`** exports planning MDX from `content/docs/**` to **`/planning-pack/site/`**, including **`books/<stream>/planning/*`** (per-novel `roadmap`, `state`, `task-registry`, `decisions`, **`AGENTS.md`**) plus section `books/planning/`. Open the **Planning pack** modal on the site to download. |
 | Files included | Recursive `.md`, `.mdx`, `.xml`, `.toml`, `.txt` under each root; skips `node_modules`, `.git`, `dist`, `.next`, `__pycache__`. |
 | Built-in titles | Each `books/<slug>/book.json` can list `../../apps/portfolio/content/docs/books/planning` so **books** planning MDX ships inside the built EPUB (shared tree; stream-specific pages live beside section planning). Includes **Mordred's Tale**, **Mordred's Legacy**, **Magicborn: The Rune Path**. |
 
@@ -88,7 +95,7 @@ Verify with **`pnpm run build:books`** and open the output under `apps/portfolio
 | `follow-on-docs` | Reader and implementation docs come after the planning stack. |
 | `reader-extensions` | Shipped reader/AI scope: P0-P3b, AI-v0 shipped; Payload + `sqlite-vec` RAG under AI-v1a-AI-v1d; `magicborn` as public lore corpus; **P5** planning-folder EPUB supplement shipped (`repub epub --planning` / `epubPlanningDirs`); **P4** annotation merge at build time still planned. Monorepo narrative: [documentation/requirements](/docs/documentation/requirements). Details and task ids: [task registry](/docs/books/planning/task-registry). |
 | `agent-loop` | Follow `AGENTS.md`: read planning state, pick one books task, implement, verify, then update planning records. |
-| `book-planning` | Per-book planning (e.g. Mordred's Tale) uses **state** (roadmap + queue), **task registry**, and **decisions** -- no separate outline page; arc lives in state and locks in decisions. |
+| `book-planning` | Per-book planning uses **`roadmap.mdx`** (phase timeline), **state** (beats + queue), **task registry**, **decisions**, and **`AGENTS.md`** (fiction-only agent rules). Beat-level arc lives in **state**; locks in **decisions**. |
 | `reader-shell-passes` | **`books-reader-03`:** reader shell **shipped** (site **`SidebarTrigger`**, shelf **search/filters**, **ember/ink** theme, **`readerModalStore` + strip + modal root**). **`books-reader-04`:** **repub artifact** + **book-scoped cockpit packs** from embedded EPUB planning -- [embed architecture](/docs/documentation/reader-repo-planner-embed-architecture) + [decisions](/docs/books/planning/decisions). |
 
 ## Phases, task ids, and frontmatter
@@ -106,4 +113,8 @@ Shape matches [global planning](/docs/global/global-planning): **`<books>-<strea
 - **`repoPath`:** Optional YAML frontmatter on any planning `.mdx` file: repo-relative path to this file (this page sets `repoPath: apps/portfolio/content/docs/books/planning/planning-docs.mdx`). Not shown in the article body.
 - **`taskPhase`:** Optional frontmatter when a page is owned by a single phase (e.g. a future `books-ai-01-kickoff.mdx`). Omit on shared indexes like [task registry](/docs/books/planning/task-registry).
 
-Read order for **books** work: root **`AGENTS.md`** → [requirements](/docs/books/requirements) → [roadmap](/docs/books/planning/roadmap) → [state](/docs/books/planning/state) (include [Magicborn line](/docs/books/planning/state#magicborn-line-world-order-and-chapter-beats) when writing cross-title fiction) → [task registry](/docs/books/planning/task-registry) → [decisions](/docs/books/planning/decisions) → [errors and attempts](/docs/books/planning/errors-and-attempts). Open this page when you need the local playbook, the per-book planning map, or the EPUB planning-supplement rules. Monorepo scope → [documentation/requirements](/docs/documentation/requirements). Global reference docs remain optional context: [Planning docs](/docs/global/planning/planning-docs) and [Global planning guide](/docs/global/global-planning).
+Read order for **books** work: root **`AGENTS.md`** → [requirements](/docs/books/requirements) → [roadmap](/docs/books/planning/roadmap) → [state](/docs/books/planning/state) (include [Magicborn line](/docs/books/planning/state#magicborn-line-world-order-and-chapter-beats) when writing cross-title fiction) → [task registry](/docs/books/planning/task-registry) → [decisions](/docs/books/planning/decisions) → [errors and attempts](/docs/books/planning/errors-and-attempts).
+
+For a **single novel stream** (`mordreds-tale`, `mordreds-legacy`, `magicborn-rune-path`): that folder’s **`AGENTS.md`** (fiction loop) → **`roadmap.mdx`** → **`state.mdx`** → **`task-registry.mdx`** → **`decisions.mdx`**, then manuscript under `books/<slug>/`.
+
+Open this page when you need the local playbook, the per-book planning map, or the EPUB planning-supplement rules. Monorepo scope → [documentation/requirements](/docs/documentation/requirements). Global reference docs remain optional context: [Planning docs](/docs/global/planning/planning-docs) and [Global planning guide](/docs/global/global-planning).

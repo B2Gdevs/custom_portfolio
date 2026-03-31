@@ -9,7 +9,10 @@
       "Dark fantasy"
     ],
     "status": "available",
-    "hasEpub": true
+    "hasEpub": true,
+    "remoteEpubUrl": "/api/published-book-artifacts/file/magicborn_rune_path--epub--cp-20260331-033239-4ad389b.epub",
+    "planningPackUrl": "/api/published-book-artifacts/file/magicborn_rune_path--planning-pack--cp-20260331-033239-4ad389b.zip",
+    "artifactVersion": "cp-20260331-033239-4ad389b"
   },
   {
     "slug": "mordreds_legacy",
@@ -21,7 +24,10 @@
       "Dark fantasy"
     ],
     "status": "available",
-    "hasEpub": true
+    "hasEpub": true,
+    "remoteEpubUrl": "/api/published-book-artifacts/file/mordreds_legacy--epub--cp-20260331-033239-4ad389b.epub",
+    "planningPackUrl": "/api/published-book-artifacts/file/mordreds_legacy--planning-pack--cp-20260331-033239-4ad389b.zip",
+    "artifactVersion": "cp-20260331-033239-4ad389b"
   },
   {
     "slug": "mordreds_tale",
@@ -33,7 +39,10 @@
       "Dark fantasy"
     ],
     "status": "available",
-    "hasEpub": true
+    "hasEpub": true,
+    "remoteEpubUrl": "/api/published-book-artifacts/file/mordreds_tale--epub--cp-20260331-033239-4ad389b.epub",
+    "planningPackUrl": "/api/published-book-artifacts/file/mordreds_tale--planning-pack--cp-20260331-033239-4ad389b.zip",
+    "artifactVersion": "cp-20260331-033239-4ad389b"
   },
   {
     "slug": "mordreds_tale_part_1",
@@ -46,7 +55,10 @@
       "Epic fantasy"
     ],
     "status": "available",
-    "hasEpub": true
+    "hasEpub": true,
+    "remoteEpubUrl": "/api/published-book-artifacts/file/mordreds_tale_part_1--epub--cp-20260331-033239-4ad389b.epub",
+    "planningPackUrl": "/api/published-book-artifacts/file/mordreds_tale_part_1--planning-pack--cp-20260331-033239-4ad389b.zip",
+    "artifactVersion": "cp-20260331-033239-4ad389b"
   },
   {
     "slug": "mordreds_tale_part_2",
@@ -59,7 +71,10 @@
       "War fantasy"
     ],
     "status": "available",
-    "hasEpub": true
+    "hasEpub": true,
+    "remoteEpubUrl": "/api/published-book-artifacts/file/mordreds_tale_part_2--epub--cp-20260331-033239-4ad389b.epub",
+    "planningPackUrl": "/api/published-book-artifacts/file/mordreds_tale_part_2--planning-pack--cp-20260331-033239-4ad389b.zip",
+    "artifactVersion": "cp-20260331-033239-4ad389b"
   },
   {
     "slug": "mordreds_tale_part_3",
@@ -72,6 +87,9 @@
       "Political fantasy"
     ],
     "status": "available",
-    "hasEpub": true
+    "hasEpub": true,
+    "remoteEpubUrl": "/api/published-book-artifacts/file/mordreds_tale_part_3--epub--cp-20260331-033239-4ad389b.epub",
+    "planningPackUrl": "/api/published-book-artifacts/file/mordreds_tale_part_3--planning-pack--cp-20260331-033239-4ad389b.zip",
+    "artifactVersion": "cp-20260331-033239-4ad389b"
   }
 ]

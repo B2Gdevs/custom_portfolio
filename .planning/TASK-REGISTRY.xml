@@ -109,4 +109,58 @@
       <depends>01-10</depends>
     </task>
   </phase>
+  <phase id="02">
+    <task id="02-01" agent-id="" status="in-progress">
+      <goal>Plan and land the shared data/storage provider abstraction in the Global docs + codebase so Payload/SQLite local workflows and Supabase hosted workflows share one runtime contract, bootstrap path, and verification story without committing large `.db` files.</goal>
+      <keywords>data,storage,sqlite,supabase,payload,planning</keywords>
+      <commands>
+        <command>pnpm --filter @portfolio/app test:unit</command>
+        <command>pnpm run build</command>
+        <command>pnpm run lint</command>
+      </commands>
+      <depends>01-11</depends>
+    </task>
+  </phase>
+  <phase id="03">
+    <task id="03-01" agent-id="" status="done">
+      <goal>Extract `@portfolio/repub-builder` into the standalone `MagicbornStudios/repub-builder` repository, vendor it back into this repo as `vendor/repub-builder`, and keep the monorepo consuming it as a working workspace dependency and git-installable package.</goal>
+      <keywords>repub-builder,submodule,vendor,git-install,workspace,packages</keywords>
+      <commands>
+        <command>pnpm --filter @portfolio/repub-builder test</command>
+        <command>pnpm run build</command>
+        <command>pnpm run lint</command>
+        <command>git -C vendor/repub-builder push origin main</command>
+      </commands>
+      <depends>02-01</depends>
+    </task>
+    <task id="03-02" agent-id="" status="in-progress">
+      <goal>Classify the large git blobs by artifact type, land the first off-repo publish path for versioned EPUB/planning-pack artifacts, define what moves into storage/database versus what remains repo-resident, document the branch-history cleanup or rebuild required because the current unpushed range already contains large DB/EPUB blobs, restore builtin planning-pack visibility in the portfolio modal, and keep applying the SSR/SEO-safe rendering contract through real migrations for heavy public media and DB-backed public content.</goal>
+      <keywords>blob-audit,storage,database,seo,ssr,artifacts</keywords>
+      <commands>
+        <command>pnpm --filter @portfolio/app exec vitest run tests/unit/lib/book-artifacts.test.ts tests/unit/lib/reader-workspace-state.test.ts tests/unit/lib/payload-collection-contract.test.ts</command>
+        <command>pnpm --filter @portfolio/repub-builder test</command>
+        <command>pnpm run build</command>
+        <command>pnpm run lint</command>
+      </commands>
+      <depends>03-01</depends>
+    </task>
+    <task id="03-03" agent-id="" status="planned">
+      <goal>Plan and execute the next public-catalog migration after the storage baseline: move apps, project metadata, resume metadata, and public download assets onto SSR-safe Postgres collections plus storage-backed files, while keeping long-form public prose repo-first where that still lowers maintenance.</goal>
+      <keywords>apps,projects,resumes,downloads,postgres,storage,seo</keywords>
+      <commands>
+        <command>pnpm run build</command>
+        <command>pnpm run lint</command>
+      </commands>
+      <depends>03-02</depends>
+    </task>
+    <task id="03-04" agent-id="" status="planned">
+      <goal>Refresh the public shell around the existing owner-only auth/session contract so the sidebar exposes login/account affordances and private/admin entry points only for the seeded owner account.</goal>
+      <keywords>auth,sidebar,login,owner-only,shadcn</keywords>
+      <commands>
+        <command>pnpm run build</command>
+        <command>pnpm run lint</command>
+      </commands>
+      <depends>03-03</depends>
+    </task>
+  </phase>
 </task-registry>

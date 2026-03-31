@@ -7,7 +7,12 @@ import YouTubeEmbed from '@/components/projects/YouTubeEmbed';
 import BookReaderEmbed from '@/components/books/BookReaderEmbed';
 import Callout from '@/components/blog/Callout';
 import DocLinkCard from '@/components/blog/DocLinkCard';
-import { PlanningPackInlineButton } from '@/components/planning/PlanningPackInlineButton';
+import { CopyMarkdownSample } from '@/components/blog/CopyMarkdownSample';
+import { ArticleDetails } from '@/components/blog/ArticleDetails';
+import { FictionLoopDemo } from '@/components/blog/FictionLoopDemo';
+import { ManuscriptLoopResourcesHub } from '@/components/blog/ManuscriptLoopResourcesHub';
+import { PlanningPackLaunchButton } from '@/components/planning/PlanningPackLaunchButton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 function reactNodeToPlainText(node: ReactNode): string {
   if (node == null || typeof node === 'boolean') return '';
@@ -166,8 +171,8 @@ function buildMDXComponents(components: MDXComponents): MDXComponents {
     YouTube: (props: { url: string; title?: string }) => (
       <YouTubeEmbed url={props.url} title={props.title} />
     ),
-    BookReaderEmbed: (props: { slug: string; title?: string }) => (
-      <BookReaderEmbed slug={props.slug} title={props.title} />
+    BookReaderEmbed: (props: { slug: string; title?: string; checkpoint?: string }) => (
+      <BookReaderEmbed slug={props.slug} title={props.title} checkpoint={props.checkpoint} />
     ),
     Callout: (props: { type?: 'info' | 'tip' | 'note' | 'warning'; title?: string; children?: React.ReactNode }) => (
       <Callout type={props.type} title={props.title}>{props.children}</Callout>
@@ -175,9 +180,36 @@ function buildMDXComponents(components: MDXComponents): MDXComponents {
     DocLinkCard: (props: { href: string; title: string; description?: string }) => (
       <DocLinkCard href={props.href} title={props.title} description={props.description} />
     ),
-    PlanningPackButton: (props: { label?: string }) => (
-      <PlanningPackInlineButton label={props.label} />
+    PlanningPackButton: (props: {
+      label?: string;
+      subtitle?: string;
+      variant?: 'default' | 'featured';
+    }) => (
+      <PlanningPackLaunchButton
+        label={props.label}
+        subtitle={props.subtitle}
+        variant={props.variant ?? 'default'}
+      />
     ),
+    ManuscriptLoopResourcesHub: () => <ManuscriptLoopResourcesHub />,
+    CopyMarkdownSample: (props: {
+      title?: string;
+      filename?: string;
+      markdown?: string;
+      children?: React.ReactNode;
+    }) => (
+      <CopyMarkdownSample title={props.title} filename={props.filename} markdown={props.markdown}>
+        {props.children}
+      </CopyMarkdownSample>
+    ),
+    ArticleDetails: (props: { summary: string; children?: React.ReactNode }) => (
+      <ArticleDetails summary={props.summary}>{props.children}</ArticleDetails>
+    ),
+    FictionLoopDemo: () => <FictionLoopDemo />,
+    Tabs: (props: ComponentProps<typeof Tabs>) => <Tabs {...props} />,
+    TabsList: (props: ComponentProps<typeof TabsList>) => <TabsList {...props} />,
+    TabsTrigger: (props: ComponentProps<typeof TabsTrigger>) => <TabsTrigger {...props} />,
+    TabsContent: (props: ComponentProps<typeof TabsContent>) => <TabsContent {...props} />,
     ...components,
   };
 }

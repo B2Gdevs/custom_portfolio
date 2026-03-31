@@ -1,3 +1,4 @@
+import { logChatRuntimeProcessEnvOnce } from '@/lib/chat-runtime-env-log';
 import { buildRagSystemMessage } from '@/lib/rag/chat-context';
 import { createLogger } from '@/lib/logging';
 import { retrieveRagContext } from '@/lib/rag/retrieve';
@@ -12,6 +13,9 @@ const OPENAI_CHAT_COMPLETIONS_URL = 'https://api.openai.com/v1/chat/completions'
 const DEFAULT_CHAT_MODEL = 'gpt-4o-mini';
 const MAX_CONVERSATION_MESSAGES = 12;
 const CHAT_LOGGER = createLogger('chat.api');
+
+/** Node runtime — full env dump uses `fs` in `logChatRuntimeProcessEnvOnce`. */
+export const runtime = 'nodejs';
 
 function jsonResponse(body: unknown, status = 200, headers?: HeadersInit) {
   return new Response(JSON.stringify(body), {
@@ -96,7 +100,14 @@ function previewText(value: string, limit = 160) {
   return `${normalized.slice(0, limit)}...`;
 }
 
+/** When `SITE_CHAT_RAG` is `0`, `false`, or `off`, skip RAG/embeddings (chat uses only system + conversation). */
+function isSiteChatRagEnabled(): boolean {
+  const v = process.env.SITE_CHAT_RAG?.trim().toLowerCase();
+  return v !== '0' && v !== 'false' && v !== 'off';
+}
+
 export async function POST(request: Request) {
+  logChatRuntimeProcessEnvOnce('POST /api/chat');
   const requestId = crypto.randomUUID();
   const startedAt = Date.now();
   const responseHeaders = { 'x-portfolio-request-id': requestId };
@@ -143,19 +154,28 @@ export async function POST(request: Request) {
     );
   }
 
+  const ragEnabled = isSiteChatRagEnabled();
   const retrievalStartedAt = Date.now();
-  const hits = await retrieveRagContext(query).catch((error) => {
-    CHAT_LOGGER.warn('rag retrieval failed for chat request; continuing without hits', {
+  const hits = ragEnabled
+    ? await retrieveRagContext(query).catch((error) => {
+        CHAT_LOGGER.warn('rag retrieval failed for chat request; continuing without hits', {
+          requestId,
+          elapsedMs: Date.now() - retrievalStartedAt,
+          error,
+        });
+        return [];
+      })
+    : [];
+  if (!ragEnabled) {
+    CHAT_LOGGER.info('site chat RAG skipped (SITE_CHAT_RAG disables retrieval; no embedding calls)', {
       requestId,
-      elapsedMs: Date.now() - retrievalStartedAt,
-      error,
     });
-    return [];
-  });
+  }
   CHAT_LOGGER.info('rag retrieval completed for chat request', {
     requestId,
     elapsedMs: Date.now() - retrievalStartedAt,
     hitCount: hits.length,
+    ragEnabled,
   });
   CHAT_LOGGER.debug('rag retrieval hits', {
     requestId,

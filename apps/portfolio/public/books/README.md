@@ -4,7 +4,9 @@ Do **not** edit these files by hand.
 
 | Output | Source |
 | --- | --- |
-| **`manifest.json`** | Written by `scripts/build-books.cjs` when you run **`pnpm run build:books`** from the **repo root**, or automatically when **`pnpm dev`** runs the books watcher. The Next.js app reads this for the books index and homepage. |
-| **`{slug}/book.epub`** | Built from **`books/{slug}/`** (markdown/MDX under `chapters/`). |
+| **`manifest.json`** | Written by `scripts/build-books.cjs` when you run **`pnpm run build:books`** from the **repo root**, or automatically when **`pnpm dev`** runs the books watcher. The Next.js app reads this for the books index, homepage, and any published remote artifact URLs. |
+| **`{slug}/book.epub`** | Built from **`books/{slug}/`** (markdown/MDX under `chapters/`). These local EPUBs are working artifacts only and are now gitignored so published versions can live in storage instead of normal commits. |
 
-Authoring lives under repo-root **`books/`** (e.g. `book.json`, `chapters/`). Adding a new book folder and running the build (or saving files during `pnpm dev`) updates this directory.
+**Incremental builds:** `scripts/build-books.cjs` stores input fingerprints in **`.tmp/book-build-cache.json`** (gitignored). When nothing under a book’s inputs changed, it skips EPUB generation (no `epub-gen` image download / zip). Set **`BOOKS_FORCE_REBUILD=1`** for a full rebuild (e.g. after upgrading `repub-builder`).
+
+Authoring lives under repo-root **`books/`** (e.g. `book.json`, `chapters/`). Adding a new book folder and running the build (or saving files during `pnpm dev`) updates this directory. Use **`pnpm run publish:book-artifacts`** or **`pnpm run build:books:publish`** to checkpoint the built EPUB plus a zipped planning pack into storage and refresh the manifest with remote artifact URLs.

@@ -6,7 +6,8 @@
   "workspaces": [
     "apps/*",
     "packages/*",
-    "packages-shared/*"
+    "packages-shared/*",
+    "vendor/repub-builder"
   ],
   "scripts": {
     "setup": "./scripts/setup-git-hooks.sh",
@@ -38,6 +39,9 @@
     "package:org:setup": "./scripts/setup-org-secrets.sh",
     "package:org:update": "./scripts/update-org-npm-token.sh",
     "build:books": "pnpm --filter @portfolio/repub-builder run build && node scripts/build-books.cjs",
+    "publish:book-artifacts": "pnpm --filter @portfolio/app exec tsx --tsconfig tsconfig.json scripts/publish-book-artifacts.ts",
+    "publish:public-media": "pnpm --filter @portfolio/app exec tsx --tsconfig tsconfig.json scripts/publish-public-media.ts",
+    "build:books:publish": "pnpm run build:books && pnpm run publish:book-artifacts",
     "planning": "node scripts/run-planning-cli.mjs",
     "planning:init": "node scripts/run-planning-cli.mjs init --minimal --no-agents-md",
     "planning:init:force": "node scripts/run-planning-cli.mjs init --force --minimal --no-agents-md",
@@ -48,7 +52,11 @@
     "planning:report-view": "node scripts/run-planning-cli.mjs report view",
     "planning:ui": "node scripts/run-planning-cli.mjs report view",
     "planning:embed-packs": "node scripts/run-planning-cli.mjs pack embed-build -o apps/portfolio/public/planning-embed/builtin-packs.json --docs-dir apps/portfolio/content/docs/repo-planner",
-    "vendors:commit-push": "node scripts/commit-push-vendors-and-root.cjs"
+    "vendors:commit-push": "node scripts/commit-push-vendors-and-root.cjs",
+    "test:unit": "pnpm --filter @portfolio/app run test:unit",
+    "test:unit:coverage": "pnpm --filter @portfolio/app run test:unit:coverage",
+    "test:unit:report": "pnpm --filter @portfolio/app run test:unit:report",
+    "chat:env-preview": "pnpm --filter @portfolio/app run chat:env-preview"
   },
   "devDependencies": {
     "@iarna/toml": "^2.2.5",

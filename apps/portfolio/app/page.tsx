@@ -1,7 +1,7 @@
 import { getAllContent } from '@/lib/content';
 import { getBooks } from '@/lib/books';
 import { getFeaturedBookShowcase } from '@/lib/featured-book';
-import { getMusicTracks } from '@/lib/music';
+import { getMusicTracks } from '@/lib/listen-runtime';
 import CreativeHero from '@/components/home/CreativeHero';
 import FeaturedBookExperience from '@/components/home/FeaturedBookExperience';
 import SoundtrackSection from '@/components/home/SoundtrackSection';
@@ -12,7 +12,7 @@ export default async function Home() {
   const docs = getAllContent('docs');
   const books = getBooks();
   const featuredBook = getFeaturedBookShowcase();
-  const tracks = getMusicTracks();
+  const tracks = await getMusicTracks();
 
   if (!featuredBook) {
     return (

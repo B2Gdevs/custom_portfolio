@@ -54,7 +54,9 @@ export const DEFAULT_READER_WORKSPACE_SETTINGS: ReaderWorkspaceSettings = {
 };
 
 function asString(value: unknown) {
-  return typeof value === 'string' ? value : null;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number') return String(value);
+  return null;
 }
 
 function asBoolean(value: unknown, fallback: boolean) {

@@ -1,3 +1,83 @@
-<*xml version="1.0" encoding="UTF-8"*>
+<?xml version="1.0" encoding="UTF-8"?>
 <decisions>
+  <decision id="02-01">
+    <title>Dual provider data plane: local SQLite plus Supabase</title>
+    <summary>Shared app data and uploaded assets should move behind a provider contract that keeps local SQLite plus local files as the default development path while adding Supabase as the first hosted backend; do not rely on committed `.db` binaries or Git LFS for normal runtime setup.</summary>
+    <impact>Books, Listen, and future shared services can target one backend-neutral contract. Auth/session migration stays separate from the first data/storage phase.</impact>
+    <references>
+      <file path="apps/portfolio/content/docs/global/planning/plans/global-data-01/PLAN.mdx" />
+      <file path="apps/portfolio/content/docs/global/planning/task-registry.mdx" />
+      <file path="apps/portfolio/content/docs/documentation/requirements.mdx" />
+    </references>
+  </decision>
+  <decision id="02-02">
+    <title>Supabase hosted bootstrap is standardized around one linked project plus a private reader bucket</title>
+    <summary>The hosted bootstrap path should use one linked Supabase project ref, a private `reader-library` bucket, env-driven Payload Postgres/S3 settings in the repo, and a machine-local Codex MCP registration. Only the database password and the S3 access-key pair stay manual secrets.</summary>
+    <impact>Most of the hosted setup can now be repeated from the repo and local CLI state without committing `.db` files or keeping a vague dashboard-only checklist.</impact>
+    <references>
+      <file path="apps/portfolio/content/docs/global/planning/plans/global-data-01/PLAN.mdx" />
+      <file path="apps/portfolio/content/docs/global/planning/plans/global-data-01/SUPABASE-BOOTSTRAP.mdx" />
+      <file path=".env.example" />
+    </references>
+  </decision>
+  <decision id="03-01">
+    <title>repub-builder becomes a standalone git-installable repo and returns as a vendored submodule</title>
+    <summary>`@portfolio/repub-builder` should move out of `packages/` and live in the standalone `MagicbornStudios/repub-builder` repository. This monorepo should consume it through a vendored submodule workspace checkout instead of carrying the package as a normal in-tree directory.</summary>
+    <impact>The package can behave like a real external library with git URL installs, while the portfolio repo keeps a pinned vendored checkout and stops coupling package structure to app-repo history.</impact>
+    <references>
+      <file path="apps/portfolio/content/docs/global/planning/plans/global-data-02/PLAN.mdx" />
+      <file path="apps/portfolio/content/docs/global/planning/task-registry.mdx" />
+      <file path="apps/portfolio/content/docs/documentation/requirements.mdx" />
+    </references>
+  </decision>
+  <decision id="03-02">
+    <title>Published book binaries move to storage as immutable versioned artifacts while the manifest stays lightweight</title>
+    <summary>Built EPUBs and planning-pack zips should publish into storage as immutable versioned artifacts. Payload tracks the current version, while `public/books/manifest.json` keeps only lightweight metadata plus the current remote URLs needed by the site and reader.</summary>
+    <impact>The repo stops treating shipped EPUB/zip binaries as normal commit cargo, checkpoint naming stays explicit, and SSR-facing routes can still render deterministic metadata without keeping heavyweight binaries in git.</impact>
+    <references>
+      <file path="apps/portfolio/content/docs/global/planning/plans/global-data-02/PLAN.mdx" />
+      <file path="apps/portfolio/content/docs/global/planning/decisions.mdx" />
+      <file path="apps/portfolio/public/books/manifest.json" />
+    </references>
+  </decision>
+  <decision id="03-03">
+    <title>Public SEO surfaces may be repo-first or Postgres-backed, but storage is only for heavy binaries and private assets</title>
+    <summary>Public pages may keep authored copy in repo or fetch it from Postgres on the server, but they must resolve through stable slug and metadata loaders. Supabase storage is for heavy binaries, media, generated bundles, originals, and private uploads rather than as the source of crawlable page copy.</summary>
+    <impact>The repo can move heavy files and mutable catalogs off git without turning public content into client-only storage reads or sacrificing server-rendered SEO surfaces.</impact>
+    <references>
+      <file path="apps/portfolio/content/docs/global/planning/plans/global-data-02/STORAGE-POLICY.mdx" />
+      <file path="apps/portfolio/content/docs/global/planning/plans/global-data-02/SSR-SEO-MATRIX.mdx" />
+      <file path="apps/portfolio/content/docs/global/planning/decisions.mdx" />
+    </references>
+  </decision>
+  <decision id="03-04">
+    <title>Public site media uses a manifest bridge during migration instead of forcing immediate content rewrites</title>
+    <summary>Heavy public site media should publish into `site-media-assets`, while a small manifest maps legacy `/images/...` paths to storage-backed URLs. Content loaders resolve those paths at runtime so authored MDX and frontmatter can keep stable references during the migration.</summary>
+    <impact>The portfolio app can adopt storage-backed media without rewriting every existing document at once, and the same bridge can be extended to other public-media classes until a fuller DB-backed content model is worth the churn.</impact>
+    <references>
+      <file path="apps/portfolio/content/docs/global/planning/plans/global-data-02/PLAN.mdx" />
+      <file path="apps/portfolio/content/docs/global/planning/decisions.mdx" />
+      <file path="apps/portfolio/public/media/manifest.json" />
+    </references>
+  </decision>
+  <decision id="03-05">
+    <title>Public catalogs move metadata first, while heavy files move to storage and long-form copy stays repo-first until proven otherwise</title>
+    <summary>The next public-catalog migration should separate metadata from heavyweight files. `/apps`, `/projects`, and `/resumes` may move ordering, summaries, links, and file relationships into Postgres collections such as `site-app-records`, `project-records`, and `resume-records`, while downloadable or media-heavy files move into storage collections such as `site-download-assets`. Long-form editorial bodies can stay repo-first until moving them clearly reduces maintenance.</summary>
+    <impact>The repo can shed hard-coded arrays, local file scans, and heavy downloadable artifacts without weakening SSR or forcing all public writing into the database before that trade actually pays off.</impact>
+    <references>
+      <file path="apps/portfolio/content/docs/global/planning/plans/global-data-03/PLAN.mdx" />
+      <file path="apps/portfolio/content/docs/global/planning/plans/global-data-02/STORAGE-POLICY.mdx" />
+      <file path="apps/portfolio/content/docs/global/planning/decisions.mdx" />
+    </references>
+  </decision>
+  <decision id="03-06">
+    <title>Public auth UI remains owner-only in v1</title>
+    <summary>The shell/sidebar login refresh should reuse the existing seeded owner account and auth/session routes. Public visitors browse almost everything anonymously, while login only unlocks private and admin surfaces for the single owner configured by the auth env vars until a broader role model is intentionally added.</summary>
+    <impact>The UI can adopt shadcn-compatible login and account affordances without implying public signup or multi-user behavior that the backend does not support yet.</impact>
+    <references>
+      <file path="apps/portfolio/content/docs/global/planning/decisions.mdx" />
+      <file path="apps/portfolio/content/docs/global/planning/task-registry.mdx" />
+      <file path="apps/portfolio/lib/auth/config.ts" />
+    </references>
+  </decision>
 </decisions>

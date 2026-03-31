@@ -1,0 +1,130 @@
+---
+title: Storage policy -- global-data-02
+description: Artifact classes, Supabase targets, and SSR/SEO rules for moving heavy runtime files out of git.
+date: "2026-03-31"
+updated: "2026-03-31"
+repoPath: apps/portfolio/content/docs/global/planning/plans/global-data-02/STORAGE-POLICY.mdx
+taskPhase: global-data-02
+---
+
+# Storage policy: `global-data-02`
+
+## Immediate blocker
+
+`repub-builder` is extracted, but the root repo still cannot safely push its local `main` history as-is because the current ahead-of-origin range already includes large binary blobs:
+
+- `apps/portfolio/portfolio.db` at about `113 MB`
+- multiple generated `apps/portfolio/public/books/**/book.epub` blobs at about `41 MB`
+
+So the first practical outcome of this phase is:
+
+1. stop creating new git-tracked heavy artifacts
+2. rebuild or rewrite the blocked local commit range
+3. move the artifact classes below onto Supabase storage and Postgres-backed metadata
+
+## Blob pressure checkpoint
+
+The current audit is no longer just "books are heavy." The largest classes now visible in history are:
+
+| Class | Current examples | Practical reading |
+| --- | --- | --- |
+| `generated-book-binaries` | `apps/portfolio/public/books/**/book.epub`, `.repub` | these should never be normal git history again |
+| `local-db-history` | `apps/portfolio/portfolio.db` | local runtime state must be seedable/importable, not committed |
+| `image-sequence-source` | `books/mordreds_tale/images/*.png` | large chapter art/source images can stay in git only when they are true source assets, not generated runtime exports |
+| `video-media` | `books/mordreds_legacy/videos/*.mp4` | heavyweight public media should move behind storage plus metadata |
+| `build-output-leakage` | `.next/**`, `.standalone/**` | these are hygiene problems, not storage candidates |
+| `vendored-dependency-leakage` | accidental `node_modules/**` history | this is a git hygiene problem, not a database/storage problem |
+
+## Artifact classes
+
+| Artifact class | Current examples | Target home | Notes |
+| --- | --- | --- | --- |
+| `local-dev-db` | `apps/portfolio/portfolio.db` | local-only SQLite/Postgres dev state, never git | keep `.db` files ignored; use seed/import/export flows instead of commits |
+| `published-book-binaries` | `apps/portfolio/public/books/*/book.epub`, future `.repub` | Supabase public storage bucket + Postgres metadata row | generated in local/CI, uploaded after build, not stored as repo artifacts |
+| `reader-private-uploads` | owner-uploaded EPUBs and derived assets | Supabase private bucket `reader-library` + Payload metadata | private access stays signed/proxied; no repo residency |
+| `public-heavy-media` | screenshots, cover images, galleries, videos, downloadable media kits | Supabase public storage bucket + DB/media metadata | keep only lightweight source references or asset ids in repo content |
+| `public-optimized-images` | covers, thumbnails, OG-safe derivatives, responsive variants | storage bucket or deterministic build output + DB metadata | these can be public and cacheable; the page only needs a stable URL and metadata |
+| `audio-catalog-media` | listen tracks, previews, preset bundles, downloadable stems | Supabase public/private bucket + DB metadata | public or gated by row visibility; route metadata stays in DB/repo, not in binary blobs |
+| `authored-source-assets` | manuscript art, chapter image sequences, source PSD/PNG sets, raw exports | repo only if they are true authoring source and reasonably sized; otherwise private/archive storage | source assets are not automatically "SEO assets"; only keep them in git when versioning value is worth the weight |
+| `packaged-doc-bundles` | planning packs, future docs export zips, downloadable bundles | Supabase public storage bucket + DB metadata | treat as generated artifacts like EPUBs, not repo-resident outputs |
+| `build-output` | `.standalone/`, `.reader-builds/`, `.next/`, test reports | local build output only | gitignored; regenerate when needed |
+| `seo-copy-and-route-content` | docs/blog/project/book landing copy, slugs, metadata | repo MDX or Postgres rows queried on the server | keep deterministic server-rendered content, not signed client fetches |
+
+## Supabase target model
+
+| Need | Target |
+| --- | --- |
+| public downloadable EPUBs and future repub artifacts | a versioned public bucket such as `published-books` |
+| public planning-pack zip exports and similar bundles | the same versioned public bucket or a sibling `published-packs` bucket |
+| private reader uploads | existing private `reader-library` bucket |
+| public media heavier than repo-friendly images | a public bucket such as `site-media` |
+| original source assets too large for healthy git usage | a private/archive bucket such as `source-archive` |
+| metadata for public books/media | Postgres rows surfaced through Payload collections or a provider-owned repository layer |
+
+## SSR and SEO contract
+
+| Surface | Rule |
+| --- | --- |
+| public route HTML | render on the server from repo content or Postgres metadata, never from client-only storage reads |
+| page metadata (`title`, `description`, OG image) | derive from server-side DB/file lookups with stable slug keys |
+| canonical public assets | storage URL or proxy path may back the asset, but the route that references it must still resolve deterministically on the server |
+| docs/blog/editorial pages | remain file-first unless there is a strong reason to move them |
+| books/listen/projects indexes | may read from Postgres on the server with caching/revalidation, as long as the HTML remains crawlable |
+| public detail pages backed by DB content | may be statically generated at build time, ISR-backed, or request-time SSR from Postgres if the server can resolve stable content without per-user secrets |
+| signed/private assets | never part of SEO; page chrome may be public, but the asset itself must resolve through signed or authenticated routes |
+| private/user-specific content | signed URLs or authenticated proxy routes only; no SEO requirement |
+
+## Render strategies
+
+| Strategy | Best for | Notes |
+| --- | --- | --- |
+| `repo-first static` | docs, blog posts, long-form public narrative, planning records | strongest authoring/version control story; no DB requirement |
+| `DB-backed static build` | stable public catalogs or detail pages whose copy lives in Postgres | Next can pull from Postgres during build and emit static HTML; keep slugs and metadata stable |
+| `DB-backed ISR` | public catalogs that change without a full deploy | server fetches from Postgres with revalidation; still crawlable because HTML is rendered on the server |
+| `request-time SSR` | public pages that must reflect fresh DB state immediately | use sparingly; still SEO-safe if response is server-rendered and stable for crawlers |
+| `client-only storage fetch` | private workspace media and owner-only tools | not suitable for SEO surfaces |
+
+## What can move off-repo next
+
+| Class | Move off repo? | Why |
+| --- | --- | --- |
+| built EPUBs / repub outputs / checkpoint binaries | `yes` | already proven; keep version rows in Postgres and binaries in storage |
+| planning packs / docs export zips | `yes` | generated bundles with no reason to live in git |
+| public videos | `yes` | heavy, cacheable, and SEO only needs stable metadata plus URL |
+| large screenshots and gallery originals | `yes` | store originals in storage and keep metadata plus chosen hero image path in DB or repo |
+| audio tracks / previews / downloadable bundles | `yes` | binary-heavy, natural fit for storage plus metadata |
+| OG images / thumbnails / responsive derivatives | `usually yes` | can be regenerated or published to storage; pages only need stable URLs |
+| docs/blog/project body copy | `usually no` | these are the SEO payload and versioned authoring source |
+| planning source documents | `no` | they are core repo text, not runtime weight |
+| small logos / icons / critical theme assets | `usually no` | keeping them local simplifies builds and avoids pointless indirection |
+| per-user uploads, annotations, workspace exports | `yes` | private runtime data, zero SEO value |
+
+## Next modeled public content
+
+The next step is not "put all content in the database." It is to move the right metadata and binary files first:
+
+- `site-app-records`
+  - store app-card metadata, ordering, descriptions, route hints, and optional planning-pack/download relationships for `/apps`
+- `project-records`
+  - store project summaries, ordering, tags, link groups, and media/download relations
+  - keep long-form project bodies repo-first initially so SSR stays simple and editorial writing does not gain an unnecessary CMS tax
+- `resume-records`
+  - store resume gallery metadata and published file relations instead of deriving everything from local HTML directory scans
+- `site-download-assets`
+  - store public downloadable files such as resume HTML/PDF artifacts, public planning-pack zips, and future public export bundles
+
+This is the maintenance split to protect:
+
+- Postgres owns structured metadata and relationships.
+- Supabase storage owns heavy files and downloadable artifacts.
+- Server-rendered loaders own SEO.
+- Repo files stay the authoring source for long-form prose until moving them removes more code than it adds.
+
+## Transition order
+
+1. Rewrite or rebuild the current `origin/main..main` range so `portfolio.db` and generated EPUB blobs are no longer inside pending push history.
+2. Extend the provider-owned metadata model from published book artifacts into public media and downloadable bundle classes.
+3. Change every generated bundle flow (`build:books`, planning-pack packaging, future export zips) to publish to Supabase storage instead of committing outputs into the repo.
+4. Move large public media and screenshots behind the same storage model, while keeping stable hero/canonical metadata available to the server.
+5. Keep SEO-critical copy either file-backed or server-queried from Postgres with stable slugs, metadata loaders, and cache/revalidation rules.
+6. Treat build-output leakage and accidental vendored dependencies as git hygiene cleanup, not as storage features.

@@ -1,15 +1,15 @@
 ---
 title: Book reader (EPUB)
-description: Embed the portfolio EPUB reader in docs; it loads book.epub from static files built from repo-root books/.
+description: Embed the portfolio EPUB reader in docs; it loads built EPUBs from the books manifest, whether the current artifact lives locally or behind storage.
 ---
 
 # Book reader (EPUB)
 
-The portfolio serves built books from static files at `/books/<slug>/book.epub`. These are produced by the root-level script `pnpm run build:books` from the repo-root `books/` directory. The in-app reader loads `book.epub` and uses the same EPUB runtime on the dedicated book reader page and in embedded docs.
+The portfolio still builds EPUBs from the repo-root `books/` directory with `pnpm run build:books`, but the current shipped artifact no longer has to live in git. The site reads `public/books/manifest.json`, which can now point each built book at a current remote artifact URL in storage while keeping the same reader/runtime surface on the dedicated reader page and in embedded docs.
 
 ## Embedded reader in docs
 
-The `BookReaderEmbed` component can be used in any doc or article to show the same reader used on the book reader page, loading a specific book by slug from the static EPUB URL.
+The `BookReaderEmbed` component can be used in any doc or article to show the same reader used on the book reader page, loading a specific book by slug from the current manifest-backed EPUB URL.
 
 Example:
 
@@ -17,9 +17,10 @@ Example:
 
 ## How it works
 
-- EPUB: built from `books/<slug>/chapters/` and written to `apps/portfolio/public/books/<slug>/book.epub`
-- Manifest: `build:books` writes `public/books/manifest.json`, which powers the books list and `getBooks()`
-- Runtime: the reader fetches `/books/<slug>/book.epub` and renders it in-browser without server-side book rendering
+- EPUB build artifact: built from `books/<slug>/chapters/` and written locally to `apps/portfolio/public/books/<slug>/book.epub` during authoring
+- Publish step: `pnpm run publish:book-artifacts` or `pnpm run build:books:publish` uploads the immutable EPUB plus a zipped planning pack to storage and refreshes the manifest with current remote URLs
+- Manifest: `build:books` writes `public/books/manifest.json`, which powers the books list, `getBooks()`, and current download/reader URLs
+- Runtime: the reader loads the manifest-selected URL and renders it in-browser without server-side EPUB rendering
 
 ## Planning records
 

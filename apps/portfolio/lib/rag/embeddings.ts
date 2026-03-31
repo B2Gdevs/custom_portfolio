@@ -1,4 +1,4 @@
-import { getEmbeddingDimensions, getEmbeddingModel } from './config';
+import { getEmbeddingDimensions, getEmbeddingModel, getEmbeddingProvider } from './config';
 
 interface OpenAIEmbeddingsResponse {
   data: Array<{
@@ -10,6 +10,11 @@ interface OpenAIEmbeddingsResponse {
 export async function embedTexts(texts: string[]): Promise<number[][]> {
   if (!texts.length) {
     return [];
+  }
+
+  if (getEmbeddingProvider() === 'local') {
+    const { embedTextsLocal } = await import('./embeddings-local');
+    return embedTextsLocal(texts);
   }
 
   const apiKey = process.env.OPENAI_API_KEY?.trim();

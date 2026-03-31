@@ -3,6 +3,13 @@
   "author": "Ben Garrard",
   "description": "War in Hallinghorn, returning magic, and kinship under pressure. Mordred rises while crowns bargain over wells and blood.",
   "genres": ["Fantasy", "Dark fantasy", "War fantasy"],
+  "epubPartition": {
+    "sourceBook": "mordreds_tale",
+    "chapterStart": 15,
+    "chapterEnd": 18,
+    "renumberChapters": true,
+    "renumberStart": 1
+  },
   "epubPlanningDirs": [
     "../../apps/portfolio/content/docs/books/planning",
     "../../apps/portfolio/content/docs/books/mordreds-tale/planning"

@@ -1,5 +1,7 @@
-import 'dotenv/config';
 import { ensureOwnerSeed } from '@/lib/auth/seed';
+import { loadScriptEnv } from './load-script-env';
+
+loadScriptEnv();
 
 async function main() {
   const result = await ensureOwnerSeed();
@@ -11,11 +13,13 @@ async function main() {
   console.log(
     `[auth:seed] ${status} (${result.tenantId} / ${result.userId})`,
   );
+
+  process.exit(0);
 }
 
 main().catch((error: unknown) => {
   const message =
     error instanceof Error ? error.stack || error.message : String(error);
   console.error(`[auth:seed] failed: ${message}`);
-  process.exitCode = 1;
+  process.exit(1);
 });

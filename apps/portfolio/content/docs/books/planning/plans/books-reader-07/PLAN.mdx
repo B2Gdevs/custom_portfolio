@@ -1,0 +1,30 @@
+---
+title: books-reader-07 Plan
+description: Kickoff for the next reader shadcn migration wave inside @portfolio/repub-builder.
+date: "2026-03-30"
+updated: "2026-03-30"
+repoPath: apps/portfolio/content/docs/books/planning/plans/books-reader-07/PLAN.mdx
+taskPhase: books-reader-07
+---
+
+# Kickoff: `books-reader-07`
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `goal` | expand the mirrored package-local shadcn stack and replace the reader's remaining raw control surfaces, starting with workspace forms and the main viewer chrome |
+| `scope` | `@portfolio/repub-builder/reader` UI primitives, `ReaderWorkspace`, `ReaderPlanningStrip`, `ReaderModalRoot`, `ReaderWorkspaceSidebar`, and the highest-traffic `EpubViewer` controls |
+| `non-goals` | rewriting the EPUB canvas layout, changing backend behavior, replacing every custom motion/layout primitive in one pass, or importing app-local components directly into the package |
+| `dependencies` | `books-reader-06`, `BOOKS-READER-PACKAGE-LOCAL-UI-PRIMITIVES`, `BOOKS-READER-PACKAGE-LOCAL-SHADCN-FIRST`, current reader tests, and the portfolio token set |
+| `tests required` | targeted reader workspace coverage, package tests where viewer/runtime behavior changes, plus `pnpm run build` and `pnpm run lint` |
+| `definition of done` | package-local `Textarea`, `Select`, and `Checkbox` primitives exist; workspace forms and the main viewer action controls use them or the mirrored `Button`/`Input`; planning strip and modal controls stop using raw buttons; docs capture any remaining intentionally custom surfaces |
+| `first tasks` | add the missing primitives, migrate workspace controls, migrate viewer controls in the highest-traffic overlays/footers, then verify and log the remainder audit |
+
+## Open Questions
+
+| Question | Status | Notes |
+| --- | --- | --- |
+| should every raw button inside `EpubViewer` be replaced immediately? | `answered` | no; prioritize user-facing action surfaces and keep bespoke rendering/canvas-adjacent code custom where the component abstraction adds little value |
+| should the package depend on new external shadcn/base-ui peers to do this? | `answered` | no for now; mirror the small primitives locally so `@portfolio/repub-builder` stays self-contained inside the monorepo |
+| should the built-in and queued shelf sections come back as part of this phase? | `answered` | no; the reader library stays on the flattened shelf grid unless a later explicit UX phase changes it |

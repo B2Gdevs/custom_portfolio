@@ -2,6 +2,12 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { marked } from 'marked';
+import {
+  readPublicMediaManifest,
+  replacePublicMediaReferencesInSourceFromManifest,
+  resolvePublicMediaRecordFromManifest,
+  resolvePublicMediaUrlFromManifest,
+} from '@/lib/public-media';
 
 const contentDirectory = path.join(process.cwd(), 'content');
 
@@ -140,6 +146,8 @@ function safeLinkArray(value: unknown): ContentLink[] | undefined {
 }
 
 function normalizeContentMeta(meta: Record<string, unknown>, slug: string, fileModifiedDate: string): ContentMeta {
+  const mediaManifest = readPublicMediaManifest();
+
   return {
     ...meta,
     slug,
@@ -148,9 +156,17 @@ function normalizeContentMeta(meta: Record<string, unknown>, slug: string, fileM
     date: typeof meta.date === 'string' ? meta.date : fileModifiedDate,
     updated: typeof meta.updated === 'string' ? meta.updated : fileModifiedDate,
     tags: safeStringArray(meta.tags),
-    featuredImage: typeof meta.featuredImage === 'string' ? meta.featuredImage : undefined,
-    image: typeof meta.image === 'string' ? meta.image : undefined,
-    images: safeStringArray(meta.images),
+    featuredImage:
+      typeof meta.featuredImage === 'string'
+        ? resolvePublicMediaUrlFromManifest(mediaManifest, meta.featuredImage)
+        : undefined,
+    image:
+      typeof meta.image === 'string'
+        ? resolvePublicMediaUrlFromManifest(mediaManifest, meta.image)
+        : undefined,
+    images: safeStringArray(meta.images)?.map((entry) =>
+      resolvePublicMediaUrlFromManifest(mediaManifest, entry),
+    ),
     githubUrl: typeof meta.githubUrl === 'string' ? meta.githubUrl : undefined,
     liveUrl: typeof meta.liveUrl === 'string' ? meta.liveUrl : undefined,
     status: typeof meta.status === 'string' ? meta.status : undefined,
@@ -163,7 +179,9 @@ function normalizeContentMeta(meta: Record<string, unknown>, slug: string, fileM
     links: safeLinkArray(meta.links),
     searchKeywords: safeStringArray(meta.searchKeywords),
     media: Array.isArray(meta.media)
-      ? meta.media.filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === 'object')
+      ? meta.media
+          .filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === 'object')
+          .map((item) => resolvePublicMediaRecordFromManifest(mediaManifest, item))
       : undefined,
   };
 }
@@ -323,13 +341,17 @@ export function getContentBySlug(
   const stats = fs.statSync(filePath);
   const fileModifiedDate = stats.mtime.toISOString().split('T')[0];
   const meta = normalizeContentMeta(data, slug, fileModifiedDate);
-  const parsed = parseContentBody(content);
+  const resolvedContent = replacePublicMediaReferencesInSourceFromManifest(
+    readPublicMediaManifest(),
+    content,
+  );
+  const parsed = parseContentBody(resolvedContent);
 
   return {
     meta,
     slug,
     href: getContentHref(type, slug),
-    content,
+    content: resolvedContent,
     plainText: parsed.plainText,
     headings: parsed.headings,
     missingRequiredSections: getMissingRequiredSections(type, parsed.headings),

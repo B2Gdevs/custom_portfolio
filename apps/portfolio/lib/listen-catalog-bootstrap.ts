@@ -18,6 +18,7 @@ type ListenCatalogRecordDoc = {
   description?: string | null;
   bandlabUrl?: string | null;
   embedUrl?: string | null;
+  artworkUrl?: string | null;
   date?: string | null;
   extraTags?: Array<{ tag?: string | null }> | null;
 };
@@ -69,6 +70,7 @@ function toListenCatalogEntry(doc: ListenCatalogRecordDoc): ListenCatalogEntry |
     description: doc.description,
     bandlabUrl: doc.bandlabUrl,
     embedUrl: doc.embedUrl ?? '',
+    artworkUrl: doc.artworkUrl ?? undefined,
     date: doc.date ?? undefined,
     extraTags: normalizeTags(doc.extraTags),
   };

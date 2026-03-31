@@ -2,10 +2,10 @@
 title: Task Registry
 description: Executable tasks for the Global docs section and repo-wide planning IA.
 date: "2026-03-28"
-updated: "2026-03-30"
+updated: "2026-03-31"
 order: 3
 repoPath: apps/portfolio/content/docs/global/planning/task-registry.mdx
-taskPhase: global-site-02
+taskPhase: global-data-02
 ---
 
 # Task Registry
@@ -33,6 +33,37 @@ taskPhase: global-site-02
 | `global-auth-01-01` | `done` | establish Payload auth foundations for the site: auth-enabled users, tenant/org seed, owner seed, long-lived session cookie policy, no public signup, and local auto-login for development | `global-site-02-02` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
 | `global-auth-01-02` | `done` | add shared tenant and entitlement helpers so books/listen/admin features can ask one permission layer whether private or write-capable behavior is allowed | `global-auth-01-01` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
 | `global-auth-01-03` | `done` | expose the auth foundation to the portfolio host: login, logout, me/session checks, and owner-aware gating helpers without opening public signup | `global-auth-01-01` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
+
+## Phase `global-auth-02`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `global-auth-02-01` | `planned` | refresh the portfolio shell/sidebar around the existing owner-only auth/session contract: add shadcn-compatible login/account affordances, keep public browsing open, and surface private/admin entry points only when the seeded owner session is active | `global-auth-01-03`, `global-data-03-01` | relevant component tests, `pnpm run build`, `pnpm run lint` |
+
+## Phase `global-data-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `global-data-01-01` | `done` | define one shared provider contract for app data and uploaded assets, including env selection rules and phase-1 boundaries for local SQLite/file mode versus hosted Supabase mode | `global-auth-01-03` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
+| `global-data-01-02` | `planned` | move shared Listen and Reader runtime access behind provider-owned repositories/bootstrap services so routes and components stop depending on one concrete backend | `global-data-01-01` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
+| `global-data-01-03` | `in-progress` | add the install/sync/bootstrap path for large local data: local SQLite/file export-import rules plus Supabase bootstrap/migration flow for hosted data and uploads | `global-data-01-01`, `global-data-01-02` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
+| `global-data-01-04` | `planned` | decide the phase-1 boundary for Books AI/RAG under the new provider model, then align section planners and deploy/local docs on the supported backend matrix | `global-data-01-01` | docs updated, `pnpm run build`, `pnpm run lint` |
+
+## Phase `global-data-02`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `global-data-02-01` | `done` | extract `@portfolio/repub-builder` into the standalone `MagicbornStudios/repub-builder` repo, vendor it back as `vendor/repub-builder`, and keep the monorepo consuming it as a working workspace package and git-installable library | `global-data-01-01` | `pnpm --filter @portfolio/repub-builder test`, `pnpm --filter @portfolio/app exec vitest run tests/unit/components/books/ReaderWorkspace.test.tsx`, `pnpm run build`, `pnpm run lint`, submodule repo push |
+| `global-data-02-02` | `in-progress` | classify the large git blobs by artifact type, land the first off-repo artifact path (versioned EPUB + planning-pack uploads with manifest-backed remote URLs), and define the branch-history cleanup/rebuild needed because the current unpushed range already contains large DB/EPUB blobs | `global-data-02-01` | storage policy doc + hosted artifact publish checkpoint + `pnpm --filter @portfolio/app exec vitest run tests/unit/lib/book-artifacts.test.ts tests/unit/lib/reader-workspace-state.test.ts tests/unit/lib/payload-collection-contract.test.ts`, `pnpm --filter @portfolio/repub-builder test`, `pnpm run build`, `pnpm run lint` |
+| `global-data-02-03` | `in-progress` | define and start applying the SSR/SEO-safe rendering contract for content that moves into the database/storage layer: classify which surfaces stay repo-first, which become Postgres-backed server-rendered catalogs, and which binaries/media move entirely to storage; land the new public-media collections/publisher, restore builtin-pack visibility in the planning-pack modal, and wire storage-backed URLs back into the portfolio app without rewriting authored content | `global-data-02-02` | docs updated, route/data matrix reviewed, `pnpm --filter @portfolio/app exec vitest run tests/unit/lib/planning-pack-modal-data.test.ts tests/unit/lib/public-media.test.ts tests/unit/lib/payload-runtime-config.test.ts tests/unit/lib/payload-collection-contract.test.ts`, `pnpm run build`, `pnpm run lint` |
+
+## Phase `global-data-03`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `global-data-03-01` | `planned` | add the next public catalog collections and SSR-safe loaders: `site-app-records` plus `site-download-assets`, and migrate `/apps` plus public planning-pack/download metadata away from hard-coded component arrays and repo-resident binaries | `global-data-02-03` | targeted loader/component tests, `pnpm run build`, `pnpm run lint` |
+| `global-data-03-02` | `planned` | move project metadata, ordering, link groups, and media/download relations into `project-records` while keeping long-form project bodies repo-first until the DB path proves simpler | `global-data-03-01` | targeted loader/component tests, `pnpm run build`, `pnpm run lint` |
+| `global-data-03-03` | `planned` | move resumes onto `resume-records` plus `site-download-assets` so gallery metadata and downloadable HTML/PDF artifacts stop depending on local directory scans and repo-resident files | `global-data-03-01` | targeted loader/component tests, `pnpm run build`, `pnpm run lint` |
 
 ## Registry rules
 

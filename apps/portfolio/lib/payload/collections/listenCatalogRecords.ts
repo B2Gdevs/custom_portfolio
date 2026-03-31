@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload';
+import { LISTEN_MEDIA_ASSET_COLLECTION_SLUG } from './listenMediaAssets';
 
 export const LISTEN_CATALOG_RECORDS_COLLECTION_SLUG = 'listen-catalog-records';
 
@@ -75,6 +76,15 @@ export const listenCatalogRecords: CollectionConfig = {
     },
     {
       name: 'embedUrl',
+      type: 'text',
+    },
+    {
+      name: 'artworkAsset',
+      type: 'relationship',
+      relationTo: LISTEN_MEDIA_ASSET_COLLECTION_SLUG,
+    },
+    {
+      name: 'artworkUrl',
       type: 'text',
     },
     {

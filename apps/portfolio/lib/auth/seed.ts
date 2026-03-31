@@ -10,6 +10,7 @@ type SeedResult = {
   createdTenant: boolean;
   createdUser: boolean;
   tenantId: string;
+  tenantValue: number | string;
   userId: string;
 };
 
@@ -18,7 +19,9 @@ function isObject(value: unknown): value is Record<string, unknown> {
 }
 
 function asString(value: unknown) {
-  return typeof value === 'string' ? value : null;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number') return String(value);
+  return null;
 }
 
 export async function ensureOwnerSeed(): Promise<SeedResult> {
@@ -55,7 +58,8 @@ export async function ensureOwnerSeed(): Promise<SeedResult> {
     createdTenant = true;
   }
 
-  const tenantId = asString((tenant as Record<string, unknown>).id);
+  const tenantValue = (tenant as Record<string, unknown>).id;
+  const tenantId = asString(tenantValue);
   if (!tenantId) {
     throw new Error('owner seed could not resolve tenant id');
   }
@@ -85,7 +89,7 @@ export async function ensureOwnerSeed(): Promise<SeedResult> {
         password: seed.password,
         displayName: seed.displayName,
         role: 'owner',
-        tenant: tenantId,
+        tenant: tenantValue,
         entitlements: OWNER_DEFAULT_ENTITLEMENTS,
       },
     });
@@ -122,7 +126,7 @@ export async function ensureOwnerSeed(): Promise<SeedResult> {
         data: {
           displayName: seed.displayName,
           role: 'owner',
-          tenant: tenantId,
+          tenant: tenantValue,
           entitlements: Array.from(
             new Set([...entitlements, ...OWNER_DEFAULT_ENTITLEMENTS]),
           ),
@@ -140,6 +144,7 @@ export async function ensureOwnerSeed(): Promise<SeedResult> {
     createdTenant,
     createdUser,
     tenantId,
+    tenantValue: tenantValue as number | string,
     userId,
   };
 }

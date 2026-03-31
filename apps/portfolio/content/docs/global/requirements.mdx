@@ -31,6 +31,7 @@ order: 6
 | `GLOBAL-REQ-07` | executable behavior cannot be marked done without automated tests | verification needs to prove the behavior, not just assert that the code compiles |
 | `GLOBAL-REQ-08` | new, ambiguous, or stale phases should use a lightweight kickoff record before implementation | agents should clarify scope, non-goals, risks, and first tasks before doing broad work |
 | `GLOBAL-REQ-09` | auth, tenant, and entitlement policy for gated site features should live in one shared monorepo layer before sections build private or write-capable product features on top of it | books, listen, admin, and future tools need one permission model instead of section-specific access hacks |
+| `GLOBAL-REQ-10` | shared app data and uploaded assets should use one provider contract that preserves a first-class local SQLite/file path while allowing a hosted backend such as Supabase to run the same product flows | sections should not fork their own persistence story or rely on committed `.db` artifacts and Git LFS just to share state |
 
 ## Section Boundaries
 

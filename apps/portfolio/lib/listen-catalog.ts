@@ -13,6 +13,7 @@ export interface ListenCatalogEntry {
   description: string;
   bandlabUrl: string;
   embedUrl: string;
+  artworkUrl?: string;
   lockGroup?: string;
   /** Optional ISO date for sort when using newest/oldest */
   date?: string;

@@ -1,7 +1,15 @@
 import type { CollectionConfig } from 'payload';
 import { resolvePortfolioAppPath } from '../app-root';
+import {
+  canManageReaderUploadCollection,
+  readReaderUploadCollection,
+} from '../access';
 
 export const READER_LIBRARY_ASSET_COLLECTION_SLUG = 'reader-library-assets';
+
+export function getReaderLibraryAssetFileURL(filename: string) {
+  return `/api/${READER_LIBRARY_ASSET_COLLECTION_SLUG}/file/${encodeURIComponent(filename)}`;
+}
 
 export const readerLibraryAssets: CollectionConfig = {
   slug: READER_LIBRARY_ASSET_COLLECTION_SLUG,
@@ -9,6 +17,12 @@ export const readerLibraryAssets: CollectionConfig = {
     useAsTitle: 'filename',
     group: 'Reader',
     defaultColumns: ['filename', 'mimeType', 'tenant', 'uploadedBy', 'updatedAt'],
+  },
+  access: {
+    create: canManageReaderUploadCollection,
+    delete: readReaderUploadCollection,
+    read: readReaderUploadCollection,
+    update: readReaderUploadCollection,
   },
   upload: {
     staticDir: resolvePortfolioAppPath('media', 'reader-library'),

@@ -1,13 +1,19 @@
 import { GET } from '@/app/api/content/search/route';
 import { getAllContentEntries } from '@/lib/content';
+import { getListenSearchDiscoveryItems } from '@/lib/listen-runtime';
 
 vi.mock('@/lib/content', () => ({
   getAllContentEntries: vi.fn(),
 }));
 
+vi.mock('@/lib/listen-runtime', () => ({
+  getListenSearchDiscoveryItems: vi.fn(),
+}));
+
 describe('/api/content/search', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.mocked(getListenSearchDiscoveryItems).mockResolvedValue([]);
   });
 
   it('returns grouped blog and project hits for the command palette', async () => {

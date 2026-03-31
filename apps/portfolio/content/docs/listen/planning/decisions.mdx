@@ -57,6 +57,22 @@ repoPath: apps/portfolio/content/docs/listen/planning/decisions.mdx
 | **Rationale** | The private-media path should match the same owner-session model used by Books instead of keeping a second access story alive in the UI. |
 | **Consequences** | Shared-password unlock remains only for explicitly public `lockGroup` previews; private media now requires auth-backed visibility from the start. |
 
+## `LISTEN-DATA-03` -- DB-backed rows become runtime-first after seeding
+
+| Field | Value |
+| --- | --- |
+| **Decision** | Once the seed/backfill path exists, runtime Listen surfaces should prefer Payload-backed rows first and use `listen-catalog.ts` only as authored fallback/bootstrap content. |
+| **Rationale** | The DB model already exists; the next gain is using one durable row source for `/listen`, search, home tracks, and future admin edits instead of leaving the DB as passive scaffolding. |
+| **Consequences** | The next Listen data phase needs an explicit upsert contract, local seed story, and fallback rule so the site still renders cleanly before or without DB rows. |
+
+## `LISTEN-DATA-04` -- Seed/upsert is the first owner maintenance path
+
+| Field | Value |
+| --- | --- |
+| **Decision** | The first long-lived owner maintenance flow for Listen should be a repeatable local seed/upsert command (`pnpm --filter @portfolio/app listen:seed`) rather than a new bespoke admin surface. |
+| **Rationale** | The catalog is still small, the owner is the only editor, and the DB-first runtime path needs a stable content pipeline before UI editing adds more state and permissions work. |
+| **Consequences** | `listen-catalog.ts` remains useful as authored fallback/bootstrap content, and new admin/editor work should wait until the seed flow proves insufficient. |
+
 ## `LISTEN-UX-01` -- Parity with blog / projects discovery
 
 | Field | Value |

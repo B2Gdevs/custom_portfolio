@@ -12,6 +12,9 @@ import { RequiredSectionsNotice } from '@/components/content/RequiredSectionsNot
 import { buildContentLinkGroups } from '@/lib/content-view-models';
 import { ArrowLeft } from 'lucide-react';
 
+/** This post inlines Apps + Resources inside the Resources tab; skip duplicate top link strip. */
+const MANUSCRIPT_LOOP_BLOG_SLUG = 'how-we-write-books-with-planning-documents-and-the-manuscript-loop';
+
 export async function generateStaticParams() {
   const posts = getAllContent('blog');
   return posts.map((post) => ({
@@ -74,12 +77,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             </div>
           </header>
 
-          <ContentTopLinks
-            heading="Downloads & Resources"
-            appLinks={linkGroups.appLinks}
-            downloads={linkGroups.downloads}
-            links={linkGroups.links}
-          />
+          {slug !== MANUSCRIPT_LOOP_BLOG_SLUG ? (
+            <ContentTopLinks
+              heading="Downloads & Resources"
+              appLinks={linkGroups.appLinks}
+              downloads={linkGroups.downloads}
+              links={linkGroups.links}
+            />
+          ) : null}
 
           {process.env.NODE_ENV !== 'production' ? (
             <RequiredSectionsNotice type="blog" missing={post.missingRequiredSections} />

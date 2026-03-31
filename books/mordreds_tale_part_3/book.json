@@ -3,6 +3,13 @@
   "author": "Ben Garrard",
   "description": "Giants, survival, and statecraft after the tree is neglected. Power hardens into law while the world refuses to stay cut.",
   "genres": ["Fantasy", "Dark fantasy", "Political fantasy"],
+  "epubPartition": {
+    "sourceBook": "mordreds_tale",
+    "chapterStart": 19,
+    "chapterEnd": 19,
+    "renumberChapters": true,
+    "renumberStart": 1
+  },
   "epubPlanningDirs": [
     "../../apps/portfolio/content/docs/books/planning",
     "../../apps/portfolio/content/docs/books/mordreds-tale/planning"

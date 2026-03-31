@@ -30,6 +30,6 @@ function entryToPublicTrack(entry: ListenCatalogEntry): MusicTrack | null {
 }
 
 /** Public, unlocked tracks only (home soundtrack section). */
-export function getMusicTracks(): MusicTrack[] {
+export function getStaticMusicTracks(): MusicTrack[] {
   return getListenCatalog().map(entryToPublicTrack).filter(Boolean) as MusicTrack[];
 }

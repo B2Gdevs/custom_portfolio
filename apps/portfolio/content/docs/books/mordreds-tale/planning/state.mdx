@@ -2,7 +2,7 @@
 title: Mordred's Tale — State
 description: Narrative fronts, manuscript position, story roadmap (acts), open drafting questions, and next queue.
 date: "2026-03-18"
-updated: "2026-04-07"
+updated: "2026-03-30"
 order: 7
 ---
 
@@ -16,16 +16,17 @@ order: 7
 | `world-order` | *Tale* → *Rune Path* → *Legacy* — [`BOOKS-WORLD-CHRONOLOGY`](/docs/books/planning/decisions); [section State — Magicborn line](/docs/books/planning/state#magicborn-line-world-order-and-chapter-beats) |
 | `source` | `books/mordreds_tale/` |
 | `status` | `in-progress` |
-| `updated` | `2026-04-07` |
+| `updated` | `2026-03-30` |
 | `draft-goal` | Complete full first draft chapter-by-chapter; page-level polish (line edits, continuity, prose) deferred. |
-| `arc` | Story roadmap (below), open questions, and draft targets on **this page**. Locked story choices live in [Decisions](/docs/books/mordreds-tale/planning/decisions). Work queue in [Task registry](/docs/books/mordreds-tale/planning/task-registry). |
+| `arc` | Story roadmap (below), open questions, and draft targets on **this page**. Locked story choices live in [Decisions](/docs/books/mordreds-tale/planning/decisions). Work queue in [Task registry](/docs/books/mordreds-tale/planning/task-registry). Phase sequence: [Roadmap](/docs/books/mordreds-tale/planning/roadmap). |
+| `fiction-agents` | `planning/AGENTS.md` | Fiction-only agent loop (beats, prose, spillover)—read before manuscript sessions. |
 
 ## Book 1 cycle (beat pass → rework → draft)
 
 | Field | Value |
 | --- | --- |
 | `feel` | **Magicborn-line** target: darker, more shocking, high emotion, tragic stakes, **survivors** who stay potent — see [`MT-MAGICBORN-SERIES-FEEL`](/docs/books/mordreds-tale/planning/decisions). |
-| `beat-pass-first` | Lock **Ch6–15** beats (workshop Q&A, moral/shock notes) under **`mt-beats-pass-01`** **before** returning to **Ch3** rework — see [`MT-BOOK1-BEATS-PASS-BEFORE-CH3`](/docs/books/mordreds-tale/planning/decisions). |
+| `beat-pass-first` | Lock **Ch6–19** beats (workshop Q&A, moral/shock notes) under **`mt-beats-pass-01`** **before** returning to **Ch3** rework — see [`MT-BOOK1-BEATS-PASS-BEFORE-CH3`](/docs/books/mordreds-tale/planning/decisions). |
 | `chapter-done` | A chapter moves on when **all beats are on the page** in scene form and the [Chapter Done Checklist](/docs/books/mordreds-tale/planning/task-registry#chapter-done-checklist-definition-of-done) passes (not line-perfect). |
 | `suggestions` | During draft/rework, capture **dilemma / escalation / dialogue** notes in beat sheets or decisions so polish does not flatten intent. |
 | `recap` | **In chat:** when you open a chapter pass, ask for a recap and the agent answers **here** (ending beat, who knows what, temperature, hooks). **Not** a substitute: planning files may log outcomes only; they do **not** replace the spoken recap in session. |
@@ -54,7 +55,7 @@ In prose, use **Owain**, **Enid**, **Gwyneth**, **Tanya**, **Geraint**, **Sister
 | `words per page` | ~250–300 (manuscript norm). |
 | `pages per chapter` | Flexible; scene-driven (often ~10–20 ms pages). |
 | `novel overall` | **Working trilogy:** three-part Tale rollout with hooks at each boundary; see [`MT-TALE-SERIES-THREE-VOLUME`](/docs/books/mordreds-tale/planning/decisions) + [`MT-TALE-PART-BOUNDARIES-V1`](/docs/books/mordreds-tale/planning/decisions). |
-| `chapter target` | **~14–18** numbered chapters + **prologue** **per** **volume** **shape** **TBD**; see **full chapter spine** (`MT-CHAPTER-COUNT-TARGET`). Scene needs beat word-count, not a fixed count. |
+| `chapter target` | **Part I** = **14** numbered + **prologue** ([`MT-PART1-FOURTEEN-CHAPTER-PACE`](/docs/books/mordreds-tale/planning/decisions)); Part II/III per [`MT-TALE-PART-BOUNDARIES-V2`](/docs/books/mordreds-tale/planning/decisions). Full-source `mordreds_tale/` = **Ch1–19** on disk; **`mordreds_tale_part_1`** mirrors **Ch1–14** + prologue. |
 | `audience feel` | Unsettled, morally implicated; hope + dread. Morally grey and rash choices, betrayal, submissiveness vs resistance, greed, karma, scheming — no clean heroes. |
 
 ## Series / volume split (working)
@@ -62,12 +63,60 @@ In prose, use **Owain**, **Enid**, **Gwyneth**, **Tanya**, **Geraint**, **Sister
 | Field | Value |
 | --- | --- |
 | `status` | **Locked + implemented in build inputs** — [`MT-TALE-PART-BOUNDARIES-V1`](/docs/books/mordreds-tale/planning/decisions). |
-| `Part 1` (locked) | **`mordreds_tale_part_1`** = `00` prologue + **Ch1–Ch10**. Focus: origins, Jack/Morgana setup, House/church/patron politics, relic hunting economy, child/teen growth lanes, Act II curtain at global magic return + south vector hook. |
-| `Part 2` (locked) | **`mordreds_tale_part_2`** = **Ch11–Ch14**. Focus: Hallinghorn war texture, political negotiation, Mordred/Enid/Gwyneth kinship pressure, ascent and coalition fault-lines. |
-| `Part 3` (locked v1) | **`mordreds_tale_part_3`** = **Ch15+**. Current EPUB seed is Ch15 scaffold; expand this lane with giants, survival politics, and power hardening into law. |
+| `Part 1` (locked) | **`mordreds_tale_part_1`** = `00` prologue + **14** numbered chapters ([`MT-PART1-FOURTEEN-CHAPTER-PACE`](/docs/books/mordreds-tale/planning/decisions)). Focus: origins, **explicit datelines** on intercuts ([`MT-INTERCUT-DATELINE-EXPLICIT`](/docs/books/mordreds-tale/planning/decisions)), **church–Jack partnership** ([`MT-CHURCH-JACK-PARTNERSHIP`](/docs/books/mordreds-tale/planning/decisions)), **House daily life** + **relic-hunt field**, **why Jack cannot find Mordred** ([`MT-JACK-CANNOT-FIND-MORDRED-WHY`](/docs/books/mordreds-tale/planning/decisions)), teen castle + **Merlin** curtain — **Part I ends** with **Morgana carrying Mordred south** ([`MT-MORGANA-MORDRED-RECOGNITION-FLIGHT`](/docs/books/mordreds-tale/planning/decisions)). |
+| `Part 2` (locked) | **`mordreds_tale_part_2`** = **4** chapters (renumbered **1–4** in folder). **Wells** = **private** discovery; **Magicborn** as **draft** / **servitude** ([`MT-PART2-WELLS-PRIVATE-DISCOVERY`](/docs/books/mordreds-tale/planning/decisions), [`MT-PART2-MAGICBORN-DRAFT-SERVITUDE`](/docs/books/mordreds-tale/planning/decisions)); **Gwyneth** **competent** / **feared** ([`MT-PART2-GWYNETH-COMPETENT-FEARED`](/docs/books/mordreds-tale/planning/decisions)); Mordred’s **wide** political knowledge + **2–3** close allies ([`MT-PART2-MORDRED-NETWORK-SECRETS`](/docs/books/mordreds-tale/planning/decisions)); curtain = **carriage cliffhanger** ([`MT-PART2-END-CARRIAGE-CLIFFHANGER`](/docs/books/mordreds-tale/planning/decisions)). |
+| `Part 3` (locked) | **`mordreds_tale_part_3`**: **giants** **end Act I** ~**Ch5** ([`MT-PART3-GIANTS-ACT1-CH5`](/docs/books/mordreds-tale/planning/decisions)); **Mordred** kills **Jack**, takes **Black Heart**, ends giants ([`MT-PART3-JACK-BLACK-HEART-KILL`](/docs/books/mordreds-tale/planning/decisions)); **giant death** scene ([`MT-PART3-GIANT-DEATH-SCENE`](/docs/books/mordreds-tale/planning/decisions)); **institutions under horror** ([`MT-PART3-INSTITUTION-HORROR`](/docs/books/mordreds-tale/planning/decisions)). Expand chapter count beyond current seed. |
+| `chapter numbering` | Each part restarts at **Chapter 1** in **`mordreds_tale_part_*`**. Full-source **`mordreds_tale/`** uses **one** continuous **Chapter 1–19** spine on disk (Part I = **1–14**, Act III war arc = **15–19**) ([`MT-TALE-PART-BOUNDARIES-V2`](/docs/books/mordreds-tale/planning/decisions)). |
 | `depth queue` | [`MT-TALE-DEPTH-PRIORITIES`](/docs/books/mordreds-tale/planning/decisions): **magic** **outside** **Tarro**; **church** ↔ **Jack**; **more** **Tanya** / **Owain** / **Enid**; **named** **fiancé** + **scene** for **Enid**’s **arranged** **match**. |
 
-## Morgana (captivity — Ch5+)
+## Part 1 — fourteen-chapter map (target)
+
+**Goal:** slow pacing; **same** story endpoint as before — **Morgana carries Mordred south** (last beat of Part I). **Intercuts** use **explicit datelines** ([`MT-INTERCUT-DATELINE-EXPLICIT`](/docs/books/mordreds-tale/planning/decisions)).
+
+| Part 1 Ch | Working title | Source (full `mordreds_tale` spine) | Expansion / split notes |
+| --- | --- | --- | --- |
+| — | **Prologue** | `00-prologue` | unchanged |
+| **1** | Morgana | old Ch1 | — |
+| **2** | Jack | old Ch2 | optional **relic-hunt field** B-plot |
+| **3** | Morgana Imprisoned | old Ch3 | **datelines**; Jack hunt |
+| **4** | House gate | old **Ch4** half | **House** arrival, **Merris**, **bark**, **daily** rhythm |
+| **5** | Midas / mercy | old **Ch4** half | **Midas** + aftermath; **why** boy is **hot** |
+| **6** | Patron’s cell | old Ch5 | **Tell me**; **Jack** + **Morgana** charge failure |
+| **7** | Second Well | old Ch6 | **Owain**; **tie** to **second well** logic |
+| **8** | Devil in the Register | old Ch7 | **registry** + **church**; **Jack** cannot **pull** ward |
+| **9** | Geraint’s Sister | old Ch8 | **Enid** household; **Jack** visits |
+| **10** | The Rope | old Ch9 | — |
+| **11** | Patron castle / Halric | old **Ch10** **split** | **Prince Halric**; **arranged** match |
+| **12** | Hallway / gravity | old **Ch10** **split** | **Mordred** **evasion**; **Enid** |
+| **13** | Forced descent + flood | old **Ch10** **split** | **Merlin**; **surge** begins |
+| **14** | Relic chaos + flight | old **Ch10** **split** | **Morgana** escape; **recognition**; **carry south** — **Part I curtain** |
+
+**Jack cannot find Mordred** — land in **Ch4–9** ([`MT-JACK-CANNOT-FIND-MORDRED-WHY`](/docs/books/mordreds-tale/planning/decisions)): **sequestration**; **registry** path; **Midas** visibility; **Morgana** **priority**; **second well** as **substitute** when the **child** is **off the board**.
+
+## Detail capture pass (Book 1 focus)
+
+These are concrete beats requested for the next writing passes so we do not lose character pressure under plot mechanics.
+
+| Thread | Must-land beats (current answer) | Open checks |
+| --- | --- | --- |
+| **Owain ↔ Tanya (marriage fracture)** | Show progression: practical partnership -> suspicion cycle -> poison-household cold war -> public break after bright-spell fallout -> Tanya execution aftermath lives in Owain/Enid/Geraint. Keep Owain's "hero" self-story visible while he keeps doing harm. | How many scenes before *The Rope* are needed to make Tanya's end feel inevitable (not sudden)? |
+| **Owain with Enid vs Geraint** | Owain's favoritism must read as both tenderness and utilitarian fear (Enid as conduit). Geraint reads neglected long before blindness; post-blinding, Owain's guilt mutates into overcontrol. | Pick 2-3 signature moments where Geraint notices Owain choosing Enid first. |
+| **Geraint after blindness and after Tanya** | Keep him on-page as a living consequence: altered routine, dependence rage, status drop in household, relationship with Enid shifts from sibling rivalry to harm-memory and political usefulness. | Does Geraint later align with church, with anti-Enid resentment, or with survival pragmatism? |
+| **Tanya's hanging scene (Ch10)** | Keep execution on-page, but focus on witness-cost (Enid + crowd + Owain barred), church language, and the "justice theater" machinery. Shock lands via consequence, not gore linger. | Decide focal lens: Enid-near, Owain-near, or cold omniscient with both reactions. |
+| **Mordred hidden practice (House years)** | Show private spell language, failed attempts, bark suppression patterns, punishments, and micro-successes that explain later gravity control. Practice is survival and identity, not rebellion slogan. | Choose one repeating exercise ("float pebble", "weight shift", etc.) that evolves across chapters. |
+| **Mordred + Morgana outside Tarro (post-Ch14)** | Keep this as a real growth arc: flight control, mixed-form casting, relic handling, lair reconnaissance, old-kingdom cautionary history from Morgana. This is where he becomes politically dangerous, not only powerful. | Lock chapter placement (late Ch14 tag vs Ch15 opener vs intercut thread). |
+| **Jack–Hallinghorn relationship / why Halric is in Tarro** | Halric is present as treaty collateral + marriage diplomacy + well-politics: Hallinghorn wants access leverage to Tarro's relic gate; Jack/church want controllable dynastic tie through Enid. | Is Halric formally "guest", "ward", or "envoy-prince"? Pick legal framing in registry/castle dialogue. |
+| **Halric death as war spark (proposed)** | Candidate trigger: during an intimate encounter with Enid near the return-of-magic window, bark fails/snaps at climax-level vocal release; uncontrolled gravity burst kills Halric violently in private quarters; guards witness aftermath; Hallinghorn frames it as murder/sacrilege and escalates to war. | Confirm tone boundary for explicitness; decide whether Enid intended any harm (likely no) and whether Jack/church attempts immediate cover-up. |
+
+## Part 3 — scaffold (giants ~Ch5)
+
+| Part 3 Ch | Act | Job |
+| --- | --- | --- |
+| **1–4** | **Act I** (build) | **Institution** under strain **before** giants; **horror** + **politics** ([`MT-PART3-INSTITUTION-HORROR`](/docs/books/mordreds-tale/planning/decisions)) |
+| **5** | **Act I** curtain | **Giants** arrive **end of Act I** ([`MT-PART3-GIANTS-ACT1-CH5`](/docs/books/mordreds-tale/planning/decisions)); **Jack** + **Black Heart** arc toward [`MT-PART3-JACK-BLACK-HEART-KILL`](/docs/books/mordreds-tale/planning/decisions) |
+| **6+** | **Act II** | **Aftermath**; **giant** **death** scene ([`MT-PART3-GIANT-DEATH-SCENE`](/docs/books/mordreds-tale/planning/decisions)); **law** / **bench** |
+
+## Morgana (captivity — Ch6+)
 
 | Field | Value |
 | --- | --- |
@@ -93,19 +142,19 @@ In prose, use **Owain**, **Enid**, **Gwyneth**, **Tanya**, **Geraint**, **Sister
 | **End Act I** | Ch3 intercuts (dateline rules unchanged); Morgana taken; **infant** Mordred → **House of Small Mercies**; **Owain** on stage. |
 | **Act I → II magic** | Sleeping/contact Morgana (Jack); Morgana+Mordred well; then **Enid** as enforced conduit after separation until Merlin. |
 | **Act II close** | Jack finds **Merlin** (stasis) at tree core while Enid ~14; **global magic** returns; **Tarro** threatened; **relic chaos** city-wide ([`MT-TARRO-RELIC-CHAOS-MERLIN-BOOM`](/docs/books/mordreds-tale/planning/decisions)); **act break**. Mordred gets a **surge / loss-of-control / injury** beat ([`MT-MORDRED-MAGIC-SURGE-COST`](/docs/books/mordreds-tale/planning/decisions)). **Morgana** escapes, **flies**, **recognizes** Mordred, **flight** to **Hallinghorn** ([`MT-MORGANA-MORDRED-RECOGNITION-FLIGHT`](/docs/books/mordreds-tale/planning/decisions)). |
-| **Post-Ch10 field arc** | With **Morgana**, Mordred trains beyond gravity (flight control, multi-form spellwork, relic handling under load), scouts old and imitation **lairs**, and learns why some old kingdoms died when rulers tried to reproduce pantheon systems ([`MT-MORDRED-MORGANA-OUTSIDE-TARRO-TRAINING`](/docs/books/mordreds-tale/planning/decisions)). |
+| **Post-Ch14 field arc** | With **Morgana**, Mordred trains beyond gravity (flight control, multi-form spellwork, relic handling under load), scouts old and imitation **lairs**, and learns why some old kingdoms died when rulers tried to reproduce pantheon systems ([`MT-MORDRED-MORGANA-OUTSIDE-TARRO-TRAINING`](/docs/books/mordreds-tale/planning/decisions)). |
 | **Cosmology** | **Merlin** + **Morgana** are the **only surviving old-tier powers** in play; rest of pantheon **gone** for story purposes. |
 
 ## Narrative Fronts
 
 | Thread | Location | Last Page | Summary |
 | --- | --- | --- | --- |
-| **Morgana (present)** | Ch5 — `05-chapter-5-the-patron-s-cell/` | `008-page-99-the-second-well.md` (draft v1) | **Jack’s cell**; **charge fails**; **Tell me** beat; **Owain** order for **second well** / **Enid**. |
-| **Morgana (flight)** | Post-**Ch10** core (scaffold TBD) | — | **Escape** in **relic chaos**; **recognizes** Mordred by **cast**; **carries** him toward **Hallinghorn** ([`MT-MORGANA-MORDRED-RECOGNITION-FLIGHT`](/docs/books/mordreds-tale/planning/decisions)). |
-| **Jack (patron / pipeline)** | Ch5–Ch8 (visits) | Ch8 `006-page-121-warm-metal.md` (draft scaffold) | **House** holds **Mordred** out of reach ([`MT-JACK-CHILD-OUT-OF-REACH`](/docs/books/mordreds-tale/planning/decisions)); **Enid** conduit handling in Owain’s house. |
-| **Mordred** | Ch4–Ch15 | Ch15 `008-page-171-the-next-rota.md` (draft scaffold) | **Ch4** Midas; **Ch7** registry / grille; **Ch10** core + surge; **post-Ch10** outside-Tarro training with Morgana (flight, relic craft, lair reconnaissance); **Ch11–15** war → bench → law. **Jack** paternity **unknown** to Mordred ([`MT-MORDRED-JACK-PATERNITY-UNKNOWN`](/docs/books/mordreds-tale/planning/decisions)). |
-| **Owain** | Ch6–Ch8 | Ch8 `008-page-123-whisper-below.md` (draft scaffold) | **Ch6** second well + **relic-hunter cover** lie ([`MT-OWAIN-RELIC-COVER-VOCAB`](/docs/books/mordreds-tale/planning/decisions)); **Ch8** **Enid** household, **Tanya** poison, **metal** touch. |
-| **Coalition / war** | Ch11–Ch15 | Ch15 `008-page-171-the-next-rota.md` (draft scaffold) | Southern allies named; **registry** law; **giants** pedagogy → [Legacy readers](/docs/magicborn/in-world/mordreds-legacy/national-reader-series-notice-of-duty). |
+| **Morgana (present)** | Ch6 — `06-chapter-6-the-patron-s-cell/` | `008-page-99-the-second-well.md` (draft v1) | **Jack’s cell**; **charge fails**; **Tell me** beat; **Owain** order for **second well** / **Enid**. |
+| **Morgana (flight)** | **Ch14** *Relic Chaos and Flight* (`14-chapter-14-relic-chaos-and-flight/`) | — | **Escape** in **relic chaos**; **recognizes** Mordred by **cast**; **carries** him toward **Hallinghorn** ([`MT-MORGANA-MORDRED-RECOGNITION-FLIGHT`](/docs/books/mordreds-tale/planning/decisions)). |
+| **Jack (patron / pipeline)** | Ch6–Ch9 (visits) | Ch9 `006-page-121-warm-metal.md` (draft scaffold) | **House** holds **Mordred** out of reach ([`MT-JACK-CHILD-OUT-OF-REACH`](/docs/books/mordreds-tale/planning/decisions)); **Enid** conduit handling in Owain’s house. |
+| **Mordred** | Ch4–Ch19 | Ch19 `008-page-171-the-next-rota.md` (draft scaffold) | **Ch4–5** House gate + Midas; **Ch8** registry / grille; **Ch11–14** castle / core / surge / flight; **post-Ch14** outside-Tarro training with Morgana; **Ch15–19** war → bench → law. **Jack** paternity **unknown** to Mordred ([`MT-MORDRED-JACK-PATERNITY-UNKNOWN`](/docs/books/mordreds-tale/planning/decisions)). |
+| **Owain** | Ch7–Ch9 | Ch9 `008-page-123-whisper-below.md` (draft scaffold) | **Ch7** second well + **relic-hunter cover** lie ([`MT-OWAIN-RELIC-COVER-VOCAB`](/docs/books/mordreds-tale/planning/decisions)); **Ch9** **Enid** household, **Tanya** poison, **metal** touch. |
+| **Coalition / war** | Ch15–Ch19 | Ch19 `008-page-171-the-next-rota.md` (draft scaffold) | Southern allies named; **registry** law; **giants** pedagogy → [Legacy readers](/docs/magicborn/in-world/mordreds-legacy/national-reader-series-notice-of-duty). |
 
 ## Story roadmap — Act I
 
@@ -120,7 +169,7 @@ In prose, use **Owain**, **Enid**, **Gwyneth**, **Tanya**, **Geraint**, **Sister
 
 ## Full chapter spine (working — full-source lane)
 
-Rough numbering; **Act II Ch5–10** (curtain = **Ch10** *The Core Opens*) and **Act III Ch11–15** stay flexible until each chapter is checklist-clean.
+**Part I** on disk = **Prologue** + **Ch1–14**; **Act III** war arc = **Ch15–19**. Act II story curtain (Merlin / surge) lands in **Ch11–14** (split from the old single *Core Opens* chapter). Folder names: `04-chapter-4-the-house-gate/` … `19-chapter-19-two-from-the-bough/`.
 
 | # | Chapter | Act | Status | One-line job |
 | --- | --- | --- | --- | --- |
@@ -128,18 +177,22 @@ Rough numbering; **Act II Ch5–10** (curtain = **Ch10** *The Core Opens*) and *
 | 1 | Morgana | I | done | Birth, escape, toward council |
 | 2 | Jack | I | done | Past: lair, sleeping Morgana, relic economy |
 | 3 | Morgana Imprisoned | I | rework (after beat pass) | Present + Jack hunt; Tarro; separation; handoff |
-| 4 | Mordred | II | draft v1 | **House gate**; bark; handlers + **inert Midas relic**; **kill** plot; **Keth** gilded; **Merris** covers; `MT-CH4-MIDAS-RELIC` |
-| 5 | Patron’s cell / Tell me | II | draft v1 | **Jack**: House **won’t release** boy; **Morgana** fails to charge; **fantasy speech** + **violence**; **realization** → **Owain** order ([`MT-JACK-TELL-ME-SCENE`](/docs/books/mordreds-tale/planning/decisions)) |
-| 6 | **The Second Well** (working) | II | draft v1 | **Owain** POV; second well; **Morgana** silent; **Tanya** suspicion; relic-hunter **cover** vocabulary on domestic lies — [`MT-OWAIN-RELIC-COVER-VOCAB`](/docs/books/mordreds-tale/planning/decisions) |
-| 7 | **Devil in the Register** (working) | II | draft scaffold | Mordred POV; registry + **devil** language; **Jack grille** near-miss; bark-off; Merris **protect + discipline** — pages **108–115** |
-| 8 | **Geraint’s Sister** (working) | II | draft scaffold | **Enid** household; **Owain** POV locked — [`MT-CH8-POV-OWAIN`](/docs/books/mordreds-tale/planning/decisions); **Jack** visits; **Tanya** poison; **bark** + **metal** touch — pages **116–123** |
-| 9 | **The Rope** (working) | II | draft scaffold | **Tanya** hanging **on-page**; **Enid** witness; **Owain** barred — **one** manuscript page — `09-chapter-9-the-rope/` **page 124** |
-| 10 | **The Core Opens** (working) | II | draft scaffold | **15/14** castle; **Jack** at **core**; **Merlin**; **gravity** surge (**broken arm**); **Morgana** under **castle** vault — pages **125–131** |
-| 11 | **Hallinghorn Smoke** (working) | III | draft scaffold | War camp; **Jack** **alive**; **Rhys Wyn**, **Aldara of Brindleford** — pages **132–139** |
-| 12 | **Meadow Proof** (working) | III | draft scaffold | Meadow duel; **MT-ACT-III-BATTLE** — pages **140–147** |
-| 13 | **Terms in the Carriage** (working) | III | draft scaffold | Carriage; **Gwyneth** pressure; coalition terms — pages **148–155** |
-| 14 | **The Coalition Bench** (working) | III | draft scaffold | Bench politics; **registry** mandate — pages **156–163** |
-| 15 / E | **Two From the Bough** (working) | III | draft scaffold | First seating + **National Reader** / duty law close; **giants** via curriculum docs — pages **164–171** |
+| 4 | **The House Gate** (working) | II | draft v1 | Gate, **Merris**, bark, daily rhythm — pages **85–86** (`04-chapter-4-the-house-gate/`) |
+| 5 | **Midas and Mercy** (working) | II | draft v1 | Midas relic **core**; **kill** plot; **Keth** gilded; aftermath — pages **87–91** — [`MT-CH4-MIDAS-RELIC`](/docs/books/mordreds-tale/planning/decisions) |
+| 6 | Patron’s cell / Tell me | II | draft v1 | **Jack**: House **won’t release** boy; **Morgana** fails to charge; **fantasy speech** + **violence**; **realization** → **Owain** order ([`MT-JACK-TELL-ME-SCENE`](/docs/books/mordreds-tale/planning/decisions)) |
+| 7 | **The Second Well** (working) | II | draft v1 | **Owain** POV; second well; **Morgana** silent; **Tanya** suspicion; relic-hunter **cover** — [`MT-OWAIN-RELIC-COVER-VOCAB`](/docs/books/mordreds-tale/planning/decisions) |
+| 8 | **Devil in the Register** (working) | II | draft scaffold | Mordred POV; registry + **devil** language; **Jack grille** near-miss — pages **108–115** |
+| 9 | **Geraint’s Sister** (working) | II | draft scaffold | **Enid** household; **Owain** POV — [`MT-CH8-POV-OWAIN`](/docs/books/mordreds-tale/planning/decisions); **Jack** visits; **Tanya** poison — pages **116–123** |
+| 10 | **The Rope** (working) | II | draft scaffold | **Tanya** hanging **on-page**; **Enid** witness; **Owain** barred — **page 124** (`10-chapter-10-the-rope/`) |
+| 11 | **The Patron Castle** (working) | II | draft scaffold | **Halric**; arranged match; **page 125** |
+| 12 | **The Hallway** (working) | II | draft scaffold | Mordred **evasion**; **Enid** — **page 126** |
+| 13 | **The Forced Descent and Surge** (working) | II | draft scaffold | **Merlin**; descent, flood, too light — pages **127–129** |
+| 14 | **Relic Chaos and Flight** (working) | II | draft scaffold | Bone/skin; **Morgana** flight; **Part I curtain** — pages **130–131** |
+| 15 | **Hallinghorn Smoke** (working) | III | draft scaffold | War camp; **Jack** **alive**; **Rhys Wyn**, **Aldara** — pages **132–139** |
+| 16 | **Meadow Proof** (working) | III | draft scaffold | Meadow duel; **MT-ACT-III-BATTLE** — pages **140–147** |
+| 17 | **Terms in the Carriage** (working) | III | draft scaffold | Carriage; **Gwyneth** pressure; coalition terms — pages **148–155** |
+| 18 | **The Coalition Bench** (working) | III | draft scaffold | Bench politics; **registry** mandate — pages **156–163** |
+| 19 / E | **Two From the Bough** (working) | III | draft scaffold | First seating + **National Reader** / duty law close; **giants** via curriculum docs — pages **164–171** |
 
 **Sequel:** politics / Magicborn lives → [**Mordred’s Legacy** planning](/docs/books/mordreds-legacy/planning/state). **Book 2 world** → stump, **Tarro dungeon**, duty rotas (`MT-BOOK2-TARRO-DUNGEON`).
 
@@ -156,31 +209,32 @@ Rough numbering; **Act II Ch5–10** (curtain = **Ch10** *The Core Opens*) and *
 
 | Chapter | Working title | POV | Purpose (beats) |
 | --- | --- | --- | --- |
-| **Ch4** | **Mordred** | Tight third on **Mordred** (infant/toddler consciousness — sensory, limited cognition; no gimmick diary) | **Arc:** Arrival (**p85**): gate, **Merris**, **bark**, clay cord from Ch3. **Midas core (p86+):** handlers keep a **dead**-believed **Midas relic**; let baby **play** with it; plan **murder** instead of raising him; **Mordred** **charges** the relic — **handler** turns **gold** ([`MT-CH4-MIDAS-RELIC`](/docs/books/mordreds-tale/planning/decisions)). Aftermath / who enters next → handoff to Ch5. **Draft status:** pages **85–91** in folder. |
-| **Ch5** | **Jack / Morgana** | **Jack** POV (Morgana in scene, **silent**); optional **cut** to council impatience | **Mordred** thread: **off-page** House holds him ([`MT-JACK-CHILD-OUT-OF-REACH`](/docs/books/mordreds-tale/planning/decisions)). **Pages 92–99** drafted. |
-| **Ch6** | **The Second Well** | **Owain** POV — [`MT-CH6-POV-OWAIN`](/docs/books/mordreds-tale/planning/decisions) | Second well after Ch5 order; **Morgana silent**; **Tanya** suspicion; **procedure + explicit** coercion — [`MT-CH6-COERCION-PROCEDURE-EXPLICIT`](/docs/books/mordreds-tale/planning/decisions). **Cover** — [`MT-OWAIN-RELIC-COVER-VOCAB`](/docs/books/mordreds-tale/planning/decisions). **Pages 100–107.** |
-| **Ch7** | **Devil in the Register** | **Mordred** POV — [`MT-CH7-POV-MORDRED`](/docs/books/mordreds-tale/planning/decisions) | Registry post-Midas; church **devil** language; **bark-off** / almost-spell; **Jack** **grille** near-miss — [`MT-CH7-JACK-GRILLE-NEAR-MISS`](/docs/books/mordreds-tale/planning/decisions); **Merris** dual role — [`MT-CH7-MERRIS-PROTECTOR-AND-DISCIPLINARIAN`](/docs/books/mordreds-tale/planning/decisions). **Pages 108–115.** |
-| **Ch8** | **Geraint’s Sister** | **Owain** POV — [`MT-CH8-POV-OWAIN`](/docs/books/mordreds-tale/planning/decisions) | **Enid** household; **Jack** visits; **Tanya** poison; **Geraint** jealousy seed; **bark**; guided **metal** touch; **Morgana** rumor. **Pages 116–123.** |
-| **Ch9–15** | See **beat sheets** below | Mixed | Liberty draft; **reorder beats** as manuscript demands. |
+| **Ch4** | **The House Gate** | Tight third on **Mordred** (infant/toddler) | **p85–86:** gate, **Merris**, **bark**, clay cord from Ch3; arrival rhythm. **Folder:** `04-chapter-4-the-house-gate/`. |
+| **Ch5** | **Midas and Mercy** | Same **Mordred** POV | **p87–91:** handlers + **inert Midas relic**; **kill** plot; **Mordred** **charges** relic — **handler** turns **gold** ([`MT-CH4-MIDAS-RELIC`](/docs/books/mordreds-tale/planning/decisions)). Handoff → Ch6. **Folder:** `05-chapter-5-midas-and-mercy/`. |
+| **Ch6** | **Jack / Morgana** | **Jack** POV (Morgana in scene, **silent**); optional **cut** to council impatience | **Mordred** thread: **off-page** House holds him ([`MT-JACK-CHILD-OUT-OF-REACH`](/docs/books/mordreds-tale/planning/decisions)). **Pages 92–99** drafted. |
+| **Ch7** | **The Second Well** | **Owain** POV — [`MT-CH6-POV-OWAIN`](/docs/books/mordreds-tale/planning/decisions) | Second well after Ch6 order; **Morgana silent**; **Tanya** suspicion; **procedure + explicit** coercion — [`MT-CH6-COERCION-PROCEDURE-EXPLICIT`](/docs/books/mordreds-tale/planning/decisions). **Cover** — [`MT-OWAIN-RELIC-COVER-VOCAB`](/docs/books/mordreds-tale/planning/decisions). **Pages 100–107.** |
+| **Ch8** | **Devil in the Register** | **Mordred** POV — [`MT-CH7-POV-MORDRED`](/docs/books/mordreds-tale/planning/decisions) | Registry post-Midas; church **devil** language; **bark-off** / almost-spell; **Jack** **grille** near-miss — [`MT-CH7-JACK-GRILLE-NEAR-MISS`](/docs/books/mordreds-tale/planning/decisions); **Merris** dual role — [`MT-CH7-MERRIS-PROTECTOR-AND-DISCIPLINARIAN`](/docs/books/mordreds-tale/planning/decisions). **Pages 108–115.** |
+| **Ch9** | **Geraint’s Sister** | **Owain** POV — [`MT-CH8-POV-OWAIN`](/docs/books/mordreds-tale/planning/decisions) | **Enid** household; **Jack** visits; **Tanya** poison; **Geraint** jealousy seed; **bark**; guided **metal** touch; **Morgana** rumor. **Pages 116–123.** |
+| **Ch10–19** | See **beat sheets** below | Mixed | Liberty draft; **reorder beats** as manuscript demands. |
 
-## Beat sheets — Chapters 6–15 (liberty draft)
+## Beat sheets — Chapters 6–19 (liberty draft)
 
 *Purpose:* pacing map + **alternatives** + **questions to revisit**. During **`mt-beats-pass-01`**, each chapter gains a **Locked for draft** block (chosen POV, primary beats, moral/shock/survival notes, struck or promoted FQs). Nothing is final for drafting until that lock exists for that chapter.
 
-*Beat-lock:* **`mt-beats-01-ch08`** **done**; **`mt-beats-01-ch09`** covers **Ch9** *The Rope* + **Ch10** *The Core Opens* after split. Ask for a **chat recap** (Ch8→Ch9→Ch10) when you open that pass.
+*Beat-lock:* **`mt-beats-01-ch08`** **done**; **`mt-beats-01-ch09`** covers **Ch10** *The Rope* + **Ch11–14** *Core Opens* sequence. Ask for a **chat recap** (Ch9→Ch10→Ch11–14) when you open that pass.
 
 ### Pacing spine (breath vs pressure)
 
 | Stretch | Rhythm | Note |
 | --- | --- | --- |
-| **Ch6–7** | **Pressure → breath** | Ch5 ended **hot** (violence + order). Ch6 can stay **claustrophobic**; Ch7 widens to **House routine** or **street whispers** so the reader inhales. |
-| **Ch8** | **Pressure** | Enid thread = **new cruelty**; contrast Mordred’s isolation with **her** golden cage. |
-| **Ch9** | **Pressure** | **The Rope** — domestic horror made public; **Enid** witness; ends before teen castle thread. |
-| **Ch10** | **Long exhale + slam** | Castle meeting (human scale) → Merlin (mythic scale) → **world magic** = act break **thunder**. |
-| **Act III** | **Cold open fast** | **Ch11** drops into **war already ugly**; 12–13 are **long**; 14 **political** (shorter possible); 15 **closing law / curriculum** hook. |
+| **Ch7–8** | **Pressure → breath** | Ch6 ended **hot** (violence + order). Ch7 can stay **claustrophobic**; Ch8 widens to **House routine** or **street whispers** so the reader inhales. |
+| **Ch9** | **Pressure** | Enid thread = **new cruelty**; contrast Mordred’s isolation with **her** golden cage. |
+| **Ch10** | **Pressure** | **The Rope** — domestic horror made public; **Enid** witness; ends before teen castle thread. |
+| **Ch11–14** | **Long exhale + slam** | Castle meeting (human scale) → Merlin (mythic scale) → **world magic** = act break **thunder** (split across four chapter folders). |
+| **Act III** | **Cold open fast** | **Ch15** drops into **war already ugly**; 16–17 are **long**; 18 **political** (shorter possible); 19 **closing law / curriculum** hook. |
 | **Global trick** | Alternate **Mordred** / **Enid** / **Jack** chapters when two POVs risk fatigue; or **stay** on one thread **two** chapters then switch — pick per draft read-through. |
 
-### Chapter 6 — *The Second Well* (working)
+### Chapter 7 — *The Second Well* (working)
 
 | Field | Content |
 | --- | --- |
@@ -193,11 +247,11 @@ Rough numbering; **Act II Ch5–10** (curtain = **Ch10** *The Core Opens*) and *
 | **Questions** | ~~Tanya timing / Morgana one line~~ → **resolved** in [decisions](/docs/books/mordreds-tale/planning/decisions): [`MT-TANYA-SUSPECTS-NEVER-FULL-KNOWLEDGE`](/docs/books/mordreds-tale/planning/decisions), [`MT-MORGANA-SILENCE-OWAIN-COERCION`](/docs/books/mordreds-tale/planning/decisions). |
 | **Locked for draft** | **POV:** Owain ([`MT-CH6-POV-OWAIN`](/docs/books/mordreds-tale/planning/decisions)). **Morgana:** silent to Owain ([`MT-MORGANA-SILENCE-OWAIN-COERCION`](/docs/books/mordreds-tale/planning/decisions)). **Tanya:** never full knowledge; suspicion after **many nights away** — [`MT-TANYA-SUSPECTS-NEVER-FULL-KNOWLEDGE`](/docs/books/mordreds-tale/planning/decisions). **Domestic lie:** relic-hunter / **registry** jargon as **cover** for night absences — [`MT-OWAIN-RELIC-COVER-VOCAB`](/docs/books/mordreds-tale/planning/decisions). **Enid (household cover):** to Tanya, **Jack’s bastard**; Owain raises because Jack won’t father — [`MT-ENID-COVER-STORY-JACK-TO-TANYA`](/docs/books/mordreds-tale/planning/decisions). **Coercion on page:** **procedure + explicit** (GoT-weight **cost**, not gore porn) — [`MT-CH6-COERCION-PROCEDURE-EXPLICIT`](/docs/books/mordreds-tale/planning/decisions). **Violence taste:** consequence / dilemmas / irrational-in-the-moment over splatter — [`MT-BOOK1-VIOLENCE-CONSEQUENCE-OVER-GORE`](/docs/books/mordreds-tale/planning/decisions). |
 
-### Ch6 — coercion note (locked)
+### Ch7 — coercion note (locked)
 
 Hybrid from [decisions](/docs/books/mordreds-tale/planning/decisions): **institutional frame** (keys, Jack as auditor, Owain’s split) **plus** enough **explicit** weight that the reader cannot pretend the harm is abstract. **Splatter** is not the tool; **consequence on bodies and marriage** is.
 
-### Chapter 7 — *Devil in the Register* (working)
+### Chapter 8 — *Devil in the Register* (working)
 
 | Field | Content |
 | --- | --- |
@@ -210,7 +264,7 @@ Hybrid from [decisions](/docs/books/mordreds-tale/planning/decisions): **institu
 | **Questions** | ~~Legal owner / Merris stance~~ → **resolved:** [`MT-FQ-01-REGISTRY-CHURCH-WARD-JACK-PATRONAGE`](/docs/books/mordreds-tale/planning/decisions), [`MT-CH7-MERRIS-PROTECTOR-AND-DISCIPLINARIAN`](/docs/books/mordreds-tale/planning/decisions). ~~Jack A vs B~~ → **B** — [`MT-CH7-JACK-GRILLE-NEAR-MISS`](/docs/books/mordreds-tale/planning/decisions). ~~Alt C~~ → **not Ch7** — [`MT-CH7-NO-ESCAPE-ATTEMPT`](/docs/books/mordreds-tale/planning/decisions). |
 | **Locked for draft** | **POV** Mordred. **Jack:** grille **near miss**, no reconciliation. **No** failed-escape beat this chapter. **Registry:** church **ward** on paper, **Jack patronage** behind the forms — `MT-FQ-01-REGISTRY-CHURCH-WARD-JACK-PATRONAGE`. **Merris:** **protect** from worse outsiders **and** **discipline** / institutional control — `MT-CH7-MERRIS-PROTECTOR-AND-DISCIPLINARIAN`. **Taste:** consequence and dilemma over gore — `MT-BOOK1-VIOLENCE-CONSEQUENCE-OVER-GORE`. |
 
-### Chapter 8 — *Geraint’s Sister* (working)
+### Chapter 9 — *Geraint’s Sister* (working)
 
 | Field | Content |
 | --- | --- |
@@ -223,7 +277,7 @@ Hybrid from [decisions](/docs/books/mordreds-tale/planning/decisions): **institu
 | **Questions** | When does **Morgana** **see** Enid (if ever) before **castle**? Does **Jack** **suspect** Mordred is **learning** in the House? |
 | **Locked for draft** | **POV:** **Owain** — [`MT-CH8-POV-OWAIN`](/docs/books/mordreds-tale/planning/decisions). **Parallel Mordred** chapter same file-count: **deferred** (keep Mordred thread in Ch7 adjacent). **Skip to Enid age 5:** **deferred** (baby gothic retained). **Geraint** blind POV: **later** only (`MT-ENID-BRIGHT-SPELL-ARC`). **Beats:** naming; **Jack** warmth reads **wrong**; **Tanya** poison; **bark** bands small; **metal** touch with infant; street rumor **Morgana** under patron stones. **Taste:** consequence over gore — `MT-BOOK1-VIOLENCE-CONSEQUENCE-OVER-GORE`. |
 
-### Chapter 9 — *The Rope* (working)
+### Chapter 10 — *The Rope* (working)
 
 | Field | Content |
 | --- | --- |
@@ -233,31 +287,33 @@ Hybrid from [decisions](/docs/books/mordreds-tale/planning/decisions): **institu
 | **Expand pass** | Draft currently **thin** for the **cast** **cost** — **room** to **deepen** **witness** **texture**, **Owain** **barred**, **Enid** **interiority**, **church** **voice** in the **crowd** ([`MT-TALE-DEPTH-PRIORITIES`](/docs/books/mordreds-tale/planning/decisions)). |
 | **Locked for draft** | **On-page** execution; **single** page scaffold (`page-124-the-rope.md`); **years** before **15/14** castle thread. |
 
-### Chapter 10 — *The Core Opens* (working)
+### Chapters 11–14 — *The Core Opens* (working; split on disk)
 
 | Field | Content |
 | --- | --- |
 | **Primary job** | **Mordred 15 / Enid 14** castle beat; **Merlin** discovery; **magic** returns; **Mordred** **hurt** by surge ([`MT-MORDRED-MAGIC-SURGE-COST`](/docs/books/mordreds-tale/planning/decisions)). |
 | **POV** | **Split**: hallway **Mordred**; **depths** Jack/Owain; **Enid** reaction to **world** change. |
-| **Beats** | **Enid**’s **arranged** **match** ([`MT-ARRANGED-MARRIAGE-GENERAL`](/docs/books/mordreds-tale/planning/decisions)): **named** **fiancé** (**general**’s **house** or **proxy**), **traits** on **page**, **scene** **before** or **woven** into **125–126** so **hallway** **stakes** **land** ([`MT-TALE-DEPTH-PRIORITIES`](/docs/books/mordreds-tale/planning/decisions)). **Arranged marriage** pressure on Enid; **hallway** encounter; **Jack** **forces** descent; **core**; **Merlin** beat; **tree**; **sky** wrong; **relic chaos** in **Tarro**; **Morgana** **out** of **vault** — **uncontrolled** flight, **aged** then **partially** restored; **spots** Mordred, **almost** leaves; **recognition** **cast** (infant **well** rhyme); **carries** him **toward** **Hallinghorn** ([`MT-MORGANA-POST-MERLIN-RESTORATION`](/docs/books/mordreds-tale/planning/decisions), [`MT-TARRO-RELIC-CHAOS-MERLIN-BOOM`](/docs/books/mordreds-tale/planning/decisions), [`MT-MORGANA-MORDRED-RECOGNITION-FLIGHT`](/docs/books/mordreds-tale/planning/decisions)); **Act II curtain** (may **spill** into **Ch11** cold open). |
+| **Beats** | **Enid**’s **arranged** **match** ([`MT-ARRANGED-MARRIAGE-GENERAL`](/docs/books/mordreds-tale/planning/decisions)): **named** **fiancé** (**general**’s **house** or **proxy**), **traits** on **page**, **scene** **before** or **woven** into **125–126** so **hallway** **stakes** **land** ([`MT-TALE-DEPTH-PRIORITIES`](/docs/books/mordreds-tale/planning/decisions)). **Arranged marriage** pressure on Enid; **hallway** encounter; **Jack** **forces** descent; **core**; **Merlin** beat; **tree**; **sky** wrong; **relic chaos** in **Tarro**; **Morgana** **out** of **vault** — **uncontrolled** flight, **aged** then **partially** restored; **spots** Mordred, **almost** leaves; **recognition** **cast** (infant **well** rhyme); **carries** him **toward** **Hallinghorn** ([`MT-MORGANA-POST-MERLIN-RESTORATION`](/docs/books/mordreds-tale/planning/decisions), [`MT-TARRO-RELIC-CHAOS-MERLIN-BOOM`](/docs/books/mordreds-tale/planning/decisions), [`MT-MORGANA-MORDRED-RECOGNITION-FLIGHT`](/docs/books/mordreds-tale/planning/decisions)); **Act II curtain** (may **spill** into **Ch15** cold open). |
 | **Alternative A** | **Merlin** **speaks** one line to **Mordred** across distance — **cheating** but electric. |
 | **Alternative B** | **Enid** **first** **free** spell when global magic hits — **parallel** birth metaphor. |
 | **Alternative C** | **Castle meeting** **after** core opens — **chaos** meeting instead of calm hallway. |
 | **Questions** | ~~Jack at core~~ → **physical** ([`MT-CH9-JACK-AT-CORE-PHYSICAL`](/docs/books/mordreds-tale/planning/decisions)). ~~Morgana during boom~~ → **held** **under castle vault** until **escape** in **relic chaos** ([`MT-MORGANA-HOLDING-CASTLE-VAULT`](/docs/books/mordreds-tale/planning/decisions) + [`MT-TARRO-RELIC-CHAOS-MERLIN-BOOM`](/docs/books/mordreds-tale/planning/decisions)); **flight** / **recognition** / **Hallinghorn** vector ([`MT-MORGANA-MORDRED-RECOGNITION-FLIGHT`](/docs/books/mordreds-tale/planning/decisions)). Merlin recognition of Morgana blood in Mordred → **open** (`FQ-03` adjacent). |
-| **Locked for draft** | **Ages** **15/14** exact. **Hallway** blend + **gravity** **evasion** (secret **practice**; **not** a **political** **rebellion** against **Jack** / **Tarro** — [`MT-MORDRED-CASTLE-GRAVITY-NOT-REBELLION`](/docs/books/mordreds-tale/planning/decisions) / [`MT-CH9-CASTLE-HALLWAY-BLEND-GRAVITY-ESCAPE`](/docs/books/mordreds-tale/planning/decisions)). **Surge** = **gravity** ping-pong + **right arm** break + skin-only heal ([`MT-CH9-MORDRED-GRAVITY-SURGE-SEQUENCE`](/docs/books/mordreds-tale/planning/decisions)). **Mordred** does not know **Jack** as father ([`MT-MORDRED-JACK-PATERNITY-UNKNOWN`](/docs/books/mordreds-tale/planning/decisions)). Patron **seat** = **castle** ([`MT-MORGANA-HOLDING-CASTLE-VAULT`](/docs/books/mordreds-tale/planning/decisions)). **Pages 125–131** — separate from **Ch9** rope. |
+| **Locked for draft** | **Ages** **15/14** exact. **Hallway** blend + **gravity** **evasion** (secret **practice**; **not** a **political** **rebellion** against **Jack** / **Tarro** — [`MT-MORDRED-CASTLE-GRAVITY-NOT-REBELLION`](/docs/books/mordreds-tale/planning/decisions) / [`MT-CH9-CASTLE-HALLWAY-BLEND-GRAVITY-ESCAPE`](/docs/books/mordreds-tale/planning/decisions)). **Surge** = **gravity** ping-pong + **right arm** break + skin-only heal ([`MT-CH9-MORDRED-GRAVITY-SURGE-SEQUENCE`](/docs/books/mordreds-tale/planning/decisions)). **Mordred** does not know **Jack** as father ([`MT-MORDRED-JACK-PATERNITY-UNKNOWN`](/docs/books/mordreds-tale/planning/decisions)). Patron **seat** = **castle** ([`MT-MORGANA-HOLDING-CASTLE-VAULT`](/docs/books/mordreds-tale/planning/decisions)). **Pages 125–131** — separate from **Ch10** *The Rope*. **Halric track:** include his Tarro presence rationale (treaty + gate politics) and evaluate whether his death at magic-release becomes Hallinghorn casus belli. |
 
-### Chapter 11 — *Hallinghorn Smoke* (working)
+### Chapter 15 — *Hallinghorn Smoke* (working)
+
+*Folder `15-chapter-15-hallinghorn-smoke/`.*
 
 | Field | Content |
 | --- | --- |
 | **Primary job** | **Time jump**; war **texture**; Mordred **not** on Jack’s side emotionally; **southern friends** **named** and **given** wants. |
 | **POV** | Mordred + **one** southern POV snippet (optional). |
-| **Beats** | **Camp**, **map**, **stakes** (lair gate economics); **first** sighting **Enid** in **enemy** colors; **Gwyneth** **shown** as **soldier** not doll. **Bridge required:** include a post-Ch10 interval where **Mordred** and **Morgana** work outside Tarro before full war cadence (training + reconnaissance) — then land in Hallinghorn ([`MT-MORDRED-MORGANA-OUTSIDE-TARRO-TRAINING`](/docs/books/mordreds-tale/planning/decisions)). |
+| **Beats** | **Camp**, **map**, **stakes** (lair gate economics); **first** sighting **Enid** in **enemy** colors; **Gwyneth** **shown** as **soldier** not doll. **Bridge required:** include a post-Ch14 interval where **Mordred** and **Morgana** work outside Tarro before full war cadence (training + reconnaissance) — then land in Hallinghorn ([`MT-MORDRED-MORGANA-OUTSIDE-TARRO-TRAINING`](/docs/books/mordreds-tale/planning/decisions)). |
 | **Alternative A** | **Start** in **media res** — **battle** already lost once; **retreat**. |
-| **Alternative B** | **Diplomatic** chapter — **almost** peace; **fails**; leads to **Ch12** (*Meadow Proof*). |
+| **Alternative B** | **Diplomatic** chapter — **almost** peace; **fails**; leads to **Ch16** (*Meadow Proof*). |
 | **Questions** | **Jack** **alive** at war start? **Imprisoned**? **Puppet** king? **Who** holds **Tarro**? |
 
-### Chapter 12 — *Meadow Proof* (working)
+### Chapter 16 — *Meadow Proof* (working)
 
 | Field | Content |
 | --- | --- |
@@ -266,7 +322,7 @@ Hybrid from [decisions](/docs/books/mordreds-tale/planning/decisions): **institu
 | **Alternative B** | **Jack** **absent** — **ideological** war only. |
 | **Questions** | Does **Mordred** **spare** unit on purpose — **first** coalition seed on the grass? |
 
-### Chapter 13 — *Terms in the Carriage* (working)
+### Chapter 17 — *Terms in the Carriage* (working)
 
 | Field | Content |
 | --- | --- |
@@ -275,7 +331,7 @@ Hybrid from [decisions](/docs/books/mordreds-tale/planning/decisions): **institu
 | **Alternative B** | **No carriage** — **tent** truce; **rain**. |
 | **Questions** | **When** does **Enid** **learn** **Gwyneth**’s father truth if not here? |
 
-### Chapter 14 — *The Coalition Bench* (working)
+### Chapter 18 — *The Coalition Bench* (working)
 
 | Field | Content |
 | --- | --- |
@@ -284,7 +340,7 @@ Hybrid from [decisions](/docs/books/mordreds-tale/planning/decisions): **institu
 | **Alternative B** | **Jack** **lives** as **prisoner-patron** — **creepy** continuity. |
 | **Questions** | **Morgana**’s **fate** at bench: **queen mother**, **hidden**, **dead**, **gone**? |
 
-### Chapter 15 / Epilogue — *Two From the Bough* (working)
+### Chapter 19 / Epilogue — *Two From the Bough* (working)
 
 | Field | Content |
 | --- | --- |
@@ -303,10 +359,13 @@ Hybrid from [decisions](/docs/books/mordreds-tale/planning/decisions): **institu
 | `FQ-03` | **Merlin**’s **agenda** — ally, **tool**, **enemy**, **indifferent**? |
 | `FQ-04` | **Southern friends**: **how many** named characters **max** before bench is crowded? |
 | `FQ-05` | **Enid** ↔ **Mordred**: **forgiveness** arc or **truce** only? |
-| `FQ-06` | ~~**Tanya** **hanging**~~ → locked **on-page** ([`MT-TANYA-HANGING-ON-PAGE`](/docs/books/mordreds-tale/planning/decisions)); **Ch9** — *The Rope* (`09-chapter-9-the-rope/page-124-the-rope.md`). |
+| `FQ-06` | ~~**Tanya** **hanging**~~ → locked **on-page** ([`MT-TANYA-HANGING-ON-PAGE`](/docs/books/mordreds-tale/planning/decisions)); **Ch10** — *The Rope* (`10-chapter-10-the-rope/001-page-124-the-rope.md`). |
 | `FQ-07` | **Prologue** **callback** at **giant** coda or **coalition**? |
 | `FQ-08` | ~~**Years** between rope and **15/14** castle~~ → bridged on **page 125** (*Years after the rope*); refine on polish pass. |
 | `FQ-09` | ~~**Enid**'s **fiancé** details~~ → locked on-page: **Prince Halric of Hallinghorn**; entitled, puppet-like with older men, dismissive to women and poor; marriage framed by Jack/church as kingdom union and "another well" project (see Ch10 p125 + [`MT-TALE-DEPTH-PRIORITIES`](/docs/books/mordreds-tale/planning/decisions)). |
+| `FQ-10` | **Halric death trigger + war causality:** do we lock the "private chamber / bark snap / uncontrolled gravity kill" as the incident that turns Hallinghorn from tense diplomacy to declared war? |
+| `FQ-11` | **Owain household depth:** which chapter carries Geraint's post-blind daily life and post-Tanya caregiver reality (late Ch9, Ch10 fallout, or early Ch11 bridge)? |
+| `FQ-12` | **Mordred practice montage:** where to place two anchor practice scenes that pay directly into Ch12–13 gravity control? |
 
 ## Story roadmap — Act III
 
@@ -324,6 +383,8 @@ Hybrid from [decisions](/docs/books/mordreds-tale/planning/decisions): **institu
 | Beat | Content |
 | --- | --- |
 | **Reveal** | **Tarro’s** edge built on **hidden wells** — sleeping Morgana, then Morgana+Mordred, then **Enid**; Jack’s brokerage and church/crown **lair gate**. |
+| **Church ↔ Jack** | **Partnership** — shared **registry** language, **patron** legitimacy, **relic** gate ([`MT-CHURCH-JACK-PARTNERSHIP`](/docs/books/mordreds-tale/planning/decisions)). |
+| **Jack cannot find Mordred** | **House** **sequestration** + **registry** + **Midas** heat + **wrong** search channels + **Morgana** first — then **second well** ([`MT-JACK-CANNOT-FIND-MORDRED-WHY`](/docs/books/mordreds-tale/planning/decisions)). |
 | **Owain Act I** | Right-hand; **hero**-motive; fathers **Enid** with Morgana under coercion; **Tanya** household poison. |
 | **Enid** | Born later; not at orphanage day; conduit until Merlin; blinded-brother + hanging arc. |
 | **Merlin ~14** | Core opened; world magic returns; Mordred **surge** cost. |
@@ -338,8 +399,8 @@ Hybrid from [decisions](/docs/books/mordreds-tale/planning/decisions): **institu
 | Gwyneth paternity | She **suspects** Jack; still pick **carriage vs approach** emphasis when drafting Act III. |
 | Book 2 / Legacy | **Mordred’s Legacy** — [state](/docs/books/mordreds-legacy/planning/state); **Tarro dungeon**, stump, duty rotas; illusory-brothel police beat still valid. |
 | Southern ally names | Who sits Mordred’s coalition bench from **Hallinghorn** — lock in Act III draft. |
-| Giant coda placement | **Epilogue** vs **numbered Ch15** — pick when Act III structure is stable. |
-| **Forward** | See **Forward questions** (`FQ-01`–`FQ-08`) under beat sheets — **Ch6–15** planning. |
+| Giant coda placement | **Part III** now **on-page** giants + **Black Heart** ([`MT-PART3-JACK-BLACK-HEART-KILL`](/docs/books/mordreds-tale/planning/decisions)); reconcile with [`MT-BOOK1-GIANTS-CODA`](/docs/books/mordreds-tale/planning/decisions) + [`MT-GIANTS-PRIMARY-TELLING-LEGACY`](/docs/books/mordreds-tale/planning/decisions) (curriculum vs scene). |
+| **Forward** | See **Forward questions** (`FQ-01`–`FQ-12`) under beat sheets — **Ch6–19** planning. |
 
 ## Optional polish (later)
 
@@ -400,8 +461,9 @@ Hybrid from [decisions](/docs/books/mordreds-tale/planning/decisions): **institu
 | `ch1` | `books/mordreds_tale/chapters/01-chapter-1-morgana/` | Morgana escape, baby, toward council |
 | `ch2` | `books/mordreds_tale/chapters/02-chapter-2-jack/` | Jack sent to lair, pendant, discovery of sleeping woman, magic found |
 | `ch3` | `books/mordreds_tale/chapters/03-chapter-3-morgana-imprisoned/` | Tarro, council, eastern quarters, convergence, separation |
-| `ch4` | `books/mordreds_tale/chapters/04-chapter-4-mordred/` | House of Small Mercies, bark, Merris, Midas setup |
-| `ch5` | `books/mordreds_tale/chapters/05-chapter-5-the-patron-s-cell/` | Jack, Morgana, charge failure, Owain order |
+| `ch4` | `books/mordreds_tale/chapters/04-chapter-4-the-house-gate/` | House of Small Mercies arrival, bark, Merris |
+| `ch5` | `books/mordreds_tale/chapters/05-chapter-5-midas-and-mercy/` | Midas incident and House aftermath |
+| `ch6` | `books/mordreds_tale/chapters/06-chapter-6-the-patron-s-cell/` | Jack, Morgana, charge failure, Owain order |
 
 ## Style Rule
 

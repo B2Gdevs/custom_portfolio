@@ -1,0 +1,22 @@
+---
+title: listen-data-01-01 Plan
+description: Kickoff for the first Listen DB seeding and backfill phase.
+date: "2026-03-30"
+updated: "2026-03-30"
+order: 1
+repoPath: apps/portfolio/content/docs/listen/planning/plans/listen-data-01-01/PLAN.mdx
+taskPhase: listen-data-01-01
+---
+
+# Kickoff
+
+| Field | Notes |
+| --- | --- |
+| `goal` | Turn the Listen DB model into the real source of active catalog rows by defining how the current file-authored catalog seeds and backfills Payload records. |
+| `scope` | Decide the seed contract, which fields remain authored in `listen-catalog.ts`, how slugs/visibility/tags/date map to Payload, and what fallback behavior runtime surfaces keep while the DB is empty or partial. |
+| `non-goals` | No full admin UI, no public upload tooling, no route changes, and no new ACL model beyond the owner session and existing entitlements. |
+| `dependencies` | `listen-access-01-02`, current Payload Listen collection, `/listen` bootstrap worker path. |
+| `open questions` | None. |
+| `tests required` | Planning-only for `01-01`; implementation tasks in `01-02` and `01-03` must add unit coverage plus build/lint gates. |
+| `definition of done` | The next Listen data phase has explicit task rows for seed/upsert, DB-first runtime reads, and the owner/admin maintenance workflow, with the authored fallback rule written down clearly enough for implementation. |
+| `first tasks` | Define the canonical seed fields, define DB-first versus fallback read order, define local owner seeding flow, then split implementation into seed, runtime consumption, and admin docs tasks. |

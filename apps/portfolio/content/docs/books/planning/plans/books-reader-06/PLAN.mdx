@@ -1,0 +1,30 @@
+---
+title: books-reader-06 Plan
+description: Kickoff for reader shell cleanup and package-local shadcn alignment.
+date: "2026-03-30"
+updated: "2026-03-30"
+repoPath: apps/portfolio/content/docs/books/planning/plans/books-reader-06/PLAN.mdx
+taskPhase: books-reader-06
+---
+
+# Kickoff: `books-reader-06`
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `goal` | remove duplicate reader shell chrome, restore the built-in shelf, and move the packaged reader workspace onto package-local shared UI primitives that stay visually aligned with the portfolio tokens |
+| `scope` | `@portfolio/repub-builder/reader` workspace/sidebar/shelf chrome, the portfolio host wrapper for toolbar/sidebar injection, and the books planning records needed to track the cleanup pass |
+| `non-goals` | new backend persistence behavior, reader URL redesign, public write features, a separate design system for repub-builder, or a full third-party embed API for the package |
+| `dependencies` | `books-reader-03`, `books-reader-05`, `BOOKS-READER-RUNTIME-REPUB-PACKAGE`, `BOOKS-READER-SHADCN-IN-REPUB-BUILDER`, and the current portfolio sidebar host shell |
+| `tests required` | targeted reader component coverage for the shell contract regression, plus `pnpm run build` and `pnpm run lint` |
+| `definition of done` | the reader no longer renders an extra hamburger/mobile drawer, the host sidebar trigger is the only menu control in the toolbar, built-in and queued shelf sections render again beside saved uploads, package-local shared UI primitives replace app-local imports/hand-rolled controls where practical, and verification passes |
+| `first tasks` | write the section phase records, patch the shell/sidebar and shelf rendering, add package-local shared primitives, then verify with targeted reader tests plus build/lint |
+
+## Open Questions
+
+| Question | Status | Notes |
+| --- | --- | --- |
+| should the reader keep a dedicated workspace rail in addition to the portfolio sidebar? | `answered` | yes for now; the cleanup is about removing the extra drawer/hamburger, not deleting the workspace rail entirely |
+| should repub-builder import portfolio UI files directly? | `answered` | no; copy the small shared primitives into the package and keep them visually synced through the same Tailwind tokens |
+| does this phase change backend behavior? | `answered` | no; it is a shell/runtime cleanup pass on top of the shipped auth/data layer |

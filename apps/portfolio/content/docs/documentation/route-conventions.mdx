@@ -20,7 +20,7 @@ This page is the **planning source of truth** for site URL shape. Implementation
 | **Interactive apps** | **`/apps/*`** is the **reader, Dialogue Forge, repo planner, and future tool** namespace. Hub at **`/apps`**. Do not keep duplicate published routes under **`/docs/apps`**. |
 | **No top-level tool exceptions** | **Deprecated:** **`/dialogue-forge`**, **`/books`** listing/read routes. Use **`/apps/dialogue-forge`** and **`/apps/reader`**; old URLs **redirect** (308). |
 | **Top-level content indices** | **`/blog`**, **`/projects`**, **`/listen`** stay at the site root as **browsable catalogs** (MDX or data-driven listings), not under **`/apps/*`**. **`/listen`** covers music tracks and BandLab presets; planning: [listen route-and-urls](/docs/listen/route-and-urls). |
-| **Static reading assets** | Built EPUBs and **`manifest.json`** stay under **`/books/<slug>/...`** as **files** in `public/books/` (not React routes). Do not confuse with removed **`/books` pages**. |
+| **Static reading assets** | The lightweight books manifest stays under **`/books/manifest.json`** in `public/books/`. Local EPUB build outputs may still appear under **`/books/<slug>/book.epub`** during authoring, but the current shipped artifact can now be a storage-backed file URL surfaced through that manifest instead of a permanently committed binary. |
 | **APIs** | **`/api/*`** only. Optional future: **documented route handlers** colocated with **`@portfolio/repub-builder`** for embedders (CopilotKit-style), shipped as part of the same package story. |
 | **Admin** | **`/admin/*`** remains internal / operator surfaces. |
 | **Redirects** | Keep **permanent redirects** from removed paths; log notable external links in [errors-and-attempts](/docs/documentation/planning/errors-and-attempts) if needed. |
@@ -50,16 +50,16 @@ This page is the **planning source of truth** for site URL shape. Implementation
 | --- | --- |
 | **Kookit** (`vendor/kookit`) | **Reference for navigation / chrome patterns** when designing the EPUB **reader shell** (how a serious reader moves between library and book). It is **not** the product UI we ship; we **do not** label it "just a util" in planning -- it informs **UX and technical navigation** choices inside **`/apps/reader`**. |
 | **`@portfolio/repub-builder` today** | **Build-time** pipeline: CLI (`repub`, `repub epub`), manuscript -> EPUB used by `scripts/build-books.cjs`, plus RichEPub/Vite packaging. **Not** the same folder as `components/books/*` today, but it is the **monorepo home for EPUB/repub concerns**. |
-| **Target architecture** | **Shipped:** **`@portfolio/repub-builder/reader`** exports **`ReaderWorkspace`**, **`EpubViewer`**, shelf, **`readerModalStore`**, planning strip + modal root, catalog **filters**, **ember/ink** chrome theme (persisted), etc.; **`apps/portfolio`** uses a thin **`components/books/ReaderWorkspace.tsx`** host + **`transpilePackages`**. **Shell:** site **`SidebarProvider` / `SidebarInset`** + **`SidebarTrigger`** in the reader toolbar (**no** duplicate package sidebar). Optional **`./next` helpers** remain future work. |
+| **Target architecture** | **Shipped:** **`@portfolio/repub-builder/reader`** exports **`ReaderWorkspace`**, **`EpubViewer`**, shelf, **`readerModalStore`**, planning strip + modal root, catalog **filters**, and reader chrome aligned to the portfolio tokens; **`apps/portfolio`** uses a thin **`components/books/ReaderWorkspace.tsx`** host + **`transpilePackages`**. **Shell:** the portfolio host keeps the global site sidebar, injects **`SidebarTrigger`** into the reader toolbar, and the package renders one reader-workspace rail for library/current-book context (**no** extra reader drawer/hamburger). Optional **`./next` helpers** remain future work. |
 
 ## ADR: Reader runtime package boundary (`books-reader-03-01`)
 
 | Decision | Detail |
 | --- | --- |
 | **Coupling** | **`ReaderWorkspace`** and **`EpubViewer`** ship together from **`@portfolio/repub-builder/reader`** so hosts never embed the viewer without the surrounding workspace state (library, tabs, uploads, planning strip). |
-| **Host contract** | Portfolio passes **`ReaderLink`**, optional **`readerToolbarStart`**, **`getPlanningStripConfig`**, **`renderPlanningCockpit`**, and manifest-derived **`books`**; paths default to **`/apps/reader`** and **`/books/<slug>/book.epub`**. |
+| **Host contract** | Portfolio passes **`ReaderLink`**, optional **`readerToolbarStart`**, **`getPlanningStripConfig`**, **`renderPlanningCockpit`**, and manifest-derived **`books`**. Built-in books now prefer `remoteEpubUrl` from the manifest when present and fall back to **`/books/<slug>/book.epub`** only for local-only authoring flows. |
 | **Styling** | Reader chrome is **bundled Tailwind classes** in the package (**`BOOKS-READER-THEME-BUNDLED-PARITY`**); the host does not fork shelf card markup for theme — optional **`ember` / `ink`** toggle is internal to **`ReaderWorkspace`**. |
-| **shadcn** | Dashboard primitives that must match the site (**`SidebarTrigger`**) are **injected by the host**; the package does not bundle **`@/components/ui/sidebar`**. |
+| **shadcn** | Host-only primitives that depend on app shell context (**`SidebarTrigger`**) stay injected by the host; the package may mirror small reader-facing shadcn-style primitives locally as long as they use the same token language and do not import app-local UI files directly. |
 | **Portfolio app** | Imports the **stable public API** from that package; **`apps/portfolio`** remains the demo host, not the only consumer long term. |
 
 ## Remaining migration checklist

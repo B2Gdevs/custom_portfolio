@@ -1,6 +1,0 @@
-{
-  "title": "Sample RichEPub Book",
-  "author": "Portfolio",
-  "entry": "content/index.html",
-  "outputPath": "dist/sample-book.repub"
-}

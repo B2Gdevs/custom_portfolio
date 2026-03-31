@@ -1,7 +1,6 @@
 import type { ListenCatalogEntry } from '@/lib/listen-catalog';
-import { getListenCatalog } from '@/lib/listen-catalog';
 import { resolveListenEmbedSrc } from '@/lib/bandlab-embed';
-import { runListenCatalogWorker } from '@/lib/listen/catalog-worker-runner';
+import { getListenRuntimeBootstrap } from '@/lib/listen-runtime';
 import { listenGroupCookieName } from '@/lib/listen-unlock';
 import { toListenDiscoveryItem, type ListenPageRow } from '@/lib/listen-items';
 
@@ -25,39 +24,6 @@ export function getUnlockedListenGroups(
   return unlocked;
 }
 
-async function getListenBootstrap(cookieHeader: string) {
-  try {
-    const result = await runListenCatalogWorker({ cookieHeader });
-    const body = result.body as
-      | {
-          ok?: boolean;
-          bootstrap?: {
-            access?: { canViewPrivate?: boolean };
-            entries?: ListenCatalogEntry[];
-          };
-        }
-      | undefined;
-
-    if (body?.ok && body.bootstrap?.entries) {
-      return {
-        access: {
-          canViewPrivate: Boolean(body.bootstrap.access?.canViewPrivate),
-        },
-        entries: body.bootstrap.entries,
-      };
-    }
-  } catch {
-    // fall back to file-backed catalog only
-  }
-
-  return {
-    access: {
-      canViewPrivate: false,
-    },
-    entries: getListenCatalog(),
-  };
-}
-
 export async function buildListenPageRows({
   cookieStore,
   cookieHeader,
@@ -65,7 +31,7 @@ export async function buildListenPageRows({
   cookieStore: CookieReader;
   cookieHeader: string;
 }): Promise<ListenPageRow[]> {
-  const { access, entries } = await getListenBootstrap(cookieHeader);
+  const { access, entries } = await getListenRuntimeBootstrap(cookieHeader);
   const unlockedGroups = getUnlockedListenGroups(cookieStore, entries);
   return entries.flatMap((entry) => {
     if (entry.visibility === 'private' && !access.canViewPrivate) {

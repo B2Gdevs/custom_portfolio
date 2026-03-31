@@ -1,5 +1,4 @@
 import { buildConfig } from 'payload';
-import { sqliteAdapter } from '@payloadcms/db-sqlite';
 import {
   AUTH_COOKIE_PREFIX,
   getOwnerSeedConfig,
@@ -9,13 +8,19 @@ import { ragSources } from './lib/payload/collections/ragSources';
 import { ragChunks } from './lib/payload/collections/ragChunks';
 import { ragIngestRuns } from './lib/payload/collections/ragIngestRuns';
 import { listenCatalogRecords } from './lib/payload/collections/listenCatalogRecords';
+import { listenMediaAssets } from './lib/payload/collections/listenMediaAssets';
 import { readerLibraryRecords } from './lib/payload/collections/readerLibraryRecords';
 import { readerLibraryAssets } from './lib/payload/collections/readerLibraryAssets';
 import { readerReadingStates } from './lib/payload/collections/readerReadingStates';
 import { readerSettings } from './lib/payload/collections/readerSettings';
+import { publishedBookArtifacts } from './lib/payload/collections/publishedBookArtifacts';
+import { siteMediaAssets } from './lib/payload/collections/siteMediaAssets';
 import { tenants } from './lib/payload/collections/tenants';
 import { users } from './lib/payload/collections/users';
-import { getPayloadDatabaseUrl } from './lib/rag/config';
+import {
+  getPayloadDatabaseAdapter,
+  getPayloadPlugins,
+} from './lib/payload/runtime-config';
 
 const ownerSeed = getOwnerSeedConfig();
 
@@ -32,15 +37,15 @@ export default buildConfig({
         }
       : false,
   },
-  db: sqliteAdapter({
-    client: {
-      url: getPayloadDatabaseUrl(),
-    },
-  }),
+  db: getPayloadDatabaseAdapter(),
+  plugins: getPayloadPlugins(),
   collections: [
     tenants,
     users,
     listenCatalogRecords,
+    listenMediaAssets,
+    publishedBookArtifacts,
+    siteMediaAssets,
     readerLibraryAssets,
     readerLibraryRecords,
     readerReadingStates,

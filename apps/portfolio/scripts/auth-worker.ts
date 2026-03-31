@@ -1,10 +1,12 @@
-import 'dotenv/config';
 import { getViewerFeatureAccess } from '@/lib/auth/permissions';
 import {
   getSessionViewer,
   loginWithCredentials,
   maybeAutoLoginForDevelopment,
 } from '@/lib/auth/session';
+import { loadScriptEnv } from './load-script-env';
+
+loadScriptEnv();
 
 function decodePayload(raw: string | undefined) {
   if (!raw) return {};

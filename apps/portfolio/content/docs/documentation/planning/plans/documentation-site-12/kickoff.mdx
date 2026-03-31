@@ -1,0 +1,45 @@
+---
+title: "documentation-site-12 — kickoff"
+description: Apps hub cards, compact planning-pack control, media copilot modal — open questions and scope.
+date: "2026-03-31"
+updated: "2026-03-31"
+repoPath: apps/portfolio/content/docs/documentation/planning/plans/documentation-site-12/kickoff.mdx
+order: 0
+---
+
+# documentation-site-12 — kickoff
+
+## Scope
+
+- Reusable **app card** with optional cover, tooltips, primary CTA, and **magic** affordance (visible on **cover hover**) that opens **SiteCopilot** with implicit **`mediaSlot`** context — **no separate media mode toggle** for the user.
+- **Planning pack** as a **compact toolbar** control (animated icon per registry policy), not a large marketing tile on articles.
+- **Session gallery** of generated images (memory + `sessionStorage`); **Persist** to Payload/S3 when `global-data-01` / upload path is ready.
+- **API** for image generation **separate** from RAG `/api/chat` to keep contracts clear.
+
+## Non-goals (v1)
+
+- Replacing the main **SiteCopilot** RAG product with image mode only (optional later hybrid).
+- Public anonymous uploads to S3 without an explicit policy decision.
+
+## Resolved (see [decisions](/docs/documentation/planning/decisions))
+
+- **Image provider:** **OpenAI** — `DOCUMENTATION-SITE-MEDIA-IMAGE-OPENAI`.
+- **Shell:** **Extend SiteCopilot** with **slot context from cover hover control** — `DOCUMENTATION-SITE-MEDIA-COPILOT-CONTEXT`.
+
+## Open questions
+
+1. **Auth:** Who may generate and who may persist (owner-only vs logged-in)?
+2. **Slot ids:** e.g. `app-cover:reader` — single image per slot vs history per slot?
+3. **Dev tooling:** [shadcn MCP](https://ui.shadcn.com/docs/mcp) runs via **`pnpm --dir apps/portfolio exec shadcn mcp`** (see **`DOCUMENTATION-MCP-SHADCN-PNPM`**); **Supabase** URL MCP may require **browser login** — enable both in Cursor Settings after pull.
+4. **Image API:** **`POST /api/media/generate`** is live; **SiteCopilot** still needs to **call** it from **`mediaSlot`** sessions (**`12-05`**).
+5. **RAG embeddings:** optional **local MiniLM** path is **`documentation-site-13`** — not automatic; set **`RAG_EMBEDDING_PROVIDER=local`** and re-ingest after wiping the RAG SQLite file.
+
+## References
+
+- assistant-ui shadcn example: [shadcn.tsx (thread, composer, MarkdownText, parts)](https://github.com/assistant-ui/assistant-ui/blob/main/apps/docs/components/examples/shadcn.tsx)
+- Existing shell: `apps/portfolio/components/site/SiteCopilot.tsx`, `apps/portfolio/app/api/chat/route.ts`
+- Apps hub: `apps/portfolio/components/apps/AppsHubPage.tsx`
+
+## Definition of done (phase)
+
+- **`12-02`** + **`12-06`** done (hub hover → slot + image route + tests); **`12-05`** (copilot calls generate + session gallery) and **`12-03`/`12-04`** remain; **`12-07`–`12-08`** optional after storage decision.

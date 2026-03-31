@@ -2,10 +2,10 @@
 title: State
 description: Current cycle and focus for the Global documentation section (repo-wide planning IA).
 date: "2026-03-28"
-updated: "2026-03-30"
+updated: "2026-03-31"
 order: 2
 repoPath: apps/portfolio/content/docs/global/planning/state.mdx
-taskPhase: global-site-02
+taskPhase: global-data-02
 ---
 
 # State
@@ -17,28 +17,35 @@ taskPhase: global-site-02
 | `section` | `global` |
 | `owner` | `monorepo` |
 | `status` | `active` |
-| `updated` | `2026-03-30` |
+| `updated` | `2026-03-31` |
 
 ## Current cycle
 
 | Field | Value |
 | --- | --- |
-| `phase` | `global-site-02` maintenance |
-| `focus` | `global-auth-01` is now shipped end to end for v1, Books has consumed it through a polished backend-backed reader shelf plus the repub artifact merge, and Listen has finished the first private-media migration pass. Global can stay in maintenance while section planners define the next Books and Listen phases on top of the shared access layer. |
-| `constraint` | Global should define the shared access model once; section planners should consume it instead of inventing separate lock or auth systems |
+| `phase` | `global-data-02` active while `global-data-01` remains the shared provider baseline and `global-data-03` is now the next queued public-catalog migration |
+| `focus` | the provider contract baseline is landed, `repub-builder` is now extracted into its own standalone vendored package, and both off-repo publishers are live: built EPUBs plus planning-pack zips publish as versioned book artifacts, and public site imagery now publishes through `site-media-assets` with a lightweight `public/media/manifest.json` mapping back into the existing project/blog/frontmatter/MDX surfaces. `listen-media-assets` is also live as the storage lane for future Listen-owned media, while the current `/listen` surface remains BandLab-link-first. The planning-pack modal now merges builtin embed packs again so the init pack is visible. The remaining cross-cutting work is execution: clean the blocked unpushed history, then migrate the next public catalog and download classes behind the same SSR-safe contract. |
+| `constraint` | repo-memory reduction cannot casually break authored-content SSR. Runtime binaries, generated reading artifacts, and private media can move behind storage/database paths, but route metadata, public page content, and indexable SEO surfaces still need a clear render contract |
 
 ## Next queue
 
 | Priority | Action |
 | --- | --- |
-| `1` | define the next Books reader phase now that the backend-backed workspace and artifact merge are both shipped |
-| `2` | plan the next Listen data/backfill phase now that private media already uses the shared auth/entitlement model |
-| `3` | keep `global-site-02` guidance aligned as the auth-backed section work lands |
+| `1` | continue `global-data-02-02`: rebuild or rewrite the still-unpushed branch range so committed DB/EPUB blobs are actually removed from the push path instead of only being replaced by future storage rules |
+| `2` | continue `global-data-02-03` from the new baseline: remove or replace repo-resident copies of the now-published site media where safe, and keep extending the same publish path to the next heavy public classes |
+| `3` | start `global-data-03-01`: define the concrete Payload collections and server loaders for `/apps`, public planning-pack/download metadata, and the first public bundle records so those surfaces stop depending on hard-coded component arrays or repo-resident zip/html artifacts |
+| `4` | queue `global-data-03-02` and `03-03`: move projects and resumes onto Postgres metadata plus storage-backed files while preserving SSR and keeping long-form editorial copy repo-first where that still reduces maintenance |
+| `5` | queue `global-auth-02-01`: refresh the site shell/sidebar around owner-only login and private-surface affordances using the existing auth/session routes instead of inventing a second auth stack |
 
 ## References
 
 | Id | Path |
 | --- | --- |
 | `docs-global` | `apps/portfolio/content/docs/global/` |
+| `global-data-kickoff` | `apps/portfolio/content/docs/global/planning/plans/global-data-01/PLAN.mdx` |
+| `global-data-supabase-bootstrap` | `apps/portfolio/content/docs/global/planning/plans/global-data-01/SUPABASE-BOOTSTRAP.mdx` |
+| `global-data-catalog-kickoff` | `apps/portfolio/content/docs/global/planning/plans/global-data-03/PLAN.mdx` |
 | `docs-lib` | `apps/portfolio/lib/docs.ts` |
+| `payload-config` | `apps/portfolio/payload.config.ts` |
+| `rag-config` | `apps/portfolio/lib/rag/config.ts` |
 | `agents-root` | `AGENTS.md` (repo root) |

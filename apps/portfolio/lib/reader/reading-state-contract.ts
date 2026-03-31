@@ -16,7 +16,9 @@ export type ReaderPersistedState = {
 export type ReaderPersistedStateInput = Omit<ReaderPersistedState, 'updatedAt'>;
 
 function asString(value: unknown) {
-  return typeof value === 'string' ? value : null;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number') return String(value);
+  return null;
 }
 
 function clampProgress(value: unknown) {

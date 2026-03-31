@@ -7,3 +7,6 @@
 [submodule "vendor/repo-planner"]
 	path = vendor/repo-planner
 	url = https://github.com/MagicbornStudios/RepoPlanner.git
+[submodule "vendor/repub-builder"]
+	path = vendor/repub-builder
+	url = https://github.com/MagicbornStudios/repub-builder

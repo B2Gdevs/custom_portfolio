@@ -1,8 +1,8 @@
 ---
 title: Planning Docs
-description: Planning loop records for the Listen surface -- tracks, BandLab presets, filters, and simple lock groups.
+description: Planning loop records for the Listen surface -- tracks, BandLab presets, filters, identity, and DB-backed media records.
 date: "2026-03-28"
-updated: "2026-03-28"
+updated: "2026-03-30"
 order: 1
 repoPath: apps/portfolio/content/docs/listen/planning/planning-docs.mdx
 ---
@@ -25,7 +25,7 @@ repoPath: apps/portfolio/content/docs/listen/planning/planning-docs.mdx
 | Step | Rule |
 | --- | --- |
 | `1` | update these Listen planning docs before implementation |
-| `2` | execute one logical task from `listen-surface-01` (or a successor phase) |
+| `2` | execute one logical task from the active Listen phase (`listen-surface-*`, `listen-access-*`, `listen-data-*`) |
 | `3` | verify `pnpm run build` and `pnpm run lint`; spot-check `/listen` in dev |
 | `4` | mark tasks done in `task-registry.mdx` and refresh `state.mdx` |
 
@@ -42,15 +42,26 @@ repoPath: apps/portfolio/content/docs/listen/planning/planning-docs.mdx
 | --- | --- |
 | `surface` | catalog/discovery UX, unlock flow, and shared shell behavior |
 | `identity` | listen-specific theme treatment, mini logo, and orientation cues within the shared content-surface system |
+| `data` | DB-backed catalog rows, seeding/backfill, and long-lived admin workflow |
 
 ## Code anchors (today)
 
 | Area | Path |
 | --- | --- |
 | Public page | `apps/portfolio/app/listen/page.tsx` |
-| Catalog | `apps/portfolio/lib/listen-catalog.ts` (`getListenCatalog`); public home tracks via `apps/portfolio/lib/music.ts` (`getMusicTracks`) |
+| Catalog | `apps/portfolio/lib/listen-catalog.ts` (`getListenCatalog`), `apps/portfolio/lib/listen-catalog-bootstrap.ts`, `apps/portfolio/lib/listen-runtime.ts`, `apps/portfolio/lib/payload/collections/listenCatalogRecords.ts`; public home tracks via `apps/portfolio/lib/listen-runtime.ts` (`getMusicTracks`) |
 | Discovery UI | `ListenIndexClient`, `lib/content-discovery` (kind `listen`) |
 | Unlock | `POST /api/listen/unlock`, `LISTEN_LOCK_GROUPS`, `lib/listen-unlock.ts` |
+| Seed / backfill | `apps/portfolio/lib/listen/seed.ts`, `apps/portfolio/scripts/seed-listen-catalog.ts`, `pnpm --filter @portfolio/app listen:seed` |
+
+## Owner workflow
+
+| Step | Rule |
+| --- | --- |
+| `1` | author or revise fallback rows in `listen-catalog.ts` when shaping new data locally |
+| `2` | run `pnpm --filter @portfolio/app listen:seed` to upsert those rows into Payload under the owner tenant |
+| `3` | runtime surfaces (`/listen`, home tracks, command-palette search) prefer DB-backed rows first and fall back to file-authored rows only when the DB path is empty or unavailable |
+| `4` | private owner-only rows stay `visibility: private`; public preview rows may still use `lockGroup` if they intentionally keep the shared-password flow |
 
 ## Related
 

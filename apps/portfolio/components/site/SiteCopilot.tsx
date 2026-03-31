@@ -13,12 +13,14 @@ import { DevToolsFrame } from '@assistant-ui/react-devtools';
 import { ArrowUp, Plus, Wrench, X } from 'lucide-react';
 import { type Dispatch, type SetStateAction, useCallback, useEffect, useState } from 'react';
 import { SiteCopilotSources, type SiteCopilotSourceBundle } from './SiteCopilotSources';
+import { useSiteCopilot } from './SiteCopilotContext';
 import { createLogger } from '@/lib/logging';
 import type { RagSearchHit } from '@/lib/rag/types';
 import type {
   SiteChatApiResponse,
   SiteChatConversationMessage,
 } from '@/lib/site-chat';
+import type { MediaGenerateResponse } from '@/lib/site-media';
 
 interface AssistantUiMessagePart {
   type?: string;
@@ -153,6 +155,16 @@ function AssistantTurnSources({
   );
 }
 
+const messagePartComponents = {
+  Image: ({ image }: { image: string }) => (
+    <img
+      src={image}
+      alt="Generated cover image"
+      className="max-h-[min(22rem,50vh)] max-w-full rounded-xl border border-[#ded9cf] object-contain dark:border-[#3a372f]"
+    />
+  ),
+};
+
 function ClaudeChatMessage(props: AssistantTurnSourcesProps) {
   const isUser = useAuiState((state) => state.message.role === 'user');
 
@@ -169,7 +181,7 @@ function ClaudeChatMessage(props: AssistantTurnSourcesProps) {
               : 'border-[#ded9cf] bg-white/95 text-[#201b18] dark:border-[#3a372f] dark:bg-[#1f1e1b] dark:text-[#f3eee5]',
           ].join(' ')}
         >
-          <MessagePrimitive.Parts />
+          <MessagePrimitive.Parts components={messagePartComponents} />
         </div>
         <AssistantTurnSources {...props} />
       </div>
@@ -177,28 +189,53 @@ function ClaudeChatMessage(props: AssistantTurnSourcesProps) {
   );
 }
 
-function ClaudeEmptyState() {
+function appCoverLabelFromContext(contextId: string | null): string | null {
+  if (!contextId?.startsWith('app-cover:')) {
+    return null;
+  }
+  const id = contextId.slice('app-cover:'.length).trim();
+  if (!id) {
+    return null;
+  }
+  return id
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+function ClaudeEmptyState({ coverImageContext }: { coverImageContext: string | null }) {
+  const coverLabel = appCoverLabelFromContext(coverImageContext);
+  const isCover = Boolean(coverLabel);
+
   return (
     <div className="mx-auto flex h-full w-full max-w-3xl flex-col items-center justify-center px-6 text-center">
       <p className="text-[0.68rem] uppercase tracking-[0.34em] text-[#8e7f72] dark:text-[#b4ab9f]">
         {CHAT_TITLE}
       </p>
       <h2 className="mt-4 font-serif text-3xl text-[#1f1a17] dark:text-[#f3eee5]">
-        {CHAT_INTRO}
+        {isCover ? `Cover for ${coverLabel}` : CHAT_INTRO}
       </h2>
       <p className="mt-4 max-w-2xl text-sm leading-7 text-[#6f665f] dark:text-[#c7beb1]">
-        This assistant only answers from public portfolio material and retrieved site context.
+        {isCover
+          ? 'Describe the cover you want and send — the thread will show a generated image. Send again to iterate on the look.'
+          : 'This assistant only answers from public portfolio material and retrieved site context.'}
       </p>
     </div>
   );
 }
 
-function ClaudeComposer() {
+function ClaudeComposer({ coverImageContext }: { coverImageContext: string | null }) {
+  const coverLabel = appCoverLabelFromContext(coverImageContext);
+  const placeholder = coverLabel
+    ? `Describe the ${coverLabel} cover image…`
+    : 'How can I help you today?';
+  const modeHint = coverLabel ? 'OpenAI Images · cover' : 'OpenAI + site RAG';
+
   return (
     <ComposerPrimitive.Root className="mx-auto flex w-full max-w-3xl flex-col gap-3 rounded-[1.75rem] border border-[#ded9cf] bg-white/96 p-3 shadow-[0_24px_80px_rgba(39,28,18,0.12)] dark:border-[#39342d] dark:bg-[#1f1e1b]/96">
       <ComposerPrimitive.Input
         aria-label="Type a message..."
-        placeholder="How can I help you today?"
+        placeholder={placeholder}
         className="min-h-24 w-full resize-none bg-transparent px-2 py-1 font-serif text-base leading-7 text-[#1d1815] outline-none placeholder:text-[#8f8376] dark:text-[#f3eee5] dark:placeholder:text-[#92887c]"
       />
       <div className="flex items-center justify-between gap-3">
@@ -210,7 +247,7 @@ function ClaudeComposer() {
             <Plus className="h-4 w-4" />
           </ComposerPrimitive.AddAttachment>
           <span className="text-xs uppercase tracking-[0.24em] text-[#8b7c6f] dark:text-[#b7aea3]">
-            OpenAI + site RAG
+            {modeHint}
           </span>
         </div>
         <ComposerPrimitive.Send
@@ -225,6 +262,7 @@ function ClaudeComposer() {
 }
 
 interface ClaudePanelProps extends AssistantTurnSourcesProps {
+  coverImageContext: string | null;
   isDevtoolsOpen: boolean;
   onClose: () => void;
   onOpenDevtools: () => void;
@@ -232,12 +270,15 @@ interface ClaudePanelProps extends AssistantTurnSourcesProps {
 }
 
 function ClaudePanel({
+  coverImageContext,
   isDevtoolsOpen,
   onClose,
   onOpenDevtools,
   onCloseDevtools,
   ...sourceProps
 }: ClaudePanelProps) {
+  const coverLabel = appCoverLabelFromContext(coverImageContext);
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-end bg-[rgba(24,17,12,0.28)] p-3 backdrop-blur-[2px] sm:p-6">
       <div
@@ -260,6 +301,11 @@ function ClaudePanel({
               <h2 className="mt-1 font-serif text-xl text-[#1d1815] dark:text-[#f3eee5]">
                 {CHAT_TITLE}
               </h2>
+              {coverLabel ? (
+                <p className="mt-1 text-xs text-[#7a6e62] dark:text-[#a69b8e]">
+                  Cover context: {coverLabel}
+                </p>
+              ) : null}
             </div>
             <div className="flex items-center gap-2">
               {DEVTOOLS_ENABLED ? (
@@ -286,12 +332,12 @@ function ClaudePanel({
           <ThreadPrimitive.Root className="flex min-h-0 flex-1 flex-col px-4 pb-4 pt-5 sm:px-5">
             <ThreadPrimitive.Viewport className="min-h-0 flex-1 overflow-y-auto px-1">
               <ThreadPrimitive.Empty>
-                <ClaudeEmptyState />
+                <ClaudeEmptyState coverImageContext={coverImageContext} />
               </ThreadPrimitive.Empty>
               <ThreadPrimitive.Messages>{() => <ClaudeChatMessage {...sourceProps} />}</ThreadPrimitive.Messages>
             </ThreadPrimitive.Viewport>
             <div className="pt-4">
-              <ClaudeComposer />
+              <ClaudeComposer coverImageContext={coverImageContext} />
             </div>
           </ThreadPrimitive.Root>
         </div>
@@ -311,8 +357,12 @@ function ClaudePanel({
   );
 }
 
+function isAppCoverImageContext(contextId: string | null): contextId is string {
+  return Boolean(contextId?.startsWith('app-cover:'));
+}
+
 export function SiteCopilot() {
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, openChat, closeChat, coverImageContext } = useSiteCopilot();
   const [isDevtoolsOpen, setIsDevtoolsOpen] = useState(false);
   const [pendingBundle, setPendingBundle] = useState<SiteCopilotSourceBundle | null>(null);
   const [sourcesByMessageId, setSourcesByMessageId] = useState<Record<string, SiteCopilotSourceBundle>>({});
@@ -334,6 +384,58 @@ export function SiteCopilot() {
           content: [{ type: 'text' as const, text: 'Ask a question about the public site first.' }],
           status: { type: 'complete' as const, reason: 'stop' as const },
         };
+      }
+
+      if (isAppCoverImageContext(coverImageContext)) {
+        setPendingBundle(null);
+        setSourcesLoading(false);
+        CHAT_LOGGER.info('cover image generate started', {
+          queryPreview: previewText(query),
+          coverImageContext,
+        });
+        try {
+          const response = await fetch('/api/media/generate', {
+            method: 'POST',
+            signal: abortSignal,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              prompt: query,
+              mediaSlot: coverImageContext,
+            }),
+          });
+          const data = (await response.json().catch(() => null)) as MediaGenerateResponse | null;
+          if (!response.ok || !data || data.ok !== true) {
+            const message =
+              data && 'ok' in data && data.ok === false && typeof data.message === 'string'
+                ? data.message
+                : 'Image generation failed.';
+            const error = new Error(message) as Error & { status?: number };
+            error.status = response.status;
+            throw error;
+          }
+          const src = `data:image/png;base64,${data.b64Json}`;
+          const caption =
+            typeof data.revisedPrompt === 'string' && data.revisedPrompt.trim()
+              ? data.revisedPrompt.trim()
+              : 'Here is a draft cover image. Adjust your next message to iterate.';
+          CHAT_LOGGER.info('cover image generate completed', {
+            elapsedMs: Date.now() - startedAt,
+            model: data.model,
+          });
+          return {
+            content: [
+              { type: 'image' as const, image: src },
+              { type: 'text' as const, text: caption },
+            ],
+            status: { type: 'complete' as const, reason: 'stop' as const },
+          };
+        } catch (error) {
+          CHAT_LOGGER.error('cover image generate threw', {
+            elapsedMs: Date.now() - startedAt,
+            error,
+          });
+          throw error;
+        }
       }
 
       setSourcesLoading(true);
@@ -423,7 +525,7 @@ export function SiteCopilot() {
         setSourcesLoading(false);
       }
     },
-    [],
+    [coverImageContext],
   );
 
   const runtime = useLocalRuntime(
@@ -437,7 +539,7 @@ export function SiteCopilot() {
     <AssistantRuntimeProvider runtime={runtime}>
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={openChat}
         className="inline-flex items-center gap-2 rounded-full border border-[#d6c8b3] bg-[#f7f0e2]/96 px-4 py-3 font-serif text-sm text-[#2a2119] shadow-[0_18px_44px_rgba(34,22,14,0.16)] transition hover:-translate-y-0.5 hover:bg-[#fbf5ea] dark:border-[#3a332c] dark:bg-[#211d19]/96 dark:text-[#f5ecdf] dark:hover:bg-[#2a2520]"
       >
         Open Chat
@@ -445,6 +547,7 @@ export function SiteCopilot() {
 
       {isOpen ? (
         <ClaudePanel
+          coverImageContext={coverImageContext}
           pendingBundle={pendingBundle}
           setPendingBundle={setPendingBundle}
           setSourcesByMessageId={setSourcesByMessageId}
@@ -452,7 +555,7 @@ export function SiteCopilot() {
           sourcesLoading={sourcesLoading}
           isDevtoolsOpen={isDevtoolsOpen}
           onClose={() => {
-            setIsOpen(false);
+            closeChat();
             setIsDevtoolsOpen(false);
           }}
           onOpenDevtools={() => setIsDevtoolsOpen(true)}

@@ -2,10 +2,10 @@
 title: State
 description: Compact state records for the books section.
 date: "2026-03-15"
-updated: "2026-04-07"
+updated: "2026-04-08"
 order: 2
 repoPath: apps/portfolio/content/docs/books/planning/state.mdx
-taskPhase: books-reader-02
+taskPhase: books-reader-07
 ---
 
 # State
@@ -17,24 +17,24 @@ taskPhase: books-reader-02
 | `section` | `books` |
 | `owner` | `books-section` |
 | `status` | `active` |
-| `updated` | `2026-04-07` |
+| `updated` | `2026-04-08` |
 
 ## Current Cycle
 
 | Field | Value |
 | --- | --- |
-| `phase` | `books-reader-02` closed after the artifact merge pass |
-| `plan` | **Reader shell groundwork is shipped**: **`ReaderWorkspace`** + **`EpubViewer`**, shelf search and filters, planning strip, reader modal store, and book-scoped planning packs. The auth-aware reader foundation, sync layer, workspace polish, and the repub artifact merge are now in place too: backend reader collections, a shared workspace bootstrap contract, DB-backed reading state for built-in books, owner-only workspace settings save, explicit local-EPUB upload, saved-upload shelf cards, continue-reading defaults, planning appendix embedding, and committed author-annotation exports folded back into the emitted EPUB artifact. |
-| `focus` | keep the reader as the primary product lane, but stop pretending there is still an open artifact-merge task: the current repub artifact now bundles planning supplements plus author-annotation baseline data while anonymous/local fallback rules stay intact; the next reader work needs a fresh planned phase rather than more ad hoc follow-up on `books-reader-02` |
+| `phase` | `books-reader-07` is active for the next shadcn migration wave |
+| `plan` | **Reader shell groundwork is shipped**: **`ReaderWorkspace`** + **`EpubViewer`**, planning strip, reader modal store, auth-aware backend persistence, explicit upload/save paths, and book-scoped planning packs. `books-reader-07` extends the package-local UI stack beyond the initial primitives: `Textarea`, `Select`, and `Checkbox` now exist in `@portfolio/repub-builder`, workspace settings/upload flows use them, and the main viewer overlay/footer actions moved onto the same mirrored button/input stack. |
+| `focus` | finish the viewer-side remainder audit and keep migrating custom `EpubViewer` surfaces only where the component abstraction actually helps, without flattening the bespoke reading-stage layout into generic app chrome |
 | `constraint` | anonymous reading and local EPUB import stay available, but write-capable behavior and DB persistence must go through the shared auth/entitlement layer; local import alone must not auto-upload a book or mutate backend records |
 
 ## Next Queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | plan the next dedicated reader phase before more implementation; `books-reader-02` and `books-reader-05` are closed | `reader-planning` |
-| `2` | maintain `books-reader-05` only when the polished backend-backed shelf or artifact-backed reader exposes a concrete bug or missing owner affordance | `reader` |
-| `3` | AI and publishing remain back burner until a new reader phase is defined | `queue-policy` |
+| `1` | execute `books-reader-07`: add mirrored reader `Textarea` / `Select` / `Checkbox` controls and migrate workspace + viewer action surfaces onto package-local shadcn-style components | `reader-execution` |
+| `2` | keep a remainder audit for custom viewer surfaces that still need follow-up after this wave | `reader-audit` |
+| `3` | AI and publishing remain back burner while the active reader migration wave is in flight | `queue-policy` |
 
 ## References
 
@@ -43,11 +43,12 @@ taskPhase: books-reader-02
 | `books-root` | `books/mordreds_tale/` | authored source of truth |
 | `home-page` | `apps/portfolio/app/page.tsx` | primary site reading entry |
 | `reader-embed` | `apps/portfolio/components/books/BookReaderEmbed.tsx` | embedded reader surface |
-| `viewer` | `packages/repub-builder/src/reader/EpubViewer.tsx` | EPUB runtime, annotations UI, export/repack (**re-export** from `apps/portfolio/lib/epub-annotations.ts` for legacy imports) |
-| `reader-workspace` | `packages/repub-builder/src/reader/ReaderWorkspace.tsx`, `apps/portfolio/components/books/ReaderWorkspace.tsx`, `apps/portfolio/lib/reader/workspace-library.ts` | library + reading shell + **v1 dashboard** sidebar; host wires **`Link`**, backend upload shelf records, and planning cockpit |
+| `viewer` | `vendor/repub-builder/src/reader/EpubViewer.tsx` | EPUB runtime, annotations UI, export/repack (**re-export** from `apps/portfolio/lib/epub-annotations.ts` for legacy imports) |
+| `reader-workspace` | `vendor/repub-builder/src/reader/ReaderWorkspace.tsx`, `apps/portfolio/components/books/ReaderWorkspace.tsx`, `apps/portfolio/lib/reader/workspace-library.ts` | library + reading shell + **v1 dashboard** sidebar; host wires **`Link`**, backend upload shelf records, and planning cockpit |
+| `reader-phase-plan` | `apps/portfolio/content/docs/books/planning/plans/books-reader-06/PLAN.mdx` | kickoff for the shell cleanup + shadcn alignment pass |
 | `books-lib` | `apps/portfolio/lib/books.ts` | current manifest reader; needs richer library metadata for cover-forward shelf UI |
 | `epub-annotations` | `apps/portfolio/lib/epub-annotations.ts` | IndexedDB, schema, JSON and annotated-EPUB zip |
-| `reader-planning-strip` | `packages/repub-builder/src/reader/ReaderPlanningStrip.tsx` | **`readerModalStore`** only (**`BOOKS-READER-PLANNING-STRIP-PACKAGE-READER-MODAL-STORE`**) -- [embed architecture](/docs/documentation/reader-repo-planner-embed-architecture) |
+| `reader-planning-strip` | `vendor/repub-builder/src/reader/ReaderPlanningStrip.tsx` | **`readerModalStore`** only (**`BOOKS-READER-PLANNING-STRIP-PACKAGE-READER-MODAL-STORE`**) -- [embed architecture](/docs/documentation/reader-repo-planner-embed-architecture) |
 | `site-copilot` | `apps/portfolio/components/site/SiteCopilot.tsx` | floating site chat shell |
 | `chat-api` | `apps/portfolio/app/api/chat/route.ts` | assistant-ui-backed public chat route with server-side RAG grounding |
 | `logging-lib` | `apps/portfolio/lib/logging.ts` | shared env-driven structured logging for client/server flows |
@@ -63,7 +64,7 @@ taskPhase: books-reader-02
 | `reader-collections` | `apps/portfolio/lib/payload/collections/readerLibraryAssets.ts`, `apps/portfolio/lib/payload/collections/readerLibraryRecords.ts`, `apps/portfolio/lib/payload/collections/readerSettings.ts` | backend reader library/settings/upload foundation for entitled sessions |
 | `reader-reading-state` | `apps/portfolio/lib/reader/reading-state.ts`, `apps/portfolio/app/api/reader/state/route.ts`, `apps/portfolio/lib/payload/collections/readerReadingStates.ts` | DB-backed annotations/progress for entitled built-in reading sessions with local fallback intact |
 | `reader-write-routes` | `apps/portfolio/app/api/reader/workspace/settings/route.ts`, `apps/portfolio/app/api/reader/library/upload/route.ts` | owner-only workspace settings save and explicit EPUB upload worker boundaries |
-| `repub-reader-runtime` | **`@portfolio/repub-builder/reader`** (`packages/repub-builder/src/reader/index.ts`) | **ReaderWorkspace**, **`EpubViewer`**, shelf, **`readerModalStore`**, **`ReaderModalRoot`**; consumed by **`apps/portfolio`** via **`transpilePackages`** + site **`SidebarTrigger`** |
+| `repub-reader-runtime` | **`@portfolio/repub-builder/reader`** (`vendor/repub-builder/src/reader/index.ts`) | **ReaderWorkspace**, **`EpubViewer`**, shelf, **`readerModalStore`**, **`ReaderModalRoot`**; consumed by **`apps/portfolio`** via **`transpilePackages`** + site **`SidebarTrigger`** |
 | `books-structure-doc` | `apps/portfolio/content/docs/books/book-structure.mdx` | formal source and EPUB structure rules |
 | `book-output` | `apps/portfolio/public/books/` | generated reading artifacts |
 | `front-page-reader` | `apps/portfolio/components/home/FeaturedBookExperience.tsx` | user-triggered reader mount path |
@@ -78,7 +79,7 @@ Section-level fiction coordination for the three Magicborn-line titles. **Locks:
 
 | Order | Book | Slug | Note |
 | --- | --- | --- | --- |
-| `1` | **Mordred's Tale — Part I: Wells of Tarro** | `mordreds_tale_part_1` | Prologue + Ch1–Ch10: origin lanes, world setup, relic economy, politics, and magic return hook |
+| `1` | **Mordred's Tale — Part I: Wells of Tarro** | `mordreds_tale_part_1` | Prologue + **14** numbered chapters (target pacing); curtain = **Morgana carries Mordred south** — [Tale state](/docs/books/mordreds-tale/planning/state#part-1--fourteen-chapter-map-target) |
 | `2` | **Mordred's Tale — Part II: Smoke and Crowns** | `mordreds_tale_part_2` | Ch11–Ch14: war, political pressure, Mordred/Enid/Gwyneth kinship tension, ascent |
 | `3` | **Mordred's Tale — Part III: Boughfall** | `mordreds_tale_part_3` | Ch15+ lane: giants, survival, power hardening into law (currently scaffold seed) |
 | `4` | **Magicborn: The Rune Path** | `magicborn_rune_path` | **Kael prequel** -- opens **17**; ends **still running** (fugitive on the Path); **not** a sequel to Tale |

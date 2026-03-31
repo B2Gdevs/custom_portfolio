@@ -4,6 +4,7 @@ import { ContentCommandPaletteHotkey } from '@/components/content/ContentCommand
 import { SiteLayout } from '@/components/layout/SiteLayout';
 import { ModalRoot } from '@/components/modals/ModalRoot';
 import { SiteCopilot } from '@/components/site/SiteCopilot';
+import { SiteCopilotProvider } from '@/components/site/SiteCopilotContext';
 import { getAllContent } from '@/lib/content';
 import { buildSiteMenus } from '@/lib/site-menus';
 import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Serif } from 'next/font/google';
@@ -50,6 +51,14 @@ export default function RootLayout({
   const siteChatEnabled =
     Boolean(process.env.OPENAI_API_KEY?.trim()) && process.env.NEXT_PUBLIC_SITE_CHAT !== '0';
 
+  const siteShell = (
+    <>
+      <SiteLayout navMenus={navMenus}>{children}</SiteLayout>
+      <ContentCommandPaletteHotkey />
+      <ModalRoot />
+    </>
+  );
+
   return (
     <html
       lang="en"
@@ -62,19 +71,19 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body>
-        <SiteLayout navMenus={navMenus}>
-          {children}
-        </SiteLayout>
-        <ContentCommandPaletteHotkey />
-        <ModalRoot />
         {siteChatEnabled ? (
-          <div
-            data-testid="site-copilot-shell"
-            className="fixed bottom-6 right-6 z-[130] pointer-events-none [&_*]:pointer-events-auto"
-          >
-            <SiteCopilot />
-          </div>
-        ) : null}
+          <SiteCopilotProvider>
+            {siteShell}
+            <div
+              data-testid="site-copilot-shell"
+              className="fixed bottom-6 right-6 z-[130] pointer-events-none [&_*]:pointer-events-auto"
+            >
+              <SiteCopilot />
+            </div>
+          </SiteCopilotProvider>
+        ) : (
+          siteShell
+        )}
       </body>
     </html>
   );

@@ -6,7 +6,10 @@ import {
 } from '@/lib/auth/permissions';
 import { getSessionViewer } from '@/lib/auth/session';
 import { getPayloadClient } from '@/lib/payload';
-import { READER_LIBRARY_ASSET_COLLECTION_SLUG } from '@/lib/payload/collections/readerLibraryAssets';
+import {
+  getReaderLibraryAssetFileURL,
+  READER_LIBRARY_ASSET_COLLECTION_SLUG,
+} from '@/lib/payload/collections/readerLibraryAssets';
 import {
   READER_LIBRARY_COLLECTION_SLUG,
   READER_SETTINGS_COLLECTION_SLUG,
@@ -24,6 +27,22 @@ type UnknownRecord = Record<string, unknown>;
 
 function isRecord(value: unknown): value is UnknownRecord {
   return Boolean(value) && typeof value === 'object';
+}
+
+function getUploadedAssetURL(asset: unknown) {
+  if (!isRecord(asset)) {
+    return null;
+  }
+
+  if (typeof asset.filename === 'string' && asset.filename.trim().length > 0) {
+    return getReaderLibraryAssetFileURL(asset.filename);
+  }
+
+  if (typeof asset.url === 'string' && asset.url.trim().length > 0) {
+    return asset.url;
+  }
+
+  return null;
 }
 
 export async function saveReaderWorkspaceSettings(
@@ -110,10 +129,7 @@ export async function uploadReaderLibraryEpub(
   });
 
   const assetId = isRecord(asset) && asset.id != null ? String(asset.id) : null;
-  const assetUrl =
-    isRecord(asset) && typeof asset.url === 'string' && asset.url.trim().length > 0
-      ? asset.url
-      : null;
+  const assetUrl = getUploadedAssetURL(asset);
 
   const saved = await payload.create({
     collection: READER_LIBRARY_COLLECTION_SLUG,

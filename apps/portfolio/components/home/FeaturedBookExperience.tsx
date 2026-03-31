@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { Download, Sparkles } from 'lucide-react';
+import { getPublishedBookDownloadUrl } from '@/lib/book-artifacts';
 import type { BookEntry } from '@/lib/books';
 import type { FeaturedBookShowcase } from '@/lib/featured-book';
 
@@ -23,7 +24,9 @@ export default function FeaturedBookExperience({
   const readerHref = selectedBook?.hasEpub
     ? `/apps/reader?book=${encodeURIComponent(selectedBook.slug)}`
     : '/apps/reader';
-  const downloadHref = selectedBook?.hasEpub ? `/books/${selectedBook.slug}/book.epub` : null;
+  const downloadHref = selectedBook?.hasEpub
+    ? getPublishedBookDownloadUrl(selectedBook)
+    : null;
 
   return (
     <section
@@ -65,7 +68,13 @@ export default function FeaturedBookExperience({
               Go to the reader
             </Link>
             <a
-              href={`/books/${featuredBook.slug}/book.epub`}
+              href={
+                getPublishedBookDownloadUrl(
+                  books.find((book) => book.slug === featuredBook.slug) ?? {
+                    slug: featuredBook.slug,
+                  },
+                )
+              }
               download={`${featuredBook.slug}.epub`}
               className="inline-flex items-center gap-2 rounded-full border border-border bg-dark px-5 py-3 text-sm font-medium text-primary transition-colors hover:border-accent hover:text-accent"
             >

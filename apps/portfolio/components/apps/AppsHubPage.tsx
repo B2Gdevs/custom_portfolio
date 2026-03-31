@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { BookOpen, Layers, LayoutGrid, MessageSquare, Terminal } from 'lucide-react';
+import { LayoutGrid } from 'lucide-react';
+import { AppsHubAppCard } from '@/components/apps/AppsHubAppCard';
 import { readerAppHref } from '@/lib/reader-routes';
 
 const apps = [
@@ -9,7 +10,7 @@ const apps = [
     description:
       'In-browser graph / Yarn / play-test editor for branching dialogue. Runs inside the main site shell so you can jump back to docs, projects, or the reader without leaving the app namespace.',
     href: '/apps/dialogue-forge',
-    icon: MessageSquare,
+    iconName: 'message-square' as const,
     cta: 'Open Dialogue Forge',
     note: (
       <>
@@ -27,7 +28,7 @@ const apps = [
     description:
       'Vendored planning CLI and embedded cockpit: live repo read APIs plus workspace UI, with package-owned shell work still in flight.',
     href: '/apps/repo-planner',
-    icon: Terminal,
+    iconName: 'terminal' as const,
     cta: 'Open Repo Planner',
     note: (
       <>
@@ -45,7 +46,7 @@ const apps = [
     description:
       'Build-time export of section planning MDX to static Markdown under `/planning-pack/site/` plus `manifest.json`. Read-only downloads for visitors.',
     href: '/docs/global/global-planning',
-    icon: Layers,
+    iconName: 'layers' as const,
     cta: 'Open planning guide',
     note: (
       <>
@@ -61,7 +62,7 @@ const apps = [
     description:
       'Canonical reading surface for built books. Library-first shell, deep links by query, and local EPUB import as a secondary utility path.',
     href: readerAppHref({ book: 'mordreds_tale' }),
-    icon: BookOpen,
+    iconName: 'book-open' as const,
     cta: 'Open reader',
     note: (
       <>
@@ -88,31 +89,11 @@ export function AppsHubPage() {
       </header>
 
       <ul className="mt-10 grid gap-6 lg:grid-cols-2">
-        {apps.map((app) => {
-          const Icon = app.icon;
-          return (
-            <li key={app.id}>
-              <article className="story-card flex h-full flex-col p-6 md:p-8">
-                <div className="mb-4 flex items-start gap-3">
-                  <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-border/80 bg-dark text-accent">
-                    <Icon size={22} aria-hidden />
-                  </span>
-                  <div>
-                    <h2 className="text-xl font-semibold text-primary">{app.title}</h2>
-                    <p className="mt-2 text-sm leading-relaxed text-text-muted">{app.description}</p>
-                  </div>
-                </div>
-                <div className="mb-4 flex-1 text-xs leading-relaxed text-text-muted/90">{app.note}</div>
-                <Link
-                  href={app.href}
-                  className="inline-flex w-fit items-center rounded-full border border-border px-4 py-2 text-sm font-medium text-primary transition-colors hover:border-accent hover:text-accent"
-                >
-                  {app.cta}
-                </Link>
-              </article>
-            </li>
-          );
-        })}
+        {apps.map((app) => (
+          <li key={app.id}>
+            <AppsHubAppCard {...app} />
+          </li>
+        ))}
       </ul>
     </div>
   );

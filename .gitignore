@@ -12,6 +12,9 @@ node_modules/
 
 # testing
 /coverage
+apps/portfolio/coverage/
+apps/portfolio/test-reports/**
+!apps/portfolio/test-reports/README.md
 playwright-report/
 test-results/
 **/playwright-report/
@@ -27,6 +30,9 @@ out/
 build/
 **/dist/
 
+# book build cache (scripts/build-books.cjs)
+.tmp/
+
 # misc
 .DS_Store
 *.pem
@@ -35,8 +41,13 @@ nul
 # GSD Codex install (local skills; avoid Windows nul git error)
 .codex/
 .claude/
+.agents/
+.cursor/
+.trae/
+skills-lock.json
 
 # debug
+chat-runtime-env.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -55,8 +66,13 @@ next-env.d.ts
 
 # database
 *.db
+*.db-shm
+*.db-wal
 *.db-journal
 /drizzle
+apps/portfolio/public/books/**/book.epub
+apps/portfolio/public/books/**/checkpoints/**
+apps/portfolio/public/books/**/*.repub
 
 # Release artifacts (downloaded by scripts/download-releases.cjs)
 .releases/
@@ -69,3 +85,8 @@ next-env.d.ts
 # RepoPlanner CLI telemetry + generated reports (local only; do not commit)
 .planning-reports/
 .planning/reports/
+
+# Local ML weights / transformers.js cache (MiniLM etc.); keep apps/portfolio/models/README.md tracked
+apps/portfolio/models/.transformers-cache/
+apps/portfolio/models/**/*.onnx
+apps/portfolio/models/**/*.bin

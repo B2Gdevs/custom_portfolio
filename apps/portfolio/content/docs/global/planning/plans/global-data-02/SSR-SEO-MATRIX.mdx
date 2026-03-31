@@ -1,0 +1,72 @@
+---
+title: SSR and SEO matrix -- global-data-02
+description: Which content classes stay in repo, move to Postgres, or move to storage while preserving crawlable server-rendered output.
+date: "2026-03-31"
+updated: "2026-03-31"
+repoPath: apps/portfolio/content/docs/global/planning/plans/global-data-02/SSR-SEO-MATRIX.mdx
+taskPhase: global-data-02
+---
+
+# SSR and SEO matrix: `global-data-02`
+
+## Core rule
+
+Heavy files do not need to stay in git for SEO. What search engines need is stable HTML, stable metadata, and stable public asset URLs. That means:
+
+1. content metadata can live in Postgres
+2. binaries can live in Supabase storage
+3. Next can still render pages on the server at build time, with ISR, or with request-time SSR
+
+## Content placement matrix
+
+| Surface | Primary source | Binary source | Render mode | SEO posture |
+| --- | --- | --- | --- | --- |
+| docs pages | repo MDX | local small images or public storage media | static build | file-first, strongest canonical authoring story |
+| blog posts | repo MDX | local small images or public storage media | static build | keep post body in repo unless editorial workflow changes materially |
+| projects pages | repo MDX or Postgres row | storage-backed screenshots/video | static build or ISR | crawlable if server renders summary/body/meta |
+| books index and landing pages | manifest or Postgres metadata rows | storage-backed cover/media | static build or ISR | keep slug/title/description on server; EPUB stays off-repo |
+| book checkpoint downloads | Postgres artifact row | storage-backed EPUB/zip | linked from SSR page | asset itself is not the SEO document |
+| planning pack downloads | Postgres artifact row | storage-backed zip | linked from SSR page | same as EPUBs |
+| listen catalog | Postgres rows | storage-backed audio/bundles | ISR or SSR | SEO comes from rendered catalog/detail HTML, not audio blob location |
+| private reader library | Postgres rows | private storage bucket | authenticated SSR/client hybrid | not an SEO surface |
+| annotations / workspace state | Postgres rows | optional private attachments | authenticated only | not an SEO surface |
+| generated OG images | Postgres or repo metadata | storage-backed or generated route | SSR metadata pipeline | use stable canonical URLs |
+
+## Practical Next.js rules
+
+| Need | Approach |
+| --- | --- |
+| "static page from DB" | fetch from Postgres in server components during build and emit HTML |
+| "static paths from DB" | use DB-backed slug enumeration for `generateStaticParams` where the route set is finite |
+| "fresh but crawlable public catalog" | server-render from Postgres with `revalidate` / ISR |
+| "fresh immediately after publish" | request-time SSR or explicit revalidation after write |
+| "private asset download" | signed storage URL or authenticated proxy route, never part of public SEO contract |
+
+## Offload candidates by priority
+
+| Priority | Class | Why now |
+| --- | --- | --- |
+| `1` | generated book binaries and planning-pack zips | already implemented as a publish flow; just finish history cleanup and adopt it consistently |
+| `2` | public-heavy media: videos, gallery originals, large screenshots | obvious blob pressure with little downside if metadata stays server-side |
+| `3` | listen audio files and bundle downloads | natural storage fit, especially as the catalog grows |
+| `4` | generated image derivatives and downloadable export bundles | easy to regenerate or republish; no reason to pin in git |
+| `5` | public catalog metadata currently trapped in repo-only structures | move selectively to Postgres where editing velocity or scale justifies it |
+
+## Repo-resident by default
+
+These should stay repo-first unless there is a very strong reason to move them:
+
+- docs and planning source text
+- blog post bodies
+- small design assets and icons
+- route definitions, schema code, and page composition
+- any content where git history is the real editorial workflow
+
+## Execution rule
+
+When deciding whether something moves out of the repo, ask two separate questions:
+
+1. Is this the canonical authored text or schema?
+2. Is this a heavy runtime or generated artifact?
+
+If the answer is "authored text," keep it repo-first by default. If the answer is "heavy runtime/generated artifact," it should usually move to Postgres metadata plus Supabase storage.

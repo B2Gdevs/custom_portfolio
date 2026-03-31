@@ -39,6 +39,8 @@ function formatSectionLabel(sectionKey) {
 function isPlanningDocSlug(slug) {
   const parts = slug.split('/');
   if (parts[1] === 'planning') return true;
+  // e.g. books/mordreds-tale/planning/state.mdx → books/<slug>/planning/*
+  if (parts[0] === 'books' && parts[2] === 'planning') return true;
 
   const leaf = parts[parts.length - 1] || slug;
   return leaf === 'global-planning' || leaf === 'roadmap' || leaf === 'requirements';

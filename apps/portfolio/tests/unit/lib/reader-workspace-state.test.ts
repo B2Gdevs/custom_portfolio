@@ -9,6 +9,11 @@ const builtInBook: BookEntry = {
   status: 'available',
 };
 
+const builtInRemoteBook: BookEntry = {
+  ...builtInBook,
+  remoteEpubUrl: '/api/published-book-artifacts/file/mordreds_tale.epub',
+};
+
 describe('reader workspace state', () => {
   it('builds distinct storage keys for uploaded records', () => {
     expect(
@@ -50,6 +55,22 @@ describe('reader workspace state', () => {
       viewerSource: {
         kind: 'built-in',
         epubUrl: '/books/mordreds_tale/book.epub',
+        storageKey: 'mordreds_tale',
+      },
+    });
+  });
+
+  it('resolves built-in reading through a published remote EPUB URL when present', () => {
+    expect(resolveReaderWorkspaceState({ initialBook: builtInRemoteBook })).toEqual({
+      mode: 'built-in-reading',
+      title: "Mordred's Tale",
+      kicker: 'Built-in reading',
+      bookSlug: 'mordreds_tale',
+      canDownload: true,
+      localFileName: null,
+      viewerSource: {
+        kind: 'built-in',
+        epubUrl: '/api/published-book-artifacts/file/mordreds_tale.epub',
         storageKey: 'mordreds_tale',
       },
     });

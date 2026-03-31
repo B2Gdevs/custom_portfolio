@@ -213,7 +213,7 @@ export async function ingestRagCorpus(options: IngestOptions = {}): Promise<RagI
     const previousChunksBySourceId = new Map<string, PayloadDoc[]>();
 
     for (const chunk of previousChunks.docs as PayloadDoc[]) {
-      const sourceId = String(chunk.sourceId);
+      const sourceId = String(chunk.sourceExternalId);
       const current = previousChunksBySourceId.get(sourceId) ?? [];
       current.push(chunk);
       previousChunksBySourceId.set(sourceId, current);
@@ -283,7 +283,7 @@ export async function ingestRagCorpus(options: IngestOptions = {}): Promise<RagI
               vectorKey: `${runPartitionKey}:${source.sourceId}:${normalizeNumber(priorChunk.chunkIndex)}`,
               source: sourceDoc.id,
               run: runDocumentId,
-              sourceId: source.sourceId,
+              sourceExternalId: source.sourceId,
               sourceTitle: source.title,
               sourceKind: source.kind,
               sourceScope: source.scope,
@@ -349,7 +349,7 @@ export async function ingestRagCorpus(options: IngestOptions = {}): Promise<RagI
             vectorKey: `${runPartitionKey}:${source.sourceId}:${chunkDraft.chunkIndex}`,
             source: sourceDoc.id,
             run: runDocumentId,
-            sourceId: source.sourceId,
+            sourceExternalId: source.sourceId,
             sourceTitle: source.title,
             sourceKind: source.kind,
             sourceScope: source.scope,

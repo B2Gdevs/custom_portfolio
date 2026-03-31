@@ -97,14 +97,19 @@ const nextConfig: NextConfig = {
   },
   // Keep native/server-only SQLite and Payload packages out of the client bundle.
   serverExternalPackages: [
+    '@aws-sdk/client-s3',
+    '@aws-sdk/s3-request-presigner',
     '@libsql/client',
     '@libsql/hrana-client',
     '@libsql/isomorphic-fetch',
     '@libsql/isomorphic-ws',
+    '@payloadcms/db-postgres',
     '@payloadcms/db-sqlite',
+    '@payloadcms/storage-s3',
     'better-sqlite3',
     'libsql',
     'payload',
+    'pg',
     'sqlite-vec',
   ],
   webpack: (config, { webpack, isServer }) => {
@@ -135,10 +140,20 @@ const nextConfig: NextConfig = {
             (
               request === 'payload' ||
               request.startsWith('payload/') ||
+              request === '@payloadcms/db-postgres' ||
+              request.startsWith('@payloadcms/db-postgres/') ||
               request === '@payloadcms/db-sqlite' ||
               request.startsWith('@payloadcms/db-sqlite/') ||
+              request === '@payloadcms/storage-s3' ||
+              request.startsWith('@payloadcms/storage-s3/') ||
+              request === '@aws-sdk/client-s3' ||
+              request.startsWith('@aws-sdk/client-s3/') ||
+              request === '@aws-sdk/s3-request-presigner' ||
+              request.startsWith('@aws-sdk/s3-request-presigner/') ||
               request === 'libsql' ||
-              request.startsWith('@libsql/')
+              request.startsWith('@libsql/') ||
+              request === 'pg' ||
+              request.startsWith('pg/')
             )
           ) {
             return callback(null, `commonjs ${request}`);

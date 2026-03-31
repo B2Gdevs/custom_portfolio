@@ -5,7 +5,7 @@ export const ragChunks: CollectionConfig = {
   admin: {
     useAsTitle: 'vectorKey',
     group: 'RAG',
-    defaultColumns: ['vectorKey', 'sourceId', 'chunkIndex', 'heading', 'isActive'],
+    defaultColumns: ['vectorKey', 'sourceExternalId', 'chunkIndex', 'heading', 'isActive'],
   },
   fields: [
     {
@@ -30,7 +30,7 @@ export const ragChunks: CollectionConfig = {
       index: true,
     },
     {
-      name: 'sourceId',
+      name: 'sourceExternalId',
       type: 'text',
       required: true,
       index: true,

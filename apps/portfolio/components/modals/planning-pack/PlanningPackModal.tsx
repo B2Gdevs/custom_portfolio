@@ -4,11 +4,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { marked } from 'marked';
 import { X } from 'lucide-react';
 import {
+  type BuiltinEmbedPacksPayload,
   PlanningPackGallery,
   stripPlanningPackPreviewPreamble,
 } from 'repo-planner/planning-pack';
 import type { ModalShellProps } from '@/lib/modal-types';
 import type { PlanningPackItem, PlanningPackManifest } from '@/lib/planning-pack-manifest';
+import { mergePlanningPackManifestWithBuiltinPacks } from '@/lib/planning-pack-modal-data';
 
 type Tab = 'demo' | 'site';
 
@@ -21,19 +23,55 @@ export function PlanningPackModal({ onClose }: ModalShellProps) {
   const [docLoading, setDocLoading] = useState(false);
 
   useEffect(() => {
-    fetch('/planning-pack/manifest.json')
-      .then((r) => {
-        if (!r.ok) {
+    let cancelled = false;
+    const objectUrls: string[] = [];
+    const createObjectUrl = (input: { content: string; filename: string }) => {
+      const blob = new Blob([input.content], { type: 'text/markdown;charset=utf-8' });
+      const objectUrl = URL.createObjectURL(blob);
+      objectUrls.push(objectUrl);
+      return objectUrl;
+    };
+
+    Promise.all([
+      fetch('/planning-pack/manifest.json')
+        .then((r) => (r.ok ? (r.json() as Promise<PlanningPackManifest>) : null))
+        .catch(() => null),
+      fetch('/planning-embed/builtin-packs.json')
+        .then((r) => (r.ok ? (r.json() as Promise<BuiltinEmbedPacksPayload>) : null))
+        .catch(() => null),
+    ])
+      .then(([siteManifest, builtinPayload]) => {
+        if (cancelled) {
+          return;
+        }
+
+        const merged = mergePlanningPackManifestWithBuiltinPacks({
+          manifest: siteManifest,
+          builtinPayload,
+          createObjectUrl,
+        });
+
+        if (!merged) {
           throw new Error(
-            'Planning manifest missing. Run `pnpm dev` or `pnpm run build` so build-planning-pack runs.',
+            'Planning pack data missing. Run `pnpm dev` or `pnpm run build` so planning-pack and planning-embed builders run.',
           );
         }
-        return r.json();
+
+        setManifest(merged);
+        setLoadError(null);
       })
-      .then((m: PlanningPackManifest) => setManifest(m))
-      .catch((e: unknown) =>
-        setLoadError(e instanceof Error ? e.message : 'Failed to load planning pack.'),
-      );
+      .catch((e: unknown) => {
+        if (cancelled) {
+          return;
+        }
+
+        setLoadError(e instanceof Error ? e.message : 'Failed to load planning pack.');
+      });
+
+    return () => {
+      cancelled = true;
+      objectUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
   }, []);
 
   useEffect(() => {

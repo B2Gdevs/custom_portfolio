@@ -17,25 +17,27 @@ order: 2
 | `section` | `documentation` |
 | `owner` | `docs-section` |
 | `status` | `active` |
-| `updated` | `2026-03-30` |
+| `updated` | `2026-03-31` |
 
 ## Current Cycle
 
 | Field | Value |
 | --- | --- |
-| `phase` | `documentation-site-10` maintenance + cross-cutting reader/access planning |
-| `plan` | planning IA reset is shipped; the shared auth foundation, Books reader workspace polish, Books repub artifact merge, and the first Listen access phase are now in place, while Documentation keeps the global-first workflow aligned with the next explicit Books phase and the next Listen data/backfill phase |
-| `focus` | stop steering agents toward repo-planner workflow debt first; keep Books in maintain-only mode until a new explicit reader phase is defined, and treat Listen access as shipped while the next DB-row/backfill phase is planned |
+| `phase` | `documentation-site-10` maintenance + `global-data-01` / `global-data-02` planning, with `global-data-03` queued next |
+| `plan` | planning IA reset is shipped; the shared auth foundation, Books reader workspace polish, Books repub artifact merge, and the first Listen access/data phases are now in place. Documentation now needs the next cross-cutting contracts: keep local SQLite workflows viable while adding a hosted data/storage path, keep chipping away at the blocked heavy-blob history, and define the next public-catalog migrations so `/apps`, `/projects`, and `/resumes` stop depending on hard-coded arrays or local file scans where Postgres metadata and storage-backed downloads would be simpler. |
+| `focus` | keep the global-first workflow aligned around shared data/storage, public-catalog migrations, and the owner-only auth shell before more backend-heavy Books or Listen work spreads backend assumptions and repo-resident assets across sections |
 | `constraint` | section planning MDX is first for **section** work; root `.planning` stays canonical for **monorepo** gates; see root `AGENTS.md` |
 
 ## Next Queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | define the next dedicated Books reader phase now that artifact merge and backend shelf work are both closed | `planning` |
-| `2` | plan the next Listen data/backfill phase now that private media already uses the shared auth/entitlement model | `planning` |
-| `3` | maintain the Global auth docs and routes only when Books/Listen discover a real gap | `cross-cutting` |
-| `4` | maintain `documentation-site-08` / `09` / `07` only when they unblock the auth-backed product work | `tooling` |
+| `1` | continue `global-data-02`: finish the history cleanup baseline and keep extending off-repo storage rules now that books and public media are publishing successfully | `cross-cutting` |
+| `2` | plan and execute `global-data-03`: move apps, project metadata, resume metadata, and public download assets behind SSR-safe Postgres loaders plus storage-backed files | `cross-cutting` |
+| `3` | queue `global-auth-02`: refresh the shell/sidebar around owner-only login and private/admin entry points using the existing auth/session API and shadcn-compatible UI | `cross-cutting` |
+| `4` | define the next dedicated Books reader phase after the shared data/storage contract is clear | `planning` |
+| `5` | maintain Listen through real-row seeding and catalog cleanup now that the DB-first runtime path is in place | `content` |
+| `6` | continue **`documentation-site-12`**: **`12-05`** wire **`SiteCopilot`** → **`/api/media/generate`** + session gallery; **`12-03`** compact planning-pack toolbar; **`12-04`** session store — image route + local RAG embeddings path are landed | `implementation` |
 
 ## Cross-cutting queue
 
@@ -53,6 +55,10 @@ Monorepo-wide items that are not (yet) a full `.planning` task row. Mirror or cl
 | `open` | **CLI ergonomics:** `documentation-site-07-01` / `07-02` -- Ink, **two CLIs**, submodule bumps, and the remaining publish / `pnpm dlx` docs polish per [requirements](/docs/documentation/requirements) CLI table. |
 | `done` | **Reader backend pass:** auth-backed reader workspace, DB-backed reading-state sync, owner-only settings save, explicit local-EPUB upload, saved-upload shelf cards, record-aware deep links, and continue-reading defaults are now in place -- [books task registry](/docs/books/planning/task-registry). |
 | `done` | **Listen private media pass:** private rows now use DB-backed visibility plus owner entitlements instead of shared-password unlock groups -- [listen task registry](/docs/listen/planning/task-registry). |
+| `open` | **Dual backend data/storage phase:** the env-driven contract is now landed for Payload SQLite/Postgres plus local-disk/Supabase-S3 uploads; Supabase CLI linking, Codex MCP registration, the private `reader-library` bucket, and repo env templates are now in place. Remaining work is the final secret handoff, any further bootstrap automation, and the Books RAG boundary under `global-data-01`. |
+| `open` | **Repo artifact and storage policy phase:** `repub-builder` is now a standalone vendored submodule/workspace package, the book-artifact publisher is live, and the first public-media migration is live too: `site-media-assets` plus `listen-media-assets` exist, current site imagery now publishes to storage with a lightweight manifest bridge, and the app resolves those URLs without rewriting authored content. The planning-pack modal now merges builtin init packs again. The remaining `global-data-02` work is the actual branch/history cleanup plus the next off-repo media/catalog slices. |
+| `open` | **Public catalog migration phase:** `global-data-03` is now the next queued slice for `site-app-records`, `project-records`, `resume-records`, and `site-download-assets`, so `/apps`, `/projects`, and `/resumes` can move to SSR-safe Postgres metadata plus storage-backed files without forcing all long-form prose into the database. |
+| `open` | **Owner-only shell refresh:** `global-auth-02` will reuse the existing seeded owner account and auth/session routes to add sidebar account/login affordances without opening public signup. |
 | `open` | **Shared content surfaces:** align `listen`, `blog`, and `projects` on one reusable shell with per-section mini logos and theme identity -- `documentation-site-09`, section registries below. |
 | `done` | **Planning IA reset:** literal section `planning/` folders are live, section docs/links now point at those paths, and one-off plans belong under `planning/plans/` instead of top-level implementation-plan drift -- `documentation-site-10`. |
 

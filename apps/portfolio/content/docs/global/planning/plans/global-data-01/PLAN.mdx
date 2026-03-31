@@ -1,0 +1,34 @@
+---
+title: Kickoff -- global-data-01
+description: Shared data and storage provider contract for local SQLite plus Supabase.
+date: "2026-03-30"
+updated: "2026-03-30"
+repoPath: apps/portfolio/content/docs/global/planning/plans/global-data-01/PLAN.mdx
+taskPhase: global-data-01
+---
+
+# Kickoff: `global-data-01`
+
+| Field | Value |
+| --- | --- |
+| `goal` | Let the app run the same product flows against a first-class local SQLite/file setup and a hosted Supabase data/storage setup so large local `.db` files are no longer an implied repo artifact. |
+| `why-now` | `apps/portfolio/portfolio.db` is already too large to treat like a normal committed file, but Listen and the reader now depend on real runtime data. The next backend step needs a deliberate contract instead of ad hoc provider drift. |
+| `scope` | Shared provider selection rules, backend-neutral data/storage interfaces, Listen and Reader adoption targets, bootstrap/sync/install workflow for local and hosted setups, and the phase-1 decision on how Books RAG fits the matrix. |
+| `non-goals` | Replacing the current auth/session layer in the first pass, forcing cloud-only development, migrating every SQLite path at once, or redesigning RepoPlanner/workflow docs beyond what this phase needs. |
+| `definition-of-done` | One provider contract exists for app data and uploaded assets, local SQLite plus local files remain the default local path, Supabase is supported as the first hosted backend, bootstrap/migration docs exist, and automated tests cover the provider-neutral runtime seams before section tasks call the phase done. |
+| `tests-required` | Unit coverage for provider selection and shared repository/bootstrap services; integration or smoke coverage for the local and hosted runtime paths where practical; `pnpm run build`; `pnpm run lint`. |
+| `dependencies` | `global-auth-01`, current Payload collections and runtime helpers, `listen-data-01`, `books-reader-05`, and `books-ai-01` for the RAG boundary decision. |
+| `open-questions` | Whether hosted mode keeps Payload in front of Supabase or consumes Supabase directly for phase 1; whether Books RAG remote parity is in scope now or deferred behind a documented SQLite-sidecar boundary; what bootstrap artifact seeds local SQLite from hosted or authored data most cleanly (SQL dump, JSON export, or app CLI sync). |
+| `first-tasks` | `global-data-01-01`, `global-data-01-02`, `global-data-01-03`, `global-data-01-04` |
+
+## Hosted bootstrap checkpoint
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| `payload-provider-contract` | `done` | env-driven SQLite/Postgres plus local-disk/S3 switching is already landed in app code |
+| `supabase-cli-link` | `done` | local repo is linked to project `rqvahypyhisslcrkdokf` |
+| `supabase-storage-bucket` | `done` | private `reader-library` bucket created for reader uploads |
+| `codex-mcp-registration` | `done` | machine-local Codex config now enables remote MCP and registers the Supabase MCP URL |
+| `codex-mcp-oauth` | `blocked-on-tooling` | `codex mcp list` shows the server as `Auth: Unsupported`, so `codex mcp login supabase` does not complete in this build |
+| `env-bootstrap` | `done` | root `.env` and `.env.example` now include the project ref, publishable URL/key, S3 endpoint, bucket, region, and placeholders for missing secrets |
+| `remaining-manual-inputs` | `open` | fill the database password and generate the Supabase S3 access-key pair before hosted mode can boot |

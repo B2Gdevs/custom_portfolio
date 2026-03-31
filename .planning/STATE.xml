@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <state>
   <agent-registry />
-  <current-phase>01</current-phase>
-  <current-plan>bootstrap</current-plan>
+  <current-phase>03</current-phase>
+  <current-plan>global-data-02</current-plan>
   <status>active</status>
-  <next-action>The shared auth foundation, the polished backend-backed reader workspace, the repub artifact merge, and the first Listen access phase are now in place: owner seed, tenant/org seed, long-lived sessions, entitlement/viewer helpers, host-facing login/logout/session routes, reader library/settings/reading-state collections, owner-only workspace settings save, explicit local-EPUB upload, saved-upload shelf cards, continue-reading defaults, planning supplement embedding, committed author annotations folded back into the emitted EPUB artifact, and Payload-backed Listen catalog records filtered through the shared access layer without private rows falling back to shared-password unlocks. Next, define the next Books reader phase explicitly, then plan the next Listen data/backfill phase on top of the now-stable access model.</next-action>
+  <next-action>The shared provider contract is landed, `@portfolio/repub-builder` now builds from the vendored standalone repo, the hosted book-artifact publisher is live, and the first public-media migration is live too: `site-media-assets` plus `listen-media-assets` exist and current site imagery now resolves through a lightweight storage-backed manifest. The planning-pack modal now merges builtin init packs again. Next, continue `global-data-02-02` by rebuilding or rewriting the still-unpushed branch range so the historical DB/EPUB blobs actually leave the push path, then start the queued public-catalog slice (`global-data-03`) for apps, project metadata, resume metadata, and public download assets, followed by the owner-only shell refresh in `global-auth-02`.</next-action>
   <references>
     <reference>AGENTS.md (repo root)</reference>
     <reference>apps/portfolio/content/docs/global/requirements.mdx</reference>
     <reference>apps/portfolio/content/docs/global/planning/roadmap.mdx</reference>
     <reference>apps/portfolio/content/docs/global/planning/state.mdx</reference>
     <reference>apps/portfolio/content/docs/global/planning/task-registry.mdx</reference>
+    <reference>apps/portfolio/content/docs/global/planning/plans/global-data-01/PLAN.mdx</reference>
+    <reference>apps/portfolio/content/docs/global/planning/plans/global-data-01/SUPABASE-BOOTSTRAP.mdx</reference>
+    <reference>apps/portfolio/content/docs/global/planning/plans/global-data-02/PLAN.mdx</reference>
+    <reference>apps/portfolio/content/docs/global/planning/plans/global-data-03/PLAN.mdx</reference>
     <reference>apps/portfolio/content/docs/documentation/requirements.mdx</reference>
     <reference>apps/portfolio/content/docs/documentation/planning/state.mdx</reference>
     <reference>.planning/AGENTS.md</reference>

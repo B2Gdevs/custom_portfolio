@@ -1,4 +1,3 @@
-import 'server-only';
 import type { Payload } from 'payload';
 
 let payloadPromise: Promise<Payload> | null = null;

@@ -1,0 +1,58 @@
+---
+title: Supabase Bootstrap
+description: Hosted bootstrap checkpoint for global-data-01.
+date: "2026-03-30"
+updated: "2026-03-30"
+repoPath: apps/portfolio/content/docs/global/planning/plans/global-data-01/SUPABASE-BOOTSTRAP.mdx
+taskPhase: global-data-01
+---
+
+# Supabase bootstrap checkpoint
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `project-ref` | `rqvahypyhisslcrkdokf` |
+| `status` | `in-progress` |
+| `phase-task` | `global-data-01-03` |
+| `goal` | make the hosted Payload/Postgres plus Supabase Storage path installable with one local env fill-in instead of committed `.db` artifacts |
+
+## Completed in this pass
+
+| Item | Result |
+| --- | --- |
+| `supabase-cli` | local repo is linked to `rqvahypyhisslcrkdokf`; `supabase projects list` shows the project as linked |
+| `codex-mcp` | `~/.codex/config.toml` enables remote MCP and registers `supabase` at `https://mcp.supabase.com/mcp?project_ref=rqvahypyhisslcrkdokf` |
+| `agent-skill` | `supabase/agent-skills` installed the `supabase-postgres-best-practices` skill into the shared skills directory |
+| `storage-bucket` | remote private bucket `reader-library` created through the Storage API |
+| `local-supabase-config` | `supabase/config.toml` now declares the matching local `reader-library` bucket |
+| `env-bootstrap` | root `.env` and `.env.example` now include the Supabase project ref, publishable URL/key, S3 endpoint, bucket, region, and placeholders for the remaining secrets |
+| `working-db-url-shape` | root env now favors the Supabase session pooler URL with `sslmode=require&uselibpqcompat=true&connection_limit=1`; the direct host stays documented only as an IPv6-capable fallback |
+
+## Remaining manual secrets
+
+| Secret | Why it stays manual |
+| --- | --- |
+| `DATABASE_URL` password segment | Supabase CLI exposes the host but not the database password; the placeholder in `.env` must be replaced from the dashboard |
+| `PAYLOAD_S3_ACCESS_KEY_ID` | Supabase requires an S3 access-key pair generated in Storage Configuration |
+| `PAYLOAD_S3_SECRET_ACCESS_KEY` | the secret half of the S3 access-key pair is only shown when created |
+
+## Installed values
+
+| Key | Value |
+| --- | --- |
+| `SUPABASE_PROJECT_REF` | `rqvahypyhisslcrkdokf` |
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://rqvahypyhisslcrkdokf.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | project publishable key is prefilled in `.env` and `.env.example` |
+| `PAYLOAD_DB_PROVIDER` | `postgres` |
+| `PAYLOAD_STORAGE_PROVIDER` | `s3` |
+| `PAYLOAD_S3_BUCKET` | `reader-library` |
+| `PAYLOAD_S3_ENDPOINT` | `https://rqvahypyhisslcrkdokf.storage.supabase.co/storage/v1/s3` |
+| `PAYLOAD_S3_REGION` | `us-west-2` |
+
+## Notes
+
+- The linked Supabase CLI also surfaced a pooled host template: `aws-0-us-west-2.pooler.supabase.com`. On this Windows host the direct `db.<project-ref>.supabase.co` record only resolved to IPv6, so the working runtime path switched to the session pooler plus `sslmode=require&uselibpqcompat=true&connection_limit=1`.
+- After the first schema push landed, hosted mode switched `PAYLOAD_POSTGRES_PUSH` back to `0` so seed/runtime processes stop trying to diff and push the schema on every startup.
+- `codex mcp login supabase` did not complete in this Codex build because the added server reports `Auth: Unsupported` in `codex mcp list`. The remote server is still registered for future sessions.

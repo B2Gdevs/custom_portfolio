@@ -117,14 +117,15 @@ describe('reader workspace write service', () => {
         .fn()
         .mockResolvedValueOnce({
           id: 'asset-1',
-          url: '/api/media/file/mordreds-tale.epub',
+          filename: 'mordreds-tale.epub',
+          url: 'https://storage.example/reader-library/mordreds-tale.epub',
         })
         .mockResolvedValueOnce({
           id: 'record-1',
           title: 'Mordred Upload',
           author: 'Ben Garrard',
           description: 'Private upload',
-          epubUrl: '/api/media/file/mordreds-tale.epub',
+          epubUrl: '/api/reader-library-assets/file/mordreds-tale.epub',
           sourceKind: 'uploaded',
           sourceFileName: 'mordreds-tale.epub',
           visibility: 'private',
@@ -149,7 +150,7 @@ describe('reader workspace write service', () => {
       author: 'Ben Garrard',
       description: 'Private upload',
       coverImageUrl: null,
-      epubUrl: '/api/media/file/mordreds-tale.epub',
+      epubUrl: '/api/reader-library-assets/file/mordreds-tale.epub',
       sourceKind: 'uploaded',
       sourceFileName: 'mordreds-tale.epub',
       visibility: 'private',
@@ -169,7 +170,7 @@ describe('reader workspace write service', () => {
         collection: 'reader-library-records',
         data: expect.objectContaining({
           title: 'Mordred Upload',
-          epubUrl: '/api/media/file/mordreds-tale.epub',
+          epubUrl: '/api/reader-library-assets/file/mordreds-tale.epub',
           tenant: 'tenant-1',
           uploadedBy: 'user-1',
         }),

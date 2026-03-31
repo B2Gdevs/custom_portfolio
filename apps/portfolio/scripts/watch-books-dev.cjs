@@ -2,6 +2,7 @@
 /**
  * Watches repo-root books/ and re-runs scripts/build-books.cjs (debounced).
  * Used by `pnpm dev` in @portfolio/app. Keeps public/books/manifest.json and EPUBs fresh.
+ * build-books skips unchanged books via `.tmp/book-build-cache.json`; use BOOKS_FORCE_REBUILD=1 to rebuild all.
  */
 const { spawnSync } = require('child_process');
 const path = require('path');

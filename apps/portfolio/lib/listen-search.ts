@@ -3,8 +3,10 @@ import type { DiscoveryItem } from '@/lib/content-discovery';
 import { toListenDiscoveryItem } from '@/lib/listen-items';
 
 /** Search hits omit embed URLs for gated rows. */
-export function getListenSearchDiscoveryItems(): DiscoveryItem[] {
+export function getStaticListenSearchDiscoveryItems(): DiscoveryItem[] {
   return getListenCatalog().map((entry) =>
-    toListenDiscoveryItem(entry, { mediaPublic: !entry.lockGroup })
+    toListenDiscoveryItem(entry, {
+      mediaPublic: entry.visibility === 'public' && !entry.lockGroup,
+    })
   );
 }

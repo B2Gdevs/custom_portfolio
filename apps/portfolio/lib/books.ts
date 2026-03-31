@@ -10,6 +10,9 @@ export interface BookEntry {
   genres?: string[];
   status?: 'available' | 'coming-soon';
   hasEpub: boolean;
+  remoteEpubUrl?: string;
+  planningPackUrl?: string;
+  artifactVersion?: string | null;
 }
 
 let cached: BookEntry[] | null = null;

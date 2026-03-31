@@ -2,7 +2,7 @@
 title: State
 description: Compact state records for the blog section.
 date: "2026-03-16"
-updated: "2026-03-29"
+updated: "2026-03-30"
 order: 2
 repoPath: apps/portfolio/content/docs/blog/planning/state.mdx
 taskPhase: blog-discovery-02
@@ -17,14 +17,14 @@ taskPhase: blog-discovery-02
 | `section` | `blog` |
 | `owner` | `blog-section` |
 | `status` | `active` |
-| `updated` | `2026-03-29` |
+| `updated` | `2026-03-30` |
 
 ## Current Cycle
 
 | Field | Value |
 | --- | --- |
 | `phase` | `blog-content-03` + `blog-discovery-02` |
-| `plan` | the new coding-agents article now demonstrates the long-form pattern we want for planning-heavy essays: strong thesis, cited planning artifacts, Mermaid diagrams, and inline tool affordances; the broader categorization and publishing rules still need to be finalized |
+| `plan` | coding-agents + books-planning articles both demonstrate the long-form pattern: thesis, cited artifacts, Mermaid, DocLinkCards; categorization and blog-vs-docs rules still TBD |
 | `focus` | use the new article as the reference example for planning-oriented blog posts while keeping the bigger blog-versus-docs boundary work visible |
 | `constraint` | planning for blog work lives in these docs, not `.planning` |
 
@@ -45,6 +45,7 @@ taskPhase: blog-discovery-02
 | `blog-index` | `apps/portfolio/app/blog/` | public blog listing and routes |
 | `blog-list` | `apps/portfolio/components/blog/BlogList.tsx` | current blog index implementation to replace with a richer discovery shell |
 | `blog-post` | `apps/portfolio/app/blog/[slug]/page.tsx` | current article page implementation and future TOC/article-chrome target |
+| `blog-books-loop` | `apps/portfolio/content/blog/how-we-write-books-with-planning-documents-and-the-manuscript-loop.mdx` | public how-to: books planning loop, manuscript layout, EPUB partition example, vocabulary |
 | `home-archive` | `apps/portfolio/components/home/ArchiveGateway.tsx` | front-page entry point into blog |
 | `modal-root` | `apps/portfolio/components/modals/ModalRoot.tsx` | current modal host if command-palette search becomes a modal |
 | `editor-docs` | `apps/portfolio/content/docs/editor/` | planning surface for the proposed EPUB authoring editor |

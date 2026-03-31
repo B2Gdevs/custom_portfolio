@@ -1,0 +1,84 @@
+---
+title: Kickoff -- global-data-02
+description: Extract repub-builder into a standalone repo and use the blob audit to define off-repo artifact rules.
+date: "2026-03-30"
+updated: "2026-03-31"
+repoPath: apps/portfolio/content/docs/global/planning/plans/global-data-02/PLAN.mdx
+taskPhase: global-data-02
+---
+
+# Kickoff: `global-data-02`
+
+| Field | Value |
+| --- | --- |
+| `goal` | move `@portfolio/repub-builder` into its own git-installable repository, vendor it back as a submodule, and define the next repo-memory reduction rules from the actual large-blob history |
+| `why-now` | the blob audit shows the repo still carries very large generated EPUB/repub outputs, a previously committed local database, media binaries, and even build artifacts in history. Keeping `repub-builder` as an in-tree package means one more reusable product vertical is trapped inside the app repo instead of behaving like a real package. |
+| `scope` | standalone repo extraction for `repub-builder`, monorepo submodule/workspace adoption, package self-containment work needed for git installs, and a follow-up artifact/storage/SSR plan driven by the audit |
+| `non-goals` | rewriting every content route to read from the database immediately, removing SSR from public pages, or cleaning all historical blobs out of git in the same slice |
+| `definition-of-done` | `repub-builder` has its own working repository and remote push, this repo vendors it as a submodule and still builds against it, and the planning docs capture the next artifact/storage rules using the audit instead of guesswork |
+| `tests-required` | `pnpm --filter @portfolio/repub-builder test`, `pnpm run build`, `pnpm run lint`, plus a successful push of the submodule repo and a root commit updating the submodule pointer |
+| `dependencies` | `global-data-01`, existing reader/package extraction decisions in the books section, and the remote `MagicbornStudios/repub-builder` repository |
+| `open-questions` | whether `book-components` should stay embedded inside the standalone repo or become its own package later; which generated reader artifacts should stop living under `public/books/`; whether historical blob cleanup is a follow-up `git filter-repo` phase after storage rules are locked; which public catalog surfaces should become DB-backed first once the SSR contract is explicit |
+| `first-tasks` | `global-data-02-01`, `global-data-02-02`, `global-data-02-03` |
+
+## Blob audit checkpoint
+
+| Artifact class | Status | Notes |
+| --- | --- | --- |
+| `local-db-history` | `confirmed` | `apps/portfolio/portfolio.db` is the single largest tracked blob at about 113 MB in history |
+| `generated-book-artifacts` | `confirmed` | multiple `apps/portfolio/public/books/**/book.epub` and `.repub` blobs are about 40 MB each across revisions |
+| `standalone-reader-builds` | `confirmed` | `.standalone/portfolio-reader/public/books/**` also carries duplicated large book artifacts in history |
+| `media-binaries` | `confirmed` | the repo contains large video/image binaries such as `books/mordreds_legacy/videos/the-breath-between-footsteps.mp4` and project screenshots |
+| `build-output-leakage` | `confirmed` | `.next/dev/static/chunks/*.js.map` blobs show prior build output made it into git history |
+
+## Extraction checkpoint
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| `standalone-repo` | `done` | `vendor/repub-builder` is now the standalone `MagicbornStudios/repub-builder` git checkout and package source of truth |
+| `workspace-adoption` | `done` | the monorepo root workspace now includes `vendor/repub-builder`; the old `packages/repub-builder` copy was removed |
+| `package-surface` | `done` | the standalone package now builds with `tsup`, emits `dist/`, ships a git-install README, embeds `book-components`, and keeps the reader runtime export working for the portfolio host |
+| `host-verification` | `done` | `pnpm --filter @portfolio/repub-builder test`, the targeted reader workspace test, `pnpm run build`, and `pnpm run lint` all pass after the extraction |
+| `next-active-slice` | `in-progress` | turn the blob audit into concrete off-repo storage rules and an SSR/SEO contract for DB-backed content under `global-data-02-02` and `global-data-02-03` |
+
+## Unpushed range blocker
+
+The current `origin/main..main` range is still **six commits ahead**, and the largest blobs in that unpushed range are already enough to block or slow a normal `git push`.
+
+| Blob | Approx size | Current path | Consequence |
+| --- | --- | --- | --- |
+| `portfolio.db` | `113 MB` | `apps/portfolio/portfolio.db` | this local DB is still present in the unpushed commit range, so deleting it later in the branch does not make the push safe by itself |
+| `mordreds_tale` EPUB variants | `~41 MB` each | `apps/portfolio/public/books/mordreds_tale*/book.epub` | generated book binaries are still riding inside the pending history |
+| lockfile snapshots | `600-700 KB` | `pnpm-lock.yaml` | not a blocker alone, but shows the push range is carrying large churn even outside binary artifacts |
+
+That means `global-data-02-02` has to cover **history cleanup or branch rebuild from `origin/main`** as part of the storage migration, not only future artifact policy.
+
+## Artifact publish checkpoint
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| `payload-artifact-collection` | `done` | `published-book-artifacts` now exists as a first-class Payload upload collection and uses the hosted S3 path when `PAYLOAD_STORAGE_PROVIDER=s3` |
+| `versioned-publisher` | `done` | `apps/portfolio/scripts/publish-book-artifacts.ts` publishes immutable versioned EPUB and planning-pack zip artifacts, and `pnpm run build:books:publish` is now the repo-level checkpoint flow |
+| `manifest-remote-urls` | `done` | `public/books/manifest.json` now keeps current `remoteEpubUrl`, `planningPackUrl`, and `artifactVersion` fields so the portfolio host and reader can use storage-backed downloads without losing SSR-safe metadata |
+| `git-guardrail` | `done` | local `public/books/**/book.epub` outputs are now gitignored so future builds stop defaulting to commit-candidate binaries |
+| `hosted-checkpoint` | `done` | the first hosted publish completed as version `cp-20260331-033239-4ad389b` for the current built book set |
+| `remaining-gap` | `in-progress` | the repo still needs branch/history cleanup because the previously committed DB/EPUB blobs are already in the unpushed range, and the wider SSR/SEO contract still needs to be written down under `global-data-02-03` |
+
+## SSR and storage contract checkpoint
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| `storage-matrix` | `done` | `STORAGE-POLICY.mdx` now classifies heavy binaries, source assets, public media, generated bundles, and repo-first authored content separately instead of flattening them all into "move to DB" |
+| `ssr-seo-matrix` | `done` | `SSR-SEO-MATRIX.mdx` now defines when a surface stays file-first, when it can become DB-backed static/ISR/SSR, and which asset classes never matter for SEO directly |
+| `next-migration-order` | `defined` | after history cleanup, the next off-repo priorities are heavy public media, listen binary assets, and any generated export bundles that still land in git |
+| `planning-pack-modal-parity` | `done` | the portfolio planning-pack modal now merges `/planning-pack/manifest.json` with `/planning-embed/builtin-packs.json`, so the builtin init pack is visible again instead of silently disappearing from the gallery |
+
+## Public media checkpoint
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| `site-media-assets` | `done` | `site-media-assets` is now a first-class Payload upload collection and S3 target for public site imagery |
+| `listen-media-assets` | `done` | `listen-media-assets` is now a first-class Payload upload collection, even though the current Listen surface still stays BandLab-link-first |
+| `public-media-manifest` | `done` | `public/media/manifest.json` now maps original site image paths to storage-backed asset URLs so existing content frontmatter and authored MDX can resolve through storage without rewriting every document |
+| `hosted-site-media-publish` | `done` | the first hosted public-media publish completed with `39` site assets uploaded and `0` listen assets because the current listen catalog has no local media files yet |
+| `next-public-catalog-slice` | `defined` | `global-data-03` now captures the next model: `site-app-records`, `project-records`, `resume-records`, and `site-download-assets` will move the next public metadata and download surfaces off hard-coded arrays or repo-local scans while keeping SSR |

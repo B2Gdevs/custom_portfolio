@@ -1,0 +1,41 @@
+---
+title: Kickoff -- global-data-03
+description: Move public app, project, resume, and download metadata behind SSR-safe loaders while offloading heavy files to storage.
+date: "2026-03-31"
+updated: "2026-03-31"
+repoPath: apps/portfolio/content/docs/global/planning/plans/global-data-03/PLAN.mdx
+taskPhase: global-data-03
+---
+
+# Kickoff: `global-data-03`
+
+| Field | Value |
+| --- | --- |
+| `goal` | move the next public catalog surfaces off repo-heavy file coupling: apps, projects, resumes, and public downloadable bundles should resolve through server-side loaders with Postgres metadata and storage-backed files where that reduces git weight |
+| `why-now` | the current storage work proved the pattern for books and public media, but the app still maintains hard-coded app cards, file-walk resume metadata, and repo-first project payloads even when most of the heavy assets can already live in Supabase storage without hurting SEO |
+| `scope` | planning-pack modal parity, app catalog metadata, project metadata plus asset relations, resume metadata plus download assets, and the render contract for server-side SEO on these routes |
+| `non-goals` | moving all long-form docs/blog prose into the database, replacing every MDX body immediately, opening public signup, or removing the existing public routes while the new loaders are landing |
+| `definition-of-done` | the public catalog model is documented, concrete collections are chosen, the first route-level consumers are identified, and execution tasks are sequenced so storage-backed files and DB-backed metadata can replace the current repo-heavy paths without breaking SSR |
+| `tests-required` | docs updated, targeted loader/component tests for any immediate runtime changes, `pnpm run build`, and `pnpm run lint` |
+| `dependencies` | `global-data-02`, `global-auth-01`, `site-media-assets`, `listen-media-assets`, and the existing Supabase/Payload hosted path |
+| `open-questions` | whether project long-form bodies stay MDX-first for now while only metadata and media relations move to Postgres; whether app cards need a dedicated collection or can reuse project-style records; whether resumes keep HTML source in repo as authoring input while published HTML/PDF/download files move to storage; whether planning-pack site exports should use a generic public download collection instead of bespoke per-feature buckets |
+| `first-tasks` | `global-data-03-01`, `global-data-03-02`, `global-data-03-03` |
+
+## Planned collections
+
+| Collection | Kind | Purpose |
+| --- | --- | --- |
+| `site-app-records` | metadata | drives `/apps` and any app-detail SEO metadata from Postgres instead of a hard-coded component list |
+| `project-records` | metadata | stores project slugs, summaries, ordering, link groups, and media relations while allowing long-form MDX bodies to stay repo-first initially |
+| `resume-records` | metadata | stores resume slugs, titles, summaries, ordering, and published-file references instead of deriving all metadata from local HTML scans |
+| `site-download-assets` | upload | stores public downloadable files such as resume HTML/PDF artifacts, public planning-pack zips, and future public export bundles |
+
+## Render contract
+
+| Surface | Canonical source | Storage role | SEO rule |
+| --- | --- | --- | --- |
+| `/apps` | Postgres metadata via `site-app-records` | screenshots or downloadable bundles live in storage | page metadata and card copy render on the server |
+| `/projects` index | Postgres metadata via `project-records` | screenshots, gallery items, videos, and downloads live in storage | index remains SSG/ISR or SSR from stable slug/meta loaders |
+| `/projects/[slug]` body | repo MDX first, DB metadata second | media and downloadable files live in storage | keep server-rendered long-form copy and stable meta tags |
+| `/resumes` | Postgres metadata via `resume-records` | HTML/PDF/download artifacts live in storage via `site-download-assets` | gallery and detail metadata render on the server; files stay downloadable from storage-backed URLs |
+| planning-pack modal | built manifest plus builtin packs now, later optional DB metadata for public packs | zip exports live in storage-backed download assets | public pack labels and summaries can be server-rendered or statically built; blob files do not live in git |

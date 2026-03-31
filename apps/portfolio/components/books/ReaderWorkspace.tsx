@@ -9,6 +9,7 @@ import {
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { RepoPlannerCockpitClient } from '@/components/repo-planner/RepoPlannerCockpitClient';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import {
   fetchReaderPersistedState,
   fetchReaderWorkspaceBootstrap,
@@ -164,6 +165,9 @@ export default function ReaderWorkspace({
       onUploadImportedBook={handleUploadImportedBook}
       initialBook={resolvedInitialBook}
       ReaderLink={Link}
+      readerToolbarStart={
+        <SidebarTrigger className="shrink-0 border-border bg-dark text-text-muted hover:bg-dark-elevated hover:text-primary" />
+      }
       getPlanningStripConfig={(bookSlug) => {
         if (!bookSlug) return null;
         const factory = READER_BOOK_PLANNING_PAYLOADS[bookSlug];

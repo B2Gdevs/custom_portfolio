@@ -2,7 +2,7 @@
 title: Task Registry
 description: Compact task records for the documentation section.
 date: "2026-03-16"
-updated: "2026-03-30"
+updated: "2026-03-31"
 taskPhase: documentation-site-10
 repoPath: apps/portfolio/content/docs/documentation/planning/task-registry.mdx
 order: 3
@@ -113,3 +113,31 @@ Aligned with [Route conventions](/docs/documentation/route-conventions). **Do no
 | `documentation-site-10-02` | `done` | update agent guidance and docs guidance so roadmap/state/task-registry/decisions are the living loop and `IMPLEMENTATION_PLAN` becomes a legacy compatibility pointer instead of the behavioral default | `documentation-site-10-01` | root AGENTS + repo-planner docs + `.planning` guidance aligned |
 | `documentation-site-10-03` | `done` | migrate section planning docs into literal `planning/` folders without breaking site routes, packs, or docs navigation; leave redirects/aliases or route mapping notes where needed during transition | `documentation-site-10-01` | `pnpm run build`, docs paths verified |
 | `documentation-site-10-04` | `done` | add section-local `requirements.mdx` and `planning/roadmap.mdx` records for active docs sections, and rewrite read-order guidance so `planning-docs.mdx` is a playbook rather than the canonical planning record | `documentation-site-10-03` | `pnpm run build`, `pnpm run lint` |
+
+## Phase `documentation-site-12` (apps hub cards, compact planning-pack control, media copilot)
+
+**Goal:** Stripe-style integrated docs/apps UX: a **reusable app card** (cover image, actions, tooltips), a **compact toolbar-style planning-pack control** (not a hero tile), and a **focused media workflow** (generate / iterate / pick cover) launched from a **magic** control on **cover hover** that opens **SiteCopilot** with **`mediaSlot`** context (**no manual media-mode toggle**). **OpenAI Images** for generation; API route separate from RAG `/api/chat`. Session-scoped image memory + later Payload/S3/Supabase persistence. Thread layout informed by assistant-ui **shadcn** example ([`shadcn.tsx` thread + composer + parts](https://github.com/assistant-ui/assistant-ui/blob/main/apps/docs/components/examples/shadcn.tsx)) — gallery + markdown + image parts in the transcript.
+
+**Decisions:** `DOCUMENTATION-SITE-MEDIA-IMAGE-OPENAI`, `DOCUMENTATION-SITE-MEDIA-COPILOT-CONTEXT`. Remaining: auth for generate/persist, slot history policy.
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `documentation-site-12-01` | `done` | **Kickoff:** `planning/plans/documentation-site-12/` — provider + copilot-shell decisions recorded; slot/API boundaries documented; **`.cursor/mcp.json`** adds [shadcn MCP](https://ui.shadcn.com/docs/mcp) + Supabase MCP (`project_ref` as provided) | `documentation-site-09-01` | decisions + kickoff + MCP file in repo |
+| `documentation-site-12-02` | `done` | **`AppsHubAppCard`**: `/apps` hub cards; icon/cover tile with **hover/focus magic** (wand) → **`openChatForMediaSlot(`**`app-cover:{id}`**`)**`; no mode toggle | `documentation-site-12-01` | manual `/apps`; `SiteCopilot` slot-aware copy |
+| `documentation-site-12-03` | `planned` | **`PlanningPackToolbarButton`**: compact icon-first control for toolbars/article chrome; optional **animated** icon via approved registry ([`documentation-site-09-02`](/docs/documentation/planning/task-registry#phase-documentation-site-09-shared-content-surfaces)); demote/remove oversized “featured” planning CTA from article surfaces | `documentation-site-12-01`, `documentation-site-09-02` | visual + a11y pass |
+| `documentation-site-12-04` | `planned` | **Client session store** for generated images: in-memory + `sessionStorage` (and optional `localStorage` policy); list UI for “this session” gallery; no data loss on refresh within session | `documentation-site-12-01` | unit tests for hydrate/merge |
+| `documentation-site-12-05` | `planned` | **Extend `SiteCopilot`:** when `mediaSlot` is set from card, show **media session UI** (gallery rail + image-capable thread + composer); clearing slot returns to default RAG chat; **Set as cover** commits URL into slot registry | `documentation-site-12-02`, `documentation-site-12-04`, `books-ai-01-07` | manual E2E happy path |
+| `documentation-site-12-06` | `done` | **`POST /api/media/generate`**: OpenAI Images (`OPENAI_IMAGE_MODEL`, default `dall-e-3`), **`b64_json`**, optional **`mediaSlot`**; structured errors; **`OPENAI_IMAGE_E2E`** opt-in Playwright quota test | `documentation-site-12-01` | `tests/unit/api/media-generate-route.test.ts`; `tests/e2e/media-generate.spec.ts` |
+| `documentation-site-12-07` | `planned` | **Payload + S3 (phase 2):** persist accepted images, link to `appId` + variant; admin/owner upload path; public read rules | `global-data-01` closure or scoped spike | integration test |
+| `documentation-site-12-08` | `planned` | **Batch covers:** script or owner UI — iterate registered apps, run templated prompt, write artifacts to agreed path or collection | `documentation-site-12-06`, `documentation-site-12-07` optional | one full run documented |
+
+## Phase `documentation-site-13` (RAG cost: local embeddings)
+
+**Goal:** keep **chat completions / images** on OpenAI where needed, but **drop OpenAI embedding spend** for RAG when desired by using **CPU MiniLM** and a **gitignored** cache.
+
+**Decision:** `DOCUMENTATION-RAG-EMBEDDINGS-LOCAL-MINILM`. See **`apps/portfolio/models/README.md`**.
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `documentation-site-13-01` | `done` | **`RAG_EMBEDDING_PROVIDER=local`** → **`embedTexts`** uses **`@xenova/transformers`** + default **`Xenova/all-MiniLM-L6-v2`** (384d); cache dir under **`models/.transformers-cache/`** | `-` | `tests/unit/lib/rag/embedding-config.test.ts`; manual delete DB + re-ingest when switching |
+| `documentation-site-13-02` | `planned` | **Operator doc** in [requirements](/docs/documentation/requirements) or global planning: when to use local vs OpenAI embeddings, quota pitfalls, CI recipe | `documentation-site-13-01` | docs PR + link from `models/README.md` |

@@ -24,17 +24,17 @@ taskPhase: listen-surface-03
 | Field | Value |
 | --- | --- |
 | `phase` | `listen-surface-03` maintenance |
-| `plan` | the public listening-room surface is shipped, the DB-backed catalog bootstrap is in place, and private owner-only rows now depend on the shared authenticated session instead of shared-password unlocks |
-| `focus` | keep `/listen` public, seed real DB-backed tracks and presets, and tighten the long-lived Listen data/admin workflow on top of the shared auth layer |
+| `plan` | the public listening-room surface, shared access model, and DB-first runtime data path are in place; the next Listen work is mainly real-row seeding, catalog cleanup, and owner maintenance as new tracks and presets land |
+| `focus` | keep `/listen` public, use the new seed/upsert flow when real rows change, and only add more Listen implementation when a concrete data/admin need appears |
 | `constraint` | no public signup; private media should reuse the Global auth layer instead of inventing a Listen-only access scheme |
 
 ## Next queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | plan the next Listen data phase around seeding and backfilling real DB-backed rows now that the access model is stable | `planning` |
-| `2` | continue catalog copy/data cleanup only when it supports the backend-backed model | `content` |
-| `3` | add admin/editor workflow only after the row model and backfill plan are explicit | `feature` |
+| `1` | seed and backfill real DB-backed Listen rows as tracks and presets are ready | `content` |
+| `2` | continue catalog copy/data cleanup only when it supports the DB-first model | `content` |
+| `3` | add admin/editor workflow only when the owner maintenance flow hits a real limitation | `feature` |
 
 ## References
 

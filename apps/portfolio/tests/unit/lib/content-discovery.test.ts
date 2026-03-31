@@ -6,7 +6,7 @@ import {
   searchDiscoveryItems,
 } from '@/lib/content-discovery';
 import type { DiscoveryItem } from '@/lib/content-discovery';
-import { getListenSearchDiscoveryItems } from '@/lib/listen-search';
+import { getStaticListenSearchDiscoveryItems } from '@/lib/listen-search';
 
 const items: DiscoveryItem[] = [
   {
@@ -142,7 +142,7 @@ describe('content discovery utilities', () => {
   });
 
   it('matches listen catalog rows when the query looks like the /listen path', () => {
-    const listen = getListenSearchDiscoveryItems();
+    const listen = getStaticListenSearchDiscoveryItems();
     const hits = searchDiscoveryItems(listen, '/listen', 20);
 
     expect(hits.length).toBeGreaterThan(0);

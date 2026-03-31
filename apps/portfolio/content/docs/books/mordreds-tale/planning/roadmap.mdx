@@ -1,0 +1,46 @@
+---
+title: Mordred's Tale — Roadmap
+description: Phase-level writing and packaging timeline for Book 1 full source and trilogy part volumes.
+date: "2026-03-18"
+updated: "2026-03-30"
+order: 6
+repoPath: apps/portfolio/content/docs/books/mordreds-tale/planning/roadmap.mdx
+---
+
+# Mordred's Tale — Roadmap
+
+Phases mirror the [task registry](/docs/books/mordreds-tale/planning/task-registry). This page is the **sequence view**; rows with ids and verification stay on the registry.
+
+## Phase map
+
+| Phase id | Intent | Definition of done (summary) |
+| --- | --- | --- |
+| `mt-beats-pass-01` | Beat-lock **Ch6–19** before Ch3 return; moral/shock/survival notes per chapter | Each chapter row on [state](/docs/books/mordreds-tale/planning/state) has **Locked for draft**; FQ sweep in `mt-beats-01-closeout` |
+| `mt-act-i` | Finish **Act I** drafting (Ch3 focus; blocked until beat pass policy satisfied) | Ch3 passes chapter checklist + handoff to Act II per registry |
+| `mt-act-ii` | **Act II** chapter-at-a-time draft (full-source spine Ch4–14 as numbered on disk) | Ch14 checklist + `pnpm run build:books` when applicable |
+| `mt-act-iii` | **Act III** war / coalition / carriage / epilogue lane | Act III beat map locked + Ch15–19 draft/rework gates |
+| `mt-polish` | Deferred line / continuity / prose balance | After draft phases; read-through verification |
+| `mt-trilogy-packaging-01` | Part I / II / III EPUB inputs from canonical `mordreds_tale` | Part folders build; manifest sane |
+| `mt-trilogy-beats-pass-01` | **14-chapter Part I** map, datelines, Jack search, trilogy rhythm | Part beat rows on [state](/docs/books/mordreds-tale/planning/state); cross-links to [decisions](/docs/books/mordreds-tale/planning/decisions) |
+
+## Dependency sketch
+
+```mermaid
+flowchart LR
+  B[mt-beats-pass-01] --> R4[Ch4-5 rework]
+  R4 --> R3[Ch3 rework]
+  B --> A2[mt-act-ii tail]
+  A2 --> A3[mt-act-iii]
+  A3 --> P[mt-polish]
+  P1[mt-trilogy-beats-pass-01] --> Pkg[mt-trilogy-packaging-01]
+```
+
+## Cross-links
+
+| Record | Path |
+| --- | --- |
+| Story pointer + beat sheets | [State](/docs/books/mordreds-tale/planning/state) |
+| Executable tasks | [Task registry](/docs/books/mordreds-tale/planning/task-registry) |
+| Locked canon | [Decisions](/docs/books/mordreds-tale/planning/decisions) |
+| Magicborn line (all books) | [Books section state — Magicborn line](/docs/books/planning/state#magicborn-line-world-order-and-chapter-beats) |
+| Fiction agent loop | `content/docs/books/mordreds-tale/planning/AGENTS.md` |
