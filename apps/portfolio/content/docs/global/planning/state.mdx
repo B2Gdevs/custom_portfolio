@@ -23,19 +23,18 @@ taskPhase: global-data-02
 
 | Field | Value |
 | --- | --- |
-| `phase` | `global-data-02` active while `global-data-01` remains the shared provider baseline and `global-data-03` is now the next queued public-catalog migration |
-| `focus` | the provider contract baseline is landed, `repub-builder` is now extracted into its own standalone vendored package, and both off-repo publishers are live: built EPUBs plus planning-pack zips publish as versioned book artifacts, and public site imagery now publishes through `site-media-assets` with a lightweight `public/media/manifest.json` mapping back into the existing project/blog/frontmatter/MDX surfaces. `listen-media-assets` is also live as the storage lane for future Listen-owned media, while the current `/listen` surface remains BandLab-link-first. The planning-pack modal now merges builtin embed packs again so the init pack is visible. The remaining cross-cutting work is execution: clean the blocked unpushed history, then migrate the next public catalog and download classes behind the same SSR-safe contract. |
+| `phase` | `global-data-03-01` is now active while `global-data-01` remains the shared provider baseline and `global-data-02` stays as the storage-policy foundation |
+| `focus` | the blocked heavy-blob history is cleaned and `main` pushes again. `repub-builder` is extracted, the book-artifact and public-media publishers are live, and the app has now started the next public-catalog migration: `site-app-records` and `site-download-assets` exist, `/apps` loads through an SSR-safe worker bridge instead of a hard-coded array, and the hosted app registry is seeded in Supabase. The next execution slice is consuming `site-download-assets` for public planning-pack and resume files without weakening SSR or public SEO. |
 | `constraint` | repo-memory reduction cannot casually break authored-content SSR. Runtime binaries, generated reading artifacts, and private media can move behind storage/database paths, but route metadata, public page content, and indexable SEO surfaces still need a clear render contract |
 
 ## Next queue
 
 | Priority | Action |
 | --- | --- |
-| `1` | continue `global-data-02-02`: rebuild or rewrite the still-unpushed branch range so committed DB/EPUB blobs are actually removed from the push path instead of only being replaced by future storage rules |
-| `2` | continue `global-data-02-03` from the new baseline: remove or replace repo-resident copies of the now-published site media where safe, and keep extending the same publish path to the next heavy public classes |
-| `3` | start `global-data-03-01`: define the concrete Payload collections and server loaders for `/apps`, public planning-pack/download metadata, and the first public bundle records so those surfaces stop depending on hard-coded component arrays or repo-resident zip/html artifacts |
-| `4` | queue `global-data-03-02` and `03-03`: move projects and resumes onto Postgres metadata plus storage-backed files while preserving SSR and keeping long-form editorial copy repo-first where that still reduces maintenance |
-| `5` | queue `global-auth-02-01`: refresh the site shell/sidebar around owner-only login and private-surface affordances using the existing auth/session routes instead of inventing a second auth stack |
+| `1` | continue `global-data-03-01`: wire the first real `site-download-assets` consumers for public planning-pack bundles and resume/download artifacts so those files stop depending on repo-resident binaries |
+| `2` | continue `global-data-02-03` from the new baseline: remove or replace repo-resident copies of now-published site media where safe, and keep extending the same publish path to the next heavy public classes |
+| `3` | queue `global-data-03-02` and `03-03`: move projects and resume metadata onto Postgres records plus storage-backed relations while keeping long-form editorial copy repo-first where that still reduces maintenance |
+| `4` | queue `global-auth-02-01`: refresh the site shell/sidebar around owner-only login and private-surface affordances using the existing auth/session routes instead of inventing a second auth stack |
 
 ## References
 

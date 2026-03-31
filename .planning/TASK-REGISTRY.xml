@@ -144,8 +144,8 @@
       </commands>
       <depends>03-01</depends>
     </task>
-    <task id="03-03" agent-id="" status="planned">
-      <goal>Plan and execute the next public-catalog migration after the storage baseline: move apps, project metadata, resume metadata, and public download assets onto SSR-safe Postgres collections plus storage-backed files, while keeping long-form public prose repo-first where that still lowers maintenance.</goal>
+    <task id="03-03" agent-id="" status="in-progress">
+      <goal>Execute the next public-catalog migration after the storage baseline: `site-app-records` plus `site-download-assets` are now landing first, `/apps` should read from hosted metadata through an SSR-safe loader, and the next steps are planning-pack/resume download consumers followed by project and resume metadata while long-form public prose stays repo-first where that still lowers maintenance.</goal>
       <keywords>apps,projects,resumes,downloads,postgres,storage,seo</keywords>
       <commands>
         <command>pnpm run build</command>

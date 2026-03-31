@@ -61,7 +61,7 @@ taskPhase: global-data-02
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
-| `global-data-03-01` | `planned` | add the next public catalog collections and SSR-safe loaders: `site-app-records` plus `site-download-assets`, and migrate `/apps` plus public planning-pack/download metadata away from hard-coded component arrays and repo-resident binaries | `global-data-02-03` | targeted loader/component tests, `pnpm run build`, `pnpm run lint` |
+| `global-data-03-01` | `in-progress` | add the next public catalog collections and SSR-safe loaders: `site-app-records` plus `site-download-assets`, migrate `/apps` off the hard-coded component array, seed the hosted app registry, and start moving public planning-pack/download metadata away from repo-resident binaries | `global-data-02-03` | targeted loader/component tests, `pnpm run build`, `pnpm run lint` |
 | `global-data-03-02` | `planned` | move project metadata, ordering, link groups, and media/download relations into `project-records` while keeping long-form project bodies repo-first until the DB path proves simpler | `global-data-03-01` | targeted loader/component tests, `pnpm run build`, `pnpm run lint` |
 | `global-data-03-03` | `planned` | move resumes onto `resume-records` plus `site-download-assets` so gallery metadata and downloadable HTML/PDF artifacts stop depending on local directory scans and repo-resident files | `global-data-03-01` | targeted loader/component tests, `pnpm run build`, `pnpm run lint` |
 

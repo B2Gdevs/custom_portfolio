@@ -23,6 +23,7 @@
     "db:studio": "drizzle-kit studio",
     "auth:seed": "tsx --tsconfig tsconfig.json scripts/seed-auth-owner.ts",
     "listen:seed": "tsx --tsconfig tsconfig.json scripts/seed-listen-catalog.ts",
+    "site:seed:apps": "tsx --tsconfig tsconfig.json scripts/seed-site-app-records.ts",
     "chat:env-preview": "tsx --tsconfig tsconfig.json scripts/chat-env-preview.ts"
   },
   "dependencies": {

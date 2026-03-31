@@ -59,6 +59,9 @@ export function getPayloadS3StorageOptions(): S3StorageOptions | null {
       'reader-library-assets': {
         signedDownloads: true,
       },
+      'site-download-assets': {
+        signedDownloads: false,
+      },
       'site-media-assets': {
         signedDownloads: false,
       },

@@ -1,6 +1,8 @@
 import { ragChunks } from '@/lib/payload/collections/ragChunks';
 import { listenMediaAssets } from '@/lib/payload/collections/listenMediaAssets';
 import { publishedBookArtifacts } from '@/lib/payload/collections/publishedBookArtifacts';
+import { siteAppRecords } from '@/lib/payload/collections/siteAppRecords';
+import { siteDownloadAssets } from '@/lib/payload/collections/siteDownloadAssets';
 import { siteMediaAssets } from '@/lib/payload/collections/siteMediaAssets';
 
 type SimpleField = {
@@ -84,6 +86,44 @@ describe('payload collection contracts', () => {
 
   it('avoids SQL column collisions in listen-media-assets fields', () => {
     const fields = (listenMediaAssets.fields ?? []).filter(isSimpleField);
+    const seen = new Map<string, string>();
+    const duplicates: Array<{ column: string; names: string[] }> = [];
+
+    for (const field of fields) {
+      const column = toSqlColumnName(field);
+      const existing = seen.get(column);
+      if (existing) {
+        duplicates.push({ column, names: [existing, field.name] });
+        continue;
+      }
+
+      seen.set(column, field.name);
+    }
+
+    expect(duplicates).toEqual([]);
+  });
+
+  it('avoids SQL column collisions in site-app-records fields', () => {
+    const fields = (siteAppRecords.fields ?? []).filter(isSimpleField);
+    const seen = new Map<string, string>();
+    const duplicates: Array<{ column: string; names: string[] }> = [];
+
+    for (const field of fields) {
+      const column = toSqlColumnName(field);
+      const existing = seen.get(column);
+      if (existing) {
+        duplicates.push({ column, names: [existing, field.name] });
+        continue;
+      }
+
+      seen.set(column, field.name);
+    }
+
+    expect(duplicates).toEqual([]);
+  });
+
+  it('avoids SQL column collisions in site-download-assets fields', () => {
+    const fields = (siteDownloadAssets.fields ?? []).filter(isSimpleField);
     const seen = new Map<string, string>();
     const duplicates: Array<{ column: string; names: string[] }> = [];
 

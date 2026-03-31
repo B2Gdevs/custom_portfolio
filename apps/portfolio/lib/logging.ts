@@ -33,6 +33,19 @@ interface CreateLoggerOptions {
   defaultLevel?: LogLevel;
 }
 
+type ServerLogFsModule = {
+  stat(path: string): Promise<{ size: number }>;
+  rename(oldPath: string, newPath: string): Promise<void>;
+  mkdir(path: string, options?: { recursive?: boolean }): Promise<void>;
+  appendFile(path: string, data: string, encoding: 'utf8'): Promise<void>;
+};
+
+type ServerLogPathModule = {
+  isAbsolute(path: string): boolean;
+  resolve(...paths: string[]): string;
+  dirname(path: string): string;
+};
+
 export interface Logger {
   scope: string;
   runtime: LogRuntime;
@@ -223,8 +236,107 @@ function getConsoleMethod(level: LogLevel) {
   }
 }
 
+function isServerFileLoggingEnabled() {
+  if (typeof window !== 'undefined') return false;
+  const raw = process.env.LOG_FILE_ENABLED?.trim().toLowerCase();
+  return raw === '1' || raw === 'true' || raw === 'yes' || raw === 'on';
+}
+
+function parsePositiveInt(raw: string | undefined, fallback: number) {
+  const parsed = Number.parseInt(raw ?? '', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function getServerLogFilePath(cwd: string, pathModule: ServerLogPathModule) {
+  const configured = process.env.LOG_FILE_PATH?.trim() || '.logs/portfolio-server.log';
+  return pathModule.isAbsolute(configured) ? configured : pathModule.resolve(cwd, configured);
+}
+
+let serverFsPromise: Promise<ServerLogFsModule> | null = null;
+let serverPathPromise: Promise<ServerLogPathModule> | null = null;
+let serverFileWriteQueue: Promise<void> = Promise.resolve();
+const runtimeImport = new Function(
+  'specifier',
+  'return import(specifier)',
+) as <T>(specifier: string) => Promise<T>;
+
+async function getServerFs() {
+  serverFsPromise ??= runtimeImport<ServerLogFsModule>('fs/promises');
+  return serverFsPromise;
+}
+
+async function getServerPath() {
+  serverPathPromise ??= runtimeImport<ServerLogPathModule>('path');
+  return serverPathPromise;
+}
+
+async function rotateLogFileIfNeeded(
+  fsModule: ServerLogFsModule,
+  pathModule: ServerLogPathModule,
+  filePath: string,
+  maxBytes: number,
+  maxFiles: number,
+  incomingLength: number,
+) {
+  let currentSize = 0;
+  try {
+    const stat = await fsModule.stat(filePath);
+    currentSize = stat.size;
+  } catch {
+    currentSize = 0;
+  }
+
+  if (currentSize + incomingLength <= maxBytes) {
+    return;
+  }
+
+  for (let index = maxFiles - 1; index >= 1; index -= 1) {
+    const from = `${filePath}.${index}`;
+    const to = `${filePath}.${index + 1}`;
+    try {
+      await fsModule.rename(from, to);
+    } catch {
+      // No-op when the source generation does not exist yet.
+    }
+  }
+
+  try {
+    await fsModule.rename(filePath, `${filePath}.1`);
+  } catch {
+    // No-op when the base file does not exist yet.
+  }
+}
+
+function formatServerFileLine(entry: LogEntry) {
+  return JSON.stringify(entry) + '\n';
+}
+
+function writeServerLogFile(entry: LogEntry) {
+  if (!isServerFileLoggingEnabled() || entry.runtime !== 'server') {
+    return;
+  }
+
+  serverFileWriteQueue = serverFileWriteQueue
+    .then(async () => {
+      const [fsModule, pathModule] = await Promise.all([getServerFs(), getServerPath()]);
+      const cwd = process.cwd();
+      const filePath = getServerLogFilePath(cwd, pathModule);
+      const maxBytes = parsePositiveInt(process.env.LOG_FILE_MAX_BYTES, 5 * 1024 * 1024);
+      const maxFiles = parsePositiveInt(process.env.LOG_FILE_MAX_FILES, 5);
+      const line = formatServerFileLine(entry);
+
+      await fsModule.mkdir(pathModule.dirname(filePath), { recursive: true });
+      await rotateLogFileIfNeeded(fsModule, pathModule, filePath, maxBytes, maxFiles, line.length);
+      await fsModule.appendFile(filePath, line, 'utf8');
+    })
+    .catch((error) => {
+      console.error('[portfolio][server][logging] file sink failed', error);
+    });
+}
+
 function emit(entry: LogEntry) {
   pushEntry(entry);
+  writeServerLogFile(entry);
 
   const consoleMethod = getConsoleMethod(entry.level);
   const prefix = `[portfolio][${entry.runtime}][${entry.scope}][${entry.level}] ${entry.message}`;

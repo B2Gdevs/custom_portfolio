@@ -1,5 +1,7 @@
+import { getSiteApps } from '@/lib/site-apps';
 import { AppsHubPage } from '@/components/apps/AppsHubPage';
 
-export default function AppsPage() {
-  return <AppsHubPage />;
+export default async function AppsPage() {
+  const apps = await getSiteApps();
+  return <AppsHubPage apps={apps} />;
 }

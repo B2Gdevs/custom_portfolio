@@ -1,79 +1,51 @@
 import Link from 'next/link';
 import { LayoutGrid } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { AppsHubAppCard } from '@/components/apps/AppsHubAppCard';
-import { readerAppHref } from '@/lib/reader-routes';
+import type { SiteAppRecord } from '@/lib/site-app-registry';
 
-const apps = [
-  {
-    id: 'dialogue-forge',
-    title: 'Dialogue Forge',
-    description:
-      'In-browser graph / Yarn / play-test editor for branching dialogue. Runs inside the main site shell so you can jump back to docs, projects, or the reader without leaving the app namespace.',
-    href: '/apps/dialogue-forge',
-    iconName: 'message-square' as const,
-    cta: 'Open Dialogue Forge',
-    note: (
-      <>
-        Docs for the toolchain live under{' '}
-        <Link href="/docs/dialogue-forge/planning/planning-docs" className="text-accent underline">
-          Docs - dialogue-forge
+type AppsHubPageProps = {
+  apps: SiteAppRecord[];
+};
+
+function renderAppNote(app: SiteAppRecord) {
+  const fragments: ReactNode[] = [];
+
+  if (app.supportHref && app.supportLabel) {
+    fragments.push(
+      <span key="support">
+        Notes live in{' '}
+        <Link href={app.supportHref} className="text-accent underline">
+          {app.supportLabel}
         </Link>
-        . State stays local to this browser tab.
-      </>
-    ),
-  },
-  {
-    id: 'repo-planner',
-    title: 'Repo Planner',
-    description:
-      'Vendored planning CLI and embedded cockpit: live repo read APIs plus workspace UI, with package-owned shell work still in flight.',
-    href: '/apps/repo-planner',
-    iconName: 'terminal' as const,
-    cta: 'Open Repo Planner',
-    note: (
-      <>
-        Planning and embed notes live in{' '}
-        <Link href="/docs/repo-planner/planning/planning-docs" className="text-accent underline">
-          Repo Planner docs
-        </Link>
-        . The browser workspace remains read-only against the repo by default.
-      </>
-    ),
-  },
-  {
-    id: 'planning-pack',
-    title: 'Planning pack',
-    description:
-      'Build-time export of section planning MDX to static Markdown under `/planning-pack/site/` plus `manifest.json`. Read-only downloads for visitors.',
-    href: '/docs/global/global-planning',
-    iconName: 'layers' as const,
-    cta: 'Open planning guide',
-    note: (
-      <>
-        Use the site sidebar{' '}
-        <span className="font-medium text-text-muted">Planning pack</span> control to browse and download exports while
-        staying inside the main shell.
-      </>
-    ),
-  },
-  {
-    id: 'reader',
-    title: 'EPUB reader',
-    description:
-      'Canonical reading surface for built books. Library-first shell, deep links by query, and local EPUB import as a secondary utility path.',
-    href: readerAppHref({ book: 'mordreds_tale' }),
-    iconName: 'book-open' as const,
-    cta: 'Open reader',
-    note: (
-      <>
+        .
+      </span>,
+    );
+  }
+
+  if (app.supportText) {
+    fragments.push(<span key="support-text">{app.supportText}</span>);
+  }
+
+  if (app.exampleCode) {
+    fragments.push(
+      <span key="example">
         Example:{' '}
-        <code className="rounded bg-dark px-1.5 py-0.5 text-text-muted">/apps/reader?book=mordreds_tale</code>
-      </>
-    ),
-  },
-];
+        <code className="rounded bg-dark px-1.5 py-0.5 text-text-muted">{app.exampleCode}</code>
+      </span>,
+    );
+  }
 
-export function AppsHubPage() {
+  return fragments.reduce<ReactNode[]>((acc, fragment, index) => {
+    if (index > 0) {
+      acc.push(' ');
+    }
+    acc.push(fragment);
+    return acc;
+  }, []);
+}
+
+export function AppsHubPage({ apps }: AppsHubPageProps) {
   return (
     <div className="section-shell pb-16">
       <header className="story-card max-w-5xl p-8 md:p-10">
@@ -91,7 +63,7 @@ export function AppsHubPage() {
       <ul className="mt-10 grid gap-6 lg:grid-cols-2">
         {apps.map((app) => (
           <li key={app.id}>
-            <AppsHubAppCard {...app} />
+            <AppsHubAppCard {...app} note={renderAppNote(app)} />
           </li>
         ))}
       </ul>

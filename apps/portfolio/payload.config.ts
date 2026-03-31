@@ -14,6 +14,8 @@ import { readerLibraryAssets } from './lib/payload/collections/readerLibraryAsse
 import { readerReadingStates } from './lib/payload/collections/readerReadingStates';
 import { readerSettings } from './lib/payload/collections/readerSettings';
 import { publishedBookArtifacts } from './lib/payload/collections/publishedBookArtifacts';
+import { siteAppRecords } from './lib/payload/collections/siteAppRecords';
+import { siteDownloadAssets } from './lib/payload/collections/siteDownloadAssets';
 import { siteMediaAssets } from './lib/payload/collections/siteMediaAssets';
 import { tenants } from './lib/payload/collections/tenants';
 import { users } from './lib/payload/collections/users';
@@ -45,6 +47,8 @@ export default buildConfig({
     listenCatalogRecords,
     listenMediaAssets,
     publishedBookArtifacts,
+    siteAppRecords,
+    siteDownloadAssets,
     siteMediaAssets,
     readerLibraryAssets,
     readerLibraryRecords,

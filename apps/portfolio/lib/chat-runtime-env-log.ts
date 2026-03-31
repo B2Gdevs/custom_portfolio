@@ -34,9 +34,18 @@ export function logChatRuntimeProcessEnvOnce(label: string): void {
 
   const sorted = Object.keys(process.env).sort();
   const lines = sorted.map((k) => `${k}=${process.env[k] ?? ''}`);
+  const appRoot = resolvePortfolioAppRoot();
+  const repoRoot = path.resolve(appRoot, '..', '..');
+  const envCandidates = [
+    path.join(repoRoot, '.env'),
+    path.join(repoRoot, '.env.local'),
+    path.join(appRoot, '.env'),
+    path.join(appRoot, '.env.local'),
+  ];
   const block = [
     `========== ${label} ${new Date().toISOString()} ==========`,
-    `pid=${process.pid} node=${process.version} platform=${process.platform}`,
+    `pid=${process.pid} node=${process.version} platform=${process.platform} cwd=${process.cwd()}`,
+    ...envCandidates.map((p) => `env_file_exists ${p}=${fs.existsSync(p)}`),
     ...lines,
     '========== end process.env ==========',
   ].join('\n');

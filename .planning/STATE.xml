@@ -4,7 +4,7 @@
   <current-phase>03</current-phase>
   <current-plan>global-data-02</current-plan>
   <status>active</status>
-  <next-action>The shared provider contract is landed, `@portfolio/repub-builder` now builds from the vendored standalone repo, the hosted book-artifact publisher is live, and the first public-media migration is live too: `site-media-assets` plus `listen-media-assets` exist and current site imagery now resolves through a lightweight storage-backed manifest. The planning-pack modal now merges builtin init packs again. Next, continue `global-data-02-02` by rebuilding or rewriting the still-unpushed branch range so the historical DB/EPUB blobs actually leave the push path, then start the queued public-catalog slice (`global-data-03`) for apps, project metadata, resume metadata, and public download assets, followed by the owner-only shell refresh in `global-auth-02`.</next-action>
+  <next-action>The heavy-blob history cleanup is done and `main` pushes again. The shared provider contract is landed, `@portfolio/repub-builder` builds from the vendored standalone repo, hosted book-artifact and public-media publishers are live, and `/apps` now reads from seeded Supabase-backed `site-app-records` through an SSR-safe worker boundary. Next, continue `global-data-03-01` by wiring the first real `site-download-assets` consumers for public planning-pack bundles and resume/download artifacts, then continue `global-data-03-02` and `global-data-03-03` for project and resume metadata, followed by the owner-only shell refresh in `global-auth-02`.</next-action>
   <references>
     <reference>AGENTS.md (repo root)</reference>
     <reference>apps/portfolio/content/docs/global/requirements.mdx</reference>
