@@ -47,7 +47,12 @@ nul
 skills-lock.json
 
 # debug
-.logs/
+.logs/*
+!.logs/README.md
+# Shell/IDE redirects of `next dev` / `next start` (not Next's `.next/` dir, not app JSONL logs)
+.next-dev-*.log
+.next-start-*.log
+.tmp-next*.log
 chat-runtime-env.log
 npm-debug.log*
 yarn-debug.log*
