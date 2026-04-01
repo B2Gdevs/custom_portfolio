@@ -101,6 +101,7 @@
   },
   "devDependencies": {
     "@magicborn/cli": "workspace:*",
+    "@magicborn/mb-cli-framework": "workspace:*",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/cli": "^4.2.2",
     "@tailwindcss/postcss": "^4",

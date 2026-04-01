@@ -31,10 +31,32 @@ describe('getCompleteLines', () => {
     expect(getCompleteLines('top')).toContain('pnpm');
   });
 
-  it('lists vendor forward targets', () => {
+  it('lists vendor subcommands (ids come from vendor-suggest)', () => {
     expect(getCompleteLines('vendor')).toEqual(
-      expect.arrayContaining(['add', 'list', 'users', 'org', 'tenant', 'blog']),
+      expect.arrayContaining(['add', 'list', 'use', 'clear', 'scope']),
     );
+    expect(getCompleteLines('vendor')).not.toContain('users');
+  });
+
+  it('includes payload in top-level commands', () => {
+    expect(getCompleteLines('top')).toContain('payload');
+  });
+
+  it('returns payload subcommands', () => {
+    expect(getCompleteLines('payload')).toEqual(expect.arrayContaining(['collections', 'app']));
+  });
+
+  it('returns payload app generate aliases', () => {
+    expect(getCompleteLines('payload-app')).toEqual(expect.arrayContaining(['generate', 'gen']));
+  });
+
+  it('includes chat in top-level commands', () => {
+    expect(getCompleteLines('top')).toContain('chat');
+  });
+
+  it('vendor-suggest includes grimetime when monorepo root is discoverable', () => {
+    const lines = getCompleteLines('vendor-suggest');
+    expect(lines.some((l) => l.startsWith('grimetime'))).toBe(true);
   });
 
   it('returns vendor-ids including grimetime', () => {

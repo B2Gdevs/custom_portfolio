@@ -205,13 +205,17 @@ async function runGenerate(target: GenerateTarget, flagArgs: string[]): Promise<
   const hasKey = Boolean(process.env.OPENAI_API_KEY?.trim());
   const ragDefaultOnForBook = cliConfig.rag?.useRagForBookGenerate !== false;
   const withRag = values['with-rag'] === true || (target === 'book' && ragDefaultOnForBook);
-  if (withRag) {
+    if (withRag) {
     const ragBookSlug = normalizeRagBookSlug(values as Record<string, string | boolean | undefined>, cliConfig);
     const ragQuery =
       (values['rag-query'] as string | undefined)?.trim() ||
       resolvePromptBody(values as Record<string, string | boolean | undefined>) ||
       `${target} ${ragBookSlug ?? values.id ?? values.pack ?? ''}`.trim();
     if (ragQuery) {
+      if (isCli && !json) {
+        ui.section('RAG · prompt context');
+        ui.info(`query: ${ragQuery.slice(0, 120)}${ragQuery.length > 120 ? '…' : ''}`);
+      }
       try {
         const ragHits = await collectRagContext({
           bookSlug: ragBookSlug,
@@ -219,10 +223,15 @@ async function runGenerate(target: GenerateTarget, flagArgs: string[]): Promise<
           maxHits: Math.max(1, Math.min(8, cliConfig.rag?.maxHits ?? 4)),
         });
         if (ragHits.length > 0) {
+          if (isCli && !json) {
+            ui.step(`Merged ${ragHits.length} RAG hit(s) into prompt`);
+          }
           const ragBlock = ragHits
             .map((h, idx) => `${idx + 1}. ${h.title}${h.heading ? ` | ${h.heading}` : ''}\n${h.snippet || h.content}`)
             .join('\n\n');
           finalPrompt = `${finalPrompt}\n\n---\n\nContext from book knowledge base:\n${ragBlock}`;
+        } else if (isCli && !json) {
+          ui.info('No RAG hits for this query (continuing without extra context).');
         }
       } catch {
         // RAG is additive; generation should continue without it.
@@ -252,7 +261,8 @@ async function runGenerate(target: GenerateTarget, flagArgs: string[]): Promise<
         JSON.stringify({ ok: true, mode: 'dry-run', prompt: finalPrompt, ...manifestBase }, null, 2),
       );
     } else {
-      ui.banner('magicborn ' + target + ' generate');
+      ui.banner('generate', target);
+      ui.section('Dry-run · prompt preview');
       ui.configSnapshot({
         hasOpenAiKey: hasKey,
         model,
@@ -275,7 +285,7 @@ async function runGenerate(target: GenerateTarget, flagArgs: string[]): Promise<
         JSON.stringify({ ok: true, mode: 'prompt-only', prompt: finalPrompt, ...manifestBase }, null, 2),
       );
     } else {
-      if (isCli) ui.banner('magicborn ' + target + ' generate');
+      if (isCli) ui.banner('generate', target);
       console.log(finalPrompt);
       if (isCli) ui.promptOnlyFooter();
     }
@@ -294,7 +304,8 @@ async function runGenerate(target: GenerateTarget, flagArgs: string[]): Promise<
   }
 
   if (!json) {
-    ui.banner('magicborn ' + target + ' generate');
+    ui.banner('generate', target);
+    ui.section('OpenAI · image generation');
     ui.configSnapshot({
       hasOpenAiKey: true,
       model,
@@ -313,12 +324,14 @@ async function runGenerate(target: GenerateTarget, flagArgs: string[]): Promise<
     ui.step(`Calling OpenAI Images (${model}, ${size})…`);
   }
 
-  const result = await generateOpenAiImage({
-    apiKey: process.env.OPENAI_API_KEY!.trim(),
-    prompt: finalPrompt,
-    size,
-    model,
-  });
+  const result = await ui.withLongRunningResult(`OpenAI Images ${size}`, () =>
+    generateOpenAiImage({
+      apiKey: process.env.OPENAI_API_KEY!.trim(),
+      prompt: finalPrompt,
+      size,
+      model,
+    }),
+  );
 
   const durationMs = Date.now() - started;
 
@@ -400,7 +413,7 @@ function runStyleCommand(args: string[]): void {
   if (action === 'show') {
     const effective = cfg.styleBlock?.trim() || MAGICBORN_IMAGE_STYLE_BLOCK;
     if (isCli) {
-      createMagicbornCli(true).banner('magicborn style show');
+      createMagicbornCli(true).banner('style · show');
       console.log(cfg.styleBlock?.trim() ? 'Source: cli-config override' : 'Source: built-in default');
       console.log('─'.repeat(60));
     }
@@ -675,7 +688,7 @@ function runBookScenesList(flagArgs: string[]): void {
   }
   const isCli = process.env.MAGICBORN_CLI === '1';
   if (isCli) {
-    createMagicbornCli(true).banner('magicborn book scenes list');
+    createMagicbornCli(true).banner('scenes · list', 'book');
     console.log('Curated scene seeds (use --seed <key> with `magicborn book generate`)');
     console.log('─'.repeat(60));
   }
@@ -744,7 +757,7 @@ async function runAppList(flagArgs: string[]): Promise<void> {
   }
   const isCli = process.env.MAGICBORN_CLI === '1';
   if (isCli) {
-    createMagicbornCli(true).banner('magicborn app list');
+    createMagicbornCli(true).banner('list', 'app');
     console.log(`Site apps (source: ${source})`);
     console.log('─'.repeat(50));
   }
@@ -777,7 +790,7 @@ function runProjectList(flagArgs: string[]): void {
   }
   const isCli = process.env.MAGICBORN_CLI === '1';
   if (isCli) {
-    createMagicbornCli(true).banner('magicborn project list');
+    createMagicbornCli(true).banner('list', 'project');
     console.log('Projects (source: content)');
     console.log('─'.repeat(50));
   }
@@ -789,6 +802,57 @@ function runProjectList(flagArgs: string[]): void {
     console.log('Tip: magicborn project generate --id <slug> --prompt "…"');
   }
   process.exit(0);
+}
+
+/** Payload discovery smoke: list collection slugs from this app's config (global-tooling-02-05). */
+async function runPayloadCollections(argv: string[]): Promise<void> {
+  const wantJson = argv.includes('--json');
+  const mod = await import('../../payload.config');
+  const { default: cfg } = mod;
+  const cols = (cfg.collections ?? []) as Array<{ slug?: string }>;
+  const slugs = cols
+    .map((c) => (typeof c?.slug === 'string' ? c.slug.trim() : ''))
+    .filter(Boolean)
+    .sort();
+  if (wantJson) {
+    console.log(
+      JSON.stringify(
+        { ok: true, source: 'apps/portfolio/payload.config.ts', collections: slugs },
+        null,
+        2,
+      ),
+    );
+  } else {
+    for (const s of slugs) {
+      console.log(s);
+    }
+  }
+  process.exit(0);
+}
+
+/** Payload site-app operator path; headless auth deferred (global-tooling-03-05). */
+function runPayloadAppGenerate(flagArgs: string[]): void {
+  const dry = flagArgs.includes('--dry-run');
+  if (dry) {
+    console.log(
+      JSON.stringify(
+        {
+          ok: true,
+          mode: 'dry-run',
+          command: 'payload app generate',
+          note:
+            'Will create or update site app records via Payload Local API once operator auth (API key or session bridge) is available.',
+        },
+        null,
+        2,
+      ),
+    );
+    process.exit(0);
+  }
+  console.error(
+    'payload app generate requires Payload auth (not wired for headless CLI yet). Use --dry-run for the contract, or use the Payload admin UI. See global-tooling-03-05.',
+  );
+  process.exit(1);
 }
 
 async function main() {
@@ -803,7 +867,7 @@ async function main() {
 
   if (argv.length === 0) {
     console.error(
-      'Usage: magicborn <book|app|project|planning-pack|listen|style|model|openai|pnpm|vendor|completion|shell-init|update> …\nTry: magicborn --help',
+      'Usage: magicborn <book|app|project|planning-pack|listen|style|model|openai|chat|payload|pnpm|vendor|completion|shell-init|update> …\nFrom @magicborn/cli, an empty TTY run opens the Ink home; plain mode: magicborn --help',
     );
     process.exit(1);
   }
@@ -864,6 +928,16 @@ async function main() {
 
   if (a0 === 'openai') {
     await runOpenAiCli(argv.slice(1));
+    return;
+  }
+
+  if (a0 === 'payload' && a1 === 'collections') {
+    await runPayloadCollections(argv.slice(2));
+    return;
+  }
+
+  if (a0 === 'payload' && a1 === 'app' && (a2 === 'generate' || a2 === 'gen')) {
+    runPayloadAppGenerate(argv.slice(3));
     return;
   }
 

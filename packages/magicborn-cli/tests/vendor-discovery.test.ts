@@ -6,8 +6,14 @@ import {
   VENDOR_CLI_FRAMEWORK_ID,
   VENDOR_CLI_MANIFEST_LEGACY_JSON_RELPATH,
   discoverVendorProfiles,
+  getDefaultVendorId,
+  getVendorCompletionRows,
   loadVendorRegistry,
 } from '../src/vendor-registry.ts';
+import {
+  clearVendorScopeFile,
+  writeVendorScopeFile,
+} from '../src/vendor-scope.ts';
 
 function writeJson(p: string, v: unknown) {
   fs.mkdirSync(path.dirname(p), { recursive: true });
@@ -88,6 +94,114 @@ bin = "cli.mjs"
 
     const found = discoverVendorProfiles(tmp, ['vendor']);
     expect(found.legacy).toEqual({ path: 'vendor/legacy', bin: 'cli.mjs' });
+    fs.rmSync(tmp, { recursive: true, force: true });
+  });
+});
+
+describe('getDefaultVendorId', () => {
+  const origEnv = process.env.MAGICBORN_VENDOR_ID;
+
+  function restoreEnv() {
+    if (origEnv === undefined) {
+      delete process.env.MAGICBORN_VENDOR_ID;
+    } else {
+      process.env.MAGICBORN_VENDOR_ID = origEnv;
+    }
+  }
+
+  it('prefers MAGICBORN_VENDOR_ID when registered', () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mb-vnd-env-'));
+    writeJson(path.join(tmp, 'pnpm-workspace.yaml'), {});
+    writeTomlManifest(
+      path.join(tmp, 'vendor', 'acme'),
+      `
+framework = "${VENDOR_CLI_FRAMEWORK_ID}"
+id = "acme"
+bin = "bin/a.mjs"
+`,
+    );
+    process.env.MAGICBORN_VENDOR_ID = 'acme';
+    try {
+      const reg = loadVendorRegistry(tmp);
+      expect(getDefaultVendorId(reg, tmp)).toBe('acme');
+    } finally {
+      restoreEnv();
+      fs.rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it('prefers scope file over registry defaultVendor', () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mb-vnd-scope-def-'));
+    writeJson(path.join(tmp, 'pnpm-workspace.yaml'), {});
+    writeTomlManifest(
+      path.join(tmp, 'vendor', 'acme'),
+      `
+framework = "${VENDOR_CLI_FRAMEWORK_ID}"
+id = "acme"
+bin = "bin/a.mjs"
+`,
+    );
+    writeTomlManifest(
+      path.join(tmp, 'vendor', 'beta'),
+      `
+framework = "${VENDOR_CLI_FRAMEWORK_ID}"
+id = "beta"
+bin = "bin/b.mjs"
+`,
+    );
+    fs.mkdirSync(path.join(tmp, '.magicborn'), { recursive: true });
+    writeJson(path.join(tmp, '.magicborn', 'vendors.json'), {
+      defaultVendor: 'beta',
+    });
+    restoreEnv();
+    const acmeRoot = path.join(tmp, 'vendor', 'acme');
+    writeVendorScopeFile(tmp, { vendorId: 'acme', vendorRoot: acmeRoot });
+    try {
+      const reg = loadVendorRegistry(tmp);
+      expect(getDefaultVendorId(reg, tmp)).toBe('acme');
+    } finally {
+      clearVendorScopeFile(tmp);
+      fs.rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('getVendorCompletionRows', () => {
+  it('sets controllable true when vendor bin exists', () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mb-vnd-row-ok-'));
+    writeJson(path.join(tmp, 'pnpm-workspace.yaml'), {});
+    const pkg = path.join(tmp, 'vendor', 'acme');
+    writeTomlManifest(
+      pkg,
+      `
+framework = "${VENDOR_CLI_FRAMEWORK_ID}"
+id = "acme"
+bin = "bin/a.mjs"
+`,
+    );
+    const binAbs = path.join(pkg, 'bin', 'a.mjs');
+    fs.mkdirSync(path.dirname(binAbs), { recursive: true });
+    fs.writeFileSync(binAbs, '', 'utf8');
+    const rows = getVendorCompletionRows(tmp);
+    const acme = rows.find((r) => r.id === 'acme');
+    expect(acme?.controllable).toBe(true);
+    fs.rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('sets controllable false when vendor bin is missing', () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mb-vnd-row-miss-'));
+    writeJson(path.join(tmp, 'pnpm-workspace.yaml'), {});
+    writeTomlManifest(
+      path.join(tmp, 'vendor', 'acme'),
+      `
+framework = "${VENDOR_CLI_FRAMEWORK_ID}"
+id = "acme"
+bin = "bin/nope.mjs"
+`,
+    );
+    const rows = getVendorCompletionRows(tmp);
+    const acme = rows.find((r) => r.id === 'acme');
+    expect(acme?.controllable).toBe(false);
     fs.rmSync(tmp, { recursive: true, force: true });
   });
 });

@@ -5,9 +5,37 @@ import {
   loadVendorRegistry,
   resolveVendorProfile,
 } from './vendor-registry.js';
+import {
+  clearVendorScopeFile,
+  readVendorScopeFile,
+  writeVendorScopeFile,
+} from './vendor-scope.js';
 
-/** Documented first-class forwards to vendor CLIs (e.g. grimetime users …). */
+/** @deprecated Top-level forwards (use `magicborn vendor <id> <cmd> …`). */
 export const VENDOR_TOPIC_COMMANDS = ['users', 'org', 'tenant', 'blog'] as const;
+
+const VENDOR_LEADING_RESERVED = new Set(['list', 'use', 'clear', 'scope', 'add']);
+
+/**
+ * If argv starts with a registered vendor id, treat it as `magicborn vendor <id> …`.
+ * Does not consume `list|use|clear|scope|add`.
+ */
+export function stripLeadingVendorId(
+  vendorIds: Record<string, unknown>,
+  argv: string[],
+): { explicitVendorId: string | null; rest: string[] } {
+  if (argv.length === 0) {
+    return { explicitVendorId: null, rest: argv };
+  }
+  const first = argv[0] ?? '';
+  if (VENDOR_LEADING_RESERVED.has(first)) {
+    return { explicitVendorId: null, rest: argv };
+  }
+  if (vendorIds[first]) {
+    return { explicitVendorId: first, rest: argv.slice(1) };
+  }
+  return { explicitVendorId: null, rest: argv };
+}
 
 export type ParsedVendorArgs = {
   vendorId: string | null;
@@ -48,24 +76,129 @@ export function parseVendorForwardArgs(argv: string[]): ParsedVendorArgs {
 
 export function printVendorCliHelp(): void {
   console.log(`Usage:
-  magicborn vendor --id <id> [args...]     Run a registered vendor CLI (cwd = vendor package root)
-  magicborn vendor <users|org|tenant|blog> [args...]
-                                            Shorthand: same as --id default + that subcommand
-  magicborn vendor list                     List registered vendors
-  magicborn vendor add <url>                Add a git submodule (unchanged)
+  magicborn vendor list                     List registered vendors (JSON)
+  magicborn vendor <id> [args...]          Run vendor CLI (cwd = vendor package root); id = registered vendor
+  magicborn vendor --id <id> [args...]     Same, explicit id flag
+  magicborn vendor use <id> [--export]      Set default vendor (.magicborn/vendor-scope.json)
+  magicborn vendor clear [--export]         Remove vendor scope file
+  magicborn vendor scope [--json]           Show env + scope + effective default vendor
+  magicborn vendor add <url>                Add a git submodule (Commander)
 
 Environment:
-  MAGICBORN_VENDOR_ID   Default vendor when --id is omitted (e.g. grimetime)
+  MAGICBORN_VENDOR_ID   Overrides scope file (highest precedence for default vendor)
+  MAGICBORN_VENDOR_ROOT Optional hint (set by vendor use --export)
+
+Scope:
+  eval "$(magicborn vendor use <id> --export)"   Apply in current shell
+  magicborn vendor clear && eval "$(magicborn vendor clear --export)"   Clear
 
 Registry:
   .magicborn/vendors.json       Optional overlay; merges discovered + defaults.
   vendor/<pkg>/.magicborn/cli.toml  Magicborn vendor CLI manifest (auto-discovery; legacy cli.json still read)
 
+Completion:
+  Tab after vendor: ids + list/use/clear/scope/add; (cli) suffix when bin exists (see magicborn completion bash).
+
 Examples:
-  magicborn vendor --id grimetime doctor
-  magicborn vendor --id grimetime seed push foundation
-  magicborn vendor users --help
+  magicborn vendor grimetime doctor
+  magicborn vendor grimetime users --help
+  magicborn vendor --id grimetime seed
+  eval "$(magicborn vendor use grimetime --export)"
+
+Deprecated (still works, stderr warning):
+  magicborn users …   → use: magicborn vendor <default-id> users …
 `);
+}
+
+function runVendorUse(
+  repoRoot: string,
+  registry: ReturnType<typeof loadVendorRegistry>,
+  args: string[],
+): number {
+  const exportMode = args.includes('--export');
+  const idArg = args.find((a) => a !== '--export' && !a.startsWith('-'));
+  if (!idArg) {
+    console.error('Usage: magicborn vendor use <id> [--export]');
+    return 1;
+  }
+  if (!registry.vendors[idArg]) {
+    console.error(`Unknown vendor "${idArg}". Try: magicborn vendor list`);
+    return 1;
+  }
+  let root: string;
+  try {
+    root = resolveVendorProfile(repoRoot, registry, idArg).root;
+  } catch (e) {
+    console.error(e instanceof Error ? e.message : e);
+    return 1;
+  }
+  writeVendorScopeFile(repoRoot, { vendorId: idArg, vendorRoot: root });
+  if (exportMode) {
+    console.log(`export MAGICBORN_VENDOR_ID=${JSON.stringify(idArg)}`);
+    console.log(`export MAGICBORN_VENDOR_ROOT=${JSON.stringify(root)}`);
+  } else {
+    console.error(`Vendor scope set: ${idArg}`);
+    console.error(`Package root: ${root}`);
+    console.error(`This shell: eval "$(magicborn vendor use ${idArg} --export)"`);
+    console.error(`Clear: magicborn vendor clear`);
+  }
+  return 0;
+}
+
+function runVendorClear(repoRoot: string, args: string[]): number {
+  const exportMode = args.includes('--export');
+  const gone = clearVendorScopeFile(repoRoot);
+  if (exportMode) {
+    console.log('unset MAGICBORN_VENDOR_ID');
+    console.log('unset MAGICBORN_VENDOR_ROOT');
+  } else {
+    console.error(
+      gone
+        ? 'Vendor scope cleared (.magicborn/vendor-scope.json removed).'
+        : 'No vendor scope file was set.',
+    );
+    if (gone) {
+      console.error(`Shell: eval "$(magicborn vendor clear --export)"`);
+    }
+  }
+  return 0;
+}
+
+function runVendorScope(
+  repoRoot: string,
+  registry: ReturnType<typeof loadVendorRegistry>,
+  wantJson: boolean,
+): number {
+  const envId = process.env.MAGICBORN_VENDOR_ID?.trim() || null;
+  const envRoot = process.env.MAGICBORN_VENDOR_ROOT?.trim() || null;
+  const file = readVendorScopeFile(repoRoot);
+  let effective: string;
+  try {
+    effective = getDefaultVendorId(registry, repoRoot);
+  } catch (e) {
+    console.error(e instanceof Error ? e.message : e);
+    return 1;
+  }
+  if (wantJson) {
+    console.log(
+      JSON.stringify(
+        {
+          ok: true,
+          env: { MAGICBORN_VENDOR_ID: envId, MAGICBORN_VENDOR_ROOT: envRoot },
+          scopeFile: file,
+          effectiveDefaultVendor: effective,
+        },
+        null,
+        2,
+      ),
+    );
+    return 0;
+  }
+  console.log(`MAGICBORN_VENDOR_ID (env):    ${envId ?? '(unset)'}`);
+  console.log(`MAGICBORN_VENDOR_ROOT (env): ${envRoot ?? '(unset)'}`);
+  console.log(`Scope file:                   ${file ? `${file.vendorId} → ${file.vendorRoot}` : '(none)'}`);
+  console.log(`Effective default vendor:     ${effective}`);
+  return 0;
 }
 
 /**
@@ -76,13 +209,27 @@ export function runVendorForward(argv: string[]): number {
   const registry = loadVendorRegistry(repoRoot);
 
   if (argv[0] === 'list') {
-    const def = getDefaultVendorId(registry);
+    const def = getDefaultVendorId(registry, repoRoot);
     console.log(JSON.stringify({ ok: true, defaultVendor: def, vendors: registry.vendors }, null, 2));
     return 0;
   }
 
-  const parsed = parseVendorForwardArgs(argv);
-  let vendorId = parsed.vendorId ?? getDefaultVendorId(registry);
+  if (argv[0] === 'use') {
+    return runVendorUse(repoRoot, registry, argv.slice(1));
+  }
+
+  if (argv[0] === 'clear') {
+    return runVendorClear(repoRoot, argv.slice(1));
+  }
+
+  if (argv[0] === 'scope') {
+    const wantJson = argv.includes('--json');
+    return runVendorScope(repoRoot, registry, wantJson);
+  }
+
+  const { explicitVendorId, rest } = stripLeadingVendorId(registry.vendors, argv);
+  const parsed = parseVendorForwardArgs(rest);
+  let vendorId = parsed.vendorId ?? explicitVendorId ?? getDefaultVendorId(registry, repoRoot);
   const forwarded = parsed.forwarded;
 
   const { root, bin } = resolveVendorProfile(repoRoot, registry, vendorId);
@@ -93,6 +240,7 @@ export function runVendorForward(argv: string[]): number {
     env: {
       ...process.env,
       MAGICBORN_VENDOR_ID: vendorId,
+      MAGICBORN_VENDOR_ROOT: root,
     },
   });
   return result.status ?? 1;

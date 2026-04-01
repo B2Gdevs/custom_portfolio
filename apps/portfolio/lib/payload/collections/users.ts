@@ -14,6 +14,8 @@ export const users: CollectionConfig = {
     tokenExpiration: AUTH_SESSION_MAX_AGE_SECONDS,
     maxLoginAttempts: 10,
     verify: false,
+    /** Per-user API keys for REST/GraphQL (`users API-Key …`); operator CLI can mint/store in `.magicborn/` (see Payload docs). */
+    useAPIKey: true,
   },
   admin: {
     useAsTitle: 'email',

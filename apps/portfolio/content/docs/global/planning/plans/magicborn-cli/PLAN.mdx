@@ -2,7 +2,7 @@
 title: Magicborn CLI (unified operator tooling)
 description: Plan for a first-class `magicborn` (or `pnpm mb`) command suite.
 date: "2026-03-31"
-updated: "2026-04-02"
+updated: "2026-04-05"
 repoPath: apps/portfolio/content/docs/global/planning/plans/magicborn-cli/PLAN.mdx
 taskPhase: global-tooling-01
 order: 1
@@ -35,6 +35,51 @@ order: 1
 
 - Implement with **`commander`** or **`yargs`** + **`tsx`** shebang, or a small **`packages/magicborn-cli`** workspace package consumed as `pnpm mb`.
 - **Max UX**: top-level `magicborn --help`, **per-command help**, **exit codes**, **NO_COLOR** / **FORCE_COLOR**, and **stable stderr** for errors.
+
+### CLI visual language (terminal)
+
+**Implemented in** `apps/portfolio/lib/magicborn/magicborn-cli-ui.ts` (when **`MAGICBORN_CLI=1`** and not **`--json`**).
+
+| Role | Meaning | Default (color on) |
+| --- | --- | --- |
+| **Domain ribbon** | Same **families** as `magicborn --help`: asset/repo vs Payload catalog | **`book`**, **`planning-pack`**, **`listen`** → **yellow**; **`app`**, **`project`** → **cyan** |
+| **Verb** | Primary action (`generate`, `Calling`, first word of a step) | Bold cyan |
+| **Argument / value** | Models, paths, sizes | Yellow |
+| **Flag names** | `--print-prompt`, labels like `prompt` / `manifest` in summaries | Magenta |
+| **Meta / paths** | Repo path, hints, secondary copy | Dim |
+| **Section rules** | Phase boundaries (`RAG · prompt context`, `OpenAI · image generation`) | Magenta `──` rules |
+| **Info** | Neutral operator notes | Blue `ℹ` + dim on **stdout** |
+| **Warnings / dry-run / prompt-only** | Advisory footer copy | Yellow + dim on **`stderr`** (`console.warn`) so they stay visible next to stdout transcripts |
+| **Errors** | Failures | Red on **`stderr`** (`console.error`) |
+| **Success** | Done block | Green `✓`; spend line yellow on stdout |
+| **Long-running** | OpenAI image request | Braille spinner on TTY until the call returns |
+
+**Planning packs** sit in the **asset & repo** family with **books** and **listen**: not Payload-only CRUD; they use **repo / embed assets** alongside CMS. **Yellow** ribbons and the **first help section** describe that.
+
+### `magicborn --help` (grouped colors)
+
+**Implemented in** `packages/magicborn-cli/src/help-format.ts` via Commander **`configureHelp`** (root command only; subcommands keep default help).
+
+| Section title (bold) | Command name color | Commands |
+| --- | --- | --- |
+| Asset & repo (local + CMS, not Payload-only) | Yellow | `book`, `planning-pack`, `listen` |
+| Payload CMS catalog | Cyan | `app`, `project`, `payload` |
+| Vendor | Green | `vendor`, `users`, `org`, `tenant`, `blog` |
+| OpenAI | Blue | `openai` |
+| Model & style | Magenta | `model`, `style` |
+| Shell, completion, updates | Gray | `completion`, `shell-init`, `update` |
+| (body text) | Dim **magenta** | Descriptions in the right-hand column |
+
+**Workspace:** `pnpm <args>` is listed separately (dim gray) — not a Commander subcommand.
+
+**Open questions** (optional later): dedicated **stderr** stream for **info** lines; richer **subcommand** help (`magicborn book --help`) with the same palette.
+
+### Tab completion layout (bash / zsh / fish)
+
+- **Bash** uses GNU **readline**: matches are drawn in a **grid**; column order is controlled by **`print-completions-horizontally`**. **`magicborn shell-init bash`** sets **`off`** so read order is **column-major** (down the first column, then the next). True **one item per line** is **not** a bash default; use **zsh** `menu select` or **fish**’s pager for that feel.
+- **`magicborn completion zsh`** / **`fish`** snippets document optional **`zstyle`** / pager color lines.
+
+Task: **`global-tooling-01-05`** in [global task registry](/docs/global/planning/task-registry).
 
 ## Planning tasks
 
@@ -84,8 +129,14 @@ Every generated file maps to a **stable ref** for CLI, local working files, and 
 - **`global-tooling-01-03`:** Schema + persistence for **asset taxonomy** above; reconcile **local manifest ↔ Payload** for interrupted runs.
 - **`global-tooling-01-04`:** **Logo** generation, storage, and **active logo** selection via CLI (**`global-tooling-dec-02`**, **`global-tooling-dec-03`**).
 
+### Next wave — Ink TUI, chat, vendor v2 (`global-tooling-03`)
+
+The current **picocolors + string `--help`** path stays for **pipes, CI, and `NO_COLOR`**. The **default interactive** experience is planned to move to **Ink** (layouts, borders, list/detail, forms) with optional **[assistant-ui for Ink](https://www.assistant-ui.com/ink)** for guided flows (e.g. **`payload <alias> generate`** when fields are missing). **Vendor** help will list **discovered vendor ids** under **`vendor`** only (remove misleading top-level **`users`/`org`/…**). **Yellow** in the next design pass should track **local/repo actions** (packaging, publishers) as well as creative asset flows.
+
+Kickoff and risks: [ink-tui-vendor-v2](/docs/global/planning/plans/magicborn-cli/ink-tui-vendor-v2). Tasks: [task registry](/docs/global/planning/task-registry) **`global-tooling-03`**.
+
 ## References
 
-- [Global task registry](/docs/global/planning/task-registry) — phase **`global-tooling-01`**
+- [Global task registry](/docs/global/planning/task-registry) — phases **`global-tooling-01`** … **`global-tooling-03`**
 - [mb-cli-framework](/docs/global/planning/plans/mb-cli-framework/PLAN) — shared completion / vendor scope / submodule (**`global-tooling-02`**)
 - [Decisions](/docs/global/planning/decisions) — **`global-tooling-dec-01`** (operator RAG boundary), **`global-tooling-dec-02`** (taxonomy + text-on-image), **`global-tooling-dec-03`** (active logo pointer)

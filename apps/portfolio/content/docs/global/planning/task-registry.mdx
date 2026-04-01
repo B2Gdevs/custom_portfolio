@@ -2,7 +2,7 @@
 title: Task Registry
 description: Executable tasks for the Global docs section and repo-wide planning IA.
 date: "2026-03-28"
-updated: "2026-04-02"
+updated: "2026-04-05"
 order: 3
 repoPath: apps/portfolio/content/docs/global/planning/task-registry.mdx
 taskPhase: global-data-02
@@ -49,6 +49,7 @@ taskPhase: global-data-02
 | `global-auth-03-01` | `done` | gate **`POST /api/media/generate`** behind **session** + **`admin:access`** entitlement; **401** unauthenticated, **403** member without admin | `global-auth-01-03` | `tests/unit/api/media-generate-route.test.ts`; SiteCopilot uses **`credentials: 'include'`** |
 | `global-auth-03-02` | `planned` | **Visitor / non-privileged reader:** annotations and local reader state stay **browser-local** or **session-scoped**, **no durable server sync** unless entitled; UX and copy push **export**; align with [books requirements](/docs/books/requirements) **`BOOKS-REQ-08`** / **`BOOKS-REQ-10`** | `global-auth-03-01` | reader tests or documented UAT |
 | `global-auth-03-03` | `in-progress` | **Invites + org roles:** trusted **`pnpm auth:invite`** operator flow plus **single-use, expiring, tenant-scoped invite links** for consumers; role templates stay **`owner` / `admin` / `member`** with **default-deny entitlements**; product self-signup stays out of scope. Docs: [PLAN](/docs/global/planning/plans/global-auth-03/plan), [INVITES](/docs/global/planning/plans/global-auth-03/invites) | `global-auth-01-01` | run invite script against dev DB; accept/revoke/expiry test cases from [PLAN](/docs/global/planning/plans/global-auth-03/plan) |
+| `global-auth-03-04` | `planned` | **Clerk planning for multi-tenant portfolio auth:** evaluate Clerk-hosted sign-in, social login, and user/account chrome for the portfolio while keeping Payload users, tenants, roles, and entitlements as the authorization core. This slice is planning-first because the portfolio’s multi-tenant boundary and future org invites need a cleaner design than Grime Time’s single-product customer portal. Docs: [CLERK](/docs/global/planning/plans/global-auth-03/clerk) | `global-auth-03-03`, `global-auth-01-01` | planning notes updated; phase kickoff records multi-tenant constraints and migration risks |
 
 ## Phase `global-tooling-01` (Magicborn CLI — backlog)
 
@@ -60,6 +61,8 @@ taskPhase: global-data-02
 | `global-tooling-01-02` | `done` | CLI **`pnpm magicborn generate <target>`** calls **`lib/magicborn/openai-image-generate`** (same behavior as **`POST /api/media/generate`**) using **`.env`** (`OPENAI_API_KEY`); writes **`.magicborn/runs/<id>/`** (`image.png`, `prompt.txt`, `manifest.json`); **rag-style** terminal UI when **`MAGICBORN_CLI=1`**; flags **`--dry-run`**, **`--print-prompt`**, **`--raw`**, **`--size`**, **`--slot`**, **`--json`**; spend line when OpenAI returns **usage** | `global-tooling-01-01`, `global-auth-03-01` | `tests/unit/lib/magicborn-openai-image-generate.test.ts`; `tests/unit/api/media-generate-route.test.ts`; dry-run without key |
 | `global-tooling-01-03` | `planned` | **Asset taxonomy** in data model: `kind` (site, book, app, project, listen, planning-pack, blog, ui), **ref** + **variant**, **`textOnImage`** (or equivalent), storage URL + hashes; wire **`site-app-records`** and **`project-records`** to generated media; **reconcile** local manifest vs Payload for partial runs and manual upload | `global-tooling-01-02` | loader tests + `pnpm run build`; at least one app + one project record can point at a generated asset |
 | `global-tooling-01-04` | `planned` | **Site logos:** generate variants, upload to **`site-media-assets`** (or sibling collection), CLI commands to **list** candidates and **`set-active`** logo pointer the app shell/header reads (**`global-tooling-dec-03`**) | `global-tooling-01-03` | E2E or unit: active pointer resolves; CLI documented in [magicborn-cli plan](/docs/global/planning/plans/magicborn-cli/plan) |
+| `global-tooling-01-05` | `done` | **CLI visual language + completion UX docs:** semantic colors (verb / arg / flag / section / log levels), domain ribbons (**`planning-pack`** vs **`book`** vs …), long-running spinner for OpenAI; bash **`print-completions-horizontally off`** + zsh/fish notes for list-friendly completion; fix bash top-level **`payload`** word | `global-tooling-01-02` | [magicborn-cli PLAN](/docs/global/planning/plans/magicborn-cli/plan) “CLI visual language”; `tests/unit/lib/magicborn-cli-ui.test.ts`; `pnpm exec vitest run` (portfolio) |
+| `global-tooling-01-06` | `done` | **Grouped color `magicborn --help`** (payload / vendor / OpenAI / model / shell / asset sections + dim magenta descriptions); **warnings → stderr** in portfolio CLI UI; ribbons align with help (**yellow** asset family, **cyan** Payload catalog); **Grime Time** `PageMediaRegistryBridge` effect keyed by entry signature + ref (fix max update depth) | `global-tooling-01-05` | `packages/magicborn-cli` tests + build; `pnpm magicborn --help`; vendor `PageMediaDevtoolsContext` + int test |
 
 ## Phase `global-tooling-02` (mb-cli-framework — shared shell)
 
@@ -67,11 +70,23 @@ taskPhase: global-data-02
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
-| `global-tooling-02-01` | `in-progress` | **Submodule + workspace:** `git submodule add` → `vendor/mb-cli-framework`; `pnpm-workspace.yaml` entry; minimal package skeleton in submodule (or initial commit upstream) so both repos can `workspace:*` or `file:` depend | `global-tooling-01-01` | `pnpm install`; `git submodule status` |
-| `global-tooling-02-02` | `planned` | **Tab completion:** `magicborn __complete vendor-ids` (or extended topic) returns **id + suffix** (`(cli)` / plain); bash/zsh/fish updated; **NO_COLOR** respected; legend in completion script header | `global-tooling-02-01` | manual tab check; `pnpm --filter @portfolio/app test:unit` for `__complete` if covered |
-| `global-tooling-02-03` | `planned` | **Scope commands:** `magicborn vendor use <id>` / `magicborn vendor clear` (env + docs); optional `MAGICBORN_PS1` prompt snippet for interactive shells | `global-tooling-02-01` | manual: use/clear cycle |
-| `global-tooling-02-04` | `planned` | **Port consumers:** refactor `@magicborn/cli` + Grime Time CLI to import shared helpers from submodule (incremental; no big-bang) | `global-tooling-02-02`, `global-tooling-02-03` | both CLIs `--help`; grimetime CI if present |
-| `global-tooling-02-05` | `planned` | **Discovery spike:** spec + prototype for Payload collection introspection + OpenAI/RAG defaults → generated or cached command list (install or runtime) | `global-tooling-02-04` | doc + one scripted smoke (optional) |
+| `global-tooling-02-01` | `done` | **Submodule + workspace:** `git submodule add` → `vendor/mb-cli-framework`; `pnpm-workspace.yaml` entry; minimal package skeleton in submodule (or initial commit upstream) so both repos can `workspace:*` or `file:` depend | `global-tooling-01-01` | `pnpm install`; `git submodule status` |
+| `global-tooling-02-02` | `done` | **Tab completion:** `vendor-suggest` topic + **`(cli)`** suffix / optional ANSI (**`NO_COLOR`**, **`FORCE_COLOR`**, **`MAGICBORN_COMPLETE_ANSI`**); bash completion + fish hints; legend in completion script header | `global-tooling-02-01` | `tests/unit/magicborn-complete-words.test.ts`; `pnpm --filter @magicborn/cli test` |
+| `global-tooling-02-03` | `done` | **Scope:** `magicborn vendor use <id>` / `clear` / `scope` (`.magicborn/vendor-scope.json`); **`MAGICBORN_VENDOR_ROOT`** when forwarding | `global-tooling-02-01` | `pnpm --filter @magicborn/cli test` (`vendor-scope`, `vendor-run`); manual use/clear |
+| `global-tooling-02-04` | `done` | **Port consumers:** `@magicborn/cli` depends on **`@magicborn/mb-cli-framework`**; portfolio **`complete-words`** imports framework + **`getVendorCompletionRows`** | `global-tooling-02-02`, `global-tooling-02-03` | `pnpm --filter @magicborn/cli build`; `pnpm --filter @portfolio/app exec vitest run tests/unit/magicborn-complete-words.test.ts` |
+| `global-tooling-02-05` | `done` | **Discovery spike:** `magicborn payload collections` lists slugs from **`payload.config`** ( **`--json`** ); completion topic **`payload`** → **`collections`** | `global-tooling-02-04` | `scripts/magicborn/run.ts` branch; `tests/unit/scripts/magicborn-payload-collections.test.ts` |
+
+## Phase `global-tooling-03` (Ink TUI + vendor v2 + chat + themes)
+
+**Goal:** **Ink**-based terminal shell (layouts, borders, list/detail, forms), optional **[assistant-ui for Ink](https://www.assistant-ui.com/ink)** operator chat shared via **`mb-cli-framework`**, **shadcn-aligned theme tokens** export, **vendor** UX that lists **real vendor packages** (badges for CLI hop) instead of grimetime-only top-level aliases, and **`payload <alias> generate`** (+ guided chat). Kickoff: [ink-tui-vendor-v2](/docs/global/planning/plans/magicborn-cli/ink-tui-vendor-v2).
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `global-tooling-03-01` | `done` | **`mb-cli-framework`:** Ink host entry (`renderPlain` vs `renderInk`), **theme contract** (token map + `NO_COLOR` / `FORCE_COLOR`), lazy dynamic import for TUI | `global-tooling-02-04` | unit tests for theme + plain fallback; grimetime consumer compiles |
+| `global-tooling-03-02` | `done` | **assistant-ui + Ink:** shared `<OperatorChat />` (or equivalent) + tool slot; **magicborn** subcommand e.g. `magicborn chat` or flag `--chat` for guided flows; **CI** path skips Ink | `global-tooling-03-01` | manual: chat opens in TTY; `--json` unchanged |
+| `global-tooling-03-03` | `done` | **Default `magicborn` home:** Ink **dashboard** (sections, rules, list) replacing string-only help; keep **`magicborn --help` plain** for pipes / `NO_COLOR` automation | `global-tooling-03-01` | snapshot or component tests; `MAGICBORN_PLAIN` doc |
+| `global-tooling-03-04` | `done` | **Vendor v2:** remove **top-level** `users`/`org`/`tenant`/`blog` from Commander (shim + deprecation optional); **`vendor <id>`** tree + **badges**; **`use`** spawns vendor CLI with **`cwd` + .env merge**; completion topics updated | `global-tooling-02-03` | `pnpm --filter @magicborn/cli test`; e2e: `vendor grimetime -- --help` |
+| `global-tooling-03-05` | `planned` | **`payload <alias> generate`:** alias map (`app` → `site-app-records`, etc.), Payload Local API / script, optional **chat** for missing fields; docs in magicborn-cli plan | `global-tooling-02-05`, `global-tooling-03-02` | one collection dry-run + `--json` shape |
 
 ## Phase `global-admin-01`
 

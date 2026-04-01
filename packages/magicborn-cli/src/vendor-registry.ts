@@ -1,7 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { parse as parseToml } from '@iarna/toml';
+import type { VendorCompletionRow } from '@magicborn/mb-cli-framework';
 import { findRepoRoot } from './repo-root.js';
+import { readVendorScopeFile } from './vendor-scope.js';
 
 /** Primary manifest (aligned with repo `.magicborn/cli-config.toml`). */
 export const VENDOR_CLI_MANIFEST_RELPATH = path.join('.magicborn', 'cli.toml');
@@ -309,10 +311,17 @@ export function resolveVendorProfile(
   return { id: vendorId, root, bin, profile };
 }
 
-export function getDefaultVendorId(registry: VendorRegistryFile): string {
+/**
+ * Default vendor: `MAGICBORN_VENDOR_ID` env → `.magicborn/vendor-scope.json` → registry default → first id.
+ */
+export function getDefaultVendorId(registry: VendorRegistryFile, repoRoot: string): string {
   const fromEnv = process.env.MAGICBORN_VENDOR_ID?.trim();
   if (fromEnv && registry.vendors[fromEnv]) {
     return fromEnv;
+  }
+  const scoped = readVendorScopeFile(repoRoot);
+  if (scoped && registry.vendors[scoped.vendorId]) {
+    return scoped.vendorId;
   }
   const d = registry.defaultVendor?.trim();
   if (d && registry.vendors[d]) {
@@ -334,4 +343,21 @@ export function findRepoRootForVendor(): string {
 /** Stable sorted ids for shell completion (`magicborn __complete vendor-ids`). */
 export function getRegisteredVendorIds(repoRoot: string): string[] {
   return Object.keys(loadVendorRegistry(repoRoot).vendors).sort();
+}
+
+/** For tab completion: each vendor + whether its CLI bin exists (`id` vs `id(cli)`). */
+export function getVendorCompletionRows(repoRoot: string): VendorCompletionRow[] {
+  const reg = loadVendorRegistry(repoRoot);
+  const rows: VendorCompletionRow[] = [];
+  for (const id of Object.keys(reg.vendors).sort()) {
+    let controllable = false;
+    try {
+      const { bin } = resolveVendorProfile(repoRoot, reg, id);
+      controllable = fs.existsSync(bin);
+    } catch {
+      controllable = false;
+    }
+    rows.push({ id, controllable });
+  }
+  return rows;
 }

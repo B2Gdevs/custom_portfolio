@@ -1,0 +1,67 @@
+---
+title: Ink TUI, assistant-ui chat, vendor v2, Payload generate
+description: Kickoff for React/Ink terminal shell, embedded operator chat, dynamic vendor tree, and collection-scoped generate — extends magicborn + mb-cli-framework.
+date: "2026-04-04"
+updated: "2026-04-04"
+repoPath: apps/portfolio/content/docs/global/planning/plans/magicborn-cli/ink-tui-vendor-v2.mdx
+taskPhase: global-tooling-03
+order: 2
+---
+
+# Ink TUI, chat, vendor v2, Payload generate
+
+This document captures **target UX** and **risks** for the next operator-CLI iteration. Execution is tracked as **`global-tooling-03`** in the [global task registry](/docs/global/planning/task-registry).
+
+## Goals
+
+| Area | Intent |
+| --- | --- |
+| **Terminal UI** | Replace **flat string `--help`** as the default “home” experience with an **Ink** ([ink](https://github.com/vadimdemedes/ink)) React tree: **section headers, footers, horizontal rules, list vs detail layouts**, and **keyboard-driven forms** (e.g. `@inkjs/ui` `TextInput`, stepped wizards). |
+| **Operator chat** | Embed a **terminal-native chat** primitive (see [assistant-ui for Ink](https://www.assistant-ui.com/ink)) so **magicborn**, **grimetime**, and future CLIs share one **runtime + tool** pattern — optional for CI (`--json`, `MAGICBORN_PLAIN=1`). |
+| **Theming** | Align **ANSI palettes** with **shadcn-style tokens** where possible: document a **token → 16-color / truecolor** map, optional **`theme export`** / **v4** pipeline **inside `mb-cli-framework`** so consumers do not fork palettes. |
+| **Semantic color** | **Yellow** emphasizes **local / repo actions** (packaging, publishers, non-DB workflows), not only “asset family.” **Cyan** (or agreed Payload hue) stays **Payload-backed catalog**; reconcile with existing help groups in [magicborn CLI plan](./plan). |
+| **Vendor UX v2** | **No** fake top-level **`users` / `org` / `tenant` / `blog`** in root help — those are **Grime Time CLI** verbs, not portfolio concepts. **One** `vendor` command; **second token** = **discovered vendor id** from `vendor/` + manifests; **badges** for **CLI hop** (bin exists, env loadable). **`use`** = run nested CLI with **`cwd` = vendor package root**, merged env, while **logical context** remains monorepo root (document in shell banner / status line). |
+| **Payload generate** | Path like **`magicborn payload <alias> generate`** (alias maps to collection + shape) to scaffold or create records; **guided mode** opens **chat** to collect required fields when flags are insufficient. |
+
+## Architecture sketch
+
+```
+@magicborn/cli (Commander argv) 
+  → mb-cli-framework: parse + theme + optional Ink root
+      → <MagicbornTui /> | plain formatter (--json | NO_TTY | MAGICBORN_PLAIN)
+      → <OperatorChat />  (assistant-ui + Ink) when subcommand requests it
+```
+
+- **Commander** (or thin adapter) remains for **stable argv**, **`--help` plain** fallback, and **automation**.
+- **Ink** owns **layout**, **focus**, **spinner**, **borders**; **assistant-ui** owns **thread / composer / tool renderers** where we adopt it.
+
+## Vendor v2 — behavior
+
+1. **`magicborn vendor`** with no args → **Ink list** (or TUI) of registry entries: id, path, **badge** `[cli]` / `[pkg]` / `[broken]`, short description.
+2. **`magicborn vendor <id>`** → sub-menu or forward: **grimetime** shows its own subcommands (`users`, `org`, …) **under** that id, not at portfolio root.
+3. **`magicborn vendor use <id>`** (evolve): optional **interactive shell** that **spawns** vendor bin with **`cwd`** = vendor root, **env** = `process.env` + **vendor `.env`** (explicit merge order documented); parent process stays portfolio; **exit** returns to magicborn context.
+4. **Completion**: `vendor <TAB>` → ids; `vendor grimetime <TAB>` → grimetime’s verbs (static table or `grimetime --help` scrape cache — open question).
+
+## Env loading — principles (avoid “fighting” it)
+
+| Layer | Rule |
+| --- | --- |
+| **Host** | Portfolio root `.env` loaded once for magicborn process (today’s `load-magicborn-env`). |
+| **Vendor forward** | When executing vendor CLI: **`cwd` = vendor root**; load **`vendor/<id>/.env`** if present **into the child env only** (or merge with documented precedence: child overrides host for collisions **only** for allow-listed keys — **decide**). |
+| **Secrets** | Never print merged env; **dry-run** can show **which files** would be read. |
+| **Document** | One table in mb-cli-framework: **precedence** + **`MAGICBORN_*`** overrides. |
+
+## Risks and open questions
+
+1. **Windows Git Bash / MINGW64** (common here): Ink **raw mode** and **TTY** detection differ from macOS/Linux; we need a **CI + manual matrix** (Windows Terminal, Git Bash, PowerShell). If Ink blocks a segment of users, keep **`MAGICBORN_PLAIN=1`** string path forever.
+2. **Bundle size / cold start**: React + Ink + assistant-ui is heavier than Commander-only; acceptable per product direction; still gate **lazy `import()`** for TUI so **`magicborn payload collections --json`** stays fast.
+3. **Top-level alias removal** is **breaking** for anyone scripting `magicborn users`; mitigate with **deprecation shim** + stderr warning one release, or **major** bump of `@magicborn/cli`.
+4. **Dynamic Commander commands**: registering `vendor grimetime` at startup requires **sync** registry read; alternatively **one** `vendor` command + **positional** id — completion does the UX heavy lift.
+5. **Payload `generate` / CLI write path**: On a **trusted machine** that already has **`PAYLOAD_SECRET`** (and DB access), the operator model is: **`PAYLOAD_SECRET`** only proves the app/config is yours — it does **not** impersonate a user. Impersonation for HTTP is **`Authorization: users API-Key <key>`** ([Payload API keys](https://payloadcms.com/docs/authentication/api-keys)). **`users`** now has **`auth.useAPIKey: true`** so keys can be created in admin; a future **`magicborn payload login`** (or similar) can list users (owners/admins first), mint or rotate a key into **gitignored** `.magicborn/`, and reuse it until missing/invalid. **Clerk** stays separate for browser sign-in; this path is operator-only.
+6. **shadcn → ANSI**: true **v4 CSS** is not 1:1 with terminals; deliver **token JSON** + **recommended ANSI mapping**, not pixel-perfect parity.
+
+## References
+
+- [assistant-ui / Ink](https://www.assistant-ui.com/ink)
+- [Magicborn CLI plan](./plan) — current Commander + picocolors help
+- [mb-cli-framework plan](/docs/global/planning/plans/mb-cli-framework/plan) — shared package direction

@@ -3,7 +3,14 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { getRegisteredVendorIds } from '@magicborn/cli/vendor-registry';
+import {
+  formatVendorCompletionToken,
+  shouldEmitAnsiForCompletion,
+} from '@magicborn/mb-cli-framework';
+import {
+  getRegisteredVendorIds,
+  getVendorCompletionRows,
+} from '@magicborn/cli/vendor-registry';
 import { getAllContentEntries } from '@/lib/content';
 import { getBooks } from '@/lib/books';
 import { getListenCatalog } from '@/lib/listen-catalog';
@@ -19,12 +26,10 @@ const TOP_LEVEL = [
   'style',
   'model',
   'openai',
+  'chat',
+  'payload',
   'pnpm',
   'vendor',
-  'users',
-  'org',
-  'tenant',
-  'blog',
   'completion',
   'shell-init',
   'update',
@@ -57,6 +62,28 @@ function getVendorIdsForCompletion(): string[] {
   }
 }
 
+/** Tab completion: vendor id, optional green `(cli)` when bin exists (NO_COLOR / MAGICBORN_COMPLETE_ANSI). */
+function getVendorSuggestLines(): string[] {
+  const repoRoot = findMonorepoRoot();
+  if (!repoRoot) {
+    return [];
+  }
+  try {
+    const rows = getVendorCompletionRows(repoRoot);
+    let ansi = false;
+    if (process.env.MAGICBORN_COMPLETE_ANSI === '0') {
+      ansi = false;
+    } else if (process.env.MAGICBORN_COMPLETE_ANSI === '1') {
+      ansi = true;
+    } else {
+      ansi = shouldEmitAnsiForCompletion();
+    }
+    return rows.map((r) => formatVendorCompletionToken(r, { ansi }));
+  } catch {
+    return [];
+  }
+}
+
 export function getCompleteLines(topic: string): string[] {
   const t = topic.trim();
   switch (t) {
@@ -74,9 +101,15 @@ export function getCompleteLines(topic: string): string[] {
     case 'listen':
       return ['generate', 'gen'];
     case 'vendor':
-      return ['add', 'list', 'users', 'org', 'tenant', 'blog'];
+      return ['add', 'list', 'use', 'clear', 'scope'];
     case 'vendor-ids':
       return getVendorIdsForCompletion();
+    case 'vendor-suggest':
+      return getVendorSuggestLines();
+    case 'payload':
+      return ['collections', 'app'];
+    case 'payload-app':
+      return ['generate', 'gen'];
     case 'style':
       return ['show', 'set', 'clear', 'reset', 'suggest'];
     case 'model':

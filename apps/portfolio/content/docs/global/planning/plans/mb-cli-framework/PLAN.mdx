@@ -2,7 +2,7 @@
 title: mb-cli-framework — shared CLI shell (portfolio + Grime Time)
 description: Kickoff for vendoring MagicbornStudios/mb-cli-framework and unifying tab UX, vendor scope, and command patterns across magicborn and grimetime.
 date: "2026-04-02"
-updated: "2026-04-02"
+updated: "2026-04-05"
 repoPath: apps/portfolio/content/docs/global/planning/plans/mb-cli-framework/PLAN.mdx
 taskPhase: global-tooling-02
 order: 1
@@ -58,7 +58,18 @@ Phase **`global-tooling-02`** — rows **`global-tooling-02-01`** … **`02-05`*
 2. **npm package name** inside submodule (`@magicborn/mb-cli-framework` vs `mb-cli-framework`) — align before first publish.
 3. **Bash color in completions:** use **suffix + legend in `magicborn completion bash` header** if ANSI is unreliable.
 
+## Phase 3 (planned) — Ink shell, themes, chat primitive
+
+Tracked as **`global-tooling-03`** in the [task registry](/docs/global/planning/task-registry). This package should own:
+
+- **Ink** render entry (`renderPlain` vs `renderInk`), **lazy** dynamic import so non-TTY paths stay fast.
+- **Theme contract**: shadcn-aligned **token JSON** → ANSI / truecolor mapping; **`NO_COLOR`** respected.
+- **Shared operator chat** hook for consumers adopting [assistant-ui / Ink](https://www.assistant-ui.com/ink).
+
+Kickoff (UX + env precedence + Windows TTY risks): [ink-tui-vendor-v2](/docs/global/planning/plans/magicborn-cli/ink-tui-vendor-v2).
+
 ## References
 
 - [Magicborn CLI plan](/docs/global/planning/plans/magicborn-cli/plan) — existing operator scope.
-- [Global task registry](/docs/global/planning/task-registry) — **`global-tooling-02`**.
+- [Global task registry](/docs/global/planning/task-registry) — **`global-tooling-02`**, **`global-tooling-03`**.
+- [Ink / vendor v2 kickoff](/docs/global/planning/plans/magicborn-cli/ink-tui-vendor-v2)

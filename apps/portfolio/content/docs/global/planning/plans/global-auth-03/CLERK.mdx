@@ -1,0 +1,43 @@
+---
+title: Clerk planning note (global-auth-03-04)
+description: Portfolio-side Clerk evaluation before multi-tenant auth implementation.
+date: "2026-04-01"
+updated: "2026-04-01"
+repoPath: apps/portfolio/content/docs/global/planning/plans/global-auth-03/CLERK.mdx
+taskPhase: global-auth-03
+order: 2
+---
+
+# Why this note exists
+
+Grime Time has now started the real Clerk migration, but the portfolio cannot simply copy that auth shape.
+
+The portfolio has a different auth problem:
+
+- tenants/orgs already exist in the planning model
+- invites are part of the future shared auth foundation
+- roles and entitlements need to span multiple product surfaces
+- the site is still mostly public and owner-operated today
+
+That means Clerk may be the right hosted identity layer, but the portfolio needs a planning-first pass before implementation.
+
+## Working direction
+
+- **Clerk** is the leading candidate for hosted identity, social login, and account UI.
+- **Payload users + tenants + entitlements** remain the authorization core.
+- invite acceptance should still be tenant-scoped and default-deny.
+- section/product surfaces should continue asking the shared auth layer for permissions instead of talking directly to Clerk concepts.
+
+## What the portfolio must answer first
+
+1. How Clerk identities map onto existing tenant membership and entitlements.
+2. Whether Clerk organizations are useful here, or whether tenant/org state should stay entirely first-party in Payload.
+3. How invite acceptance should bind a Clerk identity to an existing Payload user record.
+4. How owner-only today transitions into broader org access without weakening the current restricted-operator posture.
+5. How future billing/customer ids, if they land in the portfolio stack, relate to the same external-id model used in Grime Time.
+
+## Non-goal
+
+Do not start swapping the portfolio auth/session code to Clerk until those multi-tenant answers are explicit.
+
+The goal of `global-auth-03-04` is to define the migration contract, not to copy Grime Time’s customer-portal auth surface into a different product.

@@ -3,6 +3,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
+import {
+  isMagicbornPlainMode,
+  resolvePortfolioChatApiUrl,
+  shouldOfferMagicbornTui,
+} from '@magicborn/mb-cli-framework';
 import { FISH_COMPLETION, ZSH_COMPLETION } from './completion-scripts.js';
 import { findRepoRoot } from './repo-root.js';
 import { forwardMagicborn } from './forward-portfolio.js';
@@ -10,35 +15,15 @@ import { runMagicbornUpdate } from './run-update.js';
 import { runVendorAdd } from './vendor-add.js';
 import { runMagicbornPnpm } from './pnpm-wrap.js';
 import { printVendorCliHelp, runVendorForward, VENDOR_TOPIC_COMMANDS } from './vendor-run.js';
+import { formatMagicbornRootHelp } from './help-format.js';
+import { findRepoRootForVendor, getDefaultVendorId, loadVendorRegistry } from './vendor-registry.js';
+import { runMagicbornHomeTui } from './tui/run-home-tui.js';
+import { runChatStubTui } from './tui/run-chat-tui.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const argvEarly = process.argv.slice(2);
-if (argvEarly[0] === 'pnpm') {
-  process.exit(runMagicbornPnpm(argvEarly.slice(1)));
-}
-
-/** Top-level aliases: `magicborn users` === `magicborn vendor users` (same vendor CLI). */
+/** @deprecated Top-level `users|org|tenant|blog` — forward with stderr deprecation. */
 const vendorTopicForward = new Set<string>(VENDOR_TOPIC_COMMANDS);
-if (argvEarly[0] && vendorTopicForward.has(argvEarly[0])) {
-  if (argvEarly[1] === '--help' || argvEarly[1] === '-h') {
-    printVendorCliHelp();
-    process.exit(0);
-  }
-  process.exit(runVendorForward(argvEarly));
-}
-
-/** `vendor add` stays in Commander; everything else forwards to the vendor package CLI. */
-if (argvEarly[0] === 'vendor') {
-  const rest = argvEarly.slice(1);
-  if (rest[0] !== 'add') {
-    if (rest.length === 0 || rest[0] === '--help' || rest[0] === '-h') {
-      printVendorCliHelp();
-      process.exit(0);
-    }
-    process.exit(runVendorForward(rest));
-  }
-}
 
 function readBashCompletionScript(): string {
   const p = path.join(__dirname, '..', 'completions', 'magicborn.bash');
@@ -60,11 +45,13 @@ function applyShellInitBash(root: string): { updated: boolean; filePaths: string
   const end = '# <<< magicborn shell <<<';
   const blockLines = [
     start,
+    '# magicborn --help: yellow=asset/repo · cyan=Payload · green=vendor · blue=OpenAI · magenta=model/style · gray=shell',
     `export MAGICBORN_REPO="${root.replace(/\\/g, '/')}"`,
     'alias magicborn=\'pnpm -s magicborn\'',
     'eval "$(pnpm -s magicborn completion bash 2>/dev/null)"',
     "bind 'set show-all-if-ambiguous on' 2>/dev/null || true",
     "bind 'set completion-ignore-case on' 2>/dev/null || true",
+    "bind 'set print-completions-horizontally off' 2>/dev/null || true",
     end,
   ];
   const nextBlock = blockLines.join('\n');
@@ -100,19 +87,14 @@ program
     'Magicborn operator CLI — media, scenes, app/project lists, OpenAI account probes, pnpm passthrough, vendor repos',
   )
   .version('0.5.0')
-  .addHelpText(
-    'after',
-    `
-Pass-through:
-  magicborn pnpm <args>    Run pnpm with cwd = nearest package.json (from $PWD), else monorepo root
-  Examples: magicborn pnpm install
-            magicborn pnpm --filter @portfolio/app run build
-            (from apps/portfolio) magicborn pnpm run test:unit
-
-  magicborn vendor …       Forward to a registered vendor CLI (default: grimetime). See: magicborn vendor --help
-  magicborn users|org|tenant|blog …   Top-level aliases (same as magicborn vendor <cmd> …)
-`,
-  );
+  .configureHelp({
+    formatHelp(cmd, helper) {
+      if (!cmd.parent) {
+        return formatMagicbornRootHelp(cmd);
+      }
+      return helper.formatHelp(cmd, helper);
+    },
+  });
 
 function repoRootOrExit(): string {
   try {
@@ -283,6 +265,31 @@ attachGenerateOptions(
   forward(['listen', 'generate', ...forwardGenerateArgs(opts)]);
 });
 
+const payloadCmd = program
+  .command('payload')
+  .description('Payload CMS discovery (reads apps/portfolio/payload.config)');
+
+payloadCmd
+  .command('collections')
+  .description('List collection slugs (discovery smoke for global-tooling-02-05)')
+  .option('--json', 'JSON output', false)
+  .action((opts: { json?: boolean }) => {
+    forward(['payload', 'collections', ...(opts.json ? ['--json'] : [])]);
+  });
+
+const payloadAppCmd = payloadCmd.command('app').description('Site app records in Payload (scaffold)');
+
+payloadAppCmd
+  .command('generate')
+  .aliases(['gen'])
+  .description('Scaffold: Payload Local API auth not wired yet (global-tooling-03-05); --dry-run prints contract')
+  .option('--dry-run', 'Print JSON plan only', false)
+  .action((opts: { dryRun?: boolean }) => {
+    const tail = ['payload', 'app', 'generate'];
+    if (opts.dryRun) tail.push('--dry-run');
+    forward(tail);
+  });
+
 const vendorCmd = program
   .command('vendor')
   .description(
@@ -298,17 +305,29 @@ vendorCmd
     runVendorAdd({ repoRoot: repoRootOrExit(), url, name: opts.name, apply: opts.apply });
   });
 
-for (const topic of VENDOR_TOPIC_COMMANDS) {
-  program
-    .command(topic)
-    .description(`Vendor CLI: forward to default vendor (same as: magicborn vendor ${topic} …)`)
-    .action(() => {
-      console.error(
-        `magicborn: internal error: "${topic}" must be handled before Commander.parse; please report.`,
-      );
-      process.exit(1);
-    });
-}
+program
+  .command('chat')
+  .description(
+    'Site chat in the terminal (@assistant-ui/react-ink → POST /api/chat, same as web Site Copilot)',
+  )
+  .action(() => {
+    void (async () => {
+      try {
+        if (!isMagicbornPlainMode() && shouldOfferMagicbornTui()) {
+          await runChatStubTui();
+        } else {
+          const url = resolvePortfolioChatApiUrl();
+          console.log(
+            `magicborn chat: use a TTY without MAGICBORN_PLAIN for Ink. Or POST ${url} with the Site Copilot JSON body (see vendor/mb-cli-framework README).`,
+          );
+        }
+      } catch (e) {
+        console.error(e instanceof Error ? e.message : e);
+        process.exit(1);
+      }
+      process.exit(0);
+    })();
+  });
 
 program
   .command('shell-init')
@@ -336,6 +355,9 @@ program
     }
     if (s === 'fish') {
       console.log('# Add to ~/.config/fish/config.fish');
+      console.log(
+        '# magicborn --help colors: yellow=asset/repo · cyan=Payload · green=vendor · blue=OpenAI · magenta=model/style · gray=shell',
+      );
       console.log(`set -gx MAGICBORN_REPO '${posixRoot}'`);
       console.log('fish_add_path $MAGICBORN_REPO/node_modules/.bin');
       console.log(
@@ -344,12 +366,19 @@ program
       return;
     }
     console.log('# Add to ~/.bashrc or ~/.zshrc');
+    console.log(
+      '# magicborn --help: yellow=asset/repo · cyan=Payload catalog · green=vendor · blue=OpenAI · magenta=model/style · gray=shell',
+    );
     console.log(`export MAGICBORN_REPO="${posixRoot}"`);
     console.log('alias magicborn=\'pnpm -s magicborn\'');
     console.log('export PATH="$MAGICBORN_REPO/node_modules/.bin:$PATH"');
     console.log('eval "$(pnpm -s magicborn completion bash)"');
     console.log("bind 'set show-all-if-ambiguous on' 2>/dev/null || true");
     console.log("bind 'set completion-ignore-case on' 2>/dev/null || true");
+    console.log(
+      "# Prefer column-major completion listing (top-to-bottom in each column); still a grid on wide terminals.",
+    );
+    console.log("bind 'set print-completions-horizontally off' 2>/dev/null || true");
   });
 
 program
@@ -538,4 +567,57 @@ program
     process.exit(1);
   });
 
-program.parse();
+void (async () => {
+  const argvEarly = process.argv.slice(2);
+
+  if (argvEarly.length === 0) {
+    if (!isMagicbornPlainMode() && shouldOfferMagicbornTui()) {
+      try {
+        await runMagicbornHomeTui();
+      } catch (e) {
+        console.error(e instanceof Error ? e.message : e);
+        process.exit(1);
+      }
+      process.exit(0);
+    }
+    program.outputHelp();
+    process.exit(0);
+  }
+
+  if (argvEarly[0] === 'pnpm') {
+    process.exit(runMagicbornPnpm(argvEarly.slice(1)));
+  }
+
+  if (argvEarly[0] && vendorTopicForward.has(argvEarly[0])) {
+    if (argvEarly[1] === '--help' || argvEarly[1] === '-h') {
+      printVendorCliHelp();
+      process.exit(0);
+    }
+    try {
+      const rr = findRepoRootForVendor();
+      const reg = loadVendorRegistry(rr);
+      const def = getDefaultVendorId(reg, rr);
+      console.warn(
+        `[magicborn] Deprecated: use \`magicborn vendor ${def} ${argvEarly[0]} …\` (or \`magicborn vendor <id> ${argvEarly[0]} …\`).`,
+      );
+    } catch {
+      console.warn(
+        `[magicborn] Deprecated: top-level \`${argvEarly[0]}\` — use \`magicborn vendor <vendor-id> ${argvEarly[0]} …\`.`,
+      );
+    }
+    process.exit(runVendorForward(argvEarly));
+  }
+
+  if (argvEarly[0] === 'vendor') {
+    const rest = argvEarly.slice(1);
+    if (rest[0] !== 'add') {
+      if (rest.length === 0 || rest[0] === '--help' || rest[0] === '-h') {
+        printVendorCliHelp();
+        process.exit(0);
+      }
+      process.exit(runVendorForward(rest));
+    }
+  }
+
+  program.parse();
+})();
