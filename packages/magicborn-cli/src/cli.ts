@@ -17,9 +17,6 @@ import { runMagicbornPnpm } from './pnpm-wrap.js';
 import { printVendorCliHelp, runVendorForward, VENDOR_TOPIC_COMMANDS } from './vendor-run.js';
 import { formatMagicbornRootHelp } from './help-format.js';
 import { findRepoRootForVendor, getDefaultVendorId, loadVendorRegistry } from './vendor-registry.js';
-import { runMagicbornHomeTui } from './tui/run-home-tui.js';
-import { runChatStubTui } from './tui/run-chat-tui.js';
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** @deprecated Top-level `users|org|tenant|blog` — forward with stderr deprecation. */
@@ -282,11 +279,17 @@ const payloadAppCmd = payloadCmd.command('app').description('Site app records in
 payloadAppCmd
   .command('generate')
   .aliases(['gen'])
-  .description('Scaffold: Payload Local API auth not wired yet (global-tooling-03-05); --dry-run prints contract')
-  .option('--dry-run', 'Print JSON plan only', false)
-  .action((opts: { dryRun?: boolean }) => {
+  .description(
+    'Upsert site-app-records via REST + users API key (MAGICBORN_PAYLOAD_USERS_API_KEY); --dry-run prints contract',
+  )
+  .option('--slug <id>', 'Registry app id (see FALLBACK_SITE_APPS / site catalog)')
+  .option('--dry-run', 'Print JSON contract + resolved body', false)
+  .option('--json', 'JSON on stdout for execute path', false)
+  .action((opts: { dryRun?: boolean; slug?: string; json?: boolean }) => {
     const tail = ['payload', 'app', 'generate'];
     if (opts.dryRun) tail.push('--dry-run');
+    if (opts.json) tail.push('--json');
+    if (opts.slug) tail.push('--slug', opts.slug);
     forward(tail);
   });
 
@@ -314,6 +317,7 @@ program
     void (async () => {
       try {
         if (!isMagicbornPlainMode() && shouldOfferMagicbornTui()) {
+          const { runChatStubTui } = await import('./tui/run-chat-tui.js');
           await runChatStubTui();
         } else {
           const url = resolvePortfolioChatApiUrl();
@@ -573,6 +577,7 @@ void (async () => {
   if (argvEarly.length === 0) {
     if (!isMagicbornPlainMode() && shouldOfferMagicbornTui()) {
       try {
+        const { runMagicbornHomeTui } = await import('./tui/run-home-tui.js');
         await runMagicbornHomeTui();
       } catch (e) {
         console.error(e instanceof Error ? e.message : e);

@@ -5,6 +5,7 @@ import {
   loadVendorRegistry,
   resolveVendorProfile,
 } from './vendor-registry.js';
+import { loadVendorDotEnv } from './vendor-env.js';
 import {
   clearVendorScopeFile,
   readVendorScopeFile,
@@ -233,12 +234,14 @@ export function runVendorForward(argv: string[]): number {
   const forwarded = parsed.forwarded;
 
   const { root, bin } = resolveVendorProfile(repoRoot, registry, vendorId);
+  const vendorEnv = loadVendorDotEnv(root);
 
   const result = spawnSync(process.execPath, [bin, ...forwarded], {
     cwd: root,
     stdio: 'inherit',
     env: {
       ...process.env,
+      ...vendorEnv,
       MAGICBORN_VENDOR_ID: vendorId,
       MAGICBORN_VENDOR_ROOT: root,
     },

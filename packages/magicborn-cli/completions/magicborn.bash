@@ -163,8 +163,8 @@ _magicborn() {
         COMPREPLY=( $(compgen -W "generate gen" -- "$cur") )
         return
       fi
-      if [[ "$second" == "app" && ( "$third" == "generate" || "$third" == "gen" ) && ${COMP_CWORD} -eq 4 ]]; then
-        COMPREPLY=( $(compgen -W "--dry-run" -- "$cur") )
+      if [[ "$second" == "app" && ( "$third" == "generate" || "$third" == "gen" ) && ${COMP_CWORD} -ge 4 ]]; then
+        COMPREPLY=( $(compgen -W "--slug --dry-run --json" -- "$cur") )
         return
       fi
       ;;

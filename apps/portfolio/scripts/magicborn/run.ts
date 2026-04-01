@@ -29,6 +29,13 @@ import {
 import { loadMagicbornEnv } from './load-magicborn-env';
 import { printCompleteLines } from './complete-words';
 import { runOpenAiCli } from './openai-cli';
+import {
+  PAYLOAD_CLI_GENERATE_ALIASES,
+  resolvePayloadCliOrigin,
+  resolvePayloadUsersApiKey,
+  siteAppRecordFromFallback,
+  upsertSiteAppRecordViaRest,
+} from '@/lib/magicborn/payload-cli-generate';
 
 type GenerateTarget = 'book' | 'app' | 'project' | 'planning-pack' | 'listen';
 
@@ -830,18 +837,53 @@ async function runPayloadCollections(argv: string[]): Promise<void> {
   process.exit(0);
 }
 
-/** Payload site-app operator path; headless auth deferred (global-tooling-03-05). */
-function runPayloadAppGenerate(flagArgs: string[]): void {
-  const dry = flagArgs.includes('--dry-run');
+/** Payload site-app upsert via REST + users API key (global-tooling-03-05). */
+async function runPayloadAppGenerate(flagArgs: string[]): Promise<void> {
+  const { values } = parseArgs({
+    args: flagArgs,
+    options: {
+      slug: { type: 'string' },
+      'dry-run': { type: 'boolean', default: false },
+      json: { type: 'boolean', default: false },
+    },
+    strict: true,
+    allowPositionals: false,
+  });
+
+  const slug = (values.slug as string | undefined)?.trim();
+  const dry = values['dry-run'] === true;
+  const wantJson = values.json === true;
+  const isCli = process.env.MAGICBORN_CLI === '1';
+
+  const contract = {
+    ok: true,
+    command: 'payload app generate',
+    alias: 'app',
+    collection: PAYLOAD_CLI_GENERATE_ALIASES.app.collection,
+    label: PAYLOAD_CLI_GENERATE_ALIASES.app.label,
+    authHeader: 'Authorization: users API-Key <key>',
+    env: {
+      MAGICBORN_PAYLOAD_URL: 'Next app origin (optional; default http://127.0.0.1:3000)',
+      NEXT_PUBLIC_APP_URL: 'Alternate origin if MAGICBORN_PAYLOAD_URL unset',
+      MAGICBORN_PAYLOAD_USERS_API_KEY: 'Required for writes; create under Payload admin → Users → API keys',
+      PAYLOAD_USERS_API_KEY: 'Alias for MAGICBORN_PAYLOAD_USERS_API_KEY',
+    },
+    flags: ['--slug <id>', '--dry-run', '--json'],
+    bodySource:
+      'When --slug matches a built-in registry id, fields are taken from FALLBACK_SITE_APPS; otherwise extend CLI with explicit flags later.',
+  };
+
   if (dry) {
+    const body = slug ? siteAppRecordFromFallback(slug) : null;
     console.log(
       JSON.stringify(
         {
-          ok: true,
+          ...contract,
           mode: 'dry-run',
-          command: 'payload app generate',
-          note:
-            'Will create or update site app records via Payload Local API once operator auth (API key or session bridge) is available.',
+          slug: slug ?? null,
+          resolvedOrigin: resolvePayloadCliOrigin(),
+          hasApiKey: Boolean(resolvePayloadUsersApiKey()),
+          exampleBody: body,
         },
         null,
         2,
@@ -849,10 +891,57 @@ function runPayloadAppGenerate(flagArgs: string[]): void {
     );
     process.exit(0);
   }
-  console.error(
-    'payload app generate requires Payload auth (not wired for headless CLI yet). Use --dry-run for the contract, or use the Payload admin UI. See global-tooling-03-05.',
-  );
-  process.exit(1);
+
+  if (!slug) {
+    const msg = 'payload app generate: pass --slug <id> (registry id) or use --dry-run.';
+    if (wantJson) {
+      console.log(JSON.stringify({ ok: false, error: 'missing_slug', message: msg }, null, 2));
+    } else {
+      console.error(msg);
+    }
+    process.exit(1);
+  }
+
+  const apiKey = resolvePayloadUsersApiKey();
+  const origin = resolvePayloadCliOrigin();
+  if (!apiKey) {
+    const msg =
+      'Set MAGICBORN_PAYLOAD_USERS_API_KEY (users API key from Payload admin). Use --dry-run to inspect the contract.';
+    if (wantJson) {
+      console.log(JSON.stringify({ ok: false, error: 'missing_api_key', message: msg, origin }, null, 2));
+    } else {
+      console.error(msg);
+    }
+    process.exit(1);
+  }
+
+  const body = siteAppRecordFromFallback(slug);
+  if (!body) {
+    const msg = `Unknown app slug "${slug}". Known registry ids: ${FALLBACK_SITE_APPS.map((a) => a.id).join(', ')}`;
+    if (wantJson) {
+      console.log(JSON.stringify({ ok: false, error: 'unknown_slug', message: msg }, null, 2));
+    } else {
+      console.error(msg);
+    }
+    process.exit(1);
+  }
+
+  const result = await upsertSiteAppRecordViaRest({ origin, apiKey, body, slug });
+  if (wantJson) {
+    console.log(JSON.stringify(result, null, 2));
+  } else if (result.ok) {
+    if (isCli) {
+      const ui = createMagicbornCli(true);
+      ui.banner('generate · payload', 'app');
+      ui.step(`${result.mode} ${PAYLOAD_CLI_GENERATE_ALIASES.app.collection} id=${result.id}`);
+      ui.info(`origin: ${origin}`);
+    } else {
+      console.log(`${result.mode} site-app-records id=${result.id}`);
+    }
+  } else if (!wantJson) {
+    console.error(result.message);
+  }
+  process.exit(result.ok ? 0 : 1);
 }
 
 async function main() {
@@ -937,7 +1026,7 @@ async function main() {
   }
 
   if (a0 === 'payload' && a1 === 'app' && (a2 === 'generate' || a2 === 'gen')) {
-    runPayloadAppGenerate(argv.slice(3));
+    await runPayloadAppGenerate(argv.slice(3));
     return;
   }
 
