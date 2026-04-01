@@ -106,6 +106,9 @@ Examples:
   magicborn vendor --id grimetime seed
   eval "$(magicborn vendor use grimetime --export)"
 
+Vendor env:
+  vendor/<id>/.env is merged over the parent process env for nested CLI runs (vendor wins on key collision).
+
 Deprecated (still works, stderr warning):
   magicborn users …   → use: magicborn vendor <default-id> users …
 `);
