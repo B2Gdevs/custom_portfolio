@@ -83,7 +83,8 @@
     "chat:env-preview": "pnpm --filter @portfolio/app run chat:env-preview",
     "rag:ingest": "node scripts/rag-ingest-from-root.cjs",
     "magicborn": "node packages/magicborn-cli/dist/cli.js",
-    "mb": "node packages/magicborn-cli/dist/cli.js"
+    "mb": "node packages/magicborn-cli/dist/cli.js",
+    "completion:pnpm-bash": "node -e \"console.log('bash: source ./completions/pnpm-workspace.bash (from repo root, after pnpm install)')\""
   },
   "devDependencies": {
     "@iarna/toml": "^2.2.5",
