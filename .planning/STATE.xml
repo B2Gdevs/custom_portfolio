@@ -17,6 +17,7 @@
     <reference>apps/portfolio/content/docs/global/planning/plans/global-data-03/PLAN.mdx</reference>
     <reference>apps/portfolio/content/docs/global/planning/plans/global-auth-02/PLAN.mdx</reference>
     <reference>apps/portfolio/content/docs/global/planning/plans/global-admin-01/PLAN.mdx</reference>
+    <reference>apps/portfolio/content/docs/global/planning/plans/mb-cli-framework/PLAN.mdx</reference>
     <reference>apps/portfolio/content/docs/documentation/requirements.mdx</reference>
     <reference>apps/portfolio/content/docs/documentation/planning/state.mdx</reference>
     <reference>.planning/AGENTS.md</reference>
