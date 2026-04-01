@@ -125,11 +125,24 @@ export function SiteLayout({
           className={cn(
             'min-h-svh',
             isReaderAppRoute ? 'bg-background' : 'bg-transparent',
-            isBookReadRoute ? 'lg:h-screen lg:overflow-hidden' : ''
+            /** Reader: bound to viewport on all breakpoints so `h-full` inside repub-builder resolves (was lg-only). */
+            isBookReadRoute ? 'h-svh min-h-0 overflow-hidden' : ''
           )}
         >
-          <div className={cn('flex min-h-svh flex-col', isReaderAppRoute ? 'lg:h-full lg:min-h-0' : '')}>
-            <main className="min-h-0 flex-1">{children}</main>
+          <div
+            className={cn(
+              'flex flex-col',
+              isReaderAppRoute ? 'h-full min-h-0 flex-1 overflow-hidden' : 'min-h-svh',
+            )}
+          >
+            <div
+              className={cn(
+                'min-h-0 flex-1',
+                isReaderAppRoute ? 'flex min-h-0 flex-col overflow-hidden' : '',
+              )}
+            >
+              {children}
+            </div>
             {!isReaderAppRoute ? (
               <footer className="mt-16 border-t border-border/80 bg-dark-alt/80 py-10">
                 <div className="mx-auto max-w-7xl px-6 text-center">
