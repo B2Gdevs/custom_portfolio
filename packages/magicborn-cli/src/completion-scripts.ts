@@ -18,6 +18,7 @@ complete -c magicborn -f -n "__fish_use_subcommand" -a listen -d "Listen / BandL
 complete -c magicborn -f -n "__fish_use_subcommand" -a openai -d "OpenAI account / models"
 complete -c magicborn -f -n "__fish_use_subcommand" -a vendor -d "Vendor repos"
 complete -c magicborn -f -n "__fish_use_subcommand" -a completion -d "Shell completion"
+complete -c magicborn -f -n "__fish_use_subcommand" -a update -d "pnpm install + rebuild CLI"
 complete -c magicborn -f -n '__fish_seen_subcommand_from_path book' -a "generate gen scenes"
 complete -c magicborn -f -n '__fish_seen_subcommand_from_path book scenes' -a "list extract"
 complete -c magicborn -f -n '__fish_seen_subcommand_from_path app' -a "list generate gen"

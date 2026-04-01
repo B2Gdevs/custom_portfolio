@@ -19,6 +19,7 @@ const TOP_LEVEL = [
   'vendor',
   'completion',
   'shell-init',
+  'update',
 ];
 
 export function getCompleteLines(topic: string): string[] {

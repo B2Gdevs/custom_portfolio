@@ -22,4 +22,8 @@ describe('getCompleteLines', () => {
       expect.arrayContaining(['status', 'models', 'projects', 'help']),
     );
   });
+
+  it('includes update in top-level commands', () => {
+    expect(getCompleteLines('top')).toContain('update');
+  });
 });

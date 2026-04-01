@@ -52,7 +52,7 @@ _magicborn() {
   fi
 
   if [[ ${COMP_CWORD} -eq 1 ]]; then
-    COMPREPLY=( $(compgen -W "book app project planning-pack listen style model openai vendor completion shell-init" -- "$cur") )
+    COMPREPLY=( $(compgen -W "book app project planning-pack listen style model openai vendor completion shell-init update" -- "$cur") )
     return
   fi
 
@@ -160,6 +160,12 @@ _magicborn() {
       fi
       if [[ "$second" == "projects" && ${COMP_CWORD} -eq 3 ]]; then
         COMPREPLY=( $(compgen -W "--json --include-archived --limit" -- "$cur") )
+        return
+      fi
+      ;;
+    update)
+      if [[ ${COMP_CWORD} -eq 2 ]]; then
+        COMPREPLY=( $(compgen -W "--pull" -- "$cur") )
         return
       fi
       ;;

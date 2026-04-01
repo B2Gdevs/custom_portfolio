@@ -6,6 +6,7 @@ import { Command } from 'commander';
 import { FISH_COMPLETION, ZSH_COMPLETION } from './completion-scripts.js';
 import { findRepoRoot } from './repo-root.js';
 import { forwardMagicborn } from './forward-portfolio.js';
+import { runMagicbornUpdate } from './run-update.js';
 import { runVendorAdd } from './vendor-add.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -67,7 +68,7 @@ const program = new Command();
 program
   .name('magicborn')
   .description('Magicborn operator CLI — media, scenes, app/project lists, OpenAI account probes, vendor repos')
-  .version('0.4.0');
+  .version('0.4.1');
 
 function repoRootOrExit(): string {
   try {
@@ -445,6 +446,16 @@ openaiCmd
     if (opts.includeArchived) tail.push('--include-archived');
     if (opts.limit) tail.push('--limit', opts.limit);
     forward(tail);
+  });
+
+program
+  .command('update')
+  .description(
+    'Run pnpm install at the monorepo root and rebuild @magicborn/cli + @portfolio/repub-builder (get latest CLI + reader dist after git pull)',
+  )
+  .option('--pull', 'Run git pull --ff-only in the repo root first', false)
+  .action((opts: { pull?: boolean }) => {
+    process.exit(runMagicbornUpdate(repoRootOrExit(), { pull: opts.pull }));
   });
 
 program
