@@ -1,6 +1,9 @@
 /**
  * One word per line for `magicborn __complete <topic>` (shell tab completion).
  */
+import fs from 'node:fs';
+import path from 'node:path';
+import { getRegisteredVendorIds } from '@magicborn/cli/vendor-registry';
 import { getAllContentEntries } from '@/lib/content';
 import { getBooks } from '@/lib/books';
 import { getListenCatalog } from '@/lib/listen-catalog';
@@ -18,10 +21,41 @@ const TOP_LEVEL = [
   'openai',
   'pnpm',
   'vendor',
+  'users',
+  'org',
+  'tenant',
+  'blog',
   'completion',
   'shell-init',
   'update',
 ];
+
+function findMonorepoRoot(start = process.cwd()): string | null {
+  let dir = path.resolve(start);
+  const { root } = path.parse(dir);
+  for (;;) {
+    if (fs.existsSync(path.join(dir, 'pnpm-workspace.yaml'))) {
+      return dir;
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir || dir === root) {
+      return null;
+    }
+    dir = parent;
+  }
+}
+
+function getVendorIdsForCompletion(): string[] {
+  const repoRoot = findMonorepoRoot();
+  if (!repoRoot) {
+    return [];
+  }
+  try {
+    return getRegisteredVendorIds(repoRoot);
+  } catch {
+    return [];
+  }
+}
 
 export function getCompleteLines(topic: string): string[] {
   const t = topic.trim();
@@ -40,7 +74,9 @@ export function getCompleteLines(topic: string): string[] {
     case 'listen':
       return ['generate', 'gen'];
     case 'vendor':
-      return ['add'];
+      return ['add', 'list', 'users', 'org', 'tenant', 'blog'];
+    case 'vendor-ids':
+      return getVendorIdsForCompletion();
     case 'style':
       return ['show', 'set', 'clear', 'reset', 'suggest'];
     case 'model':

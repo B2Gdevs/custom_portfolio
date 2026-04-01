@@ -225,6 +225,9 @@ importers:
         specifier: ^5.0.12
         version: 5.0.12(@types/react@19.2.14)(immer@11.1.4)(react@19.2.1)(use-sync-external-store@1.6.0(react@19.2.1))
     devDependencies:
+      '@magicborn/cli':
+        specifier: workspace:*
+        version: link:../../packages/magicborn-cli
       '@playwright/test':
         specifier: ^1.58.2
         version: 1.58.2
@@ -407,6 +410,9 @@ importers:
 
   packages/magicborn-cli:
     dependencies:
+      '@iarna/toml':
+        specifier: ^2.2.5
+        version: 2.2.5
       commander:
         specifier: ^14.0.3
         version: 14.0.3
@@ -463,6 +469,15 @@ importers:
       vitest:
         specifier: ^1.0.0
         version: 1.6.1(@types/node@22.19.15)(jsdom@29.0.1(@noble/hashes@1.8.0))(lightningcss@1.32.0)(sass@1.77.4)
+
+  vendor/mb-cli-framework:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.19.3
+        version: 22.19.15
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   vendor/repub-builder:
     dependencies:

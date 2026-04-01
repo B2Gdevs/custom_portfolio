@@ -9,12 +9,35 @@ import { forwardMagicborn } from './forward-portfolio.js';
 import { runMagicbornUpdate } from './run-update.js';
 import { runVendorAdd } from './vendor-add.js';
 import { runMagicbornPnpm } from './pnpm-wrap.js';
+import { printVendorCliHelp, runVendorForward, VENDOR_TOPIC_COMMANDS } from './vendor-run.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const argvEarly = process.argv.slice(2);
 if (argvEarly[0] === 'pnpm') {
   process.exit(runMagicbornPnpm(argvEarly.slice(1)));
+}
+
+/** Top-level aliases: `magicborn users` === `magicborn vendor users` (same vendor CLI). */
+const vendorTopicForward = new Set<string>(VENDOR_TOPIC_COMMANDS);
+if (argvEarly[0] && vendorTopicForward.has(argvEarly[0])) {
+  if (argvEarly[1] === '--help' || argvEarly[1] === '-h') {
+    printVendorCliHelp();
+    process.exit(0);
+  }
+  process.exit(runVendorForward(argvEarly));
+}
+
+/** `vendor add` stays in Commander; everything else forwards to the vendor package CLI. */
+if (argvEarly[0] === 'vendor') {
+  const rest = argvEarly.slice(1);
+  if (rest[0] !== 'add') {
+    if (rest.length === 0 || rest[0] === '--help' || rest[0] === '-h') {
+      printVendorCliHelp();
+      process.exit(0);
+    }
+    process.exit(runVendorForward(rest));
+  }
 }
 
 function readBashCompletionScript(): string {
@@ -85,6 +108,9 @@ Pass-through:
   Examples: magicborn pnpm install
             magicborn pnpm --filter @portfolio/app run build
             (from apps/portfolio) magicborn pnpm run test:unit
+
+  magicborn vendor …       Forward to a registered vendor CLI (default: grimetime). See: magicborn vendor --help
+  magicborn users|org|tenant|blog …   Top-level aliases (same as magicborn vendor <cmd> …)
 `,
   );
 
@@ -259,7 +285,9 @@ attachGenerateOptions(
 
 const vendorCmd = program
   .command('vendor')
-  .description('Vendor third-party repos (git submodule + workspace entry)');
+  .description(
+    'Vendor repos: `add` registers a submodule; other args forward to the vendor CLI (see `magicborn vendor --help`)',
+  );
 
 vendorCmd
   .command('add')
@@ -269,6 +297,18 @@ vendorCmd
   .action((url: string, opts: { name?: string; apply: boolean }) => {
     runVendorAdd({ repoRoot: repoRootOrExit(), url, name: opts.name, apply: opts.apply });
   });
+
+for (const topic of VENDOR_TOPIC_COMMANDS) {
+  program
+    .command(topic)
+    .description(`Vendor CLI: forward to default vendor (same as: magicborn vendor ${topic} …)`)
+    .action(() => {
+      console.error(
+        `magicborn: internal error: "${topic}" must be handled before Commander.parse; please report.`,
+      );
+      process.exit(1);
+    });
+}
 
 program
   .command('shell-init')

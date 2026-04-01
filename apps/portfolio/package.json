@@ -100,6 +100,7 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@magicborn/cli": "workspace:*",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/cli": "^4.2.2",
     "@tailwindcss/postcss": "^4",

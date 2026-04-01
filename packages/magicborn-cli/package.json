@@ -8,14 +8,24 @@
     "completions"
   ],
   "type": "module",
+  "exports": {
+    ".": "./dist/cli.js",
+    "./vendor-registry": {
+      "types": "./dist/vendor-registry.d.ts",
+      "import": "./dist/vendor-registry.js",
+      "default": "./dist/vendor-registry.js"
+    }
+  },
   "bin": {
     "magicborn": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "prepare": "tsc -p tsconfig.json"
+    "prepare": "tsc -p tsconfig.json",
+    "test": "vitest run"
   },
   "dependencies": {
+    "@iarna/toml": "^2.2.5",
     "commander": "^14.0.3"
   },
   "devDependencies": {

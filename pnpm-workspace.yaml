@@ -3,3 +3,4 @@ packages:
   - "packages/*"
   - "packages-shared/*"
   - "vendor/repub-builder"
+  - "vendor/mb-cli-framework"

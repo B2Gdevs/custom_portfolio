@@ -47,12 +47,13 @@ _magicborn() {
           return
         fi
         ;;
-      --id)
+      --id|-i)
         ctx=""
         for ((i=1; i<COMP_CWORD; i++)); do
           w="${COMP_WORDS[i]}"
           [[ "$w" == "app" ]] && ctx=app
           [[ "$w" == "project" ]] && ctx=project
+          [[ "$w" == "vendor" ]] && ctx=vendor
         done
         if [[ "$ctx" == "app" ]]; then
           COMPREPLY=( $(compgen -W "$(magicborn __complete app-ids 2>/dev/null | tr '\n' ' ')" -- "$cur") )
@@ -60,6 +61,10 @@ _magicborn() {
         fi
         if [[ "$ctx" == "project" ]]; then
           COMPREPLY=( $(compgen -W "$(magicborn __complete project-slugs 2>/dev/null | tr '\n' ' ')" -- "$cur") )
+          return
+        fi
+        if [[ "$ctx" == "vendor" ]]; then
+          COMPREPLY=( $(compgen -W "$(magicborn __complete vendor-ids 2>/dev/null | tr '\n' ' ')" -- "$cur") )
           return
         fi
         ;;
@@ -78,7 +83,7 @@ _magicborn() {
   fi
 
   if [[ ${COMP_CWORD} -eq 1 ]]; then
-    COMPREPLY=( $(compgen -W "book app project planning-pack listen style model openai pnpm vendor completion shell-init update" -- "$cur") )
+    COMPREPLY=( $(compgen -W "book app project planning-pack listen style model openai pnpm vendor users org tenant blog completion shell-init update" -- "$cur") )
     return
   fi
 
@@ -123,7 +128,7 @@ _magicborn() {
       ;;
     vendor)
       if [[ ${COMP_CWORD} -eq 2 ]]; then
-        COMPREPLY=( $(compgen -W "add" -- "$cur") )
+        COMPREPLY=( $(compgen -W "add list users org tenant blog --id -i" -- "$cur") )
         return
       fi
       ;;

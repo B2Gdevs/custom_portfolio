@@ -30,4 +30,14 @@ describe('getCompleteLines', () => {
   it('includes pnpm passthrough in top-level commands', () => {
     expect(getCompleteLines('top')).toContain('pnpm');
   });
+
+  it('lists vendor forward targets', () => {
+    expect(getCompleteLines('vendor')).toEqual(
+      expect.arrayContaining(['add', 'list', 'users', 'org', 'tenant', 'blog']),
+    );
+  });
+
+  it('returns vendor-ids including grimetime', () => {
+    expect(getCompleteLines('vendor-ids')).toContain('grimetime');
+  });
 });

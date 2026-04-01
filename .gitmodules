@@ -13,3 +13,6 @@
 [submodule "vendor/grime-time-site"]
 	path = vendor/grime-time-site
 	url = https://github.com/B2Gdevs/grime_time_site.git
+[submodule "vendor/mb-cli-framework"]
+	path = vendor/mb-cli-framework
+	url = https://github.com/MagicbornStudios/mb-cli-framework.git

@@ -61,6 +61,18 @@ taskPhase: global-data-02
 | `global-tooling-01-03` | `planned` | **Asset taxonomy** in data model: `kind` (site, book, app, project, listen, planning-pack, blog, ui), **ref** + **variant**, **`textOnImage`** (or equivalent), storage URL + hashes; wire **`site-app-records`** and **`project-records`** to generated media; **reconcile** local manifest vs Payload for partial runs and manual upload | `global-tooling-01-02` | loader tests + `pnpm run build`; at least one app + one project record can point at a generated asset |
 | `global-tooling-01-04` | `planned` | **Site logos:** generate variants, upload to **`site-media-assets`** (or sibling collection), CLI commands to **list** candidates and **`set-active`** logo pointer the app shell/header reads (**`global-tooling-dec-03`**) | `global-tooling-01-03` | E2E or unit: active pointer resolves; CLI documented in [magicborn-cli plan](/docs/global/planning/plans/magicborn-cli/plan) |
 
+## Phase `global-tooling-02` (mb-cli-framework — shared shell)
+
+**Goal:** vendor **[mb-cli-framework](https://github.com/MagicbornStudios/mb-cli-framework)** as `vendor/mb-cli-framework`, share completion / scope / color conventions between **`magicborn`** (this repo) and **`grimetime`** (Grime Time), tab-first DX, **`vendor use` / `vendor clear`**, and a roadmap for Payload/OpenAI/RAG command discovery. Kickoff: [PLAN](/docs/global/planning/plans/mb-cli-framework/PLAN).
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `global-tooling-02-01` | `in-progress` | **Submodule + workspace:** `git submodule add` → `vendor/mb-cli-framework`; `pnpm-workspace.yaml` entry; minimal package skeleton in submodule (or initial commit upstream) so both repos can `workspace:*` or `file:` depend | `global-tooling-01-01` | `pnpm install`; `git submodule status` |
+| `global-tooling-02-02` | `planned` | **Tab completion:** `magicborn __complete vendor-ids` (or extended topic) returns **id + suffix** (`(cli)` / plain); bash/zsh/fish updated; **NO_COLOR** respected; legend in completion script header | `global-tooling-02-01` | manual tab check; `pnpm --filter @portfolio/app test:unit` for `__complete` if covered |
+| `global-tooling-02-03` | `planned` | **Scope commands:** `magicborn vendor use <id>` / `magicborn vendor clear` (env + docs); optional `MAGICBORN_PS1` prompt snippet for interactive shells | `global-tooling-02-01` | manual: use/clear cycle |
+| `global-tooling-02-04` | `planned` | **Port consumers:** refactor `@magicborn/cli` + Grime Time CLI to import shared helpers from submodule (incremental; no big-bang) | `global-tooling-02-02`, `global-tooling-02-03` | both CLIs `--help`; grimetime CI if present |
+| `global-tooling-02-05` | `planned` | **Discovery spike:** spec + prototype for Payload collection introspection + OpenAI/RAG defaults → generated or cached command list (install or runtime) | `global-tooling-02-04` | doc + one scripted smoke (optional) |
+
 ## Phase `global-admin-01`
 
 | Id | Status | Goal | Depends | Verify |
