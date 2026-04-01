@@ -3,14 +3,31 @@
  * Prints newline-separated completion candidates for package.json script names,
  * given the current partial token (segment-aware for `foo:bar:baz` keys).
  *
- * Usage: node scripts/pnpm-workspace-script-completions.mjs <repoRoot> <currentWord>
+ * Usage: node scripts/pnpm-workspace-script-completions.mjs <cwd> <currentWord>
+ * Walks up from `cwd` to find the nearest package.json and reads its `scripts` keys.
  */
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync, existsSync } from 'node:fs';
+import { join, dirname, resolve } from 'node:path';
 
-const root = process.argv[2];
+const startDir = process.argv[2] || process.cwd();
 const cur = process.argv[3] ?? '';
 
+function findNearestPackageJsonRoot(start) {
+  let dir = resolve(start);
+  for (;;) {
+    const pkg = join(dir, 'package.json');
+    if (existsSync(pkg)) {
+      return dir;
+    }
+    const parent = dirname(dir);
+    if (parent === dir) {
+      return null;
+    }
+    dir = parent;
+  }
+}
+
+const root = findNearestPackageJsonRoot(startDir);
 if (!root) {
   process.exit(1);
 }

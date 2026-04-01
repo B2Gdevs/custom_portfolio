@@ -803,7 +803,7 @@ async function main() {
 
   if (argv.length === 0) {
     console.error(
-      'Usage: magicborn <book|app|project|planning-pack|listen|style|model|openai|vendor|completion|shell-init|update> …\nTry: magicborn --help',
+      'Usage: magicborn <book|app|project|planning-pack|listen|style|model|openai|pnpm|vendor|completion|shell-init|update> …\nTry: magicborn --help',
     );
     process.exit(1);
   }

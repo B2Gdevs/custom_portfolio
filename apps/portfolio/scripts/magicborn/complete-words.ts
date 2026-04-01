@@ -16,6 +16,7 @@ const TOP_LEVEL = [
   'style',
   'model',
   'openai',
+  'pnpm',
   'vendor',
   'completion',
   'shell-init',

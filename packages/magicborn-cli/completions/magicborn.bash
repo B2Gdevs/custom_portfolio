@@ -1,6 +1,21 @@
 # magicborn completion (bash) — install: eval "$(magicborn completion bash)"
 # Requires: magicborn on PATH (pnpm install at repo root → node_modules/.bin, or shell-init).
 
+# `magicborn pnpm …` reuses pnpm workspace script completion (nearest package.json from $PWD).
+if [[ -z "${__MAGICBORN_PNPM_COMPLETION_LOADED:-}" ]]; then
+  __mb_pn_top=""
+  if [[ -n "${MAGICBORN_REPO:-}" && -f "$MAGICBORN_REPO/completions/pnpm-workspace.bash" ]]; then
+    __mb_pn_top="$MAGICBORN_REPO"
+  else
+    __mb_pn_top=$(git rev-parse --show-toplevel 2>/dev/null)
+  fi
+  if [[ -n "$__mb_pn_top" && -f "$__mb_pn_top/completions/pnpm-workspace.bash" ]]; then
+    # shellcheck source=/dev/null
+    source "$__mb_pn_top/completions/pnpm-workspace.bash"
+  fi
+  __MAGICBORN_PNPM_COMPLETION_LOADED=1
+fi
+
 _magicborn() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   local prev="${COMP_WORDS[COMP_CWORD-1]}"
@@ -51,8 +66,19 @@ _magicborn() {
     esac
   fi
 
+  if [[ "${COMP_WORDS[1]}" == "pnpm" ]] && [[ ${COMP_CWORD} -ge 2 ]] && type _pnpm_workspace &>/dev/null; then
+    local _mb_save=("${COMP_WORDS[@]}")
+    local _mb_sc=$COMP_CWORD
+    COMP_WORDS=( "${COMP_WORDS[@]:1}" )
+    ((COMP_CWORD--))
+    _pnpm_workspace
+    COMP_WORDS=("${_mb_save[@]}")
+    COMP_CWORD=$_mb_sc
+    return
+  fi
+
   if [[ ${COMP_CWORD} -eq 1 ]]; then
-    COMPREPLY=( $(compgen -W "book app project planning-pack listen style model openai vendor completion shell-init update" -- "$cur") )
+    COMPREPLY=( $(compgen -W "book app project planning-pack listen style model openai pnpm vendor completion shell-init update" -- "$cur") )
     return
   fi
 

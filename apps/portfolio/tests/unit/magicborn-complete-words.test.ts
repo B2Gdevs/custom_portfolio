@@ -26,4 +26,8 @@ describe('getCompleteLines', () => {
   it('includes update in top-level commands', () => {
     expect(getCompleteLines('top')).toContain('update');
   });
+
+  it('includes pnpm passthrough in top-level commands', () => {
+    expect(getCompleteLines('top')).toContain('pnpm');
+  });
 });

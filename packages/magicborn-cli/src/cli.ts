@@ -8,8 +8,14 @@ import { findRepoRoot } from './repo-root.js';
 import { forwardMagicborn } from './forward-portfolio.js';
 import { runMagicbornUpdate } from './run-update.js';
 import { runVendorAdd } from './vendor-add.js';
+import { runMagicbornPnpm } from './pnpm-wrap.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const argvEarly = process.argv.slice(2);
+if (argvEarly[0] === 'pnpm') {
+  process.exit(runMagicbornPnpm(argvEarly.slice(1)));
+}
 
 function readBashCompletionScript(): string {
   const p = path.join(__dirname, '..', 'completions', 'magicborn.bash');
@@ -67,8 +73,20 @@ function applyShellInitBash(root: string): { updated: boolean; filePaths: string
 const program = new Command();
 program
   .name('magicborn')
-  .description('Magicborn operator CLI — media, scenes, app/project lists, OpenAI account probes, vendor repos')
-  .version('0.4.1');
+  .description(
+    'Magicborn operator CLI — media, scenes, app/project lists, OpenAI account probes, pnpm passthrough, vendor repos',
+  )
+  .version('0.5.0')
+  .addHelpText(
+    'after',
+    `
+Pass-through:
+  magicborn pnpm <args>    Run pnpm with cwd = nearest package.json (from $PWD), else monorepo root
+  Examples: magicborn pnpm install
+            magicborn pnpm --filter @portfolio/app run build
+            (from apps/portfolio) magicborn pnpm run test:unit
+`,
+  );
 
 function repoRootOrExit(): string {
   try {

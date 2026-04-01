@@ -77,6 +77,7 @@
     "build:grimetime": "pnpm run vendor:grimetime:build",
     "start:grimetime:local": "pnpm run vendor:grimetime:start:local",
     "vendors:commit-push": "node scripts/commit-push-vendors-and-root.cjs",
+    "test:magicborn-cli": "pnpm --filter @magicborn/cli test",
     "test:unit": "pnpm --filter @portfolio/app run test:unit",
     "test:unit:coverage": "pnpm --filter @portfolio/app run test:unit:coverage",
     "test:unit:report": "pnpm --filter @portfolio/app run test:unit:report",
