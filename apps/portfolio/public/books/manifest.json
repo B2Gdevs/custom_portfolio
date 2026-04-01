@@ -10,9 +10,9 @@
     ],
     "status": "available",
     "hasEpub": true,
-    "remoteEpubUrl": "/api/published-book-artifacts/file/magicborn_rune_path--epub--cp-20260331-033239-4ad389b.epub",
-    "planningPackUrl": "/api/published-book-artifacts/file/magicborn_rune_path--planning-pack--cp-20260331-033239-4ad389b.zip",
-    "artifactVersion": "cp-20260331-033239-4ad389b"
+    "remoteEpubUrl": "/api/published-book-artifacts/file/magicborn_rune_path--epub--cp-20260401-034207-b3d8df0.epub",
+    "planningPackUrl": "/api/published-book-artifacts/file/magicborn_rune_path--planning-pack--cp-20260401-035716-b3d8df0.zip",
+    "artifactVersion": "cp-20260401-034207-b3d8df0"
   },
   {
     "slug": "mordreds_legacy",
@@ -25,9 +25,9 @@
     ],
     "status": "available",
     "hasEpub": true,
-    "remoteEpubUrl": "/api/published-book-artifacts/file/mordreds_legacy--epub--cp-20260331-033239-4ad389b.epub",
-    "planningPackUrl": "/api/published-book-artifacts/file/mordreds_legacy--planning-pack--cp-20260331-033239-4ad389b.zip",
-    "artifactVersion": "cp-20260331-033239-4ad389b"
+    "remoteEpubUrl": "/api/published-book-artifacts/file/mordreds_legacy--epub--cp-20260401-034207-b3d8df0.epub",
+    "planningPackUrl": "/api/published-book-artifacts/file/mordreds_legacy--planning-pack--cp-20260401-035716-b3d8df0.zip",
+    "artifactVersion": "cp-20260401-034207-b3d8df0"
   },
   {
     "slug": "mordreds_tale",
@@ -40,9 +40,9 @@
     ],
     "status": "available",
     "hasEpub": true,
-    "remoteEpubUrl": "/api/published-book-artifacts/file/mordreds_tale--epub--cp-20260331-033239-4ad389b.epub",
-    "planningPackUrl": "/api/published-book-artifacts/file/mordreds_tale--planning-pack--cp-20260331-033239-4ad389b.zip",
-    "artifactVersion": "cp-20260331-033239-4ad389b"
+    "remoteEpubUrl": "/api/published-book-artifacts/file/mordreds_tale--epub--cp-20260401-034207-b3d8df0.epub",
+    "planningPackUrl": "/api/published-book-artifacts/file/mordreds_tale--planning-pack--cp-20260401-035716-b3d8df0.zip",
+    "artifactVersion": "cp-20260401-034207-b3d8df0"
   },
   {
     "slug": "mordreds_tale_part_1",
@@ -56,9 +56,9 @@
     ],
     "status": "available",
     "hasEpub": true,
-    "remoteEpubUrl": "/api/published-book-artifacts/file/mordreds_tale_part_1--epub--cp-20260331-033239-4ad389b.epub",
-    "planningPackUrl": "/api/published-book-artifacts/file/mordreds_tale_part_1--planning-pack--cp-20260331-033239-4ad389b.zip",
-    "artifactVersion": "cp-20260331-033239-4ad389b"
+    "remoteEpubUrl": "/api/published-book-artifacts/file/mordreds_tale_part_1--epub--cp-20260401-034207-b3d8df0.epub",
+    "planningPackUrl": "/api/published-book-artifacts/file/mordreds_tale_part_1--planning-pack--cp-20260401-035716-b3d8df0.zip",
+    "artifactVersion": "cp-20260401-034207-b3d8df0"
   },
   {
     "slug": "mordreds_tale_part_2",
@@ -72,9 +72,9 @@
     ],
     "status": "available",
     "hasEpub": true,
-    "remoteEpubUrl": "/api/published-book-artifacts/file/mordreds_tale_part_2--epub--cp-20260331-033239-4ad389b.epub",
-    "planningPackUrl": "/api/published-book-artifacts/file/mordreds_tale_part_2--planning-pack--cp-20260331-033239-4ad389b.zip",
-    "artifactVersion": "cp-20260331-033239-4ad389b"
+    "remoteEpubUrl": "/api/published-book-artifacts/file/mordreds_tale_part_2--epub--cp-20260401-034207-b3d8df0.epub",
+    "planningPackUrl": "/api/published-book-artifacts/file/mordreds_tale_part_2--planning-pack--cp-20260401-035716-b3d8df0.zip",
+    "artifactVersion": "cp-20260401-034207-b3d8df0"
   },
   {
     "slug": "mordreds_tale_part_3",
@@ -88,8 +88,8 @@
     ],
     "status": "available",
     "hasEpub": true,
-    "remoteEpubUrl": "/api/published-book-artifacts/file/mordreds_tale_part_3--epub--cp-20260331-033239-4ad389b.epub",
-    "planningPackUrl": "/api/published-book-artifacts/file/mordreds_tale_part_3--planning-pack--cp-20260331-033239-4ad389b.zip",
-    "artifactVersion": "cp-20260331-033239-4ad389b"
+    "remoteEpubUrl": "/api/published-book-artifacts/file/mordreds_tale_part_3--epub--cp-20260401-034207-b3d8df0.epub",
+    "planningPackUrl": "/api/published-book-artifacts/file/mordreds_tale_part_3--planning-pack--cp-20260401-035716-b3d8df0.zip",
+    "artifactVersion": "cp-20260401-034207-b3d8df0"
   }
 ]

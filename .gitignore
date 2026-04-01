@@ -30,6 +30,9 @@ out/
 build/
 **/dist/
 
+# Magicborn CLI local runs (generated images + manifests)
+.magicborn/
+
 # book build cache (scripts/build-books.cjs)
 .tmp/
 

@@ -40,8 +40,8 @@ describe('retrieveRagContext', () => {
     const rerankedHits = [{ ...semanticHits[0], score: 0.95 }];
 
     vi.mocked(embedTexts).mockResolvedValue([[0.1, 0.2, 0.3]]);
-    vi.mocked(searchSemanticRagHits).mockReturnValue(semanticHits);
-    vi.mocked(rerankRagHits).mockReturnValue(rerankedHits);
+    vi.mocked(searchSemanticRagHits).mockResolvedValue(semanticHits);
+    vi.mocked(rerankRagHits).mockResolvedValue(rerankedHits);
 
     await expect(retrieveRagContext('  morgana powers relics  ')).resolves.toEqual(rerankedHits);
     expect(embedTexts).toHaveBeenCalledWith(['morgana powers relics']);

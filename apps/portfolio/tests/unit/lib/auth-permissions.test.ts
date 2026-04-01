@@ -17,6 +17,8 @@ describe('auth permissions', () => {
       {
         id: 'user_1',
         email: 'owner@magicborn.local',
+        displayName: 'Ben Garrard',
+        avatarUrl: '/images/my_avatar.jpeg',
         role: 'owner',
         entitlements: OWNER_DEFAULT_ENTITLEMENTS,
         tenant: {
@@ -39,6 +41,12 @@ describe('auth permissions', () => {
       authenticated: true,
       autoLoggedIn: true,
       isOwner: true,
+      user: {
+        id: 'user_1',
+        email: 'owner@magicborn.local',
+        displayName: 'Ben Garrard',
+        avatarUrl: '/images/my_avatar.jpeg',
+      },
       role: 'owner',
       tenant: {
         id: 'tenant_1',
@@ -69,6 +77,7 @@ describe('auth permissions', () => {
       authenticated: false,
       autoLoggedIn: false,
       isOwner: false,
+      user: null,
       role: null,
       tenant: null,
       entitlements: [],

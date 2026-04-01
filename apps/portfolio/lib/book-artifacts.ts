@@ -6,6 +6,19 @@ export type PublishedBookManifestFields = {
   artifactVersion?: string | null;
 };
 
+export type PublishedBookArtifactComparable = {
+  title: string;
+  bookSlug: string;
+  artifactKind: PublishedBookArtifactKind;
+  versionTag: string;
+  isCurrent: boolean;
+  checksumSha256: string;
+  fileSizeBytes: number;
+  sourceCommit: string | null;
+  sourcePath: string | null;
+  planningSourcePaths: string[];
+};
+
 export function sanitizeArtifactVersionTag(input: string) {
   return input
     .trim()
@@ -44,6 +57,108 @@ export function buildPublishedBookArtifactFilename(
   const normalizedVersion = sanitizeArtifactVersionTag(versionTag) || 'current';
   const normalizedExt = extension.replace(/^\./, '').toLowerCase();
   return `${bookSlug}--${artifactKind}--${normalizedVersion}.${normalizedExt}`;
+}
+
+function asString(value: unknown) {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (typeof value === 'number') {
+    return String(value);
+  }
+
+  return null;
+}
+
+function asNumber(value: unknown) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string' && value.trim().length > 0) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
+}
+
+function asBoolean(value: unknown) {
+  return typeof value === 'boolean' ? value : null;
+}
+
+function normalizeOptionalString(value: unknown) {
+  const normalized = asString(value)?.trim();
+  return normalized && normalized.length > 0 ? normalized : null;
+}
+
+export function normalizePlanningSourcePaths(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((entry) => normalizeOptionalString(entry))
+    .filter((entry): entry is string => Boolean(entry))
+    .sort((a, b) => a.localeCompare(b));
+}
+
+export function normalizePublishedBookArtifactComparable(
+  value: unknown,
+): PublishedBookArtifactComparable | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+  const title = normalizeOptionalString(record.title);
+  const bookSlug = normalizeOptionalString(record.bookSlug);
+  const artifactKind = normalizeOptionalString(record.artifactKind);
+  const versionTag = normalizeOptionalString(record.versionTag);
+  const checksumSha256 = normalizeOptionalString(record.checksumSha256);
+  const fileSizeBytes = asNumber(record.fileSizeBytes);
+
+  if (!title || !bookSlug || !artifactKind || !versionTag || !checksumSha256 || fileSizeBytes === null) {
+    return null;
+  }
+
+  return {
+    title,
+    bookSlug,
+    artifactKind: artifactKind as PublishedBookArtifactKind,
+    versionTag,
+    isCurrent: asBoolean(record.isCurrent) ?? false,
+    checksumSha256,
+    fileSizeBytes,
+    sourceCommit: normalizeOptionalString(record.sourceCommit),
+    sourcePath: normalizeOptionalString(record.sourcePath),
+    planningSourcePaths: normalizePlanningSourcePaths(record.planningSourcePaths),
+  };
+}
+
+export function shouldUpdatePublishedBookArtifact(
+  existing: unknown,
+  desired: PublishedBookArtifactComparable,
+) {
+  const normalizedExisting = normalizePublishedBookArtifactComparable(existing);
+  if (!normalizedExisting) {
+    return true;
+  }
+
+  return JSON.stringify(normalizedExisting) !== JSON.stringify(desired);
+}
+
+export function shouldReuseCurrentPublishedBookArtifact(
+  currentArtifact: unknown,
+  checksumSha256: string,
+) {
+  const normalizedCurrent = normalizePublishedBookArtifactComparable(currentArtifact);
+  if (!normalizedCurrent || !normalizedCurrent.isCurrent) {
+    return false;
+  }
+
+  return normalizedCurrent.checksumSha256 === checksumSha256;
 }
 
 export function preservePublishedBookManifestFields<

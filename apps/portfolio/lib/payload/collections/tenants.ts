@@ -1,4 +1,8 @@
 import type { CollectionConfig } from 'payload';
+import {
+  canManageOwnerAdminCollection,
+  readOwnerAdminCollection,
+} from '../access';
 
 export const tenants: CollectionConfig = {
   slug: 'tenants',
@@ -6,6 +10,12 @@ export const tenants: CollectionConfig = {
     useAsTitle: 'name',
     group: 'Auth',
     defaultColumns: ['name', 'slug', 'isOwnerTenant', 'active'],
+  },
+  access: {
+    read: readOwnerAdminCollection,
+    create: canManageOwnerAdminCollection,
+    update: canManageOwnerAdminCollection,
+    delete: canManageOwnerAdminCollection,
   },
   fields: [
     {

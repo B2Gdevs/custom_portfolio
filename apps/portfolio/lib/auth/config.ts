@@ -38,6 +38,8 @@ export function getOwnerSeedConfig() {
       process.env.PORTFOLIO_OWNER_TENANT_NAME?.trim() || 'Magicborn Studios',
     tenantSlug:
       process.env.PORTFOLIO_OWNER_TENANT_SLUG?.trim() || 'magicborn-studios',
+    avatarUrl:
+      process.env.PORTFOLIO_OWNER_AVATAR_URL?.trim() || '/images/my_avatar.jpeg',
   };
 }
 

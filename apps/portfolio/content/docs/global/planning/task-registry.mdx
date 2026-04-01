@@ -2,7 +2,7 @@
 title: Task Registry
 description: Executable tasks for the Global docs section and repo-wide planning IA.
 date: "2026-03-28"
-updated: "2026-03-31"
+updated: "2026-04-02"
 order: 3
 repoPath: apps/portfolio/content/docs/global/planning/task-registry.mdx
 taskPhase: global-data-02
@@ -38,16 +38,43 @@ taskPhase: global-data-02
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
-| `global-auth-02-01` | `planned` | refresh the portfolio shell/sidebar around the existing owner-only auth/session contract: add shadcn-compatible login/account affordances, keep public browsing open, and surface private/admin entry points only when the seeded owner session is active | `global-auth-01-03`, `global-data-03-01` | relevant component tests, `pnpm run build`, `pnpm run lint` |
+| `global-auth-02-01` | `done` | refresh the portfolio shell/sidebar around the existing owner-only auth/session contract: add shadcn-compatible login/account affordances, keep public browsing open, show live user/org context plus avatar/logout in the sidebar footer, and surface private/admin entry points only when the seeded owner session is active | `global-auth-01-03`, `global-data-03-01` | relevant component tests, `pnpm run build`, `pnpm run lint` |
+
+## Phase `global-auth-03` (restricted operators + visitor reader policy)
+
+**Goal:** **Public site stays public**, but **image generation, Copilot editing workflows, and other mutation paths** are limited to **tenant owner and org admins**. **Logged-in non-admin** users (when invites exist) are **read-only** on site content and **short-lived / export-first** in the reader. **Invites + privilege matrix** are **phase-2** design tasks until scheduled.
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `global-auth-03-01` | `done` | gate **`POST /api/media/generate`** behind **session** + **`admin:access`** entitlement; **401** unauthenticated, **403** member without admin | `global-auth-01-03` | `tests/unit/api/media-generate-route.test.ts`; SiteCopilot uses **`credentials: 'include'`** |
+| `global-auth-03-02` | `planned` | **Visitor / non-privileged reader:** annotations and local reader state stay **browser-local** or **session-scoped**, **no durable server sync** unless entitled; UX and copy push **export**; align with [books requirements](/docs/books/requirements) **`BOOKS-REQ-08`** / **`BOOKS-REQ-10`** | `global-auth-03-01` | reader tests or documented UAT |
+| `global-auth-03-03` | `in-progress` | **Invites + org roles:** trusted **`pnpm auth:invite`** operator flow plus **single-use, expiring, tenant-scoped invite links** for consumers; role templates stay **`owner` / `admin` / `member`** with **default-deny entitlements**; product self-signup stays out of scope. Docs: [PLAN](/docs/global/planning/plans/global-auth-03/plan), [INVITES](/docs/global/planning/plans/global-auth-03/invites) | `global-auth-01-01` | run invite script against dev DB; accept/revoke/expiry test cases from [PLAN](/docs/global/planning/plans/global-auth-03/plan) |
+
+## Phase `global-tooling-01` (Magicborn CLI — backlog)
+
+**Goal:** unified operator CLI for **generate**, **style/prompt architecture**, and **vendor** workflows — see [kickoff](/docs/global/planning/plans/magicborn-cli/plan). **Operator book RAG** (prompt assembly only) stays **`global-tooling-dec-01`** and is **never** mixed into default site chat RAG (**`global-data-dec-09`**). **`magicborn batch`** is explicitly **out of scope** until **`01-04`** proves single-target flows.
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `global-tooling-01-01` | `done` | scaffold `magicborn` / `pnpm mb` via **`@magicborn/cli`**: `generate` (book, app, planning-pack, listen) delegates to `scripts/magicborn/run.ts`; `vendor add` (dry-run + `--apply`) | `-` | `pnpm magicborn --help`; `pnpm magicborn generate book --print-prompt` prints style+scene; `pnpm magicborn vendor add <url>` prints plan |
+| `global-tooling-01-02` | `done` | CLI **`pnpm magicborn generate <target>`** calls **`lib/magicborn/openai-image-generate`** (same behavior as **`POST /api/media/generate`**) using **`.env`** (`OPENAI_API_KEY`); writes **`.magicborn/runs/<id>/`** (`image.png`, `prompt.txt`, `manifest.json`); **rag-style** terminal UI when **`MAGICBORN_CLI=1`**; flags **`--dry-run`**, **`--print-prompt`**, **`--raw`**, **`--size`**, **`--slot`**, **`--json`**; spend line when OpenAI returns **usage** | `global-tooling-01-01`, `global-auth-03-01` | `tests/unit/lib/magicborn-openai-image-generate.test.ts`; `tests/unit/api/media-generate-route.test.ts`; dry-run without key |
+| `global-tooling-01-03` | `planned` | **Asset taxonomy** in data model: `kind` (site, book, app, project, listen, planning-pack, blog, ui), **ref** + **variant**, **`textOnImage`** (or equivalent), storage URL + hashes; wire **`site-app-records`** and **`project-records`** to generated media; **reconcile** local manifest vs Payload for partial runs and manual upload | `global-tooling-01-02` | loader tests + `pnpm run build`; at least one app + one project record can point at a generated asset |
+| `global-tooling-01-04` | `planned` | **Site logos:** generate variants, upload to **`site-media-assets`** (or sibling collection), CLI commands to **list** candidates and **`set-active`** logo pointer the app shell/header reads (**`global-tooling-dec-03`**) | `global-tooling-01-03` | E2E or unit: active pointer resolves; CLI documented in [magicborn-cli plan](/docs/global/planning/plans/magicborn-cli/plan) |
+
+## Phase `global-admin-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `global-admin-01-01` | `done` | mount Payload's owner-only admin surface with the upstream `templates/blank/src/app/(payload)` route group, adapt it to this app's config/runtime, and use it as the CRUD back office for Payload-backed resources instead of inventing a second owner CRUD stack | `global-auth-02-01` | relevant route/component tests, `pnpm run build`, `pnpm run lint` |
 
 ## Phase `global-data-01`
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
 | `global-data-01-01` | `done` | define one shared provider contract for app data and uploaded assets, including env selection rules and phase-1 boundaries for local SQLite/file mode versus hosted Supabase mode | `global-auth-01-03` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
-| `global-data-01-02` | `planned` | move shared Listen and Reader runtime access behind provider-owned repositories/bootstrap services so routes and components stop depending on one concrete backend | `global-data-01-01` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
+| `global-data-01-02` | `done` | move shared Listen and Reader runtime access behind provider-owned repositories/bootstrap services so routes and components stop depending on one concrete backend | `global-data-01-01` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
 | `global-data-01-03` | `in-progress` | add the install/sync/bootstrap path for large local data: local SQLite/file export-import rules plus Supabase bootstrap/migration flow for hosted data and uploads | `global-data-01-01`, `global-data-01-02` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
-| `global-data-01-04` | `planned` | decide the phase-1 boundary for Books AI/RAG under the new provider model, then align section planners and deploy/local docs on the supported backend matrix | `global-data-01-01` | docs updated, `pnpm run build`, `pnpm run lint` |
+| `global-data-01-04` | `done` | **Site RAG scope (phase 1):** do **not** ingest full book manuscript EPUB text into the shared site chat/RAG corpus by default; that boundary stays aligned with **`BOOKS-REQ-04`** and **[books requirements](/docs/books/requirements)**. **Not a goal:** wiring the reader’s EPUB pipeline into RAG. **Docs alignment:** record the decision in Global **decisions**; keep **local vs Supabase** backend notes in **`global-data-01-03`** / [Supabase bootstrap](/docs/global/planning/plans/global-data-01/SUPABASE-BOOTSTRAP) / deploy docs as that track finishes | `global-data-01-01` | `global-data-dec-09` in [decisions](/docs/global/planning/decisions), `pnpm run build`, `pnpm run lint` |
 
 ## Phase `global-data-02`
 
@@ -61,9 +88,9 @@ taskPhase: global-data-02
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
-| `global-data-03-01` | `in-progress` | add the next public catalog collections and SSR-safe loaders: `site-app-records` plus `site-download-assets`, migrate `/apps` off the hard-coded component array, seed the hosted app registry, and start moving public planning-pack/download metadata away from repo-resident binaries | `global-data-02-03` | targeted loader/component tests, `pnpm run build`, `pnpm run lint` |
-| `global-data-03-02` | `planned` | move project metadata, ordering, link groups, and media/download relations into `project-records` while keeping long-form project bodies repo-first until the DB path proves simpler | `global-data-03-01` | targeted loader/component tests, `pnpm run build`, `pnpm run lint` |
-| `global-data-03-03` | `planned` | move resumes onto `resume-records` plus `site-download-assets` so gallery metadata and downloadable HTML/PDF artifacts stop depending on local directory scans and repo-resident files | `global-data-03-01` | targeted loader/component tests, `pnpm run build`, `pnpm run lint` |
+| `global-data-03-01` | `done` | add the next public catalog collections and SSR-safe loaders: `site-app-records` plus `site-download-assets`, migrate `/apps` off the hard-coded component array, seed the hosted app registry, and start moving public planning-pack/download metadata away from repo-resident binaries | `global-data-02-03` | targeted loader/component tests, `pnpm run build`, `pnpm run lint` |
+| `global-data-03-02` | `done` | move project metadata, ordering, link groups, and media/download relations into `project-records` while keeping long-form project bodies repo-first until the DB path proves simpler | `global-data-03-01` | targeted loader/component tests, `pnpm run build`, `pnpm run lint` |
+| `global-data-03-03` | `done` | move resumes onto `resume-records` plus `site-download-assets` so gallery metadata and downloadable HTML/PDF artifacts stop depending on local directory scans and repo-resident files | `global-data-03-01` | targeted loader/component tests, `pnpm run build`, `pnpm run lint` |
 
 ## Registry rules
 

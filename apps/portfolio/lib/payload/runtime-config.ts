@@ -1,7 +1,5 @@
-import { postgresAdapter } from '@payloadcms/db-postgres';
-import { s3Storage, type S3StorageOptions } from '@payloadcms/storage-s3';
+import type { S3StorageOptions } from '@payloadcms/storage-s3';
 import type { Plugin } from 'payload';
-import { sqliteAdapter } from '@payloadcms/db-sqlite';
 import {
   getPayloadDatabaseUrl,
   isPayloadUsingPostgres,
@@ -13,6 +11,10 @@ import {
 
 const DEFAULT_S3_REGION = 'us-east-1';
 const DEFAULT_S3_FORCE_PATH_STYLE = true;
+const requireRuntime = eval('require') as NodeRequire;
+const PAYLOAD_DB_POSTGRES = ['@payloadcms', 'db-postgres'].join('/');
+const PAYLOAD_DB_SQLITE = ['@payloadcms', 'db-sqlite'].join('/');
+const PAYLOAD_STORAGE_S3 = ['@payloadcms', 'storage-s3'].join('/');
 
 export {
   getPayloadDatabaseFilePath,
@@ -27,6 +29,10 @@ export {
 
 export function getPayloadDatabaseAdapter() {
   if (isPayloadUsingPostgres()) {
+    const { postgresAdapter } = requireRuntime(
+      PAYLOAD_DB_POSTGRES,
+    ) as typeof import('@payloadcms/db-postgres');
+
     return postgresAdapter({
       pool: {
         connectionString: getPayloadDatabaseUrl(),
@@ -34,6 +40,10 @@ export function getPayloadDatabaseAdapter() {
       push: readBooleanEnv('PAYLOAD_POSTGRES_PUSH', true),
     });
   }
+
+  const { sqliteAdapter } = requireRuntime(
+    PAYLOAD_DB_SQLITE,
+  ) as typeof import('@payloadcms/db-sqlite');
 
   return sqliteAdapter({
     client: {
@@ -83,5 +93,13 @@ export function getPayloadS3StorageOptions(): S3StorageOptions | null {
 
 export function getPayloadPlugins(): Plugin[] {
   const s3Options = getPayloadS3StorageOptions();
-  return s3Options ? [s3Storage(s3Options)] : [];
+  if (!s3Options) {
+    return [];
+  }
+
+  const { s3Storage } = requireRuntime(
+    PAYLOAD_STORAGE_S3,
+  ) as typeof import('@payloadcms/storage-s3');
+
+  return [s3Storage(s3Options)];
 }

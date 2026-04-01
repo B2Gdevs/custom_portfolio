@@ -1,6 +1,7 @@
 import type { Access, CollectionConfig } from 'payload';
 import type { PublishedBookArtifactKind } from '@/lib/book-artifacts';
 import { resolvePortfolioAppPath } from '../app-root';
+import { canManageOwnerAdminCollection } from '../access';
 
 export const PUBLISHED_BOOK_ARTIFACTS_COLLECTION_SLUG = 'published-book-artifacts';
 
@@ -9,7 +10,6 @@ export function getPublishedBookArtifactFileURL(filename: string) {
 }
 
 const allowPublicRead: Access = () => true;
-const denyDirectWrites: Access = () => false;
 
 const publishedArtifactKindOptions: Array<{
   label: string;
@@ -35,9 +35,9 @@ export const publishedBookArtifacts: CollectionConfig = {
   },
   access: {
     read: allowPublicRead,
-    create: denyDirectWrites,
-    update: denyDirectWrites,
-    delete: denyDirectWrites,
+    create: canManageOwnerAdminCollection,
+    update: canManageOwnerAdminCollection,
+    delete: canManageOwnerAdminCollection,
   },
   upload: {
     staticDir: resolvePortfolioAppPath('media', 'published-book-artifacts'),

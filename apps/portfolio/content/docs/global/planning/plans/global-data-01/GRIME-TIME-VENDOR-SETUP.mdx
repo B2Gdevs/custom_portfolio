@@ -1,0 +1,111 @@
+---
+title: Grime Time vendor setup
+description: Local vendoring, env bootstrap, and first-run commands for the Grime Time repo before product changes start.
+date: "2026-04-01"
+updated: "2026-04-01"
+repoPath: apps/portfolio/content/docs/global/planning/plans/global-data-01/GRIME-TIME-VENDOR-SETUP.mdx
+taskPhase: global-data-01
+order: 2
+---
+
+# Intent
+
+Vendor **Grime Time** into this monorepo as a sibling codebase, but keep it operationally separate from the portfolio app:
+
+- **git submodule** under `vendor/grime-time-site`
+- **npm** inside the vendored repo
+- **not** part of the root pnpm workspace
+- local env scaffolded from the root repo with one helper command
+
+## Why this setup
+
+- Grime Time already behaves like a standalone Payload app with its own lockfile, scripts, and nested submodules.
+- Pulling it into the root pnpm workspace would create avoidable package-manager drift before feature work even starts.
+- Vendoring it as-is lets us boot it, verify it, and then start replacing layout/auth pieces deliberately.
+
+## Root helper commands
+
+Run these from `custom_portfolio`:
+
+```bash
+pnpm run vendor:grimetime:init
+pnpm run vendor:grimetime:env
+pnpm run vendor:grimetime:env:check
+pnpm run vendor:grimetime:install
+pnpm run vendor:grimetime:build
+```
+
+When a real database is ready:
+
+```bash
+pnpm run vendor:grimetime:migrate
+pnpm run vendor:grimetime:bootstrap-admin
+pnpm run vendor:grimetime:seed
+pnpm run vendor:grimetime:dev
+```
+
+## Env contract
+
+### Required for local shell wiring
+
+These are enough to scaffold the vendored `.env` and keep the non-database secrets explicit:
+
+- `PAYLOAD_SECRET`
+- `NEXT_PUBLIC_SERVER_URL`
+- `CRON_SECRET`
+- `PREVIEW_SECRET`
+
+### Required for current local runtime
+
+- `POSTGRES_URL`
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD`
+
+`POSTGRES_URL` is intentionally left blank in the scaffolded local `.env` so the vendored repo never points at the portfolio database by accident.
+
+As of the current vendored `main`, Grime Time still prerenders routes that initialize Payload during `next build`, so a reachable Postgres database is required for:
+
+- `npm run build`
+- `npm run dev`
+- `npm run payload migrate`
+- `npm run bootstrap:admin`
+- `npm run seed`
+
+The upstream README claims build-without-DB support, but the actual vendored build currently fails on `/contact` and `/ops/crm` without `POSTGRES_URL`.
+
+### Optional integrations
+
+- Supabase auth/storage:
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - `SUPABASE_URL`
+  - `SUPABASE_S3_ACCESS_KEY_ID`
+  - `SUPABASE_S3_SECRET_ACCESS_KEY`
+  - `SUPABASE_S3_ENDPOINT`
+  - `SUPABASE_S3_REGION`
+  - `SUPABASE_STORAGE_BUCKET`
+- email:
+  - `RESEND_API_KEY`
+  - `EMAIL_FROM`
+  - `EMAIL_FROM_NAME`
+- billing:
+  - `STRIPE_SECRET_KEY`
+  - `STRIPE_ACCOUNT_ID`
+  - `STRIPE_WEBHOOK_SECRET`
+- media generation / MCP:
+  - `OPENAI_API_KEY`
+  - `PROVIDERS__OPENAI__API_KEY`
+  - `PAYLOAD_MCP_ENABLED`
+  - `PAYLOAD_MCP_API_KEY`
+  - `IMAGE_GEN_MCP_ENABLED`
+
+## Notes
+
+- The vendored repo already carries its own `.env.example` and README.
+- The root helper script writes `vendor/grime-time-site/.env` with safe local defaults and blank integration secrets.
+- The helper script leaves a commented local example for Docker/compose: `postgresql://postgres@127.0.0.1:54320/grimetime`.
+- The vendored repo includes nested submodules:
+  - `vendor/repo-planner`
+  - `vendor/image-gen-mcp`
+
+Those are initialized by `pnpm run vendor:grimetime:init`.

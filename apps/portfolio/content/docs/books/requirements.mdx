@@ -2,7 +2,7 @@
 title: Requirements
 description: Section requirements for the books section, reader shell, EPUB pipeline, and books-side AI work.
 date: "2026-03-29"
-updated: "2026-03-29"
+updated: "2026-03-31"
 repoPath: apps/portfolio/content/docs/books/requirements.mdx
 order: 6
 ---
@@ -30,6 +30,8 @@ order: 6
 | `BOOKS-REQ-06` | **`ReaderWorkspace`**, **`EpubViewer`**, and **most reader/shelf chrome** should be **implemented and exported from `@portfolio/repub-builder`**, with **`apps/portfolio`** supplying books manifest, routes, and env only; **v1** ships for **this host only** (**`BOOKS-READER-V1-PORTFOLIO-HOST-ONLY`**) | keeps one runtime for the reference host; aligns with **`BOOKS-READER-RUNTIME-REPUB-PACKAGE`**, **`BOOKS-READER-DASHBOARD-CHROME`**, **`BOOKS-READER-MOVE-EPUBVIEWER-WITH-WORKSPACE`** |
 | `BOOKS-REQ-07` | the reader workspace should support a backend-backed library for repo books, explicitly uploaded EPUB records, saved annotations, and reader settings while preserving anonymous local reading/import as a fallback | the reader is moving from demo shell to real product surface and needs persistence without breaking casual reading or turning every import into a server mutation |
 | `BOOKS-REQ-08` | editing and write-back features inside the reader must be entitlement-gated; authenticated owner flows can write to the database, anonymous visitors stay read-only | direct in-reader editing is useful, but it cannot be public by default |
+| `BOOKS-REQ-09` | **Magicborn / book imagery** should use a **shared in-repo style prompt** plus **scene prompts** tied to curated beats; **one composer** feeds OpenAI Images, SiteCopilot, and CLI (**[books-publishing-03](/docs/books/planning/plans/books-publishing-03-magicborn-media/plan)**) | avoids one-off DALL-E prompts drifting off-brand |
+| `BOOKS-REQ-10` | **Visitors and non-admin** sessions: reader annotations remain **local-first / short-lived** relative to entitled users; **export** is the durability path — server-backed annotation sync is **owner/admin** territory only (**[global-auth-03](/docs/global/planning/task-registry#phase-global-auth-03-restricted-operators--visitor-reader-policy)**) | matches a public site with a restricted operations model |
 
 ## Section Boundaries
 

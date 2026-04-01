@@ -1,4 +1,5 @@
 import path from 'node:path';
+import type { ContentLink } from '@/lib/content';
 import { getSiteDownloadAssetFileURL } from '@/lib/payload/collections/siteDownloadAssets';
 import { runSiteDownloadAssetsWorker } from '@/lib/site-download-assets-worker-runner';
 
@@ -171,6 +172,36 @@ export function resolveSiteDownloadAssetUrl(asset: Pick<SiteDownloadAssetRecord,
   }
 
   return asset.url ?? null;
+}
+
+export function toSiteDownloadLinks(downloadAssets: unknown): ContentLink[] | undefined {
+  if (!Array.isArray(downloadAssets) || downloadAssets.length === 0) {
+    return undefined;
+  }
+
+  const assets = normalizeSiteDownloadAssetDocs(downloadAssets);
+  if (assets.length === 0) {
+    return undefined;
+  }
+
+  const links = assets.reduce<ContentLink[]>((acc, asset) => {
+    const href = resolveSiteDownloadAssetUrl(asset);
+    if (!href) {
+      return acc;
+    }
+
+    acc.push({
+      href,
+      label: asset.downloadLabel ?? asset.title,
+      description: asset.summary,
+      kind: 'download',
+      external: false,
+    });
+
+    return acc;
+  }, []);
+
+  return links.length > 0 ? links : undefined;
 }
 
 export async function findSiteDownloadAssets(

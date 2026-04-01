@@ -10,3 +10,6 @@
 [submodule "vendor/repub-builder"]
 	path = vendor/repub-builder
 	url = https://github.com/MagicbornStudios/repub-builder
+[submodule "vendor/grime-time-site"]
+	path = vendor/grime-time-site
+	url = https://github.com/B2Gdevs/grime_time_site.git

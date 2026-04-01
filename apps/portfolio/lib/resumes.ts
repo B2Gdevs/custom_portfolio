@@ -1,5 +1,6 @@
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { runResumeRecordsWorker } from '@/lib/resume-records-worker-runner';
 
 export interface ResumeEntry {
   slug: string;
@@ -7,188 +8,115 @@ export interface ResumeEntry {
   title: string;
   role: string;
   summary: string;
-  sourcePath: string;
+  featuredOrder: number;
 }
 
-interface ResumeMetadataOverride {
-  order: number;
-  slug?: string;
-  title?: string;
-  role?: string;
-  summary?: string;
-}
+type ResumeRecordDoc = Partial<
+  Record<
+    'slug' | 'fileName' | 'title' | 'role' | 'summary' | 'featuredOrder' | 'published',
+    unknown
+  >
+>;
 
-const resumeMetadataOverrides: Record<string, ResumeMetadataOverride> = {
-  'blitzpanel_resume.html': {
-    order: 0,
+const FALLBACK_RESUMES: ResumeEntry[] = [
+  {
     slug: 'blitzpanel-founding-engineer',
+    fileName: 'blitzpanel_resume.html',
     title: 'Blitzpanel Founding Engineer Resume',
     role: 'Founding engineer, internal automation, and schema-driven tooling for quote-to-build workflows',
     summary:
       'Tailored toward Blitzpanel: pipeline automation, CAD-adjacent spatial data thinking, generated multi-language contracts, and operator-first internal tools.',
+    featuredOrder: 0,
   },
-  'dream_job_resume.html': {
-    order: 1,
+  {
     slug: 'your-dream-job',
+    fileName: 'dream_job_resume.html',
     title: 'Your Dream Job Resume',
-    role: 'Capital Factory Austin — startup ecosystem, founder support, and community building',
+    role: 'Capital Factory Austin - startup ecosystem, founder support, and community building',
     summary:
-      "A light editorial, Austin-focused resume tailored to Capital Factory’s open-ended dream-role application and founder ecosystem work.",
+      "A light editorial, Austin-focused resume tailored to Capital Factory's open-ended dream-role application and founder ecosystem work.",
+    featuredOrder: 1,
   },
-  'openweb_ui.html': {
-    order: 2,
+  {
     slug: 'openweb-ui',
+    fileName: 'openweb_ui.html',
     title: 'Developer Relations Resume',
     role: 'DevRel, developer advocacy, and technical writing',
     summary:
       'A print-ready version centered on developer-facing product work, advocacy, and communication.',
+    featuredOrder: 2,
   },
-  'bild_resume.html': {
-    order: 3,
+  {
     slug: 'bild',
+    fileName: 'bild_resume.html',
     title: 'AI Engineer Resume',
     role: 'AI engineer, founding engineer, and systems builder',
     summary:
       'Tailored toward AI product work, systems architecture, and high-velocity startup execution.',
+    featuredOrder: 3,
   },
-  'autohdr_resume.html': {
-    order: 4,
+  {
     slug: 'autohdr',
+    fileName: 'autohdr_resume.html',
     title: 'AI and Imaging Resume',
     role: 'Full-stack engineer focused on AI and image systems',
     summary: 'Highlights image pipelines, applied ML work, and backend systems for imaging-heavy roles.',
+    featuredOrder: 4,
   },
-  'axiom_resume.html': {
-    order: 5,
+  {
     slug: 'axiom',
+    fileName: 'axiom_resume.html',
     title: 'Full-Stack Systems Resume',
     role: 'Full-stack engineer, founder, and systems builder',
     summary: 'A broader systems-oriented resume for founding-engineer and full-stack product roles.',
+    featuredOrder: 5,
   },
-};
+];
 
 const resumeDirectoryCandidates = [
   path.resolve(process.cwd(), 'apps', 'portfolio', 'misc', 'html_resumes'),
   path.resolve(process.cwd(), 'misc', 'html_resumes'),
 ];
 
-function getResumeDirectory(): string | null {
-  return resumeDirectoryCandidates.find((directory) => existsSync(directory)) ?? null;
+function asString(value: unknown) {
+  return typeof value === 'string' ? value : null;
 }
 
-function stripTags(value: string): string {
-  return value
-    .replace(/<br\s*\/?>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&mdash;|&#8212;/gi, '—')
-    .replace(/&ndash;|&#8211;/gi, '–')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function extractMatch(html: string, pattern: RegExp): string | null {
-  const match = html.match(pattern);
-  return match?.[1] ? stripTags(match[1]) : null;
-}
-
-function deriveSlug(fileName: string, override?: ResumeMetadataOverride): string {
-  if (override?.slug) {
-    return override.slug;
-  }
-
-  return fileName
-    .replace(/\.html$/i, '')
-    .replace(/_resume$/i, '')
-    .replace(/_/g, '-');
-}
-
-function deriveTitle(fileName: string, html: string, override?: ResumeMetadataOverride): string {
-  if (override?.title) {
-    return override.title;
-  }
-
-  const titleFromHtml = extractMatch(html, /<title>([\s\S]*?)<\/title>/i);
-  if (titleFromHtml) {
-    return titleFromHtml
-      .replace(/^Benjamin Garrard\s*[—–-]\s*/i, '')
-      .replace(/\s+Resume$/i, ' Resume')
-      .trim();
-  }
-
-  return fileName
-    .replace(/\.html$/i, '')
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-function deriveRole(html: string, override?: ResumeMetadataOverride): string {
-  if (override?.role) {
-    return override.role;
-  }
-
-  return (
-    extractMatch(html, /<div[^>]+class="[^"]*\brole\b[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ??
-    extractMatch(html, /<div[^>]+class="[^"]*\bsubtitle\b[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ??
-    'Printable HTML resume'
-  );
-}
-
-function deriveSummary(fileName: string, html: string, override?: ResumeMetadataOverride): string {
-  if (override?.summary) {
-    return override.summary;
-  }
-
-  const firstParagraph =
-    extractMatch(html, /<p[^>]*>([\s\S]*?)<\/p>/i) ??
-    'Standalone HTML resume source available for viewing and download.';
-
-  return `${firstParagraph.slice(0, 157).trimEnd()}${firstParagraph.length > 157 ? '…' : ''}`;
+function asNumber(value: unknown) {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
 function compareResumes(a: ResumeEntry, b: ResumeEntry): number {
-  const orderA = resumeMetadataOverrides[a.fileName]?.order ?? Number.MAX_SAFE_INTEGER;
-  const orderB = resumeMetadataOverrides[b.fileName]?.order ?? Number.MAX_SAFE_INTEGER;
-
-  if (orderA !== orderB) {
-    return orderA - orderB;
+  if (a.featuredOrder !== b.featuredOrder) {
+    return a.featuredOrder - b.featuredOrder;
   }
 
   return a.title.localeCompare(b.title);
 }
 
-function readResumeEntries(): ResumeEntry[] {
-  const directory = getResumeDirectory();
-  if (!directory) {
-    return [];
+function toResumeEntry(doc: ResumeRecordDoc): ResumeEntry | null {
+  const slug = asString(doc.slug);
+  const fileName = asString(doc.fileName);
+  const title = asString(doc.title);
+  const role = asString(doc.role);
+  const summary = asString(doc.summary);
+
+  if (!slug || !fileName || !title || !role || !summary) {
+    return null;
   }
 
-  return readdirSync(directory)
-    .filter((fileName) => fileName.endsWith('.html'))
-    .map((fileName) => {
-      const sourcePath = path.join(directory, fileName);
-      const html = readFileSync(sourcePath, 'utf8');
-      const override = resumeMetadataOverrides[fileName];
-
-      return {
-        slug: deriveSlug(fileName, override),
-        fileName,
-        title: deriveTitle(fileName, html, override),
-        role: deriveRole(html, override),
-        summary: deriveSummary(fileName, html, override),
-        sourcePath,
-      };
-    })
-    .sort(compareResumes);
+  return {
+    slug,
+    fileName,
+    title,
+    role,
+    summary,
+    featuredOrder: asNumber(doc.featuredOrder) ?? 0,
+  };
 }
 
-export function getResumes(): ResumeEntry[] {
-  return readResumeEntries();
-}
-
-export function getResumeBySlug(slug: string): ResumeEntry | undefined {
-  return readResumeEntries().find((resume) => resume.slug === slug);
+function fallbackResumes() {
+  return [...FALLBACK_RESUMES].sort(compareResumes);
 }
 
 export function resolveResumeHtmlPath(fileName: string): string | null {
@@ -200,4 +128,50 @@ export function resolveResumeHtmlPath(fileName: string): string | null {
   }
 
   return null;
+}
+
+export function getResumeSourceEntries() {
+  return fallbackResumes()
+    .map((resume) => {
+      const sourcePath = resolveResumeHtmlPath(resume.fileName);
+      if (!sourcePath) {
+        return null;
+      }
+
+      return {
+        ...resume,
+        sourcePath,
+      };
+    })
+    .filter(
+      (resume): resume is ResumeEntry & { sourcePath: string } => resume !== null,
+    );
+}
+
+export async function getResumes(): Promise<ResumeEntry[]> {
+  try {
+    const result = await runResumeRecordsWorker();
+    const body = result.body as
+      | {
+          ok?: boolean;
+          resumes?: unknown[];
+        }
+      | undefined;
+
+    if (body?.ok && Array.isArray(body.resumes) && body.resumes.length > 0) {
+      return body.resumes
+        .map((resume) => toResumeEntry(resume as ResumeRecordDoc))
+        .filter((resume): resume is ResumeEntry => resume !== null)
+        .sort(compareResumes);
+    }
+  } catch {
+    // Fall back to the repo-authored metadata when Payload is unavailable.
+  }
+
+  return fallbackResumes();
+}
+
+export async function getResumeBySlug(slug: string): Promise<ResumeEntry | undefined> {
+  const resumes = await getResumes();
+  return resumes.find((resume) => resume.slug === slug);
 }

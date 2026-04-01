@@ -1,3 +1,5 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { buildConfig } from 'payload';
 import {
   AUTH_COOKIE_PREFIX,
@@ -17,6 +19,8 @@ import { publishedBookArtifacts } from './lib/payload/collections/publishedBookA
 import { siteAppRecords } from './lib/payload/collections/siteAppRecords';
 import { siteDownloadAssets } from './lib/payload/collections/siteDownloadAssets';
 import { siteMediaAssets } from './lib/payload/collections/siteMediaAssets';
+import { projectRecords } from './lib/payload/collections/projectRecords';
+import { resumeRecords } from './lib/payload/collections/resumeRecords';
 import { tenants } from './lib/payload/collections/tenants';
 import { users } from './lib/payload/collections/users';
 import {
@@ -24,6 +28,8 @@ import {
   getPayloadPlugins,
 } from './lib/payload/runtime-config';
 
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 const ownerSeed = getOwnerSeedConfig();
 
 export default buildConfig({
@@ -31,6 +37,9 @@ export default buildConfig({
   cookiePrefix: AUTH_COOKIE_PREFIX,
   admin: {
     user: 'users',
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
     autoRefresh: true,
     autoLogin: isLocalAutoLoginEnabled()
       ? {
@@ -50,6 +59,8 @@ export default buildConfig({
     siteAppRecords,
     siteDownloadAssets,
     siteMediaAssets,
+    projectRecords,
+    resumeRecords,
     readerLibraryAssets,
     readerLibraryRecords,
     readerReadingStates,

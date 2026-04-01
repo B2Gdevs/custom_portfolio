@@ -1,0 +1,21 @@
+---
+title: Kickoff -- global-admin-01
+description: Owner-only Payload admin mount for operational CRUD on Payload-backed resources.
+date: "2026-03-31"
+updated: "2026-03-31"
+repoPath: apps/portfolio/content/docs/global/planning/plans/global-admin-01/PLAN.mdx
+taskPhase: global-admin-01
+---
+
+# Kickoff: `global-admin-01`
+
+| Field | Value |
+| --- | --- |
+| `goal` | Mount the upstream Payload `(payload)` route group inside this Next app and use it as the owner-only operational CRUD surface for Payload-backed resources. |
+| `scope` | import the minimal route/layout files from Payload's blank template, adapt them to this app's config/runtime, verify owner access, trim the visible collections to the Payload-backed resources this site actually edits, and add only the customizations needed for the owner workflow. |
+| `non-goals` | editing repo-authored docs/blog/projects from the deployed app, building a second custom owner CRUD framework, public access, or the future all-users RBAC dashboard. |
+| `definition-of-done` | the app has a working owner-only Payload admin mount, the generated admin and API routes are live, relevant Payload-backed collections are available for CRUD, and the custom site shell can hand off to that surface cleanly. |
+| `tests-required` | route coverage for owner gating and Payload mount wiring where practical, plus `pnpm run build` and `pnpm run lint`. |
+| `dependencies` | `global-auth-02-01`, `payload.config.ts`, current Payload collections, and the upstream template files under `templates/blank/src/app/(payload)`. |
+| `open-questions` | which collections should be visible immediately versus hidden until their workflows are cleaner; whether Payload's user record should own the avatar field used by the custom shell in phase one; which admin customizations are necessary now versus later. |
+| `first-tasks` | `global-admin-01-01` |

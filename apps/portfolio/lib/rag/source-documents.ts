@@ -1,18 +1,10 @@
 import { createHash } from 'node:crypto';
 import { getAllContent, getContentBySlug } from '@/lib/content';
+import { ragIngestCorpus } from './ingest-corpus.config';
+import type { RagContentType } from './ingest-corpus.config';
 import type { RagSourceDocument, RagSourceKind } from './types';
 
-const EXCLUDED_DOC_LEAF_SLUGS = new Set([
-  'planning-docs',
-  'state',
-  'task-registry',
-  'errors-and-attempts',
-  'decisions',
-  'requirements',
-  'roadmap',
-  'global-planning',
-  'implementation-plan',
-]);
+const EXCLUDED_DOC_LEAF_SLUGS = new Set<string>(ragIngestCorpus.excludedDocLeafSlugs);
 
 function hashContent(value: string): string {
   return createHash('sha256').update(value).digest('hex');
@@ -95,24 +87,12 @@ function buildDocument(
 export function getRagSourceDocuments(): RagSourceDocument[] {
   const documents: RagSourceDocument[] = [];
 
-  for (const slug of getAllContent('docs').map((entry) => entry.slug)) {
-    const doc = buildDocument('docs', slug);
-    if (doc) {
-      documents.push(doc);
-    }
-  }
-
-  for (const slug of getAllContent('projects').map((entry) => entry.slug)) {
-    const project = buildDocument('projects', slug);
-    if (project) {
-      documents.push(project);
-    }
-  }
-
-  for (const slug of getAllContent('blog').map((entry) => entry.slug)) {
-    const post = buildDocument('blog', slug);
-    if (post) {
-      documents.push(post);
+  for (const type of ragIngestCorpus.contentTypes) {
+    for (const slug of getAllContent(type).map((entry) => entry.slug)) {
+      const doc = buildDocument(type, slug);
+      if (doc) {
+        documents.push(doc);
+      }
     }
   }
 

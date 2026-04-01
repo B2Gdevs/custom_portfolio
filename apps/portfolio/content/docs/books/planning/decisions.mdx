@@ -2,7 +2,7 @@
 title: Decisions
 description: Compact decision records for the books section.
 date: "2026-03-15"
-updated: "2026-03-30"
+updated: "2026-03-31"
 order: 5
 ---
 
@@ -90,6 +90,7 @@ order: 5
 | `BOOKS-AI-ADMIN-BASIC-AUTH` | `accepted` | Payload admin and ingest/reindex controls use basic auth in production | public chat can stay open/read-only without shipping an unauthenticated admin surface |
 | `BOOKS-AI-SCOPED-LOGGING` | `accepted` | client and server AI flows should use one shared logger with env-driven levels and scope filters instead of permanent ad hoc console statements | chat/RAG debugging can become verbose in development and targeted sessions, then be quiet again without deleting instrumentation |
 | `BOOKS-AI-STACK-NEXT` | `accepted` | assistant-ui is the active public shell; follow-on evaluations now narrow to Tool UI for schema-first tool rendering and MCP-oriented surfaces only if the assistant becomes more tool-heavy later | avoid parallel public chat stacks; add new UI/runtime layers only when a concrete feature forces them |
+| `BOOKS-MAGICBORN-IMAGE-PROMPTS` | `proposed` | **OpenAI Images** for Magicborn art use **`finalPrompt = compose(styleBlock, scenePrompt)`** with the **style block** versioned in-repo; scene rows reference **beats/chapters** from planning, not ad hoc paste in Copilot (**[books-publishing-03](/docs/books/planning/plans/books-publishing-03-magicborn-media/plan)**). | One composition path for **CLI**, **API**, and **SiteCopilot**; brand-consistent covers and scene stills. |
 
 ## Decision Rule
 

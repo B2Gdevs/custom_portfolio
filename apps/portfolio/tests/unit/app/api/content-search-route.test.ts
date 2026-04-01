@@ -1,9 +1,14 @@
 import { GET } from '@/app/api/content/search/route';
 import { getAllContentEntries } from '@/lib/content';
 import { getListenSearchDiscoveryItems } from '@/lib/listen-runtime';
+import { getProjectEntries } from '@/lib/projects';
 
 vi.mock('@/lib/content', () => ({
   getAllContentEntries: vi.fn(),
+}));
+
+vi.mock('@/lib/projects', () => ({
+  getProjectEntries: vi.fn(),
 }));
 
 vi.mock('@/lib/listen-runtime', () => ({
@@ -14,6 +19,29 @@ describe('/api/content/search', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.mocked(getListenSearchDiscoveryItems).mockResolvedValue([]);
+    vi.mocked(getProjectEntries).mockResolvedValue([
+      {
+        meta: {
+          title: 'Dialogue Forge',
+          slug: 'dialogue-forge-interactive-narrative-builder',
+          description: 'Interactive narrative builder.',
+          date: '2024-12-18',
+          updated: '2024-12-18',
+          tags: ['Interactive Fiction'],
+          status: 'active',
+          featured: true,
+          featuredOrder: 1,
+          appUrl: '/apps/dialogue-forge',
+          appLabel: 'Open Dialogue Forge',
+        },
+        slug: 'dialogue-forge-interactive-narrative-builder',
+        href: '/projects/dialogue-forge-interactive-narrative-builder',
+        content: '',
+        plainText: 'Dialogue Forge is a branching dialogue tool.',
+        headings: [{ id: 'overview', text: 'Overview', level: 2 }],
+        missingRequiredSections: [],
+      },
+    ]);
   });
 
   it('returns grouped blog and project hits for the command palette', async () => {
@@ -39,29 +67,7 @@ describe('/api/content/search', () => {
         ];
       }
 
-      return [
-        {
-          meta: {
-            title: 'Dialogue Forge',
-            slug: 'dialogue-forge-interactive-narrative-builder',
-            description: 'Interactive narrative builder.',
-            date: '2024-12-18',
-            updated: '2024-12-18',
-            tags: ['Interactive Fiction'],
-            status: 'active',
-            featured: true,
-            featuredOrder: 1,
-            appUrl: '/apps/dialogue-forge',
-            appLabel: 'Open Dialogue Forge',
-          },
-          slug: 'dialogue-forge-interactive-narrative-builder',
-          href: '/projects/dialogue-forge-interactive-narrative-builder',
-          content: '',
-          plainText: 'Dialogue Forge is a branching dialogue tool.',
-          headings: [{ id: 'overview', text: 'Overview', level: 2 }],
-          missingRequiredSections: [],
-        },
-      ];
+      return [];
     });
 
     const response = await GET(new Request('http://localhost/api/content/search?q=dialogue') as never);

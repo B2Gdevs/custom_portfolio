@@ -22,12 +22,12 @@ import {
   MoveUpRight,
   Radio,
   ScrollText,
-  Settings,
   Sparkles,
   WandSparkles,
 } from 'lucide-react';
 import type { NavIconKey, NavMenuSection } from '@/lib/site-menus';
 import { PlanningPackSidebarButton } from '@/components/planning/PlanningPackSidebarButton';
+import { SidebarAccountSection } from '@/components/auth/SidebarAccountSection';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -562,17 +562,7 @@ function PortfolioSidebarInner({ pathname, navMenus }: { pathname: string; navMe
         </a>
 
         <PlanningPackSidebarButton collapsed={iconOnly} />
-
-        {process.env.NODE_ENV === 'development' ? (
-          <Link
-            href="/admin"
-            onClick={onLinkClick}
-            className="inline-flex items-center gap-2 text-xs font-medium text-sidebar-foreground/65 transition-colors hover:text-sidebar-foreground"
-          >
-            <Settings size={16} />
-            Admin
-          </Link>
-        ) : null}
+        <SidebarAccountSection onNavigate={onLinkClick} />
       </SidebarFooter>
     </>
   );

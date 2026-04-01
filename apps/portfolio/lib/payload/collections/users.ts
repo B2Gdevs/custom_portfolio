@@ -3,6 +3,10 @@ import {
   AUTH_ENTITLEMENTS,
   AUTH_SESSION_MAX_AGE_SECONDS,
 } from '@/lib/auth/config';
+import {
+  canManageOwnerAdminCollection,
+  readOwnerAdminCollection,
+} from '../access';
 
 export const users: CollectionConfig = {
   slug: 'users',
@@ -16,17 +20,34 @@ export const users: CollectionConfig = {
     group: 'Auth',
     defaultColumns: ['email', 'displayName', 'role', 'tenant'],
   },
+  access: {
+    read: readOwnerAdminCollection,
+    create: canManageOwnerAdminCollection,
+    update: canManageOwnerAdminCollection,
+    delete: canManageOwnerAdminCollection,
+  },
   fields: [
     {
       name: 'displayName',
       type: 'text',
     },
     {
+      name: 'avatarUrl',
+      type: 'text',
+      admin: {
+        description: 'Absolute URL or site-relative image path for the owner account avatar.',
+      },
+    },
+    {
       name: 'role',
       type: 'select',
       required: true,
       defaultValue: 'owner',
-      options: [{ label: 'Owner', value: 'owner' }],
+      options: [
+        { label: 'Owner', value: 'owner' },
+        { label: 'Admin', value: 'admin' },
+        { label: 'Member', value: 'member' },
+      ],
       index: true,
     },
     {

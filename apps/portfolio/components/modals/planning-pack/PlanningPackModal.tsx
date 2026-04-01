@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import {
   type BuiltinEmbedPacksPayload,
-  PlanningPackGallery,
+  PlanningPackFileTree,
   type PlanningPackGalleryTab,
   type PlanningPackManifest,
 } from 'repo-planner/planning-pack';
@@ -120,7 +120,7 @@ export function PlanningPackModal({ onClose }: ModalShellProps) {
         </header>
 
         <div className="min-h-0 flex-1 overflow-hidden">
-          <PlanningPackGallery
+          <PlanningPackFileTree
             tabs={tabs}
             loading={loading}
             loadError={loadError}

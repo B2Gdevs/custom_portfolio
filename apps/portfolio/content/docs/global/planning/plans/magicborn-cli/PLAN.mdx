@@ -1,0 +1,90 @@
+---
+title: Magicborn CLI (unified operator tooling)
+description: Plan for a first-class `magicborn` (or `pnpm mb`) command suite.
+date: "2026-03-31"
+updated: "2026-04-01"
+repoPath: apps/portfolio/content/docs/global/planning/plans/magicborn-cli/PLAN.mdx
+taskPhase: global-tooling-01
+order: 1
+---
+
+# Magicborn CLI — is it a good idea?
+
+**Yes**, for *this* repo: you already run **many** `pnpm` scripts (auth seed, RAG ingest, book build, media publish, provider bootstrap). A **single entry** with **consistent flags**, **`--help`**, **config discovery**, and **tabular output** reduces cognitive load and avoids duplicating Payload/env bootstrapping in one-off scripts.
+
+## Recommended shape
+
+| Principle | Why |
+| --- | --- |
+| **One binary, subcommands** | `magicborn users list`, `magicborn media prompts`, `magicborn books status` — matches mental model of `kubectl`, `flyctl`, `pnpm`. |
+| **Thin wrappers first** | Delegate to existing `tsx` scripts and `lib/` until a command needs bespoke behavior. |
+| **Shared runtime** | Reuse `loadScriptEnv`, `getPayloadClient`, logging — same as `invite-user` / `rag-ingest-runner`. |
+| **JSON + table modes** | `--json` for automation; default human tables for terminal UX. |
+
+## Candidate command groups (backlog)
+
+| Group | Examples |
+| --- | --- |
+| **auth** | `users list`, `users get --email=`, `invite` (wrap `auth:invite`) |
+| **books** | `books list`, `books missing-covers`, `books build`, `books publish` |
+| **media** | `media prompt show`, `media generate --scene=…`, `media gaps` (records without `imagePrompt` metadata — needs schema) |
+| **data** | `rag ingest`, `rag status`, `provider export` |
+| **planning** | `planning packs list`, `planning embed` |
+
+## Architecture notes
+
+- Implement with **`commander`** or **`yargs`** + **`tsx`** shebang, or a small **`packages/magicborn-cli`** workspace package consumed as `pnpm mb`.
+- **Max UX**: top-level `magicborn --help`, **per-command help**, **exit codes**, **NO_COLOR** / **FORCE_COLOR**, and **stable stderr** for errors.
+
+## Planning tasks
+
+Tracked as **`global-tooling-01`** in [global task registry](/docs/global/planning/task-registry).
+
+### Landed (v0)
+
+- **Root:** `pnpm magicborn` / `pnpm mb` → `packages/magicborn-cli` (Commander), **`prepare`** builds `dist/` for the bin.
+- **`generate`:** nested commands `book` \| `app` \| `planning-pack` \| `listen` → `apps/portfolio/scripts/magicborn/run.ts`. Shared **`lib/magicborn/openai-image-generate`** with **`POST /api/media/generate`**. **`.env`** via `load-magicborn-env` (no `@next/env` in tsx). Output: **`.magicborn/runs/<id>/`** (`image.png`, `prompt.txt`, `manifest.json`). Flags: **`--dry-run`**, **`--print-prompt`**, **`--raw`**, **`--size`**, **`--slot`**, **`--json`**. Terminal UX mirrors **`rag:ingest`** when **`MAGICBORN_CLI=1`** (set by the package forwarder).
+- **`vendor add`:** GitHub URL → dry-run instructions or **`--apply`**: `git submodule add` + **`pnpm-workspace.yaml`** entry (see **`vendor/repub-builder`**); npm/GitHub Packages notes point at root **`package:*`** scripts — no secrets in repo.
+
+### Media asset taxonomy (operator + site)
+
+Every generated file maps to a **stable ref** for CLI, local working files, and Payload/storage: **`kind` + record id (+ optional sub-id / variant)**. Kinds align with what the app already surfaces or will surface soon.
+
+| Kind | Typical use | Text in image? | Notes |
+| --- | --- | --- | --- |
+| **`site`** | Logos, favicon-related art, shared chrome | **Logo:** usually no embedded tagline unless intentional; wordmarks are a separate deliberate choice | **Active logo** (and similar) is an **explicit pointer** set by the operator — not “latest upload wins” (**`global-tooling-dec-03`**). |
+| **`book`** | Covers, scene stills, character sheets | **Covers:** yes — title + subtitle (and series if needed) per brief | Scene/character images often **no** burned-in text; captions live in CMS/copy. |
+| **`app`** | Catalog cards, hero imagery for `/apps` | Often **yes** — app name + short subtitle for card-style art | Matches “book cover with text” energy for discoverability. |
+| **`project`** | Project covers / thumbnails | Often **yes** — project title + optional tagline | Same pattern as apps where the grid is image-forward. |
+| **`song`** / **`listen`** | Listen row art, BandLab-linked visuals | Case-by-case; default **no** text unless promoting a track title on the art | Keep flexible per row. |
+| **`planning-pack`** | Pack thumbnails, modal art | Usually **no** or minimal; title in UI | Align with planning embed surfaces. |
+| **`blog`** / **`article`** | Post heroes, OG-style images | Optional title on art for share cards; editorial choice | Not all posts need text on image. |
+| **`ui`** | Backgrounds, textures, marketing shells | Typically **no** text | Style layer + composition only. |
+
+**Prompt architecture (two layers):** (1) **Magicborn media design style** — shared art direction (repo `lib/magicborn-prompts` first; optional Payload override later). (2) **Asset prompt** — the specific scene, product, or layout brief. Image models that must **avoid** text still use the global negatives from the style block; when text **is** wanted, the asset prompt states typography intent explicitly.
+
+### Explicit non-goals (for now)
+
+- **`magicborn batch` / plan files:** deferred — no multi-row batch runner until single-target generate + upload paths are proven (**`global-tooling-01-02`**–**`01-04`**).
+- **ElevenLabs / audiobook pipeline:** tracked as a later slice (books complete); not part of the first CLI image loop.
+
+### Local working tree (next implementation)
+
+- **Gitignored** working root (e.g. **`.magicborn/`** at repo root): temp outputs + a **manifest** so idempotency and “upload the leftovers” do not rely on DB alone. Detailed behavior lands with **`global-tooling-01-03`** / follow-up tasks.
+
+### Suggested execution order (use soon)
+
+1. **`global-tooling-01-02`:** CLI → **`POST /api/media/generate`** with `.env` / session as today’s trust model; write to temp + manifest stub; **spend summary** per run when the API returns usage.
+2. **`global-tooling-01-03`:** Payload (or existing collections) fields for **asset role**, **ref**, **variant**, **text-on-image** flag, and wiring for **`site-app-records`** + **`project-records`** media already used in the app.
+3. **`global-tooling-01-04`:** **Site logos** — generate candidates, upload to storage, **`magicborn site logo set-active`** (or equivalent) updates the pointer the site reads.
+
+### Next (task-linked)
+
+- **`global-tooling-01-02`:** Wire generate to **`/api/media/generate`** (or shared lib); OpenAI-only for speed; optional **book-grounded operator RAG** for prompt assembly (**`global-tooling-dec-01`**, never mixed with **`global-data-dec-09`**).
+- **`global-tooling-01-03`:** Schema + persistence for **asset taxonomy** above; reconcile **local manifest ↔ Payload** for interrupted runs.
+- **`global-tooling-01-04`:** **Logo** generation, storage, and **active logo** selection via CLI (**`global-tooling-dec-02`**, **`global-tooling-dec-03`**).
+
+## References
+
+- [Global task registry](/docs/global/planning/task-registry) — phase **`global-tooling-01`**
+- [Decisions](/docs/global/planning/decisions) — **`global-tooling-dec-01`** (operator RAG boundary), **`global-tooling-dec-02`** (taxonomy + text-on-image), **`global-tooling-dec-03`** (active logo pointer)

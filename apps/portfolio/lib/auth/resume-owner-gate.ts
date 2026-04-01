@@ -5,11 +5,14 @@ type SessionPayload = {
   session?: { isOwner?: boolean } | null;
 };
 
+const SESSION_FETCH_MS = 28_000;
+
 export async function isResumeOwnerRequest(request: Request): Promise<boolean> {
   const sessionUrl = new URL('/api/auth/session', request.url);
   const res = await fetch(sessionUrl, {
     headers: { cookie: request.headers.get('cookie') ?? '' },
     cache: 'no-store',
+    signal: AbortSignal.timeout(SESSION_FETCH_MS),
   });
   if (!res.ok) return false;
   const data = (await res.json()) as SessionPayload;
@@ -26,6 +29,7 @@ export async function assertResumeOwnerOrRedirect() {
   const res = await fetch(sessionUrl, {
     headers: { cookie },
     cache: 'no-store',
+    signal: AbortSignal.timeout(SESSION_FETCH_MS),
   });
   const data = (await res.json()) as SessionPayload;
   if (!data?.session?.isOwner) {

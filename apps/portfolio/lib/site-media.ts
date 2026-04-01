@@ -1,6 +1,6 @@
 /**
  * Shared types for site media generation (OpenAI Images API).
- * Keep in sync with `app/api/media/generate/route.ts`.
+ * Server route and shared implementation: `app/api/media/generate/route.ts`, `lib/magicborn/openai-image-generate.ts`.
  */
 
 export type MediaImageSize = '1024x1024' | '1792x1024' | '1024x1792';
@@ -10,6 +10,9 @@ export type MediaGenerateRequestBody = {
   /** Stable API field: cover / app-tile target id (e.g. `app-cover:reader`). */
   mediaSlot?: string;
   size?: MediaImageSize;
+  /** When true, prepend Magicborn style block; optional `sceneKey` selects a curated seed. */
+  useMagicbornStyle?: boolean;
+  sceneKey?: string;
 };
 
 export type MediaGenerateSuccess = {

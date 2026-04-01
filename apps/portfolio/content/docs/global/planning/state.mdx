@@ -2,7 +2,7 @@
 title: State
 description: Current cycle and focus for the Global documentation section (repo-wide planning IA).
 date: "2026-03-28"
-updated: "2026-03-31"
+updated: "2026-04-01"
 order: 2
 repoPath: apps/portfolio/content/docs/global/planning/state.mdx
 taskPhase: global-data-02
@@ -17,24 +17,25 @@ taskPhase: global-data-02
 | `section` | `global` |
 | `owner` | `monorepo` |
 | `status` | `active` |
-| `updated` | `2026-03-31` |
+| `updated` | `2026-04-01` |
 
 ## Current cycle
 
 | Field | Value |
 | --- | --- |
-| `phase` | `global-data-03-01` remains active while `global-data-01` stays the shared provider baseline and `global-data-02` stays the storage-policy foundation |
-| `focus` | the blocked heavy-blob history is cleaned and `main` pushes again. `repub-builder` is extracted, the book-artifact and public-media publishers are live, and the public-catalog migration now has its first real `site-download-assets` consumers: `/apps` reads `site-app-records` through the SSR-safe worker bridge, the planning-pack modal reads a server manifest that swaps site-export URLs to published download assets when available, and `/resumes` HTML routes now prefer published storage-backed files before falling back to repo-local sources. The next execution slice is moving resume and project metadata onto dedicated records while reusing the same download-asset path. |
+| `phase` | `global-data-03` is complete. `global-data-01` stays the shared provider baseline and `global-data-02` stays the storage-policy foundation while the newly landed owner shell and Payload back office maintain the operational side of those records. |
+| `focus` | the blocked heavy-blob history is cleaned and `main` pushes again. `repub-builder` is extracted, the book-artifact and public-media publishers are live, and the public-catalog migration is now fully landed: `/apps` reads `site-app-records`, `/projects` merges `project-records` metadata over repo-authored MDX bodies, `/resumes` reads `resume-records`, and both the resume routes and planning-pack downloads reuse the shared `site-download-assets` path with repo-local fallbacks where planned. The owner shell refresh is live as well: the sidebar footer reads the shared auth/session API, shows avatar plus user/org context, supports logout, and gates `/admin` through owner-only entitlements. The owner-only Payload back office is mounted too: `/admin` now hands off to the upstream Payload route group, public-write collections allow owner CRUD, and internal reader/RAG collections stay hidden from the first admin pass. Shared Listen and Reader runtime access now follows the same provider-owned repository pattern too: bootstrap/state services call Payload-backed repositories instead of scattering collection and query details across routes and workers. Grime Time is now tracked as a first-class app entry in the site catalog so the portfolio can point at the next product line while auth work closes out. |
 | `constraint` | repo-memory reduction cannot casually break authored-content SSR. Runtime binaries, generated reading artifacts, and private media can move behind storage/database paths, but route metadata, public page content, and indexable SEO surfaces still need a clear render contract |
 
 ## Next queue
 
 | Priority | Action |
 | --- | --- |
-| `1` | continue `global-data-03-03`: move resume metadata onto `resume-records` now that current HTML/download artifacts publish through `site-download-assets` |
-| `2` | continue `global-data-03-02`: move project metadata, ordering, and download/media relations onto `project-records` while keeping long-form bodies repo-first for now |
+| `1` | finish **`global-auth-03-03`** as the last auth foundation slice before the Grime Time delivery shift: trusted CLI invites, browser invite acceptance, and the role-template / revoke path |
+| `2` | continue `global-data-01-03`: finish the install, export-import, and hosted bootstrap flow for large local data plus uploads so the same auth + storage baseline ports cleanly into Grime Time |
 | `3` | extend the `site-download-assets` publisher to the next public bundle classes as `/projects`, `/apps`, and future public exports adopt the same storage-backed path |
-| `4` | queue `global-auth-02-01`: refresh the site shell/sidebar around owner-only login and private-surface affordances using the existing auth/session routes instead of inventing a second auth stack |
+| `4` | **`global-data-01-04` closed:** phase-1 site RAG **does not** include book manuscript EPUB text by default (**`global-data-dec-09`**, **`BOOKS-REQ-04`**). Remaining **local vs hosted** doc alignment rides with **`global-data-01-03`** and Supabase bootstrap notes |
+| `5` | **`global-tooling-01-02`–`01-04`:** Magicborn CLI media path — OpenAI generate from `.env`, temp + manifest under **`.magicborn/`**, taxonomy + Payload wiring for **apps/projects** (and rest per [plan](/docs/global/planning/plans/magicborn-cli/plan)), then **site logos** with **active pointer** via CLI (**`global-tooling-dec-02`**, **`global-tooling-dec-03`**) |
 
 ## References
 
@@ -44,6 +45,9 @@ taskPhase: global-data-02
 | `global-data-kickoff` | `apps/portfolio/content/docs/global/planning/plans/global-data-01/PLAN.mdx` |
 | `global-data-supabase-bootstrap` | `apps/portfolio/content/docs/global/planning/plans/global-data-01/SUPABASE-BOOTSTRAP.mdx` |
 | `global-data-catalog-kickoff` | `apps/portfolio/content/docs/global/planning/plans/global-data-03/PLAN.mdx` |
+| `global-auth-shell-kickoff` | `apps/portfolio/content/docs/global/planning/plans/global-auth-02/PLAN.mdx` |
+| `global-admin-kickoff` | `apps/portfolio/content/docs/global/planning/plans/global-admin-01/PLAN.mdx` |
+| `magicborn-cli-plan` | `apps/portfolio/content/docs/global/planning/plans/magicborn-cli/PLAN.mdx` |
 | `docs-lib` | `apps/portfolio/lib/docs.ts` |
 | `payload-config` | `apps/portfolio/payload.config.ts` |
 | `rag-config` | `apps/portfolio/lib/rag/config.ts` |

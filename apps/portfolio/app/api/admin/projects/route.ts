@@ -1,16 +1,19 @@
 import { NextResponse } from 'next/server';
-import { getAllContent } from '@/lib/content';
+import {
+  adminUnauthorizedResponse,
+  isAdminOwnerRequest,
+} from '@/lib/auth/admin-owner-gate';
+import { getProjectSummaries } from '@/lib/projects';
 
-export async function GET() {
-  // Only allow in development
-  if (process.env.NODE_ENV !== 'development') {
-    return NextResponse.json({ error: 'Not available in production' }, { status: 403 });
+export async function GET(request: Request) {
+  if (!(await isAdminOwnerRequest(request))) {
+    return adminUnauthorizedResponse();
   }
 
   try {
-    const projects = getAllContent('projects');
+    const projects = await getProjectSummaries();
     return NextResponse.json(projects);
-  } catch (_error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 });
   }
 }

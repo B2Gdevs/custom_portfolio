@@ -1,0 +1,25 @@
+{
+  "name": "@magicborn/cli",
+  "version": "0.4.0",
+  "private": true,
+  "description": "Magicborn operator CLI (generate, vendor, …)",
+  "files": [
+    "dist",
+    "completions"
+  ],
+  "type": "module",
+  "bin": {
+    "magicborn": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "commander": "^14.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.3",
+    "typescript": "^5.9.3"
+  }
+}

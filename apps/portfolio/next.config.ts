@@ -1,6 +1,7 @@
 import path from 'path';
 import { createRequire } from 'module';
 import createMDX from '@next/mdx';
+import { withPayload } from '@payloadcms/next/withPayload';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
@@ -131,6 +132,7 @@ const nextConfig: NextConfig = {
     config.resolve.alias = {
       ...(config.resolve.alias as Record<string, string | false | string[]>),
       '@': portfolioRoot,
+      '@payload-config': path.join(portfolioRoot, 'payload.config.ts'),
       'react-markdown': resolvePkg('react-markdown'),
       diff: resolvePkg('diff'),
     };
@@ -174,12 +176,19 @@ const nextConfig: NextConfig = {
       });
       config.plugins.push(
         new webpack.IgnorePlugin({
+          resourceRegExp: /(README\.md|LICENSE|\.node)$/i,
+          contextRegExp: /(?:^|[\\/])(?:@libsql|libsql)(?:[\\/]|$)/,
+        }),
+        new webpack.IgnorePlugin({
           checkResource(resource: string, context: string) {
             const ctx = context.replace(/\\/g, '/');
             const res = resource.replace(/\\/g, '/');
             const isLibsqlDocArtifact =
               (ctx.includes('/@libsql/') || ctx.includes('/libsql/')) &&
-              (res.endsWith('/README.md') || res.endsWith('/LICENSE'));
+              (res.endsWith('/README.md') ||
+                res.endsWith('README.md') ||
+                res.endsWith('/LICENSE') ||
+                res.endsWith('LICENSE'));
             const isLibsqlNativeArtifact =
               (ctx.includes('/@libsql/') || ctx.includes('/libsql/')) &&
               res.endsWith('.node');
@@ -218,4 +227,6 @@ const withMDX = createMDX({
   },
 });
 
-export default withMDX(nextConfig);
+export default withPayload(withMDX(nextConfig), {
+  devBundleServerPackages: false,
+});

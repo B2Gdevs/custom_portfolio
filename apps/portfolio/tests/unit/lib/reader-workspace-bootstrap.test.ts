@@ -1,15 +1,15 @@
 vi.mock('server-only', () => ({}));
 
 import { getReaderWorkspaceBootstrap } from '@/lib/reader/workspace-bootstrap';
-import { getPayloadClient } from '@/lib/payload';
 import { getSessionViewer } from '@/lib/auth/session';
-
-vi.mock('@/lib/payload', () => ({
-  getPayloadClient: vi.fn(),
-}));
+import { getReaderWorkspaceRepository } from '@/lib/reader/workspace-repository';
 
 vi.mock('@/lib/auth/session', () => ({
   getSessionViewer: vi.fn(),
+}));
+
+vi.mock('@/lib/reader/workspace-repository', () => ({
+  getReaderWorkspaceRepository: vi.fn(),
 }));
 
 describe('reader workspace bootstrap', () => {
@@ -17,7 +17,7 @@ describe('reader workspace bootstrap', () => {
     vi.resetAllMocks();
   });
 
-  it('returns anonymous defaults without hitting payload', async () => {
+  it('returns anonymous defaults without hitting the repository', async () => {
     vi.mocked(getSessionViewer).mockResolvedValue({
       authenticated: false,
       autoLoggedIn: false,
@@ -44,10 +44,10 @@ describe('reader workspace bootstrap', () => {
       libraryRecords: [],
     });
 
-    expect(getPayloadClient).not.toHaveBeenCalled();
+    expect(getReaderWorkspaceRepository).not.toHaveBeenCalled();
   });
 
-  it('hydrates tenant records and settings for entitled viewers', async () => {
+  it('hydrates tenant records and settings through the repository', async () => {
     vi.mocked(getSessionViewer).mockResolvedValue({
       authenticated: true,
       autoLoggedIn: false,
@@ -70,33 +70,31 @@ describe('reader workspace bootstrap', () => {
       },
     });
 
-    const payload = {
-      find: vi
-        .fn()
-        .mockResolvedValueOnce({
-          docs: [
-            {
-              id: 'settings-1',
-              defaultWorkspaceView: 'continue-reading',
-              preferPagedReader: false,
-              showProgressBadges: true,
-            },
-          ],
-        })
-        .mockResolvedValueOnce({
-          docs: [
-            {
-              id: 'library-1',
-              title: 'Uploaded EPUB',
-              sourceKind: 'uploaded',
-              visibility: 'private',
-              sourceFileName: 'uploaded.epub',
-              updatedAt: '2026-03-30T00:00:00.000Z',
-            },
-          ],
-        }),
+    const repository = {
+      getWorkspace: vi.fn().mockResolvedValue({
+        settings: {
+          defaultWorkspaceView: 'continue-reading',
+          preferPagedReader: false,
+          showProgressBadges: true,
+        },
+        libraryRecords: [
+          {
+            id: 'library-1',
+            title: 'Uploaded EPUB',
+            bookSlug: null,
+            author: null,
+            description: null,
+            coverImageUrl: null,
+            epubUrl: null,
+            sourceKind: 'uploaded',
+            sourceFileName: 'uploaded.epub',
+            visibility: 'private',
+            updatedAt: '2026-03-30T00:00:00.000Z',
+          },
+        ],
+      }),
     };
-    vi.mocked(getPayloadClient).mockResolvedValue(payload as never);
+    vi.mocked(getReaderWorkspaceRepository).mockReturnValue(repository);
 
     await expect(getReaderWorkspaceBootstrap()).resolves.toEqual({
       access: {
@@ -132,17 +130,9 @@ describe('reader workspace bootstrap', () => {
       ],
     });
 
-    expect(payload.find).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({
-        collection: 'reader-settings',
-      }),
-    );
-    expect(payload.find).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        collection: 'reader-library-records',
-      }),
-    );
+    expect(repository.getWorkspace).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      userId: 'user-1',
+    });
   });
 });

@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@10.28.0",
+  "bin": {
+    "magicborn": "./packages/magicborn-cli/dist/cli.js"
+  },
   "workspaces": [
     "apps/*",
     "packages/*",
@@ -10,6 +13,7 @@
     "vendor/repub-builder"
   ],
   "scripts": {
+    "postinstall": "node scripts/magicborn-postinstall.cjs",
     "setup": "./scripts/setup-git-hooks.sh",
     "dev": "npm run dev --workspace=@portfolio/app",
     "build": "npm run build --workspace=@portfolio/app",
@@ -20,6 +24,9 @@
     "build:reader:standalone": "pnpm run build:reader",
     "start:reader:standalone": "pnpm run reader",
     "serve:reader:standalone": "pnpm run build:reader && pnpm run reader",
+    "dev:portfolio": "node scripts/portfolio-local.mjs dev",
+    "build:portfolio": "node scripts/portfolio-local.mjs build",
+    "start:portfolio:local": "node scripts/portfolio-local.mjs start",
     "lint": "npm run lint --workspace=@portfolio/app",
     "package": "./scripts/manage-packages.sh",
     "package:setup": "./scripts/manage-packages.sh setup",
@@ -53,11 +60,30 @@
     "planning:report-view": "node scripts/run-planning-cli.mjs report view",
     "planning:ui": "node scripts/run-planning-cli.mjs report view",
     "planning:embed-packs": "node scripts/run-planning-cli.mjs pack embed-build -o apps/portfolio/public/planning-embed/builtin-packs.json --docs-dir apps/portfolio/content/docs/repo-planner",
+    "vendor:grimetime:init": "git submodule update --init --recursive vendor/grime-time-site",
+    "vendor:grimetime:env": "node scripts/grimetime-vendor.mjs env",
+    "vendor:grimetime:env:check": "node scripts/grimetime-vendor.mjs check",
+    "vendor:grimetime:install": "node scripts/grimetime-vendor.mjs install",
+    "vendor:grimetime:build": "node scripts/grimetime-vendor.mjs run-script build --env NEXT_PUBLIC_SERVER_URL=http://127.0.0.1:5466",
+    "vendor:grimetime:dev": "node scripts/grimetime-vendor.mjs run-script dev --env GT_DEV_PORT=5465 --env NEXT_PUBLIC_SERVER_URL=http://127.0.0.1:5465",
+    "vendor:grimetime:start:local": "node scripts/grimetime-vendor.mjs run-script start --env NEXT_PUBLIC_SERVER_URL=http://127.0.0.1:5466 -- --hostname 127.0.0.1 --port 5466",
+    "vendor:grimetime:migrate": "node scripts/grimetime-vendor.mjs run-script payload -- migrate",
+    "vendor:grimetime:bootstrap-admin": "node scripts/grimetime-vendor.mjs run-script bootstrap:admin",
+    "vendor:grimetime:admin:ensure": "node scripts/grimetime-vendor.mjs run-script admin:ensure",
+    "vendor:grimetime:ai:ingest": "node scripts/grimetime-vendor.mjs run-script ai:ops:ingest",
+    "vendor:grimetime:seed": "node scripts/grimetime-vendor.mjs run-script seed:baseline",
+    "vendor:grimetime:seed:full": "node scripts/grimetime-vendor.mjs run-script seed",
+    "dev:grimetime": "pnpm run vendor:grimetime:dev",
+    "build:grimetime": "pnpm run vendor:grimetime:build",
+    "start:grimetime:local": "pnpm run vendor:grimetime:start:local",
     "vendors:commit-push": "node scripts/commit-push-vendors-and-root.cjs",
     "test:unit": "pnpm --filter @portfolio/app run test:unit",
     "test:unit:coverage": "pnpm --filter @portfolio/app run test:unit:coverage",
     "test:unit:report": "pnpm --filter @portfolio/app run test:unit:report",
-    "chat:env-preview": "pnpm --filter @portfolio/app run chat:env-preview"
+    "chat:env-preview": "pnpm --filter @portfolio/app run chat:env-preview",
+    "rag:ingest": "node scripts/rag-ingest-from-root.cjs",
+    "magicborn": "node packages/magicborn-cli/dist/cli.js",
+    "mb": "node packages/magicborn-cli/dist/cli.js"
   },
   "devDependencies": {
     "@iarna/toml": "^2.2.5",
@@ -76,7 +102,8 @@
     "overrides": {
       "styled-jsx>react": "19.2.1",
       "next": "16.0.8",
-      "@next/mdx": "16.0.8"
+      "@next/mdx": "16.0.8",
+      "sharp": "^0.34.5"
     }
   }
 }

@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, Suspense, useState } from 'react';
 import Link from 'next/link';
 import { loginAuthSession } from '@/lib/auth/client';
+import { dispatchPortfolioAuthChanged } from '@/lib/auth/events';
 
 function LoginForm() {
   const router = useRouter();
@@ -21,15 +22,27 @@ function LoginForm() {
     try {
       const { response, body } = await loginAuthSession({ email, password });
       if (!response.ok || !('ok' in body) || !body.ok) {
+        const fromServer =
+          'message' in body && typeof body.message === 'string' ? body.message : null;
+        const code =
+          'error' in body && typeof body.error === 'string' ? body.error : null;
         const msg =
-          'error' in body && typeof body.error === 'string'
-            ? body.error
-            : 'Sign-in failed.';
+          fromServer ||
+          (code === 'auth_timeout'
+            ? 'Sign-in timed out. Check that the database is reachable and DATABASE_URL is set.'
+            : null) ||
+          (code === 'invalid_credentials' ? 'Email or password is incorrect.' : null) ||
+          'Sign-in failed.';
         setError(msg);
         return;
       }
+      dispatchPortfolioAuthChanged();
       router.replace(nextPath.startsWith('/') ? nextPath : '/');
       router.refresh();
+    } catch {
+      setError(
+        'Could not reach the server. If you use `pnpm start`, ensure Payload can connect (see DATABASE_URL) and try again.',
+      );
     } finally {
       setPending(false);
     }
@@ -72,7 +85,7 @@ function LoginForm() {
             disabled={pending}
             className="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-accent-foreground transition hover:opacity-90 disabled:opacity-60"
           >
-            {pending ? 'Signing in…' : 'Sign in'}
+            {pending ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
         <p className="mt-6 text-center text-sm text-text-muted">
@@ -89,7 +102,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="section-shell flex min-h-[40vh] items-center justify-center text-text-muted">Loading…</div>
+        <div className="section-shell flex min-h-[40vh] items-center justify-center text-text-muted">Loading...</div>
       }
     >
       <LoginForm />

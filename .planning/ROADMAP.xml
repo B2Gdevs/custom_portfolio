@@ -16,8 +16,8 @@
     <depends>02</depends>
   </phase>
   <phase id="04">
-    <goal>Phase 04: move the next public catalog surfaces behind SSR-safe Postgres metadata plus storage-backed files, starting with apps, project metadata, resumes, and public download assets, then refresh the public shell around the existing owner-only auth/sidebar contract.</goal>
-    <status>planned</status>
+    <goal>Phase 04 (closed 2026-03-31): move the next public catalog surfaces behind SSR-safe Postgres metadata plus storage-backed files, starting with apps, project metadata, resumes, and public download assets. The owner-only auth shell and mounted Payload admin back office are now in place as the operational layer around those records.</goal>
+    <status>done</status>
     <depends>03</depends>
   </phase>
   <doc-flow>

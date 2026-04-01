@@ -30,14 +30,18 @@ export async function POST(request: Request) {
       response.headers.set('set-cookie', result.setCookie);
     }
     return response;
-  } catch {
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const timedOut = msg.includes('timed out');
     return NextResponse.json(
       {
         ok: false,
-        error: 'invalid_credentials',
-        message: 'Login failed.',
+        error: timedOut ? 'auth_timeout' : 'invalid_credentials',
+        message: timedOut
+          ? 'Sign-in service timed out. Check DATABASE_URL / network and try again.'
+          : 'Login failed.',
       },
-      { status: 401 },
+      { status: timedOut ? 503 : 401 },
     );
   }
 }

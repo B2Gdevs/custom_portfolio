@@ -6,6 +6,7 @@ import { LISTEN_CATALOG_RECORDS_COLLECTION_SLUG } from '@/lib/payload/collection
 type SeedListenCatalogResult = {
   created: number;
   updated: number;
+  skipped: number;
   tenantId: string;
   total: number;
 };
@@ -14,6 +15,11 @@ function normalizeId(value: unknown) {
   if (typeof value === 'string') return value;
   if (typeof value === 'number') return String(value);
   return null;
+}
+
+function normalizeOptionalString(value: unknown) {
+  const normalized = typeof value === 'string' ? value.trim() : value == null ? null : String(value);
+  return normalized && normalized.length > 0 ? normalized : null;
 }
 
 function toRecordData(
@@ -39,6 +45,19 @@ function toRecordData(
     tenant: tenantValue,
     published: true,
   };
+}
+
+function normalizeDate(value: unknown) {
+  if (!value) {
+    return null;
+  }
+
+  const date = value instanceof Date ? value : new Date(String(value));
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date.toISOString().slice(0, 10);
 }
 
 function hasChanged(
@@ -67,12 +86,12 @@ function hasChanged(
     existing.genre !== next.genre ||
     existing.mood !== next.mood ||
     existing.era !== next.era ||
-    existing.duration !== next.duration ||
+    normalizeOptionalString(existing.duration) !== normalizeOptionalString(next.duration) ||
     existing.description !== next.description ||
     existing.bandlabUrl !== next.bandlabUrl ||
     existing.embedUrl !== next.embedUrl ||
-    existing.artworkUrl !== next.artworkUrl ||
-    existing.date !== next.date ||
+    normalizeOptionalString(existing.artworkUrl) !== normalizeOptionalString(next.artworkUrl) ||
+    normalizeDate(existing.date) !== normalizeDate(next.date) ||
     existing.published !== next.published ||
     existingTenant !== normalizeId(next.tenant) ||
     existingTags.join('||') !== next.extraTags.map((entry) => entry.tag).join('||')
@@ -87,22 +106,26 @@ export async function seedListenCatalog(
 
   let created = 0;
   let updated = 0;
+  let skipped = 0;
+  const existing = await payload.find({
+    collection: LISTEN_CATALOG_RECORDS_COLLECTION_SLUG,
+    limit: 200,
+    overrideAccess: true,
+    pagination: false,
+  });
+  const existingBySlug = new Map(
+    existing.docs
+      .map((doc) => {
+        const record = doc as Record<string, unknown> | undefined;
+        const slug = typeof record?.slug === 'string' ? record.slug : null;
+        return slug ? [slug, record] : null;
+      })
+      .filter((entry): entry is [string, Record<string, unknown>] => entry !== null),
+  );
 
   for (const entry of entries) {
-    const existing = await payload.find({
-      collection: LISTEN_CATALOG_RECORDS_COLLECTION_SLUG,
-      limit: 1,
-      overrideAccess: true,
-      pagination: false,
-      where: {
-        slug: {
-          equals: entry.slug,
-        },
-      },
-    });
-
     const next = toRecordData(entry, owner.tenantId, owner.tenantValue);
-    const doc = existing.docs[0] as Record<string, unknown> | undefined;
+    const doc = existingBySlug.get(entry.slug);
 
     if (!doc) {
       await payload.create({
@@ -115,6 +138,7 @@ export async function seedListenCatalog(
     }
 
     if (!hasChanged(doc, next)) {
+      skipped += 1;
       continue;
     }
 
@@ -130,6 +154,7 @@ export async function seedListenCatalog(
   return {
     created,
     updated,
+    skipped,
     tenantId: owner.tenantId,
     total: entries.length,
   };

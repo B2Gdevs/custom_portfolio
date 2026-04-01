@@ -3,6 +3,7 @@ import { applyPlanningPackAssetUrls } from '@/lib/planning-pack-assets';
 import {
   pickResumeHtmlAsset,
   resolveSiteDownloadAssetUrl,
+  toSiteDownloadLinks,
   type SiteDownloadAssetRecord,
 } from '@/lib/site-download-assets';
 
@@ -89,5 +90,47 @@ describe('site download assets helpers', () => {
 
     expect(pickResumeHtmlAsset(assets)?.filename).toBe('axiom.html');
     expect(resolveSiteDownloadAssetUrl(assets[1])).toBe('/api/site-download-assets/file/axiom.html');
+  });
+
+  it('normalizes app and project download assets into content links', () => {
+    const links = toSiteDownloadLinks([
+      {
+        id: 'asset-zip',
+        title: 'Planning pack bundle',
+        downloadSlug: 'app--planning-pack--site-bundle',
+        downloadKind: 'app-bundle',
+        contentScope: 'app',
+        contentSlug: 'planning-pack',
+        downloadLabel: 'Download site planning pack bundle',
+        summary: 'ZIP bundle.',
+        isCurrent: true,
+        checksumSha256: 'zip',
+        fileSizeBytes: 20,
+        filename: 'planning-pack-site.zip',
+      },
+      {
+        id: 'asset-doc',
+        title: 'Dialogue Forge case study',
+        downloadSlug: 'project--dialogue-forge--case-study',
+        downloadKind: 'document',
+        contentScope: 'project',
+        contentSlug: 'dialogue-forge',
+        isCurrent: true,
+        checksumSha256: 'doc',
+        fileSizeBytes: 30,
+        filename: 'dialogue-forge.mdx',
+      },
+    ]);
+
+    expect(links).toEqual([
+      expect.objectContaining({
+        href: '/api/site-download-assets/file/planning-pack-site.zip',
+        label: 'Download site planning pack bundle',
+      }),
+      expect.objectContaining({
+        href: '/api/site-download-assets/file/dialogue-forge.mdx',
+        label: 'Dialogue Forge case study',
+      }),
+    ]);
   });
 });

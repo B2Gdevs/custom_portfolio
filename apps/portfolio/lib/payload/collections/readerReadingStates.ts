@@ -1,11 +1,22 @@
 import type { CollectionConfig } from 'payload';
+import {
+  canManageOwnerAdminCollection,
+  readOwnerAdminCollection,
+} from '../access';
 
 export const readerReadingStates: CollectionConfig = {
   slug: 'reader-reading-states',
   admin: {
     useAsTitle: 'storageKey',
     group: 'Reader',
+    hidden: true,
     defaultColumns: ['storageKey', 'bookSlug', 'user', 'tenant', 'updatedAt'],
+  },
+  access: {
+    read: readOwnerAdminCollection,
+    create: canManageOwnerAdminCollection,
+    update: canManageOwnerAdminCollection,
+    delete: canManageOwnerAdminCollection,
   },
   fields: [
     {

@@ -2,7 +2,7 @@
 title: Task Registry
 description: Compact task records for the books section.
 date: "2026-03-15"
-updated: "2026-04-07"
+updated: "2026-03-31"
 repoPath: apps/portfolio/content/docs/books/planning/task-registry.mdx
 order: 3
 ---
@@ -51,6 +51,17 @@ Legacy-looking ids such as `books-ai-01-04` are **not** a separate scheme: **`ai
 | --- | --- | --- | --- | --- |
 | `books-publishing-01-01` | `planned` | expand planning records around publishing, editions, and progression | `books-reader-01-15` | `pnpm run build:books` |
 | `books-publishing-01-02` | `planned` | build a live EPUB for the next visible book once the manuscript is ready | `books-publishing-01-01` | `pnpm run build:books`, `pnpm run build` |
+
+## Phase `books-publishing-03` (Magicborn media + prompts)
+
+**Goal:** **Cover and scene imagery** for Magicborn-line books using a **shared design-style prompt** plus **curated scene prompts** from chapter beats — same composition for **SiteCopilot**, **`POST /api/media/generate`**, and a **local CLI**. **Kickoff:** [plans/books-publishing-03-magicborn-media/PLAN.mdx](/docs/books/planning/plans/books-publishing-03-magicborn-media/plan). **Auth:** generation and owner editing paths are **owner/admin-only**; see **`global-auth-03`**.
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `books-publishing-03-01` | `done` | add an in-repo **prompt library**: Magicborn **style block** (`lib/magicborn-prompts/style-block.ts`) + **scene seeds** (`scene-seeds.ts`); expand over time from beats | `-` | `pnpm --dir apps/portfolio exec vitest run tests/unit/lib/magicborn-compose-image-prompt.test.ts`; `pnpm run build` |
+| `books-publishing-03-02` | `done` | **`composeMagicbornImagePrompt`** in `lib/magicborn-prompts/compose-image-prompt.ts`; **`POST /api/media/generate`** supports **`useMagicbornStyle`** + **`sceneKey`**; SiteCopilot sends **`useMagicbornStyle: true`** for app covers | `books-publishing-03-01` | unit + media route tests; `pnpm run build` |
+| `books-publishing-03-03` | `planned` | **CLI** to generate images locally (batch or single) using the composer + `OPENAI_API_KEY`; write artifacts to an agreed path (`public/` / `media/` / book folder); document in kickoff | `books-publishing-03-02`, `global-auth-03-01` (CLI may use server key via env, not session) | script run documented; `pnpm run build` |
+| `books-publishing-03-04` | `planned` | wire **cover** outputs into book **manifest / featured-book / OG** metadata paths so shipped surfaces pick up generated art | `books-publishing-03-03` or manual asset drop | `pnpm run build:books` where applicable; featured book shows cover |
 
 ## Phase `books-publishing-02` (Mordred's Tale trilogy packaging)
 
@@ -104,8 +115,25 @@ Legacy-looking ids such as `books-ai-01-04` are **not** a separate scheme: **`ai
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
 | `books-reader-07-01` | `done` | add the next mirrored package-local reader UI primitives (`Textarea`, `Select`, `Checkbox`) and migrate workspace settings/upload/forms plus planning-strip and modal buttons onto them | `books-reader-06-02` | `pnpm --dir apps/portfolio exec vitest run tests/unit/components/books/ReaderWorkspace.test.tsx`, `pnpm run build`, `pnpm run lint` |
-| `books-reader-07-02` | `in-progress` | migrate the main `EpubViewer` chrome, annotation controls, and page-jump controls onto the package-local shadcn stack where it fits without breaking the custom reading stage | `books-reader-07-01` | `pnpm --filter @portfolio/repub-builder test`, `pnpm run build`, `pnpm run lint` |
-| `books-reader-07-03` | `planned` | record the remaining intentionally custom reader surfaces and add targeted regression coverage for the migrated controls | `books-reader-07-01`, `books-reader-07-02` | targeted unit tests, `pnpm run build`, `pnpm run lint` |
+| `books-reader-07-02` | `done` | migrate the main `EpubViewer` **chrome only** (toolbars, overlays, annotation UI, page-jump): swap raw controls for package-local primitives (`@portfolio/repub-builder` reader UI). **Do not** replace the **`react-reader` / EPUB reading stage** or bespoke spread/CFI layout — that stays the existing viewer core | `books-reader-07-01` | `pnpm --filter @portfolio/repub-builder test`, `pnpm run build`, `pnpm run lint` |
+| `books-reader-07-03` | `done` | record the remaining intentionally custom reader surfaces and add targeted regression coverage for the migrated controls | `books-reader-07-01`, `books-reader-07-02` | `reader-ui-primitives.test.ts` + existing repub-builder tests, `pnpm --dir apps/portfolio exec vitest run tests/unit/components/books/ReaderWorkspace.test.tsx`, `pnpm run build`, `pnpm run lint` |
+
+### Definition of done (books-reader-07)
+
+| Layer | Done when |
+| --- | --- |
+| **Reading stage** | Still driven by **`EpubViewer`** + **`react-reader`** (same underlying reader as today); no requirement to wrap the iframe/canvas in generic shadcn layout primitives. |
+| **Chrome / controls** | Toolbars, dialogs, annotation panel, page jump, and other **surrounding** UI use **package-local** mirrored shadcn-style components where a straight swap does not break layout or a11y. |
+| **`07-01`** | **Done** — `Textarea` / `Select` / `Checkbox` + workspace/settings/planning-strip migrations per task row. |
+| **`07-02`** | **Done** — `EpubViewer` + `ReaderModalRoot` interactive surfaces use `Button` / `Input` / `Textarea`; **exceptions (leave as-is):** hidden file input for JSON import; **`motion.button`** TOC/notes panel scrims (Framer opacity + layout; not worth wrapping with `motion(Button)` without a refactor). |
+| **`07-03`** | **Done** — remainder documented below; **`reader-ui-primitives.test.ts`** locks the chrome primitive exports; full DOM coverage deferred as non-blocking. |
+
+### Remainder (books-reader-07-03)
+
+Phase **closed.** Intentionally custom surfaces:
+
+- **`motion.button`** full-screen backdrop dismiss for TOC and notes panels — animation boundary; keep native `motion.button`.
+- **Hidden `<input type="file">`** for annotations import — standard file picker pattern.
 
 ## Phase `books-reader-03` (reader shell + library UX)
 

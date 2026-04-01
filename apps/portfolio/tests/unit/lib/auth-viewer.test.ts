@@ -42,6 +42,7 @@ describe('auth config and viewer helpers', () => {
         id: 'user_1',
         email: 'owner@magicborn.local',
         displayName: 'Ben Garrard',
+        avatarUrl: '/images/my_avatar.jpeg',
         role: 'owner',
         entitlements: OWNER_DEFAULT_ENTITLEMENTS,
         tenant: {
@@ -58,6 +59,7 @@ describe('auth config and viewer helpers', () => {
     expect(viewer.user).toEqual(
       expect.objectContaining({
         email: 'owner@magicborn.local',
+        avatarUrl: '/images/my_avatar.jpeg',
         canPersistReader: true,
         canEditReader: true,
         canUploadReaderAssets: true,
@@ -90,6 +92,7 @@ describe('auth config and viewer helpers', () => {
     process.env.PORTFOLIO_OWNER_NAME = 'Custom Owner';
     process.env.PORTFOLIO_OWNER_TENANT_NAME = 'Custom Tenant';
     process.env.PORTFOLIO_OWNER_TENANT_SLUG = 'custom-tenant';
+    process.env.PORTFOLIO_OWNER_AVATAR_URL = '/images/custom-owner.png';
 
     expect(getOwnerSeedConfig()).toEqual({
       email: 'custom@example.com',
@@ -97,6 +100,7 @@ describe('auth config and viewer helpers', () => {
       displayName: 'Custom Owner',
       tenantName: 'Custom Tenant',
       tenantSlug: 'custom-tenant',
+      avatarUrl: '/images/custom-owner.png',
     });
   });
 });

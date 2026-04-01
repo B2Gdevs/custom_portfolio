@@ -1,11 +1,22 @@
 import type { CollectionConfig } from 'payload';
+import {
+  canManageOwnerAdminCollection,
+  readOwnerAdminCollection,
+} from '../access';
 
 export const ragIngestRuns: CollectionConfig = {
   slug: 'rag-ingest-runs',
   admin: {
     useAsTitle: 'status',
     group: 'RAG',
+    hidden: true,
     defaultColumns: ['status', 'isActive', 'indexedSourceCount', 'indexedChunkCount', 'updatedAt'],
+  },
+  access: {
+    read: readOwnerAdminCollection,
+    create: canManageOwnerAdminCollection,
+    update: canManageOwnerAdminCollection,
+    delete: canManageOwnerAdminCollection,
   },
   fields: [
     {

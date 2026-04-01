@@ -1,10 +1,21 @@
 import type { CollectionConfig } from 'payload';
+import {
+  canManageOwnerAdminCollection,
+  readOwnerAdminCollection,
+} from '../access';
 
 export const ragSources: CollectionConfig = {
   slug: 'rag-sources',
   admin: {
     useAsTitle: 'title',
     group: 'RAG',
+    hidden: true,
+  },
+  access: {
+    read: readOwnerAdminCollection,
+    create: canManageOwnerAdminCollection,
+    update: canManageOwnerAdminCollection,
+    delete: canManageOwnerAdminCollection,
   },
   fields: [
     {

@@ -82,13 +82,13 @@ export function getFeaturedBookShowcase(slug = 'mordreds_tale'): FeaturedBookSho
     status: 'EPUB preview live now',
     heroEyebrow: 'A dark fantasy world is opening here first.',
     heroSummary:
-      'Checkout my first book, Mordred\'s Tale.',
+      '',
     worldIntro:
       'Mordred\'s Tale lives between myth and street-level survival: cursed bloodlines, old magic, scavenged relics, and people trying to stay human while power keeps asking for more.',
     worldDetails: [
-      'Morgana, Jack, and the machinery of fate drive the first published reading path.',
-      'The web experience should feel like stepping into a living manuscript, not browsing a resume.',
-      'Songs will sit beside the text as companion pieces, sketches, and emotional mirrors for the world.',
+      'Morgana a Sleeping Goddess, Jack a criminal, and a world without magic which it had always known, sets the stage for beings called Magicborn.',
+      'Mordred, the first of the Magicborn.  Eventually the known as the Untamed.  Will be forever known as the first and strongest setting the rule of the world and the place where other Magicborn live in it.',
+      'Mordred with the help of Morgana condemns his own kind, oppressing them for the greater good even if it is ruthless.',
     ],
   };
 }

@@ -3,6 +3,7 @@ import { getAllContentEntries } from '@/lib/content';
 import { searchDiscoveryItems } from '@/lib/content-discovery';
 import { toDiscoveryItem } from '@/lib/content-view-models';
 import { getListenSearchDiscoveryItems } from '@/lib/listen-runtime';
+import { getProjectEntries } from '@/lib/projects';
 
 export async function GET(request: NextRequest) {
   const query = new URL(request.url).searchParams.get('q') ?? '';
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
   }
 
   const blogItems = getAllContentEntries('blog').map((entry) => toDiscoveryItem('blog', entry));
-  const projectItems = getAllContentEntries('projects').map((entry) => toDiscoveryItem('projects', entry));
+  const projectItems = (await getProjectEntries()).map((entry) => toDiscoveryItem('projects', entry));
   const listenItems = await getListenSearchDiscoveryItems(request.headers.get('cookie') ?? '');
   const hits = searchDiscoveryItems([...blogItems, ...projectItems, ...listenItems], trimmed, 20);
 

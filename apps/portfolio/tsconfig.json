@@ -26,6 +26,7 @@
       ],
       "@/hooks/*": ["./hooks/*"],
       "@/*": ["./*"],
+      "@payload-config": ["./payload.config.ts"],
       "@portfolio/*": ["../../packages/*"]
     }
   },

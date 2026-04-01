@@ -1,4 +1,8 @@
 import { NextResponse } from 'next/server';
+import {
+  adminUnauthorizedResponse,
+  isAdminOwnerRequest,
+} from '@/lib/auth/admin-owner-gate';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,7 +34,11 @@ function maskValue(key: string, raw: string | undefined): string {
 /**
  * Development-only: masked snapshot of process.env for debugging (same process as Next).
  */
-export async function GET() {
+export async function GET(request: Request) {
+  if (!(await isAdminOwnerRequest(request))) {
+    return adminUnauthorizedResponse();
+  }
+
   if (process.env.NODE_ENV !== 'development') {
     return NextResponse.json({ error: 'Only available in development' }, { status: 403 });
   }

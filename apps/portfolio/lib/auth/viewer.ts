@@ -10,6 +10,7 @@ export type AuthViewer = {
     id: string;
     email: string;
     displayName: string | null;
+    avatarUrl: string | null;
     role: string | null;
     tenant: null | {
       id: string | null;
@@ -68,6 +69,7 @@ export function viewerFromUser(user: unknown, autoLoggedIn = false): AuthViewer 
       id: asString(record.id) || '',
       email: asString(record.email) || '',
       displayName: asString(record.displayName),
+      avatarUrl: asString(record.avatarUrl),
       role: asString(record.role),
       tenant: tenantRecord
         ? {

@@ -1,22 +1,28 @@
 import type { AuthFeatureAccess } from './permissions';
 
-type AuthSessionResponse = {
+export type AuthSessionResponseBody = {
   ok: boolean;
   session: AuthFeatureAccess;
 };
 
-type AuthLoginResponse = AuthSessionResponse;
+type AuthLoginResponse = AuthSessionResponseBody;
+
+const AUTH_SESSION_FETCH_MS = 28_000;
 
 export async function fetchAuthSession(init?: RequestInit) {
+  const { signal: userSignal, ...rest } = init ?? {};
   const response = await fetch('/api/auth/session', {
     method: 'GET',
     credentials: 'include',
-    ...init,
+    signal: userSignal ?? AbortSignal.timeout(AUTH_SESSION_FETCH_MS),
+    ...rest,
   });
 
-  const body = (await response.json()) as AuthSessionResponse;
+  const body = (await response.json()) as AuthSessionResponseBody;
   return { response, body };
 }
+
+const AUTH_LOGIN_FETCH_MS = 32_000;
 
 export async function loginAuthSession(input: {
   email: string;
@@ -25,6 +31,7 @@ export async function loginAuthSession(input: {
   const response = await fetch('/api/auth/login', {
     method: 'POST',
     credentials: 'include',
+    signal: AbortSignal.timeout(AUTH_LOGIN_FETCH_MS),
     headers: {
       'Content-Type': 'application/json',
     },

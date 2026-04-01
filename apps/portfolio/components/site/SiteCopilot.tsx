@@ -10,6 +10,7 @@ import {
   useLocalRuntime,
 } from '@assistant-ui/react';
 import { DevToolsFrame } from '@assistant-ui/react-devtools';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowUp, Plus, Wrench, X } from 'lucide-react';
 import { type Dispatch, type SetStateAction, useCallback, useEffect, useState } from 'react';
 import { SiteCopilotSources, type SiteCopilotSourceBundle } from './SiteCopilotSources';
@@ -229,14 +230,17 @@ function ClaudeComposer({ coverImageContext }: { coverImageContext: string | nul
   const placeholder = coverLabel
     ? `Describe the ${coverLabel} cover image…`
     : 'How can I help you today?';
-  const modeHint = coverLabel ? 'OpenAI Images · cover' : 'OpenAI + site RAG';
+  const modeHint = coverLabel ? 'OpenAI Images · cover' : 'MiniLM embeds · GPT chat · site RAG';
 
   return (
-    <ComposerPrimitive.Root className="mx-auto flex w-full max-w-3xl flex-col gap-3 rounded-[1.75rem] border border-[#ded9cf] bg-white/96 p-3 shadow-[0_24px_80px_rgba(39,28,18,0.12)] dark:border-[#39342d] dark:bg-[#1f1e1b]/96">
+    <ComposerPrimitive.Root className="mx-auto flex w-full max-w-3xl flex-col gap-3 rounded-[1.75rem] border border-[#ded9cf] bg-white/96 p-3 shadow-[0_24px_80px_rgba(39,28,18,0.12)] transition-[box-shadow] duration-300 ease-out focus-within:shadow-[0_28px_90px_rgba(39,28,18,0.18)] dark:border-[#39342d] dark:bg-[#1f1e1b]/96 dark:focus-within:shadow-[0_28px_90px_rgba(0,0,0,0.35)]">
       <ComposerPrimitive.Input
         aria-label="Type a message..."
         placeholder={placeholder}
-        className="min-h-24 w-full resize-none bg-transparent px-2 py-1 font-serif text-base leading-7 text-[#1d1815] outline-none placeholder:text-[#8f8376] dark:text-[#f3eee5] dark:placeholder:text-[#92887c]"
+        minRows={2}
+        maxRows={9}
+        style={{ transition: 'height 0.22s ease-out' }}
+        className="w-full resize-none overflow-y-auto bg-transparent px-2 py-1 font-serif text-base leading-7 text-[#1d1815] outline-none placeholder:text-[#8f8376] dark:text-[#f3eee5] dark:placeholder:text-[#92887c]"
       />
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
@@ -280,11 +284,21 @@ function ClaudePanel({
   const coverLabel = appCoverLabelFromContext(coverImageContext);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-end bg-[rgba(24,17,12,0.28)] p-3 backdrop-blur-[2px] sm:p-6">
-      <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+      className="fixed inset-0 z-50 flex items-end justify-end bg-[rgba(24,17,12,0.28)] p-3 backdrop-blur-[2px] sm:p-6"
+    >
+      <motion.div
         role="dialog"
         aria-modal="true"
         aria-label={CHAT_TITLE}
+        initial={{ opacity: 0, y: 40, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 28, scale: 0.97 }}
+        transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
         className={[
           'grid h-[min(44rem,calc(100vh-1.5rem))] w-full overflow-hidden rounded-[2rem] border border-[#d9cfbf] bg-[#f4efe6] shadow-[0_28px_90px_rgba(24,18,13,0.24)] dark:border-[#343029] dark:bg-[#26231f]',
           isDevtoolsOpen
@@ -352,8 +366,8 @@ function ClaudePanel({
             <DevToolsFrame className="h-full min-h-72 w-full rounded-2xl border border-[#ddd3c5] bg-white dark:border-[#3b362f] dark:bg-[#1b1815]" />
           </div>
         ) : null}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -396,11 +410,13 @@ export function SiteCopilot() {
         try {
           const response = await fetch('/api/media/generate', {
             method: 'POST',
+            credentials: 'include',
             signal: abortSignal,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               prompt: query,
               mediaSlot: coverImageContext,
+              useMagicbornStyle: true,
             }),
           });
           const data = (await response.json().catch(() => null)) as MediaGenerateResponse | null;
@@ -545,23 +561,26 @@ export function SiteCopilot() {
         Open Chat
       </button>
 
-      {isOpen ? (
-        <ClaudePanel
-          coverImageContext={coverImageContext}
-          pendingBundle={pendingBundle}
-          setPendingBundle={setPendingBundle}
-          setSourcesByMessageId={setSourcesByMessageId}
-          sourcesByMessageId={sourcesByMessageId}
-          sourcesLoading={sourcesLoading}
-          isDevtoolsOpen={isDevtoolsOpen}
-          onClose={() => {
-            closeChat();
-            setIsDevtoolsOpen(false);
-          }}
-          onOpenDevtools={() => setIsDevtoolsOpen(true)}
-          onCloseDevtools={() => setIsDevtoolsOpen(false)}
-        />
-      ) : null}
+      <AnimatePresence>
+        {isOpen ? (
+          <ClaudePanel
+            key="site-copilot-panel"
+            coverImageContext={coverImageContext}
+            pendingBundle={pendingBundle}
+            setPendingBundle={setPendingBundle}
+            setSourcesByMessageId={setSourcesByMessageId}
+            sourcesByMessageId={sourcesByMessageId}
+            sourcesLoading={sourcesLoading}
+            isDevtoolsOpen={isDevtoolsOpen}
+            onClose={() => {
+              closeChat();
+              setIsDevtoolsOpen(false);
+            }}
+            onOpenDevtools={() => setIsDevtoolsOpen(true)}
+            onCloseDevtools={() => setIsDevtoolsOpen(false)}
+          />
+        ) : null}
+      </AnimatePresence>
     </AssistantRuntimeProvider>
   );
 }

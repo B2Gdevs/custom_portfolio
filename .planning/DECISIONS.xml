@@ -80,4 +80,26 @@
       <file path="apps/portfolio/lib/auth/config.ts" />
     </references>
   </decision>
+  <decision id="03-07">
+    <title>Phase-one owner account UI reads avatar data from the shared user record and session payload</title>
+    <summary>The first owner-shell pass should not stop at initials-only identity. The shared user model and `/api/auth/session` payload should carry an avatar URL so the sidebar can render a SaaS-style account footer immediately, while still falling back to initials when no avatar exists.</summary>
+    <impact>The owner shell now exposes a real account card without coupling the UI to Supabase-specific helpers, and future org-user work can reuse the same session contract.</impact>
+    <references>
+      <file path="apps/portfolio/content/docs/global/planning/decisions.mdx" />
+      <file path="apps/portfolio/lib/auth/viewer.ts" />
+      <file path="apps/portfolio/lib/auth/permissions.ts" />
+      <file path="apps/portfolio/components/auth/SidebarAccountSection.tsx" />
+    </references>
+  </decision>
+  <decision id="03-08">
+    <title>The first mounted Payload admin pass stays focused on owner-managed collections and hides internal maintenance tables</title>
+    <summary>The upstream `(payload)` route group should own `/admin`, but the first customization pass should only foreground collections that behave like operational content surfaces. Internal reader-state and RAG maintenance collections stay hidden until their workflows are intentionally designed, while public-read asset collections keep public read access and gain owner write access through Payload.</summary>
+    <impact>The mounted admin feels like a usable owner back office immediately instead of exposing every internal record table, and the existing runtime/public asset flows keep working while Payload becomes the editing surface for the collections that belong there.</impact>
+    <references>
+      <file path="apps/portfolio/content/docs/global/planning/decisions.mdx" />
+      <file path="apps/portfolio/app/(payload)/admin/[[...segments]]/page.tsx" />
+      <file path="apps/portfolio/lib/payload/collections/siteAppRecords.ts" />
+      <file path="apps/portfolio/lib/payload/collections/ragSources.ts" />
+    </references>
+  </decision>
 </decisions>

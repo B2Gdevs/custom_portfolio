@@ -1,5 +1,7 @@
 import type { AppsHubAppCardIconName } from '@/components/apps/AppsHubAppCard';
+import type { ContentLink } from '@/lib/content';
 import { readerAppHref } from '@/lib/reader-routes';
+import { toSiteDownloadLinks } from '@/lib/site-download-assets';
 
 export type SiteAppRecord = {
   id: string;
@@ -12,6 +14,7 @@ export type SiteAppRecord = {
   supportLabel?: string;
   supportText?: string;
   exampleCode?: string;
+  downloads?: ContentLink[];
   featuredOrder: number;
 };
 
@@ -26,6 +29,7 @@ export type SiteAppRecordDoc = {
   supportLabel?: string | null;
   supportText?: string | null;
   exampleCode?: string | null;
+  downloads?: unknown;
   featuredOrder?: number | null;
   published?: boolean | null;
 };
@@ -43,6 +47,20 @@ export const FALLBACK_SITE_APPS: SiteAppRecord[] = [
     supportLabel: 'Docs - dialogue-forge',
     supportText: 'State stays local to this browser tab.',
     featuredOrder: 10,
+  },
+  {
+    id: 'grime-time',
+    title: 'Grime Time',
+    description:
+      'Field CRM and marketing surface for an exterior cleaning company: estimates, scheduling, crew ops, and follow-up in one branded workspace.',
+    href: 'https://grimetime.app',
+    iconName: 'layers',
+    cta: 'Visit Grime Time',
+    supportHref: 'https://grimetime.app',
+    supportLabel: 'grimetime.app',
+    supportText:
+      'Built as the next commercial product line using the same management patterns, auth model, and shell language from this portfolio stack.',
+    featuredOrder: 15,
   },
   {
     id: 'repo-planner',
@@ -114,6 +132,7 @@ export function toSiteAppRecord(doc: SiteAppRecordDoc): SiteAppRecord | null {
     supportLabel: doc.supportLabel ?? undefined,
     supportText: doc.supportText ?? undefined,
     exampleCode: doc.exampleCode ?? undefined,
+    downloads: toSiteDownloadLinks(doc.downloads),
     featuredOrder: doc.featuredOrder ?? 0,
   };
 }

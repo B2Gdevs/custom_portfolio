@@ -16,6 +16,7 @@ export const readerLibraryAssets: CollectionConfig = {
   admin: {
     useAsTitle: 'filename',
     group: 'Reader',
+    hidden: true,
     defaultColumns: ['filename', 'mimeType', 'tenant', 'uploadedBy', 'updatedAt'],
   },
   access: {

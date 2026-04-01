@@ -1,9 +1,9 @@
 import type { Access, CollectionConfig } from 'payload';
+import { canManageOwnerAdminCollection } from '../access';
 
 export const SITE_APP_RECORD_COLLECTION_SLUG = 'site-app-records';
 
 const allowPublicRead: Access = () => true;
-const denyDirectWrites: Access = () => false;
 
 export const siteAppRecords: CollectionConfig = {
   slug: SITE_APP_RECORD_COLLECTION_SLUG,
@@ -21,9 +21,9 @@ export const siteAppRecords: CollectionConfig = {
   },
   access: {
     read: allowPublicRead,
-    create: denyDirectWrites,
-    update: denyDirectWrites,
-    delete: denyDirectWrites,
+    create: canManageOwnerAdminCollection,
+    update: canManageOwnerAdminCollection,
+    delete: canManageOwnerAdminCollection,
   },
   fields: [
     {

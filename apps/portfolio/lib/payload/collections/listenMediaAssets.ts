@@ -1,5 +1,6 @@
 import type { Access, CollectionConfig } from 'payload';
 import { resolvePortfolioAppPath } from '../app-root';
+import { canManageOwnerAdminCollection } from '../access';
 
 export const LISTEN_MEDIA_ASSET_COLLECTION_SLUG = 'listen-media-assets';
 
@@ -8,7 +9,6 @@ export function getListenMediaAssetFileURL(filename: string) {
 }
 
 const allowPublicRead: Access = () => true;
-const denyDirectWrites: Access = () => false;
 
 export const listenMediaAssets: CollectionConfig = {
   slug: LISTEN_MEDIA_ASSET_COLLECTION_SLUG,
@@ -26,9 +26,9 @@ export const listenMediaAssets: CollectionConfig = {
   },
   access: {
     read: allowPublicRead,
-    create: denyDirectWrites,
-    update: denyDirectWrites,
-    delete: denyDirectWrites,
+    create: canManageOwnerAdminCollection,
+    update: canManageOwnerAdminCollection,
+    delete: canManageOwnerAdminCollection,
   },
   upload: {
     staticDir: resolvePortfolioAppPath('media', 'listen-media-assets'),

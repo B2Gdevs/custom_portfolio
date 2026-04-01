@@ -48,7 +48,7 @@ function ResumeAction({
 export default async function ResumesPage() {
   await assertResumeOwnerOrRedirect();
 
-  const resumes = getResumes();
+  const resumes = await getResumes();
 
   return (
     <div className="section-shell pb-16">

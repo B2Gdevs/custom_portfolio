@@ -1,0 +1,42 @@
+---
+title: Invites and tenant roles (global-auth-03)
+description: Operator invite flow, roles, and follow-on product work.
+date: "2026-03-31"
+repoPath: apps/portfolio/content/docs/global/planning/plans/global-auth-03/INVITES.mdx
+taskPhase: global-auth-03
+order: 1
+---
+
+# Invites and tenant roles
+
+This file is the compact invite note. The fuller architecture and portability target live in [PLAN](/docs/global/planning/plans/global-auth-03/plan).
+
+## Shipped (CLI v1)
+
+- **Roles** on `users`: `owner` (seed), `admin`, `member`.
+- **`pnpm auth:invite`** — trusted operator creates or updates a user on an existing tenant.
+  - **`admin`** → same entitlements as the seeded owner (`OWNER_DEFAULT_ENTITLEMENTS`), including **`admin:access`** and image generation.
+  - **`member`** → **empty entitlements** → public-style access when logged in (no admin, no reader DB writes); annotations stay **local / export** per **`BOOKS-REQ-10`**.
+
+## Target (next build slice)
+
+- **Invite links** replace manual password handoff for normal onboarding.
+- CLI remains **trusted-operator only** and generates a **tenant-scoped, single-use, expiring** invite.
+- Consumer accepts invite in-browser, sets password, and enters the standard session flow.
+- Role assignment stays **template-based** (`owner` / `admin` / `member`), not ad hoc privilege editing during invite.
+
+## Not yet shipped (product invites)
+
+| Item | Notes |
+| --- | --- |
+| Email or magic-link invite | Needs token collection, expiry, and a public accept route |
+| Self-serve signup | Explicitly out of scope for v1 (**`global-auth-dec-01`**) |
+| Per-feature entitlements UI | Payload admin can edit `entitlements` today; no end-user self-service |
+
+## Session UX
+
+- **`useAuthSession`** only shows the sidebar **“Checking session”** spinner on the **first** load per mount; route changes **refresh session in the background** without blanking the footer.
+
+## Decision pointer
+
+- **`global-auth-dec-05`** — restricted operators vs read-only members.

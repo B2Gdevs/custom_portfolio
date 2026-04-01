@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { env, pipeline } from '@xenova/transformers';
 import { getEmbeddingModel, getPortfolioAppRoot } from './config';
+import { reportLocalModelError, reportLocalModelLoading, reportLocalModelReady } from './ingest-cli';
 
 function ensureCacheDir() {
   const root = getPortfolioAppRoot();
@@ -13,7 +14,19 @@ let pipePromise: Promise<unknown> | null = null;
 async function getExtractor() {
   ensureCacheDir();
   if (!pipePromise) {
-    pipePromise = pipeline('feature-extraction', getEmbeddingModel());
+    const modelId = getEmbeddingModel();
+    reportLocalModelLoading();
+    const t0 = Date.now();
+    pipePromise = (async () => {
+      try {
+        const pipe = await pipeline('feature-extraction', modelId);
+        reportLocalModelReady(Date.now() - t0, modelId);
+        return pipe;
+      } catch (error) {
+        reportLocalModelError(error);
+        throw error;
+      }
+    })();
   }
   return pipePromise;
 }

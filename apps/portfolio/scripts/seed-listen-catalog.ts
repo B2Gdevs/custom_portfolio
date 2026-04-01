@@ -8,7 +8,7 @@ async function main() {
   const { seedListenCatalog } = await import('@/lib/listen/seed');
   const result = await seedListenCatalog();
   console.log(
-    `[listen:seed] seeded ${result.total} rows (${result.created} created, ${result.updated} updated) for tenant ${result.tenantId}`,
+    `[listen:seed] seeded ${result.total} rows (${result.created} created, ${result.updated} updated, ${result.skipped} skipped) for tenant ${result.tenantId}`,
   );
 
   process.exit(0);

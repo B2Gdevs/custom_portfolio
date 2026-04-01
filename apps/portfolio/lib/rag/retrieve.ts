@@ -8,11 +8,11 @@ export async function retrieveRagContext(query: string) {
   }
 
   const [queryEmbedding] = await embedTexts([normalizedQuery]);
-  const semanticHits = searchSemanticRagHits(queryEmbedding, normalizedQuery, {
+  const semanticHits = await searchSemanticRagHits(queryEmbedding, normalizedQuery, {
     candidateLimit: 12,
   });
 
-  return rerankRagHits(normalizedQuery, semanticHits, {
+  return await rerankRagHits(normalizedQuery, semanticHits, {
     resultLimit: 6,
   });
 }

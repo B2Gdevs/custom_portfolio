@@ -57,6 +57,7 @@ describe('seedListenCatalog', () => {
     expect(result).toEqual({
       created: 1,
       updated: 0,
+      skipped: 0,
       tenantId: 'tenant_1',
       total: 1,
     });
@@ -119,6 +120,7 @@ describe('seedListenCatalog', () => {
     expect(result).toEqual({
       created: 0,
       updated: 1,
+      skipped: 0,
       tenantId: 'tenant_1',
       total: 1,
     });
@@ -132,5 +134,65 @@ describe('seedListenCatalog', () => {
         }),
       }),
     );
+  });
+
+  it('skips rows when stored values already match normalized authored data', async () => {
+    vi.mocked(getListenCatalog).mockReturnValue([
+      {
+        slug: 'public-track',
+        catalogKind: 'track',
+        visibility: 'public',
+        title: 'Public track',
+        genre: 'Rock',
+        mood: 'Bright',
+        era: 'Now',
+        description: 'A seeded row.',
+        bandlabUrl: 'https://bandlab.com/public-track',
+        embedUrl: '',
+        artworkUrl: '/images/listen/public-track.png',
+        date: '2026-03-24',
+        extraTags: ['BandLab'],
+      },
+    ]);
+
+    const payload = {
+      find: vi.fn().mockResolvedValue({
+        docs: [
+          {
+            id: 'listen_1',
+            slug: 'public-track',
+            title: 'Public track',
+            catalogKind: 'track',
+            visibility: 'public',
+            genre: 'Rock',
+            mood: 'Bright',
+            era: 'Now',
+            description: 'A seeded row.',
+            bandlabUrl: 'https://bandlab.com/public-track',
+            embedUrl: '',
+            artworkUrl: '/images/listen/public-track.png',
+            date: '2026-03-24T00:00:00.000Z',
+            published: true,
+            tenant: { id: 'tenant_1' },
+            extraTags: [{ tag: 'BandLab' }],
+          },
+        ],
+      }),
+      create: vi.fn(),
+      update: vi.fn(),
+    };
+    vi.mocked(getPayloadClient).mockResolvedValue(payload as never);
+
+    const result = await seedListenCatalog();
+
+    expect(result).toEqual({
+      created: 0,
+      updated: 0,
+      skipped: 1,
+      tenantId: 'tenant_1',
+      total: 1,
+    });
+    expect(payload.update).not.toHaveBeenCalled();
+    expect(payload.create).not.toHaveBeenCalled();
   });
 });

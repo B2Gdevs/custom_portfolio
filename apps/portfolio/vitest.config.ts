@@ -6,6 +6,7 @@ export default defineConfig({
     alias: {
       '@/vendor/repo-planner': path.resolve(__dirname, '../../vendor/repo-planner'),
       '@': path.resolve(__dirname, '.'),
+      '@payload-config': path.resolve(__dirname, './payload.config.ts'),
     },
   },
   test: {

@@ -111,7 +111,7 @@
   </phase>
   <phase id="02">
     <task id="02-01" agent-id="" status="in-progress">
-      <goal>Plan and land the shared data/storage provider abstraction in the Global docs + codebase so Payload/SQLite local workflows and Supabase hosted workflows share one runtime contract, bootstrap path, and verification story without committing large `.db` files.</goal>
+      <goal>Plan and land the shared data/storage provider abstraction in the Global docs + codebase so Payload/SQLite local workflows and Supabase hosted workflows share one runtime contract, repository-backed runtime access, bootstrap path, and verification story without committing large `.db` files.</goal>
       <keywords>data,storage,sqlite,supabase,payload,planning</keywords>
       <commands>
         <command>pnpm --filter @portfolio/app test:unit</command>
@@ -144,8 +144,8 @@
       </commands>
       <depends>03-01</depends>
     </task>
-    <task id="03-03" agent-id="" status="in-progress">
-      <goal>Execute the next public-catalog migration after the storage baseline: `site-app-records` plus `site-download-assets` are now landing first, `/apps` should read from hosted metadata through an SSR-safe loader, and the next steps are planning-pack/resume download consumers followed by project and resume metadata while long-form public prose stays repo-first where that still lowers maintenance.</goal>
+    <task id="03-03" agent-id="" status="done">
+      <goal>Execute the next public-catalog migration after the storage baseline: `site-app-records` plus `site-download-assets` back `/apps`, `project-records` now supply project metadata while repo-authored MDX bodies stay canonical, and `resume-records` now drive the resume gallery while `site-download-assets` keep serving planning-pack and resume artifacts with repo fallbacks where planned.</goal>
       <keywords>apps,projects,resumes,downloads,postgres,storage,seo</keywords>
       <commands>
         <command>pnpm run build</command>
@@ -153,14 +153,25 @@
       </commands>
       <depends>03-02</depends>
     </task>
-    <task id="03-04" agent-id="" status="planned">
-      <goal>Refresh the public shell around the existing owner-only auth/session contract so the sidebar exposes login/account affordances and private/admin entry points only for the seeded owner account.</goal>
+    <task id="03-04" agent-id="" status="done">
+      <goal>Refresh the public shell around the existing owner-only auth/session contract so the sidebar exposes login/account affordances, avatar, live user/org context, logout, and private/admin entry points only for the seeded owner account.</goal>
       <keywords>auth,sidebar,login,owner-only,shadcn</keywords>
       <commands>
+        <command>pnpm --filter @portfolio/app exec vitest run tests/unit/lib/auth-viewer.test.ts tests/unit/lib/auth-permissions.test.ts tests/unit/components/auth/SidebarAccountSection.test.tsx tests/unit/app/api/admin-routes.test.ts tests/unit/app/api/auth-routes.test.ts</command>
         <command>pnpm run build</command>
         <command>pnpm run lint</command>
       </commands>
       <depends>03-03</depends>
+    </task>
+    <task id="03-05" agent-id="" status="done">
+      <goal>Mount the upstream Payload `(payload)` app route group as the owner-only operational admin surface, adapt it to this app's config/runtime, and use it for CRUD on Payload-backed resources instead of inventing a second owner back office.</goal>
+      <keywords>payload,admin,cms,owner-only,crud</keywords>
+      <commands>
+        <command>pnpm --filter @portfolio/app exec vitest run tests/unit/app/payload-admin-mount.test.tsx tests/unit/app/api/admin-routes.test.ts tests/unit/lib/auth-viewer.test.ts tests/unit/lib/auth-permissions.test.ts tests/unit/components/auth/SidebarAccountSection.test.tsx tests/unit/app/api/auth-routes.test.ts</command>
+        <command>pnpm run build</command>
+        <command>pnpm run lint</command>
+      </commands>
+      <depends>03-04</depends>
     </task>
   </phase>
 </task-registry>

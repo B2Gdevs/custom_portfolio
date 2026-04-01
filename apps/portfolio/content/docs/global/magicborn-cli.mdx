@@ -1,0 +1,57 @@
+---
+title: Magicborn CLI
+description: Operator commands for image generation, vendor repos, and shell tab completion — no man page; use this page and --help.
+date: "2026-03-31"
+updated: "2026-03-31"
+order: 7
+repoPath: apps/portfolio/content/docs/global/magicborn-cli.mdx
+---
+
+# Magicborn CLI
+
+The **`magicborn`** command is the repo’s operator CLI for Magicborn image generation, listing books/apps/projects/listen rows, and vendor submodule setup. It is implemented in **`packages/magicborn-cli`** and forwards most work to **`apps/portfolio/scripts/magicborn/run.ts`** (Next.js libs, env loading, OpenAI).
+
+There is **no man page**. Use **`magicborn --help`**, subcommand help (e.g. **`magicborn book generate --help`**), and this page. Deeper planning and backlog notes live in **[Magicborn CLI plan](/docs/global/planning/plans/magicborn-cli/PLAN)**.
+
+## Install on your PATH
+
+After **`pnpm install`** at the repo root, the binary is **`node_modules/.bin/magicborn`** (also exposed as root **`pnpm magicborn`** / **`pnpm mb`**).
+
+**One-time shell setup** (bash/zsh — paste into `~/.bashrc` or `~/.zshrc`):
+
+```bash
+magicborn shell-init
+# or copy the printed lines manually
+```
+
+Or set **`MAGICBORN_REPO`** to the repo root and put **`$MAGICBORN_REPO/node_modules/.bin`** on **`PATH`**.
+
+**Fish:** run **`magicborn shell-init fish`** and follow the commented lines, or install the fish completion file as suggested in the output.
+
+## Tab completion (bash)
+
+Git-style discovery: subcommands, flags, and **dynamic lists** for **`--seed`**, **`--slug`**, and **`--id`** (book slugs, listen slugs, app ids, project slugs, scene seed keys).
+
+```bash
+eval "$(magicborn completion bash)"
+```
+
+Completion calls **`magicborn __complete`** with a topic name (for example `seed-keys`) internally; you normally do not run that by hand. If you already know values, skip completion and pass **`--prompt`**, **`--slug`**, **`--seed`**, etc. directly.
+
+**Zsh:** use the same bash script with **`bashcompinit`**, or read the hint from **`magicborn completion zsh`**.
+
+## Command map
+
+| Area | Examples |
+| --- | --- |
+| **Books** | **`magicborn book generate`**, **`magicborn book scenes list`** |
+| **Apps / projects** | **`magicborn app list`**, **`magicborn app generate --id …`**, **`magicborn project list`**, **`magicborn project generate --id …`** |
+| **Planning / listen** | **`magicborn planning-pack generate`**, **`magicborn listen generate`** |
+| **Vendor** | **`magicborn vendor add &lt;url&gt;`** (submodule + workspace notes) |
+| **Meta** | **`magicborn completion bash|zsh|fish`**, **`magicborn shell-init`** |
+
+Flags are shared across generate commands where applicable: **`--prompt`**, **`--seed`** (see **`magicborn book scenes list`** for keys), **`--dry-run`**, **`--print-prompt`**, **`--json`**, **`--size`**, **`--slot`**, etc. Deprecated aliases **`--scene-key`** / **`--scene-text`** still work; prefer **`--seed`** / **`--prompt`**.
+
+## Environment
+
+Image generation expects **OpenAI** (and related) variables documented in **`.env.example`** at the repo root. The portfolio handler loads **`load-magicborn-env`** so scripts work outside the Next dev server when variables are set.

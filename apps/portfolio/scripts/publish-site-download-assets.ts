@@ -3,35 +3,51 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
+import JSZip from 'jszip';
 import { loadScriptEnv } from './load-script-env';
+import { getContentBySlug, getContentFiles } from '@/lib/content';
 import { getPayloadClient } from '@/lib/payload';
 import { resolvePortfolioAppRoot } from '@/lib/payload/app-root';
-import { getResumes } from '@/lib/resumes';
+import {
+  shouldUpdatePublishedSiteDownload,
+  type SiteDownloadPublishComparable,
+} from '@/lib/payload/site-download-publish';
 import {
   getSiteDownloadAssetFileURL,
   SITE_DOWNLOAD_ASSET_COLLECTION_SLUG,
 } from '@/lib/payload/collections/siteDownloadAssets';
+import { getResumeSourceEntries } from '@/lib/resumes';
 import { readStaticPlanningPackManifest } from '@/lib/planning-pack-assets';
 
 type PayloadDoc = Record<string, unknown>;
+
+type SiteDownloadKind = 'planning-pack' | 'resume' | 'app-bundle' | 'document' | 'archive' | 'other';
+type SiteDownloadScope = 'site' | 'app' | 'project' | 'resume' | 'book';
 
 type SiteDownloadInput = {
   absolutePath: string;
   sourcePath: string;
   title: string;
   downloadSlug: string;
-  downloadKind: 'planning-pack' | 'resume';
-  contentScope: 'site' | 'resume';
+  downloadKind: SiteDownloadKind;
+  contentScope: SiteDownloadScope;
   contentSlug: string;
   downloadLabel?: string;
   summary?: string;
+  cleanup?: () => void;
+};
+
+type PublishSummary = {
+  created: number;
+  updated: number;
+  skipped: number;
 };
 
 const APP_ROOT = resolvePortfolioAppRoot();
 const REPO_ROOT = path.resolve(APP_ROOT, '..', '..');
 const PLANNING_PACK_ROOT = path.join(APP_ROOT, 'public', 'planning-pack');
+const PROJECTS_CONTENT_ROOT = path.join(APP_ROOT, 'content', 'projects');
 const ALLOWED_PLANNING_PACK_EXTENSIONS = new Set(['.json', '.md', '.txt', '.html', '.zip']);
-
 function asString(value: unknown) {
   if (typeof value === 'string') return value;
   if (typeof value === 'number') return String(value);
@@ -99,6 +115,31 @@ function walkFiles(rootPath: string): string[] {
   });
 }
 
+async function createDirectoryZipBundle(sourceDir: string, filename: string) {
+  const zip = new JSZip();
+  const files = walkFiles(sourceDir).sort((a, b) => a.localeCompare(b));
+
+  for (const absolutePath of files) {
+    const relativePath = path.relative(sourceDir, absolutePath).replace(/\\/g, '/');
+    zip.file(relativePath, fs.readFileSync(absolutePath));
+  }
+
+  const buffer = await zip.generateAsync({
+    type: 'nodebuffer',
+    compression: 'DEFLATE',
+    compressionOptions: { level: 9 },
+  });
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'portfolio-site-downloads-bundle-'));
+  const tempPath = path.join(tempDir, filename);
+  fs.writeFileSync(tempPath, buffer);
+
+  return {
+    filePath: tempPath,
+    cleanup: () => fs.rmSync(tempDir, { recursive: true, force: true }),
+  };
+}
+
 function titleFromPlanningPackPath(filePath: string) {
   const normalizedPath = filePath.replace(/\\/g, '/');
   const manifest = readStaticPlanningPackManifest();
@@ -138,8 +179,56 @@ function collectPlanningPackInputs(): SiteDownloadInput[] {
     .sort((a, b) => a.sourcePath.localeCompare(b.sourcePath));
 }
 
+async function collectPlanningPackBundleInputs(): Promise<SiteDownloadInput[]> {
+  const inputs: SiteDownloadInput[] = [];
+  const bundles = [
+    {
+      sourceDir: path.join(PLANNING_PACK_ROOT, 'site'),
+      sourcePath: '/planning-pack/site',
+      title: 'Planning pack site bundle',
+      downloadSlug: 'app--planning-pack--site-bundle',
+      downloadLabel: 'Download site planning pack bundle',
+      summary: 'ZIP bundle of the published site planning-pack export.',
+    },
+    {
+      sourceDir: path.join(PLANNING_PACK_ROOT, 'demo'),
+      sourcePath: '/planning-pack/demo',
+      title: 'Planning pack demo bundle',
+      downloadSlug: 'app--planning-pack--demo-bundle',
+      downloadLabel: 'Download demo planning pack bundle',
+      summary: 'ZIP bundle of the starter planning-pack examples.',
+    },
+  ];
+
+  for (const bundle of bundles) {
+    if (!fs.existsSync(bundle.sourceDir)) {
+      continue;
+    }
+
+    const prepared = await createDirectoryZipBundle(
+      bundle.sourceDir,
+      `${sanitizeStem(bundle.downloadSlug)}.zip`,
+    );
+
+    inputs.push({
+      absolutePath: prepared.filePath,
+      sourcePath: bundle.sourcePath,
+      title: bundle.title,
+      downloadSlug: bundle.downloadSlug,
+      downloadKind: 'app-bundle',
+      contentScope: 'app',
+      contentSlug: 'planning-pack',
+      downloadLabel: bundle.downloadLabel,
+      summary: bundle.summary,
+      cleanup: prepared.cleanup,
+    });
+  }
+
+  return inputs;
+}
+
 function collectResumeInputs(): SiteDownloadInput[] {
-  return getResumes()
+  return getResumeSourceEntries()
     .map((resume) => ({
       absolutePath: resume.sourcePath,
       sourcePath: `misc/html_resumes/${resume.fileName}`,
@@ -154,36 +243,48 @@ function collectResumeInputs(): SiteDownloadInput[] {
     .sort((a, b) => a.downloadSlug.localeCompare(b.downloadSlug));
 }
 
+function collectProjectDocumentInputs(): SiteDownloadInput[] {
+  return getContentFiles('projects')
+    .flatMap((relativePath) => {
+      const slug = relativePath.replace(/\.(md|mdx)$/, '').replace(/\\/g, '/');
+      const project = getContentBySlug('projects', slug);
+      if (!project) {
+        return [];
+      }
+
+      const input: SiteDownloadInput = {
+        absolutePath: path.join(PROJECTS_CONTENT_ROOT, relativePath),
+        sourcePath: `content/projects/${relativePath.replace(/\\/g, '/')}`,
+        title: `${project.meta.title} case study`,
+        downloadSlug: `project--${slug}--case-study`,
+        downloadKind: 'document',
+        contentScope: 'project',
+        contentSlug: slug,
+        downloadLabel: 'Download case study source',
+        summary: project.meta.description
+          ? `${project.meta.description} Source document published through site-download-assets.`
+          : 'Project case study source published through site-download-assets.',
+      };
+      return [input];
+    })
+    .sort((a, b) => a.downloadSlug.localeCompare(b.downloadSlug));
+}
+
 async function markPreviousCurrentDocs(
   payload: Awaited<ReturnType<typeof getPayloadClient>>,
+  existingDocsBySlug: Map<string, PayloadDoc[]>,
   currentId: string,
   downloadSlug: string,
 ) {
-  const existing = await payload.find({
-    collection: SITE_DOWNLOAD_ASSET_COLLECTION_SLUG,
-    depth: 0,
-    limit: 100,
-    overrideAccess: true,
-    pagination: false,
-    where: {
-      and: [
-        {
-          downloadSlug: {
-            equals: downloadSlug,
-          },
-        },
-        {
-          isCurrent: {
-            equals: true,
-          },
-        },
-      ],
-    },
-  });
+  const existingDocs = existingDocsBySlug.get(downloadSlug) ?? [];
 
-  for (const doc of existing.docs) {
+  for (const doc of existingDocs) {
     const id = asString(isRecord(doc) ? doc.id : null);
     if (!id || id === currentId) {
+      continue;
+    }
+
+    if (!isRecord(doc) || doc.isCurrent !== true) {
       continue;
     }
 
@@ -196,30 +297,75 @@ async function markPreviousCurrentDocs(
         isCurrent: false,
       },
     });
+
+    doc.isCurrent = false;
   }
+}
+
+function toPublishComparable(
+  input: SiteDownloadInput,
+  checksumSha256: string,
+): SiteDownloadPublishComparable {
+  return {
+    title: input.title,
+    downloadSlug: input.downloadSlug,
+    downloadKind: input.downloadKind,
+    contentScope: input.contentScope,
+    contentSlug: input.contentSlug,
+    downloadLabel: input.downloadLabel ?? null,
+    summary: input.summary ?? null,
+    checksumSha256,
+    fileSizeBytes: fileSizeBytes(input.absolutePath),
+    sourcePath: input.sourcePath,
+    isCurrent: true,
+  };
+}
+
+async function loadExistingSiteDownloads(
+  payload: Awaited<ReturnType<typeof getPayloadClient>>,
+) {
+  const existing = await payload.find({
+    collection: SITE_DOWNLOAD_ASSET_COLLECTION_SLUG,
+    depth: 0,
+    limit: 1000,
+    overrideAccess: true,
+    pagination: false,
+  });
+
+  const docsBySlug = new Map<string, PayloadDoc[]>();
+
+  for (const doc of existing.docs) {
+    if (!isRecord(doc)) {
+      continue;
+    }
+
+    const downloadSlug = asString(doc.downloadSlug);
+    if (!downloadSlug) {
+      continue;
+    }
+
+    const docs = docsBySlug.get(downloadSlug) ?? [];
+    docs.push(doc);
+    docsBySlug.set(downloadSlug, docs);
+  }
+
+  return docsBySlug;
 }
 
 async function publishSiteDownloadInput(
   payload: Awaited<ReturnType<typeof getPayloadClient>>,
+  existingDocsBySlug: Map<string, PayloadDoc[]>,
   input: SiteDownloadInput,
   sourceCommit: string,
 ) {
   const checksumSha256 = sha256File(input.absolutePath);
-  const existing = await payload.find({
-    collection: SITE_DOWNLOAD_ASSET_COLLECTION_SLUG,
-    depth: 0,
-    limit: 100,
-    overrideAccess: true,
-    pagination: false,
-    where: {
-      downloadSlug: {
-        equals: input.downloadSlug,
-      },
-    },
-  });
-
-  const matchingDoc = existing.docs.find((doc) => isRecord(doc) && asString(doc.checksumSha256) === checksumSha256);
+  const existingDocs = existingDocsBySlug.get(input.downloadSlug) ?? [];
+  const matchingDoc = existingDocs.find(
+    (doc) => isRecord(doc) && asString(doc.checksumSha256) === checksumSha256,
+  );
   let resolvedDoc: PayloadDoc;
+  let action: keyof PublishSummary = 'created';
+  const comparable = toPublishComparable(input, checksumSha256);
 
   if (matchingDoc && isRecord(matchingDoc)) {
     const id = asString(matchingDoc.id);
@@ -227,26 +373,32 @@ async function publishSiteDownloadInput(
       throw new Error(`site download doc missing id for ${input.downloadSlug}`);
     }
 
-    resolvedDoc = (await payload.update({
-      collection: SITE_DOWNLOAD_ASSET_COLLECTION_SLUG,
-      id,
-      overrideAccess: true,
-      depth: 0,
-      data: {
-        title: input.title,
-        downloadSlug: input.downloadSlug,
-        downloadKind: input.downloadKind,
-        contentScope: input.contentScope,
-        contentSlug: input.contentSlug,
-        downloadLabel: input.downloadLabel,
-        summary: input.summary,
-        isCurrent: true,
-        fileSizeBytes: fileSizeBytes(input.absolutePath),
-        sourceCommit,
-        sourcePath: input.sourcePath,
-        publishedAt: new Date().toISOString(),
-      },
-    })) as PayloadDoc;
+    if (shouldUpdatePublishedSiteDownload(matchingDoc, comparable)) {
+      resolvedDoc = (await payload.update({
+        collection: SITE_DOWNLOAD_ASSET_COLLECTION_SLUG,
+        id,
+        overrideAccess: true,
+        depth: 0,
+        data: {
+          title: input.title,
+          downloadSlug: input.downloadSlug,
+          downloadKind: input.downloadKind,
+          contentScope: input.contentScope,
+          contentSlug: input.contentSlug,
+          downloadLabel: input.downloadLabel,
+          summary: input.summary,
+          isCurrent: true,
+          fileSizeBytes: comparable.fileSizeBytes,
+          sourceCommit,
+          sourcePath: input.sourcePath,
+          publishedAt: new Date().toISOString(),
+        },
+      })) as PayloadDoc;
+      action = 'updated';
+    } else {
+      resolvedDoc = matchingDoc;
+      action = 'skipped';
+    }
   } else {
     const ext = path.extname(input.absolutePath);
     const tempCopy = createTempCopy(
@@ -270,7 +422,7 @@ async function publishSiteDownloadInput(
           summary: input.summary,
           isCurrent: true,
           checksumSha256,
-          fileSizeBytes: fileSizeBytes(input.absolutePath),
+          fileSizeBytes: comparable.fileSizeBytes,
           sourceCommit,
           sourcePath: input.sourcePath,
           publishedAt: new Date().toISOString(),
@@ -286,9 +438,19 @@ async function publishSiteDownloadInput(
     throw new Error(`site download publish missing id for ${input.downloadSlug}`);
   }
 
-  await markPreviousCurrentDocs(payload, currentId, input.downloadSlug);
+  const slugDocs = existingDocsBySlug.get(input.downloadSlug) ?? [];
+  const existingIndex = slugDocs.findIndex((doc) => asString(doc.id) === currentId);
+  if (existingIndex >= 0) {
+    slugDocs[existingIndex] = resolvedDoc;
+  } else {
+    slugDocs.push(resolvedDoc);
+  }
+  existingDocsBySlug.set(input.downloadSlug, slugDocs);
+
+  await markPreviousCurrentDocs(payload, existingDocsBySlug, currentId, input.downloadSlug);
 
   return {
+    action,
     downloadSlug: input.downloadSlug,
     filename: asString(resolvedDoc.filename),
     url: asString(resolvedDoc.filename)
@@ -302,15 +464,27 @@ async function main() {
 
   const payload = await getPayloadClient();
   const sourceCommit = getGitShortCommit();
-  const inputs = [...collectPlanningPackInputs(), ...collectResumeInputs()];
-  let published = 0;
+  const existingDocsBySlug = await loadExistingSiteDownloads(payload);
+  const inputs = [
+    ...collectPlanningPackInputs(),
+    ...(await collectPlanningPackBundleInputs()),
+    ...collectResumeInputs(),
+    ...collectProjectDocumentInputs(),
+  ];
+  const summary: PublishSummary = { created: 0, updated: 0, skipped: 0 };
 
   for (const input of inputs) {
-    await publishSiteDownloadInput(payload, input, sourceCommit);
-    published += 1;
+    try {
+      const result = await publishSiteDownloadInput(payload, existingDocsBySlug, input, sourceCommit);
+      summary[result.action] += 1;
+    } finally {
+      input.cleanup?.();
+    }
   }
 
-  console.log(`[site-download-assets:publish] published ${published} file(s)`);
+  console.log(
+    `[site-download-assets:publish] ${summary.created} created, ${summary.updated} updated, ${summary.skipped} skipped`,
+  );
 }
 
 main()

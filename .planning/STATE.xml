@@ -4,7 +4,7 @@
   <current-phase>03</current-phase>
   <current-plan>global-data-02</current-plan>
   <status>active</status>
-  <next-action>The heavy-blob history cleanup is done and `main` pushes again. The shared provider contract is landed, `@portfolio/repub-builder` builds from the vendored standalone repo, hosted book-artifact and public-media publishers are live, `/apps` reads from seeded Supabase-backed `site-app-records` through an SSR-safe worker boundary, the planning-pack modal now resolves through a server manifest that can swap in published `site-download-assets` URLs, and `/resumes` HTML routes now prefer published storage-backed files before falling back to repo-local sources. Next, continue `global-data-03-03` and `global-data-03-02` for resume and project metadata while reusing the same download-asset path, followed by the owner-only shell refresh in `global-auth-02`.</next-action>
+  <next-action>The heavy-blob history cleanup is done and `main` pushes again. The shared provider contract is landed, `@portfolio/repub-builder` builds from the vendored standalone repo, hosted book-artifact and public-media publishers are live, `/apps` reads from seeded `site-app-records`, `/projects` now merge `project-records` metadata over repo-authored MDX bodies, `/resumes` now read `resume-records`, and planning-pack plus resume artifacts publish through `site-download-assets` with repo fallbacks where planned. Both the owner-only shell refresh in `global-auth-02` and the mounted Payload back office in `global-admin-01` are live, and Listen plus Reader runtime access now goes through shared Payload-backed repositories instead of route-level collection/query logic. Phase-1 site RAG excludes full book manuscript EPUB text by default (`global-data-dec-09`, `BOOKS-REQ-04`); `global-data-01-04` is closed in Global planning. Grime Time is now present in the seeded app catalog at `grimetime.app`, and the next portfolio delivery priority is clear: build `global-auth-03-03` as the final auth foundation slice, then finish the remaining `global-data-01-03` bootstrap handoff so the same core can move into Grime Time without reopening auth or storage architecture.</next-action>
   <references>
     <reference>AGENTS.md (repo root)</reference>
     <reference>apps/portfolio/content/docs/global/requirements.mdx</reference>
@@ -15,6 +15,8 @@
     <reference>apps/portfolio/content/docs/global/planning/plans/global-data-01/SUPABASE-BOOTSTRAP.mdx</reference>
     <reference>apps/portfolio/content/docs/global/planning/plans/global-data-02/PLAN.mdx</reference>
     <reference>apps/portfolio/content/docs/global/planning/plans/global-data-03/PLAN.mdx</reference>
+    <reference>apps/portfolio/content/docs/global/planning/plans/global-auth-02/PLAN.mdx</reference>
+    <reference>apps/portfolio/content/docs/global/planning/plans/global-admin-01/PLAN.mdx</reference>
     <reference>apps/portfolio/content/docs/documentation/requirements.mdx</reference>
     <reference>apps/portfolio/content/docs/documentation/planning/state.mdx</reference>
     <reference>.planning/AGENTS.md</reference>

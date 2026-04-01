@@ -88,6 +88,7 @@ export async function ensureOwnerSeed(): Promise<SeedResult> {
         email: seed.email,
         password: seed.password,
         displayName: seed.displayName,
+        avatarUrl: seed.avatarUrl,
         role: 'owner',
         tenant: tenantValue,
         entitlements: OWNER_DEFAULT_ENTITLEMENTS,
@@ -117,7 +118,8 @@ export async function ensureOwnerSeed(): Promise<SeedResult> {
       tenantNeedsUpdate ||
       missingEntitlements.length > 0 ||
       userRecord.role !== 'owner' ||
-      userRecord.displayName !== seed.displayName
+      userRecord.displayName !== seed.displayName ||
+      userRecord.avatarUrl !== seed.avatarUrl
     ) {
       user = await payload.update({
         collection: AUTH_COLLECTION_SLUG,
@@ -125,6 +127,7 @@ export async function ensureOwnerSeed(): Promise<SeedResult> {
         overrideAccess: true,
         data: {
           displayName: seed.displayName,
+          avatarUrl: seed.avatarUrl,
           role: 'owner',
           tenant: tenantValue,
           entitlements: Array.from(

@@ -1,5 +1,6 @@
 import type { Access, CollectionConfig } from 'payload';
 import { resolvePortfolioAppPath } from '../app-root';
+import { canManageOwnerAdminCollection } from '../access';
 
 export const SITE_DOWNLOAD_ASSET_COLLECTION_SLUG = 'site-download-assets';
 
@@ -8,7 +9,6 @@ export function getSiteDownloadAssetFileURL(filename: string) {
 }
 
 const allowPublicRead: Access = () => true;
-const denyDirectWrites: Access = () => false;
 
 export const siteDownloadAssets: CollectionConfig = {
   slug: SITE_DOWNLOAD_ASSET_COLLECTION_SLUG,
@@ -27,9 +27,9 @@ export const siteDownloadAssets: CollectionConfig = {
   },
   access: {
     read: allowPublicRead,
-    create: denyDirectWrites,
-    update: denyDirectWrites,
-    delete: denyDirectWrites,
+    create: canManageOwnerAdminCollection,
+    update: canManageOwnerAdminCollection,
+    delete: canManageOwnerAdminCollection,
   },
   upload: {
     allowRestrictedFileTypes: true,

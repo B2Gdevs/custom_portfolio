@@ -528,68 +528,9 @@ nextjs-portal:not(:empty) {
   z-index: 9999;
 }
 
-/* EPUB reader (react-reader) – TOC and chrome polish */
-.epub-reader-root {
-  --reader-toc-bg: var(--color-dark-elevated, #1f1f1f);
-  --reader-toc-border: var(--color-border, #252525);
-  --reader-toc-text: var(--color-text, #e5e7eb);
-  --reader-toc-text-muted: var(--color-text-muted, #94a3b8);
-}
-
-/* TOC: shadcn-style button-as-link (rounded, border, hover) */
+/* EPUB reader host shell polish (keep structural selectors out of here; reader chrome owns layout). */
 .epub-reader-root button {
   cursor: pointer;
-}
-.epub-reader-root .epub-reader-content > div > div:last-child > div:first-child {
-  padding: 12px 10px;
-  gap: 4px;
-}
-.epub-reader-root .epub-reader-content > div > div:last-child > div:first-child > div > button {
-  text-align: left;
-  line-height: 1.4;
-  margin: 0 6px;
-  padding: 0.5rem 0.75rem !important;
-  border-radius: 0.5rem;
-  border: 1px solid transparent;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-}
-.epub-reader-root .epub-reader-content > div > div:last-child > div:first-child > div > button:hover {
-  background: var(--reader-toc-border) !important;
-  color: var(--color-primary, #fff) !important;
-  border-color: var(--reader-toc-border);
-}
-.epub-reader-root .epub-reader-content > div > div:last-child > div:first-child > div > button:focus-visible {
-  outline: 2px solid var(--color-accent, #3b82f6);
-  outline-offset: 2px;
-}
-/* First TOC item (section header): subtle label */
-.epub-reader-root .epub-reader-content > div > div:last-child > div:first-child > div > button:first-child {
-  font-size: 0.75rem;
-  color: var(--reader-toc-text-muted) !important;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-/* TOC sidebar scrollbar */
-.epub-reader-root .epub-reader-content > div > div:last-child > div:first-child {
-  scrollbar-gutter: stable;
-  scrollbar-width: thin;
-  scrollbar-color: var(--reader-toc-border) var(--reader-toc-bg);
-}
-.epub-reader-root .epub-reader-content > div > div:last-child > div:first-child::-webkit-scrollbar {
-  width: 8px;
-}
-.epub-reader-root .epub-reader-content > div > div:last-child > div:first-child::-webkit-scrollbar-track {
-  background: var(--reader-toc-bg);
-}
-.epub-reader-root .epub-reader-content > div > div:last-child > div:first-child::-webkit-scrollbar-thumb {
-  background: var(--reader-toc-border);
-  border-radius: 4px;
-}
-.epub-reader-root .epub-reader-content > div > div:last-child > div:first-child::-webkit-scrollbar-thumb:hover {
-  background: var(--color-border-hover, #353535);
 }
 
 .font-display {

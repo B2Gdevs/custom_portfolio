@@ -14,7 +14,7 @@ export default function CreativeHero({ featuredBook }: { featuredBook: FeaturedB
         <div className="max-w-3xl">
           <p className="section-kicker">{featuredBook.heroEyebrow}</p>
           <h1 className="font-display text-5xl leading-[0.92] tracking-[-0.03em] text-primary md:text-7xl">
-            My Tales of Magicborn.
+            Tales of Magicborn.
             <span className="mt-3 block text-text-muted">Code, Music, and Magic.</span>
           </h1>
 
@@ -25,7 +25,7 @@ export default function CreativeHero({ featuredBook }: { featuredBook: FeaturedB
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href={`/apps/reader?book=${encodeURIComponent(featuredBook.slug)}`}
-              className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-secondary transition-transform hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-primary transition-transform hover:-translate-y-0.5"
             >
               <BookOpenText size={18} />
               Start reading
@@ -51,17 +51,9 @@ export default function CreativeHero({ featuredBook }: { featuredBook: FeaturedB
               <span className="story-metric-value">{featuredBook.pageCount || '70+'}</span>
               <span>Blog Posts Written</span>
             </div>
-            <div className="story-metric">
-              <span className="story-metric-value">Now</span>
-                <span>Songs Written</span>
-            </div>
+
           </div>
-          <div className="mt-10 grid gap-4 text-sm text-text-muted sm:grid-cols-3">
-            <div className="story-metric">
-              <span className="story-metric-value">Now</span>
-              <span>Books Written</span>
-            </div>
-          </div>
+
         </div>
 
         <div className="relative">

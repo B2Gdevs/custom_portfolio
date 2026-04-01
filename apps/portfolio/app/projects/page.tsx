@@ -1,9 +1,9 @@
 import { ContentIndexClient } from '@/components/content/ContentIndexClient';
-import { getAllContentEntries } from '@/lib/content';
 import { toDiscoveryItem } from '@/lib/content-view-models';
+import { getProjectEntries } from '@/lib/projects';
 
-export default function ProjectsPage() {
-  const projects = getAllContentEntries('projects').map((entry) => toDiscoveryItem('projects', entry));
+export default async function ProjectsPage() {
+  const projects = (await getProjectEntries()).map((entry) => toDiscoveryItem('projects', entry));
 
   return (
     <ContentIndexClient

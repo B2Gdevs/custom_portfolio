@@ -9,8 +9,12 @@ import type { BookEntry } from '@/lib/books';
 import {
   buildDefaultArtifactVersionTag,
   buildPublishedBookArtifactFilename,
+  normalizePlanningSourcePaths,
+  shouldReuseCurrentPublishedBookArtifact,
+  shouldUpdatePublishedBookArtifact,
   sanitizeArtifactVersionTag,
   type PublishedBookArtifactKind,
+  type PublishedBookArtifactComparable,
 } from '@/lib/book-artifacts';
 import { resolvePortfolioAppRoot } from '@/lib/payload/app-root';
 import { getPayloadClient } from '@/lib/payload';
@@ -31,6 +35,8 @@ type PublishSummary = {
   versionTag: string;
   remoteEpubUrl: string | null;
   planningPackUrl: string | null;
+  epubAction: 'created' | 'updated' | 'skipped' | 'none';
+  planningPackAction: 'created' | 'updated' | 'skipped' | 'none';
 };
 
 const APP_ROOT = resolvePortfolioAppRoot();
@@ -131,6 +137,15 @@ function sha256File(filePath: string) {
   return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
 }
 
+function sha256StringParts(parts: Array<string | Buffer>) {
+  const hash = crypto.createHash('sha256');
+  for (const part of parts) {
+    hash.update(part);
+    hash.update('\n---\n');
+  }
+  return hash.digest('hex');
+}
+
 function sizeOfFile(filePath: string) {
   return fs.statSync(filePath).size;
 }
@@ -186,6 +201,58 @@ function addPlanningDirectoryToZip(zip: JSZip, dirPath: string) {
   }
 }
 
+function appendPlanningDirectoryToChecksum(
+  parts: Array<string | Buffer>,
+  dirPath: string,
+) {
+  const entries = fs
+    .readdirSync(dirPath, { withFileTypes: true })
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  for (const entry of entries) {
+    if (entry.name.startsWith('.')) {
+      continue;
+    }
+
+    const fullPath = path.join(dirPath, entry.name);
+    if (entry.isDirectory()) {
+      if (IGNORED_DIRECTORIES.has(entry.name)) {
+        continue;
+      }
+      appendPlanningDirectoryToChecksum(parts, fullPath);
+      continue;
+    }
+
+    const ext = path.extname(entry.name).toLowerCase();
+    if (!ALLOWED_PLANNING_EXTENSIONS.has(ext)) {
+      continue;
+    }
+
+    parts.push(path.relative(REPO_ROOT, fullPath).replace(/\\/g, '/'));
+    parts.push(fs.readFileSync(fullPath));
+  }
+}
+
+function buildPlanningPackSemanticChecksum(input: {
+  slug: string;
+  title: string;
+  planningDirs: string[];
+}) {
+  const parts: Array<string | Buffer> = [
+    input.slug,
+    input.title,
+    ...input.planningDirs
+      .map((dirPath) => path.relative(REPO_ROOT, dirPath).replace(/\\/g, '/'))
+      .sort(),
+  ];
+
+  for (const planningDir of input.planningDirs) {
+    appendPlanningDirectoryToChecksum(parts, planningDir);
+  }
+
+  return sha256StringParts(parts);
+}
+
 async function createPlanningPackZip(input: {
   slug: string;
   title: string;
@@ -204,7 +271,6 @@ async function createPlanningPackZip(input: {
   const manifest = {
     bookSlug: input.slug,
     title: input.title,
-    versionTag: input.versionTag,
     sourceCommit: input.sourceCommit,
     planningDirs: input.planningDirs
       .map((dirPath) => path.relative(REPO_ROOT, dirPath).replace(/\\/g, '/'))
@@ -288,13 +354,55 @@ async function publishVersionedArtifact(
     artifactKind: PublishedBookArtifactKind;
     versionTag: string;
     artifactPath: string;
+    artifactChecksumSha256?: string;
     sourceCommit: string;
     sourcePath: string;
     planningSourcePaths?: string[];
   },
 ) {
-  const checksumSha256 = sha256File(input.artifactPath);
+  const checksumSha256 = input.artifactChecksumSha256 ?? sha256File(input.artifactPath);
   const fileSizeBytes = sizeOfFile(input.artifactPath);
+  const desiredComparable: PublishedBookArtifactComparable = {
+    title: input.title,
+    bookSlug: input.bookSlug,
+    artifactKind: input.artifactKind,
+    versionTag: input.versionTag,
+    isCurrent: true,
+    checksumSha256,
+    fileSizeBytes,
+    sourceCommit: input.sourceCommit,
+    sourcePath: input.sourcePath,
+    planningSourcePaths: normalizePlanningSourcePaths(input.planningSourcePaths),
+  };
+  const currentArtifacts = await payload.find({
+    collection: PUBLISHED_BOOK_ARTIFACTS_COLLECTION_SLUG,
+    depth: 0,
+    limit: 100,
+    overrideAccess: true,
+    pagination: false,
+    where: {
+      and: [
+        { bookSlug: { equals: input.bookSlug } },
+        { artifactKind: { equals: input.artifactKind } },
+        { isCurrent: { equals: true } },
+      ],
+    },
+  });
+  const currentArtifact = currentArtifacts.docs.find(isRecord);
+
+  if (currentArtifact && shouldReuseCurrentPublishedBookArtifact(currentArtifact, checksumSha256)) {
+    const remoteUrl = normalizeUploadedArtifactUrl(currentArtifact);
+    if (!remoteUrl) {
+      throw new Error('current published artifact is missing a URL');
+    }
+
+    return {
+      remoteUrl,
+      versionTag: asString(currentArtifact.versionTag) ?? input.versionTag,
+      action: 'skipped' as const,
+    };
+  }
+
   const existing = await payload.find({
     collection: PUBLISHED_BOOK_ARTIFACTS_COLLECTION_SLUG,
     depth: 0,
@@ -327,22 +435,26 @@ async function publishVersionedArtifact(
       throw new Error('existing published artifact is missing an id');
     }
 
-    resolvedDoc = (await payload.update({
-      collection: PUBLISHED_BOOK_ARTIFACTS_COLLECTION_SLUG,
-      id,
-      data: {
-        title: input.title,
-        isCurrent: true,
-        checksumSha256,
-        fileSizeBytes,
-        sourceCommit: input.sourceCommit,
-        sourcePath: input.sourcePath,
-        planningSourcePaths: input.planningSourcePaths,
-        publishedAt: new Date().toISOString(),
-      },
-      depth: 0,
-      overrideAccess: true,
-    })) as PayloadDoc;
+    if (shouldUpdatePublishedBookArtifact(existingDoc, desiredComparable)) {
+      resolvedDoc = (await payload.update({
+        collection: PUBLISHED_BOOK_ARTIFACTS_COLLECTION_SLUG,
+        id,
+        data: {
+          title: input.title,
+          isCurrent: true,
+          checksumSha256,
+          fileSizeBytes,
+          sourceCommit: input.sourceCommit,
+          sourcePath: input.sourcePath,
+          planningSourcePaths: input.planningSourcePaths,
+          publishedAt: new Date().toISOString(),
+        },
+        depth: 0,
+        overrideAccess: true,
+      })) as PayloadDoc;
+    } else {
+      resolvedDoc = existingDoc;
+    }
   } else {
     resolvedDoc = (await payload.create({
       collection: PUBLISHED_BOOK_ARTIFACTS_COLLECTION_SLUG,
@@ -376,7 +488,17 @@ async function publishVersionedArtifact(
     currentId,
   });
 
-  return normalizeUploadedArtifactUrl(resolvedDoc);
+  const action: 'created' | 'updated' | 'skipped' = existingDoc
+    ? shouldUpdatePublishedBookArtifact(existingDoc, desiredComparable)
+      ? 'updated'
+      : 'skipped'
+    : 'created';
+
+  return {
+    remoteUrl: normalizeUploadedArtifactUrl(resolvedDoc),
+    versionTag: asString(resolvedDoc.versionTag) ?? input.versionTag,
+    action,
+  };
 }
 
 async function publishBuiltBook(entry: BookEntry, versionTag: string, sourceCommit: string) {
@@ -387,6 +509,8 @@ async function publishBuiltBook(entry: BookEntry, versionTag: string, sourceComm
       versionTag,
       remoteEpubUrl: entry.remoteEpubUrl ?? null,
       planningPackUrl: entry.planningPackUrl ?? null,
+      epubAction: 'none',
+      planningPackAction: 'none',
     } satisfies PublishSummary;
   }
 
@@ -398,7 +522,7 @@ async function publishBuiltBook(entry: BookEntry, versionTag: string, sourceComm
   );
 
   try {
-    const remoteEpubUrl = await publishVersionedArtifact(payload, {
+    const epubResult = await publishVersionedArtifact(payload, {
       title: `${sourceMeta.title} EPUB (${versionTag})`,
       bookSlug: entry.slug,
       artifactKind: 'epub',
@@ -409,7 +533,14 @@ async function publishBuiltBook(entry: BookEntry, versionTag: string, sourceComm
     });
 
     let planningPackUrl: string | null = null;
+    let planningPackAction: PublishSummary['planningPackAction'] = 'none';
+    let effectiveVersionTag = epubResult.versionTag;
     if (sourceMeta.planningDirs.length > 0) {
+      const planningPackChecksum = buildPlanningPackSemanticChecksum({
+        slug: entry.slug,
+        title: sourceMeta.title,
+        planningDirs: sourceMeta.planningDirs,
+      });
       const planningPackZip = await createPlanningPackZip({
         slug: entry.slug,
         title: sourceMeta.title,
@@ -419,18 +550,24 @@ async function publishBuiltBook(entry: BookEntry, versionTag: string, sourceComm
       });
 
       try {
-        planningPackUrl = await publishVersionedArtifact(payload, {
+        const planningPackResult = await publishVersionedArtifact(payload, {
           title: `${sourceMeta.title} planning pack (${versionTag})`,
           bookSlug: entry.slug,
           artifactKind: 'planning-pack',
           versionTag,
           artifactPath: planningPackZip.filePath,
+          artifactChecksumSha256: planningPackChecksum,
           sourceCommit,
           sourcePath: 'generated:planning-pack',
           planningSourcePaths: sourceMeta.planningDirs.map((dirPath) =>
             path.relative(REPO_ROOT, dirPath).replace(/\\/g, '/'),
           ),
         });
+        planningPackUrl = planningPackResult.remoteUrl;
+        planningPackAction = planningPackResult.action;
+        effectiveVersionTag = planningPackResult.action === 'created' || planningPackResult.action === 'updated'
+          ? planningPackResult.versionTag
+          : effectiveVersionTag;
       } finally {
         planningPackZip.cleanup();
       }
@@ -438,9 +575,11 @@ async function publishBuiltBook(entry: BookEntry, versionTag: string, sourceComm
 
     return {
       slug: entry.slug,
-      versionTag,
-      remoteEpubUrl,
+      versionTag: effectiveVersionTag,
+      remoteEpubUrl: epubResult.remoteUrl,
       planningPackUrl,
+      epubAction: epubResult.action,
+      planningPackAction,
     } satisfies PublishSummary;
   } finally {
     epubTemp.cleanup();
@@ -470,7 +609,10 @@ async function main() {
       ...entry,
       remoteEpubUrl: published.remoteEpubUrl ?? entry.remoteEpubUrl,
       planningPackUrl: published.planningPackUrl ?? entry.planningPackUrl,
-      artifactVersion: published.remoteEpubUrl ? published.versionTag : entry.artifactVersion ?? null,
+      artifactVersion:
+        published.epubAction !== 'none' || published.planningPackAction !== 'none'
+          ? published.versionTag
+          : entry.artifactVersion ?? null,
     } satisfies BookEntry;
   });
 
@@ -479,8 +621,8 @@ async function main() {
   console.log(`[publish-book-artifacts] published version ${versionTag}`);
   for (const entry of updatedManifest) {
     const published = publishResults.get(entry.slug);
-    const epubStatus = published?.remoteEpubUrl ? 'published' : 'skipped';
-    const planningStatus = published?.planningPackUrl ? 'published' : 'none';
+    const epubStatus = published?.epubAction ?? 'none';
+    const planningStatus = published?.planningPackAction ?? 'none';
     console.log(
       `[publish-book-artifacts] ${entry.slug}: epub=${epubStatus}, planning-pack=${planningStatus}, version=${entry.artifactVersion ?? '-'}`,
     );

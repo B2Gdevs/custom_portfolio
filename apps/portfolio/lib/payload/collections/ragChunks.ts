@@ -1,11 +1,22 @@
 import type { CollectionConfig } from 'payload';
+import {
+  canManageOwnerAdminCollection,
+  readOwnerAdminCollection,
+} from '../access';
 
 export const ragChunks: CollectionConfig = {
   slug: 'rag-chunks',
   admin: {
     useAsTitle: 'vectorKey',
     group: 'RAG',
+    hidden: true,
     defaultColumns: ['vectorKey', 'sourceExternalId', 'chunkIndex', 'heading', 'isActive'],
+  },
+  access: {
+    read: readOwnerAdminCollection,
+    create: canManageOwnerAdminCollection,
+    update: canManageOwnerAdminCollection,
+    delete: canManageOwnerAdminCollection,
   },
   fields: [
     {

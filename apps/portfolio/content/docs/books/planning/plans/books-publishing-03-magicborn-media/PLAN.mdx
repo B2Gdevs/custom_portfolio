@@ -1,0 +1,54 @@
+---
+title: books-publishing-03 Magicborn media (covers + prompts)
+description: Kickoff for Magicborn-aligned image prompts, CLI generation, and owner-gated SiteCopilot workflow.
+date: "2026-03-31"
+repoPath: apps/portfolio/content/docs/books/planning/plans/books-publishing-03-magicborn-media/PLAN.mdx
+taskPhase: books-publishing-03
+order: 1
+---
+
+# Kickoff: `books-publishing-03` — Magicborn media
+
+## Goal
+
+Ship a **repeatable pipeline** for **book and scene imagery** that:
+
+1. Uses a **single Magicborn / portfolio design-style prompt** (shared “look”) for **all** OpenAI image generations in this program.
+2. Binds **scene prompts** to **approved beats or chapter moments** from our books (curated list, not raw manuscript dump).
+3. Composes **`finalPrompt = compose(styleBlock, scenePrompt)`** in one place so **`POST /api/media/generate`**, **SiteCopilot**, and a **local CLI** share the same logic.
+4. Keeps **public reading public** while restricting **generation and other write/mutation tools** to **owner + org admins** (see **`global-auth-03`**).
+
+## Non-goals (phase 1)
+
+- **Public signup** or self-serve tenant creation.
+- **Persisting** every draft image to production storage before **`documentation-site-12-07`** (Payload/S3) is ready — phase 1 may still write to **agreed disk paths** under `public/` or `media/` for iteration.
+- **Full** multi-user org product (invites, billing) — **`global-auth-03-03`** is a **design + stub** only until explicitly scheduled.
+
+## Dependencies
+
+| Area | Link |
+| --- | --- |
+| Image API | [documentation-site-12-06](/docs/documentation/planning/task-registry) — `POST /api/media/generate` exists; **must be gated** by **`global-auth-03-01`**. |
+| Site UI | [documentation-site-12-05](/docs/documentation/planning/task-registry) — SiteCopilot media session; depends on auth + prompt composer. |
+| Auth | [global-auth-03](/docs/global/planning/task-registry#phase-global-auth-03) — restricted operators + visitor reader policy. |
+| Beats | [books state — Magicborn line](/docs/books/planning/state#magicborn-line-world-order-and-chapter-beats), cross-title registry. |
+
+## Definition of done (phase)
+
+- **Prompt library** lives in-repo (format TBD: e.g. `books/_prompts/magicborn-style.md` + `books/_prompts/scenes/<book>.md` or JSON), reviewed like other authored assets.
+- **`composeMagicbornImagePrompt`** (name TBD) is implemented once and used by API route wrapper + CLI.
+- **CLI** documented: e.g. `pnpm --filter @portfolio/app books:media:generate` (exact script name in task row) runs without opening the browser, with `.env` / `OPENAI_API_KEY`.
+- **SiteCopilot** path: logged-in **owner/admin** can generate with the same composition; anonymous users **cannot** hit generate (403 + clear message).
+- **Visitor reader annotations**: policy documented and tracked under **`global-auth-03-02`** (short-lived / export-first).
+
+## Open questions
+
+| Question | Default until decided |
+| --- | --- |
+| Where do scene rows live (MDX table vs JSON vs YAML)? | Start with **one JSON or markdown table per book** next to `book.json`. |
+| DALL-E 3 prompt length vs style block size? | Style block stays **short and stable**; scene carries specifics; trim in composer if needed. |
+| Cover vs inline scene slots? | Reuse **`mediaSlot`** patterns from SiteCopilot; add **`book-cover:{slug}`** when wiring featured book. |
+
+## Task map
+
+See [books task registry — books-publishing-03](/docs/books/planning/task-registry#phase-books-publishing-03-magicborn-media--prompts).

@@ -4,6 +4,12 @@ export type AuthFeatureAccess = {
   authenticated: boolean;
   autoLoggedIn: boolean;
   isOwner: boolean;
+  user: null | {
+    id: string;
+    email: string;
+    displayName: string | null;
+    avatarUrl: string | null;
+  };
   role: string | null;
   tenant: null | {
     id: string | null;
@@ -61,6 +67,14 @@ export function getViewerFeatureAccess(
     authenticated: isAuthenticatedViewer(viewer),
     autoLoggedIn: Boolean(viewer?.autoLoggedIn),
     isOwner: isOwnerViewer(viewer),
+    user: viewer?.user
+      ? {
+          id: viewer.user.id,
+          email: viewer.user.email,
+          displayName: viewer.user.displayName,
+          avatarUrl: viewer.user.avatarUrl,
+        }
+      : null,
     role: viewer?.user?.role ?? null,
     tenant: viewer?.user?.tenant ?? null,
     entitlements: viewer?.user?.entitlements ?? [],

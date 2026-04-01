@@ -1,6 +1,7 @@
 {
   "site": [
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/avatar.jpg",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-avatar--add5dca92e03.jpg",
@@ -9,6 +10,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/blog/2025-12-21-21-10-14.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-blog-2025-12-21-21-10-14--99e12406eaf2.png",
@@ -17,6 +19,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/blog/2025-12-21-21-10-45.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-blog-2025-12-21-21-10-45--82f4bf2e0e33.png",
@@ -25,6 +28,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/my_avatar.jpeg",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-my_avatar--5c6577126ce5.jpeg",
@@ -33,6 +37,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/og/home.jpg",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-og-home--86f681db2b3a.jpg",
@@ -41,6 +46,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/appsmith_tools/gVSlw0CczPkR1IJGm6Pwfnwu18.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-appsmith_tools-gvslw0cczpkr1ijgm6pwfnwu18--dbf853d2481f.png",
@@ -49,6 +55,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/11KSGbIZoRSg4pjdnUoif6MKHI.svg",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-11ksgbizorsg4pjdnuoif6mkhi--6fce5a0604a6.svg",
@@ -57,6 +64,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/6tTbkXggWgQCAJ4DO2QEdXXmgM.svg",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-6ttbkxggwgqcaj4do2qedxxmgm--ca764b586708.svg",
@@ -65,6 +73,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/7s8ZE3szqDMgJsyT81amczZGWBo.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-7s8ze3szqdmgjsyt81amczzgwbo--fee631db2e34.png",
@@ -73,6 +82,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/8AJjjNK7GQrVpR3a1RbXJMMmiYU.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-8ajjjnk7gqrvpr3a1rbxjmmmiyu--7644197956a0.png",
@@ -81,6 +91,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/9QnnnwwW26doRvvWfl8BY35KV4.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-9qnnnwww26dorvvwfl8by35kv4--7a34a54b9c9a.png",
@@ -89,6 +100,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/bashful_the_photoshop_plugin.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-bashful_the_photoshop_plugin--3b4f5245ca01.png",
@@ -97,6 +109,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/featured.svg",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-featured--6e7f9e043e76.svg",
@@ -105,6 +118,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/G2aKjsmvaZYZrAGxV6bU0SUyFs.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-g2akjsmvazyzragxv6bu0suyfs--cbf975409748.png",
@@ -113,6 +127,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/ktlKj3JL9TCLpynJ4MRnWPJUks.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-ktlkj3jl9tclpynj4mrnwpjuks--4263282e711d.png",
@@ -121,6 +136,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/MAHlXtIeRCIzjUZ9l6olGEC78vE.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-mahlxtiercizjuz9l6olgec78ve--520f65b18bfc.png",
@@ -129,6 +145,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/tz5ZzzqVZNDMH956istjUsV8AdU.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-tz5zzzqvzndmh956istjusv8adu--7db96ff2ee07.png",
@@ -137,6 +154,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/UoDARB5G7xjwtSXLbWcO7Z3DY.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-uodarb5g7xjwtsxlbwco7z3dy--927450b365c5.png",
@@ -145,6 +163,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/vh6UYl9qGhubfDfO166nqD1MV0.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-vh6uyl9qghubfdfo166nqd1mv0--0eeaa4a3d07b.png",
@@ -153,6 +172,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/VLKoO8caqxJOyOAJOkRJI7mUQA.svg",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-vlkoo8caqxjoyoajokrji7muqa--ae682ffc8597.svg",
@@ -161,6 +181,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/xLyn8hsiyjyo9vdfgE3RZAthOvo.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-xlyn8hsiyjyo9vdfge3rzathovo--4abc8b9e9a25.png",
@@ -169,6 +190,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/z5UQXW1idLQN1MHsjF8ZTqScQ.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-z5uqxw1idlqn1mhsjf8ztqscq--982a7cb19a7e.png",
@@ -177,6 +199,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/bashful/zCHPeZSkzGj1qLT1AwZGpmY3sU.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-bashful-zchpezskzgj1qlt1awzgpmy3su--8f3ee94660f8.png",
@@ -185,6 +208,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/colorfull/colorfull_invoicing.jpeg",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-colorfull-colorfull_invoicing--5d9e2861d53e.jpeg",
@@ -193,6 +217,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/colorfull/colorfull_org_configuration.jpeg",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-colorfull-colorfull_org_configuration--e856441a776e.jpeg",
@@ -201,6 +226,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/colorfull/colorfull_restaurant_feedback.jpeg",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-colorfull-colorfull_restaurant_feedback--96fce2021315.jpeg",
@@ -209,6 +235,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/colorfull/colorfull_restaurant_integration.jpeg",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-colorfull-colorfull_restaurant_integration--dd29542a5a85.jpeg",
@@ -217,6 +244,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/colorfull/colorfull_site.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-colorfull-colorfull_site--ef1c17ed8f6f.png",
@@ -225,6 +253,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/cvjson/cvjson_documenation.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-cvjson-cvjson_documenation--46a3aea4d1bd.png",
@@ -233,6 +262,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/dialogue-forge/featured.svg",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-dialogue-forge-featured--3673d856152a.svg",
@@ -241,6 +271,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/obj_detection/ux_feedback_1.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-obj_detection-ux_feedback_1--bb002ac33402.png",
@@ -249,6 +280,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/obj_detection/ux_feedback_2.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-obj_detection-ux_feedback_2--4470c7aeb131.png",
@@ -257,6 +289,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/obj_detection/ux_feedback_3.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-obj_detection-ux_feedback_3--dd8a5f2747eb.png",
@@ -265,6 +298,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/rapidcli/774IlQ57uvTjJPDhE9qIXrjb50.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-rapidcli-774ilq57uvtjjpdhe9qixrjb50--00a2426b4adb.png",
@@ -273,6 +307,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/rapidcli/h9AN3PiqhEzbTosiOrE1DvxfE0.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-rapidcli-h9an3piqhezbtosiore1dvxfe0--ac53a93ad906.png",
@@ -281,6 +316,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/rapidcli/poGruqmSqBJdUMcsg2YX6hKsUw.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-rapidcli-pogruqmsqbjdumcsg2yx6hksuw--c5cab637c1db.png",
@@ -289,6 +325,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/rapidcli/Q3ZGFsF47nn1xkwgCXdC59rrS5Q.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-rapidcli-q3zgfsf47nn1xkwgcxdc59rrs5q--75f7ba16c18c.png",
@@ -297,6 +334,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/rapidcli/RapidCLI.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-rapidcli-rapidcli--ada52a7169c1.png",
@@ -305,6 +343,7 @@
       "mediaKind": "image"
     },
     {
+      "action": "skipped",
       "scope": "site",
       "sourcePath": "/images/projects/rapidcli/SblGn8k3Qg75vpeDupcPyDYs.png",
       "remoteUrl": "/api/site-media-assets/file/site-media--images-projects-rapidcli-sblgn8k3qg75vpedupcpydys--099f185d7fd6.png",

@@ -1,0 +1,155 @@
+---
+title: Restricted operators + invites plan (global-auth-03)
+description: Consumer-friendly auth target with trusted operator CLI, invite links, and portable role boundaries.
+date: "2026-03-31"
+updated: "2026-03-31"
+repoPath: apps/portfolio/content/docs/global/planning/plans/global-auth-03/PLAN.mdx
+taskPhase: global-auth-03
+order: 0
+---
+
+# Phase intent
+
+Ship a **simple consumer auth experience** without turning the system into an open-signup SaaS before the product needs it.
+
+The working model is:
+
+- **Operators** are trusted. If someone can run the CLI or holds deploy secrets, they are already inside the trust boundary.
+- **Consumers** never touch the CLI. They receive a personal **invite link**, accept it in the browser, create credentials, and then use a normal account/session flow.
+- **Roles default deny**. Only `owner` and `admin` get operator privileges. `member` is logged-in but effectively read-only unless a future product expands the matrix.
+
+## Goals
+
+- Keep the public portfolio public.
+- Keep owner/admin mutation surfaces narrow and explicit.
+- Add **invite links** so onboarding does not depend on manual password handoff forever.
+- Make the auth core **portable** to future products such as Grime Time.
+
+## Non-goals
+
+- Self-serve signup.
+- Billing, org self-service, or consumer entitlement editing.
+- Email-magic-link as the only login method.
+- Provider lock-in to Supabase Auth or another hosted auth product.
+
+## End-state architecture
+
+### Source of truth
+
+- **Payload auth users + tenant records** remain the source of truth for users, roles, tenant membership, and entitlements.
+- OAuth providers, email systems, or CLI tools are **adapters**, not the core auth model.
+
+### Roles
+
+| Role | Purpose | Default entitlements |
+| --- | --- | --- |
+| `owner` | seeded top-level operator | full owner bundle |
+| `admin` | trusted org operator | same operator bundle as owner unless intentionally narrowed later |
+| `member` | invited logged-in user | none by default |
+
+### Entitlement policy
+
+- **Default deny**: no implicit privileges outside the role template.
+- The invite flow assigns a **role template**, not an arbitrary per-user privilege bag.
+- Per-feature entitlement editing remains an owner/admin maintenance action, not a consumer-facing feature.
+
+## Invite model
+
+### Trusted operator flow
+
+- Operator runs **`pnpm auth:invite`**.
+- CLI creates a **tenant-scoped, single-use, expiring invite token**.
+- CLI outputs an **accept URL** that can be emailed manually or shared privately.
+- The operator path is trusted enough to hold secrets and generate signed invite links.
+
+### Consumer acceptance flow
+
+1. User opens invite link.
+2. Browser verifies token validity and shows tenant + role context.
+3. User sets password and accepts the invitation.
+4. Invite is consumed and invalidated.
+5. User is logged in immediately and lands in the normal site shell.
+
+### Required invite properties
+
+- **Single use**
+- **Expiry**
+- **Tenant scoped**
+- **Role scoped**
+- **Email bound**
+- **Revocable**
+- **Auditable**
+
+## CLI semantics
+
+The CLI is an operator tool, not a consumer product.
+
+Required commands:
+
+- `pnpm auth:invite`
+- `pnpm auth:revoke-invite`
+- `pnpm auth:set-role`
+- `pnpm auth:disable-user`
+
+Rules:
+
+- Upsert by **email + tenant**, not blind create.
+- Refuse ambiguous tenant resolution.
+- Log who created, revoked, or changed a role.
+
+## Consumer UX
+
+### Portfolio
+
+- Login remains minimal: email + password.
+- Invite acceptance is the only onboarding path for non-owner users.
+- Logged-in `member` users still see a **clean account shell** with org context and logout, but no admin/operator surfaces.
+
+### Grime Time portability
+
+The same auth core should port cleanly to Grime Time:
+
+- same user + tenant + role + entitlement model
+- same invite-token acceptance pattern
+- same owner/admin/member default-deny posture
+- optional provider adapters for staff OAuth or CRM integrations
+
+Grime Time can add product-specific roles later such as `staff`, `dispatcher`, or `customer`, but those should sit on the same core invite and role-template system rather than starting from a second auth stack.
+
+## Security controls
+
+- Store **invite tokens hashed**, never plaintext.
+- Sign accept links and enforce **expiry**.
+- Rate-limit invite acceptance and login attempts.
+- CSRF-safe auth mutations.
+- Session rotation on login / password set.
+- Revoke all outstanding invites for a user when disabling them.
+- Keep audit timestamps and actor ids for invite creation, acceptance, revoke, and role changes.
+
+## Recommended build split
+
+### `global-auth-03-03`
+
+- invite token model
+- `auth:invite` / revoke / role-change CLI
+- accept-invite route + page
+- owner/admin/member role templates
+- tests for invite creation, accept, expiry, revoke, and role gating
+
+### later product auth phase
+
+- password reset
+- email verification
+- magic-link login
+- broader role matrix
+- consumer settings / profile management
+
+## Verification target
+
+- invite new `admin`
+- invite new `member`
+- re-invite existing user without duplicate account creation
+- revoke invite before acceptance
+- expired invite rejects cleanly
+- `member` gets `403` on admin/operator routes
+- `admin` gets operator access without owner-only seed assumptions

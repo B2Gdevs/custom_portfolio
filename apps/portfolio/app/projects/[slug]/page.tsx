@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getContentBySlug, getAllContent } from '@/lib/content';
+import { getAllContent } from '@/lib/content';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { getMDXComponents } from '@/lib/mdx';
 import { mdxOptions } from '@/lib/mdx-options';
@@ -10,6 +10,7 @@ import TableOfContents from '@/components/docs/TableOfContents';
 import { ContentTopLinks } from '@/components/content/ContentTopLinks';
 import { RequiredSectionsNotice } from '@/components/content/RequiredSectionsNotice';
 import { buildContentLinkGroups } from '@/lib/content-view-models';
+import { getProjectBySlug } from '@/lib/projects';
 import { ArrowLeft } from 'lucide-react';
 
 export async function generateStaticParams() {
@@ -21,7 +22,7 @@ export async function generateStaticParams() {
 
 export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const project = getContentBySlug('projects', slug);
+  const project = await getProjectBySlug(slug);
 
   if (!project) {
     notFound();
@@ -61,7 +62,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
             embedUrl = `https://www.youtube.com/embed/${videoId}${startParam}`;
           }
         }
-      } catch (_error) {
+      } catch {
         console.warn('Failed to parse video URL:', item.url);
       }
       return { ...item, url: embedUrl };

@@ -1,0 +1,21 @@
+---
+title: Kickoff -- global-auth-02
+description: Owner-only shell refresh for live identity, org context, avatar, and admin handoff.
+date: "2026-03-31"
+updated: "2026-03-31"
+repoPath: apps/portfolio/content/docs/global/planning/plans/global-auth-02/PLAN.mdx
+taskPhase: global-auth-02
+---
+
+# Kickoff: `global-auth-02`
+
+| Field | Value |
+| --- | --- |
+| `goal` | Refresh the site shell around the existing owner auth/session contract so the portfolio feels like a real SaaS account surface without opening public signup or multi-user management yet. |
+| `scope` | sidebar footer account card, live session fetch, avatar in phase one, user email/display name, role, org name, tenant slug/id, logout action, and owner-only private/admin entry points driven by entitlements instead of `NODE_ENV`. |
+| `non-goals` | multi-user org invites, self-service tenancy, billing, feature-flag management UI, or replacing Payload's own admin UI. |
+| `definition-of-done` | owner session state is visible in the portfolio shell, anonymous browsing remains open, private/admin links only appear for the owner session, `/admin` is gated by auth/entitlements rather than development mode checks, and automated tests cover the shell/session gating behavior. |
+| `tests-required` | component or route coverage for session display, account affordances, and owner-only gating; `pnpm run build`; `pnpm run lint`. |
+| `dependencies` | `global-auth-01-03`, `global-data-03-01`, current site sidebar primitives, and the existing auth/session routes. |
+| `open-questions` | whether the avatar source lives on the `users` collection immediately or ships with a deterministic fallback first; whether org context in the footer should show both slug and tenant id or tuck the id behind an expanded account panel; exact split between the site shell and the mounted Payload admin handoff. |
+| `first-tasks` | `global-auth-02-01` |

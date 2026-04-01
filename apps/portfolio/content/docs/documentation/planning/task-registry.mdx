@@ -119,7 +119,7 @@ Aligned with [Route conventions](/docs/documentation/route-conventions). **Do no
 
 **Goal:** Stripe-style integrated docs/apps UX: a **reusable app card** (cover image, actions, tooltips), a **compact toolbar-style planning-pack control** (not a hero tile), and a **focused media workflow** (generate / iterate / pick cover) launched from a **magic** control on **cover hover** that opens **SiteCopilot** with **`mediaSlot`** context (**no manual media-mode toggle**). **OpenAI Images** for generation; API route separate from RAG `/api/chat`. Session-scoped image memory + later Payload/S3/Supabase persistence. Thread layout informed by assistant-ui **shadcn** example ([`shadcn.tsx` thread + composer + parts](https://github.com/assistant-ui/assistant-ui/blob/main/apps/docs/components/examples/shadcn.tsx)) — gallery + markdown + image parts in the transcript.
 
-**Decisions:** `DOCUMENTATION-SITE-MEDIA-IMAGE-OPENAI`, `DOCUMENTATION-SITE-MEDIA-COPILOT-CONTEXT`. Remaining: auth for generate/persist, slot history policy.
+**Decisions:** `DOCUMENTATION-SITE-MEDIA-IMAGE-OPENAI`, `DOCUMENTATION-SITE-MEDIA-COPILOT-CONTEXT`. **Auth + prompts:** coordinate **`documentation-site-12-09`** with **`global-auth-03`** and **`books-publishing-03`**. Remaining: slot history policy, Payload persist (**12-07**).
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
@@ -131,6 +131,7 @@ Aligned with [Route conventions](/docs/documentation/route-conventions). **Do no
 | `documentation-site-12-06` | `done` | **`POST /api/media/generate`**: OpenAI Images (`OPENAI_IMAGE_MODEL`, default `dall-e-3`), **`b64_json`**, optional **`mediaSlot`**; structured errors; **`OPENAI_IMAGE_E2E`** opt-in Playwright quota test | `documentation-site-12-01` | `tests/unit/api/media-generate-route.test.ts`; `tests/e2e/media-generate.spec.ts` |
 | `documentation-site-12-07` | `planned` | **Payload + S3 (phase 2):** persist accepted images, link to `appId` + variant; admin/owner upload path; public read rules | `global-data-01` closure or scoped spike | integration test |
 | `documentation-site-12-08` | `planned` | **Batch covers:** script or owner UI — iterate registered apps, run templated prompt, write artifacts to agreed path or collection | `documentation-site-12-06`, `documentation-site-12-07` optional | one full run documented |
+| `documentation-site-12-09` | `planned` | **Auth + prompts for media:** `SiteCopilot` image flow and **`POST /api/media/generate`** use **`global-auth-03-01`** gates; optional prompt body uses **`books-publishing-03-02`** composer (style + slot/scene) instead of raw user paste where `mediaSlot` implies book/app cover | `documentation-site-12-06`, `global-auth-03-01`, `books-publishing-03-02` | owner session E2E + 403 for anonymous |
 
 ## Phase `documentation-site-13` (RAG cost: local embeddings)
 

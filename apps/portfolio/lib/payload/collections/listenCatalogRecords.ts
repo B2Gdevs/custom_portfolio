@@ -1,7 +1,9 @@
-import type { CollectionConfig } from 'payload';
+import type { Access, CollectionConfig } from 'payload';
 import { LISTEN_MEDIA_ASSET_COLLECTION_SLUG } from './listenMediaAssets';
+import { canManageOwnerAdminCollection } from '../access';
 
 export const LISTEN_CATALOG_RECORDS_COLLECTION_SLUG = 'listen-catalog-records';
+const allowPublicRead: Access = () => true;
 
 export const listenCatalogRecords: CollectionConfig = {
   slug: LISTEN_CATALOG_RECORDS_COLLECTION_SLUG,
@@ -9,6 +11,12 @@ export const listenCatalogRecords: CollectionConfig = {
     useAsTitle: 'title',
     group: 'Listen',
     defaultColumns: ['title', 'catalogKind', 'visibility', 'tenant', 'published', 'updatedAt'],
+  },
+  access: {
+    read: allowPublicRead,
+    create: canManageOwnerAdminCollection,
+    update: canManageOwnerAdminCollection,
+    delete: canManageOwnerAdminCollection,
   },
   fields: [
     {

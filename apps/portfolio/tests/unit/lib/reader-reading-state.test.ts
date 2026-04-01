@@ -2,17 +2,17 @@ import {
   getReaderPersistedState,
   saveReaderPersistedState,
 } from '@/lib/reader/reading-state';
-import { getPayloadClient } from '@/lib/payload';
 import { getSessionViewer } from '@/lib/auth/session';
+import { getReaderStateRepository } from '@/lib/reader/state-repository';
 
 vi.mock('server-only', () => ({}));
 
-vi.mock('@/lib/payload', () => ({
-  getPayloadClient: vi.fn(),
-}));
-
 vi.mock('@/lib/auth/session', () => ({
   getSessionViewer: vi.fn(),
+}));
+
+vi.mock('@/lib/reader/state-repository', () => ({
+  getReaderStateRepository: vi.fn(),
 }));
 
 describe('reader reading state service', () => {
@@ -33,10 +33,10 @@ describe('reader reading state service', () => {
         contentHash: 'hash-1',
       }),
     ).resolves.toBeNull();
-    expect(getPayloadClient).not.toHaveBeenCalled();
+    expect(getReaderStateRepository).not.toHaveBeenCalled();
   });
 
-  it('saves built-in reading state for entitled viewers', async () => {
+  it('saves built-in reading state through the repository for entitled viewers', async () => {
     vi.mocked(getSessionViewer).mockResolvedValue({
       authenticated: true,
       autoLoggedIn: false,
@@ -55,10 +55,9 @@ describe('reader reading state service', () => {
       },
     });
 
-    const payload = {
-      find: vi.fn().mockResolvedValue({ docs: [] }),
-      create: vi.fn().mockResolvedValue({
-        id: 'state-1',
+    const repository = {
+      get: vi.fn(),
+      save: vi.fn().mockResolvedValue({
         storageKey: 'mordreds_tale',
         contentHash: 'hash-1',
         bookSlug: 'mordreds_tale',
@@ -69,7 +68,7 @@ describe('reader reading state service', () => {
         updatedAt: '2026-03-30T00:00:00.000Z',
       }),
     };
-    vi.mocked(getPayloadClient).mockResolvedValue(payload as never);
+    vi.mocked(getReaderStateRepository).mockReturnValue(repository);
 
     await expect(
       saveReaderPersistedState({
@@ -90,6 +89,18 @@ describe('reader reading state service', () => {
       progress: 0.42,
       annotations: [],
       updatedAt: '2026-03-30T00:00:00.000Z',
+    });
+
+    expect(repository.save).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      userId: 'user-1',
+      storageKey: 'mordreds_tale',
+      contentHash: 'hash-1',
+      bookSlug: 'mordreds_tale',
+      sourceKind: 'built-in',
+      location: 'epubcfi(/6/2[a])',
+      progress: 0.42,
+      annotations: [],
     });
   });
 });

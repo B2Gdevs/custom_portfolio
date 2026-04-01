@@ -15,6 +15,15 @@ describe('site app records bootstrap', () => {
     vi.mocked(runSiteAppsWorker).mockRejectedValue(new Error('payload offline'));
 
     await expect(getSiteApps()).resolves.toEqual(FALLBACK_SITE_APPS);
+    expect(FALLBACK_SITE_APPS).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'grime-time',
+          href: 'https://grimetime.app',
+          cta: 'Visit Grime Time',
+        }),
+      ]),
+    );
   });
 
   it('uses site-app-record rows when they exist', async () => {
@@ -33,6 +42,14 @@ describe('site app records bootstrap', () => {
             supportHref: '/docs/repo-planner/planning/planning-docs',
             supportLabel: 'Repo Planner docs',
             supportText: 'Read-only by default.',
+            downloads: [
+              {
+                href: '/api/site-download-assets/file/repo-planner.zip',
+                label: 'Download repo planner bundle',
+                kind: 'download',
+                external: false,
+              },
+            ],
             featuredOrder: 20,
           },
         ],
@@ -43,6 +60,12 @@ describe('site app records bootstrap', () => {
       expect.objectContaining({
         id: 'repo-planner',
         description: 'Live from Payload.',
+        downloads: [
+          expect.objectContaining({
+            href: '/api/site-download-assets/file/repo-planner.zip',
+            label: 'Download repo planner bundle',
+          }),
+        ],
       }),
     ]);
   });

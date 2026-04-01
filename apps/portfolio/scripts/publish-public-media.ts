@@ -10,6 +10,12 @@ import { isPublicMediaSourcePath } from '@/lib/public-media';
 import { getPayloadClient } from '@/lib/payload';
 import { resolvePortfolioAppRoot } from '@/lib/payload/app-root';
 import {
+  shouldUpdatePublishedListenMedia,
+  shouldUpdatePublishedSiteMedia,
+  type ListenMediaPublishComparable,
+  type SiteMediaPublishComparable,
+} from '@/lib/payload/media-publish';
+import {
   getListenMediaAssetFileURL,
   LISTEN_MEDIA_ASSET_COLLECTION_SLUG,
 } from '@/lib/payload/collections/listenMediaAssets';
@@ -36,6 +42,12 @@ type ListenMediaInput = {
   listenSlug: string;
   mediaRole: 'artwork' | 'gallery-image' | 'downloadable' | 'other';
   mediaKind: 'image' | 'video' | 'audio' | 'document' | 'other';
+};
+
+type PublishSummary = {
+  created: number;
+  updated: number;
+  skipped: number;
 };
 
 const APP_ROOT = resolvePortfolioAppRoot();
@@ -247,34 +259,19 @@ function collectListenMediaInputs(): ListenMediaInput[] {
 async function markPreviousCurrentDocs(
   payload: Awaited<ReturnType<typeof getPayloadClient>>,
   collection: string,
+  existingDocsByKey: Map<string, PayloadDoc[]>,
   currentId: string,
-  sourcePathField: { name: string; value: string },
+  currentKey: string,
 ) {
-  const existing = await payload.find({
-    collection,
-    depth: 0,
-    limit: 100,
-    overrideAccess: true,
-    pagination: false,
-    where: {
-      and: [
-        {
-          [sourcePathField.name]: {
-            equals: sourcePathField.value,
-          },
-        },
-        {
-          isCurrent: {
-            equals: true,
-          },
-        },
-      ],
-    },
-  });
+  const existingDocs = existingDocsByKey.get(currentKey) ?? [];
 
-  for (const doc of existing.docs) {
+  for (const doc of existingDocs) {
     const id = asString(isRecord(doc) ? doc.id : null);
     if (!id || id === currentId) {
+      continue;
+    }
+
+    if (!isRecord(doc) || doc.isCurrent !== true) {
       continue;
     }
 
@@ -287,30 +284,96 @@ async function markPreviousCurrentDocs(
         isCurrent: false,
       },
     });
+
+    doc.isCurrent = false;
   }
+}
+
+function siteMediaKey(input: Pick<SiteMediaInput, 'sourcePath'>) {
+  return input.sourcePath;
+}
+
+function listenMediaKey(input: Pick<ListenMediaInput, 'listenSlug' | 'sourcePath'>) {
+  return `${input.listenSlug}::${input.sourcePath}`;
+}
+
+function toSiteMediaComparable(input: SiteMediaInput, checksumSha256: string): SiteMediaPublishComparable {
+  return {
+    title: input.title,
+    sourcePath: input.sourcePath,
+    contentScope: input.contentScope,
+    contentSlug: input.contentSlug ?? null,
+    mediaKind: input.mediaKind,
+    isCurrent: true,
+    checksumSha256,
+    fileSizeBytes: fileSizeBytes(input.absolutePath),
+  };
+}
+
+function toListenMediaComparable(
+  input: ListenMediaInput,
+  checksumSha256: string,
+): ListenMediaPublishComparable {
+  return {
+    title: input.title,
+    listenSlug: input.listenSlug,
+    sourcePath: input.sourcePath,
+    mediaRole: input.mediaRole,
+    mediaKind: input.mediaKind,
+    isCurrent: true,
+    checksumSha256,
+    fileSizeBytes: fileSizeBytes(input.absolutePath),
+  };
+}
+
+async function loadExistingMediaDocs(
+  payload: Awaited<ReturnType<typeof getPayloadClient>>,
+  collection: string,
+  getKey: (doc: PayloadDoc) => string | null,
+) {
+  const existing = await payload.find({
+    collection,
+    depth: 0,
+    limit: 1000,
+    overrideAccess: true,
+    pagination: false,
+  });
+
+  const docsByKey = new Map<string, PayloadDoc[]>();
+
+  for (const doc of existing.docs) {
+    if (!isRecord(doc)) {
+      continue;
+    }
+
+    const key = getKey(doc);
+    if (!key) {
+      continue;
+    }
+
+    const docs = docsByKey.get(key) ?? [];
+    docs.push(doc);
+    docsByKey.set(key, docs);
+  }
+
+  return docsByKey;
 }
 
 async function publishSiteMediaInput(
   payload: Awaited<ReturnType<typeof getPayloadClient>>,
+  existingDocsByKey: Map<string, PayloadDoc[]>,
   input: SiteMediaInput,
   sourceCommit: string,
 ) {
   const checksumSha256 = sha256File(input.absolutePath);
-  const existing = await payload.find({
-    collection: SITE_MEDIA_ASSET_COLLECTION_SLUG,
-    depth: 0,
-    limit: 100,
-    overrideAccess: true,
-    pagination: false,
-    where: {
-      sourcePath: {
-        equals: input.sourcePath,
-      },
-    },
-  });
-
-  const matchingDoc = existing.docs.find((doc) => isRecord(doc) && asString(doc.checksumSha256) === checksumSha256);
+  const mediaKey = siteMediaKey(input);
+  const existingDocs = existingDocsByKey.get(mediaKey) ?? [];
+  const matchingDoc = existingDocs.find(
+    (doc) => isRecord(doc) && asString(doc.checksumSha256) === checksumSha256,
+  );
   let resolvedDoc: PayloadDoc;
+  let action: keyof PublishSummary = 'created';
+  const comparable = toSiteMediaComparable(input, checksumSha256);
 
   if (matchingDoc && isRecord(matchingDoc)) {
     const id = asString(matchingDoc.id);
@@ -318,22 +381,28 @@ async function publishSiteMediaInput(
       throw new Error(`site media doc missing id for ${input.sourcePath}`);
     }
 
-    resolvedDoc = (await payload.update({
-      collection: SITE_MEDIA_ASSET_COLLECTION_SLUG,
-      id,
-      overrideAccess: true,
-      depth: 0,
-      data: {
-        title: input.title,
-        contentScope: input.contentScope,
-        contentSlug: input.contentSlug,
-        mediaKind: input.mediaKind,
-        isCurrent: true,
-        fileSizeBytes: fileSizeBytes(input.absolutePath),
-        sourceCommit,
-        publishedAt: new Date().toISOString(),
-      },
-    })) as PayloadDoc;
+    if (shouldUpdatePublishedSiteMedia(matchingDoc, comparable)) {
+      resolvedDoc = (await payload.update({
+        collection: SITE_MEDIA_ASSET_COLLECTION_SLUG,
+        id,
+        overrideAccess: true,
+        depth: 0,
+        data: {
+          title: input.title,
+          contentScope: input.contentScope,
+          contentSlug: input.contentSlug,
+          mediaKind: input.mediaKind,
+          isCurrent: true,
+          fileSizeBytes: comparable.fileSizeBytes,
+          sourceCommit,
+          publishedAt: new Date().toISOString(),
+        },
+      })) as PayloadDoc;
+      action = 'updated';
+    } else {
+      resolvedDoc = matchingDoc;
+      action = 'skipped';
+    }
   } else {
     const tempCopy = createTempCopy(
       input.absolutePath,
@@ -354,7 +423,7 @@ async function publishSiteMediaInput(
           mediaKind: input.mediaKind,
           isCurrent: true,
           checksumSha256,
-          fileSizeBytes: fileSizeBytes(input.absolutePath),
+          fileSizeBytes: comparable.fileSizeBytes,
           sourceCommit,
           publishedAt: new Date().toISOString(),
         },
@@ -369,10 +438,22 @@ async function publishSiteMediaInput(
     throw new Error(`site media publish missing id for ${input.sourcePath}`);
   }
 
-  await markPreviousCurrentDocs(payload, SITE_MEDIA_ASSET_COLLECTION_SLUG, currentId, {
-    name: 'sourcePath',
-    value: input.sourcePath,
-  });
+  const docs = existingDocsByKey.get(mediaKey) ?? [];
+  const existingIndex = docs.findIndex((doc) => asString(doc.id) === currentId);
+  if (existingIndex >= 0) {
+    docs[existingIndex] = resolvedDoc;
+  } else {
+    docs.push(resolvedDoc);
+  }
+  existingDocsByKey.set(mediaKey, docs);
+
+  await markPreviousCurrentDocs(
+    payload,
+    SITE_MEDIA_ASSET_COLLECTION_SLUG,
+    existingDocsByKey,
+    currentId,
+    mediaKey,
+  );
 
   const remoteUrl = normalizeUploadUrl(resolvedDoc, 'site');
   if (!remoteUrl) {
@@ -380,6 +461,7 @@ async function publishSiteMediaInput(
   }
 
   return {
+    action,
     scope: 'site' as const,
     sourcePath: input.sourcePath,
     remoteUrl,
@@ -391,34 +473,20 @@ async function publishSiteMediaInput(
 
 async function publishListenMediaInput(
   payload: Awaited<ReturnType<typeof getPayloadClient>>,
+  existingDocsByKey: Map<string, PayloadDoc[]>,
+  listenCatalogRowsBySlug: Map<string, PayloadDoc>,
   input: ListenMediaInput,
   sourceCommit: string,
 ) {
   const checksumSha256 = sha256File(input.absolutePath);
-  const existing = await payload.find({
-    collection: LISTEN_MEDIA_ASSET_COLLECTION_SLUG,
-    depth: 0,
-    limit: 100,
-    overrideAccess: true,
-    pagination: false,
-    where: {
-      and: [
-        {
-          listenSlug: {
-            equals: input.listenSlug,
-          },
-        },
-        {
-          sourcePath: {
-            equals: input.sourcePath,
-          },
-        },
-      ],
-    },
-  });
-
-  const matchingDoc = existing.docs.find((doc) => isRecord(doc) && asString(doc.checksumSha256) === checksumSha256);
+  const mediaKey = listenMediaKey(input);
+  const existingDocs = existingDocsByKey.get(mediaKey) ?? [];
+  const matchingDoc = existingDocs.find(
+    (doc) => isRecord(doc) && asString(doc.checksumSha256) === checksumSha256,
+  );
   let resolvedDoc: PayloadDoc;
+  let action: keyof PublishSummary = 'created';
+  const comparable = toListenMediaComparable(input, checksumSha256);
 
   if (matchingDoc && isRecord(matchingDoc)) {
     const id = asString(matchingDoc.id);
@@ -426,22 +494,28 @@ async function publishListenMediaInput(
       throw new Error(`listen media doc missing id for ${input.listenSlug}`);
     }
 
-    resolvedDoc = (await payload.update({
-      collection: LISTEN_MEDIA_ASSET_COLLECTION_SLUG,
-      id,
-      overrideAccess: true,
-      depth: 0,
-      data: {
-        title: input.title,
-        listenSlug: input.listenSlug,
-        mediaRole: input.mediaRole,
-        mediaKind: input.mediaKind,
-        isCurrent: true,
-        fileSizeBytes: fileSizeBytes(input.absolutePath),
-        sourceCommit,
-        publishedAt: new Date().toISOString(),
-      },
-    })) as PayloadDoc;
+    if (shouldUpdatePublishedListenMedia(matchingDoc, comparable)) {
+      resolvedDoc = (await payload.update({
+        collection: LISTEN_MEDIA_ASSET_COLLECTION_SLUG,
+        id,
+        overrideAccess: true,
+        depth: 0,
+        data: {
+          title: input.title,
+          listenSlug: input.listenSlug,
+          mediaRole: input.mediaRole,
+          mediaKind: input.mediaKind,
+          isCurrent: true,
+          fileSizeBytes: comparable.fileSizeBytes,
+          sourceCommit,
+          publishedAt: new Date().toISOString(),
+        },
+      })) as PayloadDoc;
+      action = 'updated';
+    } else {
+      resolvedDoc = matchingDoc;
+      action = 'skipped';
+    }
   } else {
     const tempCopy = createTempCopy(
       input.absolutePath,
@@ -462,7 +536,7 @@ async function publishListenMediaInput(
           mediaKind: input.mediaKind,
           isCurrent: true,
           checksumSha256,
-          fileSizeBytes: fileSizeBytes(input.absolutePath),
+          fileSizeBytes: comparable.fileSizeBytes,
           sourceCommit,
           publishedAt: new Date().toISOString(),
         },
@@ -477,32 +551,31 @@ async function publishListenMediaInput(
     throw new Error(`listen media publish missing id for ${input.listenSlug}`);
   }
 
-  await markPreviousCurrentDocs(payload, LISTEN_MEDIA_ASSET_COLLECTION_SLUG, currentId, {
-    name: 'sourcePath',
-    value: input.sourcePath,
-  });
+  const docs = existingDocsByKey.get(mediaKey) ?? [];
+  const existingIndex = docs.findIndex((doc) => asString(doc.id) === currentId);
+  if (existingIndex >= 0) {
+    docs[existingIndex] = resolvedDoc;
+  } else {
+    docs.push(resolvedDoc);
+  }
+  existingDocsByKey.set(mediaKey, docs);
+
+  await markPreviousCurrentDocs(
+    payload,
+    LISTEN_MEDIA_ASSET_COLLECTION_SLUG,
+    existingDocsByKey,
+    currentId,
+    mediaKey,
+  );
 
   const remoteUrl = normalizeUploadUrl(resolvedDoc, 'listen');
   if (!remoteUrl) {
     throw new Error(`listen media publish missing url for ${input.listenSlug}`);
   }
 
-  const listenRows = await payload.find({
-    collection: 'listen-catalog-records',
-    depth: 0,
-    limit: 1,
-    overrideAccess: true,
-    pagination: false,
-    where: {
-      slug: {
-        equals: input.listenSlug,
-      },
-    },
-  });
-
-  const listenRow = listenRows.docs.find(isRecord);
+  const listenRow = listenCatalogRowsBySlug.get(input.listenSlug);
   const listenRowId = asString(listenRow?.id);
-  if (listenRowId) {
+  if (listenRowId && asString(listenRow?.artworkUrl) !== remoteUrl) {
     await payload.update({
       collection: 'listen-catalog-records',
       id: listenRowId,
@@ -512,9 +585,13 @@ async function publishListenMediaInput(
         artworkUrl: remoteUrl,
       },
     });
+    if (listenRow) {
+      listenRow.artworkUrl = remoteUrl;
+    }
   }
 
   return {
+    action,
     scope: 'listen' as const,
     sourcePath: input.sourcePath,
     remoteUrl,
@@ -538,18 +615,55 @@ async function main() {
   const sourceCommit = getGitShortCommit();
   const siteInputs = collectSiteMediaInputs();
   const listenInputs = collectListenMediaInputs();
+  const [existingSiteMediaDocs, existingListenMediaDocs, listenCatalogRows] = await Promise.all([
+    loadExistingMediaDocs(payload, SITE_MEDIA_ASSET_COLLECTION_SLUG, (doc) =>
+      asString(doc.sourcePath),
+    ),
+    loadExistingMediaDocs(payload, LISTEN_MEDIA_ASSET_COLLECTION_SLUG, (doc) => {
+      const listenSlug = asString(doc.listenSlug);
+      const sourcePath = asString(doc.sourcePath);
+      return listenSlug && sourcePath ? `${listenSlug}::${sourcePath}` : null;
+    }),
+    payload.find({
+      collection: 'listen-catalog-records',
+      depth: 0,
+      limit: 200,
+      overrideAccess: true,
+      pagination: false,
+    }),
+  ]);
+  const listenCatalogEntries: [string, PayloadDoc][] = [];
+  for (const doc of listenCatalogRows.docs.filter(isRecord)) {
+    const slug = asString(doc.slug);
+    if (slug) {
+      listenCatalogEntries.push([slug, doc]);
+    }
+  }
+  const listenCatalogRowsBySlug = new Map(listenCatalogEntries);
 
   const manifest: PublicMediaManifest = {
     site: [],
     listen: [],
   };
+  const siteSummary: PublishSummary = { created: 0, updated: 0, skipped: 0 };
+  const listenSummary: PublishSummary = { created: 0, updated: 0, skipped: 0 };
 
   for (const input of siteInputs) {
-    manifest.site.push(await publishSiteMediaInput(payload, input, sourceCommit));
+    const result = await publishSiteMediaInput(payload, existingSiteMediaDocs, input, sourceCommit);
+    siteSummary[result.action] += 1;
+    manifest.site.push(result);
   }
 
   for (const input of listenInputs) {
-    manifest.listen.push(await publishListenMediaInput(payload, input, sourceCommit));
+    const result = await publishListenMediaInput(
+      payload,
+      existingListenMediaDocs,
+      listenCatalogRowsBySlug,
+      input,
+      sourceCommit,
+    );
+    listenSummary[result.action] += 1;
+    manifest.listen.push(result);
   }
 
   manifest.site.sort((a, b) => a.sourcePath.localeCompare(b.sourcePath));
@@ -560,7 +674,7 @@ async function main() {
   writeManifest(manifest);
 
   console.log(
-    `[publish-public-media] published ${manifest.site.length} site asset(s) and ${manifest.listen.length} listen asset(s)`,
+    `[publish-public-media] site ${siteSummary.created} created, ${siteSummary.updated} updated, ${siteSummary.skipped} skipped; listen ${listenSummary.created} created, ${listenSummary.updated} updated, ${listenSummary.skipped} skipped`,
   );
 }
 

@@ -36,6 +36,22 @@ function renderAppNote(app: SiteAppRecord) {
     );
   }
 
+  if (app.downloads && app.downloads.length > 0) {
+    fragments.push(
+      <span key="downloads">
+        Downloads:{' '}
+        {app.downloads.map((download, index) => (
+          <span key={download.href}>
+            {index > 0 ? ', ' : null}
+            <a href={download.href} className="text-accent underline" download>
+              {download.label}
+            </a>
+          </span>
+        ))}
+      </span>,
+    );
+  }
+
   return fragments.reduce<ReactNode[]>((acc, fragment, index) => {
     if (index > 0) {
       acc.push(' ');

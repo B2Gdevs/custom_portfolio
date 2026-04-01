@@ -17,7 +17,7 @@ export async function GET(
   }
 
   const { slug } = await params;
-  const resume = getResumeBySlug(slug);
+  const resume = await getResumeBySlug(slug);
 
   if (!resume) {
     return new Response('Resume not found.', { status: 404 });

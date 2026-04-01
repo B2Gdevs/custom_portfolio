@@ -2,10 +2,10 @@
 title: State
 description: Compact state records for the books section.
 date: "2026-03-15"
-updated: "2026-04-08"
+updated: "2026-03-31"
 order: 2
 repoPath: apps/portfolio/content/docs/books/planning/state.mdx
-taskPhase: books-reader-07
+taskPhase: books-publishing-03
 ---
 
 # State
@@ -17,24 +17,26 @@ taskPhase: books-reader-07
 | `section` | `books` |
 | `owner` | `books-section` |
 | `status` | `active` |
-| `updated` | `2026-04-08` |
+| `updated` | `2026-03-31` |
 
 ## Current Cycle
 
 | Field | Value |
 | --- | --- |
-| `phase` | `books-reader-07` is active for the next shadcn migration wave |
-| `plan` | **Reader shell groundwork is shipped**: **`ReaderWorkspace`** + **`EpubViewer`**, planning strip, reader modal store, auth-aware backend persistence, explicit upload/save paths, and book-scoped planning packs. `books-reader-07` extends the package-local UI stack beyond the initial primitives: `Textarea`, `Select`, and `Checkbox` now exist in `@portfolio/repub-builder`, workspace settings/upload flows use them, and the main viewer overlay/footer actions moved onto the same mirrored button/input stack. |
-| `focus` | finish the viewer-side remainder audit and keep migrating custom `EpubViewer` surfaces only where the component abstraction actually helps, without flattening the bespoke reading-stage layout into generic app chrome |
+| `phase` | **`books-publishing-03` is the active planning track:** Magicborn **style + scene** prompt library, **shared composer**, **CLI** generation, cover wiring — with **`global-auth-03`** gating owner-only image APIs. **`books-publishing-01`** (edition records) can run in parallel when you pick it up. |
+| `plan` | **Kickoff:** [books-publishing-03 Magicborn media](/docs/books/planning/plans/books-publishing-03-magicborn-media/plan). Reader shell remains stable (**`books-reader-07`** complete). |
+| `focus` | land **prompt library + composer** first, then **CLI**; coordinate **auth gates** (`/api/media/generate`) with **`global-auth-03-01`** before treating Copilot as production |
 | `constraint` | anonymous reading and local EPUB import stay available, but write-capable behavior and DB persistence must go through the shared auth/entitlement layer; local import alone must not auto-upload a book or mutate backend records |
 
 ## Next Queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | execute `books-reader-07`: add mirrored reader `Textarea` / `Select` / `Checkbox` controls and migrate workspace + viewer action surfaces onto package-local shadcn-style components | `reader-execution` |
-| `2` | keep a remainder audit for custom viewer surfaces that still need follow-up after this wave | `reader-audit` |
-| `3` | AI and publishing remain back burner while the active reader migration wave is in flight | `queue-policy` |
+| `1` | execute **`books-publishing-03`**: style prompt + beat/scene seeds + composer + CLI + optional cover wiring — see [task registry](/docs/books/planning/task-registry#phase-books-publishing-03-magicborn-media--prompts) | `publishing` |
+| `2` | **`global-auth-03`** in parallel: gate media API + **visitor reader** export-first policy (**[global task registry](/docs/global/planning/task-registry#phase-global-auth-03-restricted-operators--visitor-reader-policy)**) | `cross-cutting` |
+| `3` | **`books-publishing-01`** edition records + next EPUB when you schedule it | `publishing` |
+| `4` | **`books-ai-01`** when stabilizing Payload + vec RAG for books-side chat | `ai` |
+| `5` | reader: **maintenance only** | `reader-maintenance` |
 
 ## References
 
@@ -50,6 +52,8 @@ taskPhase: books-reader-07
 | `epub-annotations` | `apps/portfolio/lib/epub-annotations.ts` | IndexedDB, schema, JSON and annotated-EPUB zip |
 | `reader-planning-strip` | `vendor/repub-builder/src/reader/ReaderPlanningStrip.tsx` | **`readerModalStore`** only (**`BOOKS-READER-PLANNING-STRIP-PACKAGE-READER-MODAL-STORE`**) -- [embed architecture](/docs/documentation/reader-repo-planner-embed-architecture) |
 | `site-copilot` | `apps/portfolio/components/site/SiteCopilot.tsx` | floating site chat shell |
+| `magicborn-media-plan` | `apps/portfolio/content/docs/books/planning/plans/books-publishing-03-magicborn-media/PLAN.mdx` | Magicborn style + scene prompts, CLI, cover wiring (**`books-publishing-03`**) |
+| `media-generate-api` | `apps/portfolio/app/api/media/generate/route.ts` | OpenAI Images; **must align with `global-auth-03-01`** for owner-only access |
 | `chat-api` | `apps/portfolio/app/api/chat/route.ts` | assistant-ui-backed public chat route with server-side RAG grounding |
 | `logging-lib` | `apps/portfolio/lib/logging.ts` | shared env-driven structured logging for client/server flows |
 | `rag-search-api` | `apps/portfolio/app/api/rag/search/route.ts` | read-only retrieval API returning cited chunks |
