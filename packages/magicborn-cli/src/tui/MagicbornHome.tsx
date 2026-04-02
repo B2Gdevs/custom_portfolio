@@ -1,20 +1,159 @@
-import React from 'react';
-import { Box, Text, useApp, useInput } from 'ink';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Box, Text, useApp } from 'ink';
 import { resolveCliTheme } from '@magicborn/mb-cli-framework';
+import { getVendorCompletionRows } from '../vendor-registry.js';
+import { HOME_COMMAND_SECTIONS } from './home-sections.js';
+import { execMagicbornCliArgv } from './exec-repl-argv.js';
+import { parseReplLine } from './repl-parse.js';
+import { ReplLineInput } from './ReplLineInput.js';
 
-/** Default interactive home when `magicborn` is run with no args (TTY, not MAGICBORN_PLAIN). */
-export function MagicbornHome() {
+export type HomeSessionEndReason = 'quit' | 'chat';
+
+export type MagicbornHomeBranding = {
+  /** Product name (default: magicborn) */
+  product?: string;
+  /** One line under the title (ASCII / Unicode ok) */
+  tagline?: string;
+  /** Small footer line inside the header card */
+  footnote?: string;
+};
+
+export type MagicbornHomeProps = {
+  repoRoot: string;
+  cliVersion: string;
+  cliJs: string;
+  branding?: MagicbornHomeBranding;
+  onSessionEnd: (reason: HomeSessionEndReason) => void;
+};
+
+type TranscriptLine = { id: number; text: string; color?: string; dim?: boolean };
+
+let transcriptSeq = 0;
+
+function nextId(): number {
+  transcriptSeq += 1;
+  return transcriptSeq;
+}
+
+function shortenPath(p: string, max = 56): string {
+  if (p.length <= max) return p;
+  return `…${p.slice(-(max - 1))}`;
+}
+
+function buildHelpTranscript(theme: ReturnType<typeof resolveCliTheme>): TranscriptLine[] {
+  const lines: TranscriptLine[] = [
+    {
+      id: nextId(),
+      text: 'Commands (same as `magicborn …` in the shell). Leading / is optional.',
+      color: theme.muted,
+    },
+  ];
+  for (const sec of HOME_COMMAND_SECTIONS) {
+    const c = theme[sec.themeKey];
+    lines.push({ id: nextId(), text: sec.title, color: c, dim: false });
+    for (const row of sec.rows) {
+      lines.push({
+        id: nextId(),
+        text: `  ${row.cmd.padEnd(22)} ${row.hint}`,
+        color: theme.description,
+        dim: true,
+      });
+    }
+  }
+  lines.push({
+    id: nextId(),
+    text: 'REPL: help · clear · exit | Site chat: chat (full-screen)',
+    color: theme.muted,
+  });
+  return lines;
+}
+
+export function MagicbornHome(props: MagicbornHomeProps) {
   const { exit } = useApp();
   const theme = resolveCliTheme();
+  const [transcript, setTranscript] = useState<TranscriptLine[]>([]);
 
-  useInput((input, key) => {
-    if (input === 'q' || key.escape || (key.ctrl && input === 'c')) {
-      exit();
+  const product = props.branding?.product ?? 'magicborn';
+  const tagline =
+    props.branding?.tagline ??
+    'Operator CLI — type a command and press Enter (see `magicborn --help`).';
+  const footnote =
+    props.branding?.footnote ??
+    'Site Copilot (terminal): `magicborn chat` · Full command tree: `magicborn --help`';
+
+  const cols = Math.max(48, Math.min(100, (process.stdout.columns ?? 80) - 1));
+  const rows = process.stdout.rows ?? 24;
+  const maxTranscriptLines = Math.max(4, rows - 26);
+
+  const visibleTranscript = useMemo(
+    () => transcript.slice(-maxTranscriptLines),
+    [transcript, maxTranscriptLines],
+  );
+
+  const vendorUseSlashLines = useMemo(() => {
+    try {
+      return getVendorCompletionRows(props.repoRoot)
+        .filter((r) => r.controllable)
+        .map((r) => `/vendor use ${r.id}`)
+        .sort((a, b) => a.localeCompare(b));
+    } catch {
+      return [];
     }
-  });
+  }, [props.repoRoot]);
+
+  const endSession = useCallback(
+    (reason: HomeSessionEndReason) => {
+      props.onSessionEnd(reason);
+      exit();
+    },
+    [exit, props],
+  );
+
+  const appendLines = useCallback((next: TranscriptLine[]) => {
+    setTranscript((prev) => [...prev, ...next]);
+  }, []);
+
+  const runLine = useCallback(
+    (raw: string) => {
+      const line = raw.trim();
+      if (!line) return;
+
+      appendLines([{ id: nextId(), text: `> ${line}`, color: theme.primary }]);
+
+      const lower = line.toLowerCase();
+      if (lower === 'help' || lower === '?' || lower === 'h') {
+        appendLines(buildHelpTranscript(theme));
+        return;
+      }
+      if (lower === 'clear') {
+        setTranscript([]);
+        return;
+      }
+      if (lower === 'exit' || lower === 'quit' || lower === ':q') {
+        endSession('quit');
+        return;
+      }
+
+      const argv = parseReplLine(line);
+      if (argv.length === 0) return;
+
+      if (argv[0] === 'chat') {
+        endSession('chat');
+        return;
+      }
+
+      const { code, combined } = execMagicbornCliArgv(props.cliJs, props.repoRoot, argv);
+      if (combined && combined.length > 0) {
+        appendLines([{ id: nextId(), text: combined, color: code === 0 ? theme.muted : theme.error }]);
+      } else if (code !== 0) {
+        appendLines([{ id: nextId(), text: `(exit ${code})`, color: theme.warn }]);
+      }
+    },
+    [appendLines, endSession, props.cliJs, props.repoRoot, theme],
+  );
 
   return (
-    <Box flexDirection="column" width={72}>
+    <Box flexDirection="column" width={cols}>
       <Box
         borderStyle="round"
         borderColor={theme.border}
@@ -24,42 +163,59 @@ export function MagicbornHome() {
         marginBottom={1}
       >
         <Text bold color={theme.primary}>
-          magicborn
+          {product} <Text dimColor>v{props.cliVersion}</Text>
         </Text>
-        <Text color={theme.muted}>Operator CLI — q / Esc to quit · run magicborn --help for full list</Text>
+        <Text color={theme.muted}>{tagline}</Text>
+        <Text color={theme.description}>cwd {shortenPath(props.repoRoot, cols - 6)}</Text>
+        {footnote ? <Text dimColor>{footnote}</Text> : null}
       </Box>
 
       <Box flexDirection="column" marginBottom={1}>
-        <Text bold color={theme.asset}>
-          Local / packaging
-        </Text>
-        <Text color={theme.description}> book · planning-pack · listen · style · model</Text>
+        {HOME_COMMAND_SECTIONS.map((sec) => (
+          <Box key={sec.id} flexDirection="column" marginBottom={1}>
+            <Text bold underline color={theme[sec.themeKey]}>
+              {sec.title}
+            </Text>
+            {sec.rows.map((row) => (
+              <Box key={`${sec.id}-${row.cmd}`} flexDirection="row">
+                <Box marginRight={1} width={28} flexShrink={0}>
+                  <Text bold color={theme[sec.themeKey]}>
+                    {row.cmd}
+                  </Text>
+                </Box>
+                <Box flexGrow={1}>
+                  <Text wrap="wrap" color={theme.description} dimColor>
+                    {row.hint}
+                  </Text>
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        ))}
       </Box>
 
-      <Box flexDirection="column" marginBottom={1}>
-        <Text bold color={theme.payload}>
-          Payload CMS
-        </Text>
-        <Text color={theme.description}> payload collections · payload app generate (scaffold)</Text>
-      </Box>
+      {visibleTranscript.length > 0 ? (
+        <Box flexDirection="column" marginBottom={1} borderStyle="single" borderColor={theme.border} paddingX={1}>
+          <Text underline color={theme.muted}>
+            Session
+          </Text>
+          {visibleTranscript.map((t) => (
+            <Text key={t.id} color={t.color} dimColor={t.dim} wrap="wrap">
+              {t.text}
+            </Text>
+          ))}
+        </Box>
+      ) : null}
 
-      <Box flexDirection="column" marginBottom={1}>
-        <Text bold color={theme.vendor}>
-          Vendors
-        </Text>
-        <Text color={theme.description}> vendor list · vendor &lt;id&gt; … · vendor use &lt;id&gt;</Text>
-      </Box>
-
-      <Box flexDirection="column" marginBottom={1}>
-        <Text bold color={theme.openai}>
-          APIs
-        </Text>
-        <Text color={theme.description}> openai · chat (assistant-ui scaffold)</Text>
-      </Box>
-
-      <Box borderStyle="single" borderColor={theme.border} paddingX={1}>
-        <Text color={theme.muted}>global-tooling-03 · Ink + mb-cli-framework theme</Text>
-      </Box>
+      <ReplLineInput
+        borderColor={theme.border}
+        promptColor={theme.primary}
+        mutedColor={theme.muted}
+        slashExtraLines={vendorUseSlashLines}
+        placeholder="command…"
+        onExitRequest={() => endSession('quit')}
+        onSubmit={runLine}
+      />
     </Box>
   );
 }

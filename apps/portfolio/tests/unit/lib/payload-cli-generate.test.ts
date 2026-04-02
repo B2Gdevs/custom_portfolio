@@ -1,11 +1,23 @@
+import type { Payload } from 'payload';
 import { describe, expect, it, vi } from 'vitest';
 import {
   PAYLOAD_CLI_GENERATE_ALIASES,
-  resolvePayloadCliOrigin,
   siteAppRecordFromFallback,
-  upsertSiteAppRecordViaRest,
+  upsertSiteAppRecordViaLocalPayload,
 } from '@/lib/magicborn/payload-cli-generate';
 import { SITE_APP_RECORD_COLLECTION_SLUG } from '@/lib/payload/collections/siteAppRecords';
+
+function mockPayload(partial: {
+  find?: Payload['find'];
+  update?: Payload['update'];
+  create?: Payload['create'];
+}): Payload {
+  return {
+    find: partial.find ?? vi.fn(),
+    update: partial.update ?? vi.fn(),
+    create: partial.create ?? vi.fn(),
+  } as unknown as Payload;
+}
 
 describe('payload-cli-generate', () => {
   it('maps app alias to site-app-records', () => {
@@ -21,61 +33,42 @@ describe('payload-cli-generate', () => {
     });
   });
 
-  it('resolvePayloadCliOrigin respects MAGICBORN_PAYLOAD_URL', () => {
-    const a = process.env.MAGICBORN_PAYLOAD_URL;
-    const b = process.env.NEXT_PUBLIC_APP_URL;
-    process.env.MAGICBORN_PAYLOAD_URL = 'https://example.com/';
-    delete process.env.NEXT_PUBLIC_APP_URL;
-    expect(resolvePayloadCliOrigin()).toBe('https://example.com');
-    if (a !== undefined) process.env.MAGICBORN_PAYLOAD_URL = a;
-    else delete process.env.MAGICBORN_PAYLOAD_URL;
-    if (b !== undefined) process.env.NEXT_PUBLIC_APP_URL = b;
-    else delete process.env.NEXT_PUBLIC_APP_URL;
-  });
-
-  it('upsertSiteAppRecordViaRest PATCHes when doc exists', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ docs: [{ id: 7, slug: 'x' }] }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ doc: { id: 7 } }),
-      });
-    const result = await upsertSiteAppRecordViaRest({
-      origin: 'http://localhost:3000',
-      apiKey: 'k',
+  it('upsertSiteAppRecordViaLocalPayload updates when doc exists', async () => {
+    const find = vi.fn().mockResolvedValue({ docs: [{ id: 7, slug: 'x' }] });
+    const update = vi.fn().mockResolvedValue({});
+    const create = vi.fn();
+    const payload = mockPayload({ find, update, create });
+    const result = await upsertSiteAppRecordViaLocalPayload(payload, {
       body: { title: 'T' },
       slug: 'x',
-      fetchImpl: fetchMock as unknown as typeof fetch,
     });
     expect(result).toEqual({ ok: true, id: 7, mode: 'updated' });
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    const patchCall = fetchMock.mock.calls[1];
-    expect(patchCall[0]).toBe(`http://localhost:3000/api/${SITE_APP_RECORD_COLLECTION_SLUG}/7`);
-    expect(patchCall[1]?.method).toBe('PATCH');
+    expect(find).toHaveBeenCalledWith({
+      collection: SITE_APP_RECORD_COLLECTION_SLUG,
+      where: { slug: { equals: 'x' } },
+      limit: 1,
+      depth: 0,
+    });
+    expect(update).toHaveBeenCalledWith({
+      collection: SITE_APP_RECORD_COLLECTION_SLUG,
+      id: '7',
+      data: { title: 'T' },
+    });
+    expect(create).not.toHaveBeenCalled();
   });
 
-  it('upsertSiteAppRecordViaRest POSTs when no doc', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ docs: [] }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ doc: { id: 'new1' } }),
-      });
-    const result = await upsertSiteAppRecordViaRest({
-      origin: 'http://localhost:3000',
-      apiKey: 'k',
+  it('upsertSiteAppRecordViaLocalPayload creates when no doc', async () => {
+    const find = vi.fn().mockResolvedValue({ docs: [] });
+    const create = vi.fn().mockResolvedValue({ id: 'new1' });
+    const payload = mockPayload({ find, create });
+    const result = await upsertSiteAppRecordViaLocalPayload(payload, {
       body: { title: 'T', slug: 'new' },
       slug: 'new',
-      fetchImpl: fetchMock as unknown as typeof fetch,
     });
     expect(result).toEqual({ ok: true, id: 'new1', mode: 'created' });
+    expect(create).toHaveBeenCalledWith({
+      collection: SITE_APP_RECORD_COLLECTION_SLUG,
+      data: { title: 'T', slug: 'new' },
+    });
   });
 });

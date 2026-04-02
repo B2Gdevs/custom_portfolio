@@ -37,12 +37,16 @@ complete -c magicborn -f -n "__fish_use_subcommand" -a pnpm -d "pnpm passthrough
 complete -c magicborn -f -n "__fish_use_subcommand" -a vendor -d "Vendor repos"
 complete -c magicborn -f -n "__fish_use_subcommand" -a shell-init -d "PATH + completion for shell rc"
 complete -c magicborn -f -n "__fish_use_subcommand" -a completion -d "Shell completion"
+complete -c magicborn -f -n "__fish_use_subcommand" -a env -d "Vendor scope + merged .env (same as vendor CLI)"
 complete -c magicborn -f -n "__fish_use_subcommand" -a update -d "pnpm install + rebuild CLI"
 complete -c magicborn -f -n '__fish_seen_subcommand_from_path book' -a "generate gen scenes"
 complete -c magicborn -f -n '__fish_seen_subcommand_from_path book scenes' -a "list extract"
 complete -c magicborn -f -n '__fish_seen_subcommand_from_path app' -a "list generate gen"
 complete -c magicborn -f -n '__fish_seen_subcommand_from_path project' -a "list generate gen"
 complete -c magicborn -f -n '__fish_seen_subcommand_from_path vendor' -a "add list use clear scope --id -i"
+complete -c magicborn -f -n '__fish_seen_subcommand_from_path vendor use' -a '(magicborn __complete vendor-ids 2>/dev/null)'
 complete -c magicborn -f -n '__fish_seen_subcommand_from_path payload' -a "collections app"
 complete -c magicborn -f -n '__fish_seen_subcommand_from_path payload app' -a "generate gen"
+complete -c magicborn -f -n '__fish_seen_subcommand_from_path chat' -l dev -d "Start Next on spare port for /api/chat"
+complete -c magicborn -f -n '__fish_seen_subcommand_from_path chat' -l dev-port -d "Port for --dev (default 3010)"
 `;

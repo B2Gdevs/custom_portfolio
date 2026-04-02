@@ -1,7 +1,7 @@
 # magicborn completion (bash) — install: eval "$(magicborn completion bash)"
 # Requires: magicborn on PATH (pnpm install at repo root → node_modules/.bin, or shell-init).
 #
-# Vendor tab completion: (cli) = vendor package has a runnable CLI bin; plain id = registered only.
+# Vendor ids: use `__complete vendor-ids` (plain words). `vendor-suggest` adds (cli) suffix and breaks compgen matching.
 # NO_COLOR disables ANSI in vendor-suggest lines when MAGICBORN_COMPLETE_ANSI=1 is not set.
 #
 # Layout: GNU Readline prints matches in a grid; for column-major order (read top-to-bottom first),
@@ -74,7 +74,7 @@ _magicborn() {
           return
         fi
         if [[ "$ctx" == "vendor" ]]; then
-          COMPREPLY=( $(compgen -W "$(magicborn __complete vendor-suggest 2>/dev/null | tr '\n' ' ')" -- "$cur") )
+          COMPREPLY=( $(compgen -W "$(magicborn __complete vendor-ids 2>/dev/null | tr '\n' ' ')" -- "$cur") )
           return
         fi
         ;;
@@ -93,7 +93,7 @@ _magicborn() {
   fi
 
   if [[ ${COMP_CWORD} -eq 1 ]]; then
-    COMPREPLY=( $(compgen -W "book app project planning-pack listen style model openai chat payload pnpm vendor completion shell-init update" -- "$cur") )
+    COMPREPLY=( $(compgen -W "book app project planning-pack listen style model openai chat payload pnpm vendor completion shell-init update env" -- "$cur") )
     return
   fi
 
@@ -138,11 +138,15 @@ _magicborn() {
       ;;
     vendor)
       if [[ ${COMP_CWORD} -eq 2 ]]; then
-        COMPREPLY=( $(compgen -W "add list use clear scope --id -i $(magicborn __complete vendor-suggest 2>/dev/null | tr '\n' ' ')" -- "$cur") )
+        COMPREPLY=( $(compgen -W "add list use clear scope --id -i $(magicborn __complete vendor-ids 2>/dev/null | tr '\n' ' ')" -- "$cur") )
         return
       fi
       if [[ "$second" == "use" && ${COMP_CWORD} -eq 3 ]]; then
-        COMPREPLY=( $(compgen -W "$(magicborn __complete vendor-suggest 2>/dev/null | tr '\n' ' ')" -- "$cur") )
+        COMPREPLY=( $(compgen -W "$(magicborn __complete vendor-ids 2>/dev/null | tr '\n' ' ')" -- "$cur") )
+        return
+      fi
+      if [[ "$second" == "list" && ${COMP_CWORD} -eq 3 ]]; then
+        COMPREPLY=( $(compgen -W "--json" -- "$cur") )
         return
       fi
       if [[ "$second" == "scope" && ${COMP_CWORD} -eq 3 ]]; then
@@ -177,6 +181,12 @@ _magicborn() {
     shell-init)
       if [[ ${COMP_CWORD} -eq 2 ]]; then
         COMPREPLY=( $(compgen -W "bash zsh fish" -- "$cur") )
+        return
+      fi
+      ;;
+    env)
+      if [[ ${COMP_CWORD} -eq 2 ]]; then
+        COMPREPLY=( $(compgen -W "--json" -- "$cur") )
         return
       fi
       ;;
@@ -237,6 +247,14 @@ _magicborn() {
       fi
       ;;
     chat)
+      if [[ ${COMP_CWORD} -eq 2 ]]; then
+        COMPREPLY=( $(compgen -W "--dev --dev-port" -- "$cur") )
+        return
+      fi
+      if [[ ${COMP_CWORD} -eq 3 && "$prev" == "--dev-port" ]]; then
+        COMPREPLY=( )
+        return
+      fi
       return
       ;;
   esac

@@ -11,6 +11,7 @@ import {
 import { FISH_COMPLETION, ZSH_COMPLETION } from './completion-scripts.js';
 import { findRepoRoot } from './repo-root.js';
 import { forwardMagicborn } from './forward-portfolio.js';
+import { runMagicbornEnv } from './magicborn-env.js';
 import { runMagicbornUpdate } from './run-update.js';
 import { runVendorAdd } from './vendor-add.js';
 import { runMagicbornPnpm } from './pnpm-wrap.js';
@@ -280,7 +281,7 @@ payloadAppCmd
   .command('generate')
   .aliases(['gen'])
   .description(
-    'Upsert site-app-records via REST + users API key (MAGICBORN_PAYLOAD_USERS_API_KEY); --dry-run prints contract',
+    'Upsert site-app-records via local Payload (PAYLOAD_SECRET + DATABASE_URL, like seed scripts); --dry-run prints contract',
   )
   .option('--slug <id>', 'Registry app id (see FALLBACK_SITE_APPS / site catalog)')
   .option('--dry-run', 'Print JSON contract + resolved body', false)
@@ -313,12 +314,18 @@ program
   .description(
     'Site chat in the terminal (@assistant-ui/react-ink → POST /api/chat, same as web Site Copilot)',
   )
-  .action(() => {
+  .option(
+    '--dev',
+    'Start @portfolio/app Next on --dev-port (default 3010) for /api/chat; leaves :3000 and other dev servers free',
+    false,
+  )
+  .option('--dev-port <port>', 'Port for --dev', '3010')
+  .action((opts: { dev?: boolean; devPort?: string }) => {
     void (async () => {
       try {
         if (!isMagicbornPlainMode() && shouldOfferMagicbornTui()) {
           const { runChatStubTui } = await import('./tui/run-chat-tui.js');
-          await runChatStubTui();
+          await runChatStubTui({ withDev: Boolean(opts.dev), devPort: opts.devPort });
         } else {
           const url = resolvePortfolioChatApiUrl();
           console.log(
@@ -331,6 +338,16 @@ program
       }
       process.exit(0);
     })();
+  });
+
+program
+  .command('env')
+  .description(
+    'Show effective vendor scope and vendor .env merge (same env nested `magicborn vendor <id> …` uses)',
+  )
+  .option('--json', 'Machine-readable output', false)
+  .action((opts: { json?: boolean }) => {
+    process.exit(runMagicbornEnv(repoRootOrExit(), { json: Boolean(opts.json) }));
   });
 
 program

@@ -33,6 +33,7 @@ const TOP_LEVEL = [
   'completion',
   'shell-init',
   'update',
+  'env',
 ];
 
 function findMonorepoRoot(start = process.cwd()): string | null {

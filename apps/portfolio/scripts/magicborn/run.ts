@@ -31,11 +31,10 @@ import { printCompleteLines } from './complete-words';
 import { runOpenAiCli } from './openai-cli';
 import {
   PAYLOAD_CLI_GENERATE_ALIASES,
-  resolvePayloadCliOrigin,
-  resolvePayloadUsersApiKey,
   siteAppRecordFromFallback,
-  upsertSiteAppRecordViaRest,
+  upsertSiteAppRecordViaLocalPayload,
 } from '@/lib/magicborn/payload-cli-generate';
+import { getPayloadClient } from '@/lib/payload';
 
 type GenerateTarget = 'book' | 'app' | 'project' | 'planning-pack' | 'listen';
 
@@ -815,7 +814,7 @@ function runProjectList(flagArgs: string[]): void {
 async function runPayloadCollections(argv: string[]): Promise<void> {
   const wantJson = argv.includes('--json');
   const mod = await import('../../payload.config');
-  const { default: cfg } = mod;
+  const cfg = await mod.default;
   const cols = (cfg.collections ?? []) as Array<{ slug?: string }>;
   const slugs = cols
     .map((c) => (typeof c?.slug === 'string' ? c.slug.trim() : ''))
@@ -837,7 +836,7 @@ async function runPayloadCollections(argv: string[]): Promise<void> {
   process.exit(0);
 }
 
-/** Payload site-app upsert via REST + users API key (global-tooling-03-05). */
+/** Payload site-app upsert via in-process Payload (same as seed scripts; PAYLOAD_SECRET + DB). */
 async function runPayloadAppGenerate(flagArgs: string[]): Promise<void> {
   const { values } = parseArgs({
     args: flagArgs,
@@ -861,16 +860,16 @@ async function runPayloadAppGenerate(flagArgs: string[]): Promise<void> {
     alias: 'app',
     collection: PAYLOAD_CLI_GENERATE_ALIASES.app.collection,
     label: PAYLOAD_CLI_GENERATE_ALIASES.app.label,
-    authHeader: 'Authorization: users API-Key <key>',
+    mechanism:
+      'In-process getPayload() — same as scripts/seed-site-app-records.ts. No browser login, no Payload admin API keys.',
     env: {
-      MAGICBORN_PAYLOAD_URL: 'Next app origin (optional; default http://127.0.0.1:3000)',
-      NEXT_PUBLIC_APP_URL: 'Alternate origin if MAGICBORN_PAYLOAD_URL unset',
-      MAGICBORN_PAYLOAD_USERS_API_KEY: 'Required for writes; create under Payload admin → Users → API keys',
-      PAYLOAD_USERS_API_KEY: 'Alias for MAGICBORN_PAYLOAD_USERS_API_KEY',
+      PAYLOAD_SECRET: 'Required (Payload config)',
+      DATABASE_URL: 'Postgres (or sqlite file path when using sqlite provider)',
+      PAYLOAD_DB_PROVIDER: 'postgres | sqlite (matches payload.config)',
     },
     flags: ['--slug <id>', '--dry-run', '--json'],
     bodySource:
-      'When --slug matches a built-in registry id, fields are taken from FALLBACK_SITE_APPS; otherwise extend CLI with explicit flags later.',
+      'When --slug matches a built-in registry id, fields are taken from FALLBACK_SITE_APPS; extend with explicit flags later.',
   };
 
   if (dry) {
@@ -881,8 +880,8 @@ async function runPayloadAppGenerate(flagArgs: string[]): Promise<void> {
           ...contract,
           mode: 'dry-run',
           slug: slug ?? null,
-          resolvedOrigin: resolvePayloadCliOrigin(),
-          hasApiKey: Boolean(resolvePayloadUsersApiKey()),
+          hasPayloadSecret: Boolean(process.env.PAYLOAD_SECRET?.trim()),
+          hasDatabaseUrl: Boolean(process.env.DATABASE_URL?.trim()),
           exampleBody: body,
         },
         null,
@@ -902,19 +901,6 @@ async function runPayloadAppGenerate(flagArgs: string[]): Promise<void> {
     process.exit(1);
   }
 
-  const apiKey = resolvePayloadUsersApiKey();
-  const origin = resolvePayloadCliOrigin();
-  if (!apiKey) {
-    const msg =
-      'Set MAGICBORN_PAYLOAD_USERS_API_KEY (users API key from Payload admin). Use --dry-run to inspect the contract.';
-    if (wantJson) {
-      console.log(JSON.stringify({ ok: false, error: 'missing_api_key', message: msg, origin }, null, 2));
-    } else {
-      console.error(msg);
-    }
-    process.exit(1);
-  }
-
   const body = siteAppRecordFromFallback(slug);
   if (!body) {
     const msg = `Unknown app slug "${slug}". Known registry ids: ${FALLBACK_SITE_APPS.map((a) => a.id).join(', ')}`;
@@ -926,7 +912,23 @@ async function runPayloadAppGenerate(flagArgs: string[]): Promise<void> {
     process.exit(1);
   }
 
-  const result = await upsertSiteAppRecordViaRest({ origin, apiKey, body, slug });
+  let result: Awaited<ReturnType<typeof upsertSiteAppRecordViaLocalPayload>>;
+  try {
+    const payload = await getPayloadClient();
+    result = await upsertSiteAppRecordViaLocalPayload(payload, { body, slug });
+  } catch (e) {
+    const message =
+      e instanceof Error
+        ? e.message
+        : 'Failed to init Payload (check PAYLOAD_SECRET, DATABASE_URL, and provider env).';
+    if (wantJson) {
+      console.log(JSON.stringify({ ok: false, error: 'payload_init', message }, null, 2));
+    } else {
+      console.error(message);
+    }
+    process.exit(1);
+  }
+
   if (wantJson) {
     console.log(JSON.stringify(result, null, 2));
   } else if (result.ok) {
@@ -934,7 +936,7 @@ async function runPayloadAppGenerate(flagArgs: string[]): Promise<void> {
       const ui = createMagicbornCli(true);
       ui.banner('generate · payload', 'app');
       ui.step(`${result.mode} ${PAYLOAD_CLI_GENERATE_ALIASES.app.collection} id=${result.id}`);
-      ui.info(`origin: ${origin}`);
+      ui.info('local Payload (DB + PAYLOAD_SECRET)');
     } else {
       console.log(`${result.mode} site-app-records id=${result.id}`);
     }

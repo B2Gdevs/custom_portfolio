@@ -1,0 +1,63 @@
+---
+title: Org + provider sync planning note (global-auth-03-05)
+description: Provider-agnostic organization, membership, and sync planning for the portfolio auth core.
+date: "2026-04-01"
+updated: "2026-04-01"
+repoPath: apps/portfolio/content/docs/global/planning/plans/global-auth-03/ORG-SYNC.mdx
+taskPhase: global-auth-03
+order: 3
+---
+
+# Why this note exists
+
+Grime Time is proving that hosted identity can help with sign-in, social login, and account chrome, but the reusable part for the portfolio is not "copy Clerk orgs everywhere."
+
+The reusable part is:
+
+- first-party organizations
+- first-party memberships
+- role templates plus entitlement locks
+- provider mappings
+- outbound domain events
+
+That needs to be explicit before the portfolio grows beyond owner-only auth.
+
+## Working direction
+
+- **Payload users + tenants + memberships + entitlements** remain the authorization core.
+- **Hosted identity providers** such as Clerk are adapters for identity and session UX.
+- provider org ids may be stored as **external mappings**, not primary app ids.
+- section and product surfaces should continue asking the shared auth layer for permissions rather than talking directly to provider role strings.
+- provider-side org roles and permissions may be mirrored, but runtime authorization should continue to use first-party entitlements rather than assuming provider session claims are the complete permission model.
+
+## What this phase must answer
+
+1. What first-party record shape should represent organizations and memberships in the portfolio stack.
+2. Which fields are provider-authoritative versus app-authoritative.
+3. How provider sync should work when our admin changes org membership, role template, or lock state.
+4. What domain events portfolio apps should emit when org or membership state changes.
+5. How invite acceptance binds hosted identity onto an existing first-party membership without creating duplicates.
+
+## Current recommendation
+
+Use a split-authority model:
+
+- provider-authoritative:
+  - identity basics
+  - session state
+  - social login and auth factors
+
+- app-authoritative:
+  - tenant membership
+  - role template
+  - entitlements
+  - lock state
+  - product access
+
+Mirrored fields should track internal/provider write timestamps and sync source. Do not let newer provider profile changes overwrite app-only authorization state.
+
+## Non-goal
+
+Do not implement portfolio org/provider sync yet.
+
+The goal of `global-auth-03-05` is to lock the model and sync contract before the portfolio adopts a broader non-owner auth shape.

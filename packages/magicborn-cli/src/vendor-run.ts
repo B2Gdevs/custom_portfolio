@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process';
 import {
   findRepoRootForVendor,
   getDefaultVendorId,
+  getVendorCompletionRows,
   loadVendorRegistry,
   resolveVendorProfile,
 } from './vendor-registry.js';
@@ -77,7 +78,7 @@ export function parseVendorForwardArgs(argv: string[]): ParsedVendorArgs {
 
 export function printVendorCliHelp(): void {
   console.log(`Usage:
-  magicborn vendor list                     List registered vendors (JSON)
+  magicborn vendor list [--json]            Human table (default); --json for full registry
   magicborn vendor <id> [args...]          Run vendor CLI (cwd = vendor package root); id = registered vendor
   magicborn vendor --id <id> [args...]     Same, explicit id flag
   magicborn vendor use <id> [--export]      Set default vendor (.magicborn/vendor-scope.json)
@@ -214,7 +215,23 @@ export function runVendorForward(argv: string[]): number {
 
   if (argv[0] === 'list') {
     const def = getDefaultVendorId(registry, repoRoot);
-    console.log(JSON.stringify({ ok: true, defaultVendor: def, vendors: registry.vendors }, null, 2));
+    const wantJson = argv.includes('--json');
+    if (wantJson) {
+      console.log(JSON.stringify({ ok: true, defaultVendor: def, vendors: registry.vendors }, null, 2));
+      return 0;
+    }
+    const rows = getVendorCompletionRows(repoRoot).sort((a, b) => a.id.localeCompare(b.id));
+    console.log('Registered vendors  (tab: magicborn vendor use <TAB> · plain ids for shell completion)');
+    console.log(`Default: ${def}`);
+    console.log('');
+    console.log(`${'ID'.padEnd(22)} ${'CLI'.padEnd(10)} note`);
+    for (const r of rows) {
+      const cli = r.controllable ? 'yes' : 'no';
+      const note = r.id === def ? '(default)' : '';
+      console.log(`${r.id.padEnd(22)} ${cli.padEnd(10)} ${note}`.trimEnd());
+    }
+    console.log('');
+    console.log('Registry JSON: magicborn vendor list --json');
     return 0;
   }
 

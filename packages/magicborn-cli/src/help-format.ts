@@ -46,9 +46,9 @@ const GROUPS: Array<{
     names: ['model', 'style'],
   },
   {
-    title: 'Shell, completion, updates',
+    title: 'Shell, env, completion, updates',
     style: (s) => (helpColorOn() ? pc.bold(pc.gray(s)) : s),
-    names: ['completion', 'shell-init', 'update'],
+    names: ['completion', 'shell-init', 'update', 'env'],
   },
 ];
 

@@ -2,7 +2,7 @@
 title: Task Registry
 description: Executable tasks for the Global docs section and repo-wide planning IA.
 date: "2026-03-28"
-updated: "2026-04-05"
+updated: "2026-04-02"
 order: 3
 repoPath: apps/portfolio/content/docs/global/planning/task-registry.mdx
 taskPhase: global-data-02
@@ -50,6 +50,7 @@ taskPhase: global-data-02
 | `global-auth-03-02` | `planned` | **Visitor / non-privileged reader:** annotations and local reader state stay **browser-local** or **session-scoped**, **no durable server sync** unless entitled; UX and copy push **export**; align with [books requirements](/docs/books/requirements) **`BOOKS-REQ-08`** / **`BOOKS-REQ-10`** | `global-auth-03-01` | reader tests or documented UAT |
 | `global-auth-03-03` | `in-progress` | **Invites + org roles:** trusted **`pnpm auth:invite`** operator flow plus **single-use, expiring, tenant-scoped invite links** for consumers; role templates stay **`owner` / `admin` / `member`** with **default-deny entitlements**; product self-signup stays out of scope. Docs: [PLAN](/docs/global/planning/plans/global-auth-03/plan), [INVITES](/docs/global/planning/plans/global-auth-03/invites) | `global-auth-01-01` | run invite script against dev DB; accept/revoke/expiry test cases from [PLAN](/docs/global/planning/plans/global-auth-03/plan) |
 | `global-auth-03-04` | `planned` | **Clerk planning for multi-tenant portfolio auth:** evaluate Clerk-hosted sign-in, social login, and user/account chrome for the portfolio while keeping Payload users, tenants, roles, and entitlements as the authorization core. This slice is planning-first because the portfolio's multi-tenant boundary and future org invites need a cleaner design than Grime Time's single-product customer portal. Docs: [CLERK](/docs/global/planning/plans/global-auth-03/clerk) | `global-auth-03-03`, `global-auth-01-01` | planning notes updated; phase kickoff records multi-tenant constraints and migration risks |
+| `global-auth-03-05` | `planned` | **Provider-agnostic orgs + sync planning:** define first-party organizations, memberships, role templates, entitlement locks, provider mappings, and outbound domain events so the portfolio can adopt hosted identity without making Clerk the authorization source of truth. Includes org/provider sync rules, external-id mapping, and conflict handling for multi-tenant membership changes. Docs: [ORG-SYNC](/docs/global/planning/plans/global-auth-03/org-sync) | `global-auth-03-04`, `global-auth-03-03` | planning notes updated; decision records provider-authority split and event contract |
 
 ## Phase `global-tooling-01` (Magicborn CLI - backlog)
 
@@ -86,7 +87,8 @@ taskPhase: global-data-02
 | `global-tooling-03-02` | `done` | **assistant-ui + Ink:** shared `<OperatorChat />` (or equivalent) + tool slot; **magicborn** subcommand e.g. `magicborn chat` or flag `--chat` for guided flows; **CI** path skips Ink | `global-tooling-03-01` | manual: chat opens in TTY; `--json` unchanged |
 | `global-tooling-03-03` | `done` | **Default `magicborn` home:** Ink **dashboard** (sections, rules, list) replacing string-only help; keep **`magicborn --help` plain** for pipes / `NO_COLOR` automation | `global-tooling-03-01` | snapshot or component tests; `MAGICBORN_PLAIN` doc |
 | `global-tooling-03-04` | `done` | **Vendor v2:** remove **top-level** `users`/`org`/`tenant`/`blog` from Commander (shim + deprecation optional); **`vendor <id>`** tree + **badges**; **`use`** spawns vendor CLI with **`cwd` + .env merge**; completion topics updated | `global-tooling-02-03` | `pnpm --filter @magicborn/cli test`; e2e: `vendor grimetime -- --help` |
-| `global-tooling-03-05` | `done` | **`payload app generate`:** alias → `site-app-records`; **`--dry-run`** contract; REST upsert with **`MAGICBORN_PAYLOAD_USERS_API_KEY`**; body from registry **`--slug`**; guided **chat** for missing fields remains future | `global-tooling-02-05`, `global-tooling-03-02` | `tests/unit/lib/payload-cli-generate.test.ts`; `pnpm --filter @magicborn/cli test` |
+| `global-tooling-03-05` | `done` | **`payload app generate`:** alias → `site-app-records`; **`--dry-run`** contract; in-process Payload upsert (**`PAYLOAD_SECRET`** + **`DATABASE_URL`**, same as seed scripts); body from registry **`--slug`**; guided **chat** for missing fields remains future | `global-tooling-02-05`, `global-tooling-03-02` | `tests/unit/lib/payload-cli-generate.test.ts`; `pnpm --filter @magicborn/cli test` |
+| `global-tooling-03-06` | `done` | **Ink home polish:** `/` palette **↑↓** selection + **Enter** apply/run; **`magicborn env`** under shell/meta — shows effective vendor scope + **`vendor/.env`** merge (redacted) matching nested **`magicborn vendor <id> …`** child env; **`--json`** | `global-tooling-03-03`, `global-tooling-02-03` | `pnpm --filter @magicborn/cli test`; manual `magicborn env` + REPL `/` + arrows |
 
 ## Phase `global-admin-01`
 

@@ -1,3 +1,4 @@
+import type { Payload } from 'payload';
 import { SITE_APP_RECORD_COLLECTION_SLUG } from '@/lib/payload/collections/siteAppRecords';
 import { FALLBACK_SITE_APPS, type SiteAppRecord } from '@/lib/site-app-registry';
 
@@ -10,22 +11,6 @@ export const PAYLOAD_CLI_GENERATE_ALIASES = {
 } as const;
 
 export type PayloadCliGenerateAlias = keyof typeof PAYLOAD_CLI_GENERATE_ALIASES;
-
-export function resolvePayloadCliOrigin(): string {
-  const raw =
-    process.env.MAGICBORN_PAYLOAD_URL?.trim() ||
-    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
-    'http://127.0.0.1:3000';
-  return raw.replace(/\/$/, '');
-}
-
-/** `users` collection API key (`Authorization: users API-Key …`). */
-export function resolvePayloadUsersApiKey(): string | null {
-  const k =
-    process.env.MAGICBORN_PAYLOAD_USERS_API_KEY?.trim() ||
-    process.env.PAYLOAD_USERS_API_KEY?.trim();
-  return k || null;
-}
 
 export function siteAppRecordFromFallback(slug: string): Record<string, unknown> | null {
   const app = FALLBACK_SITE_APPS.find((a) => a.id === slug);
@@ -52,71 +37,39 @@ export function siteAppRecordBodyFromRegistryRow(app: SiteAppRecord): Record<str
   };
 }
 
-type SiteAppListResponse = {
-  docs?: Array<{ id?: string | number; slug?: string | null }>;
-};
-
-export async function upsertSiteAppRecordViaRest(params: {
-  origin: string;
-  apiKey: string;
-  body: Record<string, unknown>;
-  slug: string;
-  fetchImpl?: typeof fetch;
-}): Promise<{ ok: true; id: string | number; mode: 'created' | 'updated' } | { ok: false; message: string }> {
-  const fetchFn = params.fetchImpl ?? globalThis.fetch.bind(globalThis);
-  const base = params.origin.replace(/\/$/, '');
+/**
+ * Upsert via the same in-process Payload client as seed scripts (`getPayloadClient()`).
+ * Uses **PAYLOAD_SECRET** + **DATABASE_URL** (or sqlite file) from repo `.env` — no HTTP, no admin API keys.
+ */
+export async function upsertSiteAppRecordViaLocalPayload(
+  payload: Payload,
+  params: { body: Record<string, unknown>; slug: string },
+): Promise<
+  { ok: true; id: string | number; mode: 'created' | 'updated' } | { ok: false; message: string }
+> {
   const col = SITE_APP_RECORD_COLLECTION_SLUG;
-  const listUrl = `${base}/api/${col}?limit=1&depth=0&where[slug][equals]=${encodeURIComponent(params.slug)}`;
-  const headers = {
-    'Content-Type': 'application/json',
-    Authorization: `users API-Key ${params.apiKey}`,
-  };
-
-  const findRes = await fetchFn(listUrl, { headers });
-  const findJson = (await findRes.json().catch(() => null)) as SiteAppListResponse | null;
-  if (!findRes.ok) {
-    return {
-      ok: false,
-      message: `List ${col} failed (${findRes.status}): ${JSON.stringify(findJson).slice(0, 400)}`,
-    };
-  }
-  const existing = findJson?.docs?.[0];
-  const id = existing?.id;
-
-  if (id != null && id !== '') {
-    const patchUrl = `${base}/api/${col}/${id}`;
-    const patchRes = await fetchFn(patchUrl, {
-      method: 'PATCH',
-      headers,
-      body: JSON.stringify(params.body),
+  try {
+    const found = await payload.find({
+      collection: col,
+      where: { slug: { equals: params.slug } },
+      limit: 1,
+      depth: 0,
     });
-    const patchJson = await patchRes.json().catch(() => null);
-    if (!patchRes.ok) {
-      return {
-        ok: false,
-        message: `PATCH ${col}/${id} failed (${patchRes.status}): ${JSON.stringify(patchJson).slice(0, 400)}`,
-      };
+    const doc = found.docs[0];
+    if (doc && typeof doc === 'object' && doc.id != null && doc.id !== '') {
+      await payload.update({
+        collection: col,
+        id: String(doc.id),
+        data: params.body,
+      });
+      return { ok: true, id: doc.id, mode: 'updated' };
     }
-    return { ok: true, id, mode: 'updated' };
+    const created = await payload.create({
+      collection: col,
+      data: params.body,
+    });
+    return { ok: true, id: created.id, mode: 'created' };
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : String(e) };
   }
-
-  const postUrl = `${base}/api/${col}`;
-  const postRes = await fetchFn(postUrl, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(params.body),
-  });
-  const postJson = await postRes.json().catch(() => null);
-  if (!postRes.ok) {
-    return {
-      ok: false,
-      message: `POST ${col} failed (${postRes.status}): ${JSON.stringify(postJson).slice(0, 400)}`,
-    };
-  }
-  const newId = (postJson as { doc?: { id?: string | number }; id?: string | number })?.doc?.id ??
-    (postJson as { id?: string | number })?.id;
-  if (newId == null || newId === '') {
-    return { ok: false, message: 'Create succeeded but response had no id.' };
-  }
-  return { ok: true, id: newId, mode: 'created' };
 }
