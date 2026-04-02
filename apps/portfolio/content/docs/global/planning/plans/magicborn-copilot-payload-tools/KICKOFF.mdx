@@ -1,0 +1,70 @@
+---
+title: Copilot — Payload data, tools, forms, and creative batch flows
+description: Chat-first operator: query collections, schema-driven forms, scene-aware media batches; hybrid DB + optional RAG.
+date: "2026-04-06"
+order: 1
+repoPath: apps/portfolio/content/docs/global/planning/plans/magicborn-copilot-payload-tools/KICKOFF.mdx
+taskPhase: global-tooling-05
+---
+
+# Kickoff — Copilot + Payload + tools
+
+## Product intent
+
+- **Natural chat** that can **navigate and discuss** data living in **Payload collections** (projects, apps, media records, books metadata, etc.).
+- **Clarifying questions** in-thread when intent is ambiguous (missing collection, ambiguous slug, which scene set).
+- **Forms in the TUI** (bottom panel / wizard steps) generated from **Payload collection field configs** — same validation rules as admin where practical.
+- **Creative batch flows** aligned with existing repo paths: e.g. define or pick a **style** for a **project** → choose **image vs video** → choose **scenes** (typed list, picker, or **extracted** from books / planning docs) → **batch** `magicborn generate` (or server equivalent) using **`.magicborn/runs/`** conventions.
+- **Swappable RAG** (per [Ink Copilot kickoff](/docs/global/planning/plans/magicborn-cli-ink-claude-ux/KICKOFF)) for **prose discovery**; **not** the only way to get database truth.
+
+## Context strategy — hybrid (recommended)
+
+| Need | Mechanism |
+| --- | --- |
+| **Exact rows** (ids, counts, filters, “show project X”) | **Tool calls** → server uses **Payload Local API** (or narrow GraphQL) with **allowlisted** collections + **depth/limit** caps. |
+| **Authoritative create/update** | Tool returns **form schema** from **`payload.config`** fields; user confirms in Ink; server runs **validated** Local API `create` / `update`. |
+| **Unstructured “what’s in chapter 3?” / similar passages** | **`ragMode` ≠ `off`** — retrieval augments the model; still subject to [site RAG boundaries](/docs/global/planning/decisions). |
+| **Scene candidates from books/planning** | Prefer **structured extraction** first (MDX headings, scene markers, frontmatter, planning sections). Use **RAG** only to *suggest* spans when structure is thin — never as sole source for DB writes without confirmation. |
+
+**Rule of thumb:** if the answer must match the **database exactly**, use a **tool/query**, not RAG alone.
+
+## Security and auth
+
+- **Mutations** and **PII-bearing reads** require the same **session / entitlements** as today (`admin:access`, tenant boundary). Until Ink shows a real user, **system** label means **no silent writes** — either **cookie session** for owner or explicit **operator token** phase (decision in `global-auth` / Copilot slice).
+- **Allowlist** which collections and which operations Copilot tools may perform; deny-by-default for internal collections (RAG chunks, raw user payloads, etc.).
+
+## Architecture sketch
+
+1. **`POST /api/chat` (or `/api/copilot/turn`)** accepts messages + optional **`ragMode`** + **`model`** (see tooling-04). Server builds OpenAI request with **tool definitions** (`list_records`, `get_record`, `propose_form`, `submit_form`, `run_generate_batch`, …).
+2. **Tool execution** runs only on the server (Next route / server action), never arbitrary SQL from the model.
+3. **Ink client** renders assistant text; when response includes **`ui: { kind: 'form', fields: … }`** or a dedicated envelope, **bottom panel** shows the form (same pattern as Claude-style shell **`global-tooling-04`**).
+4. **Batch media:** orchestration tool chains: resolve **project** → load or create **style** record → branch **image \| video** → resolve **scenes** array → enqueue or call existing **`lib/magicborn/openai-image-generate`** (and future video) with **manifest** under **`.magicborn/`**.
+
+## Phasing (high level)
+
+| Slice | Outcome |
+| --- | --- |
+| **A** | Read-only tools + pagination; chat can “list / get” allowlisted collections. |
+| **B** | OpenAI **tool loop** (multi-step) + structured errors back to the model. |
+| **C** | **Schema → form** descriptor + Ink renderer + create/update with confirmation. |
+| **D** | **Style → medium → scenes → batch generate** using existing CLI/library paths. |
+| **E** | **Scene extraction** from repo MDX/planning (parser + tests); optional RAG assist. |
+
+## Non-goals (initial)
+
+- Rebuilding Payload Admin in Ink feature-for-feature.
+- Letting the model emit arbitrary Payload GraphQL without validation.
+- Full book EPUB text in site RAG by default (unchanged vs **`global-data-dec-09`** unless a separate decision extends scope).
+
+## Dependencies
+
+- **`global-tooling-04`** — shared bottom panel, transcript, footer (**`04-05`** context meter + **approval vs auto-accept** for CRUD).
+- **`global-tooling-06`** — **books / series / scenes** in Payload + **EPUB illustration scan** + reading-order **context** for compose ([kickoff](/docs/global/planning/plans/magicborn-books-scenes-epub/KICKOFF)).
+- **`global-tooling-01`** taxonomy / media path where batch outputs attach to **project-records** / **site-media**.
+- **`global-auth-03`** for durable operator identity on mutating flows.
+
+## Open questions (for decisions doc)
+
+- Single endpoint **`/api/chat`** vs **`/api/copilot/*`** for tool-heavy traffic (logging, timeouts, rate limits).
+- Whether **video** generation is OpenAI-only or a second provider in phase D.
+- **Scene** contract: new frontmatter key vs convention on headings vs stored `scene` entities in Payload.

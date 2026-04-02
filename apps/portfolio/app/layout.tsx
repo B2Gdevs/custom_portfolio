@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import './globals.css';
+import { ClerkProviderWrapper } from '@/components/auth/ClerkProviderWrapper';
 import { ContentCommandPaletteHotkey } from '@/components/content/ContentCommandPaletteHotkey';
 import { SiteLayout } from '@/components/layout/SiteLayout';
 import { ModalRoot } from '@/components/modals/ModalRoot';
@@ -83,19 +84,21 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body>
-        {siteChatEnabled ? (
-          <SiteCopilotProvider>
-            {siteShell}
-            <div
-              data-testid="site-copilot-shell"
-              className="fixed bottom-6 right-6 z-[130] pointer-events-none [&_*]:pointer-events-auto"
-            >
-              <SiteCopilot />
-            </div>
-          </SiteCopilotProvider>
-        ) : (
-          siteShell
-        )}
+        <ClerkProviderWrapper>
+          {siteChatEnabled ? (
+            <SiteCopilotProvider>
+              {siteShell}
+              <div
+                data-testid="site-copilot-shell"
+                className="fixed bottom-6 right-6 z-[130] pointer-events-none [&_*]:pointer-events-auto"
+              >
+                <SiteCopilot />
+              </div>
+            </SiteCopilotProvider>
+          ) : (
+            siteShell
+          )}
+        </ClerkProviderWrapper>
       </body>
     </html>
   );

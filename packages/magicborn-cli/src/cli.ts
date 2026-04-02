@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import {
   isMagicbornPlainMode,
   resolvePortfolioChatApiUrl,
@@ -312,20 +312,37 @@ vendorCmd
 program
   .command('chat')
   .description(
-    'Site chat in the terminal (@assistant-ui/react-ink → POST /api/chat, same as web Site Copilot)',
+    'Site Copilot in the terminal: default = isolated production .next-chat + next start + Ink (RAG-style step log on stderr). Flags: --dev (HMR), --rebuild, --no-server.',
   )
+  .option('--dev', 'Use next dev + webpack (HMR) instead of production .next-chat + next start', false)
+  .option('--rebuild', 'Force chat:build into .next-chat before next start', false)
+  .option('--serve-rebuild', 'Alias for --rebuild', false)
   .option(
-    '--dev',
-    'Start @portfolio/app Next on --dev-port (default 3010) for /api/chat; leaves :3000 and other dev servers free',
+    '--no-server',
+    'Open Ink only; POST to MAGICBORN_CHAT_* or default URL (no local Next process)',
     false,
   )
-  .option('--dev-port <port>', 'Port for --dev', '3010')
-  .action((opts: { dev?: boolean; devPort?: string }) => {
+  .option('--dev-port <port>', 'Local server port (default 3010)', '3010')
+  .addOption(new Option('--serve').hideHelp())
+  .action(
+    (opts: {
+      dev?: boolean;
+      rebuild?: boolean;
+      serveRebuild?: boolean;
+      noServer?: boolean;
+      devPort?: string;
+      serve?: boolean;
+    }) => {
     void (async () => {
       try {
         if (!isMagicbornPlainMode() && shouldOfferMagicbornTui()) {
           const { runChatStubTui } = await import('./tui/run-chat-tui.js');
-          await runChatStubTui({ withDev: Boolean(opts.dev), devPort: opts.devPort });
+          await runChatStubTui({
+            withDev: Boolean(opts.dev),
+            rebuild: Boolean(opts.rebuild || opts.serveRebuild),
+            noServer: Boolean(opts.noServer),
+            devPort: opts.devPort,
+          });
         } else {
           const url = resolvePortfolioChatApiUrl();
           console.log(

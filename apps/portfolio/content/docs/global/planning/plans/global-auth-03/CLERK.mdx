@@ -40,4 +40,150 @@ That means Clerk may be the right hosted identity layer, but the portfolio needs
 
 Do not start swapping the portfolio auth/session code to Clerk until those multi-tenant answers are explicit.
 
-The goal of `global-auth-03-04` is to define the migration contract, not to copy Grime Time’s customer-portal auth surface into a different product.
+The goal of `global-auth-03-04` is to define the migration contract, not to copy Grime Time's customer-portal auth surface into a different product.
+
+---
+
+## Answers to multi-tenant questions (2026-04-02)
+
+### 1. How Clerk identities map onto existing tenant membership and entitlements
+
+**Answer:** Clerk handles **authentication only**. When a Clerk user authenticates:
+
+1. Clerk webhook (`user.created`, `user.updated`) fires
+2. Webhook handler looks up or creates a Payload `users` record by `clerkId` (new field)
+3. If user doesn't exist in Payload, create with:
+   - `clerkId`: Clerk user ID
+   - `email`: from Clerk
+   - `displayName`: from Clerk profile
+   - `avatarUrl`: from Clerk profile
+   - `role`: `member` (default)
+   - `tenant`: lookup from invite or default tenant
+   - `entitlements`: empty (default-deny per `global-auth-dec-05`)
+4. If user exists, update profile fields but preserve Payload-managed fields (`role`, `tenant`, `entitlements`)
+
+**Entitlements stay in Payload.** Clerk never knows about `reader:sync`, `admin:access`, etc.
+
+### 2. Whether Clerk organizations are useful here
+
+**Answer:** **Use Clerk organizations sparingly.** The portfolio has:
+- `tenants` collection in Payload (already exists)
+- Multi-tenant membership model planned
+
+Clerk orgs can:
+- Provide org switcher UI
+- Enable org-scoped sessions
+- Simplify "which org am I in" for the user
+
+But **Payload tenants remain source of truth**:
+- Clerk org ID maps to Payload tenant ID via `clerkOrgId` field on tenants
+- Membership changes in Clerk trigger webhooks that sync to Payload
+- Authorization checks always hit Payload, never Clerk metadata
+
+**Recommendation:** Enable Clerk organizations but treat them as a UI/session convenience, not the authority.
+
+### 3. How invite acceptance binds Clerk identity to existing Payload user
+
+**Answer:** Two flows:
+
+**Flow A: Clerk-first signup (via invite link)**
+1. Operator creates invite with `pnpm auth:invite` (generates Payload invite token + expected email)
+2. Invite link goes to `/accept-invite?token=...`
+3. Page checks token validity, shows tenant/role context
+4. User clicks "Sign up with Clerk" -> redirected to Clerk signup
+5. After Clerk signup, Clerk webhook fires with `user.created`
+6. Webhook handler checks for pending invite by email
+7. If invite exists and valid: bind `clerkId` to the pre-created Payload user, mark invite consumed
+8. If no invite: create minimal Payload user with `member` role, no tenant (or default tenant)
+
+**Flow B: Existing Payload user adds Clerk identity**
+1. User with Payload-only auth logs in
+2. User clicks "Link Clerk account" in settings
+3. OAuth flow to Clerk
+4. On success, update Payload user with `clerkId`
+
+### 4. How owner-only transitions to broader org access
+
+**Answer:** Phased rollout:
+1. **Phase 1 (current):** Owner-only, Payload auth
+2. **Phase 2 (this task):** Add Clerk as optional identity layer, owner can use Clerk login
+3. **Phase 3:** Invites work with Clerk signup for `admin`/`member` roles
+4. **Phase 4:** Full org management via Clerk org UI + Payload sync
+
+**Session bridge:** Both auth methods produce the same session shape:
+- Payload-only: existing `portfolio-token` cookie
+- Clerk: Clerk session -> lookup Payload user by `clerkId` -> same entitlement checks
+
+### 5. How billing/customer IDs relate to external-id model
+
+**Answer:** Add `externalIds` field to users collection:
+```typescript
+{
+  name: 'externalIds',
+  type: 'group',
+  fields: [
+    { name: 'clerkId', type: 'text', unique: true, index: true },
+    { name: 'stripeCustomerId', type: 'text', unique: true, index: true },
+    // Future: other provider IDs
+  ],
+}
+```
+
+This keeps provider-specific IDs in one place and allows the same user to have Clerk identity + Stripe billing without coupling those systems.
+
+---
+
+## Implementation plan
+
+### Environment variables
+
+Add to `.env.example`:
+```bash
+# Clerk auth (hosted sign-in/sign-up, social login, account UI)
+CLERK_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+# Clerk webhook signing secret
+CLERK_WEBHOOK_SECRET=whsec_...
+```
+
+### Schema changes
+
+**Users collection:**
+- Add `clerkId` field (text, unique, indexed)
+- Add `externalIds` group for future providers
+
+**Tenants collection:**
+- Add `clerkOrgId` field (text, unique, indexed)
+
+### Implementation tasks
+
+| Task | Status | Description |
+| --- | --- | --- |
+| `04-01` | done | Install `@clerk/nextjs` + `svix`, add env vars to `.env.example` |
+| `04-02` | done | Add `externalIds.clerkId` to users, `externalIds.clerkOrgId` to tenants (+ `stripeCustomerId`, `stripeAccountId`) |
+| `04-03` | done | Add `ClerkProviderWrapper` to root layout with conditional mounting |
+| `04-04` | done | Add `middleware.ts` with Clerk route protection |
+| `04-05` | done | Create `/api/webhooks/clerk` endpoint for user/org sync (handles `user.*`, `organization.*`, `organizationMembership.*`) |
+| `04-06` | done | Create `/api/auth/clerk-session` endpoint + `use-clerk-auth.ts` hook for Clerk-Payload session bridge |
+| `04-07` | done | Add Clerk `SignInButton` to `SidebarAccountSection` (conditional) |
+| `04-08` | done | Create `scripts/link-clerk-user.ts` to link existing owner to Clerk identity |
+| `04-09` | pending | Run `pnpm install`, link owner to Clerk org, verify build passes, test sign-in flow |
+
+### Verification
+
+- `pnpm --filter @portfolio/app test:unit` (new tests)
+- `pnpm run build`
+- `pnpm run lint`
+- Manual: sign in with Clerk, verify Payload user created, verify entitlement checks work
+
+### Definition of done
+
+1. Clerk env vars in `.env.example` with documentation
+2. Users and tenants collections have external ID fields
+3. ClerkProvider conditionally mounts when keys present
+4. Clerk middleware injects session for route protection
+5. Webhook syncs Clerk users to Payload (create/update)
+6. Auth session hook works with both Payload-only and Clerk sessions
+7. Invite acceptance works with Clerk signup
+8. Unit tests cover sync, session bridge, and invite binding
+9. Build and lint pass

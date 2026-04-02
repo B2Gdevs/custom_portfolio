@@ -1,0 +1,90 @@
+---
+title: Magicborn Ink — Claude Code–style shell (kickoff)
+description: Chat-first TUI with slash commands, bottom panels, history, footer bar, model/RAG controls.
+date: "2026-04-02"
+updated: "2026-04-06"
+order: 1
+repoPath: apps/portfolio/content/docs/global/planning/plans/magicborn-cli-ink-claude-ux/KICKOFF.mdx
+taskPhase: global-tooling-04
+---
+
+# Kickoff — Claude Code–style Magicborn shell
+
+## Scope (phase 1)
+
+- **Chat-first layout:** scrollable transcript (user + system), not a static help wall. Help can move behind `/help` or a thin cheatsheet line.
+- **Slash commands:** `/model`, `/rag` (or `/index`), `/off` patterns; **purple/magenta** token for slash text in lists and history (`CliTheme.slash`).
+- **History lines:** `> /command` with **inverted/highlight** block for the command token; next line `└ status…` with muted body and **warn** tint for “Interrupted · …”.
+- **Bottom overlay:** when a slash command opens a picker, **only the bottom region** updates to a **panel** with **top border accent**, title + description, **↑↓** list, **Enter** confirm, **Esc** cancel — chat history above stays visible.
+- **Footer row 1 (3 slots):** (1) **orange** — **default** suggested next slash (static stack, e.g. `/model` first); (2) **dim** — current model label; (3) **dim** — folder basename or shortened cwd.
+- **Footer row 2 (session chrome):** (1) **Context meter** — estimated **% of model context window** used this session (tokens in + out + system approximations), **visual bar** (e.g. orange fill + stippled remainder) like Claude Code; (2) **Auto-compact** — when crossing a threshold, **summarize / drop** oldest turns per policy (server-assisted summary optional) and log `└ Context compacted` in history; (3) **Approval mode** — **`approve edits`** (default): every **CRUD / destructive tool** pauses for **Enter** in a bottom panel; optional **`auto accept edits on`** (persisted in **`.magicborn/cli-session.json`** or env) to move faster when the operator trusts the system; show state with **purple/cyan** accent (e.g. `» accept edits on` vs `» approvals required`).
+- **Banner:** bordered box with **product name from framework config**, **ASCII “M”** block, **`system`** user label (no session until auth), **cwd** path.
+- **Interrupt:** long jobs (e.g. RAG ingest, subprocess) run with **cancel**; SIGINT/ESC **does not** exit the app — append history line and return to composer (`AbortController` + `useInput`).
+
+## Surfaces (decided)
+
+| Surface | Role |
+| --- | --- |
+| **`magicborn` (bare, interactive)** | **Primary:** full Claude-style shell (banner, transcript, slash, footer). |
+| **`magicborn chat`** | **Same** interactive shell for chat; server prep (dev / `.next-chat`) stays as today. |
+| **One-shot flags (`--help`, `--json`, scripts)** | **Secondary:** minimal copy; no heavy interactive help. Users can still run non-interactive commands. |
+
+## Decisions — models (decided)
+
+- Assume **`OPENAI_API_KEY`** is set when using `/model`.
+- **Source of truth:** call **OpenAI’s model list API** (SDK `models.list` or equivalent) when opening the picker / on refresh — **fresh list**, filtered in the UI to **chat-capable** models (drop embeddings-only, etc.). Cache briefly in-session to avoid spam; **Enter** on “refresh” optional later.
+
+## Decisions — RAG modes (decided)
+
+**Per-request** (JSON on `POST /api/chat`, see below), not only `SITE_CHAT_RAG` env:
+
+| Mode id (proposed) | Contents |
+| --- | --- |
+| **`off`** | No retrieval / no embedding calls for that request — system + conversation only (overrides env allow-list for that turn). |
+| **`books`** | Fiction **books** corpus only. |
+| **`books_planning`** | Books **+** book **planning** MDX (no extra repo docs). |
+| **`books_planning_repo`** | Books + planning **+** **references** — other repo docs / articles / cross-links **crawled and compiled** with the books slice (single composite index for this mode). |
+
+**Implementation note:** today **`retrieveRagContext`** searches **one** semantic store built from **`ragIngestCorpus`** (`docs` / `projects` / `blog` with exclusions) — **not** yet split by book vs planning vs “repo refs”. Shipping the four modes requires **ingest + chunk metadata (or separate stores)** so retrieval can filter by mode. That is **`global-tooling-04-03`** + **`global-data`** alignment, not Ink-only.
+
+## Decisions — API (decided)
+
+- Extend **`SiteChatApiRequest`** with **optional JSON fields** (preferred over headers for clarity and caching):
+
+```ts
+// Illustrative — final names in code review
+model?: string;
+/** When set, overrides SITE_CHAT_RAG for this request only. */
+ragMode?: 'off' | 'books' | 'books_planning' | 'books_planning_repo';
+```
+
+- Server validates `model` against allowlist or passes through to OpenAI if already validated client-side; **`ragMode: 'off'`** skips `retrieveRagContext` / embeddings regardless of env.
+
+## Decisions — auth (decided)
+
+- Banner shows **`system`** and **no cookie** for Copilot until real session work; **`/api/chat`** behavior matches current anonymous/owner rules.
+
+## Why RAG at all? (short primer)
+
+- **Without RAG:** the model only sees **system prompt + your messages** — great for general reasoning, editing, brainstorming. It does **not** know your **current** repo text unless you paste it.
+- **With RAG:** each turn can inject **small excerpts** from your indexed corpus that *look* relevant to the query — better for “what does our roadmap say?”, “quote the planning task”, “which env var does X use?” **without** pasting whole files.
+- **Costs / risks:** embedding API calls per query (unless cached), chunk quality matters (bad chunks → wrong answers confidently), and **maintenance** (ingest when content changes). **Turning RAG off** (`off` or env) keeps latency and cost predictable while you judge value.
+- **Your experiment:** use **`off`** for a week on hard questions, then **`books_planning_repo`** on the same — compare hallucination vs grounding. Worthwhile if grounded answers save more time than ingest + occasional bad retrieval costs.
+
+## Non-goals (phase 1)
+
+- Full **Clerk** / Payload session inside Ink (banner stays **`system`** until invites land).
+- **Multi-index retrieval** fully wired before **metadata/filter pipeline** exists — UI + API contract can land first; ingest splits may follow **`global-data`** tasks.
+
+## Dependencies
+
+- `global-tooling-03-*` (Ink + assistant-ui baseline).
+- Portfolio **`/api/chat`** + RAG — **`global-tooling-04-03`**; corpus boundaries vs **`global-data-dec-09`** (no full book EPUB in default site RAG unless explicitly decided elsewhere).
+- **Payload-backed Copilot** (tools, forms, batch media) — phase **`global-tooling-05`**, [Copilot + Payload kickoff](/docs/global/planning/plans/magicborn-copilot-payload-tools/KICKOFF).
+
+## Definition of done (phase 1)
+
+- Repeatable **layout primitives** in `mb-cli-framework` (banner, footer, transcript line types, bottom-panel host).
+- **`magicborn`** and **`magicborn chat`** use the same **chat-first** shell for navigation.
+- Unit tests: slash parser, history reducer, theme tokens (`NO_COLOR`).
+- Manual UAT: `/model` (list from API) → footer updates; `/rag` cycles modes; JSON body sends `ragMode`; interrupt → `└ Interrupted`.

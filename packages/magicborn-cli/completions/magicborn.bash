@@ -248,7 +248,7 @@ _magicborn() {
       ;;
     chat)
       if [[ ${COMP_CWORD} -eq 2 ]]; then
-        COMPREPLY=( $(compgen -W "--dev --dev-port" -- "$cur") )
+        COMPREPLY=( $(compgen -W "--dev --rebuild --serve-rebuild --no-server --dev-port" -- "$cur") )
         return
       fi
       if [[ ${COMP_CWORD} -eq 3 && "$prev" == "--dev-port" ]]; then

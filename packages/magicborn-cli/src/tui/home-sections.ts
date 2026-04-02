@@ -48,7 +48,10 @@ export const HOME_COMMAND_SECTIONS: HomeCommandSection[] = [
     themeKey: 'openai',
     rows: [
       { cmd: 'openai', hint: 'status · models · projects · help' },
-      { cmd: 'chat', hint: 'Site Copilot (full-screen TTY, returns here after quit)' },
+      {
+        cmd: 'chat',
+        hint: 'Ink Site Copilot — default: build .next-chat if needed + start + chat',
+      },
     ],
   },
   {

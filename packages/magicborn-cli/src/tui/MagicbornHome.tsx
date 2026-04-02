@@ -62,7 +62,7 @@ function buildHelpTranscript(theme: ReturnType<typeof resolveCliTheme>): Transcr
   }
   lines.push({
     id: nextId(),
-    text: 'REPL: help · clear · exit | Site chat: chat (full-screen)',
+    text: 'REPL: help · clear · exit | chat = prod server + Ink; chat --dev = HMR',
     color: theme.muted,
   });
   return lines;
@@ -79,7 +79,7 @@ export function MagicbornHome(props: MagicbornHomeProps) {
     'Operator CLI — type a command and press Enter (see `magicborn --help`).';
   const footnote =
     props.branding?.footnote ??
-    'Site Copilot (terminal): `magicborn chat` · Full command tree: `magicborn --help`';
+    'Site Copilot: `magicborn chat` (from home) · `magicborn --help`';
 
   const cols = Math.max(48, Math.min(100, (process.stdout.columns ?? 80) - 1));
   const rows = process.stdout.rows ?? 24;
@@ -137,7 +137,7 @@ export function MagicbornHome(props: MagicbornHomeProps) {
       const argv = parseReplLine(line);
       if (argv.length === 0) return;
 
-      if (argv[0] === 'chat') {
+      if (argv[0] === 'chat' && argv.length === 1) {
         endSession('chat');
         return;
       }

@@ -2,7 +2,7 @@
 title: State
 description: Current cycle and focus for the Global documentation section (repo-wide planning IA).
 date: "2026-03-28"
-updated: "2026-04-05"
+updated: "2026-04-02"
 order: 2
 repoPath: apps/portfolio/content/docs/global/planning/state.mdx
 taskPhase: global-data-02
@@ -32,13 +32,16 @@ taskPhase: global-data-02
 | Priority | Action |
 | --- | --- |
 | `1` | finish **`global-auth-03-03`** as the last auth foundation slice before the Grime Time delivery shift: trusted CLI invites, browser invite acceptance, and the role-template / revoke path |
-| `1b` | plan **`global-auth-03-04`**: portfolio-side Clerk adoption and multi-tenant identity boundaries before carrying Grime Time's Clerk work back into this repo's org/tenant model |
+| `1b` | **`global-auth-03-04` in progress**: Clerk integration underway — `@clerk/nextjs` + `svix` added, `clerkId`/`clerkOrgId` fields on users/tenants, ClerkProvider wrapper, middleware, and webhook endpoint created. Remaining: session bridge, auth UI components, invite flow integration, tests |
 | `1c` | plan **`global-auth-03-05`**: first-party orgs, memberships, role and entitlement locks, provider mappings, and outbound domain events so hosted identity stays swappable and multi-tenant sync does not become Clerk-only |
 | `2` | continue `global-data-01-03`: finish the install, export-import, and hosted bootstrap flow for large local data plus uploads so the same auth + storage baseline ports cleanly into Grime Time |
 | `3` | extend the `site-download-assets` publisher to the next public bundle classes as `/projects`, `/apps`, and future public exports adopt the same storage-backed path |
 | `4` | **`global-data-01-04` closed:** phase-1 site RAG **does not** include book manuscript EPUB text by default (**`global-data-dec-09`**, **`BOOKS-REQ-04`**). Remaining **local vs hosted** doc alignment rides with **`global-data-01-03`** and Supabase bootstrap notes |
 | `5` | **`global-tooling-01-02`-`01-04`:** Magicborn CLI media path - OpenAI generate from `.env`, temp + manifest under **`.magicborn/`**, taxonomy + Payload wiring for **apps/projects** (and rest per [plan](/docs/global/planning/plans/magicborn-cli/plan)), then **site logos** with **active pointer** via CLI (**`global-tooling-dec-02`**, **`global-tooling-dec-03`**) |
 | `5b` | **`global-tooling-02` + `global-tooling-03` are landed:** shared **[mb-cli-framework](/docs/global/planning/plans/mb-cli-framework/PLAN)** now owns the shared shell, Ink host/theming, vendor v2, chat scaffold, and `payload <alias> generate`; next tooling work is new capability or polish, not backlog catch-up on this wave |
+| `5c` | **`global-tooling-04`:** Claude Code–style **chat-first** Ink shell (slash palette, bottom panel, footer bar, interrupt-safe jobs) — [kickoff](/docs/global/planning/plans/magicborn-cli-ink-claude-ux/KICKOFF), tasks **`global-tooling-04-01`**–**`04-04`** |
+| `5d` | **`global-tooling-05`:** Copilot **Payload tools** (query/navigate), **schema forms** in Ink, **tool-use loop**, **batch media** + **scene extraction** — [kickoff](/docs/global/planning/plans/magicborn-copilot-payload-tools/KICKOFF); hybrid **DB + optional RAG** |
+| `5e` | **`global-tooling-06` + `books-publishing-03-05`:** **Series / book / scene** in DB, **scene play** + image/video prompts, **EPUB illustration pending** scan + **LTR context windows**; **`global-tooling-04-05`** context **%** bar, **compact**, **approval vs auto-accept** |
 | `6` | **Deferred discussion:** MCP / ChatGPT Apps - after the next few phases, deep-dive on exposing reader/planning tooling via MCP Apps-style portable UI vs site-only React (see [documentation cross-cutting queue](/docs/documentation/planning/state) and OpenAI [ChatGPT apps blog](https://developers.openai.com/blog/what-makes-a-great-chatgpt-app)). |
 
 ## References
@@ -53,6 +56,9 @@ taskPhase: global-data-02
 | `global-admin-kickoff` | `apps/portfolio/content/docs/global/planning/plans/global-admin-01/PLAN.mdx` |
 | `magicborn-cli-plan` | `apps/portfolio/content/docs/global/planning/plans/magicborn-cli/PLAN.mdx` |
 | `mb-cli-framework-plan` | `apps/portfolio/content/docs/global/planning/plans/mb-cli-framework/PLAN.mdx` |
+| `magicborn-cli-ink-claude-ux` | `apps/portfolio/content/docs/global/planning/plans/magicborn-cli-ink-claude-ux/KICKOFF.mdx` |
+| `magicborn-copilot-payload-tools` | `apps/portfolio/content/docs/global/planning/plans/magicborn-copilot-payload-tools/KICKOFF.mdx` |
+| `magicborn-books-scenes-epub` | `apps/portfolio/content/docs/global/planning/plans/magicborn-books-scenes-epub/KICKOFF.mdx` |
 | `docs-lib` | `apps/portfolio/lib/docs.ts` |
 | `payload-config` | `apps/portfolio/payload.config.ts` |
 | `rag-config` | `apps/portfolio/lib/rag/config.ts` |

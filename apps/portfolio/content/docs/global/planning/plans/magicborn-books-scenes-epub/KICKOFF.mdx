@@ -1,0 +1,53 @@
+---
+title: Books, series, scenes in Payload + EPUB illustration pipeline
+description: DB model for scenes and media variants; fast EPUB scan for pending illustrations; reading-order context for compose; aligns with Magicborn media prompts.
+date: "2026-04-06"
+order: 1
+repoPath: apps/portfolio/content/docs/global/planning/plans/magicborn-books-scenes-epub/KICKOFF.mdx
+taskPhase: global-tooling-06
+---
+
+# Kickoff — Books · series · scenes · EPUB gaps
+
+## Product intent
+
+- **Books** and **series** (multi-volume groupings) live in **Payload** (or linked records) so Copilot and scripts can query them like any other collection.
+- **Scenes** belong to a **book** (and optionally **series** ordering); each scene can carry multiple **creative artifacts**:
+  - **Image prompt** (+ generated image asset refs)
+  - **Scene play** — structured beat / blocking / dialogue-ish text to steer **advanced video** composition with **Magicborn design style**
+  - **Video prompt** (+ future video outputs)
+- **Batch generation** fills gaps efficiently; aligns with [books-publishing-03](/docs/books/planning/plans/books-publishing-03-magicborn-media/plan) (`composeMagicbornImagePrompt`, `sceneKey`, style block).
+
+## EPUB “illustration pending” scan
+
+- Many built EPUBs use a **placeholder** (e.g. “illustration pending”) for figures.
+- Need a **fast** function or script (zip + XHTML walk, no full reader mount) that returns:
+  - **Count** of slots still needing real assets
+  - **Ordered list** of slots in **spine / reading order**
+  - For **each** slot: **anchor id** (or CFI hint later), **chapter / page id**, and the **text context** used to compose the first image in a chain
+
+## Reading-order context (critical)
+
+- In the emitted **page layout**, the reader sees **lead images before** all following paragraphs on that spread; **left-to-right** order means the **first** pending illustration in a chapter may appear **before** later body text is “revealed.”
+- **Context rule:** for each illustration slot **S**, gather prose from the **previous illustration boundary** (or chapter/opening) **through** the content **immediately before S** in reading order — i.e. everything the reader could have already seen when **S** first appears, **excluding** text that only appears **after** **S** on the same or later pages.
+- Repeat for each subsequent slot: window is **(after previous resolved slot, before this slot]** in spine order.
+- Implement against **repub-emitted XHTML** (same structure as [books reader shell decisions](/docs/books/planning/decisions)) so the scan matches shipped EPUBs.
+
+## Deliverables (phased)
+
+| Slice | Outcome |
+| --- | --- |
+| **Schema** | Payload collections (or fields): **Series**, **Book**, **Scene** (book FK, sort index, slug), **SceneMedia** or embedded array: type (`image` \| `video` \| `scenePlay`), prompts, asset relations, status. |
+| **Scan API** | Pure function + CLI: input EPUB path or bytes → JSON report `{ pendingCount, slots: [{ contextText, sceneHint, pageRef }] }`. |
+| **Wire-up** | Optional: push scan results into **scene** drafts or a **generation queue** collection for Copilot tools (`global-tooling-05`). |
+
+## Dependencies
+
+- **`@portfolio/repub-builder`** EPUB structure / page shells ([books reader phases](/docs/books/planning/task-registry)).
+- **`global-tooling-05`** Copilot batch flows and approval gates.
+- **`global-tooling-04`** Ink footer for session **context meter** (see [Ink kickoff](/docs/global/planning/plans/magicborn-cli-ink-claude-ux/KICKOFF) — context % + compact + approvals).
+
+## Open questions
+
+- Whether **scene** rows are **created only from DB** or **also** auto-proposed from EPUB scan (likely: scan → propose → user approves in Ink).
+- **Video** provider and how **scene play** maps to provider-specific JSON.

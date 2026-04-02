@@ -23,6 +23,8 @@ test-results/
 # next.js (anywhere in repo; do not commit build/cache)
 .next/
 **/.next/
+# Isolated production build for `magicborn chat --serve` / `pnpm chat:build` (PORTFOLIO_DIST_DIR)
+apps/portfolio/.next-chat/
 out/
 **/out/
 

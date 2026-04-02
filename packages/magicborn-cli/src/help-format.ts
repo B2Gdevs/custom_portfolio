@@ -36,7 +36,7 @@ const GROUPS: Array<{
     names: ['vendor'],
   },
   {
-    title: 'OpenAI & chat (API probes; Ink chat → portfolio /api/chat)',
+    title: 'OpenAI & chat (API probes; Ink chat → /api/chat; default prod .next-chat + start)',
     style: (s) => (helpColorOn() ? pc.bold(pc.blue(s)) : s),
     names: ['openai', 'chat'],
   },

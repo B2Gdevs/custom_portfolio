@@ -2,7 +2,7 @@
 title: Task Registry
 description: Compact task records for the books section.
 date: "2026-03-15"
-updated: "2026-03-31"
+updated: "2026-04-06"
 repoPath: apps/portfolio/content/docs/books/planning/task-registry.mdx
 order: 3
 ---
@@ -62,6 +62,7 @@ Legacy-looking ids such as `books-ai-01-04` are **not** a separate scheme: **`ai
 | `books-publishing-03-02` | `done` | **`composeMagicbornImagePrompt`** in `lib/magicborn-prompts/compose-image-prompt.ts`; **`POST /api/media/generate`** supports **`useMagicbornStyle`** + **`sceneKey`**; SiteCopilot sends **`useMagicbornStyle: true`** for app covers | `books-publishing-03-01` | unit + media route tests; `pnpm run build` |
 | `books-publishing-03-03` | `planned` | **CLI** to generate images locally (batch or single) using the composer + `OPENAI_API_KEY`; write artifacts to an agreed path (`public/` / `media/` / book folder); document in kickoff | `books-publishing-03-02`, `global-auth-03-01` (CLI may use server key via env, not session) | script run documented; `pnpm run build` |
 | `books-publishing-03-04` | `planned` | wire **cover** outputs into book **manifest / featured-book / OG** metadata paths so shipped surfaces pick up generated art | `books-publishing-03-03` or manual asset drop | `pnpm run build:books` where applicable; featured book shows cover |
+| `books-publishing-03-05` | `planned` | **Scenes + EPUB gaps:** Payload **series / book / scene** + **media variants** (image, **scene play**, video prompt); **fast scan** of built EPUBs for **illustration pending** with **reading-order context** for compose; ties into Copilot batch + **`composeMagicbornImagePrompt`** — [global kickoff](/docs/global/planning/plans/magicborn-books-scenes-epub/KICKOFF), **`global-tooling-06`** | `books-publishing-03-02`, `global-tooling-06-02` | scan script tests + one book fixture |
 
 ## Phase `books-publishing-02` (Mordred's Tale trilogy packaging)
 

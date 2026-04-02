@@ -48,5 +48,32 @@ export const tenants: CollectionConfig = {
       defaultValue: true,
       index: true,
     },
+    {
+      name: 'externalIds',
+      type: 'group',
+      admin: {
+        description: 'External provider IDs for identity and billing systems.',
+      },
+      fields: [
+        {
+          name: 'clerkOrgId',
+          type: 'text',
+          unique: true,
+          index: true,
+          admin: {
+            description: 'Clerk organization ID (org_xxx). Set when tenant is synced to Clerk.',
+          },
+        },
+        {
+          name: 'stripeAccountId',
+          type: 'text',
+          unique: true,
+          index: true,
+          admin: {
+            description: 'Stripe connected account ID (acct_xxx). Set when billing is connected.',
+          },
+        },
+      ],
+    },
   ],
 };

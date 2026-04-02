@@ -1,11 +1,58 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Building2, LoaderCircle, LogOut, Shield, UserCircle2 } from 'lucide-react';
 import { useSidebar } from '@/components/ui/sidebar';
 import { useAuthSession } from '@/lib/auth/use-auth-session';
+import { isClerkConfigured } from '@/lib/auth/use-clerk-auth';
 import { cn } from '@/lib/utils';
+
+/** Dynamically loaded Clerk components */
+function ClerkSignInButton({ children, mode = 'modal' }: { children: React.ReactNode; mode?: 'modal' | 'redirect' }) {
+  const [SignInButton, setSignInButton] = useState<React.ComponentType<any> | null>(null);
+
+  useEffect(() => {
+    if (isClerkConfigured()) {
+      import('@clerk/nextjs').then((mod) => {
+        setSignInButton(() => mod.SignInButton);
+      }).catch(() => {});
+    }
+  }, []);
+
+  if (!SignInButton) {
+    return <>{children}</>;
+  }
+
+  return <SignInButton mode={mode}>{children}</SignInButton>;
+}
+
+function ClerkUserButton() {
+  const [UserButton, setUserButton] = useState<React.ComponentType<any> | null>(null);
+
+  useEffect(() => {
+    if (isClerkConfigured()) {
+      import('@clerk/nextjs').then((mod) => {
+        setUserButton(() => mod.UserButton);
+      }).catch(() => {});
+    }
+  }, []);
+
+  if (!UserButton) return null;
+
+  return (
+    <UserButton
+      appearance={{
+        elements: {
+          avatarBox: 'size-10',
+          userButtonTrigger: 'focus:shadow-none',
+        },
+      }}
+      afterSignOutUrl="/"
+    />
+  );
+}
 
 function getUserLabel(displayName: string | null, email: string) {
   return displayName?.trim() || email;
@@ -91,28 +138,60 @@ function SidebarAccountSectionInner({
   }
 
   if (!session?.authenticated || !session.user) {
-    return collapsed ? (
-      <Link
-        href="/login?next=/admin"
-        title="Owner sign in"
-        onClick={onNavigate}
-        className="inline-flex size-10 items-center justify-center rounded-full border border-sidebar-border/80 bg-sidebar-accent/25 text-sidebar-foreground transition hover:bg-sidebar-accent"
-      >
-        <UserCircle2 className="size-5" />
-      </Link>
-    ) : (
+    const clerkEnabled = isClerkConfigured();
+
+    // Collapsed view - sign in button
+    if (collapsed) {
+      if (clerkEnabled) {
+        return (
+          <ClerkSignInButton mode="modal">
+            <button
+              title="Sign in"
+              className="inline-flex size-10 items-center justify-center rounded-full border border-sidebar-border/80 bg-sidebar-accent/25 text-sidebar-foreground transition hover:bg-sidebar-accent"
+            >
+              <UserCircle2 className="size-5" />
+            </button>
+          </ClerkSignInButton>
+        );
+      }
+      return (
+        <Link
+          href="/login?next=/admin"
+          title="Owner sign in"
+          onClick={onNavigate}
+          className="inline-flex size-10 items-center justify-center rounded-full border border-sidebar-border/80 bg-sidebar-accent/25 text-sidebar-foreground transition hover:bg-sidebar-accent"
+        >
+          <UserCircle2 className="size-5" />
+        </Link>
+      );
+    }
+
+    // Expanded view - sign in card
+    return (
       <div className="rounded-[1.4rem] border border-sidebar-border/80 bg-sidebar-accent/18 p-3">
-        <p className="text-sm font-medium text-sidebar-foreground">Owner account</p>
+        <p className="text-sm font-medium text-sidebar-foreground">
+          {clerkEnabled ? 'Sign in' : 'Owner account'}
+        </p>
         <p className="mt-1 text-xs leading-5 text-sidebar-foreground/65">
           Sign in to unlock private surfaces and operational tools.
         </p>
-        <Link
-          href="/login?next=/admin"
-          onClick={onNavigate}
-          className="mt-3 inline-flex w-full items-center justify-center rounded-full bg-sidebar-primary px-3 py-2 text-sm font-medium text-sidebar-primary-foreground transition hover:opacity-90"
-        >
-          Sign in
-        </Link>
+        {clerkEnabled ? (
+          <ClerkSignInButton mode="modal">
+            <button
+              className="mt-3 inline-flex w-full items-center justify-center rounded-full bg-sidebar-primary px-3 py-2 text-sm font-medium text-sidebar-primary-foreground transition hover:opacity-90"
+            >
+              Sign in
+            </button>
+          </ClerkSignInButton>
+        ) : (
+          <Link
+            href="/login?next=/admin"
+            onClick={onNavigate}
+            className="mt-3 inline-flex w-full items-center justify-center rounded-full bg-sidebar-primary px-3 py-2 text-sm font-medium text-sidebar-primary-foreground transition hover:opacity-90"
+          >
+            Sign in
+          </Link>
+        )}
       </div>
     );
   }

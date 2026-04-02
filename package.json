@@ -17,6 +17,8 @@
     "setup": "./scripts/setup-git-hooks.sh",
     "dev": "npm run dev --workspace=@portfolio/app",
     "dev:chat-api": "pnpm --filter @portfolio/app exec next dev --webpack -- --port 3010",
+    "chat:build": "node scripts/portfolio-chat-dist.mjs build",
+    "chat:start": "node scripts/portfolio-chat-dist.mjs start",
     "build": "pnpm --filter @portfolio/repub-builder run build && npm run build --workspace=@portfolio/app",
     "start": "npm run start --workspace=@portfolio/app",
     "build:reader": "node scripts/prepare-reader-standalone.cjs",

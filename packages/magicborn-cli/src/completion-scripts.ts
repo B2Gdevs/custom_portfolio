@@ -31,7 +31,7 @@ complete -c magicborn -f -n "__fish_use_subcommand" -a listen -d "Listen / BandL
 complete -c magicborn -f -n "__fish_use_subcommand" -a style -d "Magicborn style block"
 complete -c magicborn -f -n "__fish_use_subcommand" -a model -d "CLI model preferences"
 complete -c magicborn -f -n "__fish_use_subcommand" -a openai -d "OpenAI account / models"
-complete -c magicborn -f -n "__fish_use_subcommand" -a chat -d "Chat stub (assistant-ui path)"
+complete -c magicborn -f -n "__fish_use_subcommand" -a chat -d "Site Copilot (Ink; default prod .next-chat + start)"
 complete -c magicborn -f -n "__fish_use_subcommand" -a payload -d "Payload CMS discovery"
 complete -c magicborn -f -n "__fish_use_subcommand" -a pnpm -d "pnpm passthrough (nearest package.json)"
 complete -c magicborn -f -n "__fish_use_subcommand" -a vendor -d "Vendor repos"
@@ -47,6 +47,9 @@ complete -c magicborn -f -n '__fish_seen_subcommand_from_path vendor' -a "add li
 complete -c magicborn -f -n '__fish_seen_subcommand_from_path vendor use' -a '(magicborn __complete vendor-ids 2>/dev/null)'
 complete -c magicborn -f -n '__fish_seen_subcommand_from_path payload' -a "collections app"
 complete -c magicborn -f -n '__fish_seen_subcommand_from_path payload app' -a "generate gen"
-complete -c magicborn -f -n '__fish_seen_subcommand_from_path chat' -l dev -d "Start Next on spare port for /api/chat"
-complete -c magicborn -f -n '__fish_seen_subcommand_from_path chat' -l dev-port -d "Port for --dev (default 3010)"
+complete -c magicborn -f -n '__fish_seen_subcommand_from_path chat' -l dev -d "next dev + HMR (default: prod .next-chat + start)"
+complete -c magicborn -f -n '__fish_seen_subcommand_from_path chat' -l rebuild -d "Force chat:build before start"
+complete -c magicborn -f -n '__fish_seen_subcommand_from_path chat' -l serve-rebuild -d "Alias for --rebuild"
+complete -c magicborn -f -n '__fish_seen_subcommand_from_path chat' -l no-server -d "Ink only; no local Next"
+complete -c magicborn -f -n '__fish_seen_subcommand_from_path chat' -l dev-port -d "Local port (default 3010)"
 `;

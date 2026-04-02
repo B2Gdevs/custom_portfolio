@@ -24,8 +24,17 @@ if (process.env.REPOPLANNER_REPORTS_DIR === undefined) {
   process.env.REPOPLANNER_REPORTS_DIR = path.join(monorepoRoot, '.planning-reports');
 }
 
+const chatIsolatedDist = process.env.PORTFOLIO_DIST_DIR === '.next-chat';
+
 const nextConfig: NextConfig = {
   distDir: process.env.PORTFOLIO_DIST_DIR || '.next',
+  /** Lean Node server bundle for terminal chat only; full `pnpm build` stays default `.next`. */
+  ...(chatIsolatedDist
+    ? {
+        output: 'standalone' as const,
+        outputFileTracingRoot: monorepoRoot,
+      }
+    : {}),
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   transpilePackages: ['repo-planner', '@portfolio/repub-builder'],
   async redirects() {

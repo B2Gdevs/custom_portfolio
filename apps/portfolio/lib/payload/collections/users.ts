@@ -79,5 +79,32 @@ export const users: CollectionConfig = {
         AUTH_ENTITLEMENTS.adminAccess,
       ],
     },
+    {
+      name: 'externalIds',
+      type: 'group',
+      admin: {
+        description: 'External provider IDs for identity and billing systems.',
+      },
+      fields: [
+        {
+          name: 'clerkId',
+          type: 'text',
+          unique: true,
+          index: true,
+          admin: {
+            description: 'Clerk user ID (user_xxx). Set by webhook when user authenticates via Clerk.',
+          },
+        },
+        {
+          name: 'stripeCustomerId',
+          type: 'text',
+          unique: true,
+          index: true,
+          admin: {
+            description: 'Stripe customer ID (cus_xxx). Set when billing is connected.',
+          },
+        },
+      ],
+    },
   ],
 };
