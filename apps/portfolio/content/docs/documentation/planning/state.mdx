@@ -2,7 +2,7 @@
 title: State
 description: Compact state records for the documentation section.
 date: "2026-03-16"
-updated: "2026-04-01"
+updated: "2026-04-06"
 repoPath: apps/portfolio/content/docs/documentation/planning/state.mdx
 taskPhase: documentation-site-10
 order: 2
@@ -65,6 +65,7 @@ Monorepo-wide items that are not (yet) a full `.planning` task row. Mirror or cl
 | `done` | **Local auth/session hang (2026-04-01):** `/api/auth/session` used a subprocess with **no timeout**; a stuck Payload/DB left the sidebar on **Checking session** and owner-gated pages (e.g. **`/resumes`**) on **HeadersTimeout**. Mitigation: **`AUTH_WORKER_TIMEOUT_MS`**, **`runAuthWorker` kills** the child on expiry, session route returns **anonymous session** on worker error, login returns **503** + message on timeout, client fetches use **AbortSignal.timeout**, **`pnpm start` + LAN host** can show Site Copilot shell without **`OPENAI_API_KEY`** (see **`app/layout.tsx`** / **`NEXT_PUBLIC_SITE_CHAT_HIDE_ON_LAN`**). Login over **http://localhost** is not encrypted — use **HTTPS** in production; JSON body visibility in DevTools is expected. |
 | `open` | **Shared content surfaces:** align `listen`, `blog`, and `projects` on one reusable shell with per-section mini logos and theme identity -- `documentation-site-09`, section registries below. |
 | `open` | **Minimal chrome for `/apps` tools:** tighten editor surfaces (screenshot-annotate, Dialogue Forge, repo-planner, etc.) — lean top bar + exit to `/apps`, avoid full marketing footer inside tools; see [screenshot-annotate decisions](/docs/screenshot-annotate/planning/decisions) and [requirements](/docs/screenshot-annotate/requirements). |
+| `open` | **Vercel + `vendor/*` submodules:** the host repo records a **gitlink SHA** per submodule. That commit **must exist on the submodule remote** before Vercel can `git submodule update` (`upload-pack: not our ref` if you only committed locally). Workflow: inside `vendor/<name>`, `git push origin <branch>` **before** or **with** pushing `custom_portfolio`. Portfolio install: `git submodule update --init --recursive && pnpm install` — see [vendoring](/docs/documentation/vendoring). |
 | `done` | **Planning IA reset:** literal section `planning/` folders are live, section docs/links now point at those paths, and one-off plans belong under `planning/plans/` instead of top-level implementation-plan drift -- `documentation-site-10`. |
 
 ## References
