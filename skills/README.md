@@ -1,63 +1,69 @@
 # RepoPlanner Skills
 
-Agent skills for the [RepoPlanner](https://github.com/MagicbornStudios/RepoPlanner) planning methodology. Gives Claude the context to set up, read, and maintain structured planning docs — so humans and agents share the same source of truth.
+Six agent skills that give Claude the full RepoPlanner planning loop — from project init through autonomous phase execution. Together they enable a "plan once, execute without interruption" workflow.
+
+## The loop
+
+```
+rp-new-project → rp-plan-phase → rp-execute-phase → rp-verify-work
+      ↑                ↑                                     |
+ rp-milestone    rp-add-todo                          rp-check-todos
+                 rp-quick                                    |
+                 rp-debug ←──── (when things break) ────────┘
+```
+
+`rp-check-todos` is the re-entry point after any context reset. `rp-session` is the bridge when pausing mid-phase.
+
+## Install all 13
+
+```bash
+npx skills add MagicbornStudios/RepoPlanner/skills/repo-planner
+npx skills add MagicbornStudios/RepoPlanner/skills/rp-new-project
+npx skills add MagicbornStudios/RepoPlanner/skills/rp-plan-phase
+npx skills add MagicbornStudios/RepoPlanner/skills/rp-execute-phase
+npx skills add MagicbornStudios/RepoPlanner/skills/rp-verify-work
+npx skills add MagicbornStudios/RepoPlanner/skills/rp-check-todos
+npx skills add MagicbornStudios/RepoPlanner/skills/rp-debug
+npx skills add MagicbornStudios/RepoPlanner/skills/rp-map-codebase
+npx skills add MagicbornStudios/RepoPlanner/skills/rp-session
+npx skills add MagicbornStudios/RepoPlanner/skills/rp-milestone
+npx skills add MagicbornStudios/RepoPlanner/skills/rp-add-todo
+npx skills add MagicbornStudios/RepoPlanner/skills/rp-quick
+npx skills add MagicbornStudios/RepoPlanner/skills/rp-manuscript
+```
 
 ## Skills
 
-| Skill | What it does | Install |
-|-------|-------------|---------|
-| `repo-planner` | Core methodology: 5-doc loop, ID system, agent read order, monorepo layers | `npx skills add MagicbornStudios/repo-planner-skills/skills/repo-planner` |
-| `rp-new-project` | Initialize a new project with full planning structure | `npx skills add MagicbornStudios/repo-planner-skills/skills/rp-new-project` |
-| `rp-plan-phase` | Plan a phase: KICKOFF.md + task list | `npx skills add MagicbornStudios/repo-planner-skills/skills/rp-plan-phase` |
+| Skill | When to use |
+|-------|-------------|
+| `repo-planner` | **Install first.** Core methodology, planning root discovery, 3 file formats, monorepo layers |
+| `rp-new-project` | Initialize a new project — requirements, roadmap, state |
+| `rp-plan-phase` | Plan a phase — kickoff contract + task list before execution |
+| `rp-execute-phase` | Execute a phase atomically, task by task, with commits |
+| `rp-verify-work` | Verify a phase hit its goals before closing |
+| `rp-check-todos` | Find the best next action — re-entry after any context reset |
+| `rp-debug` | Systematic debugging — hypothesis tracking, persistent session |
+| `rp-map-codebase` | Analyze existing code — produces STACK, ARCH, CONVENTIONS, CONCERNS |
+| `rp-session` | Pause/resume mid-phase — bridges context resets in the autonomous loop |
+| `rp-milestone` | Audit milestone completeness, close it (archive + tag), start the next |
+| `rp-add-todo` | Capture an idea mid-session without losing flow |
+| `rp-quick` | Fast-path for ad-hoc tasks that don't belong in the roadmap |
+| `rp-manuscript` | Fiction/creative writing adaptation — manuscript loop, beat sheets, canon locks, chapter done checklist |
 
-## Quick install (all three)
+## Autonomous execution
 
-```bash
-npx skills add MagicbornStudios/repo-planner-skills/skills/repo-planner
-npx skills add MagicbornStudios/repo-planner-skills/skills/rp-new-project
-npx skills add MagicbornStudios/repo-planner-skills/skills/rp-plan-phase
-```
+With a fully planned project, an autonomous agent can loop without interruption:
 
-## What these skills do
+1. `rp-map-codebase` once for brownfield repos
+2. `rp-new-project` to define requirements and roadmap
+3. For each phase: `rp-plan-phase` → `rp-execute-phase` → `rp-verify-work`
+4. `rp-check-todos` at any re-entry point
+5. `rp-session` to bridge context resets mid-phase
+6. `rp-debug` when anything breaks
+7. `rp-milestone` when all phases are done and the cycle closes
 
-### `repo-planner`
-The foundation skill. Teaches Claude the RepoPlanner methodology:
-- The 5-doc planning loop (requirements → roadmap → state → task-registry → decisions)
-- Which files to read in which order before starting work
-- How phase IDs work (`<namespace>-<stream>-<phase>[-<task>]`)
-- When to require a kickoff before starting a phase
-- How to layer planning across a monorepo (global/section/sub-project)
-- How to update planning docs after execution
-
-### `rp-new-project`
-Sets up a new project's planning structure:
-- Gathers requirements through conversation
-- Creates PROJECT.md, REQUIREMENTS.md (with REQ-IDs), ROADMAP.md (phased), STATE.md, TASK-REGISTRY.md
-- Validates 100% requirement coverage across phases
-- Works for both simple repos and new monorepo sections
-
-### `rp-plan-phase`
-Plans a single phase:
-- Runs a kickoff to establish goal, scope, non-goals, definition-of-done
-- Breaks the phase into concrete, verifiable tasks with stable IDs
-- Updates task registry and state
-- Works with both `.md` and `.mdx` file formats
-
-## How it differs from GSD
-
-| | RepoPlanner Skills | GSD |
-|--|-------------------|-----|
-| Planning docs | MDX (human readable) + XML (machine) | Markdown only |
-| ID system | Stable `namespace-stream-phase-task` IDs | Sequential phase numbers |
-| Monorepo | Global/section/sub-project layers | Single `.planning/` root |
-| Errors tracking | First-class `errors-and-attempts` doc | No equivalent |
-| Cockpit UI | Embeddable Next.js cockpit | No UI |
-| CLI | `repo-planner` npm package | Shell scripts |
-| State | Cross-cutting queue + section state | Single STATE.md |
+The planning docs are the shared memory. Even after a full context reset, any skill can re-orient from the files alone.
 
 ## About RepoPlanner
 
-[RepoPlanner](https://github.com/MagicbornStudios/RepoPlanner) is an open-source planning system from [MagicbornStudios](https://github.com/MagicbornStudios). It provides:
-- XML planning templates
-- A CLI (`npx repo-planner`) for snapshot, task updates, and reports
-- An embeddable Next.js cockpit for visualization
+[RepoPlanner](https://github.com/MagicbornStudios/RepoPlanner) is an open-source planning system: XML planning templates, a `repo-planner` CLI, and an embeddable Next.js cockpit.
