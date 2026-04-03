@@ -21,7 +21,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "prepare": "node scripts/prepare-notice.mjs && node scripts/run-tsc-with-heartbeat.mjs && node scripts/prepare-done.mjs",
+    "prepare": "node scripts/prepare.mjs",
     "test": "vitest run"
   },
   "dependencies": {

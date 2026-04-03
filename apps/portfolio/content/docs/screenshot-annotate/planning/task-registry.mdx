@@ -2,7 +2,7 @@
 title: Screenshot annotate — task registry
 description: Tasks for the screenshot annotation app.
 date: "2026-04-02"
-updated: "2026-04-05"
+updated: "2026-04-06"
 order: 4
 repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/task-registry.mdx
 ---
@@ -15,12 +15,12 @@ repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/task-registry
 
 | Id | Status | Goal | Verify |
 | --- | --- | --- | --- |
-| `screenshot-annotate-01-01` | `planned` | App route + **`pick`/`annotate`/`export`** using tldraw pattern; empty state + **tldraw** editor after image chosen + export PNG (all **client-side**) | matches example structure; `pnpm` build; no upload calls |
+| `screenshot-annotate-01-01` | `planned` | App route + **`pick`/`annotate`/`export`** using tldraw pattern; **pick**-phase paste/drop/file; **four-tool** editor (**Select**, **Hand**, **Rectangle/geo**, **Text**); **PNG** export only (all **client-side**) | matches example structure; `pnpm` build; no upload calls |
 | `screenshot-annotate-01-02` | `planned` | **`site-app-records`** entry (**metadata** for `/apps` only) + docs discoverable | seed + `/apps` lists row; confirm no user media in Payload |
 | `screenshot-annotate-01-03` | `planned` | **Minimal chrome** editor frame (exit to `/apps`, no full site footer in tool surface) | visual / route layout |
 | `screenshot-annotate-02-01` | `planned` | Layers + context menu (z-order + delete) | e2e or integration |
 | `screenshot-annotate-02-02` | `planned` | Toolbar: stroke width, colors, text | visual |
-| `screenshot-annotate-04-01` | `planned` | **OCR** pipeline on pasted image (browser-side); text bounding regions | unit + fixture image |
+| `screenshot-annotate-04-01` | `planned` | **Tesseract.js** OCR (lazy-load + **Web Worker**) on image; text bounding regions | unit + fixture image |
 | `screenshot-annotate-04-02` | `planned` | **Spotlight UI**: dim full canvas, highlight text regions (Snipping Tool–style) | manual |
 | `screenshot-annotate-04-03` | `planned` | **Copy** selected region text; **copy all text** control | manual |
 | `screenshot-annotate-04-04` | `planned` | Optional **quick redact**-style presets later (email/phone) — after core copy works | — |

@@ -1,0 +1,234 @@
+---
+title: get-anything-done — architecture, boundary spec, and migration
+description: Formal boundary between get-anything-done (methodology) and repo-planner (GUI), .gad pack format spec, and migration strategy from current RP XML schema.
+date: "2026-04-03"
+updated: "2026-04-03"
+repoPath: apps/portfolio/content/docs/global/planning/plans/gad-architecture/PLAN.mdx
+taskPhase: global-planning-01
+order: 1
+---
+
+# get-anything-done — architecture, boundary spec, and migration
+
+## Summary
+
+**get-anything-done (GAD)** is the canonical, GUI-free planning methodology and tooling system.
+**repo-planner (RP)** is the official GUI for GAD — it reads what GAD produces and provides visual management surfaces.
+**mb-cli-framework** powers the CLIs for GAD, portfolio, and grime-time.
+
+This document is the formal spec for where the boundary sits, what the `.gad` pack format looks like, and how we migrate the existing RP XML schema and redundant skills.
+
+---
+
+## Upstream lineage
+
+| Repo | Role | Relationship |
+| --- | --- | --- |
+| `gsd-build/get-shit-done` | Upstream reference | Pure vendor — never modified |
+| `MagicbornStudios/get-anything-done` | Our canonical fork | `vendor/get-anything-done` submodule |
+| `MagicbornStudios/RepoPlanner` | Official GUI for GAD | `vendor/repo-planner` submodule |
+| `MagicbornStudios/mb-cli-framework` | Shared CLI framework | `vendor/mb-cli-framework` submodule |
+
+---
+
+## Boundary spec
+
+### What lives in GAD (methodology, no GUI, portable)
+
+- All planning commands (`gad discuss-phase`, `gad plan-phase`, `gad execute-phase`, etc.)
+- All subagents (`gsd-planner`, `gsd-executor`, `gsd-verifier`, etc.)
+- State / roadmap / requirements templates (Markdown — `STATE.md`, `ROADMAP.md`, `REQUIREMENTS.md`)
+- Config system (`config.json` with `planning.sub_repos`, `planning.ignore`, `planning.docs_sink`)
+- Sprint model (version-cycle-based, configurable up to N sprints per milestone — default 5, overridable in `planning-config.toml`)
+- Monorepo / vendor extensions (vendor directory policy, multi-`.planning/` awareness)
+- Migration system (parallel to GSD `update` command — `gad update` + migration scripts)
+- `.gad` pack spec and loader
+- GAD CLI (`gad` binary — see `gad-cli` plan)
+- Eval framework and drift metrics (see `gad-eval` plan)
+
+### What lives in repo-planner (GUI only)
+
+- Web UI (Payload CMS + Next.js)
+- Planning file discovery across vendor submodules
+- `MD → MDX` transformation and documentation routing (docs sink compiler)
+- Visual phase / roadmap / task dashboard
+- `rp-manuscript` as a RP-specific `.gad` pack (fiction/creative writing domain)
+- Any skill that wraps a web API or UI action specific to the portfolio app
+
+### What gets removed from repo-planner (GAD owns these)
+
+All the following RP skills are redundant — GAD has direct equivalents:
+
+| Remove from RP | GAD equivalent |
+| --- | --- |
+| `rp-add-todo` | `gad add-todo` |
+| `rp-check-todos` | `gad check-todos` |
+| `rp-debug` | `gad debug` |
+| `rp-execute-phase` | `gad execute-phase` |
+| `rp-map-codebase` | `gad map-codebase` |
+| `rp-new-project` | `gad new-project` |
+| `rp-plan-phase` | `gad plan-phase` |
+| `rp-quick` | `gad quick` |
+| `rp-verify-work` | `gad verify-work` |
+| `rp-milestone` | `gad audit-milestone` + `gad new-milestone` + `gad complete-milestone` |
+| `rp-session` | `gad pause-work` + `gad resume-work` + `gad thread` |
+
+### What migrates from RP → GAD
+
+- Vendor directory policy (currently in `repo-planner/SKILL.md` vendor section)
+- Monorepo `sub_repos` planning pattern
+- discuss-phase question-reduction approach (pre-planning Q&A loop)
+- XML → MD state schema migration tooling
+
+---
+
+## Schema migration: XML → Markdown
+
+RP currently uses `STATE.xml`, `ROADMAP.xml`, `TASK-REGISTRY.xml`, `REQUIREMENTS.xml`.
+GAD uses `STATE.md`, `ROADMAP.md`, `REQUIREMENTS.md` (Markdown).
+
+**Migration path:**
+
+1. Write a `gad migrate-schema` command that reads RP XML files and outputs GAD MD equivalents
+2. The portfolio's existing `.planning/*.xml` files stay as-is until the migration command runs
+3. After migration, the XML files are archived (not deleted) for reference
+4. The docs sink (MDX compiler) targets the MD format going forward
+
+**Schema mapping:**
+
+| RP XML | GAD Markdown |
+| --- | --- |
+| `STATE.xml` → `<current-phase>` | `STATE.md` → `## Current Position / Phase: X of Y` |
+| `ROADMAP.xml` → `<phase id>` | `ROADMAP.md` → `- [ ] **Phase X: Name**` |
+| `TASK-REGISTRY.xml` → task rows | `STATE.md` → `## Performance Metrics` + phase tables |
+| `REQUIREMENTS.xml` → stub pointers | `REQUIREMENTS.md` → full requirements prose |
+| `DECISIONS.xml` | stays in MDX public docs (no XML equivalent in GAD) |
+
+---
+
+## Docs sink architecture
+
+```
+Layer 1 — Working .planning/ dirs (source of truth, per-project)
+  vendor/get-anything-done/.planning/
+  vendor/repo-planner/.planning/
+  .planning/                              ← monorepo cross-cutting
+  vendor/grime-time-site/.planning/
+  ...
+
+Layer 2 — The sink (compiled, public-facing, read-only)
+  apps/portfolio/content/docs/planning/
+  ├── get-anything-done/
+  │   ├── STATE.mdx
+  │   ├── ROADMAP.mdx
+  │   └── phases/
+  ├── repo-planner/
+  └── grime-time-site/
+
+Layer 3 — Config (in root config.json or planning-config.toml)
+  planning.docs_sink = "apps/portfolio/content/docs/planning"
+  planning.sink_workflow = "manual"   ← explicit: run `gad docs compile`
+```
+
+`gad docs compile [--sink <path>]` reads all discovered `.planning/` dirs → transforms to MDX → writes to sink. Portfolio docs site renders from sink. **Sink is never the source.**
+
+### Sink workflow
+
+`sink_workflow` options: `manual` (default, explicit compile) | `compile-on-phase-complete` | `compile-on-state-change`.
+
+---
+
+## .gad pack format
+
+A `.gad` file is a planning pack — a versioned, distributable bundle of GAD extensions for a specific domain (e.g. fiction writing, API development, web app).
+
+### Directory structure (unpacked)
+
+```
+my-pack.gad/
+├── gad.json              ← pack manifest
+├── commands/             ← slash commands extending GAD
+├── agents/               ← subagent prompts
+├── workflows/            ← workflow documents
+├── templates/            ← file templates (STATE, PLAN, KICKOFF, etc.)
+└── references/           ← planning reference docs
+```
+
+### `gad.json` manifest schema
+
+```json
+{
+  "name": "manuscript",
+  "version": "1.0.0",
+  "extends": "get-anything-done",
+  "min_gad_version": "1.31.0",
+  "description": "Fiction/creative writing planning pack",
+  "domain": "creative-writing",
+  "entry_commands": ["gad:manuscript-new", "gad:manuscript-chapter"],
+  "token_estimate": {
+    "install_tokens": 4200,
+    "per_phase_tokens": 1800
+  },
+  "state_extensions": {
+    "canon_locks": [],
+    "forward_questions": []
+  },
+  "install": {
+    "commands": true,
+    "agents": true,
+    "templates": true,
+    "workflows": true
+  }
+}
+```
+
+### Token meta
+
+Each pack declares `token_estimate`:
+- `install_tokens`: expected tokens consumed when the pack is first loaded into context
+- `per_phase_tokens`: expected tokens per average phase execution with this pack
+
+This data feeds the eval framework's efficiency scoring.
+
+### Distribution
+
+- `.gad` files are zip archives of the above directory structure
+- Installed via `gad skills install <repo> --skill <pack-name>` (uses `npx skills add` pattern)
+- Or from a local path: `gad skills install ./my-pack.gad`
+- Registry of first-party packs lives at `MagicbornStudios/get-anything-done/packs/`
+
+---
+
+## Migration phases
+
+| Phase | Scope |
+| --- | --- |
+| **M1** | GAD: add monorepo config extension (`sub_repos`, `ignore`, `docs_sink`); contribute vendor directory policy |
+| **M2** | GAD: implement `gad migrate-schema` (XML → MD converter for existing RP projects) |
+| **M3** | RP: remove redundant skills (all `rp-*` with GAD equivalents) |
+| **M4** | RP: update to read GAD MD format instead of XML |
+| **M5** | Portfolio: run `gad migrate-schema` on existing `.planning/*.xml` |
+| **M6** | GAD: formalize discuss-phase question-reduction loop |
+| **M7** | RP: implement migration system (`rp-update` analogous to `gad update`) |
+
+---
+
+## Open questions
+
+| Id | Question | Blocks |
+| --- | --- | --- |
+| `gad-arch-oq-01` | Should `gad.json` token estimates be hand-authored or measured from eval runs? | .gad pack tooling |
+| `gad-arch-oq-02` | Does `rp-manuscript` become a `.gad` pack distributed from GAD, or stays RP-owned? | M3 scope |
+| `gad-arch-oq-03` | What is the versioning contract for `.gad` packs — semver? date-based? | Pack distribution |
+
+---
+
+## Verification (when migration phases ship)
+
+| Step | Check |
+| --- | --- |
+| Submodule | `git submodule status vendor/get-anything-done` shows correct commit |
+| Schema migration | `gad migrate-schema` converts `.planning/*.xml` → `.md` without data loss |
+| Skill removal | `ls ~/.claude/skills/rp-*` shows only RP-specific skills (not GAD duplicates) |
+| Docs sink | `gad docs compile` writes MDX to sink; portfolio renders planning pages |
+| Pack install | `gad skills install ./manuscript.gad` installs and registers in config |

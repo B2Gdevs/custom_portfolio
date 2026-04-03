@@ -168,7 +168,7 @@ export function MagicbornHome(props: MagicbornHomeProps) {
           userLine: line,
           getSession,
           persistSession,
-        }).then((r) => {
+        }).then((r: { assistantText: string } | null) => {
           if (r) {
             appendLines([{ id: nextId(), text: r.assistantText, color: theme.muted }]);
           }

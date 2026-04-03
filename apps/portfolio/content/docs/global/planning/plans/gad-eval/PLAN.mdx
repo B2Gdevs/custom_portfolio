@@ -1,0 +1,270 @@
+---
+title: gad eval framework — drift metrics, skill evaluation, and benchmark projects
+description: Eval framework for measuring GAD skill quality, calculating drift, and running versioned benchmark implementations of real requirements.
+date: "2026-04-03"
+updated: "2026-04-03"
+repoPath: apps/portfolio/content/docs/global/planning/plans/gad-eval/PLAN.mdx
+taskPhase: global-planning-03
+order: 1
+---
+
+# gad eval framework — drift metrics, skill evaluation, and benchmark projects
+
+## Summary
+
+Knowledge and methodology skills cannot be evaluated purely by trigger detection (whether Claude reaches for the skill automatically). This framework evaluates GAD skills by running them against known requirements on versioned benchmark projects and measuring outcome quality — number of edits, skill calls, token cost, requirement coverage, and drift from a baseline.
+
+---
+
+## Why this approach
+
+The `skill-creator` eval loop detects if Claude fires a skill (first tool = `Skill` or `Read`). This works for **action skills** (scripts/templates Claude can't reconstruct). It fails for **knowledge/methodology skills** — Claude answers from training and never triggers them. All GAD planning skills are methodology skills.
+
+The eval framework tests the **output**, not the trigger:
+- Did the agent implement what the requirements asked?
+- Did it follow the GAD workflow correctly?
+- How much drift from baseline?
+
+---
+
+## Run isolation (git worktrees)
+
+Each `gad eval run` creates a git worktree so the agent starts from a clean repo state:
+
+```
+gad eval run --project portfolio-bare --version v3
+
+→ git worktree add /tmp/gad-eval-portfolio-bare-v3 HEAD
+→ agent runs in /tmp/gad-eval-portfolio-bare-v3
+→ output written to evals/portfolio-bare/v3/ in main repo
+→ git worktree remove /tmp/gad-eval-portfolio-bare-v3
+```
+
+Pinning to a commit for reproducible baselines:
+```
+gad eval run --project portfolio-bare --version baseline --commit abc1234
+```
+
+TRACE and SCORE files are committed to the main repo. Working implementation files are ephemeral (worktree).
+
+---
+
+## Eval project structure
+
+All eval projects live in `vendor/get-anything-done/evals/`:
+
+```
+evals/
+├── portfolio-bare/           ← portfolio requirements as eval project
+│   ├── REQUIREMENTS.md       ← requirements only, no implementation
+│   ├── AGENTS.md             ← eval project instructions for coding agent
+│   ├── gad.json              ← eval project config (flags as eval)
+│   ├── v1/                   ← versioned run
+│   │   ├── GAD-TRACE.log     ← trace of all actions (--trace flag)
+│   │   ├── SCORE.md          ← computed scores
+│   │   └── README.md         ← scoring narrative + trace reference
+│   ├── v2/
+│   └── baseline/             ← frozen reference run (v1 or designated)
+├── api-service-bare/         ← future eval project
+└── README.md                 ← eval framework overview
+```
+
+### Eval project constraints
+
+- **Local only**: eval projects must only work with local data
+- Local DB allowed (SQLite, local Postgres, local PayloadCMS)
+- **No external services** during an eval run (no cloud APIs, no remote DBs)
+- The AI implements the project from scratch against the REQUIREMENTS each run
+- Each versioned run is a clean implementation — not a continuation
+
+---
+
+## gad-manuscript eval project
+
+`gad-manuscript` has its own eval project based on **Mordred's Tale** requirements:
+
+```
+vendor/gad-manuscript/evals/
+└── mordreds-tale-bare/
+    ├── REQUIREMENTS.md       ← Mordred's Tale requirements only (no implementation)
+    ├── AGENTS.md
+    ├── gad.json              ← flags as eval project, declares gad-manuscript dependency
+    ├── v1/
+    │   ├── GAD-TRACE.log
+    │   ├── SCORE.md
+    │   └── README.md
+    └── baseline/
+```
+
+This tests **gad-manuscript** skills specifically: does the agent correctly use beats, scenes, canon-locks, forward questions, and the book planning loop when given only requirements? Scored on the same dimensions as portfolio-bare plus domain-specific metrics (beat coverage, canon consistency, scene structure adherence).
+
+---
+
+## Portfolio requirements as the canonical benchmark
+
+The portfolio requirements (`apps/portfolio/content/docs/documentation/requirements.mdx`) are packaged into `evals/portfolio-bare/REQUIREMENTS.md` stripped of implementation context. An AI agent implements the full portfolio from those requirements alone. We run this repeatedly to:
+
+1. Test that GAD skills guide the agent to a correct implementation
+2. Measure how many iterations / edits / skill calls it takes
+3. Track improvement over time as GAD methodology is refined
+4. Demo the methodology working end-to-end
+
+---
+
+## Scoring dimensions
+
+### Primary metrics
+
+| Metric | Definition |
+| --- | --- |
+| **Requirement coverage** | Fraction of REQUIREMENTS items that the implementation satisfies |
+| **Edit efficiency** | Total file edits to reach passing state (fewer = better) |
+| **Skill call efficiency** | Number of skill invocations (fewer, higher-quality = better) |
+| **Token cost** | Total tokens consumed across the run |
+| **Task count** | Number of tasks created vs requirements (alignment ratio) |
+
+### Drift metrics
+
+Drift measures how much a new run deviates from the baseline run (reference = v1 or designated baseline).
+
+| Drift metric | Formula |
+| --- | --- |
+| `drift_success` | `baseline_coverage − current_coverage` |
+| `drift_edits` | `(current_edits − baseline_edits) / baseline_edits` |
+| `drift_tokens` | `(current_tokens − baseline_tokens) / baseline_tokens` |
+| `drift_skills` | Distribution shift in skill types used |
+| `drift_trace` | Steps per task delta; loop frequency delta |
+| **Composite drift score** | Weighted sum of above deltas |
+
+### Document drift (GAD-specific)
+
+Document drift detects when the coding agent's outputs deviate from the expected GAD artifact structure:
+
+- **Standard artifacts**: `STATE.md`, `ROADMAP.md`, `REQUIREMENTS.md`, `PROJECT.md`, `KICKOFF.md`, `PLAN.md` (phase-specific), `UAT.md`, `VALIDATION.md`
+- **Drift signal**: any document created outside this set, OR any leftover unparsed text in a standard doc after the CLI finishes parsing it
+- **High drift** = agent invented its own file structure or left planning text that the workflow should have consumed
+
+Document drift indicates a gap in the methodology:
+- Unparsed text in STATE.md → the workflow didn't complete a state transition step
+- Extra files outside standard set → agent filled a gap GAD doesn't address
+
+When document drift is high, review the eval trace to understand what the agent was trying to do and add the missing workflow guidance to GAD.
+
+### Behavioral drift
+
+Behavioral drift tracks changes across agent versions:
+
+- **Task success rate**: fraction of requirements met correctly vs baseline
+- **Error types and frequencies**: what categories of errors appear
+- **Tool usage drift**: reads vs writes vs search distribution
+- **Trajectory drift**: steps per task, reasoning chain depth, loop frequency
+
+These are logged in `GAD-TRACE.log` and aggregated in `SCORE.md`.
+
+---
+
+## TRACE format
+
+`GAD-TRACE.log` is written when `--trace` is active (eval projects only). Format:
+
+```
+[2026-04-03T14:23:01Z] SKILL_CALL  gad:plan-phase  phase=portfolio-01
+[2026-04-03T14:23:45Z] FILE_EDIT   apps/portfolio/app/layout.tsx  +42/-8
+[2026-04-03T14:24:02Z] TASK_CREATE portfolio-01-01  "Add root layout with auth shell"
+[2026-04-03T14:24:15Z] STATE_UPDATE current_phase=portfolio-01  status=planning
+[2026-04-03T14:25:03Z] SKILL_CALL  gad:execute-phase  phase=portfolio-01
+[2026-04-03T14:30:11Z] FILE_EDIT   apps/portfolio/app/page.tsx  +18/-2
+[2026-04-03T14:31:00Z] DOC_DRIFT   DETECTED  file=.planning/notes.md  reason=outside_standard_artifacts
+```
+
+Fields: `timestamp`, `event_type`, `target`, `detail`.
+
+Event types: `SKILL_CALL`, `FILE_EDIT`, `TASK_CREATE`, `TASK_UPDATE`, `STATE_UPDATE`, `DOC_DRIFT`, `PHASE_COMPLETE`, `SPRINT_COMPLETE`, `ERROR`.
+
+---
+
+## Skill and agent versioning
+
+Each GAD skill/agent carries version + token metadata in its manifest:
+
+```json
+{
+  "name": "plan-phase",
+  "version": "1.2.0",
+  "token_estimate": {
+    "document_tokens": 3200,
+    "expected_per_phase": 1400
+  },
+  "changelog": [
+    { "version": "1.2.0", "change": "Added discuss-phase pre-planning loop" },
+    { "version": "1.1.0", "change": "Research agent integration" }
+  ]
+}
+```
+
+`gad skills version --skill plan-phase` shows this metadata. The `document_tokens` is the size of the skill's SKILL.md — a proxy for context cost. `expected_per_phase` is measured from eval runs.
+
+---
+
+## SCORE.md format
+
+Generated by `gad eval score`. Written to each versioned run directory.
+
+```markdown
+# Eval Score — portfolio-bare v2
+
+## Run info
+- Date: 2026-04-03
+- GAD version: 1.31.0
+- Baseline: v1
+
+## Primary scores
+| Metric | Baseline (v1) | This run (v2) | Delta |
+|--------|--------------|---------------|-------|
+| Requirement coverage | 78% | 83% | +5% |
+| Edit count | 142 | 127 | -11% |
+| Skill calls | 34 | 29 | -15% |
+| Total tokens | 284,000 | 261,000 | -8% |
+| Task count | 47 | 43 | -9% |
+
+## Drift scores
+| Metric | Score | Status |
+|--------|-------|--------|
+| drift_success | -0.05 | ✓ improved |
+| drift_edits | -0.11 | ✓ improved |
+| drift_tokens | -0.08 | ✓ improved |
+| drift_skills | 0.02 | ✓ stable |
+| document_drift | 1 file | ⚠ review |
+
+## Document drift
+- `DETECTED: .planning/scratch.md` — agent created file outside standard artifacts
+- Trace reference: GAD-TRACE.log line 847
+
+## Composite stability index: 0.82 (↑ from 0.74)
+
+## Trace
+See: [GAD-TRACE.log](./GAD-TRACE.log)
+```
+
+---
+
+## Eval CLI commands (see gad-cli plan)
+
+```
+gad eval run [--project <name>] [--version <v>]   # run eval, writes versioned output
+gad eval score [--project <name>]                  # compute SCORE.md from latest run
+gad eval list                                      # list projects + run history
+gad eval diff <v1> <v2> [--project <name>]         # diff two run score files
+```
+
+---
+
+## Open questions
+
+| Id | Question | Blocks |
+| --- | --- | --- |
+| `gad-eval-oq-01` | Who runs the eval agent — `claude` CLI? Codex? An automated script? | `gad eval run` implementation |
+| `gad-eval-oq-02` | How do we freeze the baseline? Is it the first versioned run automatically, or manually designated? | Drift calculation |
+| `gad-eval-oq-03` | Does `GAD-TRACE.log` get parsed by the CLI or is it append-only from a hook? | TRACE implementation |
+| `gad-eval-oq-04` | Should eval projects be isolated git worktrees so each run starts clean? | Run isolation |
+| `gad-eval-oq-05` | Scoring weights for composite stability index — who defines them and are they configurable? | SCORE.md generation |

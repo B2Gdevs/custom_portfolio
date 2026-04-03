@@ -16,3 +16,9 @@
 [submodule "vendor/mb-cli-framework"]
 	path = vendor/mb-cli-framework
 	url = https://github.com/MagicbornStudios/mb-cli-framework.git
+[submodule "vendor/get-anything-done"]
+	path = vendor/get-anything-done
+	url = https://github.com/MagicbornStudios/get-anything-done.git
+[submodule "vendor/gad-manuscript"]
+	path = vendor/gad-manuscript
+	url = https://github.com/MagicbornStudios/gad-manuscript.git

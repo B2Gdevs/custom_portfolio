@@ -2,7 +2,7 @@
 title: Screenshot annotate — state
 description: Current pointer for screenshot-annotate work.
 date: "2026-04-02"
-updated: "2026-04-05"
+updated: "2026-04-06"
 order: 3
 repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/state.mdx
 ---
@@ -17,9 +17,12 @@ repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/state.mdx
 - **Data:** User screenshots **never** saved to Postgres, Supabase, Payload uploads, or S3 — **browser-only, short-lived**; see [requirements](/docs/screenshot-annotate/requirements#privacy-and-persistence-non-negotiable).
 - **Chrome:** **Minimal** — immersive editor, essential controls + exit to `/apps`; portfolio direction is to tighten chrome for **Dialogue Forge and other `/apps` tools** over time (see [documentation cross-cutting queue](/docs/documentation/planning/state#cross-cutting-queue)).
 - **Hide / redact:** **Solid** fill (or high-opacity) for v1; **blur** deferred to a later planning row.
-- **OCR / spotlight / copy text:** **Planned** phase **annotate-04** (Snipping Tool Text Actions–style); tasks **`screenshot-annotate-04-*`** in task registry.
+- **OCR / spotlight / copy text:** **Planned** phase **annotate-04** (Snipping Tool Text Actions–style); engine **Tesseract.js** in a **Web Worker**, **lazy-loaded** when the user enables text actions ([requirements — planned feature](/docs/screenshot-annotate/requirements#planned-feature--text-scan--spotlight-snipping-toolstyle)); tasks **`screenshot-annotate-04-*`** in task registry.
+- **v1 toolbar:** **Four tools only** — **Select**, **Hand**, **Rectangle/geo**, **Text** — not the full default tldraw strip ([requirements](/docs/screenshot-annotate/requirements#screenshot-annotate-v1-toolbar)).
+- **Paste:** **Pick** phase = explicit clipboard handler before tldraw mounts; **annotate** phase = tldraw [Clipboard](https://tldraw.dev/sdk-features/clipboard) APIs for native behavior ([requirements — Clipboard and paste](/docs/screenshot-annotate/requirements#clipboard-and-paste)).
+- **Export:** **Raster PNG only** in v1 ([requirements — Export format](/docs/screenshot-annotate/requirements#export-format)).
 
 **Open questions:**
 
-- OCR engine choice (Tesseract.js vs other) and performance on large screenshots.
 - Whether “copy as table” (Snipping Tool) is in scope for annotate-04 or a follow-up.
+- Tesseract language packs and performance tuning on very large screenshots (mitigate with worker + lazy load; details in requirements).

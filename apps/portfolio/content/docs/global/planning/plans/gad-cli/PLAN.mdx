@@ -1,0 +1,335 @@
+---
+title: gad CLI — planning command interface spec
+description: Full command surface, argument schema, output modes, and architecture for the gad planning CLI built on mb-cli-framework.
+date: "2026-04-03"
+updated: "2026-04-03"
+repoPath: apps/portfolio/content/docs/global/planning/plans/gad-cli/PLAN.mdx
+taskPhase: global-planning-02
+order: 1
+---
+
+# gad CLI — planning command interface spec
+
+## Summary
+
+`gad` is the planning CLI for get-anything-done. It is the non-GUI interface for CRUD operations on GAD projects, phases, tasks, sprints, and workspace config. It is built on `@magicborn/mb-cli-framework` and designed to be **non-interactive by default** — outputs a table unless `--json` or `--md` flags are passed.
+
+**repo-planner** uses the same underlying parser/utilities exposed by GAD (not re-implementing them). The CLI surface and the library surface share one code path.
+
+---
+
+## Design principles
+
+| Principle | Detail |
+| --- | --- |
+| Non-interactive default | Table output, no prompts. TTY-aware: if no TTY and no format flag, outputs JSON. |
+| Error on ambiguity | When a phase/task ID matches multiple projects, error with info listing the conflicts — never silently pick one. |
+| No delete from workspace | Deleting a project = deleting its `.planning/` dir. Just like `git`. |
+| Trace on eval only | `--trace` writes to `GAD-TRACE.log` only when project is flagged as an eval project. |
+| Framework-powered | Interactive paths use `OperatorChatApp` / Ink; non-interactive paths use shared table/JSON utilities in `mb-cli-framework`. |
+
+---
+
+## Framework integration
+
+`gad` uses `@magicborn/mb-cli-framework` for:
+- `isMagicbornPlainMode` / `shouldOfferMagicbornTui` — mode detection
+- `resolveCliTheme` — ANSI theming
+- `monorepoRootFromCwd` — workspace root discovery
+- Table formatter, JSON emitter (to be added to framework)
+- Platform utilities (`run-external-cli-msys.ts`)
+
+### Arg parser: citty
+
+Non-interactive command routing uses **`citty`** (`defineCommand` / `runMain`) — same as grime-time's existing CLI. The `citty` integration layer belongs in `mb-cli-framework` so portfolio, grime-time, and gad share one implementation.
+
+```ts
+import { defineCommand, runMain } from 'citty'
+
+const tasksCommand = defineCommand({
+  meta: { name: 'tasks', description: 'List or CRUD tasks' },
+  args: {
+    projectid: { type: 'string' },
+    phaseid: { type: 'string' },
+    create: { type: 'string' },
+    update: { type: 'string' },
+    status: { type: 'string' },
+    json: { type: 'boolean', default: false },
+    trace: { type: 'boolean', default: false },
+  },
+  run({ args }) { /* ... */ }
+})
+```
+
+Interactive paths (TUI, chat) use `ink` via the existing `OperatorChatApp` from mb-cli-framework.
+
+Non-interactive utilities (`TableFormatter`, `JsonEmitter`, `MarkdownEmitter`) belong in `mb-cli-framework` so all three CLIs share one implementation.
+
+---
+
+## Project ID format
+
+- Auto-generated on `gad projects init` (slug from folder name + short hash)
+- Stored in `.planning/config.json` as `"project_code"`
+- Configurable after init: `gad projects set-id <id>`
+- Example: `grime-time-site` → project code `GTS-a3f2`
+
+---
+
+## Sprint model
+
+- Sprints map to **version cycles** (GAD milestones)
+- Default max: **5 sprints** per milestone (configurable in `planning-config.toml`)
+- Configurable: `sprints.max_per_milestone = 5`
+
+---
+
+## Workspace discovery
+
+Discovery order:
+1. Read `planning.sub_repos` from nearest `config.json` (explicit list)
+2. Auto-crawl from monorepo root looking for `.planning/` dirs
+3. Apply `planning.ignore` patterns (gitignore-style regex)
+4. `gad workspace sync` auto-populates `sub_repos` from crawl results
+
+Config shape:
+```json
+{
+  "planning": {
+    "sub_repos": ["vendor/grime-time-site", "vendor/repo-planner"],
+    "ignore": ["**/node_modules/**", "**/dist/**"],
+    "docs_sink": "apps/portfolio/content/docs/planning",
+    "sink_workflow": "manual"
+  }
+}
+```
+
+---
+
+## Full command surface
+
+### State
+
+```
+gad state                              # global state — all projects, summary table
+gad state --projectid <id>             # state for one project
+```
+
+### Tasks
+
+```
+gad tasks                              # all tasks, all projects
+gad tasks --projectid <id>             # tasks scoped to project
+gad tasks --phaseid <id>               # tasks in phase (ambiguous → error + conflict list)
+gad tasks --create "description" \
+  [--projectid <id>] \
+  [--phaseid <id>] \
+  [--status todo|in-progress|done|blocked] \
+  [--priority high|medium|low]
+gad tasks --update <taskid> \
+  [--status <s>] [--priority <p>] [--projectid <id>]
+```
+
+### Phases
+
+```
+gad phases                             # all phases, all projects
+gad phases --projectid <id>            # project phases
+gad phases --projectid <id> tasks      # project phases with their tasks
+gad phases --create "description" [--projectid <id>]
+gad phases --update <phaseid> \
+  [--status planned|active|done] [--projectid <id>]
+```
+
+### Sprints
+
+```
+gad sprints                            # all sprints (version cycles), all projects
+gad sprints --projectid <id>           # project sprints
+gad sprints --phaseid <id>             # sprint containing phase (ambiguous → error)
+gad sprints --taskid <id>              # sprint containing task (ambiguous → error)
+gad sprints --create [--projectid <id>] [--name <n>] [--max <N>]
+gad sprints --update <sprintid> [--name <n>] [--status <s>] [--projectid <id>]
+```
+
+### Projects
+
+```
+gad projects list                      # list all discovered projects with status
+gad projects init \
+  [--name <projectname>]               # default: folder name
+  [--path <path>]                      # default: cwd
+gad projects set-id <id> [--projectid <old>]   # rename project code
+```
+
+`projects init` creates the GAD starter structure. **Skills are NOT bundled** — they are installed separately:
+
+```
+.planning/
+├── config.json        ← project config (sub_repos, ignore, docs_sink, project_code)
+├── STATE.md
+├── ROADMAP.md
+├── REQUIREMENTS.md
+└── PROJECT.md
+```
+
+### Workspace
+
+```
+gad workspace sync                     # auto-crawl + update sub_repos in config
+gad workspace add <path>               # manually register project path
+gad workspace ignore <pattern>         # add gitignore-style ignore pattern
+gad workspace show                     # print current workspace config
+```
+
+### Skills
+
+```
+gad skills install <repo> --skill <name> \
+  [--path <planning-dir>] \
+  [--projectid <id>]
+gad skills list [--projectid <id>]     # list installed skills + versions
+gad skills version [--skill <name>]    # show skill version + token estimate
+```
+
+Install pattern uses `npx skills add`:
+```
+gad skills install https://github.com/MagicbornStudios/get-anything-done --skill rp-manuscript
+# → runs: npx skills add https://github.com/MagicbornStudios/get-anything-done --skill rp-manuscript
+```
+
+### Docs
+
+```
+gad docs compile [--sink <path>]       # .planning/ → MDX sink (explicit, manual)
+gad docs watch [--sink <path>]         # watch mode, recompile on state/roadmap change
+```
+
+### Eval
+
+```
+gad eval run [--project <name>] [--version <v>]   # run eval project
+gad eval score [--project <name>]                  # compute scores + write SCORE.md
+gad eval list                                      # list eval projects + run versions
+gad eval diff <v1> <v2> [--project <name>]         # diff two run versions
+```
+
+### Schema migration
+
+```
+gad migrate-schema [--path <planning-dir>]   # XML → MD conversion for RP projects
+```
+
+---
+
+## Global flags
+
+| Flag | Effect |
+| --- | --- |
+| `--json` | JSON output (machine-readable) |
+| `--md` | Markdown output |
+| `--format table\|json\|md` | Explicit format (overrides default table) |
+| `--projectid <id>` | Scope all output to one project |
+| `--trace` | Write action to `GAD-TRACE.log` (eval projects only) |
+
+Default output: **table** (human-readable). If no TTY detected and no format flag: JSON.
+
+---
+
+## Output examples
+
+### `gad tasks` (table, default)
+
+```
+PROJECT          PHASE       TASK ID            STATUS       PRIORITY
+grime-time-site  gt-phase-3  gt-3-01            in-progress  high
+portfolio        global-05   global-05-01       todo         medium
+repo-planner     rp-m1       rp-m1-01           todo         high
+```
+
+### `gad state --projectid GTS --json`
+
+```json
+{
+  "project": "grime-time-site",
+  "project_code": "GTS-a3f2",
+  "current_phase": "gt-phase-3",
+  "status": "active",
+  "last_activity": "2026-04-03",
+  "phases_complete": 2,
+  "phases_total": 8,
+  "open_tasks": 14
+}
+```
+
+---
+
+## Error: ambiguous ID
+
+```
+$ gad tasks --phaseid phase-3
+
+Error: ambiguous phase ID "phase-3" — matches multiple projects:
+  grime-time-site  →  gt-phase-3
+  portfolio        →  global-phase-3
+
+Rerun with --projectid to scope:
+  gad tasks --phaseid phase-3 --projectid grime-time-site
+```
+
+---
+
+## mb-cli-framework additions required
+
+The following non-interactive utilities need to be added to `@magicborn/mb-cli-framework` (not to the `gad` CLI directly — they are shared with portfolio and grime-time):
+
+| Utility | Description |
+| --- | --- |
+| `TableFormatter` | Renders tabular data as ANSI table or plain text |
+| `JsonEmitter` | Consistent JSON output with `--json` flag handling |
+| `MarkdownEmitter` | Renders output as fenced markdown table |
+| `ArgParser` | Lightweight argument parser (non-interactive path) |
+| `ConflictResolver` | Error formatter for ambiguous ID conflicts |
+
+These are the non-interactive counterparts to the existing `OperatorChatApp` / Ink TUI surface. Both interactive and non-interactive paths use the same theme tokens from `resolveCliTheme`.
+
+---
+
+## Sub-CLI registration (gad-manuscript pattern)
+
+Domain packs can register sub-CLIs with `gad`. When `gad-manuscript` is installed, it adds a `manuscript` subcommand:
+
+```
+gad manuscript beats [--projectid]          # list/CRUD beat sheets
+gad manuscript scenes [--phaseid]           # list/CRUD scenes
+gad manuscript extract --from STATE.md      # extract book-planning data
+gad manuscript canon-locks [--projectid]    # show locked canon decisions
+```
+
+Registration: gad-manuscript declares an entry in its `gad.json`:
+```json
+{
+  "subcli": {
+    "name": "manuscript",
+    "entry": "cli/manuscript-main.ts",
+    "description": "Book development commands"
+  }
+}
+```
+`gad` discovers registered sub-CLIs from installed `.gad` packs at startup and mounts them as subcommands.
+
+## Decisions closed
+
+| Question | Answer |
+| --- | --- |
+| Standalone vs subcommand | Standalone `gad` binary |
+| npm package name | `get-anything-done` |
+| Arg parser | `citty` (already in grime-time; migrate to mb-cli-framework) |
+| Eval isolation | git worktrees (see `gad-eval` plan) |
+
+## Open questions
+
+| Id | Question | Blocks |
+| --- | --- | --- |
+| `gad-cli-oq-04` | Auto-TTY fallback: if no TTY and no format flag, emit JSON silently — or emit a warning line first? | Non-interactive UX |
+| `gad-cli-oq-05` | Sub-CLI discovery: scan installed `.gad` packs at startup (file-walk) or require explicit registration in root `config.json`? | gad-manuscript registration |

@@ -2,7 +2,7 @@
 title: Screenshot annotate — requirements
 description: Public, browser-only screenshot annotator built on the tldraw SDK — image intake, canvas, clipboard, and export per official docs and Image annotator example.
 date: "2026-04-02"
-updated: "2026-04-05"
+updated: "2026-04-06"
 order: 1
 repoPath: apps/portfolio/content/docs/screenshot-annotate/requirements.mdx
 ---
@@ -40,6 +40,28 @@ We **standardize on the [tldraw SDK](https://tldraw.dev/)** for canvas, shapes, 
 - **Editing** = **`annotate`** phase: mount **`Tldraw`** (or the example’s editor wrapper) with the image asset; use SDK tools for rectangles, text, ordering, and **export canvas as image** (tldraw **Data & assets** / examples on [tldraw.dev](https://tldraw.dev/), plus annotator **ImageExport**).
 - Minor product differences (minimal chrome, our copy strings, Payload catalog row) sit **around** tldraw, not instead of it.
 
+## Screenshot annotate v1 toolbar
+
+**Scope:** **annotate-01**. Do **not** ship the full default tldraw tool strip. Restrict the editor to **four** tools via SDK configuration (overrides / tool list for the pinned `@tldraw/tldraw` version):
+
+1. **Select** — move, resize, reorder, delete annotations.
+2. **Hand** — pan when the image or zoom needs it (camera still framed to the image, not an infinite canvas product).
+3. **Rectangle / geo** — outlined rectangles for callouts; **solid or high-opacity fill** on separate rects for hide/redact (v1).
+4. **Text** — labels on the image.
+
+**Layout:** follow the [Image annotator](https://tldraw.dev/examples/image-annotator) pattern — **camera and page sized to the image**, not a free infinite canvas.
+
+## Clipboard and paste
+
+**Goal:** pasting an image from the OS (screenshot to clipboard, **Ctrl or Cmd+V**, or **right-click → Paste** where the browser exposes it) **loads the base image** without friction.
+
+- **`pick` phase (before tldraw mounts):** implement an explicit **paste** path on the empty state — `paste` event and/or focusable drop zone per [First screen](/docs/screenshot-annotate/requirements#first-screen--empty-state-intake) — read `clipboardData` **files** / **image** items and feed the same `File` / `Blob` pipeline as drop + Import. tldraw’s editor handlers are **not** running yet; this thin handler is **required** so clipboard paste works on first paint.
+- **`annotate` phase:** use **tldraw’s** clipboard and external-content APIs ([Clipboard](https://tldraw.dev/sdk-features/clipboard)) — `Editor.putExternalContent`, `registerExternalContentHandler`, etc. — so behavior stays aligned with **native web clipboard** rules inside the editor (e.g. pasting additional assets where product allows).
+
+## Export format
+
+- **Raster PNG only** for the composited result (base image + annotations). No SVG/PDF requirement in v1. Download via browser; still **no** server upload for this flow.
+
 ## Privacy and persistence (non-negotiable)
 
 - **Fully client-side, short-lived:** pasted screenshots, annotations, and OCR results live **only in browser memory** (and optional **sessionStorage** only if we add “resume draft” later — default is **no** persistence across reloads).
@@ -50,11 +72,11 @@ We **standardize on the [tldraw SDK](https://tldraw.dev/)** for canvas, shapes, 
 ## Product intent
 
 - **Minimal chrome**: immersive editor — back link to `/apps`, essential tools only; no full site footer in the editor surface (aligns with the portfolio goal of **lean chrome across operator apps**; see `planning/decisions.mdx`).
-- **Paste** from clipboard (Ctrl/Cmd+V) to load the base image; **export** the composited result as a raster image.
+- **Paste** from clipboard and context-menu paste where supported to load the base image; **export** the composited result as **PNG** only ([Clipboard and paste](/docs/screenshot-annotate/requirements#clipboard-and-paste), [Export format](/docs/screenshot-annotate/requirements#export-format)).
 - **Shapes**: rectangle with **stroke width**, **no fill**, **stroke color**; **text** with color and placement; **hide** regions using **solid** filled or semi-opaque rectangles in v1 (blur/redaction polish **planned later**).
 - **Canvas focus**: viewport and interaction **locked to the image** while editing — align with tldraw **camera** / **image annotator** configuration ([example](https://tldraw.dev/examples/image-annotator)).
 - **Layers / z-order**: use tldraw’s ordering, selection, and menus ([SDK](https://tldraw.dev/)); extend only via supported hooks / APIs.
-- **Toolbar / side panel**: tldraw UI zones and style defaults, customized per product needs ([SDK](https://tldraw.dev/)).
+- **Toolbar / side panel**: **four tools only** in v1 ([Screenshot annotate v1 toolbar](/docs/screenshot-annotate/requirements#screenshot-annotate-v1-toolbar)); extra style controls (stroke width, palette) may land in **annotate-02** per task registry.
 
 ## Planned feature — text scan / spotlight (Snipping Tool–style)
 
@@ -63,7 +85,7 @@ Inspired by **Windows Snipping Tool → Text Actions**: run **OCR** on the paste
 - **Spotlight**: dim the full image with a dark overlay and **brighten or lift** detected text blocks so readable text pops (same “everything else dark, text regions lit” feel).
 - **Per-region copy**: click a detected region to select it; **copy that section’s text** to the clipboard (not only the whole image).
 - **Copy all text**: optional control (e.g. floating bar) to copy **all** recognized text in reading order.
-- **Implementation note:** OCR in the browser usually means **WASM** (e.g. **Tesseract.js**) — not lightweight; expect a **one-time download + init** cost. Mitigations: **lazy-load** the OCR bundle only when the user turns on “Text actions,” **Web Worker** for recognition, optional smaller language packs. There is **no** universal zero-WASM OCR in all browsers; **annotate-01** ships **without** OCR so first paint stays fast.
+- **OCR engine (decided):** **[Tesseract.js](https://github.com/naptha/tesseract.js)** in the browser — **lazy-load** only when the user enables **Text actions** (annotate-04); run recognition in a **Web Worker** to avoid blocking the editor; tune language packs for size vs accuracy. **annotate-01** ships **without** OCR so first paint stays fast.
 
 This block is **not** required for the first MVP; track tasks in `planning/task-registry.mdx` under **annotate-04** / OCR rows.
 
@@ -71,7 +93,7 @@ This block is **not** required for the first MVP; track tasks in `planning/task-
 
 - **`pick` phase:** keep the **ImagePicker** surface small (native **drop / paste / file** to produce a `File` or `Blob` URL — same idea as the [Image annotator](https://tldraw.dev/examples/image-annotator) example). No tldraw bundle on initial route if we **dynamic-import** the editor after `onChooseImage`.
 - **`annotate` phase:** load **tldraw** (`@tldraw/tldraw` + CSS) when entering the editor; remount with **`key`** when the image changes (per example). Clipboard and external drops route through **tldraw’s** handlers where applicable ([Clipboard](https://tldraw.dev/sdk-features/clipboard)).
-- **WASM:** reserve for **OCR (annotate-04)** only; tldraw itself is the main editor cost — acceptable tradeoff for not reinventing canvas infrastructure ([tldraw](https://tldraw.dev/)).
+- **WASM:** reserve for **Tesseract.js (annotate-04)** only; tldraw itself is the main editor cost — acceptable tradeoff for not reinventing canvas infrastructure ([tldraw](https://tldraw.dev/)).
 
 ## Non-goals (v1)
 

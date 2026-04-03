@@ -2,7 +2,7 @@
 title: Screenshot annotate — decisions
 description: Architecture and product decisions.
 date: "2026-04-02"
-updated: "2026-04-05"
+updated: "2026-04-06"
 order: 5
 repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/decisions.mdx
 ---
@@ -11,9 +11,13 @@ repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/decisions.mdx
 
 | Date | Decision | Rationale |
 | --- | --- | --- |
+| 2026-04-06 | **v1 toolbar = four tools** | **Select**, **Hand**, **Rectangle/geo**, **Text** only — restrict default tldraw strip; camera framed to the image, not an infinite-canvas product ([requirements](/docs/screenshot-annotate/requirements#screenshot-annotate-v1-toolbar)). |
+| 2026-04-06 | **Paste = pick handler + tldraw in editor** | OS screenshot → **Ctrl/Cmd+V** and context-menu paste: explicit **`pick`**-phase clipboard path before tldraw mounts; **`annotate`** phase uses tldraw external-content / clipboard APIs ([requirements — Clipboard and paste](/docs/screenshot-annotate/requirements#clipboard-and-paste)). |
+| 2026-04-06 | **Export = raster PNG only (v1)** | No SVG/PDF requirement for the composited download ([requirements — Export format](/docs/screenshot-annotate/requirements#export-format)). |
+| 2026-04-06 | **OCR engine = Tesseract.js** | Browser OCR for annotate-04: **lazy-load**, **Web Worker**, language packs sized for tradeoffs ([requirements — planned feature](/docs/screenshot-annotate/requirements#planned-feature--text-scan--spotlight-snipping-toolstyle)). |
 | 2026-04-05 | **tldraw SDK is the canvas system of record** | Build on [tldraw](https://tldraw.dev/), [Image annotator example](https://tldraw.dev/examples/image-annotator), and [Clipboard](https://tldraw.dev/sdk-features/clipboard) — no parallel canvas/clipboard/export stack ([requirements — Implementation stack](/docs/screenshot-annotate/requirements#implementation-stack--tldraw-authoritative)). |
 | 2026-04-04 | **Empty state first:** drop zone + **focusable** surface for paste; **Import** opens file picker only on explicit action | Aligns with example **`pick`** phase; see [requirements — First screen](/docs/screenshot-annotate/requirements#first-screen--empty-state-intake). |
-| 2026-04-04 | **Fast `pick` phase**; WASM only for **OCR** (lazy-loaded) | Intake stays light; tldraw loads in **`annotate`**; see [requirements — Performance](/docs/screenshot-annotate/requirements#performance--fast-first-paint-annotate-01). |
+| 2026-04-04 | **Fast `pick` phase**; WASM only for **Tesseract.js OCR** (lazy-loaded, annotate-04) | Intake stays light; tldraw loads in **`annotate`**; see [requirements — Performance](/docs/screenshot-annotate/requirements#performance--fast-first-paint-annotate-01). |
 | 2026-04-02 | List the app via **Payload** `site-app-records`, not `FALLBACK_SITE_APPS` | Scalable **catalog** (title, route, copy for `/apps`); **not** storage for user screenshots. |
 | 2026-04-03 | **No DB, no Payload media** for user work | Screenshots and edits are **ephemeral, client-only**; export is client download only. See [requirements — Privacy and persistence](/docs/screenshot-annotate/requirements#privacy-and-persistence-non-negotiable). |
 | 2026-04-02 | **Minimal chrome** in the screenshot editor | Keeps focus on the canvas; exit path to `/apps` only. Same direction requested for **Dialogue Forge** and **all portfolio `/apps` tools** — track cross-cutting work under [documentation state](/docs/documentation/planning/state). |

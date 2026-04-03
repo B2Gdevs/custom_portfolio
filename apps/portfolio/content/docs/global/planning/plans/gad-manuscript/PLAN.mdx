@@ -1,0 +1,169 @@
+---
+title: gad-manuscript — fiction and book development sub-CLI
+description: Domain pack and sub-CLI for book/fiction development built on GAD. Beats, scenes, canon locks, and book-tailored planning data extraction. Eval project based on Mordred's Tale requirements.
+date: "2026-04-03"
+updated: "2026-04-03"
+repoPath: apps/portfolio/content/docs/global/planning/plans/gad-manuscript/PLAN.mdx
+taskPhase: global-planning-05
+order: 1
+---
+
+# gad-manuscript — fiction and book development sub-CLI
+
+## Summary
+
+`gad-manuscript` is a domain `.gad` pack and sub-CLI for fiction and book development. It extends GAD with book-specific planning primitives: beat sheets, scene tracking, canon locks, forward questions, and chapter execution loops.
+
+**Source:** `MagicbornStudios/gad-manuscript` → `vendor/gad-manuscript`
+
+**Status:** brand new repo — not started. Work begins after GAD is stable and no longer depends on GSD.
+
+---
+
+## Dependency on GAD stability
+
+gad-manuscript work begins only when:
+1. GAD is fixed up and GSD is no longer the active planning system
+2. Reusable CLI code is migrated to mb-cli-framework
+3. `gad` CLI is finished
+4. Portfolio, grime-time, and repo-planner are fully using mb-cli-framework
+
+Until those gates are cleared, `rp-manuscript` stays in its current form and is not migrated.
+
+---
+
+## Sub-CLI registration
+
+When gad-manuscript is installed, it registers itself with the `gad` CLI:
+
+```
+gad manuscript beats [--projectid] [--json|--md]
+gad manuscript beats --create "Act I — Call to Refuse" [--projectid]
+gad manuscript beats --update <beatid> [--status]
+
+gad manuscript scenes [--phaseid] [--beatid] [--projectid]
+gad manuscript scenes --create "The Tournament" [--phaseid] [--beatid]
+
+gad manuscript canon-locks [--projectid]
+gad manuscript canon-locks --create "Mordred's motivation is revenge" [--locked-by <phaseid>]
+
+gad manuscript forward-questions [--projectid]
+gad manuscript forward-questions --create "Does Guinevere know?" [--phaseid]
+gad manuscript forward-questions --update <qid> --status resolved
+
+gad manuscript extract --from STATE.md [--projectid]   # parse book state into structured output
+gad manuscript chapter-status [--projectid]            # summary of chapter completion
+```
+
+The `gad.json` manifest declares the sub-CLI:
+```json
+{
+  "name": "manuscript",
+  "version": "0.1.0",
+  "extends": "get-anything-done",
+  "min_gad_version": "1.31.0",
+  "subcli": {
+    "name": "manuscript",
+    "entry": "cli/manuscript-main.ts",
+    "description": "Book development commands — beats, scenes, canon locks"
+  },
+  "domain": "fiction-creative-writing",
+  "token_estimate": {
+    "install_tokens": 4800,
+    "per_phase_tokens": 2100
+  }
+}
+```
+
+---
+
+## Skills to migrate from rp-manuscript
+
+`rp-manuscript` (currently in `vendor/repo-planner/skills/rp-manuscript/SKILL.md`) covers:
+
+| rp-manuscript concept | gad-manuscript equivalent |
+| --- | --- |
+| Story vocabulary table | `gad.json` state extension schema |
+| Section vs per-novel planning layers | GAD config + sub_repos monorepo awareness |
+| Fiction state file structure | `STATE.md` extensions template |
+| Fiction task IDs | task ID conventions in `gad.json` |
+| Canon locks pattern | `gad manuscript canon-locks` command |
+| Forward questions lifecycle | `gad manuscript forward-questions` command |
+| Chapter execution loop | GAD `execute-phase` + chapter done checklist workflow |
+| 10-item chapter done checklist | workflow template |
+| Verification gates | GAD `verify-work` + manuscript extensions |
+| EPUB build gate | new manuscript-specific gate |
+| Per-book AGENTS.md | gad-manuscript `AGENTS.md` template |
+
+Each of these becomes a skill, workflow, template, or command in the gad-manuscript pack structure.
+
+---
+
+## Eval project: mordreds-tale-bare
+
+**Location:** `vendor/gad-manuscript/evals/mordreds-tale-bare/`
+
+**Source requirements:** Mordred's Tale book requirements (from the portfolio/books section).
+
+**What it tests:**
+- Does the agent correctly use beat sheets when planning?
+- Are canon locks maintained across phases?
+- Are forward questions resolved before chapters close?
+- Is scene structure correct?
+- Is the chapter done checklist followed?
+
+**Scoring dimensions** (all standard GAD dimensions plus):
+
+| Domain-specific metric | Definition |
+| --- | --- |
+| Beat coverage | Fraction of required beats addressed in implementation |
+| Canon consistency | No canon violations across the full run |
+| Scene structure adherence | Scenes follow the expected arc structure |
+| Forward question resolution rate | Forward questions resolved before chapter closes |
+| Chapter checklist completion | All 10 checklist items checked per chapter |
+
+---
+
+## File structure (target state)
+
+```
+vendor/gad-manuscript/
+├── gad.json                    ← pack manifest
+├── cli/
+│   └── manuscript-main.ts      ← sub-CLI entry (citty commands)
+├── commands/                   ← slash commands
+│   ├── manuscript-new.md
+│   ├── manuscript-chapter.md
+│   ├── manuscript-verify.md
+│   └── ...
+├── agents/                     ← subagents
+│   ├── gad-manuscript-planner.md
+│   └── gad-manuscript-verifier.md
+├── workflows/
+│   ├── chapter-execution.md
+│   ├── beat-sheet-planning.md
+│   └── canon-lock-check.md
+├── templates/
+│   ├── state-fiction.md
+│   ├── beat-sheet.md
+│   ├── scene.md
+│   └── AGENTS.md
+├── evals/
+│   └── mordreds-tale-bare/
+│       ├── REQUIREMENTS.md
+│       ├── AGENTS.md
+│       ├── gad.json
+│       └── v1/
+└── README.md
+```
+
+---
+
+## Open questions
+
+| Id | Question | Blocks |
+| --- | --- | --- |
+| `gad-ms-oq-01` | Sub-CLI discovery: does `gad` scan for sub-CLIs at startup via file walk of installed `.gad` packs, or requires explicit `subcli` registration in root config? | gad-manuscript CLI registration |
+| `gad-ms-oq-02` | Mordred's Tale requirements source: pull from portfolio books requirements MDX, or maintain separately in gad-manuscript repo? | eval project setup |
+| `gad-ms-oq-03` | Does gad-manuscript's `STATE.md` template replace or extend the base GAD `STATE.md`? | state schema design |
+| `gad-ms-oq-04` | EPUB build gate: at what point in the workflow does the EPUB compile check run? End of milestone or end of each chapter phase? | chapter done checklist |

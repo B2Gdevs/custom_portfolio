@@ -1,5 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm run build"
+  "installCommand": "cd ../.. && git submodule update --init --recursive; pnpm install",
+  "buildCommand": "cd ../.. && pnpm run build"
 }
 

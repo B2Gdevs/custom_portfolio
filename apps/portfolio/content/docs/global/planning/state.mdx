@@ -2,7 +2,7 @@
 title: State
 description: Current cycle and focus for the Global documentation section (repo-wide planning IA).
 date: "2026-03-28"
-updated: "2026-04-10"
+updated: "2026-04-03"
 order: 2
 repoPath: apps/portfolio/content/docs/global/planning/state.mdx
 taskPhase: global-data-02
@@ -57,7 +57,26 @@ _These block kicking off named high-risk tracks until answered or explicitly def
 | `oq-02` | **Planning sync MVP:** first shipped behavior is **read-only compile** (dashboard of all `.planning` + section MDX) vs **two-way merge** with one blessed flag set? | **`global-planning-dec-02`** implementation |
 | `oq-03` | **Payload CLI metadata:** final key name and shape (e.g. `custom.magicborn` on collection config) for “expose this collection to generated operator commands”? | Agent skills + codegen spike (**`global-tooling-dec-07`**) |
 
+| `oq-04` | **GAD CLI binary name:** standalone `gad` binary or subcommand of `magicborn`? (`gad tasks` vs `magicborn planning tasks`) | [gad-cli plan](/docs/global/planning/plans/gad-cli/PLAN) |
+| `oq-05` | **GAD CLI distribution:** published as `get-anything-done-cc` on npm (matching GSD pattern) or `@magicborn/gad`? | [gad-cli plan](/docs/global/planning/plans/gad-cli/PLAN) |
+| `oq-06` | **Eval run isolation:** should `gad eval run` use git worktrees so each benchmark run starts from a clean state? | [gad-eval plan](/docs/global/planning/plans/gad-eval/PLAN) |
+| `oq-07` | **mb-cli-framework `ArgParser` dependency:** `commander`, `yargs`, or custom? | [gad-cli plan](/docs/global/planning/plans/gad-cli/PLAN), mb-cli-framework refactor |
+| `oq-08` | **rp-manuscript disposition:** becomes a `.gad` pack distributed from GAD, or stays as RP-owned extension? | [gad-architecture plan](/docs/global/planning/plans/gad-architecture/PLAN) |
+
 _Add rows when a phase kickoff surfaces new blockers; remove or mark **deferred** in **decisions** when closed._
+
+## GAD planning track
+
+New phases added 2026-04-03. These run alongside the existing global-tooling / global-auth tracks.
+
+| Phase | Goal | Status |
+| --- | --- | --- |
+| `global-planning-01` | GAD architecture formalization — boundary spec, .gad format, migration plan | planning |
+| `global-planning-02` | `gad` CLI implementation — command surface, mb-cli-framework non-interactive additions | not started |
+| `global-planning-03` | GAD eval framework — drift metrics, benchmark projects, TRACE + SCORE system | not started |
+| `global-planning-04` | RP migration — remove redundant skills, adopt GAD MD schema, become GUI-only | not started |
+
+Plans: [gad-architecture](/docs/global/planning/plans/gad-architecture/PLAN) · [gad-cli](/docs/global/planning/plans/gad-cli/PLAN) · [gad-eval](/docs/global/planning/plans/gad-eval/PLAN)
 
 ## References
 
