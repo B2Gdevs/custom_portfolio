@@ -4,6 +4,10 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   resolve: {
     alias: {
+      '@magicborn/cli/vendor-registry': path.resolve(
+        __dirname,
+        '../../packages/magicborn-cli/src/vendor-registry.ts',
+      ),
       '@/vendor/repo-planner': path.resolve(__dirname, '../../vendor/repo-planner'),
       '@': path.resolve(__dirname, '.'),
       '@payload-config': path.resolve(__dirname, './payload.config.ts'),

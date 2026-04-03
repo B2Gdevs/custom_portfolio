@@ -19,6 +19,9 @@
       }
     ],
     "paths": {
+      "@magicborn/cli/vendor-registry": [
+        "../../packages/magicborn-cli/src/vendor-registry.ts"
+      ],
       "@/vendor/repo-planner/*": ["../../vendor/repo-planner/*"],
       "@/components/ui/*": [
         "./components/ui/*",
