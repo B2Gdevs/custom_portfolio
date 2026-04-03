@@ -1,0 +1,26 @@
+---
+title: Screenshot annotate — task registry
+description: Tasks for the screenshot annotation app.
+date: "2026-04-02"
+updated: "2026-04-05"
+order: 4
+repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/task-registry.mdx
+---
+
+# Task registry
+
+**Constraint:** no API routes or collections persist user screenshots or exports; OCR stays in the browser ([requirements](/docs/screenshot-annotate/requirements#privacy-and-persistence-non-negotiable)).
+
+**Stack:** [tldraw](https://tldraw.dev/) — [Image annotator example](https://tldraw.dev/examples/image-annotator), [Clipboard](https://tldraw.dev/sdk-features/clipboard).
+
+| Id | Status | Goal | Verify |
+| --- | --- | --- | --- |
+| `screenshot-annotate-01-01` | `planned` | App route + **`pick`/`annotate`/`export`** using tldraw pattern; empty state + **tldraw** editor after image chosen + export PNG (all **client-side**) | matches example structure; `pnpm` build; no upload calls |
+| `screenshot-annotate-01-02` | `planned` | **`site-app-records`** entry (**metadata** for `/apps` only) + docs discoverable | seed + `/apps` lists row; confirm no user media in Payload |
+| `screenshot-annotate-01-03` | `planned` | **Minimal chrome** editor frame (exit to `/apps`, no full site footer in tool surface) | visual / route layout |
+| `screenshot-annotate-02-01` | `planned` | Layers + context menu (z-order + delete) | e2e or integration |
+| `screenshot-annotate-02-02` | `planned` | Toolbar: stroke width, colors, text | visual |
+| `screenshot-annotate-04-01` | `planned` | **OCR** pipeline on pasted image (browser-side); text bounding regions | unit + fixture image |
+| `screenshot-annotate-04-02` | `planned` | **Spotlight UI**: dim full canvas, highlight text regions (Snipping Tool–style) | manual |
+| `screenshot-annotate-04-03` | `planned` | **Copy** selected region text; **copy all text** control | manual |
+| `screenshot-annotate-04-04` | `planned` | Optional **quick redact**-style presets later (email/phone) — after core copy works | — |

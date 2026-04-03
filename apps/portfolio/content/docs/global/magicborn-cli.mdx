@@ -2,7 +2,7 @@
 title: Magicborn CLI
 description: Operator commands for image generation, vendor repos, and shell tab completion — no man page; use this page and --help.
 date: "2026-03-31"
-updated: "2026-03-31"
+updated: "2026-04-05"
 order: 7
 repoPath: apps/portfolio/content/docs/global/magicborn-cli.mdx
 ---
@@ -28,13 +28,30 @@ Or set **`MAGICBORN_REPO`** to the repo root and put **`$MAGICBORN_REPO/node_mod
 
 **Fish:** run **`magicborn shell-init fish`** and follow the commented lines, or install the fish completion file as suggested in the output.
 
+### Git Bash / `~/.bashrc` (critical)
+
+Do **not** put **`eval "$(magicborn completion bash)"`** in **`~/.bashrc`**. That runs **Node** while the shell is starting; on **Windows Git Bash** it can **hang before the prompt** (no `$`, terminal looks “dead”).
+
+**`magicborn shell-init bash --apply`** (current behavior) adds a block that only **`source`s** the static file:
+
+**`$MAGICBORN_REPO/packages/magicborn-cli/completions/magicborn.bash`**
+
+Tab completion still shells out to **`magicborn __complete …`** when you press Tab; login stays fast and does not spawn the full CLI.
+
+**Recovery** if you already broke the shell: open **Cmd / PowerShell**, edit **`%USERPROFILE%\.bashrc`**, remove or comment the **`eval "$(magicborn completion bash`…)"** line (or the whole **`# >>> magicborn shell >>>`** block), save, open a new Git Bash.
+
 ## Tab completion (bash)
 
 Git-style discovery: subcommands, flags, and **dynamic lists** for **`--seed`**, **`--slug`**, and **`--id`** (book slugs, listen slugs, app ids, project slugs, scene seed keys).
 
+**Recommended (no Node at login):** after **`shell-init --apply`**, your rc should **`source`** the repo file (see above). To refresh the script into a file manually:
+
 ```bash
-eval "$(magicborn completion bash)"
+magicborn completion bash > /tmp/magicborn.completion.bash
+# inspect, then source once from rc if you do not use shell-init
 ```
+
+**Avoid** in **`~/.bashrc`**: **`eval "$(magicborn completion bash)"`** (Git Bash hang risk).
 
 Completion calls **`magicborn __complete`** with a topic name (for example `seed-keys`) internally; you normally do not run that by hand. If you already know values, skip completion and pass **`--prompt`**, **`--slug`**, **`--seed`**, etc. directly.
 
@@ -55,3 +72,7 @@ Flags are shared across generate commands where applicable: **`--prompt`**, **`-
 ## Environment
 
 Image generation expects **OpenAI** (and related) variables documented in **`.env.example`** at the repo root. The portfolio handler loads **`load-magicborn-env`** so scripts work outside the Next dev server when variables are set.
+
+## Claude Code (`claude`) and Codex (`codex`)
+
+**Not wrapped by `magicborn`.** Install the **Claude Code** or **Codex** CLI on your **PATH**, **`cd`** into the monorepo ( **`cdmb`** after **`shell-init`**, or **`cd "$MAGICBORN_REPO"`** ), then run **`claude`** or **`codex`** directly. If you run **`magicborn claude`**, you only get a short hint and exit code **2** — this avoids **Node → child TTY** issues on **Windows / Git Bash**. Framework planning: **[mb-cli-framework PLAN](/docs/global/planning/plans/mb-cli-framework/PLAN)** · **[decision](/docs/global/planning/decisions)** **`global-tooling-dec-06`**.

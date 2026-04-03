@@ -1,5 +1,6 @@
 import type { Access, CollectionConfig, Field } from 'payload';
 import { SITE_DOWNLOAD_ASSET_COLLECTION_SLUG } from './siteDownloadAssets';
+import { SITE_MEDIA_ASSET_COLLECTION_SLUG } from './siteMediaAssets';
 import { canManageOwnerAdminCollection } from '../access';
 
 export const PROJECT_RECORD_COLLECTION_SLUG = 'project-records';
@@ -209,6 +210,14 @@ export const projectRecords: CollectionConfig = {
       type: 'relationship',
       relationTo: SITE_DOWNLOAD_ASSET_COLLECTION_SLUG,
       hasMany: true,
+    },
+    {
+      name: 'catalogMediaAsset',
+      type: 'relationship',
+      relationTo: SITE_MEDIA_ASSET_COLLECTION_SLUG,
+      admin: {
+        description: 'Optional published site-media-asset for this project (hero / catalog art)',
+      },
     },
     {
       name: 'published',

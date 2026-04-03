@@ -13,9 +13,12 @@ const SIDEBAR_COLLAPSED_KEY = 'site-sidebar-collapsed';
 export function SiteLayout({
   children,
   navMenus,
+  siteLogoSrc,
 }: {
   children: React.ReactNode;
   navMenus: NavMenuSection[];
+  /** Payload active brand logo URL; omit to use static `/logo.svg`. */
+  siteLogoSrc?: string | null;
 }) {
   const pathname = usePathname();
   const isReaderAppRoute =
@@ -112,6 +115,7 @@ export function SiteLayout({
       >
         <Nav
           navMenus={navMenus}
+          siteLogoSrc={siteLogoSrc}
           portfolioSidebarHoverHandlers={
             !isReaderAppRoute && sidebarCollapsed
               ? {

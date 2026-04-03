@@ -70,7 +70,7 @@ export async function runChatStubTui(opts?: RunChatTuiOptions): Promise<void> {
       const url = resolvePortfolioChatApiUrl();
       printChatCliConfigInkOnly({ chatApiUrl: url });
       printChatCliReady({ chatApiUrl: url, totalPrepMs: Date.now() - prepStarted });
-      await renderOperatorChat({ chatApiUrl: url });
+      await renderOperatorChat({ chatApiUrl: url, repoRoot: root });
       return;
     }
 
@@ -134,7 +134,7 @@ export async function runChatStubTui(opts?: RunChatTuiOptions): Promise<void> {
       totalPrepMs: Date.now() - prepStarted,
     });
 
-    await renderOperatorChat({ chatApiUrl });
+    await renderOperatorChat({ chatApiUrl, repoRoot: root });
   } finally {
     killChatServerProcess(serverProc);
     if (chatRepoRoot) {

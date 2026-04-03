@@ -19,6 +19,10 @@ import { publishedBookArtifacts } from './lib/payload/collections/publishedBookA
 import { siteAppRecords } from './lib/payload/collections/siteAppRecords';
 import { siteDownloadAssets } from './lib/payload/collections/siteDownloadAssets';
 import { siteMediaAssets } from './lib/payload/collections/siteMediaAssets';
+import { bookSeries } from './lib/payload/collections/bookSeries';
+import { bookRecords } from './lib/payload/collections/bookRecords';
+import { sceneRecords } from './lib/payload/collections/sceneRecords';
+import { sceneMediaVariants } from './lib/payload/collections/sceneMediaVariants';
 import { projectRecords } from './lib/payload/collections/projectRecords';
 import { resumeRecords } from './lib/payload/collections/resumeRecords';
 import { tenants } from './lib/payload/collections/tenants';
@@ -59,6 +63,10 @@ export default buildConfig({
     siteAppRecords,
     siteDownloadAssets,
     siteMediaAssets,
+    bookSeries,
+    bookRecords,
+    sceneRecords,
+    sceneMediaVariants,
     projectRecords,
     resumeRecords,
     readerLibraryAssets,

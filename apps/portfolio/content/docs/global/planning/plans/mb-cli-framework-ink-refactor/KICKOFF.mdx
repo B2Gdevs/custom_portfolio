@@ -1,0 +1,44 @@
+---
+title: mb-cli-framework — Ink kit extraction & Claude Code rendering parity
+description: Static regions, activity line, framework-owned primitives; incremental refactor from magicborn/grimetime.
+date: "2026-04-06"
+updated: "2026-04-06"
+order: 1
+repoPath: apps/portfolio/content/docs/global/planning/plans/mb-cli-framework-ink-refactor/KICKOFF.mdx
+taskPhase: global-tooling-08
+---
+
+# Kickoff — Ink component kit in `mb-cli-framework`
+
+## Intent
+
+- **`@magicborn/mb-cli-framework`** is the **shared kit**: theme tokens, chat adapter, completion helpers, and **increasingly** Ink **layout primitives** so **`magicborn`**, **`grimetime`**, and future CLIs do not fork one-off REPL patterns.
+- **Claude Code UX parity:** multiple vertical **regions** (banner, transcript, **activity** / “thinking…”, panel, composer, footer) so **timer-driven lines** update **without** flashing the whole screen — Ink already reconciles by component; we must **structure** the tree so volatile state lives in **small subtrees** (see exported **`TuiVerticalSlot`** / **`defaultTuiLayoutBlueprint`** in the framework).
+
+## Design decisions (working)
+
+| Topic | Direction |
+| --- | --- |
+| **Full-screen redraw** | Avoid putting parent state that changes every tick above **transcript**; use a dedicated **`activity`** slot sibling to transcript, not a wrapper that re-renders history. |
+| **Thinking / duration** | `useState` + `useEffect` interval **only inside `<ActivityLine />`** (framework or host). |
+| **assistant-ui** | Keep for **composer + thread** where it fits; wrap in slot boundaries from **`TuiLayoutBlueprint`**. |
+| **Plain mode** | `MAGICBORN_PLAIN` / `NO_COLOR` stay **out** of Ink path. |
+
+## Phasing (when it feels right)
+
+| Slice | Outcome |
+| --- | --- |
+| **A** | **`TuiVerticalSlot`** + docs (shipped); hosts adopt naming in comments only. |
+| **B** | **`CliScreenBanner`**, **`CliFooterSlotRow`**, **`CliActivityLine`** shipped; hosts wire footer + optional activity line. |
+| **C** | **Transcript** list with **stable row keys** + optional virtualization if history grows. |
+| **D** | Spike: **ink** `Static` or internal memo patterns if profiling shows unnecessary diffing. |
+
+## Dependencies
+
+- **`global-tooling-04`** Claude-style shell tasks.
+- **`@assistant-ui/react-ink`** peer as today.
+
+## Non-goals (near term)
+
+- Rewriting Claude Code itself; **emulate layout/behavior**, not proprietary code.
+- Dropping Commander or the portfolio **`forward`** scripts.

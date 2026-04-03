@@ -52,11 +52,55 @@ Phase **`global-tooling-02`** — rows **`global-tooling-02-01`** … **`02-05`*
 | CLI | `pnpm magicborn --help` still runs; optional `pnpm magicborn vendor list` |
 | Docs | This plan + [task registry](/docs/global/planning/task-registry) updated |
 
+## External operator CLIs (Claude Code, Codex)
+
+**Portfolio `magicborn` does not launch `claude` or `codex`.** Install those CLIs separately, use **`cdmb`** (from **`shell-init`**) or **`cd "$MAGICBORN_REPO"`**, then run **`claude`** / **`codex`** in the shell. Rationale: **Node-spawned** children break **TTY / `--print`** detection on some Windows setups; supporting that inside `magicborn` is **out of scope** for now (**[global-tooling-dec-06](/docs/global/planning/decisions)**).
+
+**Framework consumers** (e.g. Grime Time) may still use **`@magicborn/mb-cli-framework`** helpers **`runExternalCliViaCmdCdExec`**, **`runExternalCliViaMsysBashCdExec`**, **`shouldUseMsysBashExecWrapper`** if they choose to implement their own forwarders. Historical attempts: **[errors-and-attempts](/docs/global/planning/errors-and-attempts)**, **[mb-cli-windows-operator-forward KICKOFF](/docs/global/planning/plans/mb-cli-windows-operator-forward/KICKOFF)** (archived context).
+
+## Payload dev database sandbox (planned)
+
+**Goal:** one **`magicborn` / framework** command family to **restore production backups** into a **local-isolated** database, with an env-driven **sandbox mode** that blocks **outbound integrations** (webhooks, email, third-party sync) while keeping Payload schema and admin usable for debugging.
+
+**Standard collections / metadata** (optional framework slice): backup job records, environment labels, or restore checkpoints — only where they help **multiple apps**; avoid duplicating Payload migrations.
+
+**Kickoff:** [PAYLOAD-MCP-CHAT-KICKOFF](/docs/global/planning/plans/mb-cli-framework/PAYLOAD-MCP-CHAT-KICKOFF) · Tasks: **`global-tooling-09`** in [task registry](/docs/global/planning/task-registry).
+
+## Extension convention (planned)
+
+CLI features that are **not** pure Payload CRUD (e.g. **books**: EPUB, scene extract, file generators) register via a **documented convention** (e.g. **`.magicborn/cli.toml`** or workspace **`magicbornTopics`** export) so the core shell stays thin and **section-specific** logic stays composable.
+
+## MCP apps, chat UI, and platform guidelines
+
+- **MCP Use** (runtime / agent wiring) vs **Assistant UI** (React chat presentation) — complementary layers; see [PAYLOAD-MCP-CHAT-KICKOFF](/docs/global/planning/plans/mb-cli-framework/PAYLOAD-MCP-CHAT-KICKOFF).
+- **Quickstart skills** (upstream): `npx skills add https://github.com/mcp-use/mcp-use --skill mcp-apps-builder` and `npx skills add https://github.com/assistant-ui/skills --skill assistant-ui`.
+- **ChatGPT Apps SDK:** [UX principles](https://developers.openai.com/apps-sdk/concepts/ux-principles), [UI guidelines](https://developers.openai.com/apps-sdk/concepts/ui-guidelines).
+
+## Shell init safety (Windows / Git Bash)
+
+- **`~/.bashrc` must not run Node** to load completions (no `eval "$(magicborn completion bash)"` during rc). That subprocess loads the full CLI while stdout is a pipe and has **hung Git Bash before login prompt** in the wild.
+- **`magicborn shell-init bash --apply`** should **`source` the static file** `packages/magicborn-cli/completions/magicborn.bash` from `MAGICBORN_REPO` after exporting that variable. Tab completion still shells out to `magicborn __complete …` only when you press Tab.
+- **`magicborn.bash`** must avoid `git rev-parse` when `MAGICBORN_REPO` is set but workspace completion files are missing (same hang class from `$HOME` or odd `PWD`).
+
+## Future — native binaries + installer (magicborn, grimetime, framework consumers)
+
+Goal: **ship a single executable + small installer** (or portable zip) so operators are not dependent on **shell hooks**, **global npm link**, or **Node in PATH** for day-to-day use. Shell integration becomes optional.
+
+| Track | Notes |
+| --- | --- |
+| **Build** | **pkg**, **nexe**, or **Node SEA** (single-file executable) for `magicborn` / `grimetime`; bundle `dist/` + static completions. |
+| **Installer** | Windows: user-scope PATH + Start Menu; macOS: `.pkg` or Homebrew cask; keep **idempotent** upgrade. |
+| **Framework** | `mb-cli-framework` documents a **consumer checklist**: plain-mode defaults for CI, **no TUI on piped stdout**, completion assets as **static files** where possible. |
+| **Grime Time** | Mirror the same distribution story for `grimetime` (vendor repo); align version + signing policy with portfolio. |
+
+Planning slices: add tasks under **`global-tooling`** (or a new **`global-tooling-0x`**) when this moves from ADR to implementation; until then this section is the **intent**.
+
 ## Open questions
 
 1. **Grime Time repo:** submodule add of `mb-cli-framework` must be a **separate PR** on that repo; mirror this plan or link here.
 2. **npm package name** inside submodule (`@magicborn/mb-cli-framework` vs `mb-cli-framework`) — align before first publish.
 3. **Bash color in completions:** use **suffix + legend in `magicborn completion bash` header** if ANSI is unreliable.
+4. **Native binary toolchain:** choose **pkg vs SEA** per Node LTS support and Windows Defender false-positive rate.
 
 ## Phase 3 (planned) — Ink shell, themes, chat primitive
 
@@ -71,5 +115,6 @@ Kickoff (UX + env precedence + Windows TTY risks): [ink-tui-vendor-v2](/docs/glo
 ## References
 
 - [Magicborn CLI plan](/docs/global/planning/plans/magicborn-cli/plan) — existing operator scope.
-- [Global task registry](/docs/global/planning/task-registry) — **`global-tooling-02`**, **`global-tooling-03`**.
+- [Global task registry](/docs/global/planning/task-registry) — **`global-tooling-02`**, **`global-tooling-03`**, **`global-tooling-09`**.
 - [Ink / vendor v2 kickoff](/docs/global/planning/plans/magicborn-cli/ink-tui-vendor-v2)
+- [Payload · MCP · chat kickoff](/docs/global/planning/plans/mb-cli-framework/PAYLOAD-MCP-CHAT-KICKOFF) — DB sandbox, extensions, MCP vs Assistant UI, Apps SDK links.

@@ -1,0 +1,53 @@
+---
+title: Windows operator forward (Claude / Codex) — kickoff
+description: When Node-based magicborn cannot satisfy TTY expectations; escape hatches and future bets.
+date: "2026-04-02"
+updated: "2026-04-05"
+repoPath: apps/portfolio/content/docs/global/planning/plans/mb-cli-windows-operator-forward/KICKOFF.mdx
+order: 1
+---
+
+# Windows operator forward — kickoff
+
+**Status (2026-04-05):** Portfolio **`magicborn` no longer forwards** **`claude`** / **`codex`** (**[global-tooling-dec-06](/docs/global/planning/decisions)**). This page is **historical context** for the TTY investigation; supported path is **`cdmb`** then **`claude`** in the shell.
+
+## What we actually needed (at the time)
+
+| Need | Notes |
+| --- | --- |
+| **Repo cwd** | Run **Claude Code** / **Codex** with **monorepo root** as working directory when the operator types from **`~`** or another folder. |
+| **One entrypoint** | ~~**`magicborn claude`** / **`magicborn codex`**~~ — **withdrawn**; use shell **`cd`** + binary. |
+| **No fake REPL** | We are not reimplementing Claude; forwarding from Node proved fragile. |
+
+## What is blocking (not “global binary” mythology)
+
+- **Claude’s** own mode detection ties to **stdin / TTY / parent process**. Under **Git Bash → `node` → child**, behavior diverges from **Git Bash → `claude` directly** in the repo.
+- **Bare `claude` from `~`** can still fail **without `magicborn`** — that is **upstream** (cwd not a git project, or same TTY class of bugs). **`magicborn` cannot fix** a bare global `claude` alias.
+
+## Attempts (see also [errors-and-attempts](/docs/global/planning/errors-and-attempts))
+
+1. `spawnSync(…, { cwd: repo })` — insufficient on some Windows/Git Bash setups.
+2. `bash -c 'cd … && exec claude …'` — still under Node’s stdio; failed for at least one real environment.
+3. **`cmd.exe /c cd /d … && …`** — next attempt (ConPTY path); **`MAGICBORN_DEBUG_FORWARD=1`** logs the branch.
+
+## Escape hatches (supported today)
+
+- **`pf`** (or **`cd "$MAGICBORN_REPO"`**) then **`claude`** — matches what already works.
+- **Shell function** (no Node): `(cd "$MAGICBORN_REPO" && command claude "$@")` — optional **`~/.bashrc`** helper if you want a single alias beyond **`cdmb`**.
+- **Windows Terminal + PowerShell** for operator sessions if mintty + Node + Claude stays hostile.
+
+## Rearchitecture bets (later, not blocking shipping)
+
+| Bet | Hypothesis |
+| --- | --- |
+| **Native `magicborn` binary** (Node SEA / pkg) | Might change how the OS sees the parent of `claude`; **unproven** for this bug. |
+| **Upstream Claude Code** | Watch releases / [issues](https://github.com/anthropics/claude-code/issues); upgrade regularly. |
+
+## Non-goals
+
+- Owning Claude’s interactive UX or replacing **Codex**/**Claude** installers.
+- Guaranteeing **mintty + Node + Claude** on every Windows patch level without shell-side workarounds.
+
+## Decision pointer
+
+- **`global-tooling-dec-05`** in [decisions](/docs/global/planning/decisions).

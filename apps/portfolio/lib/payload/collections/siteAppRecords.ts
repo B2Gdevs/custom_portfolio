@@ -1,4 +1,5 @@
 import type { Access, CollectionConfig } from 'payload';
+import { SITE_MEDIA_ASSET_COLLECTION_SLUG } from './siteMediaAssets';
 import { canManageOwnerAdminCollection } from '../access';
 
 export const SITE_APP_RECORD_COLLECTION_SLUG = 'site-app-records';
@@ -98,6 +99,14 @@ export const siteAppRecords: CollectionConfig = {
       type: 'relationship',
       relationTo: 'site-download-assets',
       hasMany: true,
+    },
+    {
+      name: 'catalogMediaAsset',
+      type: 'relationship',
+      relationTo: SITE_MEDIA_ASSET_COLLECTION_SLUG,
+      admin: {
+        description: 'Optional published site-media-asset for this app tile / cover',
+      },
     },
   ],
 };

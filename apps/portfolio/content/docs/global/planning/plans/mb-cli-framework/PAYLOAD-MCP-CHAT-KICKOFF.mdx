@@ -1,0 +1,82 @@
+---
+title: Kickoff — Payload-centric CLI, DB sandbox, MCP apps & chat UI
+description: Dev data isolation, convention-based CLI extensions, MCP Use vs Assistant UI, quickstart skills, ChatGPT Apps SDK UX references.
+date: "2026-04-05"
+order: 2
+repoPath: apps/portfolio/content/docs/global/planning/plans/mb-cli-framework/PAYLOAD-MCP-CHAT-KICKOFF.mdx
+taskPhase: global-tooling-09
+---
+
+# Kickoff — Payload DB sandbox, MCP apps, and chat-first admin
+
+## Intent
+
+**`@magicborn/mb-cli-framework`** (and **`magicborn`** as the portfolio consumer) should center on **Payload CMS** as the data and schema source of truth, **Next.js + React** for web surfaces, and **OpenAI** (and peers) for model calls — while staying honest that **some domains** (e.g. **books**) add **execution-time** workflows that are **not** fully described by Payload rows alone (build scripts, EPUB, file trees).
+
+We want a **formal extension convention**: registered **topic packages** or **`.magicborn/`** hooks that add commands, completions, and optional non-DB steps without forking the core framework.
+
+Parallel track: **operator dev sandbox** — pull **production-shaped** data into a **local-isolated** database and **block outbound integrations** (webhooks, email, external APIs) so debugging is safe.
+
+Template ambition (longer horizon): something analogous to **Payload’s admin template** — a **quickstart** for **MCP app surfaces + chat** grounded in **collection config**, not a second ad-hoc CRUD stack. Chat and tool UIs should align with platform guidance where we ship inside **ChatGPT Apps** or similar hosts.
+
+## MCP Use vs Assistant UI (stack roles)
+
+| Layer | Role | Typical use |
+| --- | --- | --- |
+| **[MCP Use](https://github.com/mcp-use/mcp-use)** (ecosystem) | **Agent/runtime wiring** — connect LLMs to MCP servers, JSON config, orchestration without tying to one chat product | Backend agents, CLIs, job runners that call tools |
+| **[Assistant UI](https://www.assistant-ui.com/)** | **Presentation** — React chat, threads, tool-call rendering, provider hooks | In-app copilot, owner tools, embedded assistants |
+
+They are **not** either/or: an agent built with MCP-style tool wiring can expose an HTTP or local API; a **Assistant UI** front end can talk to that API or to MCP servers directly, depending on architecture.
+
+## Recommended skills (quickstart for builders)
+
+Install into your agent environment when prototyping MCP apps + chat UI:
+
+```bash
+npx skills add https://github.com/mcp-use/mcp-use --skill mcp-apps-builder
+npx skills add https://github.com/assistant-ui/skills --skill assistant-ui
+```
+
+(Exact `npx skills` UX may evolve; treat these as **pointers** to upstream repos.)
+
+## References — ChatGPT / Apps SDK UX & UI
+
+When designing **inline cards, fullscreen, and composer-adjacent** experiences:
+
+- [UX principles — Apps SDK](https://developers.openai.com/apps-sdk/concepts/ux-principles) — conversational leverage, extract-don’t-port, optimize for conversation not navigation, pre-publish checklist.
+- [UI guidelines — Apps SDK](https://developers.openai.com/apps-sdk/concepts/ui-guidelines) — display modes (inline, fullscreen, PiP), system typography/color/spacing, accessibility (WCAG AA).
+
+## Database / dev sandbox (requirements sketch)
+
+**Goals**
+
+- **Download or restore** production backups into a **dedicated local** DB (or schema) with one obvious **`magicborn` / framework** command family.
+- **Sandbox mode** env flag (e.g. **`MAGICBORN_DATA_SANDBOX=1`** or **`PAYLOAD_SANDBOX=1`**) that:
+  - Routes **writes** to sandbox DB only.
+  - **Disables or no-ops** integration hooks (webhooks, outbound email, third-party sync) via Payload hooks or app-level guards.
+- Optional **framework-provided** or **documented standard collections** for **backup metadata**, **restore jobs**, or **environment labels** — only where they add clarity across consumers; avoid duplicating Payload’s own migration story.
+
+**Non-goals (v0)**
+
+- Automatic anonymization of PII (may be a later phase).
+- Running sandbox and production against the same database.
+
+**Dependencies**
+
+- Align with **`global-data-01-03`** (large local data / export-import) and existing **SQLite vs Supabase** provider story.
+
+## Extension convention (sketch)
+
+- **Discovery:** `.magicborn/cli.toml` or workspace package exports **`magicbornTopics`** (name TBD) listing command modules.
+- **Books (example):** Payload holds **catalog** and **media** pointers; **CLI** still runs **file generators**, **scene extract**, **EPUB** tools — registered as **extensions**, not inlined in core.
+
+## Verification (when implemented)
+
+- Unit tests for **sandbox env** guard helpers (no network in CI).
+- Docs: this kickoff + [mb-cli-framework PLAN](/docs/global/planning/plans/mb-cli-framework/PLAN) + task registry rows under **`global-tooling-09`**.
+
+## Open questions
+
+1. **Backup format:** `pg_dump`, logical export from Payload, or provider-specific (Supabase) — pick one primary path for portfolio first.
+2. **Single flag vs dual DB URL:** does sandbox = **second `DATABASE_URL`** always, or in-process SQLite clone?
+3. **MCP server packaging:** monorepo package vs per-app `mcp.json` — document one golden path in framework README when the first template lands.

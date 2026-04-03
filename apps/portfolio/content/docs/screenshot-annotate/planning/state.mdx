@@ -1,0 +1,25 @@
+---
+title: Screenshot annotate — state
+description: Current pointer for screenshot-annotate work.
+date: "2026-04-02"
+updated: "2026-04-05"
+order: 3
+repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/state.mdx
+---
+
+# State
+
+**Next action:** Implement **annotate-01** — fork the [tldraw Image annotator](https://tldraw.dev/examples/image-annotator) flow (`pick` / `annotate` / `export`), **minimal chrome**, **Payload catalog row only**, planning tasks in registry.
+
+**Resolved (product):**
+
+- **Canvas:** **[tldraw](https://tldraw.dev/)** is the implementation base — [Clipboard](https://tldraw.dev/sdk-features/clipboard), editor APIs, export; no parallel canvas stack ([requirements](/docs/screenshot-annotate/requirements#implementation-stack--tldraw-authoritative)).
+- **Data:** User screenshots **never** saved to Postgres, Supabase, Payload uploads, or S3 — **browser-only, short-lived**; see [requirements](/docs/screenshot-annotate/requirements#privacy-and-persistence-non-negotiable).
+- **Chrome:** **Minimal** — immersive editor, essential controls + exit to `/apps`; portfolio direction is to tighten chrome for **Dialogue Forge and other `/apps` tools** over time (see [documentation cross-cutting queue](/docs/documentation/planning/state#cross-cutting-queue)).
+- **Hide / redact:** **Solid** fill (or high-opacity) for v1; **blur** deferred to a later planning row.
+- **OCR / spotlight / copy text:** **Planned** phase **annotate-04** (Snipping Tool Text Actions–style); tasks **`screenshot-annotate-04-*`** in task registry.
+
+**Open questions:**
+
+- OCR engine choice (Tesseract.js vs other) and performance on large screenshots.
+- Whether “copy as table” (Snipping Tool) is in scope for annotate-04 or a follow-up.

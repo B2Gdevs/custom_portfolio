@@ -21,6 +21,7 @@ order: 7
 | `listen` | `active` | treat **`/listen`** as a first-class discovery surface and prepare it for auth-backed private media access | move BandLab data into the DB and gate private rows through the shared auth/entitlement layer |
 | `documentation` | `active` | make the docs site itself easier to understand and maintain | keep section-local requirements and roadmaps aligned while continuing embed, CLI, and shared-surface work |
 | `repo-planner` | `active` | vendored **RepoPlanner** CLI + embedded cockpit under **`/apps/repo-planner`** | maintenance mode while auth-backed site work takes priority |
+| `screenshot-annotate` | `planned` | public **paste → annotate → export** tool (rectangles, text, layers); likely **tldraw**-backed; own docs under **`/docs/screenshot-annotate`** | ship **annotate-01** (route, paste, export, Payload app row) |
 | `editor` | `planned` | define a writing/editor tool that can compile authored content to cleaner EPUB3 | validate scope, authoring workflow, and source-format requirements |
 
 ## Reference Map
@@ -37,5 +38,6 @@ order: 7
 | `documentation` | `docs/documentation/requirements` | `docs/documentation/planning/roadmap` | `docs/documentation/planning/planning-docs` |
 | `editor` | `docs/editor/requirements` | `docs/editor/planning/roadmap` | `docs/editor/planning/planning-docs` |
 | `repo-planner` | `docs/repo-planner/requirements` | `docs/repo-planner/planning/roadmap` | `docs/repo-planner/planning/planning-docs` |
+| `screenshot-annotate` | `docs/screenshot-annotate/requirements` | `docs/screenshot-annotate/planning/roadmap` | `docs/screenshot-annotate/planning/planning-docs` |
 | **cross-section overview** | `docs/documentation/requirements` | `docs/documentation/roadmap` | `-` |
 | **root** | `.planning/REQUIREMENTS.xml` + root `AGENTS.md` | `.planning/ROADMAP.xml` | `.planning/AGENTS.md` |

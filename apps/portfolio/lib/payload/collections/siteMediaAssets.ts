@@ -20,6 +20,7 @@ export const siteMediaAssets: CollectionConfig = {
       'sourcePath',
       'contentScope',
       'contentSlug',
+      'taxonomyKind',
       'mediaKind',
       'isCurrent',
       'updatedAt',
@@ -85,6 +86,39 @@ export const siteMediaAssets: CollectionConfig = {
         { label: 'Document', value: 'document' },
         { label: 'Other', value: 'other' },
       ],
+    },
+    /** Optional link to series / book / scene / app rows for catalog + tooling (global-tooling-01-03). */
+    {
+      name: 'taxonomyKind',
+      type: 'select',
+      index: true,
+      options: [
+        { label: 'Series', value: 'series' },
+        { label: 'Book', value: 'book' },
+        { label: 'Scene', value: 'scene' },
+        { label: 'Project', value: 'project' },
+        { label: 'App', value: 'app' },
+        { label: 'Brand', value: 'brand' },
+        { label: 'Site', value: 'site' },
+        { label: 'Other', value: 'other' },
+      ],
+    },
+    {
+      name: 'taxonomyRef',
+      type: 'text',
+      index: true,
+      admin: { description: 'Slug or stable id for the taxonomy target (e.g. book slug, scene slug)' },
+    },
+    {
+      name: 'taxonomyVariant',
+      type: 'text',
+      index: true,
+      admin: { description: 'Variant label: hero, og, thumb, logo-dark, …' },
+    },
+    {
+      name: 'textOnImage',
+      type: 'textarea',
+      admin: { description: 'Optional short overlay / caption text stored with the asset' },
     },
     {
       name: 'isCurrent',

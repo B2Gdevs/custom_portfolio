@@ -10,6 +10,7 @@ import { SiteCopilotProvider } from '@/components/site/SiteCopilotContext';
 import { getAllContent } from '@/lib/content';
 import { buildSiteMenus } from '@/lib/site-menus';
 import { hostSuggestsLocalPortfolioAccess } from '@/lib/site-copilot-shell';
+import { getActiveSiteLogoPublicUrl } from '@/lib/site-branding';
 import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Serif } from 'next/font/google';
 import { cn } from '@/lib/utils';
 
@@ -51,6 +52,8 @@ export default async function RootLayout({
     blogPosts: getAllContent('blog'),
   });
 
+  const siteLogoSrc = await getActiveSiteLogoPublicUrl();
+
   const h = await headers();
   const host =
     h.get('x-forwarded-host')?.split(',')[0]?.trim() ?? h.get('host') ?? '';
@@ -66,7 +69,9 @@ export default async function RootLayout({
 
   const siteShell = (
     <>
-      <SiteLayout navMenus={navMenus}>{children}</SiteLayout>
+      <SiteLayout navMenus={navMenus} siteLogoSrc={siteLogoSrc ?? undefined}>
+        {children}
+      </SiteLayout>
       <ContentCommandPaletteHotkey />
       <ModalRoot />
     </>

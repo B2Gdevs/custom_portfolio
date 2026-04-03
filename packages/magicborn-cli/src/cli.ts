@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Command, Option } from 'commander';
+import { Command, Help, Option } from 'commander';
 import {
   isMagicbornPlainMode,
   resolvePortfolioChatApiUrl,
@@ -16,6 +16,7 @@ import { runMagicbornUpdate } from './run-update.js';
 import { runVendorAdd } from './vendor-add.js';
 import { runMagicbornPnpm } from './pnpm-wrap.js';
 import { printVendorCliHelp, runVendorForward, VENDOR_TOPIC_COMMANDS } from './vendor-run.js';
+import { formatExternalOperatorCliHint } from './operator-external-cli-hint.js';
 import { formatMagicbornRootHelp } from './help-format.js';
 import { findRepoRootForVendor, getDefaultVendorId, loadVendorRegistry } from './vendor-registry.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -32,6 +33,29 @@ function ensureLine(text: string, line: string): string {
   return text.includes(line) ? text : `${text}\n${line}`;
 }
 
+/** Bash lines: `cdmb` → monorepo; optional `cdgt` → vendor/grime-time-site when present. */
+function shellInitCdLinesBash(root: string): string[] {
+  const grimetimePath = path.join(root, 'vendor', 'grime-time-site');
+  const grimetimePosix = grimetimePath.replace(/\\/g, '/');
+  const lines: string[] = [`alias cdmb='cd "$MAGICBORN_REPO"'`];
+  if (fs.existsSync(grimetimePath)) {
+    lines.push(`export GRIMETIME_REPO="${grimetimePosix}"`);
+    lines.push(`alias cdgt='cd "$GRIMETIME_REPO"'`);
+  }
+  return lines;
+}
+
+function shellInitCdLinesFish(root: string): string[] {
+  const grimetimePath = path.join(root, 'vendor', 'grime-time-site');
+  const grimetimePosix = grimetimePath.replace(/\\/g, '/');
+  const lines: string[] = [`alias cdmb 'cd $MAGICBORN_REPO'`];
+  if (fs.existsSync(grimetimePath)) {
+    lines.push(`set -gx GRIMETIME_REPO '${grimetimePosix}'`);
+    lines.push(`alias cdgt 'cd $GRIMETIME_REPO'`);
+  }
+  return lines;
+}
+
 function applyShellInitBash(root: string): { updated: boolean; filePaths: string[] } {
   const home = process.env.HOME || process.env.USERPROFILE;
   if (!home) {
@@ -41,12 +65,18 @@ function applyShellInitBash(root: string): { updated: boolean; filePaths: string
   const bashProfilePath = path.join(home, '.bash_profile');
   const start = '# >>> magicborn shell >>>';
   const end = '# <<< magicborn shell <<<';
+  const posixRoot = root.replace(/\\/g, '/');
   const blockLines = [
     start,
     '# magicborn --help: yellow=asset/repo · cyan=Payload · green=vendor · blue=OpenAI · magenta=model/style · gray=shell',
-    `export MAGICBORN_REPO="${root.replace(/\\/g, '/')}"`,
-    'alias magicborn=\'pnpm -s magicborn\'',
-    'eval "$(pnpm -s magicborn completion bash 2>/dev/null)"',
+    `export MAGICBORN_REPO="${posixRoot}"`,
+    'export PATH="$MAGICBORN_REPO/node_modules/.bin:$PATH"',
+    ...shellInitCdLinesBash(root),
+    '# Bash completion: source the repo script only — never `eval "$(magicborn completion bash)"` here (Node subprocess during .bashrc can hang Git Bash on Windows).',
+    'if [[ -f "$MAGICBORN_REPO/packages/magicborn-cli/completions/magicborn.bash" ]]; then',
+    '  # shellcheck source=/dev/null',
+    '  source "$MAGICBORN_REPO/packages/magicborn-cli/completions/magicborn.bash"',
+    'fi',
     "bind 'set show-all-if-ambiguous on' 2>/dev/null || true",
     "bind 'set completion-ignore-case on' 2>/dev/null || true",
     "bind 'set print-completions-horizontally off' 2>/dev/null || true",
@@ -90,7 +120,8 @@ program
       if (!cmd.parent) {
         return formatMagicbornRootHelp(cmd);
       }
-      return helper.formatHelp(cmd, helper);
+      // Delegate to built-in Help — `helper.formatHelp` would recurse (same override on `helper`).
+      return Help.prototype.formatHelp.call(helper, cmd, helper);
     },
   });
 
@@ -189,14 +220,68 @@ scenes
 
 scenes
   .command('extract')
-  .description('Extract scenes from manuscript (not implemented yet)')
-  .argument('[slug]', 'Optional book slug')
+  .description(
+    'Extract scene-like ## sections from MDX (content/docs/magicborn/in-world/<slug>/ or --file)',
+  )
+  .argument('[slug]', 'Book folder under magicborn/in-world/')
+  .option('--file <path>', 'Repo-relative or absolute .mdx path')
+  .option('--slug <id>', 'Same as [slug]')
+  .option('--all-headings', 'Include every ## block, not only scene-like titles', false)
   .option('--json', 'JSON only', false)
-  .action((slug: string | undefined, opts: { json?: boolean }) => {
-    const tail: string[] = [];
+  .action(
+    (
+      slug: string | undefined,
+      opts: { json?: boolean; file?: string; slug?: string; allHeadings?: boolean },
+    ) => {
+      const tail: string[] = [];
+      if (opts.json) tail.push('--json');
+      if (opts.allHeadings) tail.push('--all-headings');
+      if (opts.file) tail.push('--file', opts.file);
+      if (opts.slug) tail.push('--slug', opts.slug);
+      if (slug) tail.push(slug);
+      forward(['book', 'scenes', 'extract', ...tail]);
+    },
+  );
+
+const booksCmd = program.command('books').description('Book pipeline (EPUB illustration gaps)');
+
+const booksIllustrations = booksCmd
+  .command('illustrations')
+  .description('EPUB illustration gap scan');
+
+booksIllustrations
+  .command('scan')
+  .description('List pending illustration slots + reading-order context (requires --epub)')
+  .argument('[label]', 'Label for JSON output (defaults to EPUB basename)')
+  .requiredOption('--epub <path>', 'Path to a .epub file')
+  .option('--json', 'JSON on stdout', false)
+  .action((label: string | undefined, opts: { epub: string; json?: boolean }) => {
+    const tail: string[] = [...(label ? [label] : []), '--epub', opts.epub];
     if (opts.json) tail.push('--json');
-    if (slug) tail.push(slug);
-    forward(['book', 'scenes', 'extract', ...tail]);
+    forward(['books', 'illustrations', 'scan', ...tail]);
+  });
+
+const siteCmd = program.command('site').description('Site branding (Payload site-media-assets)');
+
+const siteLogo = siteCmd.command('logo').description('Site logo candidates (brand / site-logo)');
+
+siteLogo
+  .command('list')
+  .description('List logo rows (contentScope=brand, contentSlug=site-logo)')
+  .option('--json', 'JSON on stdout', false)
+  .action((opts: { json?: boolean }) => {
+    forward(['site', 'logo', 'list', ...(opts.json ? ['--json'] : [])]);
+  });
+
+siteLogo
+  .command('set-active')
+  .description('Mark one logo as current (isCurrent); clears siblings')
+  .argument('<id>', 'site-media-assets document id')
+  .option('--json', 'JSON on stdout', false)
+  .action((id: string, opts: { json?: boolean }) => {
+    const tail: string[] = [id];
+    if (opts.json) tail.push('--json');
+    forward(['site', 'logo', 'set-active', ...tail]);
   });
 
 const appCmd = program.command('app').description('Site /apps catalog');
@@ -262,6 +347,68 @@ attachGenerateOptions(
 ).action((opts) => {
   forward(['listen', 'generate', ...forwardGenerateArgs(opts)]);
 });
+
+program
+  .command('batch')
+  .description(
+    'Creative batch: shared --style + scene list → multiple image runs + .magicborn/batches/<id>/batch.json (global-tooling-05-04)',
+  )
+  .requiredOption('--style <text>', 'Art direction / mood applied to every scene')
+  .option('--target <kind>', 'book | app | project | planning-pack | listen', 'project')
+  .option('--medium <m>', 'image only in v1', 'image')
+  .option('--scenes <csv>', 'Comma-separated scene labels')
+  .option('--scenes-file <path>', 'File with one scene per line (repo-relative ok)')
+  .option('--continue-on-error', 'Continue after a failed scene', false)
+  .option('--slug <slug>', 'Book or listen slug when target needs it')
+  .option('--id <id>', 'Project or app id when target needs it')
+  .option('--pack <id>', 'Planning pack id')
+  .option('--print-prompt', 'Print composed prompts only (no API)', false)
+  .option('--dry-run', 'Show composed prompts per scene; no API', false)
+  .option('--json', 'JSON summary (batch manifest + paths)', false)
+  .option('--raw', 'Omit Magicborn style block', false)
+  .option('--size <size>', '1024x1024 | 1792x1024 | 1024x1792', '1024x1024')
+  .option('--slot <id>', 'Media slot id for per-run manifests')
+  .action(
+    (opts: {
+      style: string;
+      target?: string;
+      medium?: string;
+      scenes?: string;
+      scenesFile?: string;
+      continueOnError?: boolean;
+      slug?: string;
+      id?: string;
+      pack?: string;
+      printPrompt?: boolean;
+      dryRun?: boolean;
+      json?: boolean;
+      raw?: boolean;
+      size?: string;
+      slot?: string;
+    }) => {
+      forward([
+        'batch',
+        '--style',
+        opts.style,
+        '--target',
+        opts.target ?? 'project',
+        '--medium',
+        opts.medium ?? 'image',
+        ...(opts.scenes ? ['--scenes', opts.scenes] : []),
+        ...(opts.scenesFile ? ['--scenes-file', opts.scenesFile] : []),
+        ...(opts.continueOnError ? ['--continue-on-error'] : []),
+        ...(opts.slug ? ['--slug', opts.slug] : []),
+        ...(opts.id ? ['--id', opts.id] : []),
+        ...(opts.pack ? ['--pack', opts.pack] : []),
+        ...(opts.printPrompt ? ['--print-prompt'] : []),
+        ...(opts.dryRun ? ['--dry-run'] : []),
+        ...(opts.json ? ['--json'] : []),
+        ...(opts.raw ? ['--raw'] : []),
+        ...(opts.size ? ['--size', opts.size] : []),
+        ...(opts.slot ? ['--slot', opts.slot] : []),
+      ]);
+    },
+  );
 
 const payloadCmd = program
   .command('payload')
@@ -372,7 +519,7 @@ program
   .argument('[shell]', 'bash | zsh | fish', 'bash')
   .option('--apply', 'Write/update shell rc file (bash only for now)', false)
   .description(
-    'Print PATH + completion lines for your shell rc (after `pnpm install`, `magicborn` lives in node_modules/.bin)',
+    'Print MAGICBORN_REPO + PATH (node_modules/.bin) + completion for your shell rc. After `pnpm install`, `magicborn` works from any cwd without a pnpm alias. --apply writes ~/.bashrc (bash only).',
   )
   .action((shell: string, opts: { apply?: boolean }) => {
     const root = repoRootOrExit();
@@ -398,6 +545,9 @@ program
       );
       console.log(`set -gx MAGICBORN_REPO '${posixRoot}'`);
       console.log('fish_add_path $MAGICBORN_REPO/node_modules/.bin');
+      for (const line of shellInitCdLinesFish(root)) {
+        console.log(line);
+      }
       console.log(
         '# Optional: `magicborn completion fish > ~/.config/fish/completions/magicborn.fish`',
       );
@@ -408,9 +558,19 @@ program
       '# magicborn --help: yellow=asset/repo · cyan=Payload catalog · green=vendor · blue=OpenAI · magenta=model/style · gray=shell',
     );
     console.log(`export MAGICBORN_REPO="${posixRoot}"`);
-    console.log('alias magicborn=\'pnpm -s magicborn\'');
     console.log('export PATH="$MAGICBORN_REPO/node_modules/.bin:$PATH"');
-    console.log('eval "$(pnpm -s magicborn completion bash)"');
+    for (const line of shellInitCdLinesBash(root)) {
+      console.log(line);
+    }
+    console.log(
+      '# Tab completion: source repo file (no Node at login — avoids Git Bash hangs). Optional refresh: `magicborn completion bash` to stdout.',
+    );
+    console.log(
+      'if [[ -f "$MAGICBORN_REPO/packages/magicborn-cli/completions/magicborn.bash" ]]; then',
+    );
+    console.log('  # shellcheck source=/dev/null');
+    console.log('  source "$MAGICBORN_REPO/packages/magicborn-cli/completions/magicborn.bash"');
+    console.log('fi');
     console.log("bind 'set show-all-if-ambiguous on' 2>/dev/null || true");
     console.log("bind 'set completion-ignore-case on' 2>/dev/null || true");
     console.log(
@@ -585,7 +745,9 @@ program
 
 program
   .command('completion')
-  .description('Print tab-completion script (install: eval "$(magicborn completion bash)")')
+  .description(
+    'Print tab-completion script. Prefer: source "$MAGICBORN_REPO/packages/magicborn-cli/completions/magicborn.bash" from .bashrc (shell-init does this). This subcommand is for piping / updates.',
+  )
   .argument('<shell>', 'bash | zsh | fish')
   .action((shell: string) => {
     const s = shell.trim().toLowerCase();
@@ -625,6 +787,14 @@ void (async () => {
 
   if (argvEarly[0] === 'pnpm') {
     process.exit(runMagicbornPnpm(argvEarly.slice(1)));
+  }
+
+  /** Claude Code / Codex: not wrapped — run installed binaries after `cd` into the repo (e.g. `cdmb`). */
+  if (argvEarly[0] === 'claude' || argvEarly[0] === 'codex') {
+    const cmd = argvEarly[0] as 'claude' | 'codex';
+    const root = repoRootOrExit();
+    console.error(formatExternalOperatorCliHint(cmd, argvEarly.slice(1), root));
+    process.exit(2);
   }
 
   if (argvEarly[0] && vendorTopicForward.has(argvEarly[0])) {

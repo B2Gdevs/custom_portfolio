@@ -1,4 +1,6 @@
 import { logChatRuntimeProcessEnvOnce } from '@/lib/chat-runtime-env-log';
+import { isCopilotToolsAuthorized } from '@/lib/copilot/copilot-tools-auth';
+import { COPILOT_TOOLS_SYSTEM_SUPPLEMENT, runCopilotChatOpenAiLoop } from '@/lib/copilot/openai-chat-tools';
 import { buildRagSystemMessage } from '@/lib/rag/chat-context';
 import { createLogger } from '@/lib/logging';
 import { retrieveRagContext } from '@/lib/rag/retrieve';
@@ -7,6 +9,7 @@ import {
   type SiteChatApiRequest,
   type SiteChatApiResponse,
   type SiteChatConversationMessage,
+  type SiteChatRagMode,
 } from '@/lib/site-chat';
 
 const OPENAI_CHAT_COMPLETIONS_URL = 'https://api.openai.com/v1/chat/completions';
@@ -106,6 +109,28 @@ function isSiteChatRagEnabled(): boolean {
   return v !== '0' && v !== 'false' && v !== 'off';
 }
 
+function resolveRagForRequest(payload: SiteChatApiRequest | null): {
+  ragEnabled: boolean;
+  ragMode: SiteChatRagMode | undefined;
+} {
+  const mode = payload?.ragMode;
+  if (mode === 'off') {
+    return { ragEnabled: false, ragMode: 'off' };
+  }
+  if (mode === 'books' || mode === 'books_planning' || mode === 'books_planning_repo') {
+    return { ragEnabled: true, ragMode: mode };
+  }
+  return { ragEnabled: isSiteChatRagEnabled(), ragMode: undefined };
+}
+
+function resolveChatModel(payload: SiteChatApiRequest | null): string {
+  const raw = payload?.model?.trim();
+  if (raw && /^[a-zA-Z0-9._-]+$/.test(raw) && raw.length <= 128) {
+    return raw;
+  }
+  return process.env.OPENAI_CHAT_MODEL?.trim() || DEFAULT_CHAT_MODEL;
+}
+
 export async function POST(request: Request) {
   logChatRuntimeProcessEnvOnce('POST /api/chat');
   const requestId = crypto.randomUUID();
@@ -134,6 +159,11 @@ export async function POST(request: Request) {
     messageCount: payload?.messages?.length ?? 0,
     normalizedMessageCount: conversation.length,
     queryPreview: previewText(query),
+    clientSource: payload?.client?.source,
+    clientAcceptEditsAuto: payload?.client?.acceptEditsAuto,
+    requestModel: payload?.model,
+    requestRagMode: payload?.ragMode,
+    enableCopilotTools: payload?.enableCopilotTools === true,
   });
   CHAT_LOGGER.debug('normalized chat conversation', {
     requestId,
@@ -154,10 +184,23 @@ export async function POST(request: Request) {
     );
   }
 
-  const ragEnabled = isSiteChatRagEnabled();
+  if (payload?.enableCopilotTools === true && !isCopilotToolsAuthorized(request)) {
+    CHAT_LOGGER.warn('copilot tools rejected (unauthorized)', { requestId });
+    return jsonResponse(
+      {
+        error: 'copilot_tools_forbidden',
+        message:
+          'Copilot tools require COPILOT_TOOLS_BEARER (Authorization: Bearer ...) or SITE_CHAT_COPILOT_TOOLS=1 for local dev.',
+      },
+      403,
+      responseHeaders,
+    );
+  }
+
+  const { ragEnabled, ragMode } = resolveRagForRequest(payload);
   const retrievalStartedAt = Date.now();
   const hits = ragEnabled
-    ? await retrieveRagContext(query).catch((error) => {
+    ? await retrieveRagContext(query, { ragMode }).catch((error) => {
         CHAT_LOGGER.warn('rag retrieval failed for chat request; continuing without hits', {
           requestId,
           elapsedMs: Date.now() - retrievalStartedAt,
@@ -167,8 +210,9 @@ export async function POST(request: Request) {
       })
     : [];
   if (!ragEnabled) {
-    CHAT_LOGGER.info('site chat RAG skipped (SITE_CHAT_RAG disables retrieval; no embedding calls)', {
+    CHAT_LOGGER.info('site chat RAG skipped (request or SITE_CHAT_RAG; no embedding calls)', {
       requestId,
+      ragMode: payload?.ragMode,
     });
   }
   CHAT_LOGGER.info('rag retrieval completed for chat request', {
@@ -176,6 +220,7 @@ export async function POST(request: Request) {
     elapsedMs: Date.now() - retrievalStartedAt,
     hitCount: hits.length,
     ragEnabled,
+    ragMode,
   });
   CHAT_LOGGER.debug('rag retrieval hits', {
     requestId,
@@ -190,7 +235,7 @@ export async function POST(request: Request) {
     })),
   });
   const ragSystemMessage = buildRagSystemMessage(hits);
-  const model = process.env.OPENAI_CHAT_MODEL?.trim() || DEFAULT_CHAT_MODEL;
+  const model = resolveChatModel(payload);
 
   const openAiMessages = [
     { role: 'system', content: SITE_CHAT_INSTRUCTIONS },
@@ -200,6 +245,71 @@ export async function POST(request: Request) {
       content: message.content,
     })),
   ];
+
+  if (payload?.enableCopilotTools === true) {
+    const toolMessages = [
+      {
+        role: 'system',
+        content: `${SITE_CHAT_INSTRUCTIONS}\n\n${COPILOT_TOOLS_SYSTEM_SUPPLEMENT}`,
+      },
+      ...(ragSystemMessage ? [{ role: 'system', content: ragSystemMessage }] : []),
+      ...conversation.map((message) => ({
+        role: message.role,
+        content: message.content,
+      })),
+    ] as Record<string, unknown>[];
+
+    CHAT_LOGGER.debug('dispatching copilot tool loop', {
+      requestId,
+      model,
+      upstreamMessageCount: toolMessages.length,
+      ragContextIncluded: Boolean(ragSystemMessage),
+    });
+
+    const upstreamStartedAt = Date.now();
+    try {
+      const loop = await runCopilotChatOpenAiLoop({
+        apiKey,
+        model,
+        messages: toolMessages,
+        signal: request.signal,
+      });
+      const result: SiteChatApiResponse = {
+        text: loop.text,
+        hits,
+        query,
+        model,
+        copilotToolRounds: loop.toolRounds,
+        copilotToolCalls: loop.toolCallCount,
+        copilotForm: loop.copilotForm,
+      };
+      CHAT_LOGGER.info('chat request completed (copilot tools)', {
+        requestId,
+        elapsedMs: Date.now() - startedAt,
+        upstreamElapsedMs: Date.now() - upstreamStartedAt,
+        hitCount: hits.length,
+        model,
+        copilotToolRounds: loop.toolRounds,
+        copilotToolCalls: loop.toolCallCount,
+      });
+      return jsonResponse(result, 200, responseHeaders);
+    } catch (error) {
+      CHAT_LOGGER.error('copilot tool loop failed', {
+        requestId,
+        elapsedMs: Date.now() - upstreamStartedAt,
+        error,
+      });
+      return jsonResponse(
+        {
+          error: 'copilot_tools_failed',
+          message: error instanceof Error ? error.message : 'Copilot tool loop failed.',
+        },
+        502,
+        responseHeaders,
+      );
+    }
+  }
+
   CHAT_LOGGER.debug('dispatching upstream chat request', {
     requestId,
     model,

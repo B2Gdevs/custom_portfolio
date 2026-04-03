@@ -23,12 +23,12 @@ const GROUPS: Array<{
   {
     title: 'Asset & repo (books, planning packs, listen — local + CMS, not Payload-only CRUD)',
     style: (s) => (helpColorOn() ? pc.bold(pc.yellow(s)) : s),
-    names: ['book', 'planning-pack', 'listen'],
+    names: ['book', 'books', 'batch', 'planning-pack', 'listen'],
   },
   {
     title: 'Payload CMS catalog (site apps, projects, config discovery)',
     style: (s) => (helpColorOn() ? pc.bold(pc.cyan(s)) : s),
-    names: ['app', 'project', 'payload'],
+    names: ['app', 'project', 'payload', 'site'],
   },
   {
     title: 'Vendor CLIs (`magicborn vendor <id> …`)',

@@ -6,6 +6,10 @@ import { resumeRecords } from '@/lib/payload/collections/resumeRecords';
 import { siteAppRecords } from '@/lib/payload/collections/siteAppRecords';
 import { siteDownloadAssets } from '@/lib/payload/collections/siteDownloadAssets';
 import { siteMediaAssets } from '@/lib/payload/collections/siteMediaAssets';
+import { bookSeries } from '@/lib/payload/collections/bookSeries';
+import { bookRecords } from '@/lib/payload/collections/bookRecords';
+import { sceneRecords } from '@/lib/payload/collections/sceneRecords';
+import { sceneMediaVariants } from '@/lib/payload/collections/sceneMediaVariants';
 
 type SimpleField = {
   name: string;
@@ -164,6 +168,82 @@ describe('payload collection contracts', () => {
 
   it('avoids SQL column collisions in resume-records fields', () => {
     const fields = (resumeRecords.fields ?? []).filter(isSimpleField);
+    const seen = new Map<string, string>();
+    const duplicates: Array<{ column: string; names: string[] }> = [];
+
+    for (const field of fields) {
+      const column = toSqlColumnName(field);
+      const existing = seen.get(column);
+      if (existing) {
+        duplicates.push({ column, names: [existing, field.name] });
+        continue;
+      }
+
+      seen.set(column, field.name);
+    }
+
+    expect(duplicates).toEqual([]);
+  });
+
+  it('avoids SQL column collisions in book-series fields', () => {
+    const fields = (bookSeries.fields ?? []).filter(isSimpleField);
+    const seen = new Map<string, string>();
+    const duplicates: Array<{ column: string; names: string[] }> = [];
+
+    for (const field of fields) {
+      const column = toSqlColumnName(field);
+      const existing = seen.get(column);
+      if (existing) {
+        duplicates.push({ column, names: [existing, field.name] });
+        continue;
+      }
+
+      seen.set(column, field.name);
+    }
+
+    expect(duplicates).toEqual([]);
+  });
+
+  it('avoids SQL column collisions in book-records fields', () => {
+    const fields = (bookRecords.fields ?? []).filter(isSimpleField);
+    const seen = new Map<string, string>();
+    const duplicates: Array<{ column: string; names: string[] }> = [];
+
+    for (const field of fields) {
+      const column = toSqlColumnName(field);
+      const existing = seen.get(column);
+      if (existing) {
+        duplicates.push({ column, names: [existing, field.name] });
+        continue;
+      }
+
+      seen.set(column, field.name);
+    }
+
+    expect(duplicates).toEqual([]);
+  });
+
+  it('avoids SQL column collisions in scene-records fields', () => {
+    const fields = (sceneRecords.fields ?? []).filter(isSimpleField);
+    const seen = new Map<string, string>();
+    const duplicates: Array<{ column: string; names: string[] }> = [];
+
+    for (const field of fields) {
+      const column = toSqlColumnName(field);
+      const existing = seen.get(column);
+      if (existing) {
+        duplicates.push({ column, names: [existing, field.name] });
+        continue;
+      }
+
+      seen.set(column, field.name);
+    }
+
+    expect(duplicates).toEqual([]);
+  });
+
+  it('avoids SQL column collisions in scene-media-variants fields', () => {
+    const fields = (sceneMediaVariants.fields ?? []).filter(isSimpleField);
     const seen = new Map<string, string>();
     const duplicates: Array<{ column: string; names: string[] }> = [];
 

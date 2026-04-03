@@ -9,12 +9,17 @@ import {
 export type ReplLineInputProps = {
   placeholder?: string;
   borderColor: string;
+  /** Prompt `> ` and typed line (not the `/` palette — use **`slashPaletteColor`**). */
   promptColor: string;
+  /** `/` palette title + selected row; defaults to **`promptColor`**. */
+  slashPaletteColor?: string;
   mutedColor: string;
   /** Prepended to `/` palette (e.g. `/vendor use <id>` for controllable vendors). */
   slashExtraLines?: readonly string[];
   onSubmit: (line: string) => void;
   onExitRequest: () => void;
+  /** When set, **Ctrl+E** on an **empty** line toggles accept-edits session prefs (does not insert `e`). */
+  onAcceptEditsToggle?: () => void;
 };
 
 function isTabKey(input: string, key: { tab?: boolean }): boolean {
@@ -113,12 +118,19 @@ export function ReplLineInput(props: ReplLineInputProps) {
       setValue('');
       return;
     }
+    if (key.ctrl && input === 'e') {
+      if (value.length === 0 && props.onAcceptEditsToggle) {
+        props.onAcceptEditsToggle();
+        return;
+      }
+    }
     if (input && !key.ctrl && !key.meta) {
       setValue((v) => v + input);
     }
   });
 
   const dimGhost = ghost ?? '';
+  const slashAccent = props.slashPaletteColor ?? props.promptColor;
 
   const caret = <Text inverse>{CARET_CHAR}</Text>;
 
@@ -126,7 +138,7 @@ export function ReplLineInput(props: ReplLineInputProps) {
     <Box flexDirection="column" marginTop={1}>
       {slashHints.length > 0 ? (
         <Box flexDirection="column" marginBottom={1} borderStyle="single" borderColor={props.borderColor} paddingX={1}>
-          <Text bold underline color={props.promptColor}>
+          <Text bold underline color={slashAccent}>
             / actions
           </Text>
           {slashHints.map((line, i) => {
@@ -135,7 +147,7 @@ export function ReplLineInput(props: ReplLineInputProps) {
               <Text
                 key={`${line}-${i}`}
                 bold={selected}
-                color={selected ? props.promptColor : props.mutedColor}
+                color={selected ? slashAccent : props.mutedColor}
                 dimColor={!selected}
                 wrap="wrap"
               >
@@ -164,7 +176,9 @@ export function ReplLineInput(props: ReplLineInputProps) {
         </Text>
       </Box>
       <Text color={props.mutedColor}>
-        ↑↓ pick · Enter apply or run · Tab completes · Ctrl+U clear · Esc/q empty quits · Ctrl+C quits
+        {props.onAcceptEditsToggle
+          ? '↑↓ pick · Enter apply or run · Tab completes · Ctrl+U clear · Ctrl+E accept edits (empty line) · Esc/q empty quits · Ctrl+C quits'
+          : '↑↓ pick · Enter apply or run · Tab completes · Ctrl+U clear · Esc/q empty quits · Ctrl+C quits'}
       </Text>
     </Box>
   );

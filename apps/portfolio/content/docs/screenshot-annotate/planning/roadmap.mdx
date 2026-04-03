@@ -1,0 +1,21 @@
+---
+title: Screenshot annotate — roadmap
+description: Phases for the public screenshot annotation app.
+date: "2026-04-02"
+updated: "2026-04-05"
+order: 2
+repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/roadmap.mdx
+---
+
+# Roadmap
+
+**Constraint (all phases):** user screenshots and annotations stay **client-only** — no DB, no Payload media for user content ([requirements](/docs/screenshot-annotate/requirements#privacy-and-persistence-non-negotiable)).
+
+**Stack:** [tldraw SDK](https://tldraw.dev/) — [Image annotator pattern](https://tldraw.dev/examples/image-annotator), [Clipboard](https://tldraw.dev/sdk-features/clipboard).
+
+| Phase | Goal |
+| --- | --- |
+| **annotate-01** | Route + **minimal chrome**; **`pick` → `annotate` → `export`** per tldraw example; dynamic import editor after image chosen; rectangle + text + export PNG; **Payload** `site-app-records` **catalog row only**. |
+| **annotate-02** | Product polish on top of tldraw: stroke width, color pickers, **solid** “hide” preset; z-order / context actions via SDK where possible. |
+| **annotate-03** | Camera / viewport hardening for image lock; hide or simplify tldraw chrome if needed; **Apps hub** skeleton when Payload is slow. |
+| **annotate-04** | **OCR spotlight** (separate lazy WASM); composes **above** or beside tldraw canvas — still no server persistence. |

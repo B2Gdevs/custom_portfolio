@@ -1,4 +1,4 @@
-import { retrieveRagContext } from '@/lib/rag/retrieve';
+import { filterRagHitsByMode, retrieveRagContext } from '@/lib/rag/retrieve';
 import { embedTexts } from '@/lib/rag/embeddings';
 import { rerankRagHits, searchSemanticRagHits } from '@/lib/rag/search-db';
 
@@ -10,6 +10,39 @@ vi.mock('@/lib/rag/search-db', () => ({
   searchSemanticRagHits: vi.fn(),
   rerankRagHits: vi.fn(),
 }));
+
+describe('filterRagHitsByMode', () => {
+  const baseHit = {
+    chunkId: 1,
+    sourceId: 'x',
+    sourceKind: 'doc' as const,
+    sourceScope: 'd',
+    title: 't',
+    heading: 'h',
+    anchor: 'a',
+    publicUrl: '/u',
+    content: 'c',
+    snippet: 's',
+    distance: 0.1,
+    score: 0.9,
+  };
+
+  it('keeps books_planning_repo and off as full list', () => {
+    const hits = [{ ...baseHit, sourcePath: 'apps/portfolio/content/docs/blog/x.mdx' }];
+    expect(filterRagHitsByMode(hits, 'books_planning_repo')).toEqual(hits);
+    expect(filterRagHitsByMode(hits, 'off')).toEqual(hits);
+  });
+
+  it('books mode excludes planning paths under books', () => {
+    const a = [
+      { ...baseHit, sourcePath: 'apps/portfolio/content/docs/books/foo/planning/state.mdx' },
+      { ...baseHit, sourcePath: 'apps/portfolio/content/docs/books/foo/chapter.mdx' },
+    ];
+    const out = filterRagHitsByMode(a, 'books');
+    expect(out).toHaveLength(1);
+    expect(out[0]?.sourcePath).toContain('chapter.mdx');
+  });
+});
 
 describe('retrieveRagContext', () => {
   it('returns an empty array for blank queries', async () => {

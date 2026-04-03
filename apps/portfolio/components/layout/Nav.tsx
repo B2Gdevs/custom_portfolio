@@ -355,7 +355,17 @@ function NavMenuSections({
   );
 }
 
-function PortfolioSidebarInner({ pathname, navMenus }: { pathname: string; navMenus: NavMenuSection[] }) {
+const DEFAULT_SITE_LOGO = '/logo.svg';
+
+function PortfolioSidebarInner({
+  pathname,
+  navMenus,
+  siteLogoSrc,
+}: {
+  pathname: string;
+  navMenus: NavMenuSection[];
+  siteLogoSrc?: string | null;
+}) {
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { state, isMobile, setOpenMobile } = useSidebar();
@@ -392,7 +402,7 @@ function PortfolioSidebarInner({ pathname, navMenus }: { pathname: string; navMe
         >
           <div className="sidebar-logo-wrap shrink-0">
             <Image
-              src="/logo.svg"
+              src={siteLogoSrc || DEFAULT_SITE_LOGO}
               alt="Logo"
               width={36}
               height={36}
@@ -570,15 +580,18 @@ function PortfolioSidebarInner({ pathname, navMenus }: { pathname: string; navMe
 
 export default function Nav({
   navMenus,
+  siteLogoSrc,
   portfolioSidebarHoverHandlers,
 }: {
   navMenus: NavMenuSection[];
+  siteLogoSrc?: string | null;
   portfolioSidebarHoverHandlers?: {
     onMouseEnter?: MouseEventHandler<HTMLDivElement>;
     onMouseLeave?: MouseEventHandler<HTMLDivElement>;
   };
 }) {
   const pathname = usePathname();
+  const logoSrc = siteLogoSrc || DEFAULT_SITE_LOGO;
 
   return (
     <>
@@ -587,7 +600,7 @@ export default function Nav({
           <Link href="/" className="flex min-w-0 items-center gap-3">
             <div className="sidebar-logo-wrap shrink-0">
               <Image
-                src="/logo.svg"
+                src={logoSrc}
                 alt="Logo"
                 width={32}
                 height={32}
@@ -609,7 +622,11 @@ export default function Nav({
         className="z-10 border-r border-sidebar-border/80 bg-sidebar/90 backdrop-blur-xl"
         {...portfolioSidebarHoverHandlers}
       >
-        <PortfolioSidebarInner pathname={pathname ?? ''} navMenus={navMenus} />
+        <PortfolioSidebarInner
+          pathname={pathname ?? ''}
+          navMenus={navMenus}
+          siteLogoSrc={siteLogoSrc}
+        />
         <SidebarRail />
       </Sidebar>
     </>

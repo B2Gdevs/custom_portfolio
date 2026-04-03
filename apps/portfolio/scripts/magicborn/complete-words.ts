@@ -19,10 +19,13 @@ import { MAGICBORN_SCENE_SEEDS } from '@/lib/magicborn-prompts/scene-seeds';
 
 const TOP_LEVEL = [
   'book',
+  'books',
   'app',
   'project',
   'planning-pack',
   'listen',
+  'batch',
+  'site',
   'style',
   'model',
   'openai',
@@ -95,6 +98,14 @@ export function getCompleteLines(topic: string): string[] {
       return ['generate', 'gen', 'scenes'];
     case 'book-scenes':
       return ['list', 'extract'];
+    case 'books':
+      return ['illustrations'];
+    case 'books-illustrations':
+      return ['scan'];
+    case 'site':
+      return ['logo'];
+    case 'site-logo':
+      return ['list', 'set-active'];
     case 'app':
     case 'project':
       return ['list', 'generate', 'gen'];

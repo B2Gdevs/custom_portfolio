@@ -1,0 +1,49 @@
+---
+title: Global CLI DX — any cwd, launchers, shell aliases
+description: MAGICBORN_REPO, grimetime parity, shell cd helpers; Claude/Codex run outside magicborn.
+date: "2026-04-06"
+order: 1
+repoPath: apps/portfolio/content/docs/global/planning/plans/mb-cli-global-dx/KICKOFF.mdx
+taskPhase: global-tooling-07
+---
+
+# Kickoff — global CLI DX
+
+## Problem
+
+- `findRepoRoot()` used to walk **only** from `process.cwd()`. Running **`magicborn`** from **`~`** (Git Bash default) failed or behaved oddly even though **`magicborn shell-init`** already prints **`export MAGICBORN_REPO=...`** — that variable was **not** consulted by `findRepoRoot`.
+
+## Decided / implemented
+
+- **`findRepoRoot()`** now prefers **`MAGICBORN_REPO`**, then **`MB_CLI_REPO`**, when that path contains **`pnpm-workspace.yaml`**. Other monorepos (e.g. Grime Time) can document **`MB_CLI_REPO`** the same way.
+- One-time setup from a **clone** of the repo: run **`magicborn shell-init bash --apply`** (or paste the printed `export` lines into `~/.bashrc`), then **`source ~/.bashrc`**. After that, **`magicborn`** works from **any directory** on that machine.
+
+## Optional env (document in `.env.example`)
+
+```bash
+# Pin monorepo when your shell starts in ~ (Git Bash / global tools)
+# MAGICBORN_REPO=/path/to/custom_portfolio
+```
+
+## Feasible — not breaking existing flows
+
+| Idea | Feasibility | Notes |
+| --- | --- | --- |
+| **`claude` / `codex` (external)** | **Supported** | **Not** via **`magicborn`**. Install CLIs on **PATH**, **`cdmb`** (or **`cd "$MAGICBORN_REPO"`**), run **`claude`** / **`codex`** in the shell (**[global-tooling-dec-06](/docs/global/planning/decisions)**). |
+| **Shell aliases `cd magicborn`** | **High** | Not a Node feature — add **`alias cdmb='cd "$MAGICBORN_REPO"'`** in the same shell-init block; Grime Time: **`alias cdgt='cd "$GRIMETIME_REPO"'`** once that env exists. |
+| **`pnpm link --global`** / **`npm link`** | **Medium** | Works for a **dev** machine; CI and teammates should use **repo-local** `pnpm magicborn` or `npx` from root. |
+| **Cursor “terminal won’t open”** | **Editor/OS** | Outside CLI; workaround: **Windows Terminal** profile with **`startingDirectory`** set to the repo, or always use **`MAGICBORN_REPO`**. |
+
+## Bare `magicborn` “does nothing” checklist
+
+1. **`which magicborn`** / **`Get-Command magicborn`** — ensure it points at **`node_modules/.bin`** or your global link, not an empty shim.
+2. **TTY:** bare command runs **Ink TUI** only when **`stdout.isTTY`**; otherwise you get **help**. Set **`MAGICBORN_PLAIN=1`** to force help.
+3. **Repo root:** without **`MAGICBORN_REPO`** and cwd outside the repo, **`findRepoRoot`** used to throw; now env wins.
+
+## Planning tasks
+
+| Id | Status | Goal |
+| --- | --- | --- |
+| `global-tooling-07-01` | `done` | **`findRepoRoot`** honors **`MAGICBORN_REPO`** / **`MB_CLI_REPO`** + tests |
+| `global-tooling-07-02` | `superseded` | ~~Forwarders~~ → stderr hint; see **`global-tooling-dec-06`** |
+| `global-tooling-07-03` | `done` | **shell-init:** **`cdmb`** / **`cdgt`** in bash apply + copy-paste for fish/zsh |

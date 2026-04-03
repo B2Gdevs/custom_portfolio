@@ -1,6 +1,21 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import path from 'node:path';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Box, Text, useApp } from 'ink';
-import { resolveCliTheme } from '@magicborn/mb-cli-framework';
+import {
+  approxContextPctFromChars,
+  CliContextMeter,
+  CliFooterSlotRow,
+  CliScreenBanner,
+  formatRagModeLabel,
+  handleSlashChatLine,
+  isAcceptEditsAutoEnvLocked,
+  parseSlashChatLine,
+  readCliSession,
+  resolveCliTheme,
+  toggleAcceptEditsAuto,
+  writeCliSessionMerge,
+  type CliSessionV1,
+} from '@magicborn/mb-cli-framework';
 import { getVendorCompletionRows } from '../vendor-registry.js';
 import { HOME_COMMAND_SECTIONS } from './home-sections.js';
 import { execMagicbornCliArgv } from './exec-repl-argv.js';
@@ -83,12 +98,40 @@ export function MagicbornHome(props: MagicbornHomeProps) {
 
   const cols = Math.max(48, Math.min(100, (process.stdout.columns ?? 80) - 1));
   const rows = process.stdout.rows ?? 24;
+  const [session, setSession] = useState<CliSessionV1>(() => readCliSession(props.repoRoot));
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
+  const footerModel = session.chatModel?.trim() || process.env.OPENAI_CHAT_MODEL?.trim() || 'gpt-4o-mini';
+  const footerRag = formatRagModeLabel(session.ragMode);
+  const footerFolder = path.basename(props.repoRoot);
+
+  const persistSession = useCallback(
+    (patch: Partial<CliSessionV1>) => {
+      setSession(writeCliSessionMerge(props.repoRoot, patch));
+    },
+    [props.repoRoot],
+  );
+
+  const getSession = useCallback(() => sessionRef.current, []);
   const maxTranscriptLines = Math.max(4, rows - 26);
 
   const visibleTranscript = useMemo(
     () => transcript.slice(-maxTranscriptLines),
     [transcript, maxTranscriptLines],
   );
+
+  const acceptEditsAuto = session.acceptEditsAuto === true;
+  const acceptEditsEnvLocked = isAcceptEditsAutoEnvLocked();
+
+  const handleAcceptEditsToggle = useCallback(() => {
+    setSession(toggleAcceptEditsAuto(props.repoRoot, acceptEditsAuto));
+  }, [props.repoRoot, acceptEditsAuto]);
+
+  /** Rough chars/4 vs 128k window — until server-side tokenizer (**`global-tooling-04-05`**). */
+  const approxContextPct = useMemo(() => {
+    const chars = transcript.reduce((n, t) => n + t.text.length, 0);
+    return approxContextPctFromChars(chars);
+  }, [transcript]);
 
   const vendorUseSlashLines = useMemo(() => {
     try {
@@ -120,6 +163,19 @@ export function MagicbornHome(props: MagicbornHomeProps) {
 
       appendLines([{ id: nextId(), text: `> ${line}`, color: theme.primary }]);
 
+      if (parseSlashChatLine(line)) {
+        void handleSlashChatLine({
+          userLine: line,
+          getSession,
+          persistSession,
+        }).then((r) => {
+          if (r) {
+            appendLines([{ id: nextId(), text: r.assistantText, color: theme.muted }]);
+          }
+        });
+        return;
+      }
+
       const lower = line.toLowerCase();
       if (lower === 'help' || lower === '?' || lower === 'h') {
         appendLines(buildHelpTranscript(theme));
@@ -149,26 +205,24 @@ export function MagicbornHome(props: MagicbornHomeProps) {
         appendLines([{ id: nextId(), text: `(exit ${code})`, color: theme.warn }]);
       }
     },
-    [appendLines, endSession, props.cliJs, props.repoRoot, theme],
+    [appendLines, endSession, getSession, persistSession, props.cliJs, props.repoRoot, theme],
   );
 
   return (
     <Box flexDirection="column" width={cols}>
-      <Box
-        borderStyle="round"
-        borderColor={theme.border}
-        flexDirection="column"
-        paddingX={1}
-        paddingY={0}
-        marginBottom={1}
+      <CliScreenBanner
+        theme={theme}
+        width={cols}
+        headline={
+          <Text bold color={theme.primary}>
+            {product} <Text dimColor>v{props.cliVersion}</Text>
+          </Text>
+        }
       >
-        <Text bold color={theme.primary}>
-          {product} <Text dimColor>v{props.cliVersion}</Text>
-        </Text>
         <Text color={theme.muted}>{tagline}</Text>
         <Text color={theme.description}>cwd {shortenPath(props.repoRoot, cols - 6)}</Text>
         {footnote ? <Text dimColor>{footnote}</Text> : null}
-      </Box>
+      </CliScreenBanner>
 
       <Box flexDirection="column" marginBottom={1}>
         {HOME_COMMAND_SECTIONS.map((sec) => (
@@ -210,12 +264,38 @@ export function MagicbornHome(props: MagicbornHomeProps) {
       <ReplLineInput
         borderColor={theme.border}
         promptColor={theme.primary}
+        slashPaletteColor={theme.slash}
         mutedColor={theme.muted}
         slashExtraLines={vendorUseSlashLines}
         placeholder="command…"
         onExitRequest={() => endSession('quit')}
         onSubmit={runLine}
+        onAcceptEditsToggle={acceptEditsEnvLocked ? undefined : handleAcceptEditsToggle}
       />
+
+      <CliFooterSlotRow
+        theme={theme}
+        width={cols}
+        slots={[
+          <Text key="hint" color={theme.asset}>
+            ↑ /rag
+          </Text>,
+          <Text key="model" color={theme.model}>
+            {footerModel} · {footerRag}
+          </Text>,
+          <Text key="cwd" color={theme.muted}>
+            {footerFolder}
+          </Text>,
+        ]}
+      />
+
+      <Box flexDirection="row" width={cols} justifyContent="space-between" marginTop={0}>
+        <CliContextMeter theme={theme} width={Math.max(40, cols - 36)} usedPct={approxContextPct} />
+        <Text color={theme.description} dimColor>
+          » accept edits · {acceptEditsAuto ? 'auto' : 'confirm'}
+          {acceptEditsEnvLocked ? ' (env)' : ''}
+        </Text>
+      </Box>
     </Box>
   );
 }

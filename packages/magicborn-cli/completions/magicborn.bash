@@ -1,5 +1,7 @@
-# magicborn completion (bash) — install: eval "$(magicborn completion bash)"
-# Requires: magicborn on PATH (pnpm install at repo root → node_modules/.bin, or shell-init).
+# magicborn completion (bash)
+# Install (recommended): `magicborn shell-init bash --apply` sources this file from the repo — no Node at login.
+# Alternate: `eval "$(magicborn completion bash)"` only when updating; avoid in .bashrc on Windows/Git Bash (subprocess can hang).
+# Requires: magicborn on PATH for tab-complete callbacks (`magicborn __complete …`).
 #
 # Vendor ids: use `__complete vendor-ids` (plain words). `vendor-suggest` adds (cli) suffix and breaks compgen matching.
 # NO_COLOR disables ANSI in vendor-suggest lines when MAGICBORN_COMPLETE_ANSI=1 is not set.
@@ -15,6 +17,9 @@ if [[ -z "${__MAGICBORN_PNPM_COMPLETION_LOADED:-}" ]]; then
   __mb_pn_top=""
   if [[ -n "${MAGICBORN_REPO:-}" && -f "$MAGICBORN_REPO/completions/pnpm-workspace.bash" ]]; then
     __mb_pn_top="$MAGICBORN_REPO"
+  elif [[ -n "${MAGICBORN_REPO:-}" ]]; then
+    # MAGICBORN_REPO set but workspace completions missing — do not git-rev-parse from arbitrary $PWD (can hang during .bashrc on Windows).
+    __mb_pn_top=""
   else
     __mb_pn_top=$(git rev-parse --show-toplevel 2>/dev/null)
   fi
