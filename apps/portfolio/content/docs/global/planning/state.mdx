@@ -57,11 +57,14 @@ _These block kicking off named high-risk tracks until answered or explicitly def
 | `oq-02` | **Planning sync MVP:** first shipped behavior is **read-only compile** (dashboard of all `.planning` + section MDX) vs **two-way merge** with one blessed flag set? | **`global-planning-dec-02`** implementation |
 | `oq-03` | **Payload CLI metadata:** final key name and shape (e.g. `custom.magicborn` on collection config) for “expose this collection to generated operator commands”? | Agent skills + codegen spike (**`global-tooling-dec-07`**) |
 
-| `oq-04` | **GAD CLI binary name:** standalone `gad` binary or subcommand of `magicborn`? (`gad tasks` vs `magicborn planning tasks`) | [gad-cli plan](/docs/global/planning/plans/gad-cli/PLAN) |
-| `oq-05` | **GAD CLI distribution:** published as `get-anything-done-cc` on npm (matching GSD pattern) or `@magicborn/gad`? | [gad-cli plan](/docs/global/planning/plans/gad-cli/PLAN) |
-| `oq-06` | **Eval run isolation:** should `gad eval run` use git worktrees so each benchmark run starts from a clean state? | [gad-eval plan](/docs/global/planning/plans/gad-eval/PLAN) |
-| `oq-07` | **mb-cli-framework `ArgParser` dependency:** `commander`, `yargs`, or custom? | [gad-cli plan](/docs/global/planning/plans/gad-cli/PLAN), mb-cli-framework refactor |
-| `oq-08` | **rp-manuscript disposition:** becomes a `.gad` pack distributed from GAD, or stays as RP-owned extension? | [gad-architecture plan](/docs/global/planning/plans/gad-architecture/PLAN) |
+| `oq-04` | ~~**GAD CLI binary name**~~ | **Closed** → `global-planning-dec-13`: standalone `gad` |
+| `oq-05` | ~~**GAD CLI distribution**~~ | **Closed** → `global-planning-dec-13`: published as `get-anything-done` |
+| `oq-06` | ~~**Eval run isolation**~~ | **Closed** → `global-planning-dec-14`: git worktrees |
+| `oq-07` | ~~**ArgParser dependency**~~ | **Closed** → `global-planning-dec-12`: `citty` (already in grime-time) |
+| `oq-08` | ~~**rp-manuscript disposition**~~ | **Closed** → `global-planning-dec-15`: separate `gad-manuscript` repo + sub-CLI |
+| `oq-09` | **Sub-CLI discovery:** does `gad` discover sub-CLIs by scanning installed `.gad` packs at startup, or requires explicit registration in root config? | [gad-cli plan](/docs/global/planning/plans/gad-cli/PLAN), [gad-manuscript plan](/docs/global/planning/plans/gad-manuscript/PLAN) |
+| `oq-10` | **gad-manuscript STATE.md template:** replaces or extends the base GAD `STATE.md`? | [gad-manuscript plan](/docs/global/planning/plans/gad-manuscript/PLAN) |
+| `oq-11` | **Mordred's Tale requirements source:** pull from portfolio books requirements MDX or maintain separately in gad-manuscript repo? | [gad-manuscript plan](/docs/global/planning/plans/gad-manuscript/PLAN) |
 
 _Add rows when a phase kickoff surfaces new blockers; remove or mark **deferred** in **decisions** when closed._
 
@@ -75,8 +78,11 @@ New phases added 2026-04-03. These run alongside the existing global-tooling / g
 | `global-planning-02` | `gad` CLI implementation — command surface, mb-cli-framework non-interactive additions | not started |
 | `global-planning-03` | GAD eval framework — drift metrics, benchmark projects, TRACE + SCORE system | not started |
 | `global-planning-04` | RP migration — remove redundant skills, adopt GAD MD schema, become GUI-only | not started |
+| `global-planning-05` | gad-manuscript — sub-CLI + domain pack for book/fiction development (**blocked on global-planning-01 through 04**) | not started |
 
-Plans: [gad-architecture](/docs/global/planning/plans/gad-architecture/PLAN) · [gad-cli](/docs/global/planning/plans/gad-cli/PLAN) · [gad-eval](/docs/global/planning/plans/gad-eval/PLAN)
+**Work order gate:** `global-planning-05` (gad-manuscript) does not start until GAD is stable and no longer depends on GSD (`global-planning-01` + `global-planning-02` + `global-planning-03` + mb-cli-framework migration complete).
+
+Plans: [gad-architecture](/docs/global/planning/plans/gad-architecture/PLAN) · [gad-cli](/docs/global/planning/plans/gad-cli/PLAN) · [gad-eval](/docs/global/planning/plans/gad-eval/PLAN) · [gad-manuscript](/docs/global/planning/plans/gad-manuscript/PLAN)
 
 ## References
 
