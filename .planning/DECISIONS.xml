@@ -102,4 +102,15 @@
       <file path="apps/portfolio/lib/payload/collections/ragSources.ts" />
     </references>
   </decision>
+  <decision id="05-01">
+    <title>Cross-project observability stays lightweight: public Vercel Analytics plus request-id tracing on sensitive server routes</title>
+    <summary>The portfolio and Grime Time public layouts should use Vercel Analytics for cheap pageview insight, but analytics events must strip query strings and fragments, ignore internal or admin paths, and avoid emails or other PII. Server-side observability for this pass stays small: generate request ids, return them in response headers, and log safe route summaries plus timings for high-signal Grime Time routes instead of dumping raw request payloads.</summary>
+    <impact>The repo gets usable traffic and route-level debugging signals quickly without committing to a full observability platform or leaking sensitive form and copilot data into analytics or ad hoc logs.</impact>
+    <references>
+      <file path="apps/portfolio/app/layout.tsx" />
+      <file path="apps/portfolio/lib/analytics.ts" />
+      <file path="vendor/grime-time-site/src/app/(frontend)/layout.tsx" />
+      <file path="vendor/grime-time-site/src/lib/observability.ts" />
+    </references>
+  </decision>
 </decisions>

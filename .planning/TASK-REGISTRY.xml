@@ -174,4 +174,19 @@
       <depends>03-04</depends>
     </task>
   </phase>
+  <phase id="05">
+    <task id="05-01" agent-id="" status="in-progress">
+      <goal>Finish the cross-project observability pass: wire privacy-aware Vercel Analytics into the portfolio and Grime Time public layouts, add a small Grime Time observability helper for request ids plus safe route summaries, cover the helper and response-header behavior with tests, and verify with targeted typecheck/lint/test/build commands.</goal>
+      <keywords>observability,analytics,vercel,logging,tracing,privacy,grimetime,portfolio</keywords>
+      <commands>
+        <command>pnpm --filter @portfolio/app exec vitest run tests/unit/lib/analytics.test.ts tests/unit/lib/logging.test.ts</command>
+        <command>pnpm --filter @portfolio/app run lint app/layout.tsx lib/analytics.ts tests/unit/lib/analytics.test.ts</command>
+        <command>npm exec -- tsc --noEmit</command>
+        <command>npm exec -- eslint src/app/(frontend)/layout.tsx src/app/api/lead-forms/contact/route.ts src/app/api/lead-forms/instant-quote/route.ts src/app/api/lead-forms/schedule/route.ts src/app/api/internal/ai/copilot/route.ts src/lib/observability.ts tests/int/lib/observability.int.spec.ts tests/int/lib/ai/copilot-route.int.spec.ts</command>
+        <command>npm exec -- vitest run --config ./vitest.config.mts tests/int/lib/observability.int.spec.ts tests/int/lib/ai/copilot-route.int.spec.ts</command>
+        <command>pnpm planning snapshot</command>
+      </commands>
+      <depends>03-03</depends>
+    </task>
+  </phase>
 </task-registry>

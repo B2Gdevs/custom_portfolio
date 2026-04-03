@@ -20,6 +20,11 @@
     <status>done</status>
     <depends>03</depends>
   </phase>
+  <phase id="05">
+    <goal>Phase 05: land a cheap cross-project observability baseline for the public portfolio and Grime Time. Use Vercel Analytics for privacy-aware pageview tracking on public layouts, and add request-id based tracing plus safe request summaries for high-signal Grime Time form and copilot routes without logging raw PII payloads.</goal>
+    <status>active</status>
+    <depends>04</depends>
+  </phase>
   <doc-flow>
     <doc name="documentation/requirements.mdx">Monorepo requirements narrative (public docs).</doc>
     <doc name="documentation/planning/state.mdx">Cross-cutting queue + documentation section state.</doc>

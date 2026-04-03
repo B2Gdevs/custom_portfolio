@@ -2,7 +2,7 @@
 title: mb-cli-framework — shared CLI shell (portfolio + Grime Time)
 description: Kickoff for vendoring MagicbornStudios/mb-cli-framework and unifying tab UX, vendor scope, and command patterns across magicborn and grimetime.
 date: "2026-04-02"
-updated: "2026-04-05"
+updated: "2026-04-10"
 repoPath: apps/portfolio/content/docs/global/planning/plans/mb-cli-framework/PLAN.mdx
 taskPhase: global-tooling-02
 order: 1
@@ -22,6 +22,8 @@ We currently maintain **two** operator CLIs (**`magicborn`** in this repo, **`gr
 
 We do **not** want two diverging frameworks.
 
+**Naming:** the package remains **`@magicborn/mb-cli-framework`** for now, but it is evolving into the **shared Magicborn platform layer** (CLI + reusable Payload/React primitives)—see **[global-strategy-dec-03](/docs/global/planning/decisions)**.
+
 ## Direction
 
 | Decision | Choice |
@@ -32,6 +34,7 @@ We do **not** want two diverging frameworks.
 | **Vendor UX** | `magicborn vendor` second-token completion lists **registered vendor ids** with a **suffix** (e.g. `(cli)` when `.magicborn/cli.toml` declares a controllable bin). **Colors:** opt-in via env; document terminal limitations (bash `compgen` is plain-text first; richer UX in zsh/fish). |
 | **Scope / become** | **`magicborn vendor use <id>`** (or `enter`) sets **`MAGICBORN_VENDOR_ID`** (and optionally **`MAGICBORN_VENDOR_ROOT`**) for the current shell session; **`magicborn vendor clear`** unsets. Optional **`MAGICBORN_PS1=1`** documents a **prompt snippet** (git-style) — not mandatory for CI. |
 | **Autogen commands** | **Phase 2:** introspect Payload `payload.config` / collection list + env for OpenAI + RAG config; generate or cache command stubs under **`.magicborn/commands/`** or register at runtime. Assumes “cheap local LLM” RAG and OpenAI are **defaults** but overridable per project. |
+| **Shared Payload UX (with portfolio + Grime Time)** | **Grime Time** leads **visual editing**, **media upload**, and **generation** patterns; **portfolio** adopts the same stack. Reusable **React / Payload-facing** primitives should live in this framework (or a **thin sibling package**) so both apps depend on one **vendor-style** boundary—the framework **owns** the shared components. See **[global-strategy-dec-01](/docs/global/planning/decisions)** and **state** open question **`oq-01`**. |
 
 ## Non-goals (this phase)
 

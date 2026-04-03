@@ -14,7 +14,17 @@ rp-new-project → rp-plan-phase → rp-execute-phase → rp-verify-work
 
 `rp-check-todos` is the re-entry point after any context reset. `rp-session` is the bridge when pausing mid-phase.
 
-## Install all 13
+## Universal install (local agents)
+
+Copies skills into **`.agents/skills/`** and other tool directories Cursor / Codex / Claude / … pick up:
+
+```bash
+npx skills add https://github.com/MagicbornStudios/RepoPlanner --skill '*' --agent '*' -y --copy
+```
+
+Repo-root **`.agents/`** is **gitignored**—run this after clone on each machine. The **`skills/`** copy in this monorepo stays the **tracked** reference for reviews and docs.
+
+## Install all 13 (per-skill URLs)
 
 ```bash
 npx skills add MagicbornStudios/RepoPlanner/skills/repo-planner

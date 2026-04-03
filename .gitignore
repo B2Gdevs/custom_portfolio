@@ -51,6 +51,35 @@ nul
 .trae/
 skills-lock.json
 
+# npx skills add --agent * (project-local copies into many tool dirs; not committed)
+.adal/
+.augment/
+.bob/
+.codebuddy/
+.commandcode/
+.continue/
+.cortex/
+.crush/
+.factory/
+.goose/
+.iflow/
+.junie/
+.kilocode/
+.kiro/
+.kode/
+.mcpjam/
+.mux/
+.neovate/
+.openhands/
+.pi/
+.pochi/
+.qoder/
+.qwen/
+.roo/
+.vibe/
+.windsurf/
+.zencoder/
+
 # debug
 .logs/*
 !.logs/README.md

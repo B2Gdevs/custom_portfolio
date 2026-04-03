@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import './globals.css';
 import { ClerkProviderWrapper } from '@/components/auth/ClerkProviderWrapper';
+import { VercelAnalytics } from '@/components/analytics/VercelAnalytics';
 import { ContentCommandPaletteHotkey } from '@/components/content/ContentCommandPaletteHotkey';
 import { SiteLayout } from '@/components/layout/SiteLayout';
 import { ModalRoot } from '@/components/modals/ModalRoot';
@@ -104,6 +105,7 @@ export default async function RootLayout({
             siteShell
           )}
         </ClerkProviderWrapper>
+        <VercelAnalytics />
       </body>
     </html>
   );

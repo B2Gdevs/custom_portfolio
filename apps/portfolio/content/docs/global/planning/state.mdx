@@ -2,7 +2,7 @@
 title: State
 description: Current cycle and focus for the Global documentation section (repo-wide planning IA).
 date: "2026-03-28"
-updated: "2026-04-08"
+updated: "2026-04-10"
 order: 2
 repoPath: apps/portfolio/content/docs/global/planning/state.mdx
 taskPhase: global-data-02
@@ -17,7 +17,7 @@ taskPhase: global-data-02
 | `section` | `global` |
 | `owner` | `monorepo` |
 | `status` | `active` |
-| `updated` | `2026-04-01` |
+| `updated` | `2026-04-09` |
 
 ## Current cycle
 
@@ -45,6 +45,19 @@ taskPhase: global-data-02
 | `5f` | **`global-tooling-07`:** **`MAGICBORN_REPO` / `MB_CLI_REPO`** for **any-cwd** `magicborn`; [global CLI DX kickoff](/docs/global/planning/plans/mb-cli-global-dx/KICKOFF); **`07-02`** ~~Claude/Codex forward~~ **superseded** — run **`claude`/`codex`** in shell after **`cdmb`** ([decision](/docs/global/planning/decisions) **`global-tooling-dec-06`**); **`07-03`** shell `cd` aliases |
 | `5g` | **`global-tooling-08`:** [Ink refactor kickoff](/docs/global/planning/plans/mb-cli-framework-ink-refactor/KICKOFF) — **`CliScreenBanner`**, **`CliFooterSlotRow`**, **`CliActivityLine`** in framework; **`08-02`** done; **`08-03`** reconciliation notes |
 | `6` | **MCP / ChatGPT Apps:** formal kickoff **[PAYLOAD-MCP-CHAT-KICKOFF](/docs/global/planning/plans/mb-cli-framework/PAYLOAD-MCP-CHAT-KICKOFF)** + phase **`global-tooling-09`** (DB sandbox, extension convention, skills + [Apps SDK UX](https://developers.openai.com/apps-sdk/concepts/ux-principles)); still coordinate with [documentation cross-cutting queue](/docs/documentation/planning/state) |
+| `6b` | **Strategy (2026-04):** portfolio **=** Grime Time attention; pull **visual editing + media** patterns from GT into portfolio via **shared framework/vendor** primitives (**[global-strategy-dec-01](/docs/global/planning/decisions)**). **Process:** vague goals **require** kickoffs; **open questions** below must be **empty or deferred** before starting **auth mutations**, **planning-sync**, or **shared UI extraction** phases (**[global-planning-dec-03](/docs/global/planning/decisions)**, **-05**). |
+
+## Open questions (gating)
+
+_These block kicking off named high-risk tracks until answered or explicitly deferred with a decision row._
+
+| Id | Question | Blocks |
+| --- | --- | --- |
+| `oq-01` | **Shared UI package shape:** default = **extend `mb-cli-framework` first** (**[global-strategy-dec-03](/docs/global/planning/decisions)**). Reopen only if publish size or deps force **`@magicborn/ui-payload`**. | Extracting GT page-composer / media patterns into the monorepo shared layer |
+| `oq-02` | **Planning sync MVP:** first shipped behavior is **read-only compile** (dashboard of all `.planning` + section MDX) vs **two-way merge** with one blessed flag set? | **`global-planning-dec-02`** implementation |
+| `oq-03` | **Payload CLI metadata:** final key name and shape (e.g. `custom.magicborn` on collection config) for “expose this collection to generated operator commands”? | Agent skills + codegen spike (**`global-tooling-dec-07`**) |
+
+_Add rows when a phase kickoff surfaces new blockers; remove or mark **deferred** in **decisions** when closed._
 
 ## References
 
