@@ -1,9 +1,17 @@
 import { GET } from '@/app/api/reader/workspace/route';
-import { runReaderWorkspaceWorker } from '@/lib/reader/workspace-worker-runner';
+import { getReaderWorkspaceBootstrap } from '@/lib/reader/workspace-bootstrap';
 
-vi.mock('@/lib/reader/workspace-worker-runner', () => ({
-  runReaderWorkspaceWorker: vi.fn(),
+vi.mock('@/lib/reader/workspace-bootstrap', () => ({
+  getReaderWorkspaceBootstrap: vi.fn(),
 }));
+
+vi.mock('@/lib/auth/session', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/auth/session')>('@/lib/auth/session');
+  return {
+    ...actual,
+    maybeAutoLoginForDevelopment: vi.fn().mockResolvedValue(null),
+  };
+});
 
 describe('/api/reader/workspace', () => {
   beforeEach(() => {
@@ -11,30 +19,24 @@ describe('/api/reader/workspace', () => {
   });
 
   it('returns the workspace bootstrap payload', async () => {
-    vi.mocked(runReaderWorkspaceWorker).mockResolvedValue({
-      status: 200,
-      body: {
-        ok: true,
-        workspace: {
-          access: {
-            authenticated: false,
-            autoLoggedIn: false,
-            isOwner: false,
-            canPersist: false,
-            canEdit: false,
-            canUpload: false,
-            uploadRequiresExplicitAction: true,
-            localImportMode: 'local-only',
-            storageMode: 'local-only',
-          },
-          settings: {
-            defaultWorkspaceView: 'library',
-            preferPagedReader: true,
-            showProgressBadges: true,
-          },
-          libraryRecords: [],
-        },
+    vi.mocked(getReaderWorkspaceBootstrap).mockResolvedValue({
+      access: {
+        authenticated: false,
+        autoLoggedIn: false,
+        isOwner: false,
+        canPersist: false,
+        canEdit: false,
+        canUpload: false,
+        uploadRequiresExplicitAction: true,
+        localImportMode: 'local-only',
+        storageMode: 'local-only',
       },
+      settings: {
+        defaultWorkspaceView: 'library',
+        preferPagedReader: true,
+        showProgressBadges: true,
+      },
+      libraryRecords: [],
     });
 
     const response = await GET(new Request('http://localhost/api/reader/workspace'));
@@ -44,8 +46,6 @@ describe('/api/reader/workspace', () => {
       ok: true,
       workspace: expect.any(Object),
     });
-    expect(runReaderWorkspaceWorker).toHaveBeenCalledWith({
-      cookieHeader: '',
-    });
+    expect(getReaderWorkspaceBootstrap).toHaveBeenCalled();
   });
 });
