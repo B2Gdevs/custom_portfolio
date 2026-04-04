@@ -7,6 +7,7 @@ import FeaturedBookExperience from '@/components/home/FeaturedBookExperience';
 import SoundtrackSection from '@/components/home/SoundtrackSection';
 import ArchiveGateway from '@/components/home/ArchiveGateway';
 import HumanLoopPlanningSection from '@/components/home/HumanLoopPlanningSection';
+import GetAnythingDoneSection from '@/components/home/GetAnythingDoneSection';
 
 export default async function Home() {
   const blogPosts = getAllContent('blog');
@@ -36,6 +37,7 @@ export default async function Home() {
       <CreativeHero featuredBook={featuredBook} />
       <FeaturedBookExperience featuredBook={featuredBook} books={books} />
       <HumanLoopPlanningSection />
+      <GetAnythingDoneSection />
       <SoundtrackSection tracks={tracks} />
       <ArchiveGateway
         blogCount={blogPosts.length}

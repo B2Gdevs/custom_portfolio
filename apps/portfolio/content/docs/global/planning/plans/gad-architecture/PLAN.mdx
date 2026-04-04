@@ -12,11 +12,32 @@ order: 1
 
 ## Summary
 
-**get-anything-done (GAD)** is the canonical, GUI-free planning methodology and tooling system.
-**repo-planner (RP)** is the official GUI for GAD — it reads what GAD produces and provides visual management surfaces.
+**get-anything-done (GAD)** is a direct replacement for GSD when installed. It is powered by GSD as a peer dependency — GSD is the planning engine, GAD is the platform layer that makes it scale across monorepos, teams, and products.
+
+**repo-planner (RP)** is the official GUI for GAD.
 **mb-cli-framework** powers the CLIs for GAD, portfolio, and grime-time.
 
-This document is the formal spec for where the boundary sits, what the `.gad` pack format looks like, and how we migrate the existing RP XML schema and redundant skills.
+> RP was the previous implementation of the GAD workflow. Skills (`rp-*`) encoded the methodology manually. GAD is the proper home for that work — evaluated and refined continuously via the eval framework.
+
+### Why GAD instead of GSD
+
+| GSD | GAD |
+|---|---|
+| One project at a time | Monorepo: N projects, one view |
+| Internal `gsd-tools.cjs` only | `gad` public CLI — humans + tooling + web apps |
+| No extension system | `.gad` domain packs |
+| No eval/drift framework | TRACE + SCORE + benchmark runs |
+| No docs output | Docs sink → MDX for display |
+
+GAD installs GSD first, then replaces all `gsd:` commands with `gad:`. **One prefix, no confusion.**
+
+### Scaling model
+
+```
+Simple (1 repo)     → install GAD, run gad:new-project, works like GSD
+Monorepo            → add [[planning.roots]] entries, gad tasks across all roots
+Ecosystem           → .gad domain packs, eval framework, docs sink to portfolio
+```
 
 ---
 
@@ -212,6 +233,113 @@ This data feeds the eval framework's efficiency scoring.
 | **M7** | RP: implement migration system (`rp-update` analogous to `gad update`) |
 
 ---
+
+## planning-config.toml — canonical config format
+
+The portfolio already has the right structure. GAD reads and extends this file:
+
+```toml
+[planning]
+sprintSize = 5                        # configurable, default max 5 sprints per milestone
+currentProfile = "human"
+conventionsPaths = [
+  "AGENTS.md",
+  ".planning/AGENTS.md",
+  "apps/portfolio/content/docs/documentation/requirements.mdx",
+]
+docs_sink = "apps/portfolio/content/docs/planning"   # GAD addition
+ignore = ["**/node_modules/**", "**/dist/**"]         # GAD addition
+
+[[planning.roots]]
+id = "global"
+path = "."
+planningDir = ".planning"
+discover = false
+
+[[planning.roots]]
+id = "grime-time"
+path = "vendor/grime-time-site"
+planningDir = ".planning"
+discover = true
+
+[profiles.human]
+description = "Default human view."
+
+[profiles.agent]
+description = "Agent perspective; defaultJson = true."
+defaultJson = true
+```
+
+`[[planning.roots]]` IS the multi-project registry. `discover = true` means auto-crawl. `gad workspace sync` populates this from crawl. GAD reads all roots for `gad tasks`, `gad state`, `gad docs compile`.
+
+---
+
+## Command set decisions (2026-04-03)
+
+### Keep (GAD ships these)
+
+| Command | Reason |
+|---|---|
+| All GSD core commands | Direct replacement — same workflow, `gad:` prefix |
+| `autonomous` | **Default GAD workflow.** discuss→plan→execute per phase, handles full milestone loop. `--only N` for single phase, `--interactive` keeps discuss inline. |
+| `validate-phase` | Retroactive Nyquist validation — fills test coverage gaps |
+| `next`, `do`, `forensics`, `stats`, `session-report` | Automation + observability |
+| `thread`, `note`, `plant-seed` | Context continuity across sessions |
+| `manager` | Dashboard for milestone oversight |
+| `discuss-phase`, `list-phase-assumptions` | Pre-planning quality |
+
+### Remove from GAD (use CLI instead)
+
+| Command | Reason |
+|---|---|
+| `workstreams` | Use `gad` CLI for parallel project views |
+| `list-workspaces`, `new-workspace`, `remove-workspace` | Use `gad workspace *` CLI commands |
+| `ui-phase`, `ui-review`, `secure-phase` | Domain-specific, not GAD core |
+| `pr-branch`, `ship` | Use git/gh directly |
+| `profile-user` | Deferred |
+
+### Autonomous as default
+
+`gad:autonomous` is the standard way to run a milestone. It is not a "special mode" — it is the expected agent invocation. When a coding agent is told to work, autonomous handles the discuss→plan→execute loop. `--interactive` is for human-in-the-loop sessions.
+
+---
+
+## Nyquist auditor
+
+`gsd-nyquist-auditor` fills test coverage gaps after a phase completes. Named after Nyquist sampling theorem — every requirement needs at least one observable test to "sample" it faithfully.
+
+**What it does:** For each requirement with no test: classifies test type (unit/integration/smoke), generates minimal behavioral test, runs it, debugs up to 3 iterations. Implementation files READ-ONLY — bugs escalated, never fixed.
+
+**Why it matters for GAD:** Pairs directly with the eval framework. Document drift detection (leftover text in planning docs) + Nyquist coverage gaps are the two signals that tell us where the methodology has holes.
+
+---
+
+## Parallelism — open design question
+
+GAD uses wave-based parallel execution in `execute-phase`. Concerns raised:
+
+**Benefits of parallelism:**
+- Faster wall-clock execution
+- Each agent gets fresh full context window (200k tokens)
+- Failures isolated per task
+
+**Costs of parallelism:**
+- Each agent re-reads all context files (multiplied token cost)
+- Shared planning file conflicts (STATE.md, ROADMAP.md written by multiple agents)
+- Skills activated even if not needed for the specific task
+- Context loss: agents can't see each other's work mid-wave
+
+**The key principle:** parallelize only **independent tasks with no shared write targets**. Sequential for anything touching STATE.md, ROADMAP.md, or files another task writes.
+
+**For the eval framework:** measure this explicitly:
+- `parallel_invocations_per_phase` — how many agents spawned
+- `token_cost_per_agent` — context re-read overhead
+- `conflict_rate` — how often agents write the same file
+- `skill_activation_waste` — skills loaded but never invoked
+
+High conflict rate or skill_activation_waste → the wave grouping needs refinement.
+
+**Preferred model for GAD:** sequential by default, parallel only when the plan explicitly marks tasks as independent. Coding agents should prefer sequential unless the parallelism benefit is proven by eval data.
 
 ## Open questions
 

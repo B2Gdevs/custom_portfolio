@@ -1,0 +1,22 @@
+---
+title: global-planning-01 — GAD foundation kickoff
+description: Phase contract for making GAD self-contained, renaming commands, adding planning-config.toml support, and shipping net-new GAD commands.
+date: "2026-04-03"
+updated: "2026-04-03"
+repoPath: apps/portfolio/content/docs/global/planning/plans/gad-architecture/KICKOFF.mdx
+taskPhase: global-planning-01
+order: 0
+---
+
+# Kickoff: `global-planning-01`
+
+| Field | Value |
+|-------|-------|
+| `goal` | Make GAD a self-contained, direct GSD replacement with `gad:` prefix, `planning-config.toml` multi-root support, and four net-new owned commands: `gad workspace *`, `gad docs compile`, `gad migrate-schema`, `gad eval *` |
+| `scope` | Install wrapper (GSD peer dep), command rename `gsd:→gad:`, planning-config.toml reader, workspace commands, docs compile, schema migration, eval skeleton, README |
+| `non-goals` | Rewriting gsd-tools.cjs in TypeScript (global-planning-02), mb-cli-framework citty layer (global-planning-02), removing rp-* skills (global-planning-04), gad-manuscript (global-planning-05), full eval scoring (global-planning-03) |
+| `definition-of-done` | `npx get-anything-done@latest` installs GSD then GAD; `gad:plan-phase` works; `gad workspace sync` reads planning-config.toml and lists roots; `gad docs compile` writes MDX to docs_sink; `gad migrate-schema` converts STATE.xml to STATE.md; `gad eval run` creates a worktree and scaffolds eval output; README explains GSD-powered positioning with simple + monorepo examples |
+| `tests-required` | Smoke: install in clean dir, verify gad: commands register. Unit: planning-config.toml parser reads roots correctly. Integration: docs compile writes expected MDX files. |
+| `dependencies` | `vendor/get-anything-done` submodule present ✓; GSD v1.30.0 installed ✓ |
+| `open-questions` | TTY fallback behavior (oq-04); sub-CLI discovery method (oq-09) |
+| `first-tasks` | `gad-01-01`, `gad-01-02` |

@@ -1,0 +1,74 @@
+---
+title: global-planning-01 — task breakdown
+description: Concrete tasks for the GAD foundation phase, grouped by stream.
+date: "2026-04-03"
+updated: "2026-04-03"
+repoPath: apps/portfolio/content/docs/global/planning/plans/gad-architecture/TASKS.mdx
+taskPhase: global-planning-01
+order: 2
+---
+
+# Tasks: `global-planning-01`
+
+**Goal:** GAD self-contained, GSD-powered, `gad:` prefix, planning-config.toml, net-new commands, README.
+
+---
+
+## Stream A — Install and dependency
+
+| Id | Status | Goal | Depends | Verify |
+|----|--------|------|---------|--------|
+| `gad-01-A1` | `planned` | Add `get-shit-done-cc` as `peerDependency` in GAD `package.json` | — | `npm info get-anything-done peerDependencies` |
+| `gad-01-A2` | `planned` | Update `bin/install.js`: run GSD install first, then GAD layer; write `GAD_TOOLS_PATH` env pointing at installed `gsd-tools.cjs` | A1 | Install in clean dir, `gad:help` works |
+| `gad-01-A3` | `planned` | Verify `gad:plan-phase` end-to-end in a test project (GSD tools resolve correctly) | A2 | Phase plan created without error |
+
+## Stream B — Command prefix rename
+
+| Id | Status | Goal | Depends | Verify |
+|----|--------|------|---------|--------|
+| `gad-01-B1` | `planned` | Rename `commands/gsd/` → `commands/gad/` in GAD repo | — | Dir exists |
+| `gad-01-B2` | `planned` | Update all command frontmatter: `name: gsd:*` → `name: gad:*` | B1 | `grep -r "gsd:" commands/gad/` returns 0 |
+| `gad-01-B3` | `planned` | Remove trimmed commands: `workstreams`, `list-workspaces`, `new-workspace`, `remove-workspace`, `ui-phase`, `ui-review`, `secure-phase`, `pr-branch`, `ship`, `profile-user` | B2 | Removed files absent |
+| `gad-01-B4` | `planned` | Update `install.js` to install `commands/gad/` and update `help.md` | B3 | `gad:help` lists only kept commands |
+
+## Stream C — planning-config.toml support
+
+| Id | Status | Goal | Depends | Verify |
+|----|--------|------|---------|--------|
+| `gad-01-C1` | `planned` | Write `bin/gad-config.cjs`: reads `planning-config.toml`, returns `roots[]`, `docs_sink`, `ignore`, `sprintSize`, `profiles` | — | Unit test: parse portfolio config, returns 1 root |
+| `gad-01-C2` | `planned` | `gad-config.cjs`: fall back to `config.json` `planning.sub_repos` if no toml present (backwards compat) | C1 | Test with config.json only, still works |
+| `gad-01-C3` | `planned` | Scaffold `planning-config.toml` template in GAD `templates/` | C1 | File exists with `[[planning.roots]]` example |
+
+## Stream D — Net-new GAD commands
+
+| Id | Status | Goal | Depends | Verify |
+|----|--------|------|---------|--------|
+| `gad-01-D1` | `planned` | `gad workspace sync` command + workflow: crawl from monorepo root, find `.planning/` dirs, offer to add as `[[planning.roots]]` entries in toml | C1 | Finds portfolio's 3 .planning dirs |
+| `gad-01-D2` | `planned` | `gad workspace add <path>` and `gad workspace show` | D1 | toml updated correctly |
+| `gad-01-D3` | `planned` | `gad docs compile [--sink]` command + workflow: read all roots, read STATE.md + ROADMAP.md per root, write `<sink>/<root-id>/STATE.mdx` + `ROADMAP.mdx` | C1 | MDX files appear in docs_sink |
+| `gad-01-D4` | `planned` | `gad migrate-schema [--path]` command + workflow: detect STATE.xml/ROADMAP.xml, convert to STATE.md/ROADMAP.md, archive originals | — | Portfolio .planning XML converts without data loss |
+| `gad-01-D5` | `planned` | `gad eval run --project <name>` skeleton: create git worktree, scaffold `evals/<name>/v<N>/` output dir, run agent (stub), remove worktree | — | Worktree created and cleaned up |
+| `gad-01-D6` | `planned` | `gad eval list` and `evals/portfolio-bare/` initial project (REQUIREMENTS.md stripped from portfolio) | D5 | `gad eval list` shows portfolio-bare |
+
+## Stream E — README and positioning
+
+| Id | Status | Goal | Depends | Verify |
+|----|--------|------|---------|--------|
+| `gad-01-E1` | `planned` | Write GAD `README.md`: GSD-powered positioning, simple vs monorepo examples, portfolio as canonical real-world case, `.gad` pack intro | B4, D3 | README exists, explains value clearly |
+| `gad-01-E2` | `planned` | Update GAD `CHANGELOG.md` with v1.32.0 entries for all GAD-owned additions | E1 | Changelog updated |
+
+---
+
+## Definition of done
+
+- [ ] `npx get-anything-done@latest` installs GSD then GAD in one command
+- [ ] All slash commands use `gad:` prefix; no `gsd:` commands remain in `commands/gad/`
+- [ ] `gad workspace sync` reads `planning-config.toml` and lists discovered roots
+- [ ] `gad docs compile` produces MDX files in `docs_sink` for each root
+- [ ] `gad migrate-schema` converts portfolio `.planning/*.xml` to `.md` without data loss
+- [ ] `gad eval run` creates worktree, scaffolds output, cleans up
+- [ ] README explains GSD-powered model with simple + monorepo + ecosystem tiers
+
+## Phases this unblocks
+
+`global-planning-02` (gad CLI / mb-cli-framework), `global-planning-04` (RP migration)
