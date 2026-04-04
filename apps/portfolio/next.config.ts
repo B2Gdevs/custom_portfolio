@@ -35,6 +35,17 @@ const nextConfig: NextConfig = {
         outputFileTracingRoot: monorepoRoot,
       }
     : {}),
+  /**
+   * Payload loads exactly one DB adapter via dynamic `require()`. Next file tracing does not
+   * always follow that, so Vercel lambdas can miss `@payloadcms/db-sqlite` and throw MODULE_NOT_FOUND.
+   * Include both adapters in every server trace so either branch resolves at runtime.
+   */
+  outputFileTracingIncludes: {
+    '**': [
+      './node_modules/@payloadcms/db-sqlite/**/*',
+      './node_modules/@payloadcms/db-postgres/**/*',
+    ],
+  },
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   transpilePackages: ['repo-planner', '@portfolio/repub-builder'],
   async redirects() {

@@ -46,9 +46,22 @@ export function getPayloadDatabaseProvider(): PayloadDatabaseProvider {
   if (configuredProvider === 'postgres') {
     return 'postgres';
   }
+  if (configuredProvider === 'sqlite') {
+    return 'sqlite';
+  }
 
   const databaseUrl = readOptionalEnv('DATABASE_URL');
   if (databaseUrl && /^(postgres|postgresql):/i.test(databaseUrl)) {
+    return 'postgres';
+  }
+
+  /**
+   * Vercel serverless: if DATABASE_URL is missing, inferring `sqlite` loads `@payloadcms/db-sqlite`,
+   * which may not be present in the traced bundle and surfaces as MODULE_NOT_FOUND. Prefer postgres
+   * so `getPayloadDatabaseUrl` fails with a clear "DATABASE_URL is required" instead.
+   * Set `PAYLOAD_DB_PROVIDER=sqlite` to opt into SQLite on hosted deploys.
+   */
+  if (process.env.VERCEL === '1' && !databaseUrl) {
     return 'postgres';
   }
 

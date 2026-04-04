@@ -29,6 +29,7 @@ describe('payload runtime config', () => {
     delete process.env.PAYLOAD_S3_ACCESS_KEY_ID;
     delete process.env.PAYLOAD_S3_SECRET_ACCESS_KEY;
     delete process.env.PAYLOAD_S3_FORCE_PATH_STYLE;
+    delete process.env.VERCEL;
   });
 
   afterAll(() => {
@@ -58,6 +59,13 @@ describe('payload runtime config', () => {
 
     const adapter = getPayloadDatabaseAdapter();
     expect(adapter).toBeTruthy();
+  });
+
+  it('on Vercel without DATABASE_URL, treats provider as postgres so sqlite adapter is not required', () => {
+    process.env.VERCEL = '1';
+
+    expect(getPayloadDatabaseProvider()).toBe('postgres');
+    expect(() => getPayloadDatabaseUrl()).toThrow(/DATABASE_URL is required/);
   });
 
   it('infers postgres mode from DATABASE_URL when provider is unset', () => {
