@@ -1,13 +1,15 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { GetObjectCommand, HeadObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { NextResponse } from 'next/server';
 import { getRangeRequestInfo } from 'payload/internal';
 import { getPayloadClient } from '@/lib/payload';
 import { resolvePortfolioAppPath } from '@/lib/payload/app-root';
-import { PUBLISHED_BOOK_ARTIFACTS_COLLECTION_SLUG } from '@/lib/payload/collections/publishedBookArtifacts';
 import {
   buildPublishedArtifactS3KeyCandidates,
   findPublishedBookArtifactForFile,
+  getStaticPublicBuiltEpubPath,
+  parsePublishedArtifactFilename,
 } from '@/lib/payload/published-artifact-resolve';
 import {
   getPayloadS3StorageOptions,
@@ -40,9 +42,23 @@ function buildS3Client() {
 }
 
 /**
+ * When Payload/S3 cannot serve the artifact, redirect to the EPUB emitted under `public/books/<slug>/book.epub`
+ * by `pnpm run build:books` (included in Vercel build). `fetch()` follows this redirect in the reader.
+ */
+function redirectToStaticBuiltEpub(request: Request, bookSlug: string) {
+  const staticPath = getStaticPublicBuiltEpubPath(bookSlug);
+  if (!fs.existsSync(staticPath)) {
+    return null;
+  }
+
+  return NextResponse.redirect(new URL(`/books/${bookSlug}/book.epub`, request.url), 307);
+}
+
+/**
  * Serves published book artifacts (EPUB / planning-pack zip) without relying on Payload's
  * bundled `/api/.../file/:filename` handler. Resolves by exact filename, then version, then
- * `isCurrent` so manifest URLs stay valid after republish.
+ * `isCurrent` so manifest URLs stay valid after republish. Falls back to static `public/books/`
+ * EPUB when storage is empty or objects are missing (preview deploys, S3 drift).
  */
 export async function GET(
   request: Request,
@@ -65,10 +81,18 @@ export async function GET(
     return new Response('Not Found', { status: 404 });
   }
 
+  const parsedFilename = parsePublishedArtifactFilename(filename);
+
   const payload = await getPayloadClient();
   const doc = await findPublishedBookArtifactForFile(payload, filename);
 
   if (!isRecord(doc)) {
+    if (parsedFilename?.artifactKind === 'epub') {
+      const redirect = redirectToStaticBuiltEpub(request, parsedFilename.bookSlug);
+      if (redirect) {
+        return redirect;
+      }
+    }
     return new Response('Not Found', { status: 404 });
   }
 
@@ -89,6 +113,13 @@ export async function GET(
       docFilename,
     );
     if (!fs.existsSync(filePath)) {
+      const bookSlug = asString(doc.bookSlug);
+      if (bookSlug) {
+        const redirect = redirectToStaticBuiltEpub(request, bookSlug);
+        if (redirect) {
+          return redirect;
+        }
+      }
       return new Response('Not Found', { status: 404 });
     }
     const buf = fs.readFileSync(filePath);
@@ -144,6 +175,13 @@ export async function GET(
 
   if (resolvedKey === null || headContentLength === null) {
     console.error('[published-book-artifacts/file] no S3 object for keys', keyCandidates);
+    const bookSlug = asString(doc.bookSlug);
+    if (bookSlug && asString(doc.artifactKind) === 'epub') {
+      const redirect = redirectToStaticBuiltEpub(request, bookSlug);
+      if (redirect) {
+        return redirect;
+      }
+    }
     return new Response('Not Found', { status: 404 });
   }
 
@@ -203,6 +241,13 @@ export async function GET(
         : undefined;
 
     if (name === 'NoSuchKey' || name === 'NotFound' || code === 404) {
+      const bookSlug = asString(doc.bookSlug);
+      if (bookSlug && asString(doc.artifactKind) === 'epub') {
+        const redirect = redirectToStaticBuiltEpub(request, bookSlug);
+        if (redirect) {
+          return redirect;
+        }
+      }
       return new Response('Not Found', { status: 404 });
     }
 

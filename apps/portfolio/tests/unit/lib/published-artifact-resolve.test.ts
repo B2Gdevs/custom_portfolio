@@ -1,5 +1,6 @@
 import {
   buildPublishedArtifactS3KeyCandidates,
+  getStaticPublicBuiltEpubPath,
   parsePublishedArtifactFilename,
 } from '@/lib/payload/published-artifact-resolve';
 
@@ -27,6 +28,11 @@ describe('published-artifact-resolve', () => {
   it('returns null for invalid names', () => {
     expect(parsePublishedArtifactFilename('nope.epub')).toBeNull();
     expect(parsePublishedArtifactFilename('')).toBeNull();
+  });
+
+  it('resolves static built EPUB path under public/books', () => {
+    const p = getStaticPublicBuiltEpubPath('mordreds_tale').replace(/\\/g, '/');
+    expect(p).toContain('/public/books/mordreds_tale/book.epub');
   });
 
   it('builds S3 key candidates with prefix and collection slug fallback', () => {

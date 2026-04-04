@@ -2,6 +2,7 @@ import path from 'node:path';
 import type { Payload } from 'payload';
 import { sanitizeFilename } from 'payload/shared';
 import type { PublishedBookArtifactKind } from '@/lib/book-artifacts';
+import { resolvePortfolioAppPath } from '@/lib/payload/app-root';
 import { PUBLISHED_BOOK_ARTIFACTS_COLLECTION_SLUG } from '@/lib/payload/collections/publishedBookArtifacts';
 
 const ARTIFACT_FILENAME_RE = /^(.+?)--(epub|planning-pack)--(.+)\.(epub|zip)$/i;
@@ -142,4 +143,12 @@ export function buildPublishedArtifactS3KeyCandidates(
   keys.push(path.posix.join(PUBLISHED_BOOK_ARTIFACTS_COLLECTION_SLUG, base));
 
   return [...new Set(keys)];
+}
+
+/**
+ * Built EPUB output from `pnpm run build:books` (see `scripts/build-books.cjs`).
+ * Used when Payload has no row or blob storage misses, so preview/prod can still serve reading.
+ */
+export function getStaticPublicBuiltEpubPath(bookSlug: string): string {
+  return path.join(resolvePortfolioAppPath('public', 'books', bookSlug, 'book.epub'));
 }
