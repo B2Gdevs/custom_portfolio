@@ -7,6 +7,7 @@ import type { NavMenuSection } from '@/lib/site-menus';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { isImmersiveAppsRoute } from '@/lib/app-routes';
 
 const SIDEBAR_COLLAPSED_KEY = 'site-sidebar-collapsed';
 
@@ -21,12 +22,10 @@ export function SiteLayout({
   siteLogoSrc?: string | null;
 }) {
   const pathname = usePathname();
-  const isReaderAppRoute =
-    pathname === '/apps/reader' || (pathname?.startsWith('/apps/reader/') ?? false);
-  const isBookReadRoute = isReaderAppRoute;
-  const isImmersiveReader = isReaderAppRoute;
+  const isImmersiveApp = isImmersiveAppsRoute(pathname);
+  const isBookReadRoute = isImmersiveApp;
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(isReaderAppRoute);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(isImmersiveApp);
   const [sidebarReady, setSidebarReady] = useState(false);
 
   useEffect(() => {
@@ -87,20 +86,20 @@ export function SiteLayout({
     return () => {
       window.cancelAnimationFrame(frame);
     };
-  }, [isImmersiveReader, sidebarReady]);
+  }, [isImmersiveApp, sidebarReady]);
 
   useEffect(() => {
     if (!sidebarReady || typeof window === 'undefined') return;
     window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(sidebarCollapsed));
   }, [sidebarCollapsed, sidebarReady]);
 
-  /** Reader uses its own nav rail; site sidebar is not mounted on `/apps/reader` (see Nav). */
-  const siteSidebarOpen = !isReaderAppRoute && !sidebarCollapsed;
+  /** Immersive apps (reader, screenshot-annotate) mount their own chrome; site sidebar is not mounted (see Nav). */
+  const siteSidebarOpen = !isImmersiveApp && !sidebarCollapsed;
 
   return (
     <TooltipProvider delay={0}>
       <SidebarProvider
-        {...(isReaderAppRoute
+        {...(isImmersiveApp
           ? { defaultOpen: false }
           : {
               open: siteSidebarOpen,
@@ -118,7 +117,7 @@ export function SiteLayout({
           navMenus={navMenus}
           siteLogoSrc={siteLogoSrc}
           portfolioSidebarHoverHandlers={
-            !isReaderAppRoute && sidebarCollapsed
+            !isImmersiveApp && sidebarCollapsed
               ? {
                   /** Expand and persist open until user hits collapse (no expand control when rail is icon-only). */
                   onMouseEnter: () => setSidebarCollapsed(false),
@@ -129,26 +128,26 @@ export function SiteLayout({
         <SidebarInset
           className={cn(
             'min-h-svh',
-            isReaderAppRoute ? 'bg-background' : 'bg-transparent',
-            /** Reader: bound to viewport on all breakpoints so `h-full` inside repub-builder resolves (was lg-only). */
+            isImmersiveApp ? 'bg-background' : 'bg-transparent',
+            /** Immersive apps: bound to viewport so inner `h-full` resolves. */
             isBookReadRoute ? 'h-svh min-h-0 overflow-hidden' : ''
           )}
         >
           <div
             className={cn(
               'flex flex-col',
-              isReaderAppRoute ? 'h-full min-h-0 flex-1 overflow-hidden' : 'min-h-svh',
+              isImmersiveApp ? 'h-full min-h-0 flex-1 overflow-hidden' : 'min-h-svh',
             )}
           >
             <div
               className={cn(
                 'min-h-0 flex-1',
-                isReaderAppRoute ? 'flex min-h-0 flex-col overflow-hidden' : '',
+                isImmersiveApp ? 'flex min-h-0 flex-col overflow-hidden' : '',
               )}
             >
               {children}
             </div>
-            {!isReaderAppRoute ? (
+            {!isImmersiveApp ? (
               <footer className="mt-16 border-t border-border/80 bg-dark-alt/80 py-10">
                 <div className="mx-auto max-w-7xl px-6 text-center">
                   <p className="font-display text-2xl text-primary">Ben Garrard</p>

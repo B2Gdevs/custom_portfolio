@@ -36,6 +36,19 @@ export type SiteAppRecordDoc = {
 
 export const FALLBACK_SITE_APPS: SiteAppRecord[] = [
   {
+    id: 'screenshot-annotate',
+    title: 'Screenshot annotate',
+    description:
+      'Paste, drop, or import a screenshot; add rectangles and labels; export a PNG — client-side only, no uploads.',
+    href: '/apps/screenshot-annotate',
+    iconName: 'image-plus',
+    cta: 'Open Screenshot annotate',
+    supportHref: '/docs/screenshot-annotate/planning/planning-docs',
+    supportLabel: 'Docs — screenshot-annotate',
+    supportText: 'Images and edits stay in this browser; the catalog row is metadata only.',
+    featuredOrder: 8,
+  },
+  {
     id: 'dialogue-forge',
     title: 'Dialogue Forge',
     description:
@@ -105,7 +118,8 @@ export function isIconName(value: unknown): value is AppsHubAppCardIconName {
     value === 'message-square' ||
     value === 'terminal' ||
     value === 'layers' ||
-    value === 'book-open'
+    value === 'book-open' ||
+    value === 'image-plus'
   );
 }
 

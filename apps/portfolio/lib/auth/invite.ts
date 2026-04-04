@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
+import type { Where } from 'payload';
 import type { AuthEntitlement } from '@/lib/auth/config';
 
 export const INVITE_COLLECTION_SLUG = 'inviteTokens';
@@ -122,7 +123,7 @@ export async function revokeInvitesByEmail(
   const { getPayloadClient } = await import('@/lib/payload');
   const payload = await getPayloadClient();
 
-  const where: Record<string, unknown> = {
+  const where: Where = {
     email: { equals: email.toLowerCase().trim() },
     acceptedAt: { exists: false },
     revokedAt: { exists: false },

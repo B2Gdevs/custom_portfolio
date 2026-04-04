@@ -36,6 +36,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { isImmersiveAppsRoute } from '@/lib/app-routes';
 import {
   Sidebar,
   SidebarContent,
@@ -592,8 +593,7 @@ export default function Nav({
 }) {
   const pathname = usePathname();
   const logoSrc = siteLogoSrc || DEFAULT_SITE_LOGO;
-  const isReaderAppRoute =
-    pathname === '/apps/reader' || (pathname?.startsWith('/apps/reader/') ?? false);
+  const isImmersiveApp = isImmersiveAppsRoute(pathname);
 
   return (
     <>
@@ -615,7 +615,7 @@ export default function Nav({
             </div>
           </Link>
 
-          {isReaderAppRoute ? (
+          {isImmersiveApp ? (
             <Link
               href="/apps"
               className="shrink-0 rounded-full border border-border bg-dark px-3 py-2 text-sm font-medium text-text-muted transition-colors hover:bg-dark-elevated hover:text-primary"
@@ -628,7 +628,7 @@ export default function Nav({
         </div>
       </div>
 
-      {!isReaderAppRoute ? (
+      {!isImmersiveApp ? (
         <Sidebar
           collapsible="icon"
           className="z-10 border-r border-sidebar-border/80 bg-sidebar/90 backdrop-blur-xl"

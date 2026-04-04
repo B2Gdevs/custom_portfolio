@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { BookOpen, Layers, MessageSquare, Terminal, Wand2 } from 'lucide-react';
+import { BookOpen, ImagePlus, Layers, MessageSquare, Terminal, Wand2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useSiteCopilotOptional } from '@/components/site/SiteCopilotContext';
 
@@ -10,6 +10,7 @@ const APP_CARD_ICONS = {
   terminal: Terminal,
   layers: Layers,
   'book-open': BookOpen,
+  'image-plus': ImagePlus,
 } as const;
 
 export type AppsHubAppCardIconName = keyof typeof APP_CARD_ICONS;

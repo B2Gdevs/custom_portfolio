@@ -47,7 +47,7 @@ const nextConfig: NextConfig = {
     ],
   },
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-  transpilePackages: ['repo-planner', '@portfolio/repub-builder'],
+  transpilePackages: ['repo-planner', '@portfolio/repub-builder', '@tldraw/tldraw', 'tldraw'],
   async redirects() {
     return [
       { source: '/docs/tools', destination: '/apps', permanent: false },

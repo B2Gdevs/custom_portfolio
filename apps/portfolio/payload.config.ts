@@ -27,6 +27,7 @@ import { projectRecords } from './lib/payload/collections/projectRecords';
 import { resumeRecords } from './lib/payload/collections/resumeRecords';
 import { tenants } from './lib/payload/collections/tenants';
 import { users } from './lib/payload/collections/users';
+import { inviteTokens } from './lib/payload/collections/inviteTokens';
 import {
   getPayloadDatabaseAdapter,
   getPayloadPlugins,
@@ -57,6 +58,7 @@ export default buildConfig({
   collections: [
     tenants,
     users,
+    inviteTokens,
     listenCatalogRecords,
     listenMediaAssets,
     publishedBookArtifacts,

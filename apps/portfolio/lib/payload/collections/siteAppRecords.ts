@@ -57,6 +57,7 @@ export const siteAppRecords: CollectionConfig = {
         { label: 'Terminal', value: 'terminal' },
         { label: 'Layers', value: 'layers' },
         { label: 'Book Open', value: 'book-open' },
+        { label: 'Image Plus', value: 'image-plus' },
       ],
     },
     {
