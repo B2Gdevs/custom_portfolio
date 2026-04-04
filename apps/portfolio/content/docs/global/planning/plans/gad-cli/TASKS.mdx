@@ -1,0 +1,84 @@
+---
+title: global-planning-02 — task breakdown
+description: Concrete tasks for the gad CLI binary phase, grouped by stream.
+date: "2026-04-03"
+updated: "2026-04-03"
+repoPath: apps/portfolio/content/docs/global/planning/plans/gad-cli/TASKS.mdx
+taskPhase: global-planning-02
+order: 2
+---
+
+# Tasks: `global-planning-02`
+
+**Goal:** `gad` CLI binary — real commands, not just slash commands.
+Built on `citty` + `mb-cli-framework`. Self-contained CJS entry in `vendor/get-anything-done`.
+
+---
+
+## Stream A — mb-cli-framework non-interactive utilities
+
+| Id | Status | Goal | Verify |
+|----|--------|------|--------|
+| `gad-02-A1` | `planned` | Add `TableFormatter` to mb-cli-framework: renders rows[] → ANSI table \| plain text \| JSON \| Markdown | Unit: 3-col table, 3 modes |
+| `gad-02-A2` | `planned` | Add `JsonEmitter` to mb-cli-framework: TTY-aware, `--json` flag support, consistent `{ data, error }` envelope | Unit: emits json + table |
+| `gad-02-A3` | `planned` | Export both from `src/index.ts`; rebuild framework | `import { TableFormatter } from '@magicborn/mb-cli-framework'` works |
+
+## Stream B — gad CLI scaffolding
+
+| Id | Status | Goal | Verify |
+|----|--------|------|--------|
+| `gad-02-B1` | `planned` | Add `citty ^0.1.6` to `vendor/get-anything-done/package.json` dependencies | `npm install` resolves |
+| `gad-02-B2` | `planned` | Write `bin/gad.cjs` entry point: `citty` root command, subcommands wired, `--json`/`--format` global flags | `node bin/gad.cjs --help` shows command list |
+| `gad-02-B3` | `planned` | Register `"gad": "bin/gad.cjs"` in `package.json` bin | `npx get-anything-done gad --help` works |
+
+## Stream C — workspace commands
+
+| Id | Status | Goal | Verify |
+|----|--------|------|--------|
+| `gad-02-C1` | `planned` | `gad workspace show` — reads planning-config.toml via gad-config.cjs, renders roots table | Output shows `[global]` root |
+| `gad-02-C2` | `planned` | `gad workspace sync` — crawl `.planning/` dirs, diff vs config, update toml | Finds portfolio's `.planning`, updates toml |
+| `gad-02-C3` | `planned` | `gad workspace add <path>` — appends `[[planning.roots]]` entry | toml updated, verify with `show` |
+| `gad-02-C4` | `planned` | `gad workspace ignore <pattern>` — appends to `planning.ignore` in toml | pattern appears in toml |
+
+## Stream D — projects + state commands
+
+| Id | Status | Goal | Verify |
+|----|--------|------|--------|
+| `gad-02-D1` | `planned` | Write `lib/state-reader.cjs`: parse STATE.md headers (phase, milestone, status) | Returns structured object from portfolio STATE.xml (after migration) or .md stub |
+| `gad-02-D2` | `planned` | Write `lib/roadmap-reader.cjs`: parse ROADMAP.md phases (id, status, title) | Returns phase array from portfolio ROADMAP.md |
+| `gad-02-D3` | `planned` | `gad projects list` — reads all roots, shows table of id/path/phase/status | Shows portfolio `[global]` root |
+| `gad-02-D4` | `planned` | `gad projects init [--name] [--path]` — creates `.planning/` scaffold from GAD templates | `.planning/STATE.md`, `ROADMAP.md`, `REQUIREMENTS.md` created |
+| `gad-02-D5` | `planned` | `gad state [--projectid]` — reads STATE.md per root, renders table or JSON | Shows phase + milestone for each root |
+
+## Stream E — tasks/phases/sprints (read)
+
+| Id | Status | Goal | Verify |
+|----|--------|------|--------|
+| `gad-02-E1` | `planned` | `gad phases [--projectid]` — reads ROADMAP.md, shows phase list | Shows portfolio phases |
+| `gad-02-E2` | `planned` | `gad tasks [--projectid] [--phaseid]` — reads task tables from STATE.md | Shows open tasks |
+| `gad-02-E3` | `planned` | Ambiguous ID error: when `--phaseid` matches multiple roots → error with conflict list | Error shows both matches |
+
+## Stream F — docs + eval commands
+
+| Id | Status | Goal | Verify |
+|----|--------|------|--------|
+| `gad-02-F1` | `planned` | `gad docs compile [--sink]` — real implementation: reads roots, transforms .md → .mdx, writes sink | MDX files appear in sink |
+| `gad-02-F2` | `planned` | `gad eval list` — reads `evals/` directory, renders table | Shows `portfolio-bare` |
+| `gad-02-F3` | `planned` | `gad eval run --project <name>` — git worktree, scaffold output, cleanup | Worktree created + cleaned up |
+
+---
+
+## Definition of done
+
+- [ ] `gad --help` shows full command list
+- [ ] `gad workspace show` reads `planning-config.toml` and shows roots table
+- [ ] `gad workspace sync` discovers `.planning/` dirs and updates toml
+- [ ] `gad projects list` shows all registered roots with status
+- [ ] `gad state` shows current phase + milestone for each root
+- [ ] `gad phases` reads ROADMAP.md and shows phase list
+- [ ] `gad docs compile` writes MDX to configured sink
+- [ ] `gad eval list` shows portfolio-bare project
+
+## Phases this unblocks
+
+`global-planning-03` (eval framework), `global-planning-04` (RP migration)
