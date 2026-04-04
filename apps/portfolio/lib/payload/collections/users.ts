@@ -80,6 +80,16 @@ export const users: CollectionConfig = {
       ],
     },
     {
+      name: 'disabled',
+      type: 'checkbox',
+      required: true,
+      defaultValue: false,
+      index: true,
+      admin: {
+        description: 'Disabled users cannot log in. All outstanding invites are revoked on disable.',
+      },
+    },
+    {
       name: 'externalIds',
       type: 'group',
       admin: {

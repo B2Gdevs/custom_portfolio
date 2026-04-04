@@ -1,18 +1,15 @@
 /**
- * Create a tenant user without the Payload admin UI (operator / invite flow).
+ * Create a tenant-scoped, single-use invite link (operator / invite flow).
  *
- *   pnpm auth:invite -- --email=a@b.com --password=secret --role=admin --tenant-slug=magicborn-studios
+ *   pnpm auth:invite -- --email=a@b.com --role=admin|member --tenant-slug=magicborn-studios
  *
- * Roles:
- * - admin — same entitlements as the seeded owner (admin surface, media gen, reader writes)
- * - member — no entitlements (read-only / public-level gates; use export paths in reader)
+ * Outputs a one-time accept URL. The invited user sets their own password in the browser.
+ * Use `pnpm auth:seed` for the initial owner account.
  */
 import {
-  AUTH_COLLECTION_SLUG,
-  OWNER_DEFAULT_ENTITLEMENTS,
   TENANT_COLLECTION_SLUG,
-  type AuthEntitlement,
 } from '@/lib/auth/config';
+import { createInviteToken, type InviteRole } from '@/lib/auth/invite';
 import { getPayloadClient } from '@/lib/payload';
 import { loadScriptEnv } from './load-script-env';
 
@@ -24,16 +21,18 @@ function arg(name: string): string | undefined {
   return hit ? hit.slice(prefix.length) : undefined;
 }
 
+function getSiteUrl(): string {
+  return (process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'http://localhost:3000').replace(/\/$/, '');
+}
+
 async function main() {
   const email = arg('email')?.trim();
-  const password = arg('password');
-  const role = (arg('role')?.trim() || 'member') as 'admin' | 'member';
+  const role = (arg('role')?.trim() || 'member') as InviteRole;
   const tenantSlug = arg('tenant-slug')?.trim();
-  const displayName = arg('name')?.trim() || email;
 
-  if (!email || !password) {
+  if (!email) {
     console.error(
-      'Usage: pnpm auth:invite -- --email=user@host --password=... --role=admin|member --tenant-slug=your-tenant [--name="Display"]',
+      'Usage: pnpm auth:invite -- --email=user@host --role=admin|member --tenant-slug=your-tenant',
     );
     process.exit(1);
   }
@@ -44,7 +43,7 @@ async function main() {
   }
 
   if (!tenantSlug) {
-    console.error('[auth:invite] --tenant-slug is required (use the owner tenant slug from seed)');
+    console.error('[auth:invite] --tenant-slug is required');
     process.exit(1);
   }
 
@@ -63,49 +62,19 @@ async function main() {
     process.exit(1);
   }
 
-  const tenantId = (tenant as { id: string | number }).id;
+  const tenantId = String((tenant as { id: string | number }).id);
 
-  const existing = await payload.find({
-    collection: AUTH_COLLECTION_SLUG,
-    limit: 1,
-    overrideAccess: true,
-    pagination: false,
-    where: { email: { equals: email } },
+  const { plaintext } = await createInviteToken({
+    email,
+    tenantId,
+    role,
   });
 
-  const entitlements: AuthEntitlement[] =
-    role === 'admin' ? [...OWNER_DEFAULT_ENTITLEMENTS] : [];
+  const acceptUrl = `${getSiteUrl()}/invite/accept?token=${plaintext}`;
 
-  if (existing.docs[0]) {
-    const id = String((existing.docs[0] as { id: string | number }).id);
-    await payload.update({
-      collection: AUTH_COLLECTION_SLUG,
-      id,
-      overrideAccess: true,
-      data: {
-        password,
-        displayName,
-        role,
-        tenant: tenantId,
-        entitlements,
-      },
-    });
-    console.log(`[auth:invite] updated user ${email} (${role})`);
-  } else {
-    await payload.create({
-      collection: AUTH_COLLECTION_SLUG,
-      overrideAccess: true,
-      data: {
-        email,
-        password,
-        displayName,
-        role,
-        tenant: tenantId,
-        entitlements,
-      },
-    });
-    console.log(`[auth:invite] created user ${email} (${role})`);
-  }
+  console.log(`[auth:invite] invite created for ${email} (${role})`);
+  console.log(`[auth:invite] accept URL:\n\n  ${acceptUrl}\n`);
+  console.log(`[auth:invite] expires in 72 hours — share this link securely`);
 
   process.exit(0);
 }

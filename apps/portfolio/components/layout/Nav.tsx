@@ -592,6 +592,8 @@ export default function Nav({
 }) {
   const pathname = usePathname();
   const logoSrc = siteLogoSrc || DEFAULT_SITE_LOGO;
+  const isReaderAppRoute =
+    pathname === '/apps/reader' || (pathname?.startsWith('/apps/reader/') ?? false);
 
   return (
     <>
@@ -613,22 +615,33 @@ export default function Nav({
             </div>
           </Link>
 
-          <SidebarTrigger className="shrink-0 border-border bg-dark text-text-muted hover:bg-dark-elevated hover:text-primary" />
+          {isReaderAppRoute ? (
+            <Link
+              href="/apps"
+              className="shrink-0 rounded-full border border-border bg-dark px-3 py-2 text-sm font-medium text-text-muted transition-colors hover:bg-dark-elevated hover:text-primary"
+            >
+              Apps
+            </Link>
+          ) : (
+            <SidebarTrigger className="shrink-0 border-border bg-dark text-text-muted hover:bg-dark-elevated hover:text-primary" />
+          )}
         </div>
       </div>
 
-      <Sidebar
-        collapsible="icon"
-        className="z-10 border-r border-sidebar-border/80 bg-sidebar/90 backdrop-blur-xl"
-        {...portfolioSidebarHoverHandlers}
-      >
-        <PortfolioSidebarInner
-          pathname={pathname ?? ''}
-          navMenus={navMenus}
-          siteLogoSrc={siteLogoSrc}
-        />
-        <SidebarRail />
-      </Sidebar>
+      {!isReaderAppRoute ? (
+        <Sidebar
+          collapsible="icon"
+          className="z-10 border-r border-sidebar-border/80 bg-sidebar/90 backdrop-blur-xl"
+          {...portfolioSidebarHoverHandlers}
+        >
+          <PortfolioSidebarInner
+            pathname={pathname ?? ''}
+            navMenus={navMenus}
+            siteLogoSrc={siteLogoSrc}
+          />
+          <SidebarRail />
+        </Sidebar>
+      ) : null}
     </>
   );
 }

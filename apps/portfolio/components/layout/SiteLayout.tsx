@@ -94,17 +94,18 @@ export function SiteLayout({
     window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(sidebarCollapsed));
   }, [sidebarCollapsed, sidebarReady]);
 
-  /** Reader has its own rail; never show the site chrome sidebar expanded on reader routes. */
+  /** Reader uses its own nav rail; site sidebar is not mounted on `/apps/reader` (see Nav). */
   const siteSidebarOpen = !isReaderAppRoute && !sidebarCollapsed;
 
   return (
     <TooltipProvider delay={0}>
       <SidebarProvider
-        open={siteSidebarOpen}
-        onOpenChange={(open) => {
-          if (isReaderAppRoute) return;
-          setSidebarCollapsed(!open);
-        }}
+        {...(isReaderAppRoute
+          ? { defaultOpen: false }
+          : {
+              open: siteSidebarOpen,
+              onOpenChange: (open: boolean) => setSidebarCollapsed(!open),
+            })}
         className="min-h-svh w-full"
         style={
           {
