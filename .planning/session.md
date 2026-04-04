@@ -7,43 +7,80 @@
 
 | Field | Value |
 |-------|-------|
-| Current task | `gad-01-A1` — Add `get-shit-done-cc` as peerDependency in GAD package.json |
-| Task status | not started — was about to begin when context ran out |
-| Last action | Read `vendor/get-anything-done/package.json` and first 80 lines of `bin/install.js` — context hit 94% |
-| Next action | Edit `vendor/get-anything-done/package.json`: rename package to `get-anything-done`, add `peerDependencies: { "get-shit-done-cc": ">=1.30.0" }`, update `bin` key, update `name`/`description`/`repository`/`homepage` to MagicbornStudios/get-anything-done |
+| Current task | All streams complete — ready to commit and move to global-planning-02 |
+| Task status | global-planning-01 implementation DONE, needs commit + A3 smoke test |
+| Last action | Completed all 5 streams (A1-A2, B1-B4, C1-C3, D1-D6, E1-E2) |
+| Next action | Commit `vendor/get-anything-done` changes, then A3 smoke test (manual), then mark global-planning-01 complete |
 
-## In-progress work
+## What was done this session
 
-No uncommitted changes. All planning docs written this session are clean. Only `vendor/get-anything-done` and `vendor/gad-manuscript` submodule pointers need committing.
+All tasks in `global-planning-01` implemented:
 
-Uncommitted changes:
-- `vendor/get-anything-done` — submodule added, no internal changes yet
-- `vendor/gad-manuscript` — submodule added (empty repo)
-- `apps/portfolio/content/docs/global/planning/plans/gad-architecture/PLAN.mdx` — written
-- `apps/portfolio/content/docs/global/planning/plans/gad-architecture/KICKOFF.mdx` — written
-- `apps/portfolio/content/docs/global/planning/plans/gad-architecture/TASKS.mdx` — written
-- `apps/portfolio/content/docs/global/planning/plans/gad-cli/PLAN.mdx` — written
-- `apps/portfolio/content/docs/global/planning/plans/gad-eval/PLAN.mdx` — written
-- `apps/portfolio/content/docs/global/planning/plans/gad-manuscript/PLAN.mdx` — written
-- `apps/portfolio/content/docs/global/planning/decisions.mdx` — dec-07 through dec-22 added
-- `apps/portfolio/content/docs/global/planning/state.mdx` — oq-04 through oq-11, global-planning-01 through 05
+### Stream A — Install/dependency
+- **A1** ✓ — renamed package to `get-anything-done` v1.32.0, added `peerDependencies: {"get-shit-done-cc": ">=1.30.0"}`, updated bin/author/repo/homepage
+- **A2** ✓ — `bin/install.js`: added `ensureGsdInstalled()` (runs `npx get-shit-done-cc@latest` with same flags), `writeGadToolsPath()` (writes `<configDir>/get-shit-done/.gad-env` JSON with `GAD_TOOLS_PATH`), called from `installAllRuntimes`
+- **A3** — SKIP (manual smoke test, needs actual install)
 
-## Decisions made this session
+### Stream B — Command prefix rename
+- **B1** ✓ — renamed `commands/gsd/` → `commands/gad/`
+- **B2** ✓ — all frontmatter `name: gsd:*` → `name: gad:*` (56 files, 0 remaining with `gsd:`)
+- **B3** ✓ — removed 10 trimmed commands (workstreams, list/new/remove-workspace, ui-phase, ui-review, secure-phase, pr-branch, ship, profile-user)
+- **B4** ✓ — `install.js` updated to use `commands/gad/`, `gad-*` skill prefixes; `help.md` updated; legacy cleanup still targets `commands/gsd/` (correct)
 
-All decisions written to `decisions.mdx` (dec-07 through dec-22). Key ones:
+### Stream C — planning-config.toml
+- **C1** ✓ — `bin/gad-config.cjs` written: reads `planning-config.toml` (root or `.planning/` subdir), returns `roots`, `docs_sink`, `ignore`, `sprintSize`, `profiles`; CLI entry point at `node bin/gad-config.cjs --root <dir>`
+- **C2** ✓ — fallback to `config.json` `planning.sub_repos` already in `gad-config.cjs`
+- **C3** ✓ — `get-shit-done/templates/planning-config.toml` written with annotated `[[planning.roots]]` example
 
-| Decision | What was decided | Why |
-|----------|-----------------|-----|
-| GAD positioning | GAD = GSD-powered platform layer, not competitor | GSD owns runtime, GAD owns monorepo/CLI/packs/eval |
-| Command prefix | `gad:` replaces `gsd:` entirely when GAD installed | Avoid dual-prefix confusion |
-| planning-config.toml | Canonical config format; `[[planning.roots]]` = multi-project registry | Portfolio already uses this format |
-| Autonomous | Default GAD workflow, not a special mode | When AI gets a milestone, autonomous runs it |
-| Removed commands | workstreams, list/new/remove-workspace, ui-phase, ui-review, secure-phase, pr-branch, ship, profile-user | Use gad CLI instead |
-| Parallelism | Sequential by default; parallel only for explicitly independent tasks | Token cost + conflict rate risk |
-| gad-manuscript | Separate repo, sub-CLI registering into gad | New repo MagicbornStudios/gad-manuscript created |
-| Eval isolation | Git worktrees per run | Clean state, reproducible baselines |
+### Stream D — Net-new commands
+- **D1** ✓ — `commands/gad/workspace-sync.md`
+- **D2** ✓ — `commands/gad/workspace-add.md` + `workspace-show.md`
+- **D3** ✓ — `commands/gad/docs-compile.md`
+- **D4** ✓ — `commands/gad/migrate-schema.md`
+- **D5** ✓ — `commands/gad/eval-run.md` (git worktree skeleton)
+- **D6** ✓ — `commands/gad/eval-list.md` + `evals/portfolio-bare/REQUIREMENTS.md`
 
-## Open questions (in state.mdx)
+### Stream E — README + CHANGELOG
+- **E1** ✓ — `README.md` rewritten: GSD-powered positioning, 3-tier scaling model, canonical portfolio example
+- **E2** ✓ — `CHANGELOG.md` v1.32.0 entries added
+
+## Files changed in `vendor/get-anything-done`
+
+```
+M  CHANGELOG.md
+M  README.md
+M  bin/install.js          — ensureGsdInstalled, writeGadToolsPath, commands/gad paths
+?? bin/gad-config.cjs      — NEW
+D  commands/gsd/           — deleted (56 files)
+?? commands/gad/           — NEW (56 files: 49 renamed + 7 new)
+?? evals/portfolio-bare/REQUIREMENTS.md  — NEW
+M  package.json            — renamed, version, peerDeps, bin, author, repo
+?? get-shit-done/templates/planning-config.toml — NEW
+```
+
+## Commit to make
+
+Inside `vendor/get-anything-done`:
+```bash
+git add -A
+git commit -m "feat: GAD v1.32.0 — rename package, gad: prefix, planning-config.toml, workspace/docs/eval/migrate commands"
+```
+
+Then from repo root:
+```bash
+git add vendor/get-anything-done
+git commit -m "feat(gad): v1.32.0 — foundation complete (global-planning-01)"
+```
+
+## Next phase
+
+`global-planning-02` — `gad` CLI binary via mb-cli-framework:
+- `gad workspace sync/add/show` as real CLI commands (not just slash commands)
+- `gad docs compile` CLI
+- `gad eval run/list` CLI
+- Integration with `vendor/mb-cli-framework`
+
+## Open questions (still active)
 
 | Id | Question | Blocking? |
 |----|----------|-----------|
@@ -51,66 +88,9 @@ All decisions written to `decisions.mdx` (dec-07 through dec-22). Key ones:
 | oq-10 | gad-manuscript STATE.md: replace or extend base GAD template | gad-manuscript work |
 | oq-11 | Mordred's Tale requirements source: from portfolio MDX or separate? | gad-manuscript eval |
 
-## Task list for global-planning-01
+## Important context for next session
 
-Full list in `apps/portfolio/content/docs/global/planning/plans/gad-architecture/TASKS.mdx`.
-
-### Stream A — Install/dependency
-- `gad-01-A1` ← **START HERE** — rename package + add peerDep in package.json
-- `gad-01-A2` — update bin/install.js: run GSD install first, write GAD_TOOLS_PATH
-- `gad-01-A3` — smoke test in clean dir
-
-### Stream B — Command prefix rename
-- `gad-01-B1` — rename commands/gsd/ → commands/gad/
-- `gad-01-B2` — update all frontmatter name: gsd:* → gad:*
-- `gad-01-B3` — remove trimmed commands (10 files)
-- `gad-01-B4` — update install.js + help.md
-
-### Stream C — planning-config.toml support
-- `gad-01-C1` — write bin/gad-config.cjs: reads toml, returns roots/docs_sink/ignore
-- `gad-01-C2` — fallback to config.json sub_repos if no toml
-- `gad-01-C3` — scaffold planning-config.toml template
-
-### Stream D — Net-new GAD commands
-- `gad-01-D1` — gad workspace sync command
-- `gad-01-D2` — gad workspace add + show
-- `gad-01-D3` — gad docs compile command
-- `gad-01-D4` — gad migrate-schema command
-- `gad-01-D5` — gad eval run skeleton (worktree)
-- `gad-01-D6` — gad eval list + portfolio-bare eval project
-
-### Stream E — README
-- `gad-01-E1` — GAD README.md
-- `gad-01-E2` — CHANGELOG.md v1.32.0
-
-## Context that won't survive the reset
-
-- `bin/install.js` is large (65k tokens). Only read the first 80 lines. The relevant section for A2 is the install loop — search for where it writes commands to `~/.claude/commands/gsd/`. That's the section to update to write `commands/gad/` instead.
-- GAD's `bin/install.js` handles Claude Code, Codex, OpenCode, Gemini, Copilot — multi-runtime. The command directory path varies per runtime. Search for `gsd` in that file to find all the path references to update.
-- "Community commands" = upstream GSD PRs from external contributors, nothing we wrote. GAD fork IS GSD at v1.31.0, just named differently. Our work = the net-new commands in Stream D.
-- The GSD SDK (`vendor/get-anything-done/sdk/`) wraps gsd-tools.cjs via shell-out — it is NOT a rewrite. Don't touch the SDK for global-planning-01.
-- `planning-config.toml` parser needs a TOML library. Check if `@iarna/toml` or similar is available in the monorepo before adding a new dep. Alternatively, write a minimal TOML parser for the subset we need (simple key=value + [[array of tables]]).
-
-## Verify state before resuming
-
-```bash
-git status --short
-git log --oneline -5
-ls vendor/get-anything-done/
-ls vendor/gad-manuscript/
-ls apps/portfolio/content/docs/global/planning/plans/gad-architecture/
-```
-
-## First commit to make on resume
-
-```bash
-git add apps/portfolio/content/docs/global/planning/plans/ \
-        apps/portfolio/content/docs/global/planning/decisions.mdx \
-        apps/portfolio/content/docs/global/planning/state.mdx \
-        vendor/get-anything-done \
-        vendor/gad-manuscript \
-        .gitmodules
-git commit -m "docs(global-planning): GAD architecture spec, CLI, eval, manuscript plans + decisions dec-07 through dec-22"
-```
-
-Then start `gad-01-A1`.
+- `bin/install.js` is large (~5600 lines). The GSD peer install calls `ensureGsdInstalled()` near line 5320 (before `installSdk`). The `writeGadToolsPath()` is called in `installAllRuntimes` after each runtime's `install()` call.
+- `gad-config.cjs` looks for `planning-config.toml` at root OR `.planning/planning-config.toml` — portfolio uses the latter.
+- New commands in `commands/gad/` follow the same frontmatter pattern as existing ones. The workspace-* and eval-* commands are sketch-level; real implementation happens in global-planning-02 (CLI) and gad-eval plan.
+- `install.js` legacy cleanup block at line ~3894 correctly targets `commands/gsd` (old GSD path), while current GAD install uses `commands/gad`.
