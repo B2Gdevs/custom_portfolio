@@ -1,85 +1,72 @@
 # Session Handoff
 
 **Saved:** 2026-04-03
-**Phase:** `global-planning-03` — GAD eval framework (complete)
+**Phase:** `global-planning-04` — RP migration (in progress)
 
 ## Position
 
 | Field | Value |
 |-------|-------|
-| Current task | global-planning-03 shipped; state.mdx updated |
-| Task status | All eval framework components implemented and committed |
-| Last action | Committed eval framework to get-anything-done submodule + monorepo bump |
-| Next action | global-planning-04: RP migration — remove redundant skills, adopt GAD MD schema |
+| Current task | Deprecation notices done; XML migration gated on in-progress tasks |
+| Task status | Partial — rp-* deprecated, AGENTS.md updated, KICKOFF created. XML migration blocked. |
+| Last action | Bumped repo-planner submodule with rp-* deprecation notices |
+| Next action | Check what in-progress TASK-REGISTRY.xml tasks (02-01, 03-02, 05-01) need, or move to other active work |
 
 ## What was done this session
 
 ### EPUB static fallback (committed 3f5ba19)
-- `getStaticPublicBuiltEpubPath` helper in `published-artifact-resolve.ts`
-- Fallback redirect logic in artifact route at all failure points (no Payload row, local file missing, S3 miss, S3 error)
-- `vercel.json` updated: `pnpm run build:books` runs before Next.js build
-- E2E test suite: `playwright.reader.config.ts` + `reader.spec.ts` with 3 test cases
-- Unit test for static path helper
+- Route fallback to public/books/<slug>/book.epub at all failure points
+- Vercel build now runs build:books before Next.js build
+- Unit + E2E tests
+
+### global-planning-02 (already committed, marked complete)
 
 ### global-planning-03 — GAD eval framework (committed 61d8cc1)
+- `lib/trace-writer.cjs`, `lib/score-generator.cjs`
+- `gad eval score / diff` commands
+- `evals/portfolio-bare/` with AGENTS.md, gad.json, v1 baseline run + SCORE.md
 
-**Files in `vendor/get-anything-done`:**
-- `lib/trace-writer.cjs` — TRACE log append, parse, doc-drift detection, standard artifact set
-- `lib/score-generator.cjs` — SCORE.md generation, drift metrics, composite stability index
-- `bin/gad.cjs` — added `gad eval score` and `gad eval diff` subcommands
-- `evals/README.md` — eval framework overview (structure, CLI, trace format, RUN.md schema)
-- `evals/portfolio-bare/AGENTS.md` — eval project instructions for coding agent
-- `evals/portfolio-bare/gad.json` — eval project config (type=eval, scoring weights)
-- `evals/portfolio-bare/v1/RUN.md` — baseline run (78% coverage, 142 edits, 284k tokens)
-- `evals/portfolio-bare/v1/SCORE.md` — baseline score (no drift, first run)
+### global-planning-04 — RP migration (partial, committed d330be4)
+- `.planning/AGENTS.md` updated with GAD CLI command table + migration gate note
+- `global/planning/plans/rp-migration/KICKOFF.mdx` created (migration steps, success criteria)
+- `global/planning/state.mdx`: global-planning-03 → complete, global-planning-04 → planning
+- All 11 rp-* SKILL.md files in vendor/repo-planner deprecated with gad: pointer
+- repo-planner submodule bumped
 
-**Verified working:**
-- `gad eval list` — shows portfolio-bare, 1 run
-- `gad eval score --project portfolio-bare` — generates SCORE.md
-- `gad eval diff v1 v2 --project portfolio-bare` — diffs two runs (tested with temp v2)
+## XML migration gate (still blocked)
 
-### State updates
-- `global-planning-02` → `complete` in global planning state.mdx
-- `global-planning-03` → `planning` in global planning state.mdx
+`gad migrate-schema --yes` is blocked until these TASK-REGISTRY.xml tasks complete:
+- `02-01`: shared data/storage provider abstraction (global-data-01 series)
+- `03-02`: large git blobs, off-repo publish path (partially done — EPUB artifacts live)
+- `05-01`: cross-project observability (Vercel Analytics, logging)
 
-## Commits made this session
+## Next candidates
 
-```
-3f5ba19 feat(reader): static EPUB fallback + vercel build:books; mark global-planning-02 complete
-61d8cc1 feat(eval): gad eval framework + reader e2e test suite; bump get-anything-done
-```
+| Option | Notes |
+|--------|-------|
+| `05-01` observability pass | Wire Vercel Analytics to portfolio + Grime Time; moderate scope |
+| `global-auth-03-03` | CLI invites + role-template/revoke — complex auth work |
+| `global-auth-03-04` | Clerk integration (in-progress per state.mdx) |
+| `02-01` data/storage | Large architectural task — global-data-01 series |
 
-## Next phase: global-planning-04
-
-**Goal:** RP migration — remove redundant skills, adopt GAD MD schema, become GUI-only
-
-Key tasks:
-1. Identify GSD skills that are now redundant with GAD CLI commands
-2. Remove or deprecate them in `~/.claude/get-shit-done/`
-3. Migrate any remaining RP XML plan files to GAD MD schema
-4. Update AGENTS.md to reflect GAD-first workflow
-5. Update state.mdx: global-planning-04 status → planning
+The next highest-value, bounded task is `05-01` (observability) — it completes a concrete gap and unblocks the XML migration gate (one of the 3 remaining in-progress tasks).
 
 ## Key technical notes
 
-### eval framework
-- `evals/<project>/gad.json` with `"type": "eval"` marks it as eval project
-- `RUN.md` fields used for scoring: `edit_count`, `skill_calls`, `total_tokens`, `task_count`, `requirement_coverage`
-- Baseline is automatically the lexicographically first version (v1)
-- Composite stability index: weighted average (coverage 40%, edits 20%, tokens 15%, skills 15%, tasks 10%)
-- Doc drift: any file in run dir outside STANDARD_ARTIFACTS set is flagged
+### rp-* deprecation
+- All 11 rp-* skills now have deprecation notice at top of content (after frontmatter)
+- rp-manuscript is NOT deprecated (no direct gad: equivalent yet; gad-manuscript is future)
+- XML migration requires manual TASK-REGISTRY.xml → STATE.md merge after `gad migrate-schema --yes`
 
-### EPUB fallback
-- `getStaticPublicBuiltEpubPath(slug)` returns `apps/portfolio/public/books/<slug>/book.epub`
-- Route redirects 307 to `/books/<slug>/book.epub` (public static serving)
-- Vercel build now runs `pnpm run build:books` first so EPUBs exist at deploy time
+### gad CLI location
+- `node vendor/get-anything-done/bin/gad.cjs` from repo root
+- Or `npm link` from vendor/get-anything-done for global `gad` command
 
 ## Open questions (still active)
 
 | Id | Question | Blocking? |
 |----|----------|-----------|
 | oq-09 | Sub-CLI discovery: scan packs at startup vs explicit config registration | gad-manuscript |
-| gad-cli-oq-04 | Auto-TTY fallback: warn line before JSON or silent? | Non-interactive UX |
+| rp-migration-oq-01 | Does vendor/repo-planner read MD files directly or only through pnpm planning CLI? | XML migration |
+| rp-migration-oq-02 | Should rp-* skills be removed entirely or just deprecated with a pointer? | Done for now (deprecated) |
 | gad-eval-oq-01 | Who runs the eval agent — claude CLI? Codex? automated script? | `gad eval run` full impl |
-| gad-eval-oq-02 | How to freeze baseline? First run auto, or manually designated? | Drift calculation |
-| gad-eval-oq-03 | Does GAD-TRACE.log get parsed by CLI or append-only from hook? | TRACE implementation |
