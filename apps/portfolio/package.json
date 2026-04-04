@@ -21,6 +21,7 @@
     "test:unit:coverage": "vitest run --coverage",
     "test:unit:report": "node scripts/run-unit-report.mjs",
     "test:e2e": "playwright test",
+    "test:e2e:reader": "playwright test -c playwright.reader.config.ts",
     "test": "pnpm run test:unit && pnpm run test:e2e",
     "rag:ingest": "node scripts/rag-ingest-runner.cjs",
     "db:generate": "drizzle-kit generate",

@@ -42,4 +42,39 @@ test.describe('Reader and published EPUB artifacts', () => {
 
     expect(pageErrors, pageErrors.join('\n')).toEqual([]);
   });
+
+  test('reader with book=mordreds_tale fetches EPUB without page errors', async ({ page }) => {
+    const epubPath = path.join(portfolioRoot, 'public', 'books', 'mordreds_tale', 'book.epub');
+    if (!fs.existsSync(epubPath)) {
+      test.skip();
+    }
+
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => {
+      pageErrors.push(err.message);
+    });
+
+    const epubResponse = page.waitForResponse(
+      (res) => {
+        const u = res.url();
+        return (
+          (u.includes('/api/published-book-artifacts/file/') ||
+            u.includes('/books/mordreds_tale/book.epub')) &&
+          res.status() < 500
+        );
+      },
+      { timeout: 90_000 },
+    );
+
+    await page.goto('/apps/reader?book=mordreds_tale', {
+      waitUntil: 'domcontentloaded',
+      timeout: 120_000,
+    });
+
+    const res = await epubResponse;
+    expect(res.status(), `EPUB fetch failed: ${res.url()}`).toBeLessThan(400);
+
+    await new Promise((r) => setTimeout(r, 2000));
+    expect(pageErrors, pageErrors.join('\n')).toEqual([]);
+  });
 });
