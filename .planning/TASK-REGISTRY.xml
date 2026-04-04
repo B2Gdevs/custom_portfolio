@@ -175,7 +175,7 @@
     </task>
   </phase>
   <phase id="05">
-    <task id="05-01" agent-id="" status="in-progress">
+    <task id="05-01" agent-id="" status="done">
       <goal>Finish the cross-project observability pass: wire privacy-aware Vercel Analytics into the portfolio and Grime Time public layouts, add a small Grime Time observability helper for request ids plus safe route summaries, cover the helper and response-header behavior with tests, and verify with targeted typecheck/lint/test/build commands.</goal>
       <keywords>observability,analytics,vercel,logging,tracing,privacy,grimetime,portfolio</keywords>
       <commands>
