@@ -65,9 +65,28 @@ Edit **`@_status`**: `planned` | `in-progress` | `done` | `blocked`.
 - If a phase is still missing tests, split or continue it; do not mark the row `done`.
 - Use Global + section planning to define the phase **definition of done** before relying on CLI or cockpit summaries.
 
-## Optional CLI
+## GAD CLI (preferred for state inspection)
 
-**`pnpm planning ...`** forwards to **`vendor/repo-planner/scripts/loop-cli.mjs`** (see **[getting-started.mdx](../apps/portfolio/content/docs/repo-planner/getting-started.mdx)**). Reports default to **`.planning-reports/`**.
+**`gad`** is the canonical planning CLI. Run via `node vendor/get-anything-done/bin/gad.cjs` from the repo root:
+
+| Command | What it does |
+| --- | --- |
+| `gad workspace show` | Show all planning roots from `planning-config.toml` |
+| `gad projects list` | List projects and their current phase/status |
+| `gad state show` | Show current phase and next action from STATE |
+| `gad phases list` | List all phases with status |
+| `gad tasks list` | List tasks for current or specified phase |
+| `gad eval list` | List eval projects and run history |
+| `gad eval score --project <name>` | Generate `SCORE.md` for latest eval run |
+| `gad migrate-schema [--yes]` | Preview or execute XML -> Markdown schema migration |
+
+The GAD CLI reads both XML (current format) and MD (target format) via fallback. All `gad` commands work against the current `.planning/*.xml` files without migration.
+
+**Migration gate:** `gad migrate-schema --yes` converts `STATE.xml`, `ROADMAP.xml`, `DECISIONS.xml`, `REQUIREMENTS.xml`, `ERRORS-AND-ATTEMPTS.xml` to Markdown and archives the XML files. `TASK-REGISTRY.xml` requires manual merge into `STATE.md`. Do not run until all in-progress tasks are complete.
+
+## Optional RP CLI (legacy)
+
+**`pnpm planning ...`** forwards to **`vendor/repo-planner/scripts/loop-cli.mjs`** (see **[getting-started.mdx](../apps/portfolio/content/docs/repo-planner/getting-started.mdx)**). Reports default to **`.planning-reports/`**. Prefer `gad` over the RP CLI for new work.
 
 ## Encoding policy
 

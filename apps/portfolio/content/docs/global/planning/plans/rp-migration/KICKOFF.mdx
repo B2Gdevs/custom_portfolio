@@ -1,0 +1,98 @@
+---
+title: RP migration — GAD MD schema, GUI-only RepoPlanner
+description: Migration from RP XML planning schema to GAD Markdown, removal of redundant rp-* skills, and making RepoPlanner GUI-only.
+date: "2026-04-03"
+updated: "2026-04-03"
+repoPath: apps/portfolio/content/docs/global/planning/plans/rp-migration/KICKOFF.mdx
+taskPhase: global-planning-04
+order: 1
+---
+
+# RP migration — GAD MD schema, GUI-only RepoPlanner
+
+## Goal
+
+Retire the RP XML planning schema and `rp-*` skills in favor of GAD's Markdown-based schema and `gad:` skill prefix. RepoPlanner becomes the official GUI frontend for GAD state, not a planning methodology on its own.
+
+## Context
+
+`global-planning-01` through `global-planning-03` established:
+- GAD CLI binary (`gad`) with workspace/projects/state/phases/tasks/docs/eval commands
+- GAD eval framework (TRACE + SCORE + drift metrics)
+- `lib/state-reader.cjs` and `lib/roadmap-reader.cjs` with XML + MD fallback
+
+The `.planning/` directory still uses XML. RepoPlanner reads XML. The `rp-*` skills duplicate `gad:` skills.
+
+## Work items
+
+### 1. XML -> Markdown migration (blocking: all in-progress tasks must be done first)
+
+**Prerequisite:** `TASK-REGISTRY.xml` tasks `02-01`, `03-02`, `05-01` are still `in-progress`.
+Do not run `gad migrate-schema --yes` until these are done or explicitly closed.
+
+When ready:
+```bash
+node vendor/get-anything-done/bin/gad.cjs migrate-schema --yes
+```
+
+Then manually merge `TASK-REGISTRY.xml` data into `STATE.md` (the CLI archives but does not migrate task registry).
+
+### 2. Remove redundant rp-* skills
+
+Per the gad-architecture plan, these `rp-*` skills are superseded by `gad:` equivalents:
+
+| Remove | GAD equivalent |
+| --- | --- |
+| `rp-add-todo` | `gad:add-todo` |
+| `rp-check-todos` | `gad:check-todos` |
+| `rp-debug` | `gad:debug` |
+| `rp-execute-phase` | `gad:execute-phase` |
+| `rp-map-codebase` | `gad:map-codebase` |
+| `rp-milestone` | `gad:audit-milestone` + `gad:new-milestone` + `gad:complete-milestone` |
+| `rp-new-project` | `gad:new-project` |
+| `rp-plan-phase` | `gad:plan-phase` |
+| `rp-quick` | `gad:quick` |
+| `rp-session` | `gad:pause-work` + `gad:resume-work` + `gad:thread` |
+| `rp-verify-work` | `gad:verify-work` |
+
+The `rp-*` skills live in `vendor/repo-planner`. They are not deleted from the repo but should be marked deprecated with a pointer to the `gad:` equivalent. The skill system will still find them, but the user should prefer `gad:` prefix.
+
+### 3. Update AGENTS.md files
+
+- **`.planning/AGENTS.md`** -- done in global-planning-04: GAD CLI table added, migration gate documented.
+- **Root `AGENTS.md`** -- add note that `gad:` is now the preferred skill prefix, `rp-*` is legacy.
+- **Section `AGENTS.md` files** -- align on `gad:` where they reference `rp-*`.
+
+### 4. Update vendor/repo-planner to read GAD MD state
+
+After the XML migration, RP's planning file discovery needs to handle `.md` files in addition to `.xml`. This is a vendor submodule change in `vendor/repo-planner`.
+
+### 5. RepoPlanner skill deprecation notices
+
+In each `rp-*` skill file, prepend:
+```
+> **Deprecated:** Use `gad:<equivalent>` instead. This skill remains for backwards compatibility.
+```
+
+## Success criteria
+
+- [ ] `.planning/*.xml` migrated to `.md` (XML archived, not deleted)
+- [ ] `TASK-REGISTRY.xml` data merged into `STATE.md` manually
+- [ ] `rp-*` skills have deprecation notices pointing to `gad:` equivalents
+- [ ] Root `AGENTS.md` updated to prefer `gad:` prefix
+- [ ] `vendor/repo-planner` reads both XML and MD state files
+- [ ] `gad workspace show`, `gad projects list`, `gad phases list` all work after migration
+- [ ] `global-planning-04` marked `complete` in state.mdx
+
+## Blocking
+
+- All in-progress tasks in `TASK-REGISTRY.xml` must be complete before XML migration
+- `vendor/repo-planner` must support MD before XML is archived (otherwise RP cockpit breaks)
+
+## Open questions
+
+| Id | Question |
+| --- | --- |
+| `rp-migration-oq-01` | Does `vendor/repo-planner` read MD files directly or only through `pnpm planning` CLI? |
+| `rp-migration-oq-02` | Should `rp-*` skills be removed entirely or just deprecated with a pointer? |
+| `rp-migration-oq-03` | After migration, should `.planning/` AGENTS.md be renamed or reorganized? |
