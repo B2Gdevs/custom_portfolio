@@ -2,7 +2,7 @@
 title: Decisions
 description: Compact decision records for the documentation section.
 date: "2026-03-16"
-updated: "2026-04-09"
+updated: "2026-04-05"
 order: 5
 ---
 
@@ -31,3 +31,4 @@ order: 5
 | `DOCUMENTATION-RAG-EMBEDDINGS-LOCAL-MINILM` | `accepted` | **Optional** RAG embeddings use **`RAG_EMBEDDING_PROVIDER=local`** with **`@xenova/transformers`** and **`Xenova/all-MiniLM-L6-v2`** (384-d); weights cache under **`apps/portfolio/models/.transformers-cache/`** (gitignored). **OpenAI embeddings are not required** when this is on. | **Full re-ingest** + **delete `portfolio-rag.db`** (or `RAG_SQLITE_PATH`) when switching dimensions vs OpenAI `text-embedding-3-small` (1536); chat + ingest share the same provider env |
 | `DOCUMENTATION-MCP-SHADCN-PNPM` | `accepted` | **shadcn MCP** in **`.cursor/mcp.json`** runs via **`pnpm --dir apps/portfolio exec shadcn mcp`** so the CLI resolves inside **`@portfolio/app`** (avoids **`npx` / npm “Cannot read properties of null (reading 'package')”** when the workspace root has no app `package.json` semantics npm expects) | Cursor must still **enable** the server in Settings; **Supabase** URL MCP may require **separate browser auth** per Supabase MCP docs |
 | `DOCUMENTATION-PORTFOLIO-UI-LAYERS` | `accepted` | **`components/ui/`** holds **owned** shadcn-style primitives (edit for design-system needs); **feature composition** lives under **`components/<domain>/`**. Dedupe repeated patterns in **domain** code first; avoid embedding product logic in `ui/`. Canonical prose: root **`AGENTS.md`** (**Portfolio UI**). | Refactors tracked under **`documentation-site-15`**; shared molecules (e.g. **`DiscoveryTagButton`**) live next to consumers in **`components/content/`** unless promoted later |
+| `DOCUMENTATION-PUBLIC-OPENAPI-SWAGGER` | `accepted` | **Public** HTTP surface is documented as **OpenAPI 3** (`GET /api/openapi`) from **`lib/openapi/public-portfolio-openapi.ts`**; **Swagger UI** at **`/docs/api`** loads that spec. **Admin**, **owner-only reader writes**, and **media** routes stay off the spec. With **Clerk**, **`middleware.ts`** lists **anonymous** API prefixes (session, content search, artifacts file, planning-pack manifest, docs archive/source, RAG search, listen unlock, OpenAPI) so browsers are not forced through **`auth.protect()`** for those reads. | Extend the spec when adding intentionally public routes; keep **`isPublicRoute`** aligned or anonymous API calls fail in production |
