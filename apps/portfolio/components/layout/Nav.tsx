@@ -6,7 +6,7 @@ import { NavMobileBar } from '@/components/layout/NavMobileBar';
 import { DEFAULT_SITE_LOGO } from '@/components/layout/nav-config';
 import { PortfolioSidebarInner } from '@/components/layout/nav-sidebar';
 import type { NavMenuSection } from '@/lib/site-menus';
-import { isImmersiveAppsRoute } from '@/lib/app-routes';
+import { isImmersiveAppsRoute, isReaderAppsRoute } from '@/lib/app-routes';
 import { Sidebar, SidebarRail } from '@/components/ui/sidebar';
 
 export default function Nav({
@@ -24,6 +24,8 @@ export default function Nav({
   const pathname = usePathname();
   const logoSrc = siteLogoSrc || DEFAULT_SITE_LOGO;
   const isImmersiveApp = isImmersiveAppsRoute(pathname);
+  /** Reader keeps the site rail + repub reader rail side-by-side; hide the thin edge toggle so only the reader panel has a collapse control. */
+  const isReaderApp = isReaderAppsRoute(pathname);
 
   return (
     <>
@@ -40,7 +42,7 @@ export default function Nav({
             navMenus={navMenus}
             siteLogoSrc={siteLogoSrc}
           />
-          <SidebarRail />
+          {!isReaderApp ? <SidebarRail /> : null}
         </Sidebar>
       ) : null}
     </>
