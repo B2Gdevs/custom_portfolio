@@ -1,57 +1,150 @@
-# Session Handoff
+# Session Handoff — 2026-04-05
 
-**Saved:** 2026-04-04
-**Next:** `global-auth-03-03` COMPLETE — ready for a DB migration + smoke-test pass, then `global-auth-04` or next milestone
+**Session:** s-mnkqq67t-gnzz (continued)
+**Phase:** 05 (global)
+**Methodology version:** 1.0.0
 
-## Position
+## Completed this session (2026-04-05)
+- **Task 5 (missing-arg UX):** eval run/score/diff and session resume/close now print available choices + rerun hint instead of blind citty error. `required: true` replaced with custom guards. Helpers: `listEvalProjectsHint()` and `listActiveSessionsHint()`. Decision: gad-12.
+- **Task 1 (gad context rebuild):** `gad context` now inlines all file contents by default. `--refs` flag = old lightweight mode. JSON mode also inlines content unless `--refs`. Decision: gad-09.
+- **Task 2 (gad snapshot):** `gad snapshot [--project <id>]` added. Inlines every .planning/ file (priority order: STATE, ROADMAP, REQUIREMENTS, DECISIONS, TASK-REGISTRY, then alpha). Decision: gad-10.
+- **Task 3+4 (eval subcommands):** Added `eval status` (coverage gaps), `eval runs`, `eval show`, `eval scores`. All follow missing-arg UX pattern. Updated evalCmd subCommands.
+- **Task 6 (vendor registration):** grime-time-site registered as GAD root (id=grime-time). Only vendor with existing .planning/. mb-cli-framework, gad-manuscript, repub-builder have none yet.
+- **Task 7 (gad sink):** `gad sink status/compile/decompile/validate` added. Decision: gad-11.
+- **Decisions captured:** gad-09 through gad-12 written to DECISIONS.xml.
 
-| Field | Value |
-|-------|-------|
-| Current task | global-auth-03-03 complete |
-| Last action | invite token model, CLI commands, accept route + page, tests |
-| Repo state | Modified files uncommitted — see below |
+## Remaining queue
+- gad eval trace list/show/diff/report (not started)
+- gad eval version — GAD methodology version
+- gad projects audit — format violations, missing files, sink gaps
+- planning-migration eval run (Phase D)
+- Run evals after all the above to measure improvement
 
-## What was built (global-auth-03-03)
+## Resume
+```sh
+gad context --session s-mnkqq67t-gnzz --json
+```
 
-### New files
-- `lib/payload/collections/inviteTokens.ts` — Payload collection (email, tenant, role, tokenHash, expiresAt, acceptedAt, revokedAt, createdBy)
-- `lib/auth/invite.ts` — core invite library: generate/hash token, create, verify, consume, revoke, acceptInvite
-- `scripts/revoke-invite.ts` — `pnpm auth:revoke-invite`
-- `scripts/set-user-role.ts` — `pnpm auth:set-role`
-- `scripts/disable-user.ts` — `pnpm auth:disable-user`
-- `app/api/auth/invite/accept/route.ts` — GET (verify) + POST (consume + login), rate-limited, CSRF-safe
-- `app/invite/accept/page.tsx` — acceptance UI (matches login page style)
-- `tests/unit/lib/auth-invite.test.ts` — 19 tests covering pure helpers + mocked Payload
-- `tests/unit/app/api/invite-routes.test.ts` — 12 tests covering GET + POST paths
+---
 
-### Modified files
-- `lib/payload/collections/users.ts` — added `disabled` field
-- `scripts/invite-user.ts` — replaced direct user creation with invite token flow (outputs accept URL)
-- `payload.config.ts` — registered `inviteTokens` collection
-- `package.json` — added `auth:revoke-invite`, `auth:set-role`, `auth:disable-user` scripts
+# Previous session notes (2026-04-04 final)
 
-## Test status
-- 31 new tests: all pass
-- 3 pre-existing failures (payload-admin-mount, planning-pack-modal-data, SiteCopilot) — unrelated
+**Session:** s-mnkqq67t-gnzz
+**Phase:** 05 (global) / Phase 7 (repo-planner: GAD migration)
+**Methodology version:** 1.0.0 (formalizing now)
 
-## What still needs doing before this is production-ready
-- `pnpm db:generate && pnpm db:migrate` — create the `inviteTokens` table in the DB
-- Smoke test: `pnpm auth:invite -- --email=test@x.com --role=member --tenant-slug=magicborn-studios`
-- Verify accept page renders correctly at `/invite/accept?token=...`
-- Disabled-user login enforcement: the `disabled` field is on the User model but Payload's built-in auth does NOT block login for a disabled user — need to either: (a) add a `beforeLogin` hook in the users collection, or (b) handle it in `auth-worker.ts`
+## Safety backup
+Planning sink backed up: `.tmp/planning-sink-backup-20260404`
+Do NOT delete until migration eval passes lossless round-trip.
 
-## Key constraint: disabled user login is not yet enforced
-Payload's auth doesn't natively gate on a custom `disabled` field. Options:
-1. Add `hooks: { beforeLogin: [checkDisabled] }` to the users collection
-2. After payload.auth() in session.ts, check viewer.user?.disabled
+## Completed this session
+- cli-efficiency v3 (scientific format, score 0.914)
+- DEFINITIONS.md — formal context/fidelity/formula spec
+- repo-planner registered as GAD project
+- skills/manuscript migrated; skills/README.md catalog
+- DECISIONS.xml gad-01 to gad-05
+- next-action truncation removed; gad state --full / --json restructured
+- koodo-reader + kookit submodules removed
+- CLI-SPEC.md written — canonical spec for all future gad commands
+- planning-migration eval project skeleton created
+- planning sink backed up
 
-## GAD planning track status
+## Implementation queue
 
-| Phase | Status |
-|-------|--------|
-| global-planning-01 | planning (arch spec done) |
-| global-planning-02 | complete |
-| global-planning-03 | complete |
-| global-planning-04 | planning (XML migration gated on 02-01 + 03-02) |
-| global-planning-05 | not started |
-| global-auth-03-03 | complete |
+### PHASE A — gad eval + gad trace (implement first, reference CLI-SPEC.md)
+- gad eval status — all projects + eval coverage gap flags
+- gad eval runs/show/scores subcommands
+- gad eval trace list/show/diff/report
+- Missing-arg: print list + rerun hint, never error blind
+- gad eval run --baseline --projectid — portfolio-bare as control variable (YELLOW)
+- gad eval version — GAD methodology version
+
+### PHASE B — gad projects audit + gad sink
+- gad projects audit — format violations, missing files, sink gaps
+- gad sink status/compile/decompile/diff/validate
+- Lossless round-trip requirement: compile(decompile(x))=x
+
+### PHASE C — vendor registration + format migration
+- Register: grime-time-site (has XML), mb-cli-framework, repub-builder, gad-manuscript
+- Compliance rules in CLI-SPEC.md
+- Run gad sink validate on each before touching files
+
+### PHASE D — planning-migration eval run
+- Baseline: .tmp/planning-sink-backup-20260404
+- Trace all file touches; evaluate format_compliance + lossless_roundtrip + trace_coverage
+
+## Questions for user before Phase C
+1. grime-time-site: migrate XML in place or keep XML + add MD alongside?
+2. gad-manuscript: register in this repo's planning-config.toml or standalone?
+3. GAD v1.0.0 defining characteristics vs pre-1.0 GSD loop?
+
+## Resume
+```sh
+gad context --session s-mnkqq67t-gnzz --json
+# read vendor/get-anything-done/docs/CLI-SPEC.md before any new command implementation
+```
+
+## Answers received 2026-04-04
+
+### Q1: Format flexibility (CRITICAL — changes CLI-SPEC)
+- Sub-repos and .planning/ dirs can be XML, MD, or MDX — any format stays as-is
+- The SINK normalizes to MDX only (that is the sink's contract)
+- GAD CLI must parse all three formats (XML, MD, MDX) transparently
+- compile: any format → MDX in sink
+- decompile: MDX from sink → back to original format (XML if it was XML, MD if MD)
+- The CLI and coding agents must be format-agnostic — methodology is the constant
+- gad sink validate checks: can we parse this? does it round-trip? not: is it MDX?
+
+### Q2: gad-manuscript = self-contained repo
+- NOT registered in this repo's planning-config.toml
+- Domain translator pattern: standalone repo that adapts GAD base to a vertical
+- References GAD core skills but owns its own skill set and evals
+
+### Q3: GAD v1.0.0 defining shift = skills-first + evaluation
+- Pre-1.0 (GSD/ralph-wiggum): workflow-heavy, agents followed long workflow docs
+- v1.0.0: skills are first-class, evaluated, versioned alongside methodology
+- Key shifts:
+  1. Skills have SKILL.md definitions (agent-agnostic, not Claude Code-specific)
+  2. Every skill is evaluated — does it produce correct output?
+  3. CLI provides context efficiency (replaces raw file reads)
+  4. Evals are scientific (actual content, fidelity levels, agent simulation)
+  5. Planning docs are parsed/compiled/decompiled by CLI — not just read
+  6. Trace: what an agent retrieves is measured and compared to CLI equivalent
+  7. Domain translators extend GAD to verticals (gad-manuscript = first translator)
+
+## Snapshot discussion — 2026-04-04
+
+### What RepoPlanner snapshot actually did (from loop-cli.mjs + planning-parse-core.mjs):
+- Parsed ALL planning files (XML state, roadmap, task-registry, phase PLAN.xml files)
+- Per-phase: extracted code/doc file refs from task commands ("files likely in mind")
+- Token estimates per section (same ~4 chars/token we use now)
+- Phase open questions surfaced
+- Requirements doc stats (paths, char counts, token counts)
+- Produced a structured "planning pack" — full project orientation in one call
+
+### Key distinction (captured for next session):
+- `gad context` (fully parsed) = what you need RIGHT NOW to continue work (session-scoped)
+- `gad snapshot` = FULL project planning state — all phases, all tasks, file refs per phase,
+  open questions, token stats — for deep orientation, handoffs, and eval baselines
+
+These are TWO different commands, not one.
+Skills alone are NOT enough — skills are methodology, not state capture.
+The snapshot IS the state capture mechanism. It feeds agents a planning pack.
+
+### gad snapshot target output:
+{
+  "project": "global",
+  "methodology": "1.0.0",
+  "timestamp": "...",
+  "state": { currentPhase, milestone, status, nextAction, openTasks },
+  "phases": [{ id, status, title, openQuestions[], fileRefs[] }],
+  "tasks": { inProgress: [...], planned: [...] },
+  "conventions": { loop, buildCommands, compactionProtocol },
+  "tokenStats": { total, bySection: { state, phases, tasks, conventions } },
+  "refs": { stale: [], active: [] }   // from STATE.xml references, filtered
+}
+
+### What to implement next session (PHASE A addition):
+- `gad snapshot [--projectid <id>] [--json]` — full planning pack, one call
+- `gad context` rebuilt to return parsed inline content (not refs), use --refs for old mode
+- snapshot becomes the eval input — "what did the agent get?"

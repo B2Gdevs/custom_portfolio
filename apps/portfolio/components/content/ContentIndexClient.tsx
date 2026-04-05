@@ -1,6 +1,6 @@
 'use client';
 
-import type { Dispatch, ReactNode, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { format } from 'date-fns';
@@ -20,13 +20,14 @@ import {
   getDefaultSort,
   getDiscoveryFilterOptions,
 } from '@/lib/content-discovery';
+import { DiscoveryTagButton } from '@/components/content/DiscoveryTagButton';
+import { DiscoveryHeroPanel, DiscoveryIndexLayout } from '@/components/content/DiscoveryIndexLayout';
 import { HighlightedText } from '@/components/content/HighlightedText';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { CONTENT_SEARCH_MODAL_ID } from '@/lib/modal-ids';
 import { useModalStore } from '@/stores/modalStore';
-import { cn } from '@/lib/utils';
 
 type SortOption = {
   value: string;
@@ -89,33 +90,6 @@ const IDENTITY: Record<DiscoveryKind, IdentityConfig> = {
   },
 };
 
-function DiscoveryTagButton({
-  active,
-  onClick,
-  children,
-  accentClass,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: ReactNode;
-  accentClass: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'rounded-full border px-3 py-1.5 text-sm transition',
-        active
-          ? `border-accent/70 bg-accent/15 ${accentClass}`
-          : 'border-border/70 bg-dark-alt/60 text-text-muted hover:border-border hover:text-primary'
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
 function CompactLink({ link }: { link: DiscoveryLink }) {
   const className =
     'inline-flex items-center gap-1.5 rounded-full border border-border/70 px-2.5 py-1 text-xs text-text-muted transition hover:border-accent/60 hover:text-primary';
@@ -172,7 +146,7 @@ function DiscoveryFilterPanel({
               key={option.value}
               active={(filters.sort ?? getDefaultSort(kind)) === option.value}
               onClick={() => setFilters((current) => ({ ...current, sort: option.value }))}
-              accentClass={identity.accentClass}
+              activeAccentClass={identity.accentClass}
             >
               {option.label}
             </DiscoveryTagButton>
@@ -197,7 +171,7 @@ function DiscoveryFilterPanel({
                       : [...(current.tags ?? []), tag],
                   }))
                 }
-                accentClass={identity.accentClass}
+                activeAccentClass={identity.accentClass}
               >
                 {tag}
               </DiscoveryTagButton>
@@ -213,7 +187,7 @@ function DiscoveryFilterPanel({
             <DiscoveryTagButton
               active={!filters.year}
               onClick={() => setFilters((current) => ({ ...current, year: null }))}
-              accentClass={identity.accentClass}
+              activeAccentClass={identity.accentClass}
             >
               All
             </DiscoveryTagButton>
@@ -222,7 +196,7 @@ function DiscoveryFilterPanel({
                 key={year}
                 active={filters.year === year}
                 onClick={() => setFilters((current) => ({ ...current, year }))}
-                accentClass={identity.accentClass}
+                activeAccentClass={identity.accentClass}
               >
                 {year}
               </DiscoveryTagButton>
@@ -236,7 +210,7 @@ function DiscoveryFilterPanel({
             <DiscoveryTagButton
               active={!filters.status}
               onClick={() => setFilters((current) => ({ ...current, status: null }))}
-              accentClass={identity.accentClass}
+              activeAccentClass={identity.accentClass}
             >
               All
             </DiscoveryTagButton>
@@ -245,7 +219,7 @@ function DiscoveryFilterPanel({
                 key={status}
                 active={filters.status === status}
                 onClick={() => setFilters((current) => ({ ...current, status }))}
-                accentClass={identity.accentClass}
+                activeAccentClass={identity.accentClass}
               >
                 {status}
               </DiscoveryTagButton>
@@ -283,86 +257,84 @@ export function ContentIndexClient({
   const results = filterDiscoveryItems(items, filters);
 
   return (
-    <div className="mx-auto flex max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:px-8">
-      <aside
-        className={cn(
-          'sticky top-24 hidden h-fit w-72 shrink-0 rounded-[2rem] border border-border/70 p-5 lg:block',
-          identity.panelClass
-        )}
+    <>
+      <DiscoveryIndexLayout
+        asidePanelClassName={identity.panelClass}
+        aside={
+          <>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-black/15">
+                <IdentityIcon size={20} className={identity.accentClass} />
+              </span>
+              <div>
+                <p className="text-xs uppercase tracking-[0.24em] text-text-muted">{identity.railLabel}</p>
+                <h2 className="mt-1 font-serif text-2xl text-primary">{identity.railTitle}</h2>
+              </div>
+            </div>
+            <p className="mt-3 text-sm text-text-muted">{identity.railDescription}</p>
+            <div className="mt-6">
+              <DiscoveryFilterPanel kind={kind} items={items} filters={filters} setFilters={setFilters} />
+            </div>
+          </>
+        }
       >
-        <div className="flex items-center gap-3">
-          <span className="inline-flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-black/15">
-            <IdentityIcon size={20} className={identity.accentClass} />
-          </span>
-          <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-text-muted">{identity.railLabel}</p>
-            <h2 className="mt-1 font-serif text-2xl text-primary">{identity.railTitle}</h2>
-          </div>
-        </div>
-        <p className="mt-3 text-sm text-text-muted">{identity.railDescription}</p>
-        <div className="mt-6">
-          <DiscoveryFilterPanel kind={kind} items={items} filters={filters} setFilters={setFilters} />
-        </div>
-      </aside>
-
-      <div className="min-w-0 flex-1">
-        <div
-          className={cn(
-            'rounded-[2rem] border border-border/70 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.16)]',
-            identity.panelClass
-          )}
-        >
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
-              <div className="flex items-center gap-3">
-                <span className="inline-flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-black/15">
-                  <IdentityIcon size={20} className={identity.accentClass} />
+        <>
+          <DiscoveryHeroPanel
+            panelClassName={identity.panelClass}
+            top={
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div className="max-w-3xl">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-black/15">
+                      <IdentityIcon size={20} className={identity.accentClass} />
+                    </span>
+                    <p className="text-xs uppercase tracking-[0.24em] text-text-muted">{identity.headerLabel}</p>
+                  </div>
+                  <h1 className="mt-3 font-serif text-4xl text-primary sm:text-5xl">{title}</h1>
+                  <p className="mt-3 text-base text-text-muted sm:text-lg">{description}</p>
+                </div>
+                <div className="flex gap-3 lg:w-[26rem]">
+                  <div className="relative flex-1">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
+                    <Input
+                      value={filters.query ?? ''}
+                      onChange={(event) => setFilters((current) => ({ ...current, query: event.currentTarget.value }))}
+                      placeholder={identity.searchPlaceholder}
+                      className="h-11 rounded-2xl border-border/80 bg-dark px-10"
+                      aria-label={`Search ${kind}`}
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="h-11 rounded-2xl lg:hidden"
+                    onClick={() => setMobileFiltersOpen(true)}
+                  >
+                    <Filter size={16} />
+                    Filters
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="hidden h-11 rounded-2xl xl:inline-flex"
+                    onClick={() => openModal(CONTENT_SEARCH_MODAL_ID, { initialQuery: filters.query ?? '' })}
+                  >
+                    Cmd+K
+                  </Button>
+                </div>
+              </div>
+            }
+            metaRow={
+              <>
+                <span>
+                  {results.length} {identity.resultsNoun}
                 </span>
-                <p className="text-xs uppercase tracking-[0.24em] text-text-muted">{identity.headerLabel}</p>
-              </div>
-              <h1 className="mt-3 font-serif text-4xl text-primary sm:text-5xl">{title}</h1>
-              <p className="mt-3 text-base text-text-muted sm:text-lg">{description}</p>
-            </div>
-            <div className="flex gap-3 lg:w-[26rem]">
-              <div className="relative flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
-                <Input
-                  value={filters.query ?? ''}
-                  onChange={(event) => setFilters((current) => ({ ...current, query: event.currentTarget.value }))}
-                  placeholder={identity.searchPlaceholder}
-                  className="h-11 rounded-2xl border-border/80 bg-dark px-10"
-                  aria-label={`Search ${kind}`}
-                />
-              </div>
-              <Button
-                variant="outline"
-                className="h-11 rounded-2xl lg:hidden"
-                onClick={() => setMobileFiltersOpen(true)}
-              >
-                <Filter size={16} />
-                Filters
-              </Button>
-              <Button
-                variant="outline"
-                className="hidden h-11 rounded-2xl xl:inline-flex"
-                onClick={() => openModal(CONTENT_SEARCH_MODAL_ID, { initialQuery: filters.query ?? '' })}
-              >
-                Cmd+K
-              </Button>
-            </div>
-          </div>
+                {(filters.tags?.length ?? 0) > 0 ? <span>· {filters.tags?.length} tag filters</span> : null}
+                {filters.year ? <span>· {filters.year}</span> : null}
+                {filters.status ? <span>· {filters.status}</span> : null}
+              </>
+            }
+          />
 
-          <div className="mt-6 flex flex-wrap items-center gap-2 text-sm text-text-muted">
-            <span>
-              {results.length} {identity.resultsNoun}
-            </span>
-            {(filters.tags?.length ?? 0) > 0 ? <span>· {filters.tags?.length} tag filters</span> : null}
-            {filters.year ? <span>· {filters.year}</span> : null}
-            {filters.status ? <span>· {filters.status}</span> : null}
-          </div>
-        </div>
-
-        <div className="mt-8 space-y-5">
+          <div className="mt-8 space-y-5">
           {results.length === 0 ? (
             <div className="rounded-[2rem] border border-dashed border-border/70 bg-dark-alt/40 p-10 text-center">
               <p className="font-serif text-2xl text-primary">No matches yet</p>
@@ -445,7 +417,8 @@ export function ContentIndexClient({
             })
           )}
         </div>
-      </div>
+        </>
+      </DiscoveryIndexLayout>
 
       <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
         <SheetContent side="right" className="border-border bg-[#171412] text-primary">
@@ -458,6 +431,6 @@ export function ContentIndexClient({
           </div>
         </SheetContent>
       </Sheet>
-    </div>
+    </>
   );
 }

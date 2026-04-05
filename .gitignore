@@ -134,3 +134,4 @@ apps/portfolio/public/books/**/*.repub
 apps/portfolio/models/.transformers-cache/
 apps/portfolio/models/**/*.onnx
 apps/portfolio/models/**/*.bin
+.tmp/

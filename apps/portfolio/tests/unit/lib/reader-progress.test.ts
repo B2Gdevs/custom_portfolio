@@ -1,26 +1,29 @@
 import {
-  EPUB_PROGRESS_STORAGE_PREFIX,
   formatReaderProgressLabel,
   readStoredReaderProgress,
   resolveReaderShelfStatus,
+  useReaderReadingStore,
 } from '@/lib/reader-progress';
 import { afterEach, beforeEach, vi } from 'vitest';
 
 describe('reader progress helpers', () => {
-  const storage = new Map<string, string>();
-
   beforeEach(() => {
-    storage.clear();
     vi.stubGlobal('window', {
       localStorage: {
-        getItem: (key: string) => storage.get(key) ?? null,
-        setItem: (key: string, value: string) => {
-          storage.set(key, value);
-        },
-        clear: () => {
-          storage.clear();
+        getItem: () => null,
+        setItem: () => {},
+        removeItem: () => {},
+        clear: () => {},
+        key: () => null,
+        get length() {
+          return 0;
         },
       },
+    });
+    void useReaderReadingStore.persist.clearStorage();
+    useReaderReadingStore.setState({
+      progressByKey: {},
+      locationByKey: {},
     });
   });
 
@@ -42,9 +45,8 @@ describe('reader progress helpers', () => {
     });
   });
 
-  it('reads and clamps stored progress from local storage', () => {
-    storage.set(`${EPUB_PROGRESS_STORAGE_PREFIX}mordreds_tale`, '1.4');
-
+  it('reads and clamps progress via the reading store', () => {
+    useReaderReadingStore.getState().setProgress('mordreds_tale', 1.4);
     expect(readStoredReaderProgress('mordreds_tale')).toBe(1);
   });
 });

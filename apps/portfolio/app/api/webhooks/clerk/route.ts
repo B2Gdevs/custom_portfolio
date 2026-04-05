@@ -129,6 +129,28 @@ interface ClerkMembership {
   role: string;
 }
 
+/** Matches `users` collection `externalIds` group */
+type UserExternalIds = {
+  clerkId?: string | null;
+  stripeCustomerId?: string | null;
+};
+
+/** Matches `tenants` collection `externalIds` group */
+type TenantExternalIds = {
+  clerkOrgId?: string | null;
+  stripeAccountId?: string | null;
+};
+
+type UserDocWithExternal = {
+  externalIds?: UserExternalIds | null;
+  displayName?: string | null;
+  avatarUrl?: string | null;
+};
+
+type TenantDocWithExternal = {
+  externalIds?: TenantExternalIds | null;
+};
+
 /**
  * Handle user.created event - create Payload user
  */
@@ -165,18 +187,18 @@ async function handleUserCreated(data: Record<string, unknown>) {
     });
 
     if (existingUser.docs.length > 0) {
-      // Update existing user with clerkId
-      const existingDoc = existingUser.docs[0];
+      const existingDoc = existingUser.docs[0] as UserDocWithExternal & { id: string | number };
+      const prev = existingDoc.externalIds ?? {};
       await payload.update({
         collection: 'users',
         id: existingDoc.id,
         data: {
           externalIds: {
-            ...((existingDoc as any).externalIds || {}),
+            ...prev,
             clerkId: user.id,
           },
-          displayName: displayName || (existingDoc as any).displayName,
-          avatarUrl: user.image_url || (existingDoc as any).avatarUrl,
+          displayName: displayName || existingDoc.displayName,
+          avatarUrl: user.image_url ?? existingDoc.avatarUrl,
         },
       });
       console.log(`[clerk-webhook] Updated existing user: ${primaryEmail}`);
@@ -286,16 +308,18 @@ async function handleUserDeleted(data: Record<string, unknown>) {
       return;
     }
 
-    // Clear clerkId and set entitlements to empty (effectively disable)
+    const doc = existingUser.docs[0] as UserDocWithExternal & { id: string | number };
+    const prev = doc.externalIds ?? {};
+
     await payload.update({
       collection: 'users',
-      id: existingUser.docs[0].id,
+      id: doc.id,
       data: {
         externalIds: {
-          ...((existingUser.docs[0] as any).externalIds || {}),
+          ...prev,
           clerkId: null,
         },
-        entitlements: [], // Remove all entitlements
+        entitlements: [],
       },
     });
 
@@ -330,13 +354,14 @@ async function handleOrganizationCreated(data: Record<string, unknown>) {
     });
 
     if (existingTenant.docs.length > 0) {
-      // Update existing tenant with clerkOrgId
+      const doc = existingTenant.docs[0] as TenantDocWithExternal & { id: string | number };
+      const prev = doc.externalIds ?? {};
       await payload.update({
         collection: 'tenants',
-        id: existingTenant.docs[0].id,
+        id: doc.id,
         data: {
           externalIds: {
-            ...((existingTenant.docs[0] as any).externalIds || {}),
+            ...prev,
             clerkOrgId: org.id,
           },
         },

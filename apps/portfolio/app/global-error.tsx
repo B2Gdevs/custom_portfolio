@@ -37,8 +37,9 @@ export default function GlobalError({
             )}
           </p>
           {showDetail ? (
-            <pre className="mt-4 max-h-48 overflow-auto rounded border border-border bg-dark-alt/50 p-3 text-xs text-text-muted">
+            <pre className="mt-4 max-h-64 overflow-auto rounded border border-border bg-dark-alt/50 p-3 text-xs text-text-muted whitespace-pre-wrap break-words">
               {error.message}
+              {error.stack ? `\n\n${error.stack}` : ''}
             </pre>
           ) : null}
           <button

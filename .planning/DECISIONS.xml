@@ -80,6 +80,52 @@
       <file path="apps/portfolio/lib/auth/config.ts" />
     </references>
   </decision>
+  <decision id="gad-01">
+    <title>GAD is the universal planning framework — agent-agnostic, not Claude Code-specific</title>
+    <summary>GAD (get-anything-done) is the single planning framework for all projects in this repo. Skills are methodology documents (SKILL.md) stored in vendor/get-anything-done/skills/ — they must work with any AI coding assistant, not just Claude Code. Claude Code-specific install paths (~/.claude/) are implementation details, not the canonical source.</summary>
+    <impact>All projects register under GAD via planning-config.toml. rp-* skills are deprecated; gad:* skills are canonical. No new framework-specific skill systems are added.</impact>
+    <references>
+      <file path="vendor/get-anything-done/skills/README.md" />
+      <file path=".planning/planning-config.toml" />
+    </references>
+  </decision>
+  <decision id="gad-02">
+    <title>Evals capture actual content, not just byte counts — token counts are the primary efficiency metric</title>
+    <summary>Every eval RUN.md must contain verbatim CLI and raw workflow outputs, a unit-by-unit fidelity table, token counts (chars/4), arithmetic showing all formulas applied, and an agent simulation proving the next-action decision is identical with and without the CLI. Byte counts alone are insufficient because they cannot reveal whether information is actually readable or complete.</summary>
+    <impact>All future eval runs follow the scientific format defined in vendor/get-anything-done/evals/DEFINITIONS.md. v3 is the first run that meets this standard.</impact>
+    <references>
+      <file path="vendor/get-anything-done/evals/DEFINITIONS.md" />
+      <file path="vendor/get-anything-done/evals/cli-efficiency/REQUIREMENTS.md" />
+      <file path="vendor/get-anything-done/evals/cli-efficiency/v3/RUN.md" />
+    </references>
+  </decision>
+  <decision id="gad-03">
+    <title>Context = session-variable information units; static docs are exempt from CLI coverage</title>
+    <summary>Context for agent resumption is defined as the 10 session-variable information units (U1–U10) in DEFINITIONS.md. Static docs (AGENTS.md style guide, planning model reference tables, done-task history) do not constitute context loss if absent from CLI output — they are read once and cached. Context loss occurs only when a unit's absence would cause an agent to make a different next-action decision.</summary>
+    <impact>Completeness scoring is now honest: units present at reduced fidelity (Truncated/Approximated) score 0.5, not 1.0. v3 completeness = 0.85, lower than v2's inflated 0.95.</impact>
+    <references>
+      <file path="vendor/get-anything-done/evals/DEFINITIONS.md" />
+    </references>
+  </decision>
+  <decision id="gad-04">
+    <title>All session intents, decisions, and guidance must be captured in planning docs each session</title>
+    <summary>Every working session that produces new decisions, requirements, or guidance must update DECISIONS.xml (root) and the relevant section planning docs before the session ends. Chat context is ephemeral — planning docs are the durable record. The GAD planning loop is the mechanism; this decision makes the capture requirement explicit.</summary>
+    <impact>Agents starting a new session get current decisions from the planning docs, not from reconstructing chat history. Drift between chat intent and planning state is prevented.</impact>
+    <references>
+      <file path=".planning/DECISIONS.xml" />
+      <file path="vendor/get-anything-done/evals/DEFINITIONS.md" />
+    </references>
+  </decision>
+  <decision id="gad-05">
+    <title>repo-planner is officially a GAD project; rp-* skills are deprecated</title>
+    <summary>vendor/repo-planner is registered as a GAD root (id=repo-planner) in planning-config.toml. It has a GAD-format .planning/ directory. Its skills (rp-*) are deprecated stubs pointing to gad:* equivalents. The manuscript skill content migrated to vendor/get-anything-done/skills/manuscript/SKILL.md. The portfolio docs (apps/portfolio/content/docs/repo-planner/planning/) remain as the docs sink.</summary>
+    <impact>gad projects list shows both global and repo-planner. gad state, phases, and tasks all work for repo-planner. No new rp-* skills should be created.</impact>
+    <references>
+      <file path=".planning/planning-config.toml" />
+      <file path="vendor/repo-planner/.planning/STATE.md" />
+      <file path="vendor/get-anything-done/skills/README.md" />
+    </references>
+  </decision>
   <decision id="03-07">
     <title>Phase-one owner account UI reads avatar data from the shared user record and session payload</title>
     <summary>The first owner-shell pass should not stop at initials-only identity. The shared user model and `/api/auth/session` payload should carry an avatar URL so the sidebar can render a SaaS-style account footer immediately, while still falling back to initials when no avatar exists.</summary>
@@ -111,6 +157,59 @@
       <file path="apps/portfolio/lib/analytics.ts" />
       <file path="vendor/grime-time-site/src/app/(frontend)/layout.tsx" />
       <file path="vendor/grime-time-site/src/lib/observability.ts" />
+    </references>
+  </decision>
+
+  <decision id="gad-06">
+    <title>GAD CLI is format-agnostic: XML, MD, MDX all valid in .planning/</title>
+    <summary>Sub-repos and .planning/ directories may use XML, MD, or MDX. The GAD CLI must parse all three transparently. The planning sink normalizes to MDX only. compile() converts any format to MDX; decompile() restores the original format. Coding agents and the CLI treat methodology as the constant — format is an implementation detail.</summary>
+    <impact>gad sink validate checks parseability and round-trip fidelity, not format compliance. grim-time-site can stay XML. Any new project may choose its format.</impact>
+    <references><file path="vendor/get-anything-done/docs/CLI-SPEC.md" /></references>
+  </decision>
+  <decision id="gad-07">
+    <title>gad-manuscript is a self-contained domain translator repo</title>
+    <summary>gad-manuscript is not registered in the portfolio planning-config.toml. It is a standalone repo that defines the domain translator pattern — adapts GAD base methodology to book/fiction creation. It owns its own SKILL.md files, evals, and planning docs while referencing gad:* base skills.</summary>
+    <impact>Domain translator pattern is now defined. Other verticals (product, design) follow the same pattern: standalone repo, own skills, own evals, references gad:* base.</impact>
+    <references><file path="vendor/gad-manuscript/" /></references>
+  </decision>
+  <decision id="gad-08">
+    <title>GAD v1.0.0 defining characteristic: skills-first with evaluation</title>
+    <summary>Pre-1.0 (GSD/ralph-wiggum loop) was workflow-heavy — agents followed long workflow docs. v1.0.0 is skills-first: every skill has an agent-agnostic SKILL.md definition, is evaluated for output quality, and is versioned with the methodology. The CLI provides context efficiency. Evals are scientific. Traces measure what agents retrieve. Domain translators extend GAD to verticals.</summary>
+    <impact>All new skills must have SKILL.md in vendor/get-anything-done/skills/. Skills are evaluated via the eval framework. Methodology version is tracked in package.json gadMethodologyVersion field.</impact>
+    <references><file path="vendor/get-anything-done/skills/README.md" /><file path="vendor/get-anything-done/evals/DEFINITIONS.md" /></references>
+  </decision>
+  <decision id="gad-09">
+    <title>gad context inlines file contents by default; --refs is the lightweight mode</title>
+    <summary>The `gad context` command now inlines all planning file contents directly into its output by default. This gives agents a single command to get full context without reading files separately. The `--refs` flag restores the old lightweight behavior (file paths only). This improves the completeness score on the cli-efficiency eval — agents no longer need to issue secondary read commands after `gad context`.</summary>
+    <impact>Agents must use `gad context --refs` when they only want file paths. `gad context` without flags is now verbose — suitable for session start, not for routine orientation checks.</impact>
+    <references>
+      <file path="vendor/get-anything-done/bin/gad.cjs" />
+      <file path="vendor/get-anything-done/evals/cli-efficiency/REQUIREMENTS.md" />
+    </references>
+  </decision>
+  <decision id="gad-10">
+    <title>gad snapshot is the one-shot full project context command</title>
+    <summary>`gad snapshot` inlines every planning file in a project's .planning/ directory (excluding archive/, sessions/, node_modules/). Priority order: STATE, ROADMAP, REQUIREMENTS, DECISIONS, TASK-REGISTRY, then alphabetical. This is the canonical command for handing an agent a complete cold-start context pack. It differs from `gad context` in scope — context gives session-aware minimal refs, snapshot gives everything.</summary>
+    <impact>Agents starting a fresh session on an unfamiliar project use `gad snapshot --project <id>`. `gad context` is for ongoing work within a session.</impact>
+    <references>
+      <file path="vendor/get-anything-done/bin/gad.cjs" />
+    </references>
+  </decision>
+  <decision id="gad-11">
+    <title>gad sink is the canonical docs sync command; gad docs compile is an alias</title>
+    <summary>`gad sink` owns the four-direction docs sync surface: status (diff), compile (planning→docs), decompile (docs→planning), validate (mapping health). `gad docs compile` remains for backward compatibility but is an alias path through the same docs-compiler.cjs library. The sink is manual by default (sink_workflow = "manual") — no auto-compile on file change.</summary>
+    <impact>New code uses `gad sink compile` not `gad docs compile`. The docs-compiler.cjs library is shared. `gad sink decompile` is the canonical way to pull docs edits back into planning files.</impact>
+    <references>
+      <file path="vendor/get-anything-done/bin/gad.cjs" />
+      <file path=".planning/planning-config.toml" />
+    </references>
+  </decision>
+  <decision id="gad-12">
+    <title>Missing-arg UX: print available choices and rerun hint, never a blind error</title>
+    <summary>All GAD CLI commands that require a `--project` or `--id` argument must, when that argument is absent, print the list of valid choices and a ready-to-run rerun hint on stderr before exiting 1. This applies to: eval run/score/diff (list eval projects), session resume/close (list active sessions). Blind citty "Missing required argument" errors are banned — required: true is replaced with our own check.</summary>
+    <impact>Any future command added to gad.cjs that takes a required project/session/id arg must follow this pattern. The listEvalProjectsHint() and listActiveSessionsHint() helpers are the canonical implementation.</impact>
+    <references>
+      <file path="vendor/get-anything-done/bin/gad.cjs" />
     </references>
   </decision>
 </decisions>

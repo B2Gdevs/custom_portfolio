@@ -2,7 +2,7 @@
 <roadmap>
   <phase id="01">
     <goal>Phase 01 (closed 2026-03-28): `.planning-archive` removed after migration into public docs; monorepo CLI baseline (`pnpm planning -- --version`, `engines.node &gt;= 22`, documented `pnpm dlx` / workspace exec). Ongoing: keep `.planning/*.xml` aligned with section requirements/state/task-registry MDX; agents read root AGENTS.md first.</goal>
-    <status>active</status>
+    <status>done</status>
     <depends></depends>
   </phase>
   <phase id="02">

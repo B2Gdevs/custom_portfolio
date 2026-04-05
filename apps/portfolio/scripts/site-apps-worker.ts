@@ -1,10 +1,6 @@
 import { getPayloadClient } from '@/lib/payload';
-import {
-  FALLBACK_SITE_APPS,
-  toSiteAppRecord,
-  type SiteAppRecord,
-  type SiteAppRecordDoc,
-} from '@/lib/site-app-registry';
+import { FALLBACK_SITE_APPS, type SiteAppRecord, type SiteAppRecordDoc } from '@/lib/site-app-registry';
+import { toSiteAppRecord } from '@/lib/site-app-mapper';
 
 function asString(value: unknown) {
   if (typeof value === 'string') {

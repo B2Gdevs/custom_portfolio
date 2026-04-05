@@ -1,0 +1,36 @@
+---
+title: Site shell, reader EPUB delivery, monorepo registry alignment
+description: Kickoff for documentation-site-14 — sidebar/global-error/EPUB plus how root TASK-REGISTRY 02-01 and 03-02 relate to Postgres and artifacts.
+date: "2026-04-07"
+updated: "2026-04-07"
+repoPath: apps/portfolio/content/docs/documentation/planning/plans/documentation-site-14/KICKOFF.mdx
+taskPhase: documentation-site-14
+order: 1
+---
+
+# Kickoff: `documentation-site-14`
+
+## Goals
+
+1. **Site sidebar + reader rail** — Eliminate conflicting layout behavior between the portfolio **shadcn `SidebarProvider`** (`SiteLayout` / `Nav`) and the **repub-builder `ReaderWorkspaceSidebar`** (expand/collapse + `READER_NAV_EXPANDED_KEY`). Observed: narrow viewport / DevTools dock → **wide empty rail** without icons; navigating reader → **site sidebar missing** while reader rail expanded; **expand** appears to paint reader content into the **wrong** horizontal slot.
+2. **Root `global-error`** — `app/global-error.tsx` is the **Next.js root error boundary**; it replaces the shell on **uncaught render errors** in the tree under `layout.tsx`. Production shows the generic line until **`NEXT_PUBLIC_CLIENT_ERROR_DEBUG=1`** or dev — capture **digest** from Vercel logs and fix the **underlying** throw (often `useSidebar` outside provider, hydration, or a client component exception during shell render).
+3. **Mordred’s Tale EPUB 404** — `public/books/manifest.json` points at **`/api/published-book-artifacts/file/<filename>.epub`**. The route (`app/api/published-book-artifacts/file/[filename]/route.ts`) resolves **Payload `publishedBookArtifacts`** by filename, then **local disk** under `media/published-book-artifacts/`, then **S3** key candidates, then **redirect** to `public/books/<slug>/book.epub` if present. A 404 with the file “visible in storage” usually means **DB row filename ≠ manifest string**, **S3 key mismatch**, or **build/publish** never ran on that environment — **not** the Postgres adapter itself (Payload already uses **`@payloadcms/db-postgres`** / Supabase-compatible Postgres).
+
+## Root `.planning/TASK-REGISTRY.xml` (clarification)
+
+| Task | What it tracks | Relation to today |
+| --- | --- | --- |
+| **`02-01`** | Shared **data/storage provider abstraction** in Global docs + code; SQLite local vs Supabase hosted **one contract**. | **Postgres via Payload is already in use.** Closing `02-01` is largely **documentation + any remaining repository/bootstrap gaps**, not “add Postgres.” Align with **`global-data-01`** / **`provider-bootstrap`** before flipping the XML row to `done`. |
+| **`03-02`** | Large **git blobs**; **off-repo** publish for EPUB/planning-pack; **what stays in repo** vs storage; **history** notes; **builtin planning-pack** modal visibility; SSR/SEO for heavy media. | **Much of this is already shipped** (publish scripts, manifests, `site-download-assets`). Remaining work is **policy doc**, **audit checklist**, and **closing** rows once decisions are recorded. **Item “restore builtin planning-pack visibility”** = ensure **`PlanningPackModal`** / **`public/planning-embed/builtin-packs.json`** still lists built-in packs when the modal opens from nav — separate from EPUB bytes. |
+| **`03-01`** | Repub-builder **extract** to standalone repo + vendor. | Marked **`done`** in registry; **depends on `02-01`** in XML is a **ordering** edge — if `02-01` is the gate you care about, **finish the abstraction doc + verification** then reconcile **`depends`** in a registry edit. |
+
+## Verification (phase)
+
+- `pnpm --filter @portfolio/app test:unit` (sidebar-related tests if added)
+- `pnpm run build` / `pnpm run lint`
+- Manual: home + reader with **narrow** viewport; **no** `Application error` flash; EPUB opens for `mordreds_tale` when manifest + Payload + storage align
+
+## Open decisions (owner)
+
+- **`02-01` done criteria:** minimal bar = “Global requirements + `DECISIONS` record the env-driven contract; CI verifies bootstrap”; or stricter = “all sections use repository X only.”
+- **`03-02` blob policy:** confirm **tmp**, **`.db`**, **EPUB**, **media** ignore/publish rules in one **decisions** row.

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   fetchAuthSession,
@@ -12,6 +12,13 @@ import {
   dispatchPortfolioAuthChanged,
 } from './events';
 
+type ClerkGlobalWindow = Window & {
+  Clerk?: {
+    user?: { id: string } | null;
+    signOut: () => Promise<void>;
+  } | null;
+};
+
 type AuthSessionState = {
   loading: boolean;
   session: AuthSessionResponseBody['session'] | null;
@@ -19,12 +26,15 @@ type AuthSessionState = {
   logout: () => Promise<void>;
 };
 
-/** Check if Clerk is configured (client-side check) */
 function isClerkEnabled() {
   return Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 }
 
-/** Fetch session for a Clerk-authenticated user by looking up their Payload user */
+function getClerkUserIdFromWindow(): string | null {
+  if (typeof window === 'undefined') return null;
+  return (window as ClerkGlobalWindow).Clerk?.user?.id ?? null;
+}
+
 async function fetchClerkSession(clerkUserId: string) {
   const response = await fetch(`/api/auth/clerk-session?clerkId=${encodeURIComponent(clerkUserId)}`, {
     method: 'GET',
@@ -48,19 +58,16 @@ async function loadAuthSession({
     setLoading(true);
   }
   try {
-    // If Clerk is enabled and user is authenticated via Clerk, use Clerk session bridge
     if (isClerkEnabled() && clerkUserId) {
       const body = await fetchClerkSession(clerkUserId);
       if (body.ok) {
         setSession(body.session);
       } else {
-        // Clerk user exists but no Payload user yet - show as unauthenticated
         setSession(null);
       }
       return;
     }
 
-    // Fall back to Payload-only session
     const { response, body } = await fetchAuthSession({
       cache: 'no-store',
     });
@@ -87,36 +94,37 @@ export function useAuthSession(): AuthSessionState {
   const [clerkUserId, setClerkUserId] = useState<string | null>(null);
   const firstPathnameLoadRef = useRef(true);
 
-  // Get Clerk user ID if Clerk is enabled
   useEffect(() => {
     if (!isClerkEnabled()) return;
 
-    // Dynamically import Clerk hook to avoid errors when not installed
-    import('@clerk/nextjs').then(({ useUser }) => {
-      // Note: This is a workaround - in production, use the hook properly
-      // For now, we'll check window for Clerk state
-    }).catch(() => {
-      // Clerk not installed, ignore
-    });
+    function sync() {
+      const id = getClerkUserIdFromWindow();
+      setClerkUserId((prev) => (prev === id ? prev : id));
+    }
+
+    sync();
+    const interval = setInterval(sync, 1000);
+    return () => clearInterval(interval);
   }, []);
 
-  async function runReload() {
+  const runReload = useCallback(async () => {
     await loadAuthSession({
       setLoading,
       setSession,
       withLoadingSpinner: true,
       clerkUserId,
     });
-  }
+  }, [clerkUserId]);
 
   async function logout() {
-    // If Clerk is enabled, also sign out from Clerk
     if (isClerkEnabled() && clerkUserId) {
       try {
-        const { useClerk } = await import('@clerk/nextjs');
-        // Clerk signOut is handled by the ClerkProvider
+        const clerk = (window as ClerkGlobalWindow).Clerk;
+        if (clerk) {
+          await clerk.signOut();
+        }
       } catch {
-        // Clerk not available
+        /* ignore */
       }
     }
     await logoutAuthSession();
@@ -145,7 +153,7 @@ export function useAuthSession(): AuthSessionState {
     return () => {
       window.removeEventListener(PORTFOLIO_AUTH_CHANGED_EVENT, handleAuthChanged);
     };
-  }, []);
+  }, [runReload]);
 
   return {
     loading,

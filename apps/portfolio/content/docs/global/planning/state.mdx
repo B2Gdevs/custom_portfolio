@@ -2,7 +2,7 @@
 title: State
 description: Current cycle and focus for the Global documentation section (repo-wide planning IA).
 date: "2026-03-28"
-updated: "2026-04-03"
+updated: "2026-04-08"
 order: 2
 repoPath: apps/portfolio/content/docs/global/planning/state.mdx
 taskPhase: global-data-02
@@ -17,7 +17,7 @@ taskPhase: global-data-02
 | `section` | `global` |
 | `owner` | `monorepo` |
 | `status` | `active` |
-| `updated` | `2026-04-03` |
+| `updated` | `2026-04-08` |
 
 ## Current cycle
 
@@ -32,7 +32,8 @@ taskPhase: global-data-02
 | Priority | Action |
 | --- | --- |
 | `1` | finish **`global-auth-03-03`** as the last auth foundation slice before the Grime Time delivery shift: trusted CLI invites, browser invite acceptance, and the role-template / revoke path |
-| `1b` | **`global-auth-03-04` in progress**: Clerk integration underway — `@clerk/nextjs` + `svix` added, `clerkId`/`clerkOrgId` fields on users/tenants, ClerkProvider wrapper, middleware, and webhook endpoint created. Remaining: session bridge, auth UI components, invite flow integration, tests |
+| `1a` | **Portfolio site shell + EPUB (`documentation-site-14`):** narrow sidebar / **`global-error`** / **`mordreds_tale` EPUB 404** — [kickoff](/docs/documentation/planning/plans/documentation-site-14/kickoff). Root **`.planning/TASK-REGISTRY.xml` `02-01`** = provider **contract** close-out (Postgres/Payload already); **`03-02`** = blob/modal policy **finish** — see kickoff table |
+| `1b` | **`global-auth-03-04` in progress** — **`global-auth-03-04a` done**. **Manual Clerk/build confirmation deferred** (operator chose not to confirm now — see **Deferred** below). Invites stay on **`global-auth-03-03`** |
 | `1c` | plan **`global-auth-03-05`**: first-party orgs, memberships, role and entitlement locks, provider mappings, and outbound domain events so hosted identity stays swappable and multi-tenant sync does not become Clerk-only |
 | `2` | continue `global-data-01-03`: finish the install, export-import, and hosted bootstrap flow for large local data plus uploads so the same auth + storage baseline ports cleanly into Grime Time |
 | `3` | extend the `site-download-assets` publisher to the next public bundle classes as `/projects`, `/apps`, and future public exports adopt the same storage-backed path |
@@ -46,6 +47,12 @@ taskPhase: global-data-02
 | `5g` | **`global-tooling-08`:** [Ink refactor kickoff](/docs/global/planning/plans/mb-cli-framework-ink-refactor/KICKOFF) — **`CliScreenBanner`**, **`CliFooterSlotRow`**, **`CliActivityLine`** in framework; **`08-02`** done; **`08-03`** reconciliation notes |
 | `6` | **MCP / ChatGPT Apps:** formal kickoff **[PAYLOAD-MCP-CHAT-KICKOFF](/docs/global/planning/plans/mb-cli-framework/PAYLOAD-MCP-CHAT-KICKOFF)** + phase **`global-tooling-09`** (DB sandbox, extension convention, skills + [Apps SDK UX](https://developers.openai.com/apps-sdk/concepts/ux-principles)); still coordinate with [documentation cross-cutting queue](/docs/documentation/planning/state) |
 | `6b` | **Strategy (2026-04):** portfolio **=** Grime Time attention; pull **visual editing + media** patterns from GT into portfolio via **shared framework/vendor** primitives (**[global-strategy-dec-01](/docs/global/planning/decisions)**). **Process:** vague goals **require** kickoffs; **open questions** below must be **empty or deferred** before starting **auth mutations**, **planning-sync**, or **shared UI extraction** phases (**[global-planning-dec-03](/docs/global/planning/decisions)**, **-05**). |
+
+## Deferred operator confirmations
+
+| Item | Notes |
+| --- | --- |
+| **`global-auth-03-04` verify** | Manual **Clerk sign-in** + **`pnpm run build`** (and optional owner/org link) **not** confirmed by operator right now — **intentionally deferred**; **`global-auth-03-04`** stays **`in-progress`** until someone runs verify and updates the task row. Code hygiene (**`global-auth-03-04a`**) is already **`done`**. |
 
 ## Open questions (gating)
 
@@ -104,4 +111,5 @@ Plans: [gad-architecture](/docs/global/planning/plans/gad-architecture/PLAN) · 
 | `docs-lib` | `apps/portfolio/lib/docs.ts` |
 | `payload-config` | `apps/portfolio/payload.config.ts` |
 | `rag-config` | `apps/portfolio/lib/rag/config.ts` |
+| `documentation-site-14-kickoff` | `apps/portfolio/content/docs/documentation/planning/plans/documentation-site-14/KICKOFF.mdx` |
 | `agents-root` | `AGENTS.md` (repo root) |

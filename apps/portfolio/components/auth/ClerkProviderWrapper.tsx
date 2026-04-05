@@ -1,6 +1,12 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { type ReactNode } from 'react';
+
+const ClerkProviderLazy = dynamic(
+  () => import('@clerk/nextjs').then((mod) => mod.ClerkProvider),
+  { ssr: false },
+);
 
 /**
  * Conditionally wraps children with ClerkProvider when Clerk is configured.
@@ -11,18 +17,11 @@ import { type ReactNode } from 'react';
 export function ClerkProviderWrapper({ children }: { children: ReactNode }) {
   const clerkPubKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
-  // If Clerk is not configured, render children directly
   if (!clerkPubKey) {
     return <>{children}</>;
   }
 
-  // Dynamically import ClerkProvider only when configured
-  // This prevents build errors when @clerk/nextjs is not installed
-  const ClerkProviderLazy = require('@clerk/nextjs').ClerkProvider;
-
   return (
-    <ClerkProviderLazy publishableKey={clerkPubKey}>
-      {children}
-    </ClerkProviderLazy>
+    <ClerkProviderLazy publishableKey={clerkPubKey}>{children}</ClerkProviderLazy>
   );
 }

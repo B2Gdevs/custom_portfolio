@@ -2,7 +2,7 @@
 title: Decisions
 description: Compact decision records for the Dialogue Forge section.
 date: "2026-03-15"
-updated: "2026-03-16"
+updated: "2026-04-05"
 order: 5
 ---
 
@@ -13,6 +13,9 @@ order: 5
 | `DIALOGUE-FORGE-DOCS-PLANNING-FIRST` | `accepted` | planning pages come before general implementation docs | section users reach current planning context first |
 | `DIALOGUE-FORGE-DOCS-STAY-CLOSE-TO-THE-APP` | `accepted` | docs should reflect the shipped editor, not speculative branches | drift cleanup comes before more detail |
 | `DIALOGUE-FORGE-YARN-PATH-STILL-MATTERS` | `accepted` | Yarn Spinner export remains part of the documented identity while it matches the tool | exporter docs stay only while the real tool still supports that path |
+| `DIALOGUE-FORGE-CANONICAL-MODEL-IN-PACKAGE` | `accepted` | dialogue tree, nodes, choices, conditions, and flags are owned by `packages/dialogue-forge/src/types` | portfolio docs point at the package; MDX sketches stay abbreviated |
+| `DIALOGUE-FORGE-EXPORT-IMPORT-WIRING` | `accepted` | `exportToYarn` / `importFromYarn` live in `packages/dialogue-forge/src/lib/yarn-converter.ts`; the portfolio app supplies `onExportYarn` (download); Yarn **Import .yarn** runs only inside `DialogueEditorV2` Yarn view | docs describe this split; no duplicate exporter logic in the app |
+| `DIALOGUE-FORGE-PAGE-UNDOREDO` | `accepted` | dialogue-tree undo/redo (50 steps) and hydration reset live in `useDialogueForgePageState`; editor-internal graph undo stays in the package | two layers of history are intentional; section docs mention both |
 
 ## Decision Rule
 

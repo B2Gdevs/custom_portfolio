@@ -21,6 +21,6 @@ describe('SiteCopilot', () => {
 
     expect(await screen.findByRole('dialog', { name: 'Chat' })).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: 'Type a message...' })).toBeInTheDocument();
-    expect(screen.getByText('OpenAI + site RAG')).toBeInTheDocument();
+    expect(screen.getByText('Site search · assistant')).toBeInTheDocument();
   });
 });

@@ -2,6 +2,7 @@
 title: "Dialogue Forge"
 description: "Visual dialogue editor with Yarn Spinner export for Unreal Engine"
 date: "2024-12-18"
+updated: "2026-04-04"
 order: 1
 ---
 
@@ -11,26 +12,29 @@ A visual node-based dialogue editor that exports to Yarn Spinner format for use 
 
 ## Quick Links
 
-- [Overview](/docs/dialogue-forge/overview) - Project goals and concepts
-- [Yarn Spinner Format](/docs/dialogue-forge/yarn-spinner) - Export format and syntax
-- [Architecture](/docs/dialogue-forge/architecture) - Technical design
+- [Overview](/docs/dialogue-forge/overview) — Goals and concepts
+- [Yarn Spinner Format](/docs/dialogue-forge/yarn-spinner) — Export format and syntax
+- [Architecture](/docs/dialogue-forge/architecture) — How the app and package fit together
+- [Editing Guide](/docs/dialogue-forge/editing-guide) — Using the shipped editor
 
 ## Try It
 
-🎮 **[Launch Dialogue Forge →](/apps/dialogue-forge)** — Visual graph editor for building dialogues.
+**[Open Dialogue Forge →](/apps/dialogue-forge)** — Graph, Yarn, and Play modes in one workspace.
 
-## Features
+## Features (shipped)
 
-- **Visual Node Graph** — Drag nodes, connect edges like Unreal Blueprints
-- **NPC & Player Nodes** — Different node types for dialogue flow
-- **Memory Flags** — Track choices and conditionally show options
-- **Yarn Spinner Export** — Export `.yarn` files for Unreal Engine
-- **Import/Export JSON** — Save and load dialogue trees
+- **Graph** — React Flow canvas: NPC lines, player choice nodes, and conditional branches; connect edges and edit in the side panel
+- **Yarn** — Text view of the same tree for quick reading and review
+- **Play** — Step through the dialogue like a conversation
+- **Memory flags** — Schema and runtime flags; open the flag manager from the graph toolbar when exposed
+- **Yarn export** — Download a `.yarn` file for the Yarn Spinner plugin in Unreal (export is wired from the editor; graph mode includes the usual export affordances)
+- **Persistence** — Dialogue and flags are saved in the browser (portfolio store backed by `localStorage`)
 
 ## Workflow
 
-1. Open the graph editor
-2. Right-click to add NPC or Player nodes
-3. Drag from output ports to connect nodes
-4. Edit node content in the side panel
-5. Export to Yarn Spinner for Unreal
+1. Open **`/apps/dialogue-forge`** and set the **title** in the header.
+2. Use **Graph** to add nodes, connect them, and edit text and choices in the panel.
+3. Switch to **Yarn** or **Play** to validate tone and flow.
+4. Export to **Yarn** when you are ready for engine integration.
+
+Keyboard shortcuts for undo/redo apply when focus is not inside an input (see [Editing Guide](/docs/dialogue-forge/editing-guide)).

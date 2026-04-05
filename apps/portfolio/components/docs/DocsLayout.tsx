@@ -6,6 +6,8 @@ import type { ContentMeta } from '@/lib/content';
 import { DocsFileTreeNav } from '@/components/docs/DocsFileTreeNav';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useSidebar } from '@/components/ui/sidebar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { SKELETON_DOCS_NAV_LINE_COUNT } from '@/lib/ui/skeleton-defaults';
 import { cn } from '@/lib/utils';
 
 interface DocsLayoutProps {
@@ -14,7 +16,24 @@ interface DocsLayoutProps {
 }
 
 function DocsNavFallback() {
-  return <div className="h-64 animate-pulse rounded-lg border border-border/60 bg-dark-alt/50" aria-hidden />;
+  return (
+    <div className="space-y-2 border border-border/40 bg-dark-alt/30 p-2" aria-hidden>
+      {Array.from({ length: SKELETON_DOCS_NAV_LINE_COUNT }, (_, i) => {
+        const depth = [0, 1, 1, 2, 2][i % 5];
+        return (
+          <Skeleton
+            key={i}
+            className={cn(
+              'h-3.5 rounded',
+              depth === 0 && 'w-[92%]',
+              depth === 1 && 'ml-2 w-[88%]',
+              depth === 2 && 'ml-4 w-[78%]'
+            )}
+          />
+        );
+      })}
+    </div>
+  );
 }
 
 function DocsNavPanel({

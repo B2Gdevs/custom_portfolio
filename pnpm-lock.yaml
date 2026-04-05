@@ -122,6 +122,9 @@ importers:
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
+      immer:
+        specifier: ^11.1.4
+        version: 11.1.4
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
@@ -548,6 +551,9 @@ importers:
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
+      immer:
+        specifier: ^11.1.4
+        version: 11.1.4
       jszip:
         specifier: ^3.10.1
         version: 3.10.1

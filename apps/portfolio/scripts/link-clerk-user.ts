@@ -11,6 +11,11 @@
 import { getPayload } from 'payload';
 import config from '../payload.config';
 
+type UserExternalIds = {
+  clerkId?: string | null;
+  stripeCustomerId?: string | null;
+};
+
 async function main() {
   const [clerkUserId, clerkOrgId] = process.argv.slice(2);
 
@@ -41,16 +46,20 @@ async function main() {
     process.exit(1);
   }
 
-  const owner = ownerResult.docs[0];
+  const owner = ownerResult.docs[0] as {
+    id: string | number;
+    email: string;
+    tenant: unknown;
+    externalIds?: UserExternalIds | null;
+  };
   console.log(`  Found owner: ${owner.email}`);
 
-  // Update owner with Clerk ID
   await payload.update({
     collection: 'users',
     id: owner.id,
     data: {
       externalIds: {
-        ...(owner as any).externalIds,
+        ...(owner.externalIds ?? {}),
         clerkId: clerkUserId,
       },
     },
@@ -59,7 +68,15 @@ async function main() {
 
   // If org ID provided, update tenant
   if (clerkOrgId) {
-    const tenantId = typeof owner.tenant === 'object' ? owner.tenant.id : owner.tenant;
+    const raw = owner.tenant;
+    const tenantId =
+      raw == null
+        ? undefined
+        : typeof raw === 'string' || typeof raw === 'number'
+          ? raw
+          : typeof raw === 'object' && raw !== null && 'id' in raw
+            ? (raw as { id: string | number }).id
+            : undefined;
 
     if (tenantId) {
       await payload.update({

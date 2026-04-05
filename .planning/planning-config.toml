@@ -1,6 +1,7 @@
 [planning]
 sprintSize = 5
 currentProfile = "human"
+docs_sink = "apps/portfolio/content/docs"
 conventionsPaths = [
   "AGENTS.md",
   ".planning/AGENTS.md",
@@ -9,15 +10,27 @@ conventionsPaths = [
   "apps/portfolio/content/docs/documentation/roadmap.mdx",
 ]
 
-[[planning.roots]]
-id = "global"
-path = "."
-planningDir = ".planning"
-discover = false
-
 [profiles.human]
 description = "Default human view."
 
 [profiles.agent]
 description = "Agent perspective; defaultJson = true."
 defaultJson = true
+
+[[planning.roots]]
+id = "global"
+path = "."
+planningDir = ".planning"
+discover = false
+
+[[planning.roots]]
+id = "repo-planner"
+path = "vendor/repo-planner"
+planningDir = ".planning"
+discover = false
+
+[[planning.roots]]
+id = "grime-time"
+path = "vendor/grime-time-site"
+planningDir = ".planning"
+discover = false

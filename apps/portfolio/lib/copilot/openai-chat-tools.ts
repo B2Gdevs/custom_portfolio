@@ -112,7 +112,7 @@ export async function runCopilotChatOpenAiLoop(options: {
 }): Promise<CopilotChatLoopResult> {
   const fetchFn = options.fetchImpl ?? globalThis.fetch.bind(globalThis);
   const maxRounds = options.maxRounds ?? COPILOT_TOOL_MAX_ROUNDS;
-  let working = options.messages.map((m) => ({ ...m }));
+  const working = options.messages.map((m) => ({ ...m }));
   let toolRounds = 0;
   let toolCallCount = 0;
   let lastForm: CopilotFormDescriptor | undefined;

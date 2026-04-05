@@ -9,15 +9,25 @@ import { useAuthSession } from '@/lib/auth/use-auth-session';
 import { isClerkConfigured } from '@/lib/auth/use-clerk-auth';
 import { cn } from '@/lib/utils';
 
-/** Dynamically loaded Clerk components */
-function ClerkSignInButton({ children, mode = 'modal' }: { children: React.ReactNode; mode?: 'modal' | 'redirect' }) {
-  const [SignInButton, setSignInButton] = useState<React.ComponentType<any> | null>(null);
+type ClerkSignInProps = {
+  children?: React.ReactNode;
+  mode?: 'modal' | 'redirect';
+};
+
+/** Dynamically loaded Clerk SignInButton */
+function ClerkSignInButton({
+  children,
+  mode = 'modal',
+}: ClerkSignInProps) {
+  const [SignInButton, setSignInButton] = useState<React.ComponentType<ClerkSignInProps> | null>(null);
 
   useEffect(() => {
     if (isClerkConfigured()) {
-      import('@clerk/nextjs').then((mod) => {
-        setSignInButton(() => mod.SignInButton);
-      }).catch(() => {});
+      import('@clerk/nextjs')
+        .then((mod) => {
+          setSignInButton(() => mod.SignInButton);
+        })
+        .catch(() => {});
     }
   }, []);
 
@@ -26,32 +36,6 @@ function ClerkSignInButton({ children, mode = 'modal' }: { children: React.React
   }
 
   return <SignInButton mode={mode}>{children}</SignInButton>;
-}
-
-function ClerkUserButton() {
-  const [UserButton, setUserButton] = useState<React.ComponentType<any> | null>(null);
-
-  useEffect(() => {
-    if (isClerkConfigured()) {
-      import('@clerk/nextjs').then((mod) => {
-        setUserButton(() => mod.UserButton);
-      }).catch(() => {});
-    }
-  }, []);
-
-  if (!UserButton) return null;
-
-  return (
-    <UserButton
-      appearance={{
-        elements: {
-          avatarBox: 'size-10',
-          userButtonTrigger: 'focus:shadow-none',
-        },
-      }}
-      afterSignOutUrl="/"
-    />
-  );
 }
 
 function getUserLabel(displayName: string | null, email: string) {

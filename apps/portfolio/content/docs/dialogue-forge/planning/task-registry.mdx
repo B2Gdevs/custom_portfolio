@@ -2,7 +2,7 @@
 title: Task Registry
 description: Compact task records for the Dialogue Forge section.
 date: "2026-03-15"
-updated: "2026-03-28"
+updated: "2026-04-05"
 order: 3
 repoPath: apps/portfolio/content/docs/dialogue-forge/planning/task-registry.mdx
 ---
@@ -14,9 +14,16 @@ repoPath: apps/portfolio/content/docs/dialogue-forge/planning/task-registry.mdx
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
 | `dialogue-forge-docs-01-01` | `done` | move section planning docs into the Dialogue Forge docs area | `-` | `pnpm run build`, `pnpm run lint` |
-| `dialogue-forge-docs-01-02` | `planned` | audit current Dialogue Forge docs against the shipped app and remove drift | `dialogue-forge-docs-01-01` | `pnpm run build` |
-| `dialogue-forge-docs-01-03` | `planned` | expand exporter and dialogue-model docs only where they still match the current tool | `dialogue-forge-docs-01-02` | `pnpm run build` |
-| `dialogue-forge-docs-01-04` | `planned` | capture exporter and editor decisions inside section docs instead of scattering them across implementation pages | `dialogue-forge-docs-01-03` | planning docs updated |
+| `dialogue-forge-docs-01-02` | `done` | audit current Dialogue Forge docs against the shipped app and remove drift | `dialogue-forge-docs-01-01` | `pnpm run build` |
+| `dialogue-forge-docs-01-03` | `done` | expand exporter and dialogue-model docs only where they still match the current tool | `dialogue-forge-docs-01-02` | `pnpm run build` |
+| `dialogue-forge-docs-01-04` | `done` | capture exporter and editor decisions inside section docs instead of scattering them across implementation pages | `dialogue-forge-docs-01-03` | `decisions.mdx` updated |
+
+## Phase `dialogue-forge-app-01`
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `dialogue-forge-app-01-01` | `done` | trim the shipped app route to `DialogueEditorV2` + zustand shell (undo/redo, guide, flags); remove unused legacy graph/pan/edge-drag code | `-` | `pnpm run build` |
+| `dialogue-forge-app-01-02` | `done` | extract `useDialogueForgePageState` (`lib/dialogue-forge/use-dialogue-forge-page-state.ts`); single keyed `DialogueEditorV2`; graph-only props only in graph mode | `dialogue-forge-app-01-01` | `pnpm run build` |
 
 ## Registry Rules
 

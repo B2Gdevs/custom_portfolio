@@ -3,6 +3,46 @@
 import { useEffect, useState } from 'react';
 import type { AuthSessionResponseBody } from './client';
 
+type ClerkBrowserUser = {
+  id: string;
+  primaryEmailAddress?: { emailAddress?: string } | null;
+  firstName: string | null;
+  lastName: string | null;
+  imageUrl: string | null;
+};
+
+type ClerkBrowser = {
+  user?: ClerkBrowserUser | null;
+  signOut: () => Promise<void>;
+};
+
+type ClerkGlobalWindow = Window & {
+  Clerk?: ClerkBrowser | null;
+  __clerk_frontend_api?: string;
+};
+
+function readClerkUser():
+  | {
+      id: string;
+      email: string;
+      firstName: string | null;
+      lastName: string | null;
+      imageUrl: string | null;
+    }
+  | null {
+  if (typeof window === 'undefined') return null;
+  const w = window as ClerkGlobalWindow;
+  const user = w.Clerk?.user;
+  if (!user) return null;
+  return {
+    id: user.id,
+    email: user.primaryEmailAddress?.emailAddress || '',
+    firstName: user.firstName,
+    lastName: user.lastName,
+    imageUrl: user.imageUrl,
+  };
+}
+
 /**
  * Hook that bridges Clerk authentication with Payload authorization.
  *
@@ -25,58 +65,33 @@ export function useClerkAuth() {
   const [session, setSession] = useState<AuthSessionResponseBody['session'] | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load Clerk user
   useEffect(() => {
-    async function loadClerkUser() {
-      try {
-        const clerk = await import('@clerk/nextjs');
-
-        // Check if we're in a browser context with Clerk loaded
-        if (typeof window !== 'undefined' && (window as any).__clerk_frontend_api) {
-          const clerkInstance = (window as any).Clerk;
-          if (clerkInstance?.user) {
-            const user = clerkInstance.user;
-            setClerkUser({
-              id: user.id,
-              email: user.primaryEmailAddress?.emailAddress || '',
-              firstName: user.firstName,
-              lastName: user.lastName,
-              imageUrl: user.imageUrl,
-            });
-          }
-        }
-        setClerkLoaded(true);
-      } catch {
-        // Clerk not available
-        setClerkLoaded(true);
-      }
+    function syncFromWindow() {
+      const next = readClerkUser();
+      setClerkUser((prev) => {
+        if (prev?.id === next?.id && prev?.email === next?.email) return prev;
+        return next;
+      });
     }
 
-    loadClerkUser();
+    try {
+      syncFromWindow();
+    } catch {
+      /* Clerk not on page */
+    }
+    setClerkLoaded(true);
 
-    // Listen for Clerk user changes
     const interval = setInterval(() => {
-      if (typeof window !== 'undefined' && (window as any).Clerk?.user) {
-        const user = (window as any).Clerk.user;
-        setClerkUser((prev) => {
-          if (prev?.id !== user.id) {
-            return {
-              id: user.id,
-              email: user.primaryEmailAddress?.emailAddress || '',
-              firstName: user.firstName,
-              lastName: user.lastName,
-              imageUrl: user.imageUrl,
-            };
-          }
-          return prev;
-        });
+      try {
+        syncFromWindow();
+      } catch {
+        /* ignore */
       }
     }, 1000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Load Payload session when Clerk user is available
   useEffect(() => {
     async function loadPayloadSession() {
       if (!clerkLoaded) return;
@@ -91,11 +106,11 @@ export function useClerkAuth() {
       try {
         const response = await fetch(
           `/api/auth/clerk-session?clerkId=${encodeURIComponent(clerkUser.id)}`,
-          { credentials: 'include' }
+          { credentials: 'include' },
         );
-        const body = await response.json();
+        const body = (await response.json()) as { ok?: boolean; session?: AuthSessionResponseBody['session'] };
 
-        if (body.ok) {
+        if (body.ok && body.session) {
           setSession(body.session);
         } else {
           setSession(null);
@@ -107,17 +122,19 @@ export function useClerkAuth() {
       }
     }
 
-    loadPayloadSession();
+    void loadPayloadSession();
   }, [clerkUser, clerkLoaded]);
 
   async function signOut() {
     try {
-      const clerk = (window as any).Clerk;
-      if (clerk) {
-        await clerk.signOut();
+      if (typeof window !== 'undefined') {
+        const clerk = (window as ClerkGlobalWindow).Clerk;
+        if (clerk) {
+          await clerk.signOut();
+        }
       }
     } catch {
-      // Ignore errors
+      /* ignore */
     }
     setClerkUser(null);
     setSession(null);

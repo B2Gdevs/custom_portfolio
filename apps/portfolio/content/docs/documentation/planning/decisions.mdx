@@ -2,7 +2,7 @@
 title: Decisions
 description: Compact decision records for the documentation section.
 date: "2026-03-16"
-updated: "2026-03-31"
+updated: "2026-04-09"
 order: 5
 ---
 
@@ -30,3 +30,4 @@ order: 5
 | `DOCUMENTATION-SITE-MEDIA-COPILOT-CONTEXT` | `accepted` | **Extend** the floating **`SiteCopilot`** for the media workflow — **no manual “media mode” toggle**; launching from a **hover-only control on the card cover** passes **`mediaSlot`** (e.g. `app-cover:reader`) so the session is implicitly scoped to that asset | UI opens copilot with slot context; thread/composer can show session gallery + “set cover” without a separate modal shell unless UX later demands it |
 | `DOCUMENTATION-RAG-EMBEDDINGS-LOCAL-MINILM` | `accepted` | **Optional** RAG embeddings use **`RAG_EMBEDDING_PROVIDER=local`** with **`@xenova/transformers`** and **`Xenova/all-MiniLM-L6-v2`** (384-d); weights cache under **`apps/portfolio/models/.transformers-cache/`** (gitignored). **OpenAI embeddings are not required** when this is on. | **Full re-ingest** + **delete `portfolio-rag.db`** (or `RAG_SQLITE_PATH`) when switching dimensions vs OpenAI `text-embedding-3-small` (1536); chat + ingest share the same provider env |
 | `DOCUMENTATION-MCP-SHADCN-PNPM` | `accepted` | **shadcn MCP** in **`.cursor/mcp.json`** runs via **`pnpm --dir apps/portfolio exec shadcn mcp`** so the CLI resolves inside **`@portfolio/app`** (avoids **`npx` / npm “Cannot read properties of null (reading 'package')”** when the workspace root has no app `package.json` semantics npm expects) | Cursor must still **enable** the server in Settings; **Supabase** URL MCP may require **separate browser auth** per Supabase MCP docs |
+| `DOCUMENTATION-PORTFOLIO-UI-LAYERS` | `accepted` | **`components/ui/`** holds **owned** shadcn-style primitives (edit for design-system needs); **feature composition** lives under **`components/<domain>/`**. Dedupe repeated patterns in **domain** code first; avoid embedding product logic in `ui/`. Canonical prose: root **`AGENTS.md`** (**Portfolio UI**). | Refactors tracked under **`documentation-site-15`**; shared molecules (e.g. **`DiscoveryTagButton`**) live next to consumers in **`components/content/`** unless promoted later |

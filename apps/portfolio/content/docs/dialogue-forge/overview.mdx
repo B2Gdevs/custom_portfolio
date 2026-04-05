@@ -2,6 +2,7 @@
 title: "Overview"
 description: "Project goals and core concepts for Dialogue Forge"
 date: "2024-12-18"
+updated: "2026-04-04"
 order: 2
 ---
 
@@ -9,49 +10,32 @@ order: 2
 
 ## Problem Statement
 
-Traditional dialogue editors use node-based visual graphs. While powerful, they disconnect you from the actual experience of the conversation. You're manipulating boxes and lines instead of feeling the rhythm and tone of the dialogue.
+Branching dialogue is easy to imagine and hard to keep consistent: writers need both a **bird’s-eye view** of the graph and a **player-shaped** way to feel whether beats land.
 
 ## Solution
 
-Dialogue Forge flips the approach: **you experience the dialogue as you build it**.
+Dialogue Forge gives you **three views** of the same dialogue tree: a **graph** for structure, **Yarn** text for readability, and **Play** for pacing. You edit NPC lines, player choices, and conditions in one place, then export to **Yarn Spinner** for Unreal.
 
-The interface looks like a chat app. An AI character speaks to you, and you respond by selecting from choices. But here's the twist—when you need a new choice, you create it on the spot. When dialogue needs to branch based on past decisions, you set those conditions in context.
+## Shipped experience
+
+The portfolio app at **`/apps/dialogue-forge`** hosts **`DialogueEditorV2`** from `packages/dialogue-forge`: a React Flow–based graph, optional Yarn and Play modes, and a zustand-backed store so your work survives reloads. See [Architecture](/docs/dialogue-forge/architecture) for paths and data flow.
 
 ## Core Concepts
 
-### Dialogue Nodes
+### Dialogue nodes
 
-Each message in the conversation is a node. Nodes can be:
+Nodes are typed **`npc`** (character lines), **`player`** (choices), or **`conditional`** (if / elseif / else style branches). They connect via edges; positions are stored so the graph layout stays stable.
 
-- **AI Messages**: What the character says
-- **Choice Points**: Where the player selects a response
-- **Conditional Branches**: Different paths based on memory flags
+### Memory flags
 
-### Memory Flags
+Choices and nodes can set flags; choices can require flags or comparisons so options appear only when the story state matches. The tool uses a **flag schema** plus per-dialogue usage.
 
-When a player makes a choice, it can set a memory flag. These flags persist throughout the conversation and can be used to:
+### Playthrough state
 
-- Unlock new dialogue options
-- Lock options that shouldn't appear
-- Change what the AI character says
-- Create meaningful consequences
+In **Play** mode, the tool tracks where you are in the tree and which flags apply for that run-through.
 
-### Playthrough State
+## Design principles
 
-The system tracks:
-
-- Current position in the dialogue tree
-- All memory flags set during this playthrough
-- History of the conversation for display
-
-## Design Principles
-
-1. **Play-First Design**: Build by playing, not by drawing graphs
-2. **Immediate Feedback**: See changes reflected instantly
-3. **Iterative Refinement**: Easy to replay and tweak
-4. **Simple Data Model**: JSON-based, human-readable dialogue format
-
-
-
-
-
+1. **Same data, multiple lenses** — Graph, Yarn, and Play stay in sync because they share one `DialogueTree`.
+2. **Fast iteration** — Local persistence and undo/redo support small edits without losing work.
+3. **Engine-ready export** — Yarn Spinner output is the primary path to Unreal.

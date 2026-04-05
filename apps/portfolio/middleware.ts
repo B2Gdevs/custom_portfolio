@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse, type NextFetchEvent, type NextRequest } from 'next/server';
 
 /**
  * Middleware that conditionally applies Clerk authentication when configured.
@@ -6,7 +6,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  * When CLERK_SECRET_KEY is set, this uses Clerk's middleware for session management.
  * Otherwise, it passes requests through unchanged (Payload-only auth path).
  */
-export async function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest, event: NextFetchEvent) {
   // Check if Clerk is configured
   const clerkSecretKey = process.env.CLERK_SECRET_KEY;
 
@@ -39,8 +39,7 @@ export async function middleware(request: NextRequest) {
         }
       });
 
-      // Execute the Clerk middleware
-      return handler(request, {} as any);
+      return handler(request, event);
     } catch (error) {
       // If Clerk import fails, pass through (package may not be installed)
       console.warn('Clerk middleware not available:', error);

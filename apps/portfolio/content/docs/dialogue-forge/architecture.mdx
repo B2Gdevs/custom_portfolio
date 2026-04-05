@@ -2,61 +2,32 @@
 title: "Architecture"
 description: "Technical design and data structures for Dialogue Forge"
 date: "2024-12-18"
+updated: "2026-04-05"
 order: 3
 ---
 
 # Architecture
 
-## Data Model
+## Where the code lives
 
-### Dialogue Node
+| Piece | Location |
+| --- | --- |
+| Shipped app route | `apps/portfolio/app/apps/dialogue-forge/page.tsx` |
+| Page state (undo/redo, hydration, export, shortcuts) | `apps/portfolio/lib/dialogue-forge/use-dialogue-forge-page-state.ts` |
+| Persisted dialogue + flags | `apps/portfolio/lib/stores/dialogue-forge-store.ts` |
+| Editor implementation | `packages/dialogue-forge/` (e.g. `DialogueEditorV2`, React Flow graph, Yarn + Play views) |
 
-```typescript
-interface DialogueNode {
-  id: string;
-  type: 'ai_message' | 'choice_point';
-  content: string;
-  
-  // For choice_point type
-  choices?: Choice[];
-  
-  // Next node (for ai_message without choices)
-  nextNodeId?: string;
-  
-  // Conditions for this node to appear
-  conditions?: Condition[];
-  
-  // Memory flags to set when this node is reached
-  setFlags?: string[];
-}
-```
+The app composes **`DialogueEditorV2`** with props for the active mode (graph-only features such as layout strategy, guide, and flag manager hooks are passed only in graph mode).
 
-### Choice
+## Data model (canonical)
 
-```typescript
-interface Choice {
-  id: string;
-  text: string;
-  nextNodeId: string;
-  
-  // Conditions to show this choice
-  conditions?: Condition[];
-  
-  // Flags to set when chosen
-  setFlags?: string[];
-}
-```
+Types live in `packages/dialogue-forge/src/types`. The tree is JSON-serializable and matches what the editor reads and writes.
 
-### Condition
+### Node kinds
 
-```typescript
-interface Condition {
-  flag: string;
-  operator: 'is_set' | 'is_not_set';
-}
-```
+Nodes use `type: 'npc' | 'player' | 'conditional'` (see `NODE_TYPE` in the package). NPC nodes hold line content and default routing; player nodes hold **choices**; conditional nodes hold **conditional blocks** for branching logic.
 
-### Dialogue Tree
+### Sketch (abbreviated)
 
 ```typescript
 interface DialogueTree {
@@ -65,61 +36,59 @@ interface DialogueTree {
   startNodeId: string;
   nodes: Record<string, DialogueNode>;
 }
-```
 
-### Playthrough State
-
-```typescript
-interface PlaythroughState {
-  treeId: string;
-  currentNodeId: string;
-  memoryFlags: Set<string>;
-  history: HistoryEntry[];
-}
-
-interface HistoryEntry {
-  nodeId: string;
-  type: 'ai' | 'player';
+interface DialogueNode {
+  id: string;
+  type: 'npc' | 'player' | 'conditional';
   content: string;
-  timestamp: number;
+  x: number;
+  y: number;
+  speaker?: string;
+  characterId?: string;
+  choices?: Choice[];
+  nextNodeId?: string;
+  setFlags?: string[];
+  conditionalBlocks?: ConditionalBlock[];
+  // ...
+}
+
+interface Choice {
+  id: string;
+  text: string;
+  nextNodeId?: string;
+  conditions?: Condition[];
+  setFlags?: string[];
+}
+
+interface Condition {
+  flag: string;
+  operator: /* see CONDITION_OPERATOR in package */;
+  value?: boolean | number | string;
 }
 ```
 
-## Component Architecture
+For the full definitions (including `ConditionalBlock` and operators), open the package sources under `packages/dialogue-forge/src/types/`.
 
-```
-DialogueForge/
-├── components/
-│   ├── ChatInterface.tsx      # Main chat display
-│   ├── MessageBubble.tsx      # Individual messages
-│   ├── ChoiceSelector.tsx     # Choice buttons
-│   ├── ChoiceEditor.tsx       # Create/edit choices
-│   ├── MemoryPanel.tsx        # View active flags
-│   └── NodeEditor.tsx         # Edit current node
-├── hooks/
-│   ├── useDialogueTree.ts     # Tree management
-│   ├── usePlaythrough.ts      # Playthrough state
-│   └── useMemory.ts           # Flag management
-├── lib/
-│   ├── dialogue-engine.ts     # Core logic
-│   └── storage.ts             # Persistence
-└── types/
-    └── dialogue.ts            # Type definitions
-```
+## Yarn export and import (implementation)
 
-## State Management
+| Function | File | Role |
+| --- | --- | --- |
+| `exportToYarn` | `packages/dialogue-forge/src/lib/yarn-converter.ts` | Walks `DialogueTree` nodes and emits Yarn node titles, NPC/player lines, `->` choices, `<<jump>>`, and `<<set $flag>>` style commands from flags and conditions |
+| `importFromYarn` | same | Parses `.yarn` text back into a `DialogueTree` (used when the user picks a file in **Yarn** mode) |
 
-Using React state with localStorage persistence:
+**Runtime vs file:** In Yarn Spinner, variable values live in the engine’s variable storage; the `.yarn` file carries commands and structure. The converter maps Dialogue Forge flags to `$variable` names in the exported text—see comments at the top of `yarn-converter.ts`.
 
-1. **Dialogue Tree**: The complete dialogue structure
-2. **Playthrough State**: Current position, flags, history
-3. **Edit Mode**: Whether the editor panel is open
+**Portfolio wiring:** `useDialogueForgePageState` implements `handleExportYarn` (blob download). `DialogueEditorV2` calls that hook in graph and yarn modes; **Yarn** view also wires **Import .yarn** → `importFromYarn` → `onChange`.
 
-## Storage
+## UI stack
 
-Dialogue trees are stored in localStorage as JSON. Future enhancement could add cloud sync or file export/import.
+- **Graph** — React Flow nodes and edges; layout helpers under `packages/dialogue-forge/src/utils/`.
+- **Yarn / Play** — Same `DialogueTree`; Yarn view renders exporter-oriented text; Play view simulates flow.
 
+## Persistence
 
+The portfolio store persists **`dialogueTree`** and **`flagSchema`** to `localStorage` under a single key (with migration from older separate keys). Undo/redo for the dialogue tree is managed in **`useDialogueForgePageState`** and is separate from the editor’s internal React Flow history.
 
+## Export (summary)
 
-
+Use the **Yarn export and import** table above for code paths. End users: see [Yarn Spinner Format](/docs/dialogue-forge/yarn-spinner) for syntax and Unreal import.

@@ -2,7 +2,7 @@
 title: Task Registry
 description: Compact task records for the documentation section.
 date: "2026-03-16"
-updated: "2026-03-31"
+updated: "2026-04-01"
 taskPhase: documentation-site-10
 repoPath: apps/portfolio/content/docs/documentation/planning/task-registry.mdx
 order: 3
@@ -132,6 +132,29 @@ Aligned with [Route conventions](/docs/documentation/route-conventions). **Do no
 | `documentation-site-12-07` | `planned` | **Payload + S3 (phase 2):** persist accepted images, link to `appId` + variant; admin/owner upload path; public read rules | `global-data-01` closure or scoped spike | integration test |
 | `documentation-site-12-08` | `planned` | **Batch covers:** script or owner UI — iterate registered apps, run templated prompt, write artifacts to agreed path or collection | `documentation-site-12-06`, `documentation-site-12-07` optional | one full run documented |
 | `documentation-site-12-09` | `planned` | **Auth + prompts for media:** `SiteCopilot` image flow and **`POST /api/media/generate`** use **`global-auth-03-01`** gates; optional prompt body uses **`books-publishing-03-02`** composer (style + slot/scene) instead of raw user paste where `mediaSlot` implies book/app cover | `documentation-site-12-06`, `global-auth-03-01`, `books-publishing-03-02` | owner session E2E + 403 for anonymous |
+
+## Phase `documentation-site-14` (site shell hardening + EPUB trace + registry notes)
+
+**Goal:** fix **regressions** in the **shadcn site sidebar** when the viewport is narrow (e.g. DevTools docked), **isolate** portfolio `SidebarProvider` from **reader workspace** rail state, eliminate **root `global-error`** on common navigations, and **trace** `mordreds_tale` (and siblings) **EPUB 404** against Payload + S3 + manifest. **Kickoff:** [documentation-site-14/KICKOFF](/docs/documentation/planning/plans/documentation-site-14/kickoff).
+
+**Monorepo link:** root **`.planning/TASK-REGISTRY.xml`** tasks **`02-01`** (provider abstraction — Postgres/Payload already; finish **docs + contract**) and **`03-02`** (blobs + off-repo policy — **partially** done; **decisions** + close-out). See kickoff table.
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `documentation-site-14-01` | `done` | **Sidebar shell:** audit `SiteLayout` + `Nav` + `SidebarProvider` for immersive `/apps/*` vs marketing routes; ensure **one** coherent `open`/`collapsed` model; **namespaced** localStorage vs reader `READER_NAV_EXPANDED_KEY`; fix **empty fat rail** / missing icons at **`md`/`lg`** boundaries (see `components/ui/sidebar.tsx` + `--sidebar-width-icon` overrides) | `documentation-site-10-05` | **Shipped:** `lib/stores/site-shell-store.ts` (`portfolio-site-shell` + legacy `site-sidebar-collapsed`); immersive routes skip `<Sidebar>` + zero-width rail (`SiteLayout`/`Nav`); reader rail isolated in repub **`portfolio-reader-workspace-ui`** (legacy nav keys). `pnpm run build` + `pnpm run lint`; optional manual narrow viewport / reader nav smoke |
+| `documentation-site-14-02` | `planned` | **global-error:** identify throw (digest + dev stack); add **ErrorBoundary** or fix **useSidebar**/hydration offenders; document **`NEXT_PUBLIC_CLIENT_ERROR_DEBUG`** for prod triage | `documentation-site-14-01` optional | reproduce → fix → no uncaught shell error on load |
+| `documentation-site-14-03` | `planned` | **EPUB 404:** for `mordreds_tale`, verify **`publishedBookArtifacts`** row **`filename`** matches manifest segment; **`buildPublishedArtifactS3KeyCandidates`** vs actual bucket keys; runbook: **`pnpm books:publish`** / migrate media on deploy; fallback `public/books/mordreds_tale/book.epub` | `-` | one successful fetch of manifest URL in staging/prod |
+
+## Phase `documentation-site-15` (portfolio UI composition + dedupe)
+
+**Goal:** align with **AGENTS.md** portfolio UI convention (`components/ui` = owned primitives; **`components/<domain>`** = composition); remove **duplication** in discovery / shell code in **low-risk** passes. **Does not** rewrite `components/ui/sidebar.tsx` unless a concrete shell bug or token pass requires it.
+
+| Id | Status | Goal | Depends | Verify |
+| --- | --- | --- | --- | --- |
+| `documentation-site-15-01` | `done` | **Shared discovery filter chip:** extract **`DiscoveryTagButton`** to `components/content/DiscoveryTagButton.tsx`; use from **`ContentIndexClient`** + **`ListenIndexClient`** (`activeAccentClass` vs default listen accent) | `-` | `pnpm --filter @portfolio/app exec vitest run tests/unit/components/content/discovery-tag-button.test.tsx`; `pnpm run lint` |
+| `documentation-site-15-02` | `done` | **`Nav.tsx` split:** extract mobile bar + sidebar inner blocks into colocated **`components/layout/`** modules (no nav behavior change) | `documentation-site-15-01` optional | **`Nav.tsx`** shell + **`NavMobileBar`**, **`nav-sidebar`** (`PortfolioSidebarInner` + sections), **`nav-config`** (icons + primary links); `pnpm run lint` |
+| `documentation-site-15-03` | `done` | **Discovery shell:** shared **`DiscoveryIndexLayout`** + **`DiscoveryHeroPanel`** + **`LISTEN_DISCOVERY_PANEL_CLASS`**; **`ContentIndexClient`** + **`ListenIndexClient`** + **`DiscoveryLayoutSkeleton`** | `documentation-site-15-02` optional | `pnpm run lint --workspace=@portfolio/app`; visual spot-check blog/listen |
+| `documentation-site-15-04` | `done` | **`SiteCopilot.tsx` split:** **`SiteCopilotChatPanel`** (thread, composer, devtools shell) + **`site-copilot-chat-utils.ts`**; **`SiteCopilot`** keeps runtime, fetch, logger, launcher | `-` | lint; `tests/unit/components/site/SiteCopilot.test.tsx` |
 
 ## Phase `documentation-site-13` (RAG cost: local embeddings)
 

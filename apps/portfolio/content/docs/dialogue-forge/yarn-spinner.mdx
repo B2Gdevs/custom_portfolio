@@ -2,12 +2,13 @@
 title: "Yarn Spinner Format"
 description: "How Dialogue Forge exports to Yarn Spinner for Unreal Engine"
 date: "2024-12-18"
+updated: "2026-04-04"
 order: 3
 ---
 
 # Yarn Spinner Format
 
-Dialogue Forge exports to Yarn Spinner's `.yarn` format, which can be used directly in Unreal Engine with the Yarn Spinner plugin.
+Dialogue Forge exports to Yarn Spinner's `.yarn` format, which can be used directly in Unreal Engine with the Yarn Spinner plugin. Conversion code lives in `packages/dialogue-forge` (`exportToYarn` / `importFromYarn`).
 
 ## Basic Syntax
 
@@ -74,17 +75,17 @@ Stranger: A new face in these parts.
 <<endif>>
 ```
 
-## Export from Dialogue Forge
+## Export from the shipped app
 
-1. Build your dialogue in the graph editor
-2. Click **Export** → **Yarn Spinner (.yarn)**
-3. Import the `.yarn` file into Unreal Engine
+1. Open **[Dialogue Forge](/apps/dialogue-forge)**.
+2. Use **Graph** or **Yarn** mode (export is not wired for **Play** in the portfolio shell).
+3. Trigger export from the editor: in **Yarn** mode, the Yarn view calls the app’s download handler; the graph view exposes export through the same `onExportYarn` wiring where the UI provides it.
+4. Save the downloaded `.yarn` file and import it into Unreal with the Yarn Spinner plugin.
 
-## Import to Dialogue Forge
+## Import a `.yarn` file
 
-1. Click **Import** → **Yarn Spinner (.yarn)**
-2. Select your `.yarn` file
-3. Nodes appear in the graph editor
+1. Switch to **Yarn** mode in the header.
+2. In the Yarn view, use **Import .yarn** (file picker) to load text; the editor parses it and replaces the current dialogue tree via `importFromYarn`.
 
 ## Unreal Engine Integration
 
@@ -96,8 +97,3 @@ The Yarn Spinner Unreal plugin provides:
 - Localization support
 
 See [Yarn Spinner Unreal Docs](https://docs.yarnspinner.dev/using-yarnspinner-with-unreal) for setup.
-
-
-
-
-

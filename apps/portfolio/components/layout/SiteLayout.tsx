@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import Nav from './Nav';
 import type { NavMenuSection } from '@/lib/site-menus';
@@ -8,8 +8,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { isImmersiveAppsRoute } from '@/lib/app-routes';
-
-const SIDEBAR_COLLAPSED_KEY = 'site-sidebar-collapsed';
+import { useSiteShellHydrated, useSiteShellStore } from '@/lib/stores/site-shell-store';
 
 export function SiteLayout({
   children,
@@ -25,8 +24,9 @@ export function SiteLayout({
   const isImmersiveApp = isImmersiveAppsRoute(pathname);
   const isBookReadRoute = isImmersiveApp;
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(isImmersiveApp);
-  const [sidebarReady, setSidebarReady] = useState(false);
+  const sidebarCollapsed = useSiteShellStore((s) => s.sidebarCollapsed);
+  const setSidebarCollapsed = useSiteShellStore((s) => s.setSidebarCollapsed);
+  const siteShellHydrated = useSiteShellHydrated();
 
   useEffect(() => {
     const root = document.documentElement;
@@ -72,29 +72,12 @@ export function SiteLayout({
     };
   }, []);
 
-  useEffect(() => {
-    if (sidebarReady || typeof window === 'undefined') return;
-
-    const savedPreference = window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
-    /** Default: icon rail (collapsed) on first visit; reader routes stay collapsed. */
-    const nextCollapsed = savedPreference ? savedPreference === 'true' : true;
-    const frame = window.requestAnimationFrame(() => {
-      setSidebarCollapsed(nextCollapsed);
-      setSidebarReady(true);
-    });
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-    };
-  }, [isImmersiveApp, sidebarReady]);
-
-  useEffect(() => {
-    if (!sidebarReady || typeof window === 'undefined') return;
-    window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(sidebarCollapsed));
-  }, [sidebarCollapsed, sidebarReady]);
+  /** Until persist rehydrates, default to collapsed rail to avoid a wide-sidebar flash. */
+  const effectiveCollapsed =
+    isImmersiveApp || !siteShellHydrated ? true : sidebarCollapsed;
 
   /** Immersive apps (reader, screenshot-annotate) mount their own chrome; site sidebar is not mounted (see Nav). */
-  const siteSidebarOpen = !isImmersiveApp && !sidebarCollapsed;
+  const siteSidebarOpen = !isImmersiveApp && !effectiveCollapsed;
 
   return (
     <TooltipProvider delay={0}>
@@ -105,19 +88,24 @@ export function SiteLayout({
               open: siteSidebarOpen,
               onOpenChange: (open: boolean) => setSidebarCollapsed(!open),
             })}
-        className="min-h-svh w-full"
+        className="min-h-svh w-full flex-wrap content-start"
         style={
-          {
-            '--sidebar-width': '20rem',
-            '--sidebar-width-icon': '5.5rem',
-          } as React.CSSProperties
+          (isImmersiveApp
+            ? {
+                '--sidebar-width': '0px',
+                '--sidebar-width-icon': '0px',
+              }
+            : {
+                '--sidebar-width': '20rem',
+                '--sidebar-width-icon': '5.5rem',
+              }) as React.CSSProperties
         }
       >
         <Nav
           navMenus={navMenus}
           siteLogoSrc={siteLogoSrc}
           portfolioSidebarHoverHandlers={
-            !isImmersiveApp && sidebarCollapsed
+            !isImmersiveApp && effectiveCollapsed
               ? {
                   /** Expand and persist open until user hits collapse (no expand control when rail is icon-only). */
                   onMouseEnter: () => setSidebarCollapsed(false),

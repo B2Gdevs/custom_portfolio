@@ -85,6 +85,24 @@ Reference tasks **by id** in conversation (`books-ai-01-04`, `documentation-site
 - `pnpm run lint` passes.
 - Release artifacts: **Koodo Reader** desktop -- `.releases/` via `scripts/download-releases.cjs`.
 
+## Context compaction (auto-compact re-hydration)
+
+Claude Code auto-compacts when the context window is nearly full. **Never stop work because of this** — auto-compact handles it and the GAD CLI restores context.
+
+**After compaction, immediately run:**
+
+```sh
+gad session list          # find your active session id
+gad context --session <id> --json   # get file refs for current position
+```
+
+Then read each file listed in `refs`. This gives you: AGENTS.md, STATE, ROADMAP, and the active phase PLAN — everything needed to continue. If no session exists yet, run `gad session new --project <id>` first.
+
+**Rules:**
+- Do NOT refuse to continue because context was compacted.
+- Do NOT ask the user to restart or summarise — use `gad context` instead.
+- Session JSON lives in `.planning/sessions/`. If unsure of the project id, run `gad projects`.
+
 ## GSD (Codex)
 
 GSD may create files under **`.planning/`**; this repo's **canonical** loop is described above. Prefer **roadmap/state/task-registry/decisions** over standalone implementation-plan files.
@@ -107,6 +125,12 @@ GSD may create files under **`.planning/`**; this repo's **canonical** loop is d
 
 - One logical task per iteration.
 - Prefer backpressure: fix failing build/lint before adding features.
+
+### Portfolio UI (`apps/portfolio/components`)
+
+**shadcn-style primitives** live under **`components/ui/`** — the code is **vendored into the repo** (not a black-box npm package). **Own and edit** those files for **design-system** needs (tokens, variants, a11y). **Do not** put product rules, section copy, or route logic in `ui/`.
+
+**Composition:** build features under **`components/<domain>/`** (e.g. `content/`, `listen/`, `layout/`). Rough **atomic mapping**: `ui/*` ≈ atoms (buttons, inputs, sidebar shell); reusable **domain** pieces (e.g. discovery filter chips) ≈ molecules; **page-level** sections ≈ organisms. **Deduplicate** repeated UI in **domain** folders first; touch **`ui/`** only when the primitive is wrong for the whole app.
 
 ## Public site copy (portfolio and apps)
 

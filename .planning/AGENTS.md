@@ -59,6 +59,17 @@ Edit **`@_status`**: `planned` | `in-progress` | `done` | `blocked`.
 - **`next-action`** -- one concrete next step for agents.
 - **`references`** -- root **`AGENTS.md`**, **this file**, **Global docs planning**, **`documentation/requirements.mdx`**, key **`.xml`** paths. If an older clone still has **`IMPLEMENTATION_PLAN.md`**, migrate or delete it; it is not part of the living loop.
 
+## Context compaction (auto-compact re-hydration)
+
+Claude Code auto-compacts when the context window fills. **Never stop work** — run these commands to restore context after compaction:
+
+```sh
+gad session list                      # find active session id
+gad context --session <id> --json     # minimal file refs for current position
+```
+
+Load the files returned in `refs`, then continue. Do not ask the user to restart or re-explain — `gad context` is the single re-entry point.
+
 ## Done gate
 
 - **Executable behavior is not done without tests.**

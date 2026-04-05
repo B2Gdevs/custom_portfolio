@@ -1,6 +1,6 @@
 'use client';
 
-import type { Dispatch, ReactNode, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { Filter, Headphones, Lock, Radio, Search, SlidersHorizontal, Waves } from 'lucide-react';
@@ -11,6 +11,12 @@ import {
   getDefaultSort,
   getDiscoveryFilterOptions,
 } from '@/lib/content-discovery';
+import { DiscoveryTagButton } from '@/components/content/DiscoveryTagButton';
+import {
+  DiscoveryHeroPanel,
+  DiscoveryIndexLayout,
+  LISTEN_DISCOVERY_PANEL_CLASS,
+} from '@/components/content/DiscoveryIndexLayout';
 import { HighlightedText } from '@/components/content/HighlightedText';
 import { BandLabListenEmbed } from '@/components/listen/BandLabListenEmbed';
 import { ListenUnlockForm } from '@/components/listen/ListenUnlockForm';
@@ -27,31 +33,6 @@ const bandlabCtaClassName =
   'inline-flex items-center gap-2 rounded-full border border-accent/60 bg-accent/10 px-4 py-2 text-sm text-primary transition hover:bg-accent/20';
 
 type SortOption = { value: string; label: string };
-
-function DiscoveryTagButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'rounded-full border px-3 py-1.5 text-sm transition',
-        active
-          ? 'border-accent/70 bg-accent/15 text-[#91b7d8]'
-          : 'border-border/70 bg-dark-alt/60 text-text-muted hover:border-border hover:text-primary'
-      )}
-    >
-      {children}
-    </button>
-  );
-}
 
 function ListenFilterPanel({
   items,
@@ -233,80 +214,90 @@ export function ListenIndexClient({ rows }: { rows: ListenPageRow[] }) {
   }, [results]);
 
   return (
-    <div className="mx-auto flex max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:px-8">
-      <aside className="sticky top-24 hidden h-fit w-72 shrink-0 rounded-[2rem] border border-border/70 bg-[radial-gradient(circle_at_top_left,rgba(103,147,186,0.18),transparent_45%),rgba(19,23,29,0.88)] p-5 lg:block">
-        <div className="flex items-center gap-3">
-          <span className="inline-flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-black/15">
-            <Waves size={20} className="text-[#91b7d8]" />
-          </span>
-          <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Signal</p>
-            <h2 className="mt-1 font-serif text-2xl text-primary">Listening Room</h2>
-          </div>
-        </div>
-        <p className="mt-3 text-sm text-text-muted">
-          Filter tracks and BandLab presets by type, mood, genre, and release context.
-        </p>
-        <div className="mt-6">
-          <ListenFilterPanel items={items} filters={filters} setFilters={setFilters} />
-        </div>
-      </aside>
-
-      <div className="min-w-0 flex-1">
-        <div className="rounded-[2rem] border border-border/70 bg-[radial-gradient(circle_at_top_left,rgba(103,147,186,0.18),transparent_45%),rgba(19,23,29,0.88)] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.16)]">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
-              <div className="flex items-center gap-3">
-                <span className="inline-flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-black/15">
-                  <Radio size={20} className="text-[#91b7d8]" />
-                </span>
-                <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Listen</p>
+    <>
+      <DiscoveryIndexLayout
+        asidePanelClassName={LISTEN_DISCOVERY_PANEL_CLASS}
+        aside={
+          <>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-black/15">
+                <Waves size={20} className="text-[#91b7d8]" />
+              </span>
+              <div>
+                <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Signal</p>
+                <h2 className="mt-1 font-serif text-2xl text-primary">Listening Room</h2>
               </div>
-              <h1 className="mt-3 font-serif text-4xl text-primary sm:text-5xl">Songs in the same weather system</h1>
-              <p className="mt-3 text-base text-text-muted sm:text-lg">
-                Tracks and BandLab presets in one catalog. Public rows stay open, and owner-only media appears only when the signed-in session allows it.
-              </p>
             </div>
-            <div className="flex gap-3 lg:w-[26rem]">
-              <div className="relative flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
-                <Input
-                  value={filters.query ?? ''}
-                  onChange={(event) => setFilters((current) => ({ ...current, query: event.currentTarget.value }))}
-                  placeholder="Search tracks, presets, moods, and keywords..."
-                  className="h-11 rounded-2xl border-border/80 bg-dark px-10"
-                  aria-label="Search listen catalog"
-                />
+            <p className="mt-3 text-sm text-text-muted">
+              Filter tracks and BandLab presets by type, mood, genre, and release context.
+            </p>
+            <div className="mt-6">
+              <ListenFilterPanel items={items} filters={filters} setFilters={setFilters} />
+            </div>
+          </>
+        }
+      >
+        <>
+          <DiscoveryHeroPanel
+            panelClassName={LISTEN_DISCOVERY_PANEL_CLASS}
+            top={
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div className="max-w-3xl">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-black/15">
+                      <Radio size={20} className="text-[#91b7d8]" />
+                    </span>
+                    <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Listen</p>
+                  </div>
+                  <h1 className="mt-3 font-serif text-4xl text-primary sm:text-5xl">Songs in the same weather system</h1>
+                  <p className="mt-3 text-base text-text-muted sm:text-lg">
+                    Tracks and BandLab presets in one catalog. Public rows stay open, and owner-only media appears only when the signed-in session allows it.
+                  </p>
+                </div>
+                <div className="flex gap-3 lg:w-[26rem]">
+                  <div className="relative flex-1">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
+                    <Input
+                      value={filters.query ?? ''}
+                      onChange={(event) => setFilters((current) => ({ ...current, query: event.currentTarget.value }))}
+                      placeholder="Search tracks, presets, moods, and keywords..."
+                      className="h-11 rounded-2xl border-border/80 bg-dark px-10"
+                      aria-label="Search listen catalog"
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="h-11 rounded-2xl lg:hidden"
+                    onClick={() => setMobileFiltersOpen(true)}
+                  >
+                    <Filter size={16} />
+                    Filters
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="hidden h-11 rounded-2xl xl:inline-flex"
+                    onClick={() => openModal(CONTENT_SEARCH_MODAL_ID, { initialQuery: filters.query ?? '' })}
+                  >
+                    Cmd+K
+                  </Button>
+                </div>
               </div>
-              <Button
-                variant="outline"
-                className="h-11 rounded-2xl lg:hidden"
-                onClick={() => setMobileFiltersOpen(true)}
-              >
-                <Filter size={16} />
-                Filters
-              </Button>
-              <Button
-                variant="outline"
-                className="hidden h-11 rounded-2xl xl:inline-flex"
-                onClick={() => openModal(CONTENT_SEARCH_MODAL_ID, { initialQuery: filters.query ?? '' })}
-              >
-                Cmd+K
-              </Button>
-            </div>
-          </div>
+            }
+            metaRow={
+              <>
+                <span>{results.length} rows</span>
+                {filters.listenCatalogKind ? (
+                  <span>· {filters.listenCatalogKind === 'preset' ? 'Presets' : 'Tracks'}</span>
+                ) : null}
+                {filters.genre ? <span>· {filters.genre}</span> : null}
+                {filters.mood ? <span>· {filters.mood}</span> : null}
+                {filters.era ? <span>· {filters.era}</span> : null}
+                {(filters.tags?.length ?? 0) > 0 ? <span>· {filters.tags?.length} tags</span> : null}
+              </>
+            }
+          />
 
-          <div className="mt-6 flex flex-wrap items-center gap-2 text-sm text-text-muted">
-            <span>{results.length} rows</span>
-            {filters.listenCatalogKind ? <span>· {filters.listenCatalogKind === 'preset' ? 'Presets' : 'Tracks'}</span> : null}
-            {filters.genre ? <span>· {filters.genre}</span> : null}
-            {filters.mood ? <span>· {filters.mood}</span> : null}
-            {filters.era ? <span>· {filters.era}</span> : null}
-            {(filters.tags?.length ?? 0) > 0 ? <span>· {filters.tags?.length} tags</span> : null}
-          </div>
-        </div>
-
-        <div className="mt-8 space-y-5">
+          <div className="mt-8 space-y-5">
           {results.length === 0 ? (
             <div className="rounded-[2rem] border border-dashed border-border/70 bg-dark-alt/40 p-10 text-center">
               <p className="font-serif text-2xl text-primary">No matches yet</p>
@@ -442,7 +433,8 @@ export function ListenIndexClient({ rows }: { rows: ListenPageRow[] }) {
             })
           )}
         </div>
-      </div>
+        </>
+      </DiscoveryIndexLayout>
 
       <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
         <SheetContent side="right" className="border-border bg-[#171412] text-primary">
@@ -455,6 +447,6 @@ export function ListenIndexClient({ rows }: { rows: ListenPageRow[] }) {
           </div>
         </SheetContent>
       </Sheet>
-    </div>
+    </>
   );
 }

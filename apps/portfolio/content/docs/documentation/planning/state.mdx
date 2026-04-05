@@ -2,7 +2,7 @@
 title: State
 description: Compact state records for the documentation section.
 date: "2026-03-16"
-updated: "2026-04-06"
+updated: "2026-04-09"
 repoPath: apps/portfolio/content/docs/documentation/planning/state.mdx
 taskPhase: documentation-site-10
 order: 2
@@ -17,25 +17,27 @@ order: 2
 | `section` | `documentation` |
 | `owner` | `docs-section` |
 | `status` | `active` |
-| `updated` | `2026-03-31` |
+| `updated` | `2026-04-01` |
 
 ## Current Cycle
 
 | Field | Value |
 | --- | --- |
-| `phase` | `documentation-site-10` maintenance after `global-data-03` execution closed the public apps/projects/resumes metadata migration |
+| `phase` | **`documentation-site-14`** (shell/EPUB); **`documentation-site-15`** portfolio UI dedupe **closed** ([registry](/docs/documentation/planning/task-registry#phase-documentation-site-15-portfolio-ui-composition--dedupe)); prior `documentation-site-10` IA work remains the baseline |
 | `plan` | planning IA reset is shipped; the shared auth foundation, Books reader workspace polish, Books repub artifact merge, and the first Listen access/data phases are now in place. The cross-cutting storage baseline is real now: the heavy-blob push blocker is cleared, `/apps`, `/projects`, and `/resumes` all read the new record-backed metadata path while planning-pack exports and resume HTML routes continue to publish through `site-download-assets`. Listen and Reader runtime access now also share the same repository-backed provider pattern instead of scattering collection/query logic through route helpers. |
-| `focus` | keep the global-first workflow aligned around the remaining shared data/storage provider work now that both the owner shell and the owner-only Payload admin mount are live, the public catalog metadata migration is done, and the Listen/Reader runtime contract is centralized behind provider-owned repositories |
+| `focus` | **`documentation-site-15` done** (`15-01`–`15-04`: discovery chip, **`Nav`** split, **`DiscoveryIndexLayout`**, **`SiteCopilot`** panel extraction). **`documentation-site-14-01` done**; remaining **14:** **`14-02`** / **`14-03`**. **Registry alignment:** root **`.planning/TASK-REGISTRY.xml`** **`02-01`** / **`03-02`** as before. |
 | `constraint` | section planning MDX is first for **section** work; root `.planning` stays canonical for **monorepo** gates; see root `AGENTS.md` |
 
 ## Next Queue
 
 | Priority | Action | Type |
 | --- | --- | --- |
-| `1` | extend the `site-download-assets` publisher to the next public bundle classes now that apps, projects, and resumes share the same metadata/storage split | `cross-cutting` |
-| `2` | continue `global-data-01-03`: finish the local export-import and hosted bootstrap flow for the shared provider baseline | `cross-cutting` |
-| `3` | **`global-data-01-04` done:** site RAG scope excludes default book-manuscript ingest; backend-matrix docs stay with **`global-data-01-03`** | `planning` |
-| `4` | maintain Listen through real-row seeding and catalog cleanup now that the DB-first runtime path is in place | `content` |
+| `0` | **`documentation-site-14-02`–`14-03`:** `global-error` + EPUB manifest/Payload/S3 trace per [kickoff](/docs/documentation/planning/plans/documentation-site-14/kickoff) (**`14-01` sidebar shell** closed) | `implementation` |
+| `1` | **`documentation-site-15` closed** — next portfolio UI work starts a new phase row if needed | `planning` |
+| `2` | extend the `site-download-assets` publisher to the next public bundle classes now that apps, projects, and resumes share the same metadata/storage split | `cross-cutting` |
+| `3` | continue `global-data-01-03`: finish the local export-import and hosted bootstrap flow for the shared provider baseline | `cross-cutting` |
+| `4` | **`global-data-01-04` done:** site RAG scope excludes default book-manuscript ingest; backend-matrix docs stay with **`global-data-01-03`** | `planning` |
+| `5` | maintain Listen through real-row seeding and catalog cleanup now that the DB-first runtime path is in place | `content` |
 | `7` | continue **`documentation-site-12`**: **`12-09`** auth + **Magicborn prompt composer** (**`global-auth-03`**, **`books-publishing-03`**); **`12-05`** SiteCopilot media session; **`12-03`** / **`12-04`** as before | `implementation` |
 
 ## Cross-cutting queue
@@ -61,7 +63,9 @@ Monorepo-wide items that are not (yet) a full `.planning` task row. Mirror or cl
 | `done` | **Owner-only shell refresh:** `global-auth-02` now reuses the existing seeded owner account and auth/session routes for the sidebar account footer, avatar, live identity/org context, logout, and owner-gated `/admin` entry points without opening public signup. |
 | `done` | **Owner-only Payload admin mount:** `global-admin-01` now imports Payload's upstream `(payload)` route group, uses `/admin` as the owner-only CRUD surface for Payload-backed resources, and hides reader/RAG internals from the first mounted admin pass. |
 | `done` | **Books build + site sidebar (2026-03-31):** EPUB repub cache logs **`CACHE HIT` / `CACHE MISS`**; epub-gen **`[Download Success]`** documented as local staging — [errors-and-attempts](/docs/documentation/planning/errors-and-attempts) `books-build-epub-log-01`; task **`documentation-site-10-05`**. Portfolio sidebar: hover expands rail until collapse; collapse-only control when expanded; icon rail buttons centered. |
-| `open` | **Reader + artifacts hardening:** `/api/reader/workspace` worker must not import `server-only` (tsx child process). EPUB URLs in `public/books/manifest.json` hit Payload `/api/published-book-artifacts/file/…` — Payload errors + reader fetch failures until files exist under **`apps/portfolio/media/published-book-artifacts`** (run **`pnpm books:publish`** after **`pnpm run build:books`**, or restore media from backup). **`site-media-assets`** project/blog images 400 via `/_next/image` when rows point at missing files under **`apps/portfolio/media/site-media-assets`** — run **`pnpm media:publish`** or re-seed. Optional follow-up: reader fallback to **`public/books/<slug>/book.epub`** when the artifact file is missing but the public build exists. |
+| `open` | **Reader + artifacts hardening:** `/api/reader/workspace` worker must not import `server-only` (tsx child process). EPUB URLs in `public/books/manifest.json` hit Payload `/api/published-book-artifacts/file/…` — Payload errors + reader fetch failures until files exist under **`apps/portfolio/media/published-book-artifacts`** (run **`pnpm books:publish`** after **`pnpm run build:books`**, or restore media from backup). **`site-media-assets`** project/blog images 400 via `/_next/image` when rows point at missing files under **`apps/portfolio/media/site-media-assets`** — run **`pnpm media:publish`** or re-seed. Optional follow-up: reader fallback to **`public/books/<slug>/book.epub`** when the artifact file is missing but the public build exists. **Tracked for execution:** **`documentation-site-14-03`** (filename ↔ DB ↔ S3 ↔ manifest). |
+| `done` | **Site sidebar vs reader rail:** portfolio **`portfolio-site-shell`** + immersive **`SiteLayout`/`Nav`** (no marketing **`<Sidebar>`** on reader/screenshot-annotate); reader **`portfolio-reader-workspace-ui`** in repub-builder — separate persistence from site rail. Closed **`documentation-site-14-01`**; optional narrow-viewport smoke still useful before large UI changes. |
+| `open` | **Root `global-error` on prod:** indicates uncaught error in layout/shell tree — triage with Vercel digest + **`NEXT_PUBLIC_CLIENT_ERROR_DEBUG`**. **`documentation-site-14-02`**. |
 | `done` | **Local auth/session hang (2026-04-01):** `/api/auth/session` used a subprocess with **no timeout**; a stuck Payload/DB left the sidebar on **Checking session** and owner-gated pages (e.g. **`/resumes`**) on **HeadersTimeout**. Mitigation: **`AUTH_WORKER_TIMEOUT_MS`**, **`runAuthWorker` kills** the child on expiry, session route returns **anonymous session** on worker error, login returns **503** + message on timeout, client fetches use **AbortSignal.timeout**, **`pnpm start` + LAN host** can show Site Copilot shell without **`OPENAI_API_KEY`** (see **`app/layout.tsx`** / **`NEXT_PUBLIC_SITE_CHAT_HIDE_ON_LAN`**). Login over **http://localhost** is not encrypted — use **HTTPS** in production; JSON body visibility in DevTools is expected. |
 | `open` | **Shared content surfaces:** align `listen`, `blog`, and `projects` on one reusable shell with per-section mini logos and theme identity -- `documentation-site-09`, section registries below. |
 | `open` | **Minimal chrome for `/apps` tools:** tighten editor surfaces (screenshot-annotate, Dialogue Forge, repo-planner, etc.) — lean top bar + exit to `/apps`, avoid full marketing footer inside tools; see [screenshot-annotate decisions](/docs/screenshot-annotate/planning/decisions) and [requirements](/docs/screenshot-annotate/requirements). |
