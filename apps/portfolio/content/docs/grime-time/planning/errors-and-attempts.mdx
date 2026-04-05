@@ -3,7 +3,7 @@ title: "grime-time — Errors & Attempts"
 description: "Auto-compiled from vendor/grime-time-site/.planning/ERRORS-AND-ATTEMPTS.xml"
 generated: "true"
 source: "vendor/grime-time-site/.planning/ERRORS-AND-ATTEMPTS.xml"
-updated: "2026-04-05T16:30:16.639Z"
+updated: "2026-04-05T21:17:41.563Z"
 ---
 
 # Errors & Attempts
@@ -629,4 +629,76 @@ cmd /c npm.cmd run build
 ```
 ```
 browser check: localhost:3117 home page shows `Live canvas` controls on the real page, while the composer rail only shows structure/content/media/publish controls
+```
+
+## 18-05-a4 — phase 18 — task 18-05 — resolved
+
+**Composer rail lived in page flow, drifted on scroll, and squeezed the canvas**
+
+
+**Symptom:** After removing the mini preview, the composer still behaved like a normal flex child. On long pages the rail scrolled away with the document, the tab content clipped despite available vertical space, and the canvas width collapsed too aggressively because the rail width was oversized and uncontrolled.
+
+**Cause:** The shell still treated the composer as an in-flow sidebar instead of a viewport-height authoring rail. Without a proper grid contract, sticky positioning, and a single internal scroll region, the page and composer competed for height and width.
+
+**Fix:** Move the frontend authoring shell to an open-state grid with a bounded composer width, convert the rail to a viewport-height sticky column, and push scrolling into the tab bodies using the existing portal scroll convention.
+
+**Verification:**
+```
+cmd /c npm.cmd exec eslint src/components/frontend/MarketingShell.tsx src/components/admin-impersonation/PageComposerDrawer.tsx tests/int/components/admin-impersonation/page-composer-shell.int.spec.tsx
+```
+```
+cmd /c npm.cmd exec vitest run tests/int/components/admin-impersonation/page-composer-shell.int.spec.tsx tests/int/components/admin-impersonation/page-composer-canvas.int.spec.tsx tests/int/app/page-composer-route.int.spec.ts
+```
+```
+cmd /c npm.cmd run build
+```
+```
+cmd /c npm.cmd exec -- tsc --noEmit
+```
+
+## 18-05-a5 — phase 18 — task 18-05 — resolved
+
+**Browser-page scroll still caused both side rails to end before the user finished traversing the page**
+
+
+**Symptom:** Even after stabilizing the composer rail width and sticky behavior, users could still scroll the browser page itself. That meant the left marketing sidebar and the right composer eventually appeared to end because the entire document was moving instead of just the center page canvas.
+
+**Cause:** The frontend shell still let the main document own vertical scrolling. Fixed and sticky side rails alone were not enough because the workspace never switched to an application-style scroll model with a dedicated central scroll pane.
+
+**Fix:** Convert the desktop marketing shell into a viewport-height frame, keep the side rails full-height, and move vertical scrolling into the center `marketing-shell-main` pane only.
+
+**Verification:**
+```
+cmd /c npm.cmd exec eslint src/components/frontend/MarketingShell.tsx
+```
+```
+cmd /c npm.cmd exec -- vitest run tests/int/components/admin-impersonation/page-composer-shell.int.spec.tsx tests/int/components/admin-impersonation/page-composer-canvas.int.spec.tsx tests/int/app/page-composer-route.int.spec.ts --testTimeout=20000
+```
+```
+cmd /c npm.cmd run build
+```
+```
+cmd /c npm.cmd exec -- tsc --noEmit
+```
+
+## 18-05-a6 — phase 18 — task 18-05 — resolved
+
+**Impersonation toolbar visually blanked the composer rail at common desktop widths**
+
+
+**Symptom:** After the shell-scroll fix, the composer column existed but looked blank or unreachable on some desktop widths because the fixed impersonation toolbar could overlap the rail and cover the tabs and block controls.
+
+**Cause:** The composer remained in the normal stacking order while the impersonation toolbar was rendered as a higher fixed overlay. Even though the composer itself loaded correctly, the toolbar visually sat on top of the rail.
+
+**Fix:** Raise the page composer rail above the toolbar in the stacking order while it is open so the authoring controls remain reachable.
+
+**Verification:**
+```
+browser check: localhost:5465 at 1280px and 1366px wide now shows the composer controls above the impersonation toolbar instead of behind it
+```
+```
+cmd /c npm.cmd exec eslint src/components/admin-impersonation/PageComposerDrawer.tsx
+```
+```
+cmd /c npm.cmd exec -- vitest run tests/int/components/admin-impersonation/page-composer-shell.int.spec.tsx --testTimeout=20000
 ```

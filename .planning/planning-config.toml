@@ -10,6 +10,72 @@ conventionsPaths = [
   "apps/portfolio/content/docs/documentation/roadmap.mdx",
 ]
 
+# ---------------------------------------------------------------------------
+# Docs projects — domains that live in the sink and may or may not have a
+# separate repo yet. These are real projects (not just display sections):
+# they flesh out ideas, requirements, and implementation in various forms.
+# Not always code. When a repo exists it can be added to [[planning.roots]].
+#
+# content-skill = the GAD skill that generates authored/lore content for this
+#   project (e.g. gad-manuscript generates magicborn in-world lore).
+# kind = "app" | "platform" | "lore" | "meta"
+# ---------------------------------------------------------------------------
+
+[[docs.projects]]
+id = "dialogue-forge"
+sinkPath = "dialogue-forge"
+description = "Dialogue editor app — feature docs, architecture, yarn-spinner integration"
+kind = "app"
+
+[[docs.projects]]
+id = "documentation"
+sinkPath = "documentation"
+description = "Cross-cutting monorepo meta-docs — conventions, architecture, design system"
+kind = "meta"
+
+[[docs.projects]]
+id = "books"
+sinkPath = "books"
+description = "Book platform — reader, publishing pipeline, EPUB architecture"
+kind = "platform"
+
+[[docs.projects]]
+id = "listen"
+sinkPath = "listen"
+description = "Listen platform — audio/music app, routes, player architecture"
+kind = "platform"
+
+[[docs.projects]]
+id = "blog"
+sinkPath = "blog"
+description = "Blog platform — publishing, authoring, content pipeline"
+kind = "platform"
+
+[[docs.projects]]
+id = "editor"
+sinkPath = "editor"
+description = "Editor app — rich text / document editing"
+kind = "app"
+
+[[docs.projects]]
+id = "screenshot-annotate"
+sinkPath = "screenshot-annotate"
+description = "Screenshot annotation tool"
+kind = "app"
+
+[[docs.projects]]
+id = "magicborn"
+sinkPath = "magicborn"
+description = "Magicborn fiction project — requirements, world-building, in-world lore"
+kind = "lore"
+content-skill = "gad-manuscript"
+
+[[docs.projects]]
+id = "projects"
+sinkPath = "projects"
+description = "Portfolio project catalogue — project listing and metadata"
+kind = "meta"
+
 [profiles.human]
 description = "Default human view."
 

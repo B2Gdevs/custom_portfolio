@@ -1,0 +1,132 @@
+---
+title: "GAD Eval Framework"
+description: "How GAD evaluates its own skills and measures context quality — eval projects, information units, fidelity levels, and CLI efficiency scores."
+date: "2026-04-05"
+---
+
+# GAD Eval Framework
+
+GAD planning skills are methodology documents, not code templates. Standard trigger-detection
+evals (did the agent fire the skill?) fail for methodology skills because an agent can answer
+from training without ever triggering them. The GAD eval framework tests the **output** instead:
+did the agent implement what the requirements asked, and how closely did it follow the workflow?
+
+## Eval project structure
+
+```
+evals/
+├── cli-efficiency/           # measures CLI context completeness vs raw file reads
+│   ├── REQUIREMENTS.md
+│   ├── v1/
+│   │   ├── RUN.md
+│   │   └── SCORE.md
+│   └── baseline/
+├── planning-migration/       # validates XML planning file migration accuracy
+├── portfolio-bare/           # portfolio requirements as eval benchmark
+├── project-migration/        # validates project planning scaffold correctness
+├── DEFINITIONS.md            # shared terms, formulas, fidelity levels
+└── README.md
+```
+
+## CLI commands
+
+```sh
+gad eval list                              # list all eval projects + run history
+gad eval run --project cli-efficiency      # run eval (creates git worktree)
+gad eval score --project cli-efficiency    # compute SCORE.md from latest run
+gad eval diff v1 v2 --project cli-efficiency  # diff two score files
+gad eval trace list --project cli-efficiency  # show trace log entries
+gad eval status                            # summary across all evals
+```
+
+## Information units
+
+An **information unit** is the smallest piece of context that independently affects what an
+agent would do next. GAD measures 12 units for the "resume work" workflow:
+
+| Unit | What it is | CLI surface |
+|------|-----------|-------------|
+| `U1` | Current phase ID | `gad state .phase` |
+| `U2` | Current milestone | `gad state .milestone` |
+| `U3` | Project status | `gad state .status` |
+| `U4` | Open task count | `gad state .openTasks` |
+| `U5` | Next action (full text) | `gad state --full` |
+| `U6` | In-progress task IDs + goals | `gad tasks --status in-progress` |
+| `U7` | Phase history | `gad phases` |
+| `U8` | Last activity date | `gad state .lastActivity` |
+| `U9` | Active session ID | `gad session list` |
+| `U10` | Which files to read | `gad context` |
+| `U11` | Agent loop steps | AGENTS.md (read once) |
+| `U12` | Build/verify commands | AGENTS.md (read once) |
+
+U1–U10 are session-variable. U11–U12 are static — read once, not repeated in CLI output.
+
+## Fidelity levels
+
+| Level | Symbol | Definition |
+|-------|--------|-----------|
+| Full | ✅ | Complete, unmodified, verbatim |
+| Truncated | ⚠️ T | Present but cut off |
+| Approximated | ⚠️ A | Derived or summarized, not verbatim |
+| Referenced | 📎 | File path returned, not inlined |
+| Absent | ❌ | Not present |
+
+## Formulas
+
+**Token count (approximate)**
+```
+tokens(text) = len(text) / 4
+```
+
+**Token reduction** (CLI vs raw file reads)
+```
+token_reduction = (baseline_tokens - cli_tokens) / baseline_tokens
+```
+
+**Context completeness**
+```
+completeness = (units_full + 0.5 * units_partial) / total_units
+```
+
+**Composite score** (weights per eval in gad.json)
+```
+score = (token_reduction × 0.40) + (completeness × 0.35) + ((1 − loss) × 0.25)
+```
+
+## What a RUN.md must contain
+
+1. **Workflow A output** — verbatim text of every CLI command run
+2. **Workflow B output** — verbatim content read from each file (or excerpt + byte/token counts)
+3. **Unit-by-unit fidelity table** — each unit, its fidelity level, and evidence
+4. **Token counts** — both byte and token counts per source
+5. **Formulas applied** — arithmetic shown, not just results
+6. **Residual content analysis** — what is in raw files but not in CLI, and why it matters or doesn't
+
+## Run isolation
+
+`gad eval run` creates a git worktree so the agent starts from a clean repo state:
+
+```sh
+gad eval run --project portfolio-bare
+# -> git worktree add /tmp/gad-eval-portfolio-bare-<ts> HEAD
+# -> agent runs in worktree
+# -> output written to evals/portfolio-bare/v<N>/ in main repo
+# -> git worktree remove
+```
+
+## Context loss definition
+
+Context loss is not bytes missing. It is:
+
+> A context loss occurs when an information unit present in the raw workflow is absent or
+> sufficiently degraded in the CLI workflow that an agent would make a **different decision**
+> (or ask a question it would not have needed to ask) as a result.
+
+Test: simulate the agent. Given only CLI output, what would it do next? Given full raw files,
+what would it do next? If the answer differs, there is context loss on the responsible unit(s).
+
+## Key decisions
+
+- **gad-02**: Evals capture actual content, not byte counts — tokens are the primary metric
+- **gad-03**: Context completeness is measured by information units, not file coverage
+- **gad-16**: No subagents until formally evaluated — see `evals/` for evaluation criteria

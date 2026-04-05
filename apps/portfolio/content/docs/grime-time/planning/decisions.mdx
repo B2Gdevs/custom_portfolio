@@ -3,7 +3,7 @@ title: "grime-time — Decisions"
 description: "Auto-compiled from vendor/grime-time-site/.planning/DECISIONS.xml"
 generated: "true"
 source: "vendor/grime-time-site/.planning/DECISIONS.xml"
-updated: "2026-04-05T16:30:16.639Z"
+updated: "2026-04-05T21:17:41.563Z"
 ---
 
 # Decisions
@@ -517,3 +517,15 @@ The visual composer cannot mount as a toolbar-owned viewport overlay. The stable
 The miniature preview inside the composer rail is not the right interaction model for Grime Time. The actual frontend page should be the only visual canvas during authoring, with the composer rail acting as structure, inspector, media, and publish controls. Device-width toggles belong to the live canvas, and section selection should happen on the rendered page through visible authoring chrome instead of through a duplicated preview surface.
 
 **Impact:** This removes the overflow-prone duplicate preview, aligns the composer with a direct-manipulation low-code workflow, and keeps the user editing one visual source of truth instead of two competing representations. The practical first step is canvas selection chrome and width controls on the real page while the rail remains the editing surface for block surgery.
+
+## D-content-023: Composer rail uses a viewport-height shell column with internal scrolling
+
+Once the live page became the primary canvas, the composer could no longer behave like a normal page-flow sidebar. The rail now belongs to the frontend shell layout itself, uses a fixed width contract, stays pinned to the viewport on desktop authoring screens, and scrolls internally by tab body instead of relying on page scroll position.
+
+**Impact:** This prevents the composer from drifting away during long-page editing, removes wasted space and clipped structure lists caused by nested scroll containers, and protects the page canvas from being crushed by an oversized ad-hoc drawer width. The main authoring model is now a stable shell: page canvas on the left, composer rail on the right.
+
+## D-content-024: Desktop frontend shell gives scroll ownership only to the main content pane
+
+The marketing shell should not rely on browser-page scrolling during desktop authoring. The left marketing sidebar and right composer rail are treated as viewport-height shell columns, while the center content pane owns vertical scrolling. This keeps both side rails fully available while traversing long pages.
+
+**Impact:** This removes the visible “end” of the composer and left sidebar during long-page editing, keeps customer access and login affordances anchored, and makes the live page canvas behave like a proper application workspace instead of a long document with attached sidebars.
