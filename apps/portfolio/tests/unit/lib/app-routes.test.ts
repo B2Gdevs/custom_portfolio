@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { isImmersiveAppsRoute } from '@/lib/app-routes';
+import { isImmersiveAppsRoute, isReaderAppsRoute } from '@/lib/app-routes';
 
 describe('isImmersiveAppsRoute', () => {
-  it('returns true for reader and nested reader paths', () => {
-    expect(isImmersiveAppsRoute('/apps/reader')).toBe(true);
-    expect(isImmersiveAppsRoute('/apps/reader/something')).toBe(true);
+  it('returns false for reader (site sidebar stays mounted)', () => {
+    expect(isImmersiveAppsRoute('/apps/reader')).toBe(false);
+    expect(isImmersiveAppsRoute('/apps/reader/something')).toBe(false);
   });
 
   it('returns true for screenshot-annotate', () => {
@@ -18,5 +18,18 @@ describe('isImmersiveAppsRoute', () => {
     expect(isImmersiveAppsRoute('/')).toBe(false);
     expect(isImmersiveAppsRoute(null)).toBe(false);
     expect(isImmersiveAppsRoute(undefined)).toBe(false);
+  });
+});
+
+describe('isReaderAppsRoute', () => {
+  it('returns true for reader paths', () => {
+    expect(isReaderAppsRoute('/apps/reader')).toBe(true);
+    expect(isReaderAppsRoute('/apps/reader/something')).toBe(true);
+  });
+
+  it('returns false for other routes', () => {
+    expect(isReaderAppsRoute('/apps/screenshot-annotate')).toBe(false);
+    expect(isReaderAppsRoute('/apps')).toBe(false);
+    expect(isReaderAppsRoute(null)).toBe(false);
   });
 });

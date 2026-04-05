@@ -7,7 +7,7 @@ import type { NavMenuSection } from '@/lib/site-menus';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { isImmersiveAppsRoute } from '@/lib/app-routes';
+import { isImmersiveAppsRoute, isReaderAppsRoute } from '@/lib/app-routes';
 import { useSiteShellHydrated, useSiteShellStore } from '@/lib/stores/site-shell-store';
 
 export function SiteLayout({
@@ -22,7 +22,9 @@ export function SiteLayout({
 }) {
   const pathname = usePathname();
   const isImmersiveApp = isImmersiveAppsRoute(pathname);
-  const isBookReadRoute = isImmersiveApp;
+  const isReaderApp = isReaderAppsRoute(pathname);
+  /** Full-viewport scroll shell for reader only (not for other immersive tools). */
+  const isBookReadRoute = isReaderApp;
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sidebarCollapsed = useSiteShellStore((s) => s.sidebarCollapsed);
   const setSidebarCollapsed = useSiteShellStore((s) => s.setSidebarCollapsed);
@@ -76,8 +78,11 @@ export function SiteLayout({
   const effectiveCollapsed =
     isImmersiveApp || !siteShellHydrated ? true : sidebarCollapsed;
 
-  /** Immersive apps (reader, screenshot-annotate) mount their own chrome; site sidebar is not mounted (see Nav). */
+  /** Immersive tools hide the site sidebar; reader keeps it (see Nav). */
   const siteSidebarOpen = !isImmersiveApp && !effectiveCollapsed;
+
+  /** Reader + immersive tools need a bounded-height flex chain so `h-full` reader chrome resolves. */
+  const isTightViewportApp = isImmersiveApp || isReaderApp;
 
   return (
     <TooltipProvider delay={0}>
@@ -117,25 +122,25 @@ export function SiteLayout({
           className={cn(
             'min-h-svh',
             isImmersiveApp ? 'bg-background' : 'bg-transparent',
-            /** Immersive apps: bound to viewport so inner `h-full` resolves. */
+            /** Reader + immersive: bound to viewport so inner `h-full` resolves. */
             isBookReadRoute ? 'h-svh min-h-0 overflow-hidden' : ''
           )}
         >
           <div
             className={cn(
               'flex flex-col',
-              isImmersiveApp ? 'h-full min-h-0 flex-1 overflow-hidden' : 'min-h-svh',
+              isTightViewportApp ? 'h-full min-h-0 flex-1 overflow-hidden' : 'min-h-svh',
             )}
           >
             <div
               className={cn(
                 'min-h-0 flex-1',
-                isImmersiveApp ? 'flex min-h-0 flex-col overflow-hidden' : '',
+                isTightViewportApp ? 'flex min-h-0 flex-col overflow-hidden' : '',
               )}
             >
               {children}
             </div>
-            {!isImmersiveApp ? (
+            {!isImmersiveApp && !isReaderApp ? (
               <footer className="mt-16 border-t border-border/80 bg-dark-alt/80 py-10">
                 <div className="mx-auto max-w-7xl px-6 text-center">
                   <p className="font-display text-2xl text-primary">Ben Garrard</p>
