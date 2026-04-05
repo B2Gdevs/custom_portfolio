@@ -42,6 +42,7 @@ build/
 .DS_Store
 *.pem
 nul
+.playwright-mcp/
 
 # GSD Codex install (local skills; avoid Windows nul git error)
 .codex/

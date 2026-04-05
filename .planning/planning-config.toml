@@ -24,6 +24,12 @@ planningDir = ".planning"
 discover = false
 
 [[planning.roots]]
+id = "get-anything-done"
+path = "vendor/get-anything-done"
+planningDir = ".planning"
+discover = false
+
+[[planning.roots]]
 id = "repo-planner"
 path = "vendor/repo-planner"
 planningDir = ".planning"
@@ -32,5 +38,23 @@ discover = false
 [[planning.roots]]
 id = "grime-time"
 path = "vendor/grime-time-site"
+planningDir = ".planning"
+discover = false
+
+[[planning.roots]]
+id = "repub-builder"
+path = "vendor/repub-builder"
+planningDir = ".planning"
+discover = false
+
+[[planning.roots]]
+id = "mb-cli-framework"
+path = "vendor/mb-cli-framework"
+planningDir = ".planning"
+discover = false
+
+[[planning.roots]]
+id = "gad-manuscript"
+path = "vendor/gad-manuscript"
 planningDir = ".planning"
 discover = false

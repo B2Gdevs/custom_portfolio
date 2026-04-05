@@ -1,0 +1,21 @@
+---
+title: "grime-time — Blockers"
+description: "Auto-compiled from vendor/grime-time-site/.planning/BLOCKERS.xml"
+generated: "true"
+source: "vendor/grime-time-site/.planning/BLOCKERS.xml"
+updated: "2026-04-05T16:30:16.639Z"
+---
+
+# Blockers
+
+## BLK-demo-seed-001 — Demo personas and seed data incomplete  (resolved)
+
+Resolved: `npm run seed` upserts demo fixtures by default; use `npm run seed:baseline` or `SEED_SKIP_DEMO=true` to skip. Use admin toolbar **Demo data** toggle + `?demo=1` for marketing tours. Ongoing QA: verify Stripe test objects and copy after schema changes.
+
+**Task:** 03-09
+
+## BLK-tour-ai-001 — AI ops assistant tour not scheduled  ()
+
+Staff “AI beta” Joyride step is deferred until phase `08` assistant UI is stable enough to anchor `data-tour` targets. Portal and marketing tours (`06-10` / `06-11` scope) intentionally exclude AI; see `.planning/workflows/ai-ops-assistant-beta.md`.
+
+**Task:** 08-01

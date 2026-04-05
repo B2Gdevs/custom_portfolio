@@ -3,7 +3,7 @@ title: "grime-time — Decisions"
 description: "Auto-compiled from vendor/grime-time-site/.planning/DECISIONS.xml"
 generated: "true"
 source: "vendor/grime-time-site/.planning/DECISIONS.xml"
-updated: "2026-04-05T02:27:29.852Z"
+updated: "2026-04-05T16:30:16.639Z"
 ---
 
 # Decisions
@@ -493,3 +493,27 @@ Phase 17 uses a constrained model rather than a generic builder platform. Reusab
 The phase-17 preset model was the bridge, not the endpoint. Starting in phase 18, reusable authoring should center on CMS-managed shared sections that are created in a dedicated shared-section library, edited through an explicit source-edit flow on a dedicated shared-section route, inserted into pages as linked references, detached locally when needed, and restored through lightweight version history. Phase 18 explicitly does not include promoting an existing page section into shared content. The composer should remain opinionated: shallow section-row-column-block composition, fixed layout patterns, constrained drag-and-drop, minimal library categories plus tags, and no arbitrary freeform nesting or generic flexbox builder UI.
 
 **Impact:** This keeps the composer aligned with a repeatable service-business revenue page system rather than drifting into a general-purpose layout engine. It also sets a strict reuse boundary: linked instances may override only safe placement metadata such as visibility, anchor id, instance label, and an optional tokenized spacing variant, while content, structure, styling primitives, and layout composition remain source-owned unless detached. Shared-section publish should update all linked published pages, and draft pages should resolve against the latest published shared-section version in v1. Dynamic bindings and more advanced publish workflow should build on top of this shared-section model after phase 18 rather than competing with it.
+
+## D-content-019: Composer block-schema migrations must cover both live and version tables before reusable metadata ships
+
+For page-composer block fields, `pages_*` tables are not enough. Any schema change that affects saved layout block metadata must update the live block tables and the matching `_pages_v_*` version tables in the same migration set, or the frontend and prerender paths will fail while querying draft page versions.
+
+**Impact:** Future composer migrations should be checked against both runtime surfaces before they are considered complete. Migration status alone is not proof of safety when the SQL body only partially matches the active Payload schema.
+
+## D-content-020: Composer stays as a right-edge drawer and site copilot follows the draggable admin-toolbar interaction model
+
+The public-site authoring launcher should stay anchored to the right edge of the page and open the existing right-docked page composer drawer from the live page surface. The site copilot should no longer behave like a bottom-corner modal overlay; it should use the same draggable floating-panel interaction pattern as the admin impersonation toolbar so operators can move it out of the way while authoring.
+
+**Impact:** Composer access remains visually attached to the page canvas instead of floating as a separate bottom-corner affordance, and copilot no longer blocks the viewport when opened. Local testing also needs a shared localhost-only admin bypass across both server-component auth and request-route auth so the full operator toolchain can be exercised without manual sign-in during development.
+
+## D-content-021: Frontend composer must be shell-owned, and site copilot should be visible to content-authoring users when the feature flag is on
+
+The visual composer cannot mount as a toolbar-owned viewport overlay. The stable interaction model is a single shell-owned right rail inside the frontend layout, with toolbar and right-edge launchers only toggling shared composer state. On the public site, the copilot should render for content-authoring users as well as real admins when the AI assistant flag is enabled so authoring and copilot testing use the same surface.
+
+**Impact:** This prevents the composer from overlapping the impersonation toolbar, keeps the panel aligned to the actual app shell, and removes ambiguity about where the editor lives in the layout. It also avoids the “copilot disappeared” failure mode for non-admin authoring users, while preserving the draggable panel interaction once the copilot is visible.
+
+## D-content-022: Frontend page authoring uses the live page as the visual canvas and the composer rail as a control surface
+
+The miniature preview inside the composer rail is not the right interaction model for Grime Time. The actual frontend page should be the only visual canvas during authoring, with the composer rail acting as structure, inspector, media, and publish controls. Device-width toggles belong to the live canvas, and section selection should happen on the rendered page through visible authoring chrome instead of through a duplicated preview surface.
+
+**Impact:** This removes the overflow-prone duplicate preview, aligns the composer with a direct-manipulation low-code workflow, and keeps the user editing one visual source of truth instead of two competing representations. The practical first step is canvas selection chrome and width controls on the real page while the rail remains the editing surface for block surgery.

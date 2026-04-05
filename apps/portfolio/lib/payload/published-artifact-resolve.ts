@@ -7,6 +7,32 @@ import { PUBLISHED_BOOK_ARTIFACTS_COLLECTION_SLUG } from '@/lib/payload/collecti
 
 const ARTIFACT_FILENAME_RE = /^(.+?)--(epub|planning-pack)--(.+)\.(epub|zip)$/i;
 
+/**
+ * Some uploads (Payload `sanitizeFilename` / older publishes) stored objects as
+ * `slug--epub-cp-...` instead of `slug--epub--cp-...`. URLs and manifest still use the
+ * canonical double-hyphen form, so S3 HeadObject must try both shapes.
+ */
+export function legacyHyphenSanitizedFilename(filename: string): string | null {
+  const m = filename
+    .trim()
+    .match(/^(.+?)--(epub|planning-pack)--(cp-.+)\.(epub|zip)$/i);
+  if (!m) {
+    return null;
+  }
+  return `${m[1]}--${m[2]}-${m[3]}.${m[4]}`;
+}
+
+/** Inverse of {@link legacyHyphenSanitizedFilename} for DB rows keyed by legacy names. */
+export function canonicalFromLegacyHyphenFilename(filename: string): string | null {
+  const m = filename
+    .trim()
+    .match(/^(.+?)--(epub|planning-pack)-(cp-.+)\.(epub|zip)$/i);
+  if (!m) {
+    return null;
+  }
+  return `${m[1]}--${m[2]}--${m[3]}.${m[4]}`;
+}
+
 function asString(value: unknown): string | null {
   return typeof value === 'string' ? value : null;
 }
@@ -75,7 +101,53 @@ export async function findPublishedBookArtifactForFile(
     return first as Record<string, unknown>;
   }
 
-  const parsed = parsePublishedArtifactFilename(requestedFilename);
+  const legacyName = legacyHyphenSanitizedFilename(requestedFilename);
+  if (legacyName && legacyName !== requestedFilename) {
+    const legacyExact = await payload.find({
+      collection: PUBLISHED_BOOK_ARTIFACTS_COLLECTION_SLUG,
+      depth: 0,
+      limit: 1,
+      pagination: false,
+      overrideAccess: true,
+      where: {
+        filename: {
+          equals: legacyName,
+        },
+      },
+    });
+    const legacyDoc = legacyExact.docs[0];
+    if (legacyDoc && typeof legacyDoc === 'object') {
+      return legacyDoc as Record<string, unknown>;
+    }
+  }
+
+  const canonicalFromLegacy = canonicalFromLegacyHyphenFilename(requestedFilename);
+  if (canonicalFromLegacy && canonicalFromLegacy !== requestedFilename) {
+    const canonExact = await payload.find({
+      collection: PUBLISHED_BOOK_ARTIFACTS_COLLECTION_SLUG,
+      depth: 0,
+      limit: 1,
+      pagination: false,
+      overrideAccess: true,
+      where: {
+        filename: {
+          equals: canonicalFromLegacy,
+        },
+      },
+    });
+    const canonDoc = canonExact.docs[0];
+    if (canonDoc && typeof canonDoc === 'object') {
+      return canonDoc as Record<string, unknown>;
+    }
+  }
+
+  let parsed = parsePublishedArtifactFilename(requestedFilename);
+  if (!parsed && legacyName) {
+    parsed = parsePublishedArtifactFilename(legacyName);
+  }
+  if (!parsed && canonicalFromLegacy) {
+    parsed = parsePublishedArtifactFilename(canonicalFromLegacy);
+  }
   if (!parsed) {
     return null;
   }
@@ -133,14 +205,25 @@ export function buildPublishedArtifactS3KeyCandidates(
 ): string[] {
   const prefix = sanitizeArtifactPrefix(asString(doc.prefix) ?? '');
   const name = asString(doc.filename) ?? requestedFilename;
-  const base = sanitizeFilename(name);
+  const bases = new Set<string>();
+  bases.add(sanitizeFilename(name));
+  const legacyFromDoc = legacyHyphenSanitizedFilename(name);
+  if (legacyFromDoc) {
+    bases.add(sanitizeFilename(legacyFromDoc));
+  }
+  const legacyFromRequest = legacyHyphenSanitizedFilename(requestedFilename);
+  if (legacyFromRequest) {
+    bases.add(sanitizeFilename(legacyFromRequest));
+  }
 
   const keys: string[] = [];
-  keys.push(path.posix.join(prefix, base).replace(/\/+/g, '/'));
-  if (prefix !== '') {
-    keys.push(base);
+  for (const base of bases) {
+    keys.push(path.posix.join(prefix, base).replace(/\/+/g, '/'));
+    if (prefix !== '') {
+      keys.push(base);
+    }
+    keys.push(path.posix.join(PUBLISHED_BOOK_ARTIFACTS_COLLECTION_SLUG, base));
   }
-  keys.push(path.posix.join(PUBLISHED_BOOK_ARTIFACTS_COLLECTION_SLUG, base));
 
   return [...new Set(keys)];
 }

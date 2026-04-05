@@ -1,0 +1,278 @@
+- generic [ref=e1]:
+  - generic [ref=e468]:
+    - link "Payload admin" [ref=e469] [cursor=pointer]:
+      - /url: http://localhost:3117/admin
+      - generic [ref=e470]: Payload admin
+    - link "bg@grimetime.app" [ref=e471] [cursor=pointer]:
+      - /url: http://localhost:3117/admin/collections/users/206
+    - link "New Page" [ref=e473] [cursor=pointer]:
+      - /url: http://localhost:3117/admin/collections/pages/create
+    - link "Logout" [ref=e474] [cursor=pointer]:
+      - /url: http://localhost:3117/admin/logout
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e7]: Grime Time admin
+        - generic [ref=e8]: BG
+        - generic [ref=e9]: Signed in through Clerk as bg@grimetime.app
+      - generic [ref=e10]:
+        - button "Move preview toolbar" [ref=e11]:
+          - img [ref=e12]
+        - button "Collapse" [ref=e22]
+    - generic [ref=e23]:
+      - generic [ref=e24]: Snap to corner
+      - group [ref=e25]:
+        - radio "Move toolbar to top-left" [ref=e26]:
+          - img
+        - radio "Move toolbar to top-right" [checked] [ref=e27]:
+          - img
+        - radio "Move toolbar to bottom-left" [ref=e28]:
+          - img
+        - radio "Move toolbar to bottom-right" [ref=e29]:
+          - img
+    - generic [ref=e30]:
+      - link "Home" [ref=e31] [cursor=pointer]:
+        - /url: /
+        - img
+        - text: Home
+      - link "Customer portal" [ref=e32] [cursor=pointer]:
+        - /url: /dashboard
+        - img
+        - text: Customer portal
+      - link "Ops" [ref=e33] [cursor=pointer]:
+        - /url: /ops
+        - img
+        - text: Ops
+      - link "CRM workspace" [ref=e34] [cursor=pointer]:
+        - /url: /ops/workspace?tab=crm
+        - img
+        - text: CRM workspace
+      - link "Docs" [ref=e35] [cursor=pointer]:
+        - /url: /docs
+        - img
+        - text: Docs
+      - link "Payload admin" [ref=e36] [cursor=pointer]:
+        - /url: /api/internal/admin/payload-session?next=/admin
+        - img
+        - text: Payload admin
+      - button "Close composer" [active] [ref=e475]:
+        - img
+        - text: Close composer
+      - button "Page media 7" [ref=e448]:
+        - img
+        - text: Page media
+        - generic [ref=e449]: "7"
+      - button "Demo data off" [ref=e38]:
+        - img
+        - text: Demo data off
+    - generic [ref=e40]:
+      - generic [ref=e41]:
+        - generic [ref=e42]: Active view
+        - generic [ref=e43]: BG
+        - generic [ref=e44]: bg@grimetime.app
+        - generic [ref=e45]: Search any non-staff customer to safely preview their portal and billing flow.
+      - generic [ref=e46]:
+        - generic [ref=e47]: Search users
+        - generic [ref=e48]:
+          - img
+          - textbox "Search by name, email, or company" [ref=e49]
+      - generic [ref=e50]:
+        - button "Benjamin Garrard benjamingarrard5279@gmail.com Impersonate" [ref=e476]:
+          - generic [ref=e477]:
+            - generic [ref=e478]: Benjamin Garrard
+            - generic [ref=e479]: benjamingarrard5279@gmail.com
+          - generic [ref=e480]:
+            - img [ref=e481]
+            - generic [ref=e484]: Impersonate
+        - button "Bootstrap Owner organization-access-1775097144604.owner@grimetime.app Impersonate" [ref=e485]:
+          - generic [ref=e486]:
+            - generic [ref=e487]: Bootstrap Owner
+            - generic [ref=e488]: organization-access-1775097144604.owner@grimetime.app
+          - generic [ref=e489]:
+            - img [ref=e490]
+            - generic [ref=e493]: Impersonate
+        - button "Staff Operator organization-access-1775097144604.staff@example.com Impersonate" [ref=e494]:
+          - generic [ref=e495]:
+            - generic [ref=e496]: Staff Operator
+            - generic [ref=e497]: organization-access-1775097144604.staff@example.com
+          - generic [ref=e498]:
+            - img [ref=e499]
+            - generic [ref=e502]: Impersonate
+        - button "Test User test_user@grimetime.app Impersonate" [ref=e503]:
+          - generic [ref=e504]:
+            - generic [ref=e505]: Test User
+            - generic [ref=e506]: test_user@grimetime.app
+          - generic [ref=e507]:
+            - img [ref=e508]
+            - generic [ref=e511]: Impersonate
+        - button "Test User test_user@grimetime.local Impersonate" [ref=e512]:
+          - generic [ref=e513]:
+            - generic [ref=e514]: Test User
+            - generic [ref=e515]: test_user@grimetime.local
+          - generic [ref=e516]:
+            - img [ref=e517]
+            - generic [ref=e520]: Impersonate
+        - button "Jamie Patel jamie.patel@demo.grimetime.local Jordan Chen Impersonate" [ref=e521]:
+          - generic [ref=e522]:
+            - generic [ref=e523]: Jamie Patel
+            - generic [ref=e524]: jamie.patel@demo.grimetime.local
+            - generic [ref=e526]: Jordan Chen
+          - generic [ref=e527]:
+            - img [ref=e528]
+            - generic [ref=e531]: Impersonate
+        - button "Drew Okonkwo drew.okonkwo@demo.grimetime.local Jordan Chen Impersonate" [ref=e532]:
+          - generic [ref=e533]:
+            - generic [ref=e534]: Drew Okonkwo
+            - generic [ref=e535]: drew.okonkwo@demo.grimetime.local
+            - generic [ref=e537]: Jordan Chen
+          - generic [ref=e538]:
+            - img [ref=e539]
+            - generic [ref=e542]: Impersonate
+        - button "Casey Nguyen casey.nguyen@demo.grimetime.local Jordan Chen Impersonate" [ref=e543]:
+          - generic [ref=e544]:
+            - generic [ref=e545]: Casey Nguyen
+            - generic [ref=e546]: casey.nguyen@demo.grimetime.local
+            - generic [ref=e548]: Jordan Chen
+          - generic [ref=e549]:
+            - img [ref=e550]
+            - generic [ref=e553]: Impersonate
+        - button "Riley Torres riley.torres@demo.grimetime.local Impersonate" [ref=e554]:
+          - generic [ref=e555]:
+            - generic [ref=e556]: Riley Torres
+            - generic [ref=e557]: riley.torres@demo.grimetime.local
+          - generic [ref=e558]:
+            - img [ref=e559]
+            - generic [ref=e562]: Impersonate
+        - button "Morgan Park morgan.park@demo.grimetime.local Impersonate" [ref=e563]:
+          - generic [ref=e564]:
+            - generic [ref=e565]: Morgan Park
+            - generic [ref=e566]: morgan.park@demo.grimetime.local
+          - generic [ref=e567]:
+            - img [ref=e568]
+            - generic [ref=e571]: Impersonate
+        - button "Alex Kim alex.kim@demo.grimetime.local Impersonate" [ref=e572]:
+          - generic [ref=e573]:
+            - generic [ref=e574]: Alex Kim
+            - generic [ref=e575]: alex.kim@demo.grimetime.local
+          - generic [ref=e576]:
+            - img [ref=e577]
+            - generic [ref=e580]: Impersonate
+        - button "Sam Chen sam.chen@demo.grimetime.local Impersonate" [ref=e581]:
+          - generic [ref=e582]:
+            - generic [ref=e583]: Sam Chen
+            - generic [ref=e584]: sam.chen@demo.grimetime.local
+          - generic [ref=e585]:
+            - img [ref=e586]
+            - generic [ref=e589]: Impersonate
+  - generic [ref=e52]:
+    - generic [ref=e55]:
+      - generic [ref=e56]:
+        - link "Grime Time Exterior Cleaning" [ref=e57] [cursor=pointer]:
+          - /url: /
+          - generic "Grime Time Exterior Cleaning" [ref=e58]:
+            - generic [ref=e59]: GT
+            - generic [ref=e60]:
+              - generic [ref=e61]: Grime Time
+              - generic [ref=e62]: Exterior Cleaning
+        - generic [ref=e63]:
+          - paragraph [ref=e64]: North Texas exterior cleaning
+          - paragraph [ref=e65]: Quotes, scheduling, and service proof in one clear lane.
+      - generic [ref=e67]:
+        - generic [ref=e68]: Explore
+        - list [ref=e70]:
+          - listitem [ref=e71]:
+            - link "Services" [ref=e72] [cursor=pointer]:
+              - /url: /#services
+              - img [ref=e73]
+              - generic [ref=e76]: Services
+          - listitem [ref=e77]:
+            - link "Get quote" [ref=e78] [cursor=pointer]:
+              - /url: /#instant-quote
+              - img [ref=e79]
+              - generic [ref=e82]: Get quote
+      - generic [ref=e83]:
+        - link "Get instant quote" [ref=e84] [cursor=pointer]:
+          - /url: /#instant-quote
+          - img [ref=e85]
+          - generic [ref=e88]: Get instant quote
+        - generic [ref=e89]:
+          - generic [ref=e90]:
+            - img [ref=e91]
+            - text: Customer access
+          - paragraph [ref=e94]: Returning customers can review estimates, invoices, and scheduling from one account.
+          - generic [ref=e452]:
+            - button "Customer sign in" [ref=e453]
+            - button "Create account" [ref=e454]
+        - generic [ref=e96]:
+          - link "About" [ref=e97] [cursor=pointer]:
+            - /url: /about
+          - link "Contact" [ref=e98] [cursor=pointer]:
+            - /url: /contact
+          - link "Privacy" [ref=e99] [cursor=pointer]:
+            - /url: /privacy-policy
+          - link "Terms" [ref=e100] [cursor=pointer]:
+            - /url: /terms-and-conditions
+          - link "Refund policy" [ref=e101] [cursor=pointer]:
+            - /url: /refund-policy
+          - link "Contact SLA" [ref=e102] [cursor=pointer]:
+            - /url: /contact-sla
+        - combobox "Select a theme" [ref=e104]:
+          - generic: Auto
+          - img [ref=e105]
+      - button "Toggle Sidebar" [ref=e108]
+    - main [ref=e109]:
+      - generic [ref=e110]:
+        - main [ref=e111]:
+          - generic [ref=e112]:
+            - generic [ref=e591]:
+              - generic [ref=e592]:
+                - generic [ref=e593]: Live canvas
+                - generic [ref=e594]: Click a section on the page to inspect it in the composer.
+              - generic [ref=e595]:
+                - button "Desktop" [ref=e596]
+                - button "Tablet" [ref=e597]
+                - button "Mobile" [ref=e598]
+            - generic [ref=e599]:
+              - generic [ref=e601]:
+                - generic [ref=e602]
+                - generic [ref=e628]
+              - generic [ref=e643]:
+                - generic [ref=e644]
+                - generic [ref=e714]
+              - generic [ref=e785]:
+                - generic [ref=e786]
+                - generic [ref=e824]
+        - complementary [ref=e913]:
+          - generic [ref=e914]:
+            - generic [ref=e915]:
+              - generic [ref=e916]:
+                - generic [ref=e917]: Visual composer
+                - generic [ref=e918]: /
+                - generic [ref=e919]: published
+              - generic [ref=e920]:
+                - generic [ref=e921]
+                - generic [ref=e930]
+            - button "Dismiss page composer" [ref=e941]:
+              - img
+          - generic [ref=e942]:
+            - generic [ref=e944]: The live page is the canvas. Click a section on the page to select it, then use this rail to edit structure, content, media, and publish state.
+            - generic [ref=e945]:
+              - tablist [ref=e947]:
+                - tab "Structure" [selected] [ref=e948]
+                - tab "Content" [ref=e949]
+                - tab "Media" [ref=e950]
+                - tab "Publish" [ref=e951]
+              - tabpanel "Structure" [ref=e952]:
+                - generic [ref=e953]
+              - generic [ref=e1014]:
+                - generic [ref=e1015]: Page edits stay local until you save or publish.
+                - generic [ref=e1016]
+  - generic [ref=e419]:
+    - button "Move copilot" [ref=e420]:
+      - img [ref=e421]
+    - button "Copilot" [ref=e431]:
+      - img [ref=e432]
+      - text: Copilot
+  - button "Open Next.js Dev Tools" [ref=e444] [cursor=pointer]:
+    - img [ref=e445]
+  - alert [ref=e465]

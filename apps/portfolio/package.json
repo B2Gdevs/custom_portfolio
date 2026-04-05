@@ -18,6 +18,7 @@
     "start": "next start",
     "lint": "eslint",
     "test:unit": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:unit:coverage": "vitest run --coverage",
     "test:unit:report": "node scripts/run-unit-report.mjs",
     "test:e2e": "playwright test",

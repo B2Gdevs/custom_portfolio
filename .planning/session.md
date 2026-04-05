@@ -4,7 +4,20 @@
 **Phase:** 05 (global)
 **Methodology version:** 1.0.0
 
-## Completed this session (2026-04-05)
+## Completed this session (2026-04-05 continued)
+- **v6 cli-efficiency eval:** session-scoped `gad state` + `gad phases` by default when session active. token_reduction: 0.940, composite: 0.976 — all three targets met simultaneously. Decision: gad-14.
+- **eval-run + eval-report skills:** `gad:eval-run` and `gad:eval-report` skills written. portfolio-bare eval redesigned as real agent sessions (not automated harness). `gad session new --fresh` declares context mode. `contextMode` field in session JSON + ctx column in `gad session list`. template/ directory for fresh eval copies. Decision: gad-15.
+- **Parser 100% field coverage:** Fixed task-registry-reader (`<task\s` regex, `agent-id`, `commands[]`), roadmap-reader (`depends`, `milestone`, `readDocFlow`), decisions-reader.cjs (new), requirements-reader.cjs (new), requirementsXmlToMd rewritten (no longer a tag-stripper). New CLI: `gad decisions`, `gad requirements`. tests/parser-coverage.test.cjs: **43/43 passing**.
+
+## Remaining
+- Run planning-migration eval v2 (compile grime-time + any new roots into sink)
+- Sink auto-create for new sections: already works (mkdirSync recursive by root.id) — needs test
+- Continue migrating docs + running trace for cli-efficiency v7 if needed
+
+## Resume
+```sh
+gad context --session s-mnkqq67t-gnzz --json
+```
 - **Task 5 (missing-arg UX):** eval run/score/diff and session resume/close now print available choices + rerun hint instead of blind citty error. `required: true` replaced with custom guards. Helpers: `listEvalProjectsHint()` and `listActiveSessionsHint()`. Decision: gad-12.
 - **Task 1 (gad context rebuild):** `gad context` now inlines all file contents by default. `--refs` flag = old lightweight mode. JSON mode also inlines content unless `--refs`. Decision: gad-09.
 - **Task 2 (gad snapshot):** `gad snapshot [--project <id>]` added. Inlines every .planning/ file (priority order: STATE, ROADMAP, REQUIREMENTS, DECISIONS, TASK-REGISTRY, then alpha). Decision: gad-10.

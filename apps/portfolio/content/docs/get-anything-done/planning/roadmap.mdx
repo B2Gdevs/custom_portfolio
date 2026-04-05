@@ -1,0 +1,74 @@
+---
+title: "get-anything-done — Roadmap"
+description: "Auto-compiled from vendor/get-anything-done/.planning/ROADMAP.xml"
+generated: "true"
+source: "vendor/get-anything-done/.planning/ROADMAP.xml"
+updated: "2026-04-05T16:30:16.545Z"
+---
+
+# Roadmap
+
+## Phase 01 — Foundation
+
+**Status:** done
+**Goal:** Citty-based CJS CLI scaffold. bin/gad.cjs, defineCommand, workspace/projects commands, planning-config.toml loading, findRepoRoot.
+
+## Phase 02 — Session management
+
+**Status:** done
+**Goal:** gad session new/list/resume/close. Session JSON files in .planning/sessions/. contextMode (fresh|loaded). Session-scoped defaults for state/phases commands.
+**Depends:** 01
+
+## Phase 03 — Planning readers — state, roadmap, tasks
+
+**Status:** done
+**Goal:** state-reader.cjs, roadmap-reader.cjs, task-registry-reader.cjs. gad state / gad phases / gad tasks commands. XML preferred over MD. Session-scoped --projectid defaults.
+**Depends:** 02
+
+## Phase 04 — Extended readers — decisions, requirements, errors, blockers
+
+**Status:** done
+**Goal:** decisions-reader.cjs, requirements-reader.cjs, errors-reader.cjs, blockers-reader.cjs. Corresponding CLI commands. No-misc rule: every named field must be parseable.
+**Depends:** 03
+
+## Phase 05 — Docs sink pipeline
+
+**Status:** done
+**Goal:** docs-compiler.cjs: compile (.planning XML → MDX sink) and decompile (ensure .planning dirs, create stubs). gad sink compile/decompile/sync/status/validate. SOURCE_MAP, isGenerated guard, human-authored detection.
+**Depends:** 04
+
+## Phase 06 — Eval framework
+
+**Status:** done
+**Goal:** evals/ structure with DEFINITIONS.md, RUN.md, SCORE.md, TRACE.json. gad eval run/score/diff/trace commands. portfolio-bare template. eval-run and eval-report skills. v1–v6 CLI efficiency evals.
+**Depends:** 03
+
+## Phase 07 — Parser 100% coverage + tests
+
+**Status:** done
+**Goal:** parser-coverage.test.cjs: 46 tests across 6 suites. Every named XML field covered. No-misc assertion per parser. Fixed task-registry regex bugs (&lt;task\s vs \b, agent-id lookbehind).
+**Depends:** 04
+
+## Phase 08 — Full repo planning coverage
+
+**Status:** done
+**Goal:** All vendor projects registered in planning-config.toml with .planning/ scaffold. gad refs command. plans/requirements/title fields in roadmap reader. sink sync for all 6 roots.
+**Depends:** 05
+
+## Phase 09 — Scoping and discoverability
+
+**Status:** done
+**Goal:** resolveRoots() helper. --all flag on all scoped commands. --projectid consistent across all commands. gad ls alias for projects list. Sink status human-authored detection.
+**Depends:** 08
+
+## Phase 10 — GAD eats its own dogfood + planning packs
+
+**Status:** active
+**Goal:** Register get-anything-done as a planning root. Migrate gad-* decisions into this project. Add gad pack command (bundle .planning data for repo-planner display). Update repo-planner planning-pack to consume GAD XML format.
+**Depends:** 09
+
+## Phase 11 — AGENTS.md and context system
+
+**Status:** planned
+**Goal:** Update AGENTS.md across all vendor projects to reference XML files and gad: commands. Formalize context re-hydration flow. Validate eval scores against v6 baseline.
+**Depends:** 10

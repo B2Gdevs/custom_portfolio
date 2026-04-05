@@ -3,7 +3,630 @@ title: "grime-time — Errors & Attempts"
 description: "Auto-compiled from vendor/grime-time-site/.planning/ERRORS-AND-ATTEMPTS.xml"
 generated: "true"
 source: "vendor/grime-time-site/.planning/ERRORS-AND-ATTEMPTS.xml"
-updated: "2026-04-05T02:27:29.852Z"
+updated: "2026-04-05T16:30:16.639Z"
 ---
 
 # Errors & Attempts
+
+## 04-10-a1 — phase 04 — task 04-10 — resolved
+
+**Page media devtools bridge caused a homepage render loop**
+
+
+**Symptom:** Opening the public home page with the localhost-only page-media devtools mounted triggered `Maximum update depth exceeded` from `PageMediaDevtoolsContext.tsx`.
+
+**Cause:** The provider recreated `setCurrentPage`, `clearPage`, and the full context object on every render. `PageMediaRegistryBridge` depended on that changing context object, so its effect cleanup and re-run kept setting state recursively.
+
+**Fix:** Stabilize the context callbacks with `useCallback`, memoize the provider value with `useMemo`, and make the bridge effect depend only on the stable `setCurrentPage` / `clearPage` functions rather than the whole context object.
+
+**Verification:**
+```
+cmd /c npm.cmd run test:int -- --run tests/int/components/admin-impersonation/page-media-devtools-context.int.spec.tsx tests/int/lib/media/page-media-devtools.int.spec.ts tests/int/lib/media/page-media-route.int.spec.ts
+```
+```
+cmd /c npm.cmd exec eslint "src/components/admin-impersonation/PageMediaDevtoolsContext.tsx" "tests/int/components/admin-impersonation/page-media-devtools-context.int.spec.tsx"
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 11-05-a1 — phase 11 — task 11-05 — resolved
+
+**Portal-access integration test failed before the Clerk id column existed**
+
+
+**Symptom:** After adding `clerkUserID` to Payload `users`, `tests/int/lib/auth/portalAccess.int.spec.ts` failed with `column users.clerk_user_i_d does not exist` when it created records before the latest schema change had been applied.
+
+**Cause:** The runtime app/build path had already migrated the database, but the targeted integration test could hit a database that had not seen the new column yet. Calling `payload.db.migrate()` inside the test exposed a second pre-existing issue: older migration files import `MigrateUpArgs` and `MigrateDownArgs` as runtime values, so Payload's dynamic migration loader throws during tests.
+
+**Fix:** Keep the new migration file on type-only imports and make the portal-access integration test self-heal by issuing the specific `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` and index creation directly through the Drizzle handle before creating `users` records.
+
+**Verification:**
+```
+cmd /c npm.cmd run test:int -- --run tests/int/lib/auth/portalAccess.int.spec.ts tests/int/components/auth/customer-login-card.int.spec.tsx tests/int/components/admin-impersonation/page-media-devtools-context.int.spec.tsx tests/int/lib/media/page-media-devtools.int.spec.ts tests/int/lib/media/page-media-route.int.spec.ts
+```
+```
+cmd /c npm.cmd exec eslint "src/collections/Users/index.ts" "src/lib/auth/portal-access/claims.ts" "src/lib/email/portalAccessCta.ts" "src/lib/auth/resolveCustomerPayloadUser.ts" "src/app/api/auth/claim-account/complete/route.ts" "src/components/auth/login/ClaimAccountForm.tsx" "src/migrations/20260401_170000_clerk_user_id.ts" "src/migrations/index.ts" "src/environment.d.ts" "tests/int/lib/auth/portalAccess.int.spec.ts"
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 11-05-a2 — phase 11 — task 11-05 — resolved
+
+**First-time Clerk social sign-in failed because Payload auth user creation still required a password**
+
+
+**Symptom:** Signing in through Clerk social login from the public shell hit a `ValidationError` on `users.password`, which bubbled into the homepage auth sidebar and returned `GET / 500` during the first request after Google sign-in.
+
+**Cause:** `resolveCustomerPayloadUser()` correctly mapped existing users by Clerk id or email, but when no Payload user existed yet it created a new document in the auth-enabled `users` collection without a password. Payload auth collections still validate `password` on create even if Clerk is the real identity provider.
+
+**Fix:** Assign a random local-only placeholder password when creating a brand-new Clerk-backed Payload user, keep Clerk as the real identity, and add an integration test that covers first-time Clerk customer creation so future auth cleanup does not reintroduce the validation failure.
+
+**Verification:**
+```
+cmd /c npm.cmd run test:int -- --run tests/int/lib/auth/resolve-customer-payload-user.int.spec.ts tests/int/lib/auth/customer-session-identity.int.spec.ts tests/int/lib/auth/resolve-app-auth-actor.int.spec.ts
+```
+```
+cmd /c npm.cmd exec eslint "src/lib/auth/resolveCustomerPayloadUser.ts" "tests/int/lib/auth/resolve-customer-payload-user.int.spec.ts"
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 12-01-a1 — phase 12 — task 12-01 — resolved
+
+**Organizations collection access helper caused a circular import during Payload boot**
+
+
+**Symptom:** `payload migrate:create` crashed with `ReferenceError: Cannot access 'canManageOrganizations' before initialization` as soon as the new `organizations` collection imported the access helper.
+
+**Cause:** The access helper imported collection slug constants directly from the new collections, while the collections imported the access helper. That created a circular module edge during Payload config evaluation.
+
+**Fix:** Move shared collection slugs and the default Grime Time Clerk org id into a neutral `src/lib/auth/organizationConstants.ts` module so collections, sync helpers, and access helpers no longer import each other at config-load time.
+
+**Verification:**
+```
+cmd /c npm.cmd run payload -- migrate:create add_organizations_and_memberships --skipEmpty
+```
+```
+cmd /c .\node_modules\.bin\tsc.cmd --noEmit
+```
+
+## 12-01-a2 — phase 12 — task 12-01 — resolved
+
+**Membership after-change role sync deadlocked the compatibility bridge**
+
+
+**Symptom:** The first `organization-memberships` integration tests hung or timed out, and cleanup surfaced a broken `ON DELETE SET NULL`/`NOT NULL` combination when bootstrap-created memberships were left behind after a failed run.
+
+**Cause:** Trying to recompute and write the legacy `users.roles` bridge inside the membership collection's after-change hook created a fragile same-transaction path. The bridge exists for compatibility, but the real authorization source is now the first-party membership query.
+
+**Fix:** Remove the membership after-change role sync hook, keep `organizations`/`organization-memberships` as the real runtime auth source, and move the legacy-role bridge to explicit bootstrap/auth-resolution paths (`organizationSync` and auth entrypoints) where the membership write has already settled.
+
+**Verification:**
+```
+cmd /c npm.cmd run test:int -- --run tests/int/lib/auth/organization-access.int.spec.ts tests/int/lib/auth/customer-session-identity.int.spec.ts tests/int/lib/auth/resolve-app-auth-actor.int.spec.ts tests/int/lib/auth/resolve-customer-payload-user.int.spec.ts
+```
+```
+cmd /c .\node_modules\.bin\tsc.cmd --noEmit
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 12-02-a1 — phase 12 — task 12-02 — resolved
+
+**Clerk-signed Grime Time staff users could sign in but still missed admin tools, impersonation, and page-media controls**
+
+
+**Symptom:** A real Grime Time staff member signed in through Google/Clerk could land on the homepage but still saw no floating operator toolbar, no impersonation search, no page-media tooling, and `/admin/login` still behaved like a second auth island instead of recognizing the existing session.
+
+**Cause:** The first-party membership bootstrap only promoted `ADMIN_EMAIL` or `@grimetime.app` users into the Grime Time staff org. Clerk org membership itself was not being read during session resolution, and several internal routes still authorized through legacy `users.roles` rather than the new membership-aware admin check. Payload admin also still required its own cookie with no bridge from Clerk-backed staff identity.
+
+**Fix:** Extend the Clerk session identity to include organization memberships, bootstrap the mapped Grime Time staff org from Clerk membership when present, switch impersonation routes to membership-aware admin auth, add a Payload-admin cookie bridge plus `/admin/login` redirect for signed-in Clerk users, and expose direct operator links plus inline homepage media hover controls from the public shell.
+
+**Verification:**
+```
+cmd /c npm.cmd run test:int -- --run tests/int/lib/auth/customer-session-identity.int.spec.ts tests/int/lib/auth/organization-access.int.spec.ts tests/int/lib/auth/resolve-customer-payload-user.int.spec.ts tests/int/lib/media/page-media-route.int.spec.ts tests/int/app/payload-admin-session-route.int.spec.ts
+```
+```
+cmd /c npm.cmd exec eslint "src/lib/auth/customerSessionIdentity.ts" "src/lib/auth/organizationSync.ts" "src/lib/auth/resolveCustomerPayloadUser.ts" "src/proxy.ts" "src/app/api/internal/admin/payload-session/route.ts" "src/app/api/internal/impersonation/users/route.ts" "src/app/api/internal/impersonation/start/route.ts" "src/app/api/internal/impersonation/stop/route.ts" "src/app/api/internal/dev/page-media/route.ts" "src/components/AdminBar/index.tsx" "src/components/admin-impersonation/AdminImpersonationToolbar.tsx" "src/components/admin-impersonation/InlinePageMediaEditor.tsx" "src/components/admin-impersonation/PageMediaDevtoolsContext.tsx" "src/app/(frontend)/layout.tsx" "src/components/home/GrimeTimeMarketingHome.tsx" "tests/int/lib/auth/customer-session-identity.int.spec.ts" "tests/int/lib/auth/organization-access.int.spec.ts" "tests/int/lib/auth/resolve-customer-payload-user.int.spec.ts" "tests/int/lib/media/page-media-route.int.spec.ts" "tests/int/app/payload-admin-session-route.int.spec.ts"
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 12-02-a2 — phase 12 — task 12-02 — resolved
+
+**Bootstrap membership creation failed at runtime with invalid `organization_id` and `user_id` relationship validation**
+
+
+**Symptom:** Opening staff-only routes such as `/ops` after Clerk sign-in could throw `ValidationError: The following field is invalid: organization_id, user_id` from `ensureBootstrapOrganizationMembership()`, which then broke auth-context resolution and returned a 500 from the route.
+
+**Cause:** The new first-party org bootstrap path created or updated `organization-memberships` records through local Payload operations without a local request object. In live runtime resolution, the relationship validation path for `organization` and `user` could not consistently resolve the linked records or access context, even though the same path passed in narrower tests.
+
+**Fix:** Create a local Payload request with `createLocalReq({ user }, payload)` inside the bootstrap path, and thread that `req` through organization lookup, organization creation/update, existing membership lookup, and membership create/update so the relationship validation and linked record resolution run under a stable local request context.
+
+**Verification:**
+```
+cmd /c npm.cmd run test:int -- --run tests/int/lib/auth/organization-access.int.spec.ts tests/int/lib/auth/resolve-customer-payload-user.int.spec.ts tests/int/lib/auth/customer-session-identity.int.spec.ts
+```
+```
+cmd /c npm.cmd exec eslint "src/lib/auth/organizationSync.ts" "src/lib/auth/organizationAccess.ts" "src/lib/auth/resolveCustomerPayloadUser.ts"
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 12-02-a3 — phase 12 — task 12-02 — resolved
+
+**Ops shell felt oversized and trapped page scrolling behind inset chrome**
+
+
+**Symptom:** The staff `/ops` view showed a sidebar that felt too wide, a visual gutter between the sidebar and main content, duplicated workspace actions in the page header, and an inner scroll region that made the page feel like it was scrolling in a strip between the nav and the content. The floating operator toolbar could also overlap the ops header when it snapped to the default top-right corner.
+
+**Cause:** The portal shell still used the inset sidebar variant plus a broad sidebar width, which created extra margins around the main surface. The ops and customer pages also kept their own nested `overflow-y-auto` containers instead of letting the page scroll naturally, and the toolbar still defaulted to the public-site corner placement even on secured staff routes.
+
+**Fix:** Switch the portal shell back to the standard sidebar variant, narrow the shared portal sidebar width, remove the duplicate `Open ops workspace` header action, replace the staff-only `Customer home` nav item with a direct `Public site` route, let the main ops/customer surfaces use normal page flow instead of nested scroll containers, and move the toolbar's default secure-route corner to bottom-right via a versioned storage key.
+
+**Verification:**
+```
+cmd /c npm.cmd exec eslint "src/lib/portal/layout.ts" "src/components/portal/PortalAppShell.tsx" "src/lib/navigation/portalSidebar.ts" "src/components/portal/AdminDashboardView.tsx" "src/components/portal/CustomerDashboardView.tsx" "src/app/(portal)/ops/workspace/page.tsx" "src/components/admin-impersonation/AdminImpersonationToolbar.tsx"
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 12-02-a4 — phase 12 — task 12-02 — resolved
+
+**Ops chart metric controls looked like stray transparent buttons in the header**
+
+
+**Symptom:** The Business momentum card showed a small metric toggle cluster in the top-right of the header, which read more like overlapping transparent buttons than intentional dashboard controls. The useful metric context strings such as `2 active plans` for MRR were computed in the loader but were not surfaced in a clean place in the UI.
+
+**Cause:** The chart used a compact ToggleGroup / Select switcher in the header, but the surrounding dashboard had already adopted larger card-like KPI affordances. That left the metric controls visually out of family and disconnected from the real metric context produced in `loadOpsDashboardData()`.
+
+**Fix:** Remove the top-right chart toggle cluster, add explicit chart metric summaries from the loader (Pipeline, Revenue, MRR, Margin), and render them as a clickable KPI-style row below the chart so the same controls double as metric context and chart selection. Reuse real detail strings such as `open quotes` and `active plans` instead of hiding them in the loader.
+
+**Verification:**
+```
+cmd /c npm.cmd exec eslint "src/lib/ops/loaders/loadOpsDashboardData.ts" "src/components/portal/AdminDashboardView.tsx" "src/app/(portal)/ops/page.tsx" "src/components/chart-area-interactive.tsx"
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 12-02-a5 — phase 12 — task 12-02 — resolved
+
+**Compact KPI cards still pinned trend pills in the top-right and the ops chart still surfaced a stale “later phase” disclaimer**
+
+
+**Symptom:** Even after the chart control rewrite, the `/ops` view still showed top-right transparent-looking pills such as `1 active plans` because the compact KPI cards rendered their trend badges as absolutely positioned badges in the card header. The chart disclaimer could also still show the old line about connecting real accounting and CRM data “in a later phase,” especially when that text had already been saved in Internal ops settings.
+
+**Cause:** The stray element was not from the chart anymore; it was the `SectionCards` compact card layout. Separately, the loader still accepted the legacy disclaimer string from either the global default or previously saved settings.
+
+**Fix:** Move KPI trend badges into the normal card flow under the metric value instead of absolutely pinning them in the corner, update the Internal ops settings default disclaimer to describe the real live series, and normalize legacy illustrative disclaimer strings inside the loader so the stale “later phase” copy is replaced even if the old value already exists in the database.
+
+**Verification:**
+```
+cmd /c npm.cmd exec eslint "src/components/section-cards.tsx" "src/lib/ops/loaders/loadOpsDashboardData.ts" "src/globals/InternalOpsSettings/config.ts"
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 12-02-a6 — phase 12 — task 12-02 — resolved
+
+**Page-media drawer creation flow was too awkward and the first gallery rewrite left a broken workbench**
+
+
+**Symptom:** On the home page, the local media drawer still exposed an unfriendly `Create new media record and swap` block instead of a usable gallery/library flow. The first chunked rewrite also left malformed strings, a hidden generate-new-media path, and no clear placeholder card for drag-drop, upload, or generate.
+
+**Cause:** The original drawer was built around one-off slot forms, not a reusable media library workflow. The first route changes landed the backend capabilities, but the client rewrite was still centered on inline forms and picked up chunked-patch corruption.
+
+**Fix:** Rebuild the drawer as a two-tab local media workbench: `Page media` for slot-focused replace/generate/swap actions and `Media library` for record-focused upload, drag-drop, generate, and swap flows. Extend the local devtools route with GET library loading plus `create-only`, `generate-only`, and `swap-existing-reference`, add a placeholder card for new records, and make both page cards and library cards drag-aware with selected-state feedback.
+
+**Verification:**
+```
+cmd /c npm.cmd exec eslint "src/components/admin-impersonation/PageMediaDevtoolsDrawer.tsx" "src/app/api/internal/dev/page-media/route.ts" "src/lib/media/pageMediaDevtools.ts"
+```
+```
+cmd /c npm.cmd run test:int -- --run tests/int/lib/media/page-media-route.int.spec.ts tests/int/lib/media/page-media-devtools.int.spec.ts
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 12-02-a7 — phase 12 — task 12-02 — resolved
+
+**Generate actions opened in the wrong place and the local media tools still treated everything like images**
+
+
+**Symptom:** Clicking `Generate` in the page-media drawer pushed the prompt down into the old selected-detail block instead of opening inline on the clicked card. The local workbench and hover editor also still showed extra `New record` actions on page media, only accepted image uploads, and could not deliberately create video media from dropped files or generated prompts.
+
+**Cause:** The page-media workbench still carried forward the old selected-card pattern from the first rewrite, and the route/helper layer only exposed image-generation semantics even though Payload media records themselves already supported video uploads through `mimeType`.
+
+**Fix:** Move generate controls inline onto the clicked page/library cards, remove the extra `New record` actions from page-card and hover tooling, add explicit image/video generation toggles, pass `mediaKind` through the local devtools route, return `mimeType` in devtools summaries so previews can render videos, accept image/video uploads everywhere relevant, and add a dedicated OpenAI video helper for the local media flow.
+
+**Verification:**
+```
+cmd /c npm.cmd exec eslint "src/components/admin-impersonation/PageMediaDevtoolsDrawer.tsx" "src/components/admin-impersonation/InlinePageMediaEditor.tsx" "src/app/api/internal/dev/page-media/route.ts" "src/lib/media/pageMediaDevtools.ts" "src/lib/media/openaiVideoGeneration.ts" "tests/int/lib/media/page-media-route.int.spec.ts" "tests/int/lib/media/page-media-devtools.int.spec.ts"
+```
+```
+cmd /c npm.cmd run test:int -- --run tests/int/lib/media/page-media-route.int.spec.ts tests/int/lib/media/page-media-devtools.int.spec.ts
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 12-02-a8 — phase 12 — task 12-02 — resolved
+
+**Page-slot generation still mutated shared media records and could not iterate an existing image into video**
+
+
+**Symptom:** Generating from a page-media slot such as `hero.media` could still target `generate-replace-existing`, which meant one prompt could mutate a shared media record used by multiple page slots. The local media tools also let admins flip a slot from image to video, but the video generation path did not reuse the current image as a reference input.
+
+**Cause:** The page drawer and inline hover editor still treated generate like record replacement when a slot already had a media id, even though upload-on-page had already shifted to create-and-swap semantics. The OpenAI video helper accepted prompt-only generation but had no path to resolve the current image record into an `input_reference` object.
+
+**Fix:** Make page-slot generate always submit `generate-and-swap`, pass the current slot media id as `sourceMediaId`, resolve that media record server-side when the requested output is video, fetch the current image bytes, and send them to the OpenAI video API as an `input_reference.image_url` data URL. Keep library-record generate-in-place available for explicit record iteration, but make page-slot generation always fork a new media record and swap the page relation.
+
+**Verification:**
+```
+cmd /c npm.cmd exec eslint "src/components/admin-impersonation/PageMediaDevtoolsDrawer.tsx" "src/components/admin-impersonation/InlinePageMediaEditor.tsx" "src/app/api/internal/dev/page-media/route.ts" "src/lib/media/openaiVideoGeneration.ts" "tests/int/lib/media/page-media-route.int.spec.ts"
+```
+```
+cmd /c npm.cmd run test:int -- --run tests/int/lib/media/page-media-route.int.spec.ts tests/int/lib/media/page-media-devtools.int.spec.ts
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 12-02-a9 — phase 12 — task 12-02 — resolved
+
+**Page-media cards still wasted space on separate replace/generate controls instead of one focused slot editor**
+
+
+**Symptom:** Inside the page-media drawer, each slot card still carried its own inline action row and detail state. That made the page tab feel crowded, and clicking a layout media card did not open a focused editor for that slot. The upload/generate flows were available, but they were spread across the card instead of living in a single compact slot-edit modal.
+
+**Cause:** The page tab had evolved incrementally from inline forms. Even after the gallery and media-kind improvements, the slot cards still owned too much UI and treated upload/generate as separate surface actions rather than one “edit this slot” workflow.
+
+**Fix:** Condense page-slot actions down to a single sparkle affordance and card click target, then open a focused modal for the selected slot with `Image`, `Video`, and `Gallery` tabs. Move drag-drop/upload to the top of the modal, keep generate controls at the bottom for image/video tabs, add `Cancel` plus a top-right close button, and cover the new modal-first behavior with a component integration test.
+
+**Verification:**
+```
+cmd /c npm.cmd exec eslint "src/components/admin-impersonation/PageMediaDevtoolsDrawer.tsx" "tests/int/components/admin-impersonation/page-media-devtools-drawer.int.spec.tsx"
+```
+```
+cmd /c npm.cmd run test:int -- --run tests/int/components/admin-impersonation/page-media-devtools-drawer.int.spec.tsx tests/int/lib/media/page-media-route.int.spec.ts tests/int/lib/media/page-media-devtools.int.spec.ts
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 13-06-a1 — phase 13 — task 13-06 — resolved
+
+**Localhost production verification for the page composer and focused copilot flow is now stable**
+
+
+**Symptom:** The first browser pass could not reach a healthy `next start` surface: Playwright readiness timed out, local production routes returned HTTP 500, and the new page-composer coverage could not execute end to end.
+
+**Cause:** There were several stacked issues. The page-visibility migration was not idempotent under multi-worker startup, Clerk middleware expected `localhost` rather than `127.0.0.1` during local production rewrites, Node-side ESM resolution was brittle on `next/cache` imports in the Payload boot path, and browser verification exposed additional composer-shell accessibility and overlay-targeting gaps.
+
+**Fix:** Make the page-visibility migration idempotent, switch Playwright and login helpers to `localhost`, change the affected `next/cache` imports to `next/cache.js`, then tighten the page-composer drawer and spec together: fix the copilot-authoring render loop, avoid uncontrolled-to-controlled select churn, label the media prompt textarea, label the real close button, and scope browser interactions to the fixed drawer and copilot surfaces so draft-save, media generation, publish, and focused-copilot flows can run reliably.
+
+**Verification:**
+```
+cmd /c npm.cmd exec -- tsc --noEmit
+```
+```
+cmd /c npm.cmd exec eslint src/components/admin-impersonation/PageComposerDrawer.tsx tests/e2e/page-composer.e2e.spec.ts playwright.config.ts tests/helpers/login.ts src/migrations/20260402_194706_add_page_visibility.ts
+```
+```
+cmd /c npm.cmd exec vitest run tests/int/lib/ai/copilot-authoring.int.spec.ts tests/int/lib/pages/page-composer.int.spec.ts
+```
+```
+cmd /c npm.cmd run build
+```
+```
+cmd /c npm.cmd exec -- playwright test tests/e2e/page-composer.e2e.spec.ts --config=playwright.config.ts
+```
+
+## 15-07-a1 — phase 15 — task 15-07 — resolved
+
+**Block-visibility schema and production-browser reorder verification both needed final hardening before phase 15 could close**
+
+
+**Symptom:** After phase-15 code added block-level hide/show support, the browser suite failed with missing `is_hidden` columns on page-layout tables. Once the schema was corrected, the production `next start` browser run still exposed a reorder failure because the spec's keyboard drag helper did not consistently drive the DnD handle under the fixed composer drawer.
+
+**Cause:** The new `isHidden` field had been added to the Payload block schemas and generated types without a matching Postgres migration for the live and version layout-block tables. Separately, the e2e helper was sending keyboard events through `page.keyboard`, which was less reliable than targeting the actual sortable drag handle element inside the drawer.
+
+**Fix:** Add a dedicated migration that creates `is_hidden` across every current page-layout block table and version table, migrate the local database before browser verification, then update the Playwright helper to press the sortable handle directly and assert Structure order before saving and publishing.
+
+**Verification:**
+```
+cmd /c npm.cmd exec eslint src/migrations/20260404_174500_add_page_block_visibility.ts src/migrations/index.ts tests/e2e/page-composer.e2e.spec.ts
+```
+```
+cmd /c npm.cmd exec -- tsc --noEmit
+```
+```
+cmd /c npm.cmd run payload migrate
+```
+```
+cmd /c npm.cmd exec vitest run tests/int/lib/pages/page-composer.int.spec.ts tests/int/app/page-composer-route.int.spec.ts
+```
+```
+cmd /c npm.cmd run build
+```
+```
+cmd /c set PLAYWRIGHT_BASE_URL=http://localhost:3110 && npm.cmd exec -- playwright test --config=playwright.local.config.ts tests/e2e/page-composer.e2e.spec.ts
+```
+
+## 14-03-a1 — phase 14 — task 14-03 — resolved
+
+**The first generated attachment migration pulled unrelated schema noise and had to be reduced to the real contract only**
+
+
+**Symptom:** When the new estimator attachment collection was generated, the migration draft also included unrelated schema churn such as organization-membership enum changes that were not part of the upload contract.
+
+**Cause:** The local schema snapshot had drifted enough that the generated migration tried to reconcile more than the new `instant_quote_request_attachments` collection.
+
+**Fix:** Replace the generated migration body with a clean hand-edited migration that only creates the estimator attachment enums, table, foreign keys, indexes, and locked-document relation needed for `instant-quote-request-attachments`.
+
+**Verification:**
+```
+cmd /c npm.cmd run generate:types
+```
+```
+cmd /c npm.cmd run payload migrate
+```
+```
+cmd /c npm.cmd exec vitest run tests/int/lib/forms/instant-quote-attachments.int.spec.ts
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 14-05-a1 — phase 14 — task 14-05 — resolved
+
+**Playwright webServer was not reliable for the targeted homepage estimator browser pass, so verification switched to a manual localhost dev server**
+
+
+**Symptom:** The standard Playwright `webServer` startup path timed out locally, and a manual `next start` on `localhost:3110` still failed because the runtime expected a missing `.next/prerender-manifest.json` even after a successful build.
+
+**Cause:** The local Next.js startup path remained brittle under the normal Playwright wrapper, and the targeted estimator browser checks only needed a healthy frontend surface plus mocked route responses rather than full production server semantics.
+
+**Fix:** Keep build verification as a separate command, then run the focused estimator browser tests against a manually started `next dev --hostname localhost --port 3110` process with a temporary Playwright config that omits `webServer` and points `PLAYWRIGHT_BASE_URL` at that live server.
+
+**Verification:**
+```
+cmd /c npm.cmd run build
+```
+```
+cmd /c npm.cmd exec -- playwright test tests/e2e/frontend.e2e.spec.ts --grep "instant quote" --config=playwright.local.config.ts
+```
+
+## 17-05-a1 — phase 17 — task 17-05 — resolved
+
+**Composer runtime verification required a matching Payload migration and split-surface e2e locator updates**
+
+
+**Symptom:** After the preview-first composer and reusable/custom-html schema work compiled, the frontend homepage failed at runtime with missing `composer_reusable_*` columns on page-version block tables. Once the migration was applied, the browser spec still failed because old locators treated the drawer as a single-column surface and matched the new preview canvas instead of the active Structure or Media tabs.
+
+**Cause:** The new block fields and `customHtml` block tables needed a real Postgres migration before the runtime could query page versions. Separately, the e2e spec still assumed the composer only exposed one interaction surface, so button-name locators became ambiguous once the preview canvas and tab panels were both interactive.
+
+**Fix:** Generate and apply a dedicated Payload migration for reusable metadata plus `customHtml`, then update the Playwright helpers to scope interactions to the active tabpanel for Structure and Media while leaving preview interaction available separately.
+
+**Verification:**
+```
+cmd /c npm.cmd run generate:types
+```
+```
+cmd /c npm.cmd run payload migrate
+```
+```
+cmd /c npm.cmd exec -- tsc --noEmit
+```
+```
+cmd /c npm.cmd exec vitest run tests/int/lib/pages/page-composer.int.spec.ts tests/int/app/page-composer-route.int.spec.ts
+```
+```
+cmd /c npm.cmd run build
+```
+```
+cmd /c set PLAYWRIGHT_BASE_URL=http://localhost:3111 &amp;&amp; npm.cmd exec -- playwright test tests/e2e/page-composer.e2e.spec.ts --config=playwright.local.config.ts
+```
+
+## 18-01-a1 — phase 18 — task 18-01 — resolved
+
+**Shared-section schema work exposed two Payload persistence mismatches that needed explicit correction before UI work could build safely**
+
+
+**Symptom:** The first generated `shared-sections` migration created the live enum for `status` as `draft|published` even though the collection contract included `archived`, and the collection hook normalized tags to `string[]` while the Payload field stored tag rows as `{ tag }[]`.
+
+**Cause:** Payload's generated migration reused the draft-status enum shape for the new `status` column in this collection/version surface, and the conceptual shared-section contract was intentionally flatter than Payload's array-row storage model for tags.
+
+**Fix:** Keep the conceptual shared-section contract in helper code, convert tags back to Payload row objects at the collection boundary, and add a follow-up manual migration that inserts `archived` into the relevant shared-section enums after the generated collection migration runs.
+
+**Verification:**
+```
+cmd /c npm.cmd exec eslint src/lib/pages/sharedSections.ts src/lib/auth/sharedSectionPermissions.ts src/collections/SharedSections.ts src/lib/pages/sharedSectionLibrary.ts src/app/api/internal/shared-sections/route.ts tests/int/lib/pages/shared-sections.int.spec.ts tests/int/lib/auth/shared-section-permissions.int.spec.ts tests/int/app/shared-sections-route.int.spec.ts
+```
+```
+cmd /c npm.cmd exec vitest run tests/int/lib/pages/shared-sections.int.spec.ts tests/int/lib/auth/shared-section-permissions.int.spec.ts tests/int/app/shared-sections-route.int.spec.ts
+```
+```
+cmd /c npm.cmd exec -- tsc --noEmit
+```
+```
+cmd /c npm.cmd run generate:types
+```
+```
+cmd /c npm.cmd run payload migrate
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 18-02-a1 — phase 18 — task 18-02 — resolved
+
+**Local build verification conflicted with stale Next dev and start processes, so the verification pass had to clear the old server state before trusting build artifacts**
+
+
+**Symptom:** `npm run build` first reported that another Next build was already running because a leftover `next dev --port 3110` process still held `.next/dev/lock`. After that server was stopped, the build command outlived the shell timeout while still writing fresh `.next` production artifacts.
+
+**Cause:** Phase 14 and 17 browser verification left manual `next dev` and `next start` processes behind for local Playwright passes, and those long-lived processes reused the same `.next` surface that the phase 18 build verification needed.
+
+**Fix:** Stop the stale `next dev` process before rerunning build verification, then confirm the build completed by waiting for the active `next build` processes to exit and checking for a fresh `.next/BUILD_ID` plus updated production manifest files.
+
+**Verification:**
+```
+cmd /c npm.cmd exec vitest run tests/int/components/portal/shared-sections/shared-sections-library.int.spec.tsx tests/int/lib/navigation/portal-sidebar.int.spec.ts tests/int/lib/auth/portal-nav-surface.int.spec.tsx
+```
+```
+cmd /c npm.cmd exec eslint src/lib/pages/sharedSections.ts src/lib/pages/sharedSectionLibrary.ts src/lib/query/queryKeys.ts src/lib/auth/portalNavSurface.ts src/lib/navigation/portalSidebar.ts src/components/portal/shared-sections/SharedSectionsLibrary.tsx "src/app/(portal)/shared-sections/page.tsx" tests/int/components/portal/shared-sections/shared-sections-library.int.spec.tsx tests/int/lib/navigation/portal-sidebar.int.spec.ts tests/int/lib/auth/portal-nav-surface.int.spec.tsx
+```
+```
+powershell -NoProfile -Command "Stop-Process -Id 30280,23712 -Force"
+```
+```
+powershell -NoProfile -Command "Wait-Process -Id 23520,14632 -Timeout 600"
+```
+```
+powershell -NoProfile -Command "Get-Content .next/BUILD_ID"
+```
+
+## 18-02-a2 — phase 18 — task 18-02 — resolved
+
+**Shared-section reusable metadata triggered a Postgres enum-name overflow during Next build**
+
+
+**Symptom:** `npm run build` failed during Payload init for static-page data collection with `Exceeded max identifier length for table or enum name of 63 characters` on `enum_pages_blocks_testimonials_block_composer_reusable_source_type`.
+
+**Cause:** The new `composerReusable.sourceType` select field lived under block tables with long generated table names, and Postgres enum identifiers inherited the full nested path. The field contract itself was correct, but the default generated enum name exceeded Postgres's identifier limit.
+
+**Fix:** Keep the hidden reusable metadata field, but assign short explicit `enumName` values for the nested `sourceType` and `mode` select fields in `src/blocks/shared/composerReusableField.ts` so Payload's generated Postgres enums stay within identifier limits.
+
+**Verification:**
+```
+cmd /c npm.cmd exec eslint src/blocks/shared/composerReusableField.ts
+```
+```
+cmd /c npm.cmd exec -- tsc --noEmit
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 18-02-a3 — phase 18 — task 18-02 — resolved
+
+**Reusable-metadata migration left deployed page-version block tables behind the runtime schema**
+
+
+**Symptom:** Production page loads and build-time prerender queries failed with `column _pages_v__blocks_serviceGrid.composer_reusable_source_type does not exist` while reading `_pages_v` draft versions for the homepage.
+
+**Cause:** The original reusable/custom-HTML migration only added `composer_reusable_mode`, `composer_reusable_key`, and `composer_reusable_label` on the service-grid, CTA, and content block tables. It never added `composer_reusable_source_type`, `composer_reusable_shared_section_id`, or `composer_reusable_synced_version`, and it skipped the media-block and testimonials-block live/version tables entirely. Because the migration itself had already been marked as run, later deploys looked healthy on migration status while the runtime schema was still incomplete.
+
+**Fix:** Add a new idempotent corrective migration that creates the missing reusable source columns across every affected live and `_pages_v` block table and backfills the missing mode/key/label columns for media and testimonials block tables without assuming a pristine database state.
+
+**Verification:**
+```
+cmd /c npm.cmd run generate:types
+```
+```
+cmd /c npm.cmd run payload migrate
+```
+```
+cmd /c npm.cmd exec -- tsc --noEmit
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 18-05-a1 — phase 18 — task 18-05 — resolved
+
+**Page composer launch regressed through an admin-auth mismatch and a client-side copilot sync loop**
+
+
+**Symptom:** Operators could see the page composer button on the live site, but clicking it in deployed or local admin contexts failed with `Unable to load the page composer.` After the route auth was corrected, opening the composer still tripped a `Maximum update depth exceeded` client error while syncing authoring context into the site copilot. Localhost testing also exposed that the quick admin bypass worked for server-rendered auth but still left request routes like `/api/internal/impersonation/users` returning `401`.
+
+**Cause:** The frontend shell exposed composer access to real admins, but `/api/internal/page-composer` only admitted content-authoring users. Separately, the composer was writing fresh authoring-context objects into copilot state on every render, which created a React update loop once the drawer mounted. The localhost bypass had been added only to `getCurrentAuthContext`, not to request-route auth, so admin tool APIs still behaved as unauthenticated during dev.
+
+**Fix:** Allow real admins through the page-composer route even without content-authoring membership, add stable equality gating to copilot authoring-context writes, move the page-composer launcher to a right-edge docked surface, convert the site copilot to a draggable floating panel like the admin toolbar, and centralize the localhost-only admin bypass so both server-component auth and request-route auth share the same fallback user resolution.
+
+**Verification:**
+```
+cmd /c npm.cmd exec eslint src/lib/auth/localDevBypass.ts src/lib/auth/getAuthContext.ts src/lib/auth/requirePayloadUser.ts src/components/copilot/PortalCopilotContext.tsx src/components/copilot/PortalCopilot.tsx src/components/admin-impersonation/ContentAuthoringToolbar.tsx src/app/api/internal/page-composer/route.ts tests/int/app/page-composer-route.int.spec.ts
+```
+```
+cmd /c npm.cmd exec vitest run tests/int/app/page-composer-route.int.spec.ts
+```
+```
+cmd /c npm.cmd exec -- tsc --noEmit
+```
+```
+cmd /c npm.cmd run build
+```
+```
+browser check: localhost:3115 home page shows draggable copilot, page composer opens as right drawer, and `/api/internal/impersonation/users` returns 200 under localhost bypass
+```
+
+## 18-05-a2 — phase 18 — task 18-05 — resolved
+
+**Composer rail still mounted in the wrong layer after the first launcher hotfix**
+
+
+**Symptom:** The public-site composer could be launched again, but it still rendered as a global fixed overlay on top of the impersonation toolbar instead of docking into the frontend shell. Operators also reported that the site copilot was missing during authoring on the public site.
+
+**Cause:** `PageComposerDrawer` still owned its own `fixed` viewport panel and trigger button, so the composer was instantiated from floating toolbars instead of from the app shell. Separately, frontend copilot visibility was still gated to real admins, which hid it from content-authoring users even when the authoring tools were available.
+
+**Fix:** Introduce a shared composer UI context, convert the toolbars into launcher-only surfaces, mount a single composer rail inside `MarketingShell`, offset the admin toolbar when the rail is open, and broaden frontend copilot visibility to content-authoring users when the AI assistant feature flag is enabled.
+
+**Verification:**
+```
+cmd /c npm.cmd exec eslint src/components/admin-impersonation/PageComposerContext.tsx src/components/admin-impersonation/PageComposerDrawer.tsx src/components/admin-impersonation/AdminImpersonationToolbar.tsx src/components/admin-impersonation/ContentAuthoringToolbar.tsx src/components/frontend/MarketingShell.tsx "src/app/(frontend)/layout.tsx" tests/int/components/admin-impersonation/page-composer-shell.int.spec.tsx
+```
+```
+cmd /c npm.cmd exec vitest run tests/int/components/admin-impersonation/page-composer-shell.int.spec.tsx tests/int/app/page-composer-route.int.spec.ts
+```
+```
+powershell -NoProfile -Command "if (Test-Path '.next') { Remove-Item -Recurse -Force '.next' }"
+```
+```
+cmd /c npm.cmd run build
+```
+```
+cmd /c npm.cmd exec -- tsc --noEmit
+```
+```
+browser check: localhost:3116 home page shows a right-rail `complementary` composer inside the shell and a visible draggable copilot launcher
+```
+
+## 18-05-a3 — phase 18 — task 18-05 — resolved
+
+**Drawer-owned preview duplicated the page and overflowed once the composer became a shell rail**
+
+
+**Symptom:** After the composer moved into a shell-owned right rail, the old embedded preview still rendered inside that rail. The result was a cramped duplicate page surface, visual overflow in the left side of the composer, and a mismatched mental model where users edited one surface while looking at another.
+
+**Cause:** The original phase-16 preview-first architecture assumed the composer needed its own dedicated canvas inside the drawer. Once the drawer became a docked rail, that assumption no longer matched the intended low-code workflow for Grime Time, where the real page should be the primary canvas.
+
+**Fix:** Remove the drawer-owned preview from the page-composer rail, add a shared frontend canvas layer that wraps the real rendered page with section-selection chrome and device-width controls, and wire page-section selection back into the shared composer state so the rail becomes a control surface rather than a second preview.
+
+**Verification:**
+```
+cmd /c npm.cmd exec eslint src/components/admin-impersonation/PageComposerContext.tsx src/components/admin-impersonation/PageComposerCanvas.tsx src/components/admin-impersonation/PageComposerDrawer.tsx src/blocks/RenderBlocks.tsx "src/app/(frontend)/page.tsx" "src/app/(frontend)/[slug]/page.tsx" tests/int/components/admin-impersonation/page-composer-shell.int.spec.tsx tests/int/components/admin-impersonation/page-composer-canvas.int.spec.tsx
+```
+```
+cmd /c npm.cmd exec vitest run tests/int/components/admin-impersonation/page-composer-shell.int.spec.tsx tests/int/components/admin-impersonation/page-composer-canvas.int.spec.tsx tests/int/app/page-composer-route.int.spec.ts
+```
+```
+cmd /c npm.cmd exec -- tsc --noEmit
+```
+```
+cmd /c npm.cmd run build
+```
+```
+browser check: localhost:3117 home page shows `Live canvas` controls on the real page, while the composer rail only shows structure/content/media/publish controls
+```
