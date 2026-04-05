@@ -1,0 +1,116 @@
+---
+title: "grime-time — Roadmap"
+description: "Auto-compiled from vendor/grime-time-site/.planning/ROADMAP.xml"
+generated: "true"
+source: "vendor/grime-time-site/.planning/ROADMAP.xml"
+updated: "2026-04-05T02:27:29.852Z"
+---
+
+# Roadmap
+
+## Phase 01 — Foundation
+
+**Status:** complete
+**Goal:** Repo, RepoPlanner submodule, `.planning/` contract, pushed to `main`.
+
+## Phase 02 — Product &amp; workflow planning
+
+**Status:** complete
+**Goal:** PRD, CRM/integration strategy, workflow docs, architecture notes (Payload + Supabase + Vercel).
+**Depends:** 01
+
+## Phase 03 — Landing &amp; Payload scaffold
+
+**Status:** complete
+**Goal:** Payload website baseline plus seeded public marketing site, proof content, and quick-edit content paths for launch pages.
+**Depends:** 02
+
+## Phase 04 — Supabase + team access
+
+**Status:** complete
+**Goal:** Wire Postgres to Supabase; env for prod/dev; seed users bg@ / pb@ / de@ grimetime.app; auth verified.
+**Depends:** 03
+
+## Phase 05 — Customers, forms &amp; ops integrations
+
+**Status:** complete
+**Goal:** Lead forms, Payload-native CRM lifecycle, scheduling, Resend follow-up, and Stripe billing handoff for quote-driven follow-up.
+**Depends:** 04
+
+## Phase 06 — Quoting &amp; advanced ops
+
+**Status:** complete
+**Goal:** Quoting system; internal dashboard with real business targets; growth playbook; phased equipment/tool guidance; optional in-app credential vault if approved after security design.
+**Depends:** 05
+
+## Phase 07 — First-party CRM, billing, and automation
+
+**Status:** complete
+**Goal:** Replace the old third-party CRM mental model with a Payload-native CRM workspace, Stripe webhook billing sync, and Payload-jobs-driven Resend sequences that power compact admin and customer account surfaces.
+**Depends:** 05,06
+
+## Phase 08 — AI ops assistant (beta)
+
+**Status:** complete
+**Goal:** Optional, feature-flagged staff employee copilot: portfolio-style Assistant UI and Tool UI patterns, internal-docs RAG using the same efficient local-ingestion mindset as the portfolio and Magicborn flow, and assistant-rendered ops components for tours, assigned tasks, and follow-up contacts. It stays strictly scoped to business operations and is not a customer-facing product until explicitly promoted.
+**Depends:** 07
+
+## Phase 09 — Seed system &amp; developer CLI
+
+**Status:** complete
+**Goal:** Modular, first-class seeding for this repo only: split foundation vs demo data, slice by media/pages/globals/modules, a polished CLI (dry-run, confirmations, overwrite policy), redundancy and media safety reporting, and demo fixtures wired for unit/integration/e2e tests.
+**Depends:** 03,05
+
+## Phase 10 — Lead capture expansion channels
+
+**Status:** complete
+**Goal:** Evaluate later-lifecycle lead-capture channels such as Google Business Profile messaging and only enable them when response-time coverage, inbox routing, and follow-up ownership are strong enough to protect conversion and local-search reputation.
+**Depends:** 07
+
+## Phase 11 — Field-agent messaging, notifications, and subscriptions
+
+**Status:** complete
+**Goal:** Ship employee quote-notification email first, then add a shared Grime Time tool surface for field-agent messaging and an OpenClaw plugin path, while keeping Stripe as the default infrastructure for recurring services and subscriptions.
+**Depends:** 07,08
+
+## Phase 12 — Organizations, RBAC, and provider sync
+
+**Status:** complete
+**Goal:** Define a first-party organization and membership model, keep Clerk as the identity provider rather than the business-authorization source of truth, support role and entitlement changes from Grime Time admin, and sync org/user changes safely to external providers and downstream apps.
+**Depends:** 04,07,11
+
+## Phase 13 — Visual page composer and copilot authoring
+
+**Status:** complete
+**Goal:** Turn the existing local page-media workbench and Payload page model into a visual authoring system: reusable sections, add/remove/reorder/swap workflows, draft pages and slug management, inline content and media editing, and an AI-aware copilot that understands the selected page or section context.
+**Depends:** 03,04,08,12
+
+## Phase 14 — Public quote estimator intake and pricing calibration
+
+**Status:** complete
+**Goal:** Upgrade the homepage instant quote experience so it can optionally intake a series of customer job photos, keep the estimator fast and low-friction on `/`, and recalibrate public pricing math before broader quote automation or confidence claims expand.
+**Depends:** 05,06,13
+
+## Phase 15 — Visual composer foundations and builder shell
+
+**Status:** complete
+**Goal:** Reconcile the existing Payload page/template data and current composer into a formal block-based builder foundation: audit real existing sections into a block registry, fix the builder shell and page-level controls, turn Structure into a proper block organizer, and ship a Softr-style categorized insertion flow.
+**Depends:** 12,13
+
+## Phase 16 — Visual composer inline editing and publish workflow
+
+**Status:** complete
+**Goal:** Make the preview the primary interactive editing surface: mirrored selection, hover actions, inline text editing, responsive preview modes, compact draft handling, and an actionable publish workflow.
+**Depends:** 15
+
+## Phase 17 — Visual composer reusable blocks, dynamic data, and containers
+
+**Status:** complete
+**Goal:** Bring the full block system to life with linked-or-detached reusable blocks, pre-wired dynamic blocks, constrained container slots, and a real Custom HTML block with explicit safety rules.
+**Depends:** 15,16
+
+## Phase 18 — Shared sections and constrained reuse authoring
+
+**Status:** in-progress
+**Goal:** Turn reusable authoring into a CMS-managed shared-section system with explicit source editing, promote/detach/replace flows, lightweight version restore, and a constrained shallow layout contract that avoids a freeform builder.
+**Depends:** 15,16,17

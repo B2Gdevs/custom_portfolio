@@ -38,4 +38,5 @@
     <rule>Optional: register a unique id in STATE.xml before claiming tasks if you use CLI task-update.</rule>
     <generator>node vendor/repo-planner/scripts/loop-cli.mjs new-agent-id</generator>
   </agent-id-policy>
+  <last-updated>2026-04-05T02:40:30.079Z</last-updated>
 </state>

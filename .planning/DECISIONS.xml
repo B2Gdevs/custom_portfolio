@@ -212,4 +212,36 @@
       <file path="vendor/get-anything-done/bin/gad.cjs" />
     </references>
   </decision>
+  <decision id="gad-13">
+    <title>TRACE.json is the machine-readable sidecar for every eval run</title>
+    <summary>Every eval run directory must contain a TRACE.json alongside RUN.md and SCORE.md. TRACE.json records: workflow (A/B/both), per-command token counts and unit fidelity, unit_coverage map (U1–U12 at Full/Referenced/Truncated/Approximated/Absent), and computed totals (tokens, completeness). Agents write it manually using `gad eval trace write` or inline during a run. The trace is the input to `gad eval trace diff/report` for trend analysis across runs.</summary>
+    <impact>Any new eval run must produce a TRACE.json. Backfill is done via `gad eval trace write` using data from the RUN.md. The diff command surfaces regressions and improvements per information unit. The report command shows persistent problem units across the full run history of a project.</impact>
+    <references>
+      <file path="vendor/get-anything-done/bin/gad.cjs" />
+      <file path="vendor/get-anything-done/evals/DEFINITIONS.md" />
+      <file path="vendor/get-anything-done/evals/cli-efficiency/v3/TRACE.json" />
+    </references>
+  </decision>
+  <decision id="gad-14">
+    <title>gad state and gad phases default to session project when a session is active</title>
+    <summary>When no --projectid flag is given, `gad state` and `gad phases` call `getActiveSessionProjectId()` which reads the most-recent non-closed session JSON and returns its projectId. If found, output is scoped to that project only. If the projectId doesn't match any registered root (shouldn't happen), falls back to all projects. Explicit `--projectid` overrides the session default. This drops CLI tokens from 2,341 (v5, 3 projects) to 1,104 (v6, 1 project) while keeping completeness = 1.000. token_reduction: 0.874 → 0.940. Composite: 0.950 → 0.976.</summary>
+    <impact>Agents working in a session see only their project state by default — no extra flag. Multi-project output still available via explicit --projectid or when no session exists. All three eval targets hit simultaneously for the first time in v6.</impact>
+    <references>
+      <file path="vendor/get-anything-done/bin/gad.cjs" />
+      <file path="vendor/get-anything-done/evals/cli-efficiency/v6/SCORE.md" />
+      <file path="vendor/get-anything-done/evals/cli-efficiency/v6/TRACE.json" />
+    </references>
+  </decision>
+  <decision id="gad-15">
+    <title>portfolio-bare eval uses real agent sessions, not a harness — context_mode is self-declared</title>
+    <summary>The portfolio-bare eval is not an automated harness. It is a real agent session in a template directory (evals/portfolio-bare/template/) that contains only planning docs and requirements — no app code. The agent opens the template in Claude Code or Codex, runs `gad session new [--fresh]` to declare context mode, plans phases from requirements, executes tasks, and writes a trace at the end. context_mode (fresh|loaded) is stored in the session JSON and stamped on each task in TASK-REGISTRY.xml. context_delta emerges from comparing runs across context modes over time. The user is responsible for declaring the correct context mode. Skills: `gad:eval-run` (running the eval), `gad:eval-report` (comparing runs).</summary>
+    <impact>No API keys, no execSync harness. The eval IS real agent work. The report (`gad eval trace report --project portfolio-bare`) shows which tasks are context-dependent vs requirements-derivable. A task that only appears in loaded runs is one the agent misses when starting cold — that is the most actionable finding.</impact>
+    <references>
+      <file path="vendor/get-anything-done/evals/portfolio-bare/template/" />
+      <file path="vendor/get-anything-done/skills/eval-run/SKILL.md" />
+      <file path="vendor/get-anything-done/skills/eval-report/SKILL.md" />
+      <file path="vendor/get-anything-done/evals/portfolio-bare/gad.json" />
+      <file path="vendor/get-anything-done/bin/gad.cjs" />
+    </references>
+  </decision>
 </decisions>

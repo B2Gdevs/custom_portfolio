@@ -1,0 +1,183 @@
+---
+title: "grime-time — Task Registry"
+description: "Auto-compiled from vendor/grime-time-site/.planning/TASK-REGISTRY.xml"
+generated: "true"
+source: "vendor/grime-time-site/.planning/TASK-REGISTRY.xml"
+updated: "2026-04-05T02:27:29.852Z"
+---
+
+# Task Registry
+
+## Phase 01
+
+- ✓ **01-01** Bootstrap repo, submodule, and `.planning/` contract on `main`.
+
+## Phase 02
+
+- ✓ **02-01** Maintain PRD + roadmap alignment (Payload template, Supabase PG, Vercel, three seed emails).
+- ✓ **02-02** Document the shift from third-party CRM to a Payload-native CRM, lifecycle automation, Stripe billing, and Resend follow-up.
+- ✓ **02-03** Draft workflow runbooks: lead-to-customer, team login and tool access, CRM touchpoints.
+- ✓ **02-04** Define "single pane of glass": what lives in Payload admin/routes vs Stripe, Resend, and background jobs; integration map.
+- ✓ **02-05** Security framing for shared credentials: Infisical for team secrets; Payload encrypted fields; Supabase/Postgres for sensitive data at rest.
+- ✓ **02-06** Document internal-docs policy + CRM single-org / mixed-domain model (workflows/*.md, DECISIONS).
+
+## Phase 03
+
+- ✓ **03-01** Scaffold app from Payload with-vercel-website; verify layout builder and public routes.
+- ✓ **03-02** Seed and publish the real homepage and core marketing pages for the exterior-cleaning brand.
+- ✓ **03-03** Quick-edit admin path for reviews, testimonials, and before/after proof. Testimonials: dedicated `testimonials` collection + Testimonials section block (do not place on public pages until approved).
+- ✓ **03-04** Launch checklist for marketing-site readiness: nav, CTA flow, form coverage, service areas, visual system/theme polish, and mobile QA.
+- ✓ **03-05** Publish customer-facing trust/support pages in Payload for privacy, terms, refunds, and contact response standards, then link them from the public site.
+- ✓ **03-06** Define and use a generated-image workflow for hero sections, cards, features, and atmospheric backgrounds so marketing art can be produced quickly and stored cleanly in Payload media or `public/`.
+- ✓ **03-08** Add an admin-only “Generate image + create media” button on the Payload `media` create screen: admin enters prompt (optionally edits) and clicks generate, which calls OpenAI image generation and creates a new `media` document with the generated upload.
+- ✓ **03-09** Demo-ready fixtures: `npm run seed` runs `src/endpoints/seed/demo-seed.ts` by default; `npm run seed:baseline` or `SEED_SKIP_DEMO=true` skips demo upserts. Eight `@demo.grimetime.app` personas, CRM + billing + Stripe test sync, demo mode cookie (`grime_demo_mode`) scoping `/ops` + CRM for admins, tours gated per `demo-data-and-flows.md`.
+- ✓ **03-10** Refit the public marketing shell and homepage to use a portfolio-inspired sidebar-led layout while preserving the Grime Time visual theme, service proof, instant-quote flow, dock/rail service language, and Payload-managed public content for the rest of the site.
+- ✓ **03-11** Polish the new marketing shell so the sidebar hierarchy, page spacing, and non-home heroes feel purpose-built rather than adapted from the Payload website template; keep Grime Time’s own scene, quotes, services, and support routes intact.
+- ✓ **03-07** Redesign `/contact` for clarity and stronger visual hierarchy: remove faded treatment, reduce copy density, add brand logo presence in the request card, increase icon-led affordances, and replace loose text-card stacks with compact tabs that drive a single detail panel for long-form guidance.
+
+## Phase 04
+
+- ✓ **04-01** Connect Payload to Supabase Postgres (adapter + migrations); document env for local and Vercel.
+- ✓ **04-02** Create and verify the initial admin user in the real Supabase-backed database after approved migrations.
+- ✓ **04-03** Prepare Payload MCP and editor wiring so the same local app server can expose `/api/mcp` after approved schema work and local API key setup.
+- ✓ **04-04** Split customer vs admin access flows so customer login stays customer-only, admin sign-in stays on Payload admin, the admin ops dashboard lives on `/ops`, the customer portal nav stays focused on estimates, invoices, schedule, and account settings, and effective-user auth can render customer scope cleanly when admins impersonate users.
+- ✓ **04-05** Implement admin impersonation with a floating toolbar that persists across frontend and portal pages, keeps the real admin identity, and swaps the effective user experience without exposing internal views to impersonated non-admins.
+- ✓ **04-06** Vendor and wire an image-generation MCP server with a repo-local Python environment, root `.env` config passthrough, Cursor/Codex setup, and a dev-process hook so generated imagery becomes part of the normal content workflow.
+- ✓ **04-07** Keep deploys deterministic by documenting the Payload/Vercel env contract, pinning Node on Vercel, and making Payload bootable during prerender when `PAYLOAD_SECRET` is accidentally missing.
+- ✓ **04-08** Keep Vercel production deploys on Webpack when Turbopack packaging produces an ESM/CommonJS launcher mismatch under the repo's module settings.
+- ✓ **04-09** Modernize customer auth by introducing Supabase-backed email/password, magic-link, reset-password, claim-account, and company-invite flows while keeping Payload admin auth for staff and preserving Payload `users` as the portal authorization/profile record.
+- ✓ **04-10** Extend the existing admin preview/impersonation tooling with a localhost-only page-media sidebar for frontend routes so a real admin can inspect the current page's resolved media records, replace a media file in place, or create a new media record and swap the page reference without leaving the page.
+
+## Phase 05
+
+- ✓ **05-01** Lead forms + contact storage; shared first-party quote/contact/schedule/support submission path; Payload-native CRM records with no third-party CRM dependency.
+- ✓ **05-02** Calendar booking and schedule request flow - use first-party forms with shared validation/helpers, customer portal schedule-change requests, recurring-plan cadence, and integrate the lead into Payload plus internal follow-up state.
+- ✓ **05-03** Calls / quote requests intake, internal activity timeline, and Resend-based outbound email visibility plan.
+- ✓ **05-04** Promote Payload quotes into an in-house opportunity / pipeline model so relationship management and follow-up live inside Payload instead of a third-party CRM.
+- ✓ **05-05** Build the first internal CRM workspace in Payload: leads, accounts, contacts, opportunities, activities, tasks, and follow-up queue powering `/ops` and future account views.
+- ✓ **05-06** Customer portal account surfaces: estimates from Payload quotes, invoices, recurring service plans, service appointments, and self-serve account/contact updates with no docs/admin clutter in customer nav.
+- ✓ **05-07** Improve customer activation and attention capture: account-claim links from quote/invoice/schedule emails, clearer first-login states, and easier entry into the portal when a customer already exists in CRM but has not claimed access yet. (2026-03-27: dashboard welcome + profile CTA; estimates page claim hint.)
+
+## Phase 06
+
+- ✓ **06-01** Quoting system: internal Payload collection + env gate, plus draftable/publishable quote-settings globals that power the public instant quote math and service toggles.
+- ✓ **06-02** Build and document the internal dashboard command center: KPI cards, chart, daily board, scorecard, milestones, asset guidance, and first-party operating views powered by Payload data.
+- ✓ **06-03** Define KPI formulas and replace placeholder projected revenue, MRR, margin, and milestone thresholds with real business targets before moving them into editable app data.
+- ✓ **06-04** Promote the dashboard scorecard from static docs/config into editable internal app data once schema and migrations are approved.
+- ✓ **06-05** Payload CRUD for growth milestones and ops asset inventory (`growth-milestones`, `ops-asset-ladder-items`); portal tabs read from DB; Internal ops targets extended for KPI/scorecard tooltips and chart pipeline note.
+- ✓ **06-06** Ops portal layout fix (single right column for all TabsContent), KPI row above command center, liabilities + scorecard rows collections with merge fallbacks, admin customer `/dashboard` preview + dual sidebar nav, optional `PORTAL_ADMIN_ONLY`, planning/docs updates, and first-party day-board wiring (D-ops-003).
+- ✓ **06-08** Wire ops scorecard/liability CRUD into the live dashboard, seed default rows so `/ops` is not empty, add scheduled-job reads to the day-board calendar, and move dashboard detail panels into the left rail instead of overlay sheets.
+- ✓ **06-09** Refactor `/ops` KPI cards to compact number-first presentation with shared info-icon tooltips that explain formula, composition, and data freshness; reduce paragraph copy and keep card height/scan density consistent.
+- ✓ **06-10** Portal guided tours (react-joyride): staff vs customer registry, localStorage completion, Ops overview session autolaunch for real admins, staff deep tours (CRM, Today, scorecard/liabilities, assets, milestones, portal Docs) with `?tab=` / path routing; customer surface tours (dashboard, estimates, invoices, schedule, account); sidebar launcher + portal doc alignment; marketing-site instant-quote tour (`SiteTourProvider`, button-only entry). Align with `demo-data-and-flows.md` and shell refactors (07-11, 07-12, 07-14) without breaking `data-tour` targets. QA richness gated by BLOCKERS `BLK-demo-seed-001` (`03-09`).
+- ✓ **06-11** Former backlog from `06-10` — delivered: `staff-milestones`, `staff-portal-docs`, `customer-estimates`, `customer-invoices`, `customer-schedule`, `customer-account`, site `public-instant-quote` (explicit button only). Out of scope: Payload admin shortcuts tour. AI assistant tour deferred per BLOCKERS `BLK-tour-ai-001` (phase `08`).
+
+## Phase 07
+
+- ✓ **07-01** Define and implement the first-party CRM schema: leads, accounts, contacts, opportunities, activities, tasks, and sequence enrollments linked to quotes, invoices, service plans, appointments, and users, including company-account membership that can power customer login scope.
+- ✓ **07-02** Build internal CRM API routes and query helpers for queues, search, list/detail views, owner assignment, stale follow-up detection, activity timeline writes, lead qualification/disqualification, and compact dashboard summaries.
+- ✓ **07-03** Replace placeholder ops surfaces with a compact CRM workspace using shared tables, list rows, detail panes, status badges, icons, tooltips, priority sorting, owner/commercial filters, and stale-contact follow-up indicators.
+- ✓ **07-04** Implement Stripe-backed billing sync: webhook ingestion, idempotent invoice/subscription reconciliation, customer billing actions, hosted Stripe invoice/portal flows, commercial terms billing, portal-visible payment state, and compact admin billing controls that do not rely on raw collection editors for daily work.
+- ✓ **07-05** Implement the fastest first-party sequence engine path with Payload jobs and Resend templates for lead follow-up, quote reminders, appointment confirmations, and billing reminders delivered to each worker's normal inbox (personal or company email) before optional mailbox OAuth integrations.
+- ✓ **07-06** Seed realistic demo data and add unit, integration, and Playwright coverage for CRM flows, Stripe webhook handling, and customer portal account/billing/schedule behavior.
+- ✓ **07-07** Define the day-to-day operating model: role matrix, ownership rules, queue priorities, SLA timers (including support/refund classes), and required next-action fields so staff always know what to do each day.
+- ✓ **07-08** Enforce strict data/UI separation boundaries: public and customer views only see allowed account-scoped data; admin-only docs, queues, and cross-user/company visibility remain staff-only, including impersonation-safe guards.
+- ✓ **07-09** Operationalize local MCP usage for Codex/Cursor with a repeatable verification checklist (endpoint reachable, key valid, server list healthy, and image-gen stdio launchable from repo scripts).
+- ✓ **07-10** Design and implement discount policy support for account-wide defaults and user-level overrides, with clear precedence, audit history, and safe staff-only controls.
+- ✓ **07-11** Refactor the portal shell to conventional shadcn app-layout patterns so sidebar, inset content, and admin impersonation toolbar do not overlap; ensure the toolbar remains top-layer and visible.
+- ✓ **07-12** Keep `/ops` as the KPI-first staff dashboard, move dense daily work into `/ops/workspace`, make billing follow-up a first-class ops-workspace tab, and keep legacy `/ops/*` section routes only as compatibility redirects into that single non-overlapping workspace.
+- ✓ **07-13** Implement deterministic preview identity and nav labeling: `Customer home` should use a non-admin `test_user` effective context, show context labels in sidebar (`(admin)` / `(test_user)`), and hide admin-only docs/settings when viewing customer scope.
+- ✓ **07-14** Adopt and enforce frontend/code-quality conventions: stronger icon usage where helpful, reduce copy-heavy/faded UI patterns, extract large files, centralize repeated literals into constants/typed unions, formalize reusable utilities across ops/customer surfaces, and standardize server-first plus TanStack Query client-cache patterns for live mutable workflows.
+- ✓ **07-15** Execute the refactor extraction roadmap toward the target folder structure for ops/auth/crm/dashboard modules, including prioritized large-file splits, presenter/policy extraction, and typed query-param utilities for `/ops/*` routing.
+
+## Phase 08
+
+- ✓ **08-01** Architecture plus decision updates for the employee copilot beta: business-operations-only scope, env feature flag (`AI_OPS_ASSISTANT_ENABLED` or similar), staff/admin gate, no customer-facing chat until promoted, and a UX baseline that follows the portfolio site copilot rather than a generic admin chatbot.
+- ✓ **08-02** RAG: approved-docs ingestion for portal docs and selected playbooks using the same efficient internal-docs pattern as the portfolio and Magicborn flow, with cheap local embeddings (`Xenova/all-MiniLM-L6-v2`, 384 dims) as the default baseline and retrieval contracts for quote and CRM terminology.
+- ✓ **08-03** Staff UI: build a portal employee-copilot shell using Assistant UI and Tool UI patterns, **Beta** label, streaming via Vercel AI SDK, and portfolio-inspired interaction patterns for sources, composer, and assistant panels inside `/ops` or `/ops/workspace`.
+- ✓ **08-04** Render operational components in chat: launch tours from the copilot, show the logged-in employee's assigned tasks, surface follow-up contacts and stale leads, and render compact quote or CRM cards with explicit action affordances instead of only text responses.
+- ✓ **08-05** Operational guardrails: audit logging, cost and rate limits, transcript retention policy, kill switch via env, security review before enabling in production, plus the optional later multimodal path for screenshot or image extraction into confirmed CRM handoff.
+- ✓ **08-06** Tests: integration coverage for retrieval and tool wiring, component-rendering actions, and tour-launch/task/follow-up flows, with gated Playwright smoke for the beta UI when the feature flag is on.
+
+## Phase 09
+
+- ○ **09-01** DECISION D-seed-001 + workflow stub `.planning/workflows/seed-system-and-cli.md` (phase `09` PLAN/SUMMARY remain source of truth).
+- ○ **09-02** Module graph + `registerModule` pattern; extract foundation slice from `src/endpoints/seed/index.ts` without changing default full-graph seed initially.
+- ○ **09-03** Media module: uploads, dedup / overwrite warnings, optional strict mode; map referencing pages when replacing media.
+- ○ **09-04** Pages/layout module: home hero, service grids, gallery slots; fix duplicate media assignments using redundancy report.
+- ○ **09-05** Demo submodules (CRM, billing, marketing personas) under agreed folder + `SEED_SKIP_DEMO` mapping to subgraph.
+- ✓ **09-06** CLI (`npm run grimetime`): **shipped** — `seed pull|delete`, `check|summary --json`, guarded `delete all`. **Remaining** — `--dry-run`/`push` flag polish, `--only`, `--no-input`, `report`/`plan`.
+- ○ **09-07** Tests: Vitest for planner + redundancy analyzer; integration hooks for module-scoped seed; e2e doc for Playwright demo profile. **Started:** `tests/int/seed/expectations-alignment.int.spec.ts`.
+
+## Phase 10
+
+- ○ **10-01** Evaluate Google Business Profile real-time messaging as a later lead-capture channel: define staffing coverage, response-time SLA, inbox routing (SMS / WhatsApp / CRM handoff), qualification scripts, and lead attribution before enabling it on the listing.
+
+## Phase 11
+
+- ✓ **11-01** Ship first-party quote and lead-notification email for employees using Payload jobs plus Resend templates, delivery logging, and routing rules so inbound work reaches the right person without depending on AI or chat infrastructure.
+- ○ **11-02** Define and implement a shared Grime Time tool surface for employee actions so the in-app copilot and the future OpenClaw plugin use the same auth, CRM, task, quote, and tour capabilities.
+- ○ **11-03** Build a plugin-first OpenClaw integration for field agents with safe read-first tools, one pilot chat channel, strict allowlists, and auditable operator identity before any broader rollout.
+- ○ **11-04** Expand recurring-service billing around Stripe subscriptions, hosted invoice flows, and customer portal sessions so Grime Time adopts Stripe infrastructure deeply without building custom payment rails.
+- → **11-05** Replace the current Supabase customer-auth path with Clerk-hosted auth and social login, use Clerk UI components wherever practical for sign-in/up and account affordances, and map Clerk external ids back into Payload `users` plus Stripe customer records without weakening admin impersonation or portal access checks. Current checkpoint: root `ClerkProvider`, `clerkMiddleware()`, marketing/login surfaces, persisted `clerkUserID`, the shared claim/invite token flow presents a Clerk-first completion path against the existing Payload user, the direct forgot/reset routes no longer expose Supabase-first UX when Clerk is enabled, the old `/auth/register` plus `/auth/confirm` routes now short-circuit into the Clerk-first flow, the active Clerk-first customer surfaces plus signed-in nav isolate legacy Supabase browser helpers behind fallback-only dynamic components and routes, the server now resolves customer identity through one shared helper so Clerk-primary mode does not silently fall back to Supabase sessions, Clerk-backed staff/admin sessions bind onto existing Payload admin users by email so app-owned impersonation remains viable, and the app-owned staff surfaces (`/ops`, portal docs, internal seed/auth guards) now resolve the Clerk-backed real actor before any Payload-session fallback. Remaining work is the final Supabase retirement and Stripe/customer-id linkage.
+
+## Phase 12
+
+- ✓ **12-01** Define and implement first-party `organizations` and `organization-memberships` records, map the current Grime Time staff org to Clerk external id `org_3BmXmwG7NpGNO1JKpE3MkR667Mm`, and make app-side role templates plus entitlements the business authorization source of truth instead of raw Clerk org role strings. Shipped: Payload collections + migration, entitlement helpers, membership-aware Payload admin checks, default Grime Time staff-org bootstrap for internal users, and integration coverage for membership-based admin access.
+- → **12-02** Build admin/workspace controls to assign memberships, promote/demote org role templates, and lock/unlock entitlements from Grime Time, then mirror those changes out to Clerk without making Clerk the canonical authorization store. Current checkpoint: the mapped Clerk Grime Time org now bootstraps `staff-designer` access for non-`@grimetime.app` members, signed-in staff admins can bridge into Payload admin without re-entering credentials, the frontend composer and composer-media routes now authorize on `content:write` instead of raw Payload-admin status, demo-email users are excluded from that authoring lane, private/draft page preview works for content authors, and demo fixtures were purged from the configured database through `grimetime seed delete demo` / `grimetime seed check demo`.
+- ○ **12-03** Implement provider sync plus outbound domain events: ingest Clerk webhooks into reconciliation workers, emit first-party user/org/membership change events for external apps, and use field-family timestamps plus conflict logging instead of blind global last-write-wins.
+
+## Phase 13
+
+- ✓ **13-01** Kick off the visual page-composer phase: document the current public-page reality, note that as of 2026-04-02 there is no dedicated `/home` route and `/` renders the `home` page record with specialized React treatment, define the target section-registry and draft-page model, and capture the AI/copilot UX rules for focused page or section editing.
+- ✓ **13-02** Normalize `/` first by extracting the homepage-only composition logic into a reusable section registry or block-extension path. The current `/home`-style service and "what we do" sections should become reusable section types that can be added, removed, reordered, and swapped onto `/` and future pages without requiring a dedicated `/home` route or bespoke page-specific React to remain the composition authority.
+- ✓ **13-03** Build the first staff-safe page-composer workbench with structure, content, media, and publish surfaces: drag-drop section order, add/remove/duplicate section, focused section selection, and light field editing that keeps the page visible while authoring. Shipped checkpoint: authenticated admins can open a frontend-toolbar composer, load the current page by route, reorder/add/duplicate/remove reusable service-grid sections, edit service-grid copy, manage section-row media from the same drawer through a protected staff-safe media route, and explicitly save draft or publish. Media actions are intentionally locked behind a save-first guard when the layout is dirty so persisted relation paths stay aligned.
+- ✓ **13-04** Create a first-class draft-page workflow for title, slug, visibility, publish status, and page creation so admins can make new pages without exposing them publicly, and warn when edited values are shared variables or feed business calculations instead of page-local copy. Shipped: `pages.visibility` now gates public routes and sitemaps, real admins can still preview private or draft pages from the frontend composer, the drawer can switch pages and create new draft pages, and the first warning pass calls out homepage-route edits, private-page behavior, page-local editing scope, and shared pricing-table globals.
+- ✓ **13-05** Unify page authoring with the AI shell: expose the selected page, section, and media slot as assistant-ui interactables, move focused media generation into a short-lived modal session over the shared copilot experience, and require explicit mode selection (for example image, video, or gallery) before generation proceeds.
+- ✓ **13-06** Add verification for the composer and shared AI authoring loop: unit coverage for section-registry transforms and selected-context helpers, integration coverage for page updates and draft-page create/publish rules, and Playwright coverage for add/reorder/swap/generate flows on localhost admin sessions.
+
+## Phase 14
+
+- ✓ **14-01** Kick off the public quote-estimator follow-on: capture the new `/` requirements for optional image-series intake, pricing-model recalibration, storage and staff-review expectations, and the fast-estimate UX constraints before implementation resumes.
+- ✓ **14-02** Calibrate the public estimator math: audit the current square-footage-first pricing ranges, define which service-specific variables should affect the public range versus stay staff-reviewed, and record the copy/disclaimer changes needed so the estimator remains honest while still useful.
+- ✓ **14-03** Define and implement the optional image-intake contract for the homepage estimator: file-count and size limits, validation, storage path, linkage to the lead or quote workflow, and the staff review surface for attached customer photos.
+- ✓ **14-04** Ship the public `/` estimator update: optional multi-image upload UI, updated request copy, range messaging aligned with the calibrated pricing model, and backend handling that keeps submissions fast when no images are attached.
+- ✓ **14-05** Add verification for the estimator upgrade: validation and pricing tests, upload-route coverage, and browser checks for optional image selection plus no-image fallback on the homepage.
+- ✓ **14-06** Document SOP method artifacts + formal training sequences for Soft Wash Core, Controlled Pressure Wash, Surface Cleaner Pass, and Organic Displacement so crews know steps/flags before touching code.
+- ✓ **14-07** Capture attachment metadata requirements, marketing/contact intake needs, and subscription/payment questions so the quote component can share a reusable metadata tile on the UI.
+- ✓ **14-08** Document the composer/copilot docking issue so the UI team can show the copilot panel beside the composer and allow drag/dock behavior.
+
+## Phase 15
+
+- ✓ **15-01** Audit the current composer/page implementation and inventory all existing sections/components into the first real block map, grounded in the current Payload template data and Grime Time renderers.
+- ✓ **15-02** Define the block registry, block metadata contract, page/block/reusable-block model boundaries, and editor UI state shape so the builder grows from a stable schema-driven core.
+- ✓ **15-03** Fix the working-page dropdown layering bug and move page-level controls into a compact builder header with title, slug, working page, create draft, visibility, and route preview.
+- ✓ **15-04** Redesign the Structure tab into a clean block organizer: remove redundant page labels, remove the standalone Add reusable section pattern, and add structural quick actions.
+- ✓ **15-05** Build the categorized block browser and insertion-target flow for dynamic, static, and container blocks, including Custom HTML in the taxonomy.
+- ✓ **15-06** Normalize the currently implemented Grime Time blocks into the registry and browser so insertion uses real block definitions instead of ad hoc templates.
+- ✓ **15-07** Add verification for the builder foundations, shell, and insertion flow.
+
+## Phase 16
+
+- ✓ **16-01** Implement the mirrored selection model across preview and Structure, including selected-block outline behavior.
+- ✓ **16-02** Add preview hover UI and direct block actions such as add above/below, duplicate, delete, and hide/show where appropriate.
+- ✓ **16-03** Ship inline preview editing for MVP text fields and keep Content-tab forms synchronized.
+- ✓ **16-04** Refine draft lifecycle and working-page switching so draft context stays clean when creating or switching pages.
+- ✓ **16-05** Improve Publish with validation summary, changed-block count, and page-level workflow state.
+- ✓ **16-06** Add responsive preview-mode controls and verification for preview parity plus inline-editing flows.
+
+## Phase 17
+
+- ✓ **17-01** Define and implement reusable-block insertion semantics, including linked reference vs detached copy behavior.
+- ✓ **17-02** Add the first pre-wired dynamic blocks and data-source editors for Grime Time content surfaces.
+- ✓ **17-03** Implement the first constrained container blocks with slots, child insertion, and nesting validation.
+- ✓ **17-04** Add the Custom HTML block to the registry, editor, preview, and structure labeling path, with a documented safe-rendering decision.
+- ✓ **17-05** Add verification for reusable, dynamic, container, and custom-HTML flows.
+
+## Phase 18
+
+- ✓ **18-01** Define the CMS-backed shared-section contract: collection schema, versioning baseline, usage tracking, category model, and source-vs-instance data boundaries.
+- → **18-02** Implement first-class composer actions for insert shared section, edit source, detach from reusable, and replace with reusable, using an explicit global-edit confirmation flow.
+- ○ **18-03** Ship a CMS-backed shared-section library and insertion flow grouped into Layouts, Sections, and Shared, with linked badges and instance-impact messaging.
+- ○ **18-04** Codify the constrained shallow layout model for reusable sections so composition stays at section, row, column, and block depth without turning into a freeform drag-anywhere builder.
+- ○ **18-05** Add lightweight restore flows for shared-section versions and page versions, without introducing approvals, scheduling, or full diff tooling.
+- ○ **18-06** Verify shared-section authoring, propagation, detaching, replace flows, constrained layout rules, and lightweight restore behavior with focused integration and browser coverage.

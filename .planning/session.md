@@ -13,12 +13,32 @@
 - **Task 7 (gad sink):** `gad sink status/compile/decompile/validate` added. Decision: gad-11.
 - **Decisions captured:** gad-09 through gad-12 written to DECISIONS.xml.
 
+- **gad eval trace:** `list/show/diff/report/write` subcommands. TRACE.json schema defined. Backfilled v2 and v3 traces for cli-efficiency. Diff correctly shows U5 improved v2→v3 (Truncated→Full). Report shows U6/U7/U8 as persistent problem units. Decision: gad-13.
+
+- **planning-migration eval v1 (score 0.978):** docs-compiler.cjs rewritten — XML support, correct path (`planning/state.mdx`), safe-overwrite (`generated: true` guard). grime-time: 6 MDX sink files created from XML (81/81 decisions, 18/18 phases, 120/120 tasks — lossless). Human-authored global/repo-planner sink preserved. RUN.md + SCORE.md + TRACE.json written.
+
 ## Remaining queue
-- gad eval trace list/show/diff/report (not started)
-- gad eval version — GAD methodology version
-- gad projects audit — format violations, missing files, sink gaps
-- planning-migration eval run (Phase D)
-- Run evals after all the above to measure improvement
+- ~~gad eval trace list/show/diff/report~~ ✓ done
+- ~~gad eval version~~ ✓ done — prints methodology + CLI version
+- ~~gad projects audit~~ ✓ done — per-project: dir, required files, format, sink exists, sink fresh
+- ~~planning-migration eval run~~ ✓ done (v1 score: 0.978)
+- Run cli-efficiency v4 (U6/U7/U8 fixes — documented in SCORE.md)
+
+## cli-efficiency v4 targets — DONE
+- ✓ U6: `gad tasks` goal 60→200 chars + `--full` flag (no truncation)
+- ✓ U7: `gad phases --full` prints complete goal per phase as readable blocks
+- ✓ U8: `touchStateXml()` writes ISO date to `<last-updated>` on session new/resume
+- ✓ v4 eval written: composite 0.920. U6 Full. U7/U8 still partial — fixes documented in SCORE.md.
+
+- ✓ v5 eval: composite **0.950** (target hit). completeness = 1.000 first time. U7 Full (active phase goals in JSON), U8 Full (ISO date from STATE.xml). Token trend: v2:1480 → v3:1358 → v4:2093 → v5:2341.
+
+## v6 target: token_reduction ≥ 0.90 — DONE ✓
+- ✓ `gad state` + `gad phases` scope to session project by default (no flag needed)
+- `getActiveSessionProjectId()` reads most-recent non-closed session → projectId
+- Actual CLI tokens: 1,104 (projected ~1,300)
+- token_reduction: 0.940 (projected 0.92) — exceeded target
+- v6 eval: composite **0.976** — all three metrics hit target simultaneously for first time
+- Decision: gad-14
 
 ## Resume
 ```sh

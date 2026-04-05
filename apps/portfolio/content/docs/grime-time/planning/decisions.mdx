@@ -1,0 +1,495 @@
+---
+title: "grime-time — Decisions"
+description: "Auto-compiled from vendor/grime-time-site/.planning/DECISIONS.xml"
+generated: "true"
+source: "vendor/grime-time-site/.planning/DECISIONS.xml"
+updated: "2026-04-05T02:27:29.852Z"
+---
+
+# Decisions
+
+## D-stack-001: Payload + Supabase + Vercel
+
+Use Payload CMS (with-vercel-website template) on Vercel with PostgreSQL hosted on Supabase. Swap template DB env from Neon to Supabase connection string when implementing.
+
+**Impact:** All schema and migrations target Postgres via Payload using `@payloadcms/db-postgres` (node `pg`) for reliable Supabase compatibility; avoid the template's Neon/WebSocket driver against Supabase poolers. Media uses Supabase Storage via `@payloadcms/storage-s3` when env is set; otherwise local media for dev.
+
+## D-internal-docs-001: Where internal process documentation lives
+
+Repo may stay public for transparency if we avoid secrets and customer PII in commits. High-level `.planning/` is OK; detailed SOPs can move to private repo, Notion, or Payload admin-only collections. Customers only see public pages and appropriate forms, not internal quotes or ops tools.
+
+**Impact:** Good-faith, pragmatic process writing; classify sensitive detail out of public git.
+
+## D-crm-001: Payload-native CRM replaces third-party CRM providers
+
+Grime Time will own leads, contacts, accounts, opportunities, activities, and follow-up state inside Payload instead of depending on HubSpot or EngageBay.
+
+**Impact:** Public forms, quote lifecycle, `/ops`, and future follow-up sequences should write business state directly into Payload collections and jobs. Third-party CRM provider switching is no longer the product direction.
+
+## D-content-001: Marketing site content is seed-first, with quick-edit proof in Payload admin
+
+The launch site should come from repeatable seed content, then allow staff to update reviews, testimonials, before/after proof, and public customer-support pages quickly in Payload admin without touching code.
+
+**Impact:** Homepage, support/legal pages, and core marketing pages remain reproducible across environments through the `pages` collection, while trust content can become an admin-managed collection or global once the quickest acceptable editing path is implemented.
+
+## D-content-002: Marketing imagery should stay Payload-driven, not trapped in homepage-only React content
+
+Hero art, service cards, supporting proof, and background imagery should be seeded into Payload page layout blocks and media records wherever practical. Avoid leaving core public messaging inside home-only hardcoded React panels that editors cannot reshape through the normal page model.
+
+**Impact:** The homepage can still keep specialized components when they materially improve UX, but the primary public narrative and service proof should live in reusable blocks and seeded media relationships. This keeps the site closer to the Payload website-template pattern and makes generated or uploaded images usable across pages.
+
+## D-crm-003: Ops dashboard is Payload-first, not external-CRM-gated
+
+`/ops` should operate from Payload business records, scheduled work, scorecards, and later an internal follow-up queue. External CRM reads are no longer part of the intended operating model.
+
+**Impact:** Projected revenue, tasks, and pipeline views should move toward Payload-native data sources and background jobs. Admin UX should stop surfacing provider toggles or HubSpot-only empty states.
+
+## D-crm-002: Payload quotes stay the source of truth and feed an internal pipeline
+
+Quote detail, pricing logic, tax notes, and lifecycle state live in Payload. Any pipeline or follow-up model should derive from internal Payload opportunity records, not mirrored deals in a third-party CRM.
+
+**Impact:** Keeps quoting, follow-up, and customer context in one database. Quote-driven pipeline stages can still exist, but they should be first-party records with first-party automations.
+
+## D-crm-004: Lifecycle automation uses Payload jobs and Resend
+
+Follow-up sequences, reminders, and lifecycle emails should be orchestrated through Payload background jobs and delivered through Resend rather than a CRM automation suite.
+
+**Impact:** Sequence state, enrollment rules, and business logic stay in the app database. This also creates a clear place to add tests, demo data, and auditable automation history.
+
+## D-crm-005: Mirror HubSpot CRM primitives in a first-party Payload model
+
+The in-house CRM should copy the useful shape of HubSpot, not its vendor dependency: records, properties, associations, owners, pipelines, activities, tasks, search, and sequences all become first-party collections, globals, API routes, and jobs.
+
+**Impact:** Schema and UI work should optimize for compact operator workflows, strong linking between business records, and consistent list/detail interactions. We are not rebuilding every HubSpot feature; we are deliberately implementing the core operating primitives the team needs inside Payload and Next.js.
+
+## D-crm-006: Accounts represent both households and companies, with commercial depth built in
+
+The `accounts` model is the shared first-party record for residential households and commercial companies. Commercial relationships need extra billing, AP, tax-exemption, and multi-location fields instead of being treated like a thin variant of a homeowner record.
+
+**Impact:** Pipeline, billing, scheduling, and sequence logic can stay unified while still supporting commercial operating needs. UI labels can say “Account” broadly and surface “Company” language where context is commercial.
+
+## D-ux-004: CRM workspace UX favors compact tabbed layouts over overlapping panels
+
+The first-party CRM should avoid overlapping sheets and accidental overflow. Prefer tabs, tab groups, button groups, inline detail panes, badges, info icons, and tooltips inside stable layout regions.
+
+**Impact:** `/ops` and future CRM routes should use dense, business-oriented layouts that remain readable on desktop and resilient on smaller viewports. If a section can stay in-page with tabs or button groups, do that before adding dialogs or overlay stacks.
+
+## D-billing-001: Stripe handles payments; Payload owns billing state
+
+Stripe will process payment methods, invoices, subscriptions, checkout, and webhook events. Payload remains the business-facing source of truth for invoice context, customer-visible billing history, subscription policy, and operational status.
+
+**Impact:** Billing UI in the customer portal can stay compact and consistent while Stripe handles payment rails. Webhook handlers and reconciliation logic become a first-party implementation requirement.
+
+## D-billing-002: Default billing UX is Stripe-hosted, portal-first for account holders, and supports internal adjustments
+
+Customer-facing payment flows should default to Stripe Hosted Invoice Pages plus Stripe customer portal sessions as the standard self-serve path for customers who have an account context. Grime Time logins remain optional for billing, so no-login invoice payment still works. Commercial terms accounts must support send-invoice net terms and monthly consolidated invoicing, while admins can still record onsite or out-of-band payments, discounts, credits, and refunds without storing bank details in-app.
+
+**Impact:** This keeps payment-method storage, bank-account handling, invoice delivery, refunds, credit notes, and self-serve billing changes inside Stripe where possible, which is faster to ship and easier to maintain. Payload still needs expanded billing-policy fields, invoice reconciliation data, adjustment history, and internal payment-event tracking so `/ops` and customer views reflect real business state even when payment happens outside Stripe-hosted payment flows.
+
+## D-quotes-001: Quote system: staff-managed, customer-readable for own sent/accepted estimates
+
+Quotes capture job size, description, soiling level, and later economics such as labor, materials, margin, and Texas sales tax per CPA guidance. Staff still manage quote CRUD in Payload, but customers can read their own sent/accepted estimates through the portal when a quote is linked to their account or email.
+
+**Impact:** Quote editing stays internal, while the customer portal can use the same collection as the estimate surface instead of maintaining a second estimate model. `QUOTES_INTERNAL_ENABLED` still gates staff-facing quote-tool shortcuts, not customer read access for their own records.
+
+## D-quotes-002: Instant quote math lives in draftable Payload global `quoteSettings`
+
+The public instant quote widget should not depend on hardcoded pricing bands. Service toggles, minimums, square-foot rates, and estimate multipliers live in Payload global `quoteSettings` with drafts enabled, so staff can stage changes and publish them deliberately.
+
+**Impact:** The home-page quote UI and lead submission route read published settings by default, while staff can preview drafts through Payload draft mode. This keeps pricing edits in admin, preserves a publish workflow, and avoids redeploying for normal quote tuning.
+
+## D-quotes-003: Homepage instant quote stays fast, but optional customer photo series is part of the intake contract
+
+The public estimator on `/#instant-quote` should remain a low-friction range tool, but customers may optionally attach a small series of property or problem photos with the same request so staff can scope the job faster without forcing an upload requirement on every lead.
+
+**Impact:** Form, API, storage, privacy copy, and staff review paths must support optional multi-image uploads. Attachments assist human review and follow-up; they do not replace final scope confirmation or turn the public estimator into a guaranteed final quote.
+
+## D-quotes-004: Public estimate math is calibratable guidance, not a fixed truth table
+
+The current square-footage-first estimator is useful for speed but too blunt to be treated as settled pricing. Public quote math should be recalibrated around service-specific baselines, honest range copy, and explicit staff-review lanes for factors such as access, severity, mixed surfaces, commercial complexity, and anything customer images reveal.
+
+**Impact:** Phase 14 starts with pricing calibration before UI or storage changes ship. `quoteSettings`, homepage copy, and follow-up workflow should evolve together so the public range remains credible instead of drifting away from how staff actually scope jobs.
+
+## D-quotes-005: Phase-14 calibration uses wall-count house washes, honest estimator guidance, and explicit review notes before uploads ship
+
+The public estimator should stop pretending every exterior-cleaning lane is square-footage-first. House washes now calibrate from exterior wall count for one-story and two-story homes, three-story-and-taller house washes move to staff review, and shared estimator messaging now states plainly that final scope is confirmed after access, condition, and photo review.
+
+**Impact:** `quoteSettings` now owns house-wash wall pricing plus shared estimator disclaimer copy, water-access guidance, driveway photo guidance, and the commercial expansion note. This lets the next upload task attach customer photos to a truthful estimator contract instead of hardening the old generic math.
+
+## D-quotes-006: Estimator photos live in a dedicated internal attachment collection linked to submissions first
+
+Optional `/#instant-quote` photos should not go into the public marketing media library or an untracked blob side path. Phase 14 stores them in a dedicated admin-only upload collection with enforced image limits, immediate linkage to the originating `form-submissions` row, and an optional later relationship to `quotes` when staff promote the request.
+
+**Impact:** This keeps the public estimator fast for no-image requests, gives staff a first review surface without exposing customer uploads publicly, and creates a stable contract for the upcoming homepage multipart submission flow.
+
+## D-quotes-007: Instant quote transport stays dual-mode: JSON by default, multipart only when photos are selected
+
+The estimator should not pay upload overhead on every request. The homepage keeps the existing JSON submission path for no-image requests, but switches to multipart only when the user actually selects photos, while the route accepts both transports and returns honest follow-up copy about attachment persistence.
+
+**Impact:** This preserves the low-friction default estimator lane, keeps the upload path explicit, and gives future quote or intake surfaces a reusable pattern for optional attachments plus manual-review messaging.
+
+## D-ops-001: Business scorecard and growth system belong to phase 06
+
+KPI definitions, projected revenue, MRR, margin review, liabilities, ops asset inventory, and daily/weekly rhythm are part of advanced ops work. Start them as internal docs/config with real business targets, then promote them to editable Payload data only after schema approval.
+
+**Impact:** Prevents overbuilding too early. The team can use the playbook immediately in docs and dashboard context, while editable ops globals remain a later step once migration work is approved.
+
+## D-ops-002: Internal ops KPI display lives in Payload global `internalOpsSettings`
+
+Admin-editable Internal ops targets global (src/globals/InternalOpsSettings/config.ts) holds display strings for projected revenue and MRR cards plus chart disclaimer and annual revenue goal reference. Access is admin-only. The business momentum chart remains illustrative sample data until real series are integrated (task 06-03).
+
+**Impact:** The /ops route reads this global via Local API with fallbacks if the table is missing; staff edit values in Payload admin, not in code. Portal doc: src/content/docs/ops-dashboard-targets.md (catalog slug ops-dashboard-targets).
+
+## D-ops-003: Liabilities and scorecard definitions in Payload with live dashboard wiring
+
+Operational liability checklist rows live in admin-only collection `ops-liability-items`. Scorecard definition rows (title, formula, target guidance, optional manual value fields, sort order) live in `ops-scorecard-rows`. The portal merges DB rows with defaults from `src/lib/ops/businessOperatingSystem.ts`, seeds those defaults into real records, and now uses scorecard manual values to power KPI cards where appropriate.
+
+**Impact:** The `/ops` dashboard is no longer an empty shell when the collections exist but have no content. Scorecard and liability CRUD now show up in the live dashboard, and first-party quote/service-plan metrics can override fallback target strings as the data model fills in. Customer portal can still be staff-only during rollout by toggling `PORTAL_ADMIN_ONLY=true`.
+
+## D-portal-001: Customer portal is account-first, not docs-first
+
+The customer portal should behave like an account center: estimates, invoices, scheduling, recurring-plan context, and account/contact details. Customers should not be pushed toward docs, the marketing site, Quote settings, or Payload admin from portal navigation.
+
+**Impact:** `/dashboard`, `/estimates`, `/invoices`, `/service-schedule`, and `/account` become the customer surface. Portal docs remain admin-only, and the customer sidebar/navigation strips out marketing/admin clutter.
+
+## D-auth-002: Admin impersonation uses effective-user scope while preserving the real admin identity
+
+Admins need to preview the real customer experience without losing their own admin session. The app should keep the authenticated admin as the real actor, but allow a first-party impersonation state that swaps the effective user for customer-facing routes and data. A floating toolbar should persist across pages so the admin can switch, stop impersonation, or jump between customer views.
+
+**Impact:** Customer-facing layouts and routes should read an effective auth context, while internal admin-only routes still validate the real admin. When the effective user is non-admin, internal portal views such as `/ops` or admin docs should redirect out of those views instead of leaking staff-only screens.
+
+## D-service-plan-001: Recurring plan defaults live in draftable Payload global `servicePlanSettings`
+
+Default recurring-plan terms are configurable in Payload global `servicePlanSettings`: two visits per year minimum, 20% off one-off single-job pricing by default, billed across the year in equal installments, with a default six-month cadence. Staff can stage and publish changes instead of hardcoding subscription logic.
+
+**Impact:** The customer portal and service-plan records share one source of truth for recurring-plan defaults. `service-plans` stores per-customer overrides and calculated totals, while the global keeps the baseline commercial policy editable.
+
+## D-devtools-001: Payload MCP is the preferred AI editing bridge, but it is migration-gated
+
+Use Payload's official MCP plugin so local editors can read and update approved content surfaces through the same app server. Keep it behind an explicit env flag until the MCP API keys schema is approved and migrated.
+
+**Impact:** Codex and Cursor setup can be documented and prepared in-repo without silently breaking the current database. The endpoint should come from the normal dev server once the migration gate is cleared.
+
+## D-devtools-002: Image generation MCP is vendored and launched through repo-local tooling
+
+The image-generation MCP server should be pinned in git as a submodule under `vendor/image-gen-mcp`, use its own `uv`-managed Python environment, and read provider settings from the repo root `.env`. Cursor, Codex, and local dev should all use the same repo-owned launcher instead of per-machine shell commands.
+
+**Impact:** This keeps the image pipeline reproducible across machines and lets `npm run dev` start the image service only when `IMAGE_GEN_MCP_ENABLED=true`. It also avoids spreading Python setup steps and secret handling across editor-specific notes. Marketing/content work can now depend on a stable in-repo image-generation path without coupling those assets to a separate manually managed service.
+
+## D-stack-002: Payload must stay bootable during Vercel prerender even when PAYLOAD_SECRET is misconfigured
+
+The app should still initialize Payload during build and runtime if `PAYLOAD_SECRET` is accidentally missing in Vercel, because public pages, globals, and layout chrome depend on Payload during prerender. The config therefore derives a deterministic fallback secret from deployment/runtime context, while production is still expected to set `PAYLOAD_SECRET` explicitly.
+
+**Impact:** This keeps deploys from failing on public prerender routes such as `/contact` while preserving a clear env contract: the fallback is a safety net, not the preferred production setup. `package.json` also pins Node to `20.x` so Vercel runtime selection stays predictable.
+
+## D-stack-003: Production deploys stay on Webpack until the current Turbopack launcher mismatch is resolved
+
+The repo keeps `next build --webpack` as the production build path because the current Vercel deployment runtime hit `ERR_REQUIRE_ESM` while loading App Router server output through `___next_launcher.cjs` under the repo's `type: module` scope.
+
+**Impact:** This preserves deploy reliability without changing the repo's module format or local dev ergonomics. Turbopack can stay enabled for development and can be reconsidered for production once the Vercel/Next.js packaging path no longer misclassifies the built server entrypoints.
+
+## D-crm-007: Internal employees support multiple additive roles
+
+Staff users may be assigned multiple internal roles at once (for example Sales + Scheduler). Queue visibility and duties are additive, not exclusive, so small teams can share responsibilities without role conflicts.
+
+**Impact:** Assignment logic, queue filters, and permissions should evaluate role sets instead of single-role assumptions.
+
+## D-auth-003: Customer and employee data surfaces remain strictly separated
+
+Any view that exposes cross-user or cross-company information, internal docs, or operational controls is staff/admin-only. Customer and public surfaces must stay limited to public plus self/account-scoped data, with company-admin customers limited to their own company membership management.
+
+**Impact:** Navigation, API routes, and access controls must continue enforcing these boundaries, including impersonation-safe behavior.
+
+## D-crm-008: Fastest reminder rollout uses Resend to worker preferred inboxes
+
+Day-one reminder and digest delivery uses Payload jobs with Resend sent to each worker's preferred existing email address (personal or company). Mailbox-provider OAuth integration is optional and can be added later without blocking first rollout.
+
+**Impact:** The team can ship reliable follow-up reminders immediately while deferring Gmail/Microsoft complexity until core queue and SLA behavior is stable.
+
+## D-automation-001: Lifecycle automation runs through Payload jobs, cron, and shared customer email builders
+
+Lead acknowledgement, quote delivery, invoice reminders, appointment updates, and first-party CRM sequence steps should run through Payload jobs triggered by the app's cron endpoint instead of bespoke one-off route logic. Customer lifecycle emails should use shared builders and embed claim/invite CTAs whenever the recipient still needs portal access.
+
+**Impact:** Automation state stays testable and auditable in the app, billing reminders and follow-up sequences share one execution path, and customer activation becomes part of normal quote/invoice/appointment communication rather than a separate manual support workflow.
+
+## D-devtools-003: MCP local usage requires operational verification checklist
+
+Payload and image-generation MCP setup is considered ready only when endpoint, auth key, and local transport checks pass in Codex/Cursor contexts, not just when config snippets exist.
+
+**Impact:** Reduces confusion during planning/implementation handoffs by making MCP readiness explicitly testable.
+
+## D-billing-003: Discount policy supports account defaults and user overrides
+
+Billing policy supports discounts at both account/company scope and user/contact scope. Implemented precedence is user-level override first, then account-level default, then base pricing. Both percentage and flat-amount variants are supported, and the resolved discount context is surfaced in staff billing UI.
+
+**Impact:** Discount calculations are deterministic, explainable, and staff-only. Billing screens and seeded demo data can now show whether a discount came from an account default or user override without relying on ad hoc manual interpretation.
+
+## D-crm-009: Default CRM owner routing uses explicit owner, then account owner, then stable admin fallback
+
+Until a more advanced round-robin allocator exists, new CRM records and follow-up work use deterministic owner routing: preferred explicit owner first, then the related account owner, then the seeded admin roster, then the earliest-created admin user as the final fallback.
+
+**Impact:** New leads, contacts, tasks, and billing follow-up records no longer land unowned. Small-team operations stay predictable across dev, demo, and production environments without inventing a pseudo-random assignment system.
+
+## D-ux-005: Public contact/support UX uses compact tab-detail guidance over loose card stacks
+
+The `/contact` page should prioritize immediate action clarity: high-contrast visual hierarchy, concise copy, visible brand mark in the request card, icon-led category cues, and compact tabs feeding one detail panel for policy/support guidance.
+
+**Impact:** Reduces cognitive load and prevents support copy from competing with the main form action. The page becomes easier to scan and more consistent with compact operator/customer UI patterns used elsewhere.
+
+## D-ux-006: Ops information architecture splits dense modules into dedicated routes
+
+The ops experience should use a conventional app shell with a clear split: `/ops` is the KPI-first dashboard, and `/ops/workspace` is the primary live-work surface for queues, billing follow-up, today board, scorecard, milestones, and assets. Legacy `/ops/*` section routes remain only as compatibility redirects into workspace tabs.
+
+**Impact:** Reduces overflow and overlap issues, removes duplicated billing and launcher panels, keeps sidebar navigation simpler, and avoids full-page route churn when staff switch between live work sections. It also requires the shared tab/query helpers to remain stable so redirects and deep links stay predictable.
+
+## D-ux-007: Ops KPI cards are compact, number-first, with tooltip-based metric disclosure
+
+The default `/ops` KPI cards should prioritize numeric value and quick trend context, not paragraph copy. Formula and composition details are disclosed through info-icon tooltips backed by shared KPI metadata.
+
+**Impact:** Improves dashboard scan speed and consistency while preserving transparency on what each KPI includes. Also reduces repeated explanatory text and supports reusable tooltip/config patterns.
+
+## D-auth-004: Customer-home preview uses deterministic non-admin test identity
+
+When staff use `Customer home`, the portal should run in a stable non-admin preview identity (`test_user`) so customer-flow checks are repeatable. Sidebar labels should indicate context (`Ops dashboard`, `Ops workspace`, and `Customer home (test_user)`), and admin-only links/docs/settings must be hidden in customer preview scope.
+
+**Impact:** Prevents ambiguous "am I really seeing customer scope?" states and avoids leaking admin navigation while previewing customer experiences. Requires predictable seed identity setup and impersonation/nav context wiring.
+
+## D-auth-005: Clerk becomes the primary identity layer; Payload users stay the app-facing authorization record
+
+Grime Time will adopt Clerk for hosted sign-in, sign-up, social login, passwordless flows, session handling, and account affordances such as the user button. Payload `users` remains the business/profile/authorization record, with Clerk external ids mapped back into the app for portal scope, staff permissions, impersonation, and Stripe customer linkage.
+
+**Impact:** The current Supabase customer-auth implementation becomes an interim state, not the long-term direction. Future auth work should prioritize Clerk-hosted components and Clerk session checks, while preserving a deterministic bridge into Payload `users`, account scope, and Stripe `customerId` records. Staff/admin auth should converge on the same identity provider where practical rather than keeping a permanent Supabase-vs-Payload split.
+
+## D-auth-006: Account claim and company invites share one Payload token model
+
+Existing-customer claim links and company-user invites should not become separate systems. Both flows should issue the same kind of first-party token stored on the Payload `users` record, land on the same compact Clerk-hosted auth surface, and complete by binding the verified Clerk identity back to the existing Payload user, account scope, and Stripe customer context where present.
+
+**Impact:** Reduces duplicated auth logic, keeps email CTA generation consistent across quotes/invoices/schedules/company invites, and makes the auth UI easier to refactor into small reusable modules instead of branching by flow in many places. It also keeps invite acceptance compatible with hosted Clerk components instead of custom one-off auth pages.
+
+## D-auth-007: Frontend page-media devtools stay local-only and ride the existing admin preview toolbar
+
+The public-site media editing affordance should not become a production CMS surface. Instead, the existing admin preview/impersonation toolbar can expose a localhost-only page-media sidebar for real admins that lists media resolved on the current page and allows two developer actions: replace the file behind an existing media record, or create a new media record and swap the page relationship to that new record.
+
+**Impact:** Keeps production/editor experience anchored in Payload admin while giving the developer a fast local iteration loop on homepage and public pages. This also means the tool must be hard-gated by real-admin auth plus localhost/127.0.0.1 host checks, and mutation routes must require an explicit page relationship path rather than attempting broad document rewrites.
+
+## D-auth-008: Clerk owns real identity; Grime Time owns impersonation
+
+Grime Time will use Clerk for the real signed-in identity, but it will keep support/admin impersonation as an app-layer feature using Payload-linked users plus first-party effective-user cookies instead of relying on Clerk's paid impersonation add-on.
+
+**Impact:** Existing Payload admins must bind onto Clerk by email on first sign-in so `/ops`, admin preview, and customer impersonation keep working without duplicate users. Audit and permission checks must continue to distinguish the real actor from the impersonated subject.
+
+## D-auth-009: Organizations, memberships, and entitlements stay first-party; Clerk orgs are mirrored provider state
+
+Grime Time should not treat Clerk organizations or role strings as the primary business-authorization model. The app should own first-party organization and membership records, role templates, entitlement locks, provider mappings, and downstream domain events; Clerk org and membership state is an identity/workspace adapter that may be mirrored for convenience.
+
+**Impact:** Admins can promote staff, lock or unlock capabilities, and manage the Grime Time org from app-owned surfaces without losing the option to swap auth providers later. The current Clerk org `org_3BmXmwG7NpGNO1JKpE3MkR667Mm` should be stored as an external mapping on the Grime Time organization, not hardcoded as the primary app org id.
+
+## D-auth-010: Provider sync uses split authority plus first-party domain events, not blind global last-write-wins
+
+Identity-profile fields may remain provider-authoritative, but business-authorization fields such as org membership, role template, entitlement locks, and impersonation eligibility remain app-authoritative. Mirrored fields should track internal/provider write timestamps and sync source, while Grime Time emits its own user/org/membership events for external apps and consumes Clerk webhooks through reconciliation workers.
+
+**Impact:** Changing a user or org in Grime Time admin produces an app-owned event stream that downstream systems can trust, while Clerk updates can still reconcile safely without accidentally overwriting app-only locks or permissions. Conflict logging and manual resync become part of the design instead of hidden drift.
+
+## D-auth-011: Visual authoring is granted by `content:write`; demo users are excluded
+
+The frontend page composer and its media route should authorize on the first-party `content:write` entitlement instead of requiring full Payload-admin status. External members of the official Grime Time Clerk org currently default to `staff-designer`, which grants visual editing without `/ops`, CRM, docs, impersonation, or Payload admin. Demo personas remain blocked from this authoring lane by email suffix even if demo memberships still exist locally.
+
+**Impact:** This gives Grime Time a safe designer role for invited staff such as Google-auth users while preserving the Payload admin bridge for real admins. Private and draft page preview must follow the same authoring entitlement so designers can actually work on unpublished pages, and the official Clerk org mapping should stay env-backed via `GRIME_TIME_CLERK_ORG_ID` rather than a permanently hardcoded id.
+
+## D-eng-001: Code quality favors extraction and typed shared primitives over literal sprawl
+
+As the app scales, feature work should follow shared engineering conventions: centralize repeated literals into constants/typed unions, extract reusable utilities/components from large files, and enforce practical file-size guardrails. UI work should also prefer clear icon-assisted affordances and avoid copy-heavy low-contrast layouts for primary actions.
+
+**Impact:** Improves maintainability, consistency, and implementation speed across Codex/Cursor sessions while reducing regressions from duplicated string logic and oversized monolithic components.
+
+## D-eng-002: Conventions use measurable thresholds and shared pattern catalog
+
+Engineering standards should be enforceable with measurable thresholds (repeat-literal/UI/mapping counts and file/function size guardrails) plus a shared design-pattern catalog for recurring product surfaces.
+
+**Impact:** Code reviews and implementation planning can validate DRY/SOLID goals objectively, reduce one-off architecture choices, and improve consistency across portal, CRM, and billing work.
+
+## D-eng-003: Refactor roadmap defines target folder structure for modular architecture
+
+The repository should migrate toward the documented target folder/module layout for ops/auth/crm/dashboard concerns. Extraction is incremental and feature-coupled, not a stop-the-world rewrite.
+
+**Impact:** Provides a stable architectural target for Codex/Cursor sessions, improves reuse across surfaces, and reduces future churn from ad hoc file placement.
+
+## D-eng-004: Live mutable portal and ops surfaces use server-first loading plus TanStack Query
+
+Server components remain the default for initial page load and stable read-mostly content, but live mutable portal and ops workflows should use TanStack Query in client islands for cache, mutation, invalidation, and refresh behavior instead of bespoke fetch-state logic in each component.
+
+**Impact:** This keeps first render predictable while making CRM, billing, invites, and account-management interactions easier to maintain and less error-prone. It also gives the repo one shared client-data pattern instead of a mix of ad hoc `fetch`, `useEffect`, and manual refresh state across similar workflows.
+
+## D-vault-001: Secrets and sensitive field storage
+
+Team secrets are managed in **Infisical**. Sensitive values in Payload use **encrypted fields** where applicable; sensitive columns at rest align with **Supabase** / Postgres encryption practices for the data plane.
+
+**Impact:** Reduces plaintext exposure in CMS and DB; Infisical remains the source for deploy-time and team secrets; implementation details belong next to each collection/global.
+
+## D-content-003: Testimonials collection and optional marketing block
+
+Testimonials are stored in the **`testimonials`** collection. The **Testimonials section** block on `pages` can render selected or latest-published quotes. Until marketing is ready, **do not** add this block to public pages (or leave testimonials unpublished); the block returns **null** when there is nothing to show.
+
+**Impact:** Editors can prepare content without exposing it; one canonical model for trust quotes when launch timing allows.
+
+## D-content-004: Visual page editing layers on Payload pages and drafts instead of creating a parallel page-builder store
+
+The visual composer should treat Payload `pages`, `layout` blocks, and draft versions as the source of truth. The local workbench may provide drag-drop, focused editing, and faster authoring surfaces, but it should write back into the existing page document model rather than introducing a second unpublished page-definition system.
+
+**Impact:** New-page creation, slug management, draft/publish, and reusable-section work can reuse Payload's existing lifecycle and access model. Homepage-specialized React should be decomposed into reusable sections instead of remaining the hidden composition authority.
+
+## D-content-005: Normalize `/` first; treat current `/home` ideas as reusable sections, not a required route
+
+The first composition pass should target `/`. The current service and "what we do" treatments that feel like `/home` sections should become reusable section types that can be swapped onto `/`, removed, reordered, and cloned into similar sections later. Grime Time does not need to preserve a dedicated `/home` route to achieve that reuse.
+
+**Impact:** Implementation starts by decomposing the specialized homepage structure into portable section definitions instead of building route-specific duplication. Section reuse becomes the path to future pages and variants, while `/` stays the canonical first page to normalize.
+
+## D-content-006: First composer pass should be staff-safe, not localhost-only
+
+While the existing page-media devtools remain a useful localhost-only prototype, the first real page-composer delivery for phase 13 should be safe for authenticated staff and usable immediately in normal staff workflows.
+
+**Impact:** The visual composer needs proper staff access, draft safety, and publish controls rather than relying on localhost host checks as its main boundary. The local-only drawer can continue to exist as a narrower developer tool without blocking the staff-safe authoring surface.
+
+## D-content-007: Homepage-specific service treatments become reusable ServiceGrid display variants
+
+The current homepage service cards and pricing-step treatments should not live as hidden one-off JSX inside `GrimeTimeMarketingHome`. They are now modeled as `serviceGrid.displayVariant` values with heading-based fallback for older content so the same section shapes can be added, removed, reordered, duplicated, and reused through the normal page layout model.
+
+**Impact:** This keeps `/` normalized around `pages.layout`, preserves current visual treatments without a dedicated `/home` route, and gives the upcoming staff-safe composer a real first section-library primitive instead of more route-specific composition logic.
+
+## D-content-008: First staff-safe page composer lives in the frontend admin toolbar and saves drafts by default
+
+The first staff-safe composer surface should sit where staff are already previewing pages: the authenticated frontend admin toolbar. It loads the current page document by route, keeps section edits local in the drawer until the user explicitly saves a draft or publishes, and starts with reusable section structure plus service-grid copy editing instead of waiting for a full CMS replacement.
+
+**Impact:** This gives Grime Time an immediate visual editing lane without making localhost-only tools the production authoring boundary. It also establishes a draft-first editing pattern for the upcoming media integration and broader section-library work.
+
+## D-content-009: Composer media actions stay in the same staff-safe drawer and require a persisted draft layout
+
+The first unified media pass should not send staff back to the localhost-only page-media drawer. Section-row media swapping and generation now live inside the same frontend page-composer drawer, but the composer must require a saved draft before media mutations run so relation-path updates always target the persisted layout, not an unsaved local variant.
+
+**Impact:** This keeps structure, copy, media, and publish controls in one staff-safe authoring surface while avoiding accidental media updates against stale layout paths. The save-first rule is a deliberate safety tradeoff until later phases add richer selected-context syncing and page creation flows.
+
+## D-content-010: Page visibility is explicit, and private pages remain staff-previewable from the frontend composer
+
+The first draft-page workflow needs more than draft vs published. `pages` now carry an explicit `visibility` flag so staff can create private pages without exposing them in public routes or the sitemap. Real admins can still preview those private or draft pages on the frontend so visual editing does not stop at page creation.
+
+**Impact:** This gives the composer a usable new-page workflow without forcing unfinished pages public. It also establishes a small first-pass warning model: page-local edits are called out as local by default, the homepage slug warns because it controls `/`, and shared/global pricing blocks are flagged when a section reads from the shared Pricing global.
+
+## D-content-011: Frontend staff authoring reuses the shared copilot shell instead of adding another page-editor chatbot
+
+The page composer should not grow a second assistant surface. Real admins on the frontend now share the existing copilot shell, while the composer publishes the selected page, section, and media slot into shared context. Focused media work opens the same copilot modal with explicit image, video, or gallery mode selection instead of pushing staff into another detached prompt box.
+
+**Impact:** This keeps copilot behavior consistent across portal and site-authoring work, lets the AI route reason about selected authoring state, and creates a direct bridge between the visual editor and future assistant-ui interactables without inventing separate state models for every media or copy workflow.
+
+## D-content-012: Composer follow-on work is preview-first and block-constrained, not form-first or style-free
+
+The next composer phase should behave like a constrained no-code builder in the style of Softr or Webflow-lite: the page preview is the primary surface, blocks remain reusable schema-driven components in a vertical stack, editing is explicitly split into structure/content/media/publish, and the main authoring affordances should move closer to the preview through mirrored selection, inline text editing, and compact hover controls.
+
+**Impact:** Future composer work should prioritize direct manipulation, compact top-bar controls, and state synchronization between preview and structure instead of adding more drawer-only forms or arbitrary style freedom. Guardrails stay intentional: schema-bound blocks, sidebar for deeper config, no early freeform styling system, and targeted performance work to avoid re-rendering the whole page for small edits.
+
+## D-content-013: Composer expansion starts from a real block audit and a Softr-style insertion model
+
+The composer should not grow from ad hoc templates or repeated “section” shortcuts. The next implementation stream must first audit the currently implemented page/template sections into a formal block inventory, then build a block registry and insertion flow around that real inventory. Structure is the ordered block organizer only, and insertion happens through plus-targets plus a categorized block browser for dynamic, static, and container blocks.
+
+**Impact:** This keeps the system grounded in real Grime Time content instead of speculative abstractions, removes redundant page identity from Structure, replaces the standalone “Add reusable section” pattern, and gives later reusable/dynamic/container work a stable registry and insertion path. `Custom HTML` is part of the block taxonomy from the start even if its full safety model lands later.
+
+## D-content-014: Phase-15 composer foundations stay schema-first, keep hidden blocks editable, and treat Custom HTML as planned static taxonomy
+
+The first builder-shell pass keeps the Payload page document as the only persisted authoring source of truth. Registry entries describe the current real layout blocks, hidden blocks stay visible to editors in Structure with badges and quick actions while public rendering omits them, and `Custom HTML` appears in the taxonomy as a planned static block without becoming insertable before its safety model exists.
+
+**Impact:** This avoids inventing a second builder store, keeps structure and rendering aligned with saved page data, makes block visibility a durable page-level property instead of transient UI state, and gives later phase-17 work a stable place to land reusable semantics, deeper container editing, and safe custom markup rendering.
+
+## D-content-015: Composer-launched copilot sessions should auto-dock beside the builder instead of hiding behind it
+
+When the copilot is opened from the visual composer, the default experience should be a left-gutter docked panel that stays co-present with the right-side composer controls. Floating mode remains available, but it is an override rather than the starting state.
+
+**Impact:** This gives the upcoming phase-16 follow-on work a concrete layout rule: shared authoring context between composer and copilot, explicit dock state in a shared UI store, responsive fallback on narrow screens, and z-index rules that keep both panes interactive.
+
+## D-testing-001: Local production browser verification for Grime Time should use `localhost` and treat fixed drawers as first-class interaction surfaces
+
+For Grime Time's local production browser checks, `localhost` is the canonical host. Using `127.0.0.1` breaks Clerk's dev middleware rewrite path under `next start`. The page-composer and copilot Playwright coverage should also scope interactions to the fixed drawer or copilot shell rather than relying on global page locators, because these surfaces intentionally overlay the marketing site.
+
+**Impact:** Playwright config, login helpers, and future browser specs should prefer `http://localhost` and drawer-scoped or copilot-scoped locators. This keeps browser verification aligned with the real staff authoring surfaces and avoids reintroducing the same local-production or overlay-targeting failures.
+
+## D-ops-001: Day-to-day work centers on `/ops` and the team portal, not Payload admin
+
+Staff should complete quotes, invoices, CRM follow-up, and ops workflows from **`/portal`** and **`/ops`** once authenticated. **Payload admin (`/admin`)** is for CMS configuration and after-the-fact data fixes—not the primary daily loop.
+
+**Impact:** Prioritizes portal UX, navigation, and performance (including mobile) for field use; admin remains necessary but secondary for routine operations.
+
+## D-crm-002: Inbound forms create leads first, not automatic accounts
+
+New public submissions should create a **`lead`** (with contact details on the lead). Automatic **`account`** / **`contact`** creation for every visitor is avoided to keep the CRM scope bounded; promotion to account/contact is explicit when qualified.
+
+**Impact:** Scales better for anonymous and one-off traffic; follow-up still happens from lead records.
+
+## D-launch-001: Launch bar: real photography and mobile-first UX
+
+Public marketing should use **real project photography** (not placeholders) before “launched” positioning. **Mobile-first** layouts and flows are required for staff in the field and customers on phones—responsive breakpoints, touch targets, and portal readability are launch criteria alongside functional completeness.
+
+**Impact:** Sets a clear QA bar; verify `POSTGRES_URL` / Supabase in each environment so hosted DB behavior matches expectations.
+
+## D-demo-001: Demo data and scripted flows for launch readiness
+
+Before launch demos, seed or fixture **realistic scenarios**: e.g. residential customer post-service, subscribed residential, fresh quote lead, support/refund paths, and staff workflows. These scenarios should be documented in a single runbook and reflected in seed or manual setup steps.
+
+**Impact:** Aligns sales, training, and QA; drives TASK-REGISTRY work for “demo-ready” milestones.
+
+## D-ai-001: AI ops assistant is an optional, beta, staff-only employee copilot
+
+An **internal** employee copilot for **business operations** (quotes, CRM context, playbook Q&amp;A, assigned tasks, follow-up queues) may use **OpenAI** via **Vercel AI SDK**, **Assistant UI** and **Tool UI** patterns, and **RAG** over approved docs. It should visually and behaviorally take strong inspiration from the portfolio site copilot, but stay focused on employee work inside Grime Time. It is **not** a default customer-facing product: ship behind **`AI_OPS_ASSISTANT_ENABLED`** (or equivalent), show **Beta** in UI, gate to **staff/admin**, and require explicit security review before production enablement. Optional later **vision** flows (e.g. screenshot -> phone numbers) must use **confirmation** before writes, **rate limits**, and **no raw PII** in application logs. TASK-REGISTRY phase **08** tracks delivery.
+
+**Impact:** Supersedes ad-hoc "drop in chat" experiments; ties AI work to env keys in `.env.example`, catalogued internal docs for RAG, and audit expectations. It also establishes that tours remain Joyride-based and the copilot can launch or orchestrate them rather than replacing them.
+
+## D-ai-002: Employee copilot reuses the portfolio-style internal RAG baseline and renders ops components in chat
+
+Grime Time should not invent a separate AI retrieval stack if the portfolio and Magicborn internal-docs flow already solves the ingestion problem. The default baseline is approved-docs ingestion plus cheap local embeddings (`Xenova/all-MiniLM-L6-v2`, 384 dims), with assistant responses enriched by rendered Tool UI components for tasks, follow-up contacts, quote or CRM summaries, and launch-tour actions.
+
+**Impact:** Keeps AI costs low, keeps ingestion deterministic, and makes the assistant operational instead of purely conversational. It also reduces architecture drift between the portfolio repo and Grime Time while preserving Grime Time's own staff-only domain model.
+
+## D-ai-003: AI-assisted authoring uses selected page or section context plus short-lived focused generation sessions
+
+Grime Time should converge on one AI authoring model: the current page, selected section, and selected media slot are exposed as assistant-aware context, and focused generation flows run as short-lived modal sessions over the shared copilot shell rather than as detached one-off prompt boxes. Mode choice (for example image, video, or gallery swap) must be explicit before generation runs.
+
+**Impact:** The user can stay in one assistant mental model while still entering a focused media-generation mode. Assistant UI interactables, selected state, and tool-rendered results become the bridge between chat guidance and visual editing instead of letting each prompt surface invent its own state model.
+
+## D-comms-001: Quote and lead notifications ship through Payload jobs plus Resend before chat automation
+
+New quote, lead, and follow-up notifications are deterministic business events and should use first-party jobs plus Resend templates before any OpenClaw or AI channel work. Field-assistant work must not block basic employee response-time communication.
+
+**Impact:** Implementation priority moves to employee routing, notification templates, delivery logging, and retry-safe job handling. OpenClaw can later mirror or extend these alerts, but it is not a dependency for the first notification path.
+
+## D-comms-002: Field-agent chat uses a plugin-first OpenClaw integration over a shared Grime Time tool surface
+
+Grime Time should not fork its business logic across in-app AI and field chat. Instead, expose a narrow shared tool surface for employee actions and integrate OpenClaw as a plugin consumer of that same tool layer. Channel rollout should be pragmatic: email notifications first, then a low-friction chat pilot, then more field-native channels.
+
+**Impact:** Keeps auth, CRM, tasks, quote state, and audit history inside Grime Time while allowing OpenClaw to power field messaging. It also reduces maintenance compared with an early OpenClaw fork and makes later channel changes cheaper.
+
+## D-seed-001: Modular seed layers + first-class developer CLI (this repo only)
+
+Grime Time will **split seed data** into composable layers — **foundation** (admin/setup, minimal globals), **content** (media, pages, layout blocks, nav-related globals), and **demo** (personas, CRM/billing fixtures) — each invokable independently. A **Grime-only CLI** (see `scripts/seed.ts` evolution) will provide **subcommands**, **`--dry-run`**, **`--only`**, **`--force`/`--yes`**, **`--json`**, and **non-interactive** mode for CI; **media operations** require explicit confirmation or flags when overwriting or duplicating uploads. A **redundancy report** will flag the same `media` id reused across multiple layout slots (e.g. gallery top/mid/bottom) so marketing imagery stays intentional. **Tests** should target **module-scoped** demo fixtures rather than relying on the monolithic seed. Payload admin `/next/seed` remains supported but should delegate to the same module graph (exact default bundle TBD). Implementation is tracked in roadmap **phase 09** (`.planning/phases/09-seed-system-and-cli/`).
+
+**Impact:** Refactors `src/endpoints/seed/index.ts` over time without abandoning idempotent upserts. Replaces ad-hoc env toggles with explicit CLI/module boundaries. Improves safety on a single shared database.
+
+## D-tour-001: Staff and customer onboarding uses optional portal tours, not migration wizards
+
+Guided **react-joyride** tours in the portal (registry with **staff vs customer** audience + `data-tour` selectors + grouped sidebar launcher + `?tour=` links) are the primary in-app hand-holding for `/ops` and `/dashboard`. **Completion** is stored in `localStorage` (`src/lib/tours/storage.ts`) so the **Ops overview** tour can **autolaunch once per browser session** for real admins on `/ops` (step-by-step; skippable) without replaying on every navigation. Deep staff tours (CRM, Today, scorecard/liabilities, assets) are manual only. Product direction does **not** include chat-style migration or intake wizards; business process clarity comes from tours, seed/demo data, portal Docs (e.g. `field-quoting-and-revisions.md`), and runbooks.
+
+**Impact:** Tours must stay aligned with real UI anchors and demo personas; CRM/billing work may require copy updates (TASK-REGISTRY `03-09`, BLOCKERS `BLK-demo-seed-001`). Staff/marketing tour implementation is closed (`06-10`, `06-11`); AI assistant tour waits on phase `08` (BLOCKERS `BLK-tour-ai-001`). Shell refactors (07-11, 07-12, 07-14) must preserve `data-tour` targets or update registries in the same change set.
+
+## D-content-016: Visual composer preview is a client-side canvas backed by draft page state, not the live page DOM
+
+Phase 16 should not try to mutate or instrument the server-rendered public page directly for inline authoring. The stable model is a dedicated client-side preview canvas inside the composer drawer that reads and edits the same draft-page state as Structure, Content, Media, and Publish.
+
+**Impact:** Selection, quick actions, inline text edits, responsive preview widths, and publish summaries can share one state model without coupling every frontend route to editor-only behavior. This keeps the public page renderer simple while still making the composer feel visual.
+
+## D-content-017: Reusable composer blocks are code-backed presets and Custom HTML renders only through sanitizer-backed markup
+
+Phase 17 uses a constrained model rather than a generic builder platform. Reusable blocks are inserted from a small preset catalog as either linked references or detached copies, with linked rendering resolved from code-backed presets at runtime. `Custom HTML` is allowed only through sanitizer-backed rendering that strips scripts, event handlers, and unsafe URLs while limiting iframe embeds to a trusted host list.
+
+**Impact:** Reusable authoring stays understandable without introducing a separate reusable-block collection or deep dependency graph, and custom markup gains a clear safety boundary instead of silently executing arbitrary code.
+
+## D-content-018: Phase 18 promotes reusable authoring into CMS-managed shared sections while delaying deep layout power
+
+The phase-17 preset model was the bridge, not the endpoint. Starting in phase 18, reusable authoring should center on CMS-managed shared sections that are created in a dedicated shared-section library, edited through an explicit source-edit flow on a dedicated shared-section route, inserted into pages as linked references, detached locally when needed, and restored through lightweight version history. Phase 18 explicitly does not include promoting an existing page section into shared content. The composer should remain opinionated: shallow section-row-column-block composition, fixed layout patterns, constrained drag-and-drop, minimal library categories plus tags, and no arbitrary freeform nesting or generic flexbox builder UI.
+
+**Impact:** This keeps the composer aligned with a repeatable service-business revenue page system rather than drifting into a general-purpose layout engine. It also sets a strict reuse boundary: linked instances may override only safe placement metadata such as visibility, anchor id, instance label, and an optional tokenized spacing variant, while content, structure, styling primitives, and layout composition remain source-owned unless detached. Shared-section publish should update all linked published pages, and draft pages should resolve against the latest published shared-section version in v1. Dynamic bindings and more advanced publish workflow should build on top of this shared-section model after phase 18 rather than competing with it.
