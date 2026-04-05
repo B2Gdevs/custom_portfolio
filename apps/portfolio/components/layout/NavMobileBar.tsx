@@ -7,9 +7,11 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 type NavMobileBarProps = {
   logoSrc: string;
   isImmersiveApp: boolean;
+  /** Reader hides the site sidebar; use the same escape hatch as immersive apps. */
+  isReaderApp?: boolean;
 };
 
-export function NavMobileBar({ logoSrc, isImmersiveApp }: NavMobileBarProps) {
+export function NavMobileBar({ logoSrc, isImmersiveApp, isReaderApp = false }: NavMobileBarProps) {
   return (
     <div className="flex w-full shrink-0 grow-0 basis-full border-b border-border/80 bg-dark-alt/85 px-4 py-4 backdrop-blur-xl lg:hidden">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4">
@@ -29,7 +31,7 @@ export function NavMobileBar({ logoSrc, isImmersiveApp }: NavMobileBarProps) {
           </div>
         </Link>
 
-        {isImmersiveApp ? (
+        {isImmersiveApp || isReaderApp ? (
           <Link
             href="/apps"
             className="shrink-0 rounded-full border border-border bg-dark px-3 py-2 text-sm font-medium text-text-muted transition-colors hover:bg-dark-elevated hover:text-primary"

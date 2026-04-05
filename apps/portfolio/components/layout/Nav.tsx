@@ -24,14 +24,14 @@ export default function Nav({
   const pathname = usePathname();
   const logoSrc = siteLogoSrc || DEFAULT_SITE_LOGO;
   const isImmersiveApp = isImmersiveAppsRoute(pathname);
-  /** Reader keeps the site rail + repub reader rail side-by-side; hide the thin edge toggle so only the reader panel has a collapse control. */
+  /** Reader uses the repub workspace rail only; the portfolio sidebar is not mounted. */
   const isReaderApp = isReaderAppsRoute(pathname);
 
   return (
     <>
-      <NavMobileBar logoSrc={logoSrc} isImmersiveApp={isImmersiveApp} />
+      <NavMobileBar logoSrc={logoSrc} isImmersiveApp={isImmersiveApp} isReaderApp={isReaderApp} />
 
-      {!isImmersiveApp ? (
+      {!isImmersiveApp && !isReaderApp ? (
         <Sidebar
           collapsible="icon"
           className="z-10 border-r border-sidebar-border/80 bg-sidebar/90 backdrop-blur-xl"
@@ -42,7 +42,7 @@ export default function Nav({
             navMenus={navMenus}
             siteLogoSrc={siteLogoSrc}
           />
-          {!isReaderApp ? <SidebarRail /> : null}
+          <SidebarRail />
         </Sidebar>
       ) : null}
     </>

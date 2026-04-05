@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { isImmersiveAppsRoute, isReaderAppsRoute } from '@/lib/app-routes';
 
 describe('isImmersiveAppsRoute', () => {
-  it('returns false for reader (site sidebar stays mounted)', () => {
+  it('returns false for reader (reader is not immersive; site sidebar is hidden separately)', () => {
     expect(isImmersiveAppsRoute('/apps/reader')).toBe(false);
     expect(isImmersiveAppsRoute('/apps/reader/something')).toBe(false);
   });

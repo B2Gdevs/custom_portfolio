@@ -27,6 +27,12 @@ import {
   mordredsTaleRepoPlannerModalPayload,
 } from '@/lib/repo-planner/reader-book-modal-payloads';
 import type { BookEntry } from '@/lib/books';
+import { primaryNavItems } from '@/components/layout/nav-config';
+import type { ReaderShellNavLink } from '@portfolio/repub-builder/reader';
+
+const READER_SITE_NAV_LINKS: ReaderShellNavLink[] = primaryNavItems
+  .filter((item) => item.href !== '/apps/reader')
+  .map((item) => ({ href: item.href, label: item.label }));
 
 const READER_BOOK_PLANNING_PAYLOADS: Record<
   string,
@@ -156,6 +162,7 @@ export default function ReaderWorkspace({
   return (
     <ReaderWorkspaceBase
       books={combinedBooks}
+      readerShellNavLinks={READER_SITE_NAV_LINKS}
       readerPersistenceAdapter={readerPersistenceAdapter}
       workspaceAccess={workspaceBootstrap?.access ?? null}
       workspaceSettings={workspaceBootstrap?.settings ?? null}

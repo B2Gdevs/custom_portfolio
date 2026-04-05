@@ -74,12 +74,12 @@ export function SiteLayout({
     };
   }, []);
 
-  /** Until persist rehydrates, default to collapsed rail to avoid a wide-sidebar flash. */
+  /** Until persist rehydrates, default to collapsed rail to avoid a wide-sidebar flash. Reader hides the site sidebar entirely. */
   const effectiveCollapsed =
-    isImmersiveApp || !siteShellHydrated ? true : sidebarCollapsed;
+    isImmersiveApp || isReaderApp || !siteShellHydrated ? true : sidebarCollapsed;
 
-  /** Immersive tools hide the site sidebar; reader keeps it (see Nav). */
-  const siteSidebarOpen = !isImmersiveApp && !effectiveCollapsed;
+  /** Immersive tools and reader hide the site sidebar (reader uses its own rail). */
+  const siteSidebarOpen = !isImmersiveApp && !isReaderApp && !effectiveCollapsed;
 
   /** Reader + immersive tools need a bounded-height flex chain so `h-full` reader chrome resolves. */
   const isTightViewportApp = isImmersiveApp || isReaderApp;
@@ -87,7 +87,7 @@ export function SiteLayout({
   return (
     <TooltipProvider delay={0}>
       <SidebarProvider
-        {...(isImmersiveApp
+        {...(isImmersiveApp || isReaderApp
           ? { defaultOpen: false }
           : {
               open: siteSidebarOpen,
@@ -95,7 +95,7 @@ export function SiteLayout({
             })}
         className="min-h-svh w-full flex-wrap content-start"
         style={
-          (isImmersiveApp
+          (isImmersiveApp || isReaderApp
             ? {
                 '--sidebar-width': '0px',
                 '--sidebar-width-icon': '0px',
@@ -110,7 +110,7 @@ export function SiteLayout({
           navMenus={navMenus}
           siteLogoSrc={siteLogoSrc}
           portfolioSidebarHoverHandlers={
-            !isImmersiveApp && effectiveCollapsed
+            !isImmersiveApp && !isReaderApp && effectiveCollapsed
               ? {
                   /** Expand and persist open until user hits collapse (no expand control when rail is icon-only). */
                   onMouseEnter: () => setSidebarCollapsed(false),
