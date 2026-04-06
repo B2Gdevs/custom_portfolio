@@ -2,68 +2,43 @@
 
 **Start here.** This file defines how **planning**, **documentation**, and the **Ralph-style loop** work in this repository.
 
-## Planning model: two layers, one workflow
+## Planning: GAD + RepoPlanner
 
-**`.planning/`** at the repo root is the **root planning section**. It uses **XML + `planning-config.toml` + `.planning/AGENTS.md`** -- same *roles* as a docs section, different *format* (machine-friendly, RepoPlanner-aligned).
+This repo uses **GAD** (get-anything-done) as the planning framework. The canonical loop is defined in [`vendor/get-anything-done/AGENTS.md`](vendor/get-anything-done/AGENTS.md).
 
-Each docs **section** should converge on a section-level **`requirements.mdx`** plus a literal **`planning/`** folder whose living records are **`roadmap.mdx` -> `state.mdx` -> `task-registry.mdx` -> `decisions.mdx`**. **`planning-docs.mdx`** remains a local playbook/index, with optional **`errors-and-attempts.mdx`** and **`plans/`** for support material.
+### Session start
 
-| Role | Root (`.planning/`) | Docs section (`content/docs/<section>/planning/`) |
+```sh
+# For vendor projects (GAD tracks itself, grime-time, repub-builder, etc):
+node vendor/get-anything-done/bin/gad.cjs snapshot --projectid <id>
+
+# For docs sections (global, documentation, books, etc):
+# Read the section's planning/ folder directly
+```
+
+Do NOT manually read 10+ planning files. `gad snapshot` gives you everything in one command.
+
+### The loop (gad-18)
+
+1. `gad snapshot` or `gad state` + `gad tasks` — know where you are
+2. Pick one task (status=planned)
+3. Implement it
+4. Update TASK-REGISTRY.xml (mark done), STATE.xml (next-action), DECISIONS.xml (if new decisions)
+5. Commit
+
+### Context exhaustion (gad-17)
+
+Auto-compact handles it. After compaction, run `gad snapshot` to re-hydrate and continue. Never stop work, never ask to restart, never start a "fresh session."
+
+### Planning layers
+
+| Layer | Format | Where |
 | --- | --- | --- |
-| **Index / playbook** | `.planning/AGENTS.md` | `planning-docs.mdx` (local playbook, not the living record set) |
-| **Current pointer** | `STATE.xml` | `state.mdx` |
-| **Tasks** | `TASK-REGISTRY.xml` | `task-registry.mdx` |
-| **Phases / timeline** | `ROADMAP.xml` | `planning/roadmap.mdx`; cross-section overview = [`documentation/roadmap.mdx`](apps/portfolio/content/docs/documentation/roadmap.mdx) |
-| **Requirements narrative** | `REQUIREMENTS.xml` (stub -> paths below) | `requirements.mdx`; **monorepo-wide** scope also lives in [`documentation/requirements.mdx`](apps/portfolio/content/docs/documentation/requirements.mdx) |
-| **Cross-cutting queue** | Mirror or link in `STATE.xml` `next-action` / tasks | [`documentation/planning/state.mdx`](apps/portfolio/content/docs/documentation/planning/state.mdx) **Cross-cutting queue** |
-| **Decisions** | `DECISIONS.xml` | `decisions.mdx` |
-| **Attempts / errors** | `ERRORS-AND-ATTEMPTS.xml` | `errors-and-attempts.mdx` |
-| **One-off phase plans** | `.planning/phases/<phase-id>/` after full init | `plans/<phase-id>/` |
+| Vendor projects | XML (.planning/) | `vendor/<project>/.planning/` — tracked by GAD |
+| Docs sections | MDX (planning/) | `apps/portfolio/content/docs/<section>/planning/` |
+| Root planning | XML | `.planning/` — monorepo-wide coordination |
 
-**Do not** treat **repo-root `REQUIREMENTS.md`** as the canonical requirements document. It is at most a **stub or legacy pointer**. **Do not** add **`.planning/REQUIREMENTS.md`** or treat **`.planning/IMPLEMENTATION_PLAN.md`** as the living planning source. If a phase needs a temporary plan, store it inside that phase's planning folder.
-
----
-
-## Mandatory read order (agents)
-
-1. **This file** (`AGENTS.md`).
-2. **Global human-first planning entrypoint:** **[global/requirements.mdx](apps/portfolio/content/docs/global/requirements.mdx)**, then **[global/planning/roadmap.mdx](apps/portfolio/content/docs/global/planning/roadmap.mdx)**, **[global/planning/state.mdx](apps/portfolio/content/docs/global/planning/state.mdx)**, **[global/planning/task-registry.mdx](apps/portfolio/content/docs/global/planning/task-registry.mdx)**, **[global/planning/decisions.mdx](apps/portfolio/content/docs/global/planning/decisions.mdx)**, and **[global-planning.mdx](apps/portfolio/content/docs/global/global-planning.mdx)**.
-3. **Scope of your work:**
-   - **Section-scoped work:** read that section's **`requirements.mdx`**, then **`planning/roadmap.mdx`**, **`planning/state.mdx`**, **`planning/task-registry.mdx`**, and **`planning/decisions.mdx`**. Open **`planning/planning-docs.mdx`** only when you need the section-local playbook or index.
-   - **Fiction / one novel (`books/<slug>/` + `content/docs/books/<slug>/planning/`):** read that stream's **`planning/AGENTS.md`** immediately after [books requirements](apps/portfolio/content/docs/books/requirements.mdx) when the task is **story or manuscript** (not reader/tooling code). That file defines the fiction loop; software rules below still apply if you touch code.
-   - **Monorepo / XML / RepoPlanner / cross-section gates:** **`.planning/AGENTS.md`**, then **`ROADMAP.xml`**, **`STATE.xml`**, **`TASK-REGISTRY.xml`**, stub **`REQUIREMENTS.xml`**, then **[documentation/requirements.mdx](apps/portfolio/content/docs/documentation/requirements.mdx)** and **[documentation/planning/state.mdx](apps/portfolio/content/docs/documentation/planning/state.mdx)**.
-4. **Section overview table:** **[documentation/roadmap.mdx](apps/portfolio/content/docs/documentation/roadmap.mdx)**.
-5. **Operators / RepoPlanner CLI:** **[repo-planner/requirements.mdx](apps/portfolio/content/docs/repo-planner/requirements.mdx)**, **[repo-planner/planning/roadmap.mdx](apps/portfolio/content/docs/repo-planner/planning/roadmap.mdx)**, **[repo-planner/getting-started.mdx](apps/portfolio/content/docs/repo-planner/getting-started.mdx)**, and **[repo-planner/planning/decisions.mdx](apps/portfolio/content/docs/repo-planner/planning/decisions.mdx)**.
-
-Active sections today include **`global/`**, **`documentation/`**, **`books/`**, **`repo-planner/`**, **`blog/`**, **`projects/`**, **`listen/`**, **`magicborn/`**, **`dialogue-forge/`**, and **`editor/`**.
-
----
-
-## Loop
-
-1. Read code state and the **planning layer** you are changing (Global first, then the relevant section, then **`.planning/*.xml`** when monorepo gates matter).
-2. Pick **one phase**, then one task inside it.
-3. If the phase is new, ambiguous, stale, or has no clear **definition of done**, create or refresh a short **kickoff** record before implementation. Include current phase **open questions** even when they are not blocking, and record answers as decisions when resolved. Store phase-local support docs under `planning/plans/<phase-id>/`.
-4. Implement task-by-task until the phase meets its definition of done and its requirements.
-5. Run **verification**. Any phase that changes executable behavior must include automated tests before it can be marked **`done`**. If tests are missing, the phase is not done.
-6. Mark **`done`** in **`TASK-REGISTRY.xml`** and/or the relevant section `planning/task-registry.mdx`; refresh **state**, **roadmap**, **decisions**, **errors-and-attempts**, and **`.planning/STATE.xml`** when they changed.
-7. Exit; next iteration starts with fresh context.
-
-## Phase Rules
-
-- Every phase should have: scope, non-goals, dependencies, verification, a clear **definition of done**, and visible phase **open questions** that agents surfaced while planning.
-- Use a lightweight **kickoff** when a phase is underdefined; do not start large implementation from a vague roadmap row alone.
-- **Tests required for done** is a hard rule for executable behavior. Docs-only or content-only phases still need concrete verification commands, but they do not substitute for tests on shipped behavior.
-- Global planning exists to coordinate cross-section work and standards. Section planning exists to own local delivery. Do not duplicate the full same task graph in both places.
-
-### Machine-local paths in planning MDX
-
-| Field | Purpose |
-| --- | --- |
-| `repoPath` | Repo-relative path to the `.mdx` file. |
-| `taskPhase` | Optional phase id (e.g. `documentation-site-07`). |
-
-Reference tasks **by id** in conversation (`books-ai-01-04`, `documentation-site-10-01`).
+Reference tasks by id in conversation (`books-ai-01-04`, `12-03`).
 
 ---
 
@@ -85,27 +60,9 @@ Reference tasks **by id** in conversation (`books-ai-01-04`, `documentation-site
 - `pnpm run lint` passes.
 - Release artifacts: **Koodo Reader** desktop -- `.releases/` via `scripts/download-releases.cjs`.
 
-## Context compaction (auto-compact re-hydration)
+## Context compaction
 
-Claude Code auto-compacts when the context window is nearly full. **Never stop work because of this** — auto-compact handles it and the GAD CLI restores context.
-
-**After compaction, immediately run:**
-
-```sh
-gad session list          # find your active session id
-gad context --session <id> --json   # get file refs for current position
-```
-
-Then read each file listed in `refs`. This gives you: AGENTS.md, STATE, ROADMAP, and the active phase PLAN — everything needed to continue. If no session exists yet, run `gad session new --project <id>` first.
-
-**Rules:**
-- Do NOT refuse to continue because context was compacted.
-- Do NOT ask the user to restart or summarise — use `gad context` instead.
-- Session JSON lives in `.planning/sessions/`. If unsure of the project id, run `gad projects`.
-
-## GSD (Codex)
-
-GSD may create files under **`.planning/`**; this repo's **canonical** loop is described above. Prefer **roadmap/state/task-registry/decisions** over standalone implementation-plan files.
+Auto-compact handles context limits. After compaction, run `gad snapshot --projectid <id>` to re-hydrate. Never stop work, never ask to restart.
 
 ## Artifacts (quick reference)
 
