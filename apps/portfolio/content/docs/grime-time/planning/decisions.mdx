@@ -3,7 +3,7 @@ title: "grime-time — Decisions"
 description: "Auto-compiled from vendor/grime-time-site/.planning/DECISIONS.xml"
 generated: "true"
 source: "vendor/grime-time-site/.planning/DECISIONS.xml"
-updated: "2026-04-05T21:17:41.563Z"
+updated: "2026-04-06T20:35:07.080Z"
 ---
 
 # Decisions
@@ -504,7 +504,7 @@ For page-composer block fields, `pages_*` tables are not enough. Any schema chan
 
 The public-site authoring launcher should stay anchored to the right edge of the page and open the existing right-docked page composer drawer from the live page surface. The site copilot should no longer behave like a bottom-corner modal overlay; it should use the same draggable floating-panel interaction pattern as the admin impersonation toolbar so operators can move it out of the way while authoring.
 
-**Impact:** Composer access remains visually attached to the page canvas instead of floating as a separate bottom-corner affordance, and copilot no longer blocks the viewport when opened. Local testing also needs a shared localhost-only admin bypass across both server-component auth and request-route auth so the full operator toolchain can be exercised without manual sign-in during development.
+**Impact:** Composer access remains visually attached to the page canvas instead of floating as a separate bottom-corner affordance, and copilot no longer blocks the viewport when opened. If localhost auth bypass is ever needed for debugging, it must be an explicit opt-in across both server-component auth and request-route auth rather than the default behavior.
 
 ## D-content-021: Frontend composer must be shell-owned, and site copilot should be visible to content-authoring users when the feature flag is on
 
@@ -529,3 +529,9 @@ Once the live page became the primary canvas, the composer could no longer behav
 The marketing shell should not rely on browser-page scrolling during desktop authoring. The left marketing sidebar and right composer rail are treated as viewport-height shell columns, while the center content pane owns vertical scrolling. This keeps both side rails fully available while traversing long pages.
 
 **Impact:** This removes the visible “end” of the composer and left sidebar during long-page editing, keeps customer access and login affordances anchored, and makes the live page canvas behave like a proper application workspace instead of a long document with attached sidebars.
+
+## D-content-025: Frontend operator tooling converges into one floating copilot shell, and the composer opens as a triggered sheet
+
+The earlier shell-owned right-rail composer decision no longer matches the authoring reality. On the public site, chat stays the primary floating surface, impersonation and operator actions live in a tools view inside that same copilot shell, and the page composer opens from that workflow as a right-side sheet above the live page instead of mounting as a second layout column.
+
+**Impact:** This removes the blank shell column and the live-page squeeze, keeps chat first while avoiding a second floating admin surface, and makes the composer explicitly temporary instead of a persistent shell rail. Frontend signed-in affordances should also stay on Clerk-hosted components such as `UserButton` rather than diverging into separate custom logout menus.

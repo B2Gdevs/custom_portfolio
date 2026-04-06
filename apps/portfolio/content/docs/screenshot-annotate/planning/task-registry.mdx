@@ -2,7 +2,7 @@
 title: Screenshot annotate — task registry
 description: Tasks for the screenshot annotation app.
 date: "2026-04-02"
-updated: "2026-04-05"
+updated: "2026-04-06"
 order: 4
 repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/task-registry.mdx
 ---
@@ -20,6 +20,7 @@ repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/task-registry
 | `screenshot-annotate-01-03` | `done` | **Minimal chrome** editor frame (exit to `/apps`, no full site footer in tool surface) | **`isImmersiveAppsRoute`** + immersive layout matches reader |
 | `screenshot-annotate-02-01` | `done` | Layers + context menu (z-order + delete) — custom **`ScreenshotAnnotateContextMenu`** (no select-tool-only gate) + default reorder/delete | `tests/unit/components/screenshot-annotate-context-menu.test.ts`; `pnpm run build` |
 | `screenshot-annotate-02-02` | `done` | Toolbar: stroke width, colors, text — **`ScreenshotAnnotateStylePanel`** (color, opacity, fill, dash, size, font, text/label align, geo) | `tests/unit/components/screenshot-annotate-style-panel.test.ts`; `pnpm run build` |
+| `screenshot-annotate-01-04` | `done` | **`pick`-phase paste reliability:** Clipboard API → `clipboardData.files` → `image/*` items; **stabilize** `File` before tldraw load — fixes blank editor after paste | manual paste on `/apps/screenshot-annotate`; `pnpm run build` |
 | `screenshot-annotate-04-01` | `planned` | **Tesseract.js** OCR (lazy-load + **Web Worker**) on image; text bounding regions | unit + fixture image |
 | `screenshot-annotate-04-02` | `planned` | **Spotlight UI**: dim full canvas, highlight text regions (Snipping Tool–style) | manual |
 | `screenshot-annotate-04-03` | `planned` | **Copy** selected region text; **copy all text** control | manual |

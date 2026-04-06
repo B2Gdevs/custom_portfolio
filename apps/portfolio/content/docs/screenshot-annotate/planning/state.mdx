@@ -2,7 +2,7 @@
 title: Screenshot annotate — state
 description: Current pointer for screenshot-annotate work.
 date: "2026-04-02"
-updated: "2026-04-05"
+updated: "2026-04-06"
 order: 3
 repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/state.mdx
 ---
@@ -10,6 +10,8 @@ repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/state.mdx
 # State
 
 **Next action:** **annotate-04** OCR when scheduled (Tesseract + spotlight + copy).
+
+**Shipped (2026-04-06):** **`pick`-phase paste** — **Clipboard API first** (`navigator.clipboard.read()`), then `clipboardData.files`, then `image/*` **DataTransferItem** + **`File` snapshot** before async load — fixes **blank canvas** after paste on Windows/Chrome when the naive `kind === 'file'` path returned nothing or stale blobs ([requirements — Clipboard and paste](/docs/screenshot-annotate/requirements#clipboard-and-paste); task `screenshot-annotate-01-04`).
 
 **Shipped (annotate-02):** **Context menu** works while **geo/text** tools are active (removed upstream select-tool-only gate); **Reorder** submenu + **Delete** unchanged from tldraw defaults. **Style panel** scoped to stroke, fill, color, opacity, dash, size, fonts, text alignment, and geo variant — no arrow/line-only rows.
 

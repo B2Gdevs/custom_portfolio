@@ -3,7 +3,7 @@ title: "get-anything-done — Decisions"
 description: "Auto-compiled from vendor/get-anything-done/.planning/DECISIONS.xml"
 generated: "true"
 source: "vendor/get-anything-done/.planning/DECISIONS.xml"
-updated: "2026-04-05T21:17:41.527Z"
+updated: "2026-04-06T20:35:07.052Z"
 ---
 
 # Decisions
@@ -104,8 +104,29 @@ Spawning fresh agent instances (subagents via the Agent tool in Claude Code, or 
 
 **Impact:** No GAD skill should instruct an agent to spawn subagents. The Agent tool is not referenced in any SKILL.md. When context limits are approached, the correct response is to finish the current task, update planning docs, commit, and start a fresh session — not to spawn a subagent mid-task.
 
-## gad-17: Context window exhaustion: finish, commit, hand off — do not spawn
+## gad-17: Context exhaustion: work through auto-compact, do not stop
 
-When a GAD session approaches context limits (signaled by the assistant or by hook warnings), the correct procedure is: (1) finish the current atomic task, (2) update STATE.xml next-action and TASK-REGISTRY.xml task status, (3) run gad sink sync to propagate, (4) commit, (5) start a fresh session. The new session reads gad snapshot or gad context to re-hydrate. This is what the eval framework exists to optimize — the planning docs ARE the handoff.
+When context window fills, Claude Code auto-compacts. The agent works through it — stopping to start a fresh session is pointless friction. After compaction, run `gad snapshot --projectid &lt;id&gt;` or `gad context` to re-hydrate and continue. The planning docs are what make this possible — STATE.xml next-action and TASK-REGISTRY.xml tell the agent exactly where it was. No fresh sessions, no handoff files, no asking the user to restart.
 
-**Impact:** Agents must not attempt to "push through" context exhaustion by spawning fresh instances, splitting work mid-task, or writing ad-hoc handoff files. The planning loop handles handoff. gad-04 (capture decisions) + gad-17 (handoff via planning docs) are the two halves of the durable-session contract.
+**Impact:** Agents never stop work due to context limits. Auto-compact handles it. After compaction: read gad snapshot, continue. gad-04 (capture decisions in planning docs) is what makes auto-compact re-hydration work — the planning docs ARE the durable state.
+
+## gad-18: The GAD loop is simple: snapshot → work → update docs → commit
+
+The canonical GAD loop for any agent, any coding tool:
+1. `gad snapshot --projectid &lt;id&gt;` — one command, full context. No reading 15 files manually.
+2. Pick one task from TASK-REGISTRY.xml (status=planned).
+3. Implement it.
+4. Update TASK-REGISTRY.xml (mark done), STATE.xml (next-action), DECISIONS.xml (if new decisions).
+5. Commit.
+
+That's it. AGENTS.md files in each project reference this loop but do NOT redefine it. The vendor/get-anything-done/ project is the canonical source. Root AGENTS.md and .planning/AGENTS.md are consumers that point here, not parallel definitions.
+
+Skills are methodology documents (SKILL.md) — agents read and follow them. They are not CLI commands or executable plugins. The GAD CLI provides context efficiency. Skills provide methodology.
+
+**Impact:** Root AGENTS.md mandatory read order must be simplified. Agents should NOT read 15 files on startup — gad snapshot exists for this. AGENTS.md files across vendor projects reference the GAD loop, they don't each define their own version. No memory files, no shadow task lists — TASK-REGISTRY.xml and STATE.xml are the only task tracking.
+
+## gad-19: GSD is dead — GAD and RepoPlanner only
+
+All GSD (get-shit-done) skills, hooks, commands, and references are removed from the repo. GAD is the planning framework. RepoPlanner provides the planning snapshot format that GAD consumes. No GSD commands in .claude/commands/, no GSD hooks in .claude/hooks/, no GSD references in settings.json or AGENTS.md. The context monitor and statusline hooks are useful infrastructure but must be rebranded for GAD — no npm checks for get-shit-done-cc.
+
+**Impact:** Delete .claude/commands/gsd/ entirely. Remove or rebrand .claude/hooks/gsd-* files. Clean settings.json. Remove GSD references from root AGENTS.md. Keep context monitor and statusline functionality but strip GSD branding.

@@ -3,7 +3,7 @@ title: "get-anything-done — Task Registry"
 description: "Auto-compiled from vendor/get-anything-done/.planning/TASK-REGISTRY.xml"
 generated: "true"
 source: "vendor/get-anything-done/.planning/TASK-REGISTRY.xml"
-updated: "2026-04-05T21:17:41.527Z"
+updated: "2026-04-06T20:35:07.052Z"
 ---
 
 # Task Registry
@@ -24,3 +24,26 @@ updated: "2026-04-05T21:17:41.527Z"
 - ✓ **11-01** Update AGENTS.md in all vendor project roots to reference XML planning files and gad: commands exclusively.
 - ✓ **11-02** Run gad:eval-run on GAD itself — portfolio-bare with get-anything-done requirements as the project. Measure planning loop fidelity on GAD's own workflow.
 - ✓ **11-03** Evaluate subagent utility formally: design an eval comparing single-session vs subagent execution on a representative task. Record findings in DECISIONS.xml (may revise gad-16).
+
+## Phase 12
+
+- ✓ **12-01** Add decisions gad-17 (revised: auto-compact over fresh sessions), gad-18 (canonical loop: snapshot → work → update → commit), gad-19 (GSD is dead, GAD only).
+- ✓ **12-02** Delete .claude/commands/gsd/ directory entirely (30 command files).
+- ✓ **12-03** Rebrand .claude/hooks/ for GAD: remove gsd-check-update.js (checks npm for get-shit-done-cc). Rename gsd-context-monitor.js → context-monitor.js, strip GSD references from warning messages. Rename gsd-statusline.js → statusline.js, strip GSD update check and branding. Update .claude/settings.json to reference new hook filenames.
+- ✓ **12-04** Simplify root AGENTS.md: remove the 15-file mandatory read order. Agents use gad snapshot on session start, not manual file reads. Remove GSD section. Keep build/lint/verify gates, conventions, site copy guide. Reference vendor/get-anything-done/AGENTS.md as the canonical loop definition.
+- ✓ **12-05** Simplify .planning/AGENTS.md: remove redundant loop definition, trigger phrase table, and pattern examples that duplicate root AGENTS.md and vendor GAD AGENTS.md. Keep XML schema reference and planning-config.toml pointers. Reference gad-18 for the loop.
+- ✓ **12-06** Update vendor/get-anything-done/AGENTS.md: mark as canonical loop source per gad-18. Update "Current work" section to reference phase 12. Fix gad-17 reference to reflect auto-compact over fresh sessions.
+- ✓ **12-07** Uninstall GSD globally: delete ~/.claude/get-shit-done/, ~/.claude/commands/gsd/ (56 files), ~/.claude/hooks/gsd-*.js (5 files). Clean ~/.claude/settings.json — remove all GSD hooks and statusline, keep permissions and preferences.
+- ✓ **12-08** Install all 56 GAD commands from vendor/get-anything-done/commands/gad/ as Claude Code slash commands in .claude/commands/gad/. Includes the full planning loop: plan-phase, execute-phase, discuss-phase, progress, check-todos, next, plus project lifecycle, debug, health, verify, stats, and all other commands.
+- ✓ **12-09** Clean all GSD/get-shit-done references in vendor/get-anything-done/commands/gad/*.md and propagate to .claude/commands/gad/. Replace GSD→GAD, get-shit-done→get-anything-done, /gsd:→/gad: throughout. Note: 115 references to get-shit-done remain as literal directory/file paths (the actual folder is named that).
+
+## Phase 13
+
+- ✓ **13-01** Extend gad docs command: add `gad docs list --projectid &lt;id&gt;` that shows all docs for a project — planning files from sink status, DOCS-MAP entries, and docs.projects entries. Add --all flag.
+- ✓ **13-02** Create DOCS-MAP.xml for get-anything-done with entries for evals.mdx and any other non-planning feature docs in the sink. Reader (docs-map-reader.cjs) already exists — this creates the actual data files.
+- ✓ **13-03** Create DOCS-MAP.xml for grime-time, repo-planner, and any other roots that have feature docs in their sink paths. Check each root's sink directory for non-planning MDX files.
+- ✓ **13-04** Flesh out write-intent SKILL.md: add concrete examples, template output, edge cases. The skill should be usable by any agent reading it cold — currently too abstract.
+- ✓ **13-05** Flesh out write-feature-doc SKILL.md: add concrete examples of good feature docs, MDX frontmatter template, sink path resolution logic. Currently steps are correct but thin.
+- ✓ **13-06** Flesh out write-tech-doc SKILL.md: add concrete examples, mermaid diagram patterns, decision-referencing conventions. Currently steps are correct but thin.
+- ✓ **13-07** CLI error hardening: audit all gad.cjs commands for gad-12 compliance (missing-arg UX prints choices + rerun hint). Test edge cases: missing .planning/ dirs, malformed XML, empty files.
+- ○ **13-08** Run gad sink compile to sync the 7 stale files (get-anything-done and grime-time). Verify sink is fully up to date after phase 12 changes.
