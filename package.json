@@ -31,6 +31,7 @@
     "build:portfolio": "node scripts/portfolio-local.mjs build",
     "start:portfolio:local": "node scripts/portfolio-local.mjs start",
     "lint": "npm run lint --workspace=@portfolio/app",
+    "verify:planning-refs": "node vendor/get-anything-done/bin/gad.cjs refs verify",
     "package": "./scripts/manage-packages.sh",
     "package:setup": "./scripts/manage-packages.sh setup",
     "package:token": "./scripts/manage-packages.sh token",

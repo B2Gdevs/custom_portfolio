@@ -34,6 +34,10 @@ Run via `node vendor/get-anything-done/bin/gad.cjs` from repo root. Key commands
 | `gad phases` | All phases with status |
 | `gad sink sync` | Compile planning → docs sink |
 | `gad projects list` | All registered projects |
+| `gad refs` / `gad refs list` | Aggregate refs from decisions, requirements, phases (table); bare `refs` = list |
+| `gad refs verify` | Ensure `<file path>` / `<reference>` in planning XML exist on disk |
+| `gad refs migrate --from <old> --to <new>` | Dry-run path replace across planning XML; add `--apply` to write |
+| `gad refs watch` | Re-run verify on change; use `--poll 3000` if native watch fails |
 
 ## TASK-REGISTRY.xml pattern
 
@@ -53,3 +57,27 @@ Auto-compact handles context limits. After compaction: `gad snapshot --projectid
 ## Done gate
 
 Executable behavior is not done without tests. If a phase is missing tests, continue it — do not mark done.
+
+## UI layers (atomic design) — monorepo apps
+
+Root **[`AGENTS.md`](../AGENTS.md)** defines the **Portfolio UI** convention: **`components/ui/`** holds vendored primitives (atoms: buttons, inputs, shell); **`components/<domain>/`** holds product composition (molecules/organisms). **Deduplicate in domain folders first**; change **`ui/`** only when the primitive is wrong app-wide. Vendored apps (e.g. Grime Time under `vendor/`) should follow the same split: shared chrome/tokens in one module (e.g. `adminPanelChrome.ts`), feature UI in a domain folder, not in `ui/` unless it is truly generic.
+
+## File paths in planning XML — drift and verification
+
+**Automatic rewrites do not happen** the way TypeScript updates imports: Git and the docs sink do not fix `<file path="…">` or `<reference>…</reference>` after a rename. Use **`gad refs migrate`** for a repo-wide string replace in planning XML (dry-run by default; `--apply` writes), then **`gad refs verify`**.
+
+**Verify disk existence** (implementation lives in `vendor/get-anything-done/lib/planning-ref-verify.cjs`):
+
+```sh
+pnpm run verify:planning-refs
+# same as:
+node vendor/get-anything-done/bin/gad.cjs refs verify
+```
+
+This scans `**/.planning/**/*.xml` (skips `templates/`, tool-only dirs), resolves `src/…` and `.planning/…` relative to each project root (e.g. `vendor/grime-time-site`), and exits with an error if a reference is missing. It does not validate prose in MDX — only machine-readable XML tags.
+
+**Related CLI:** `gad refs` / `gad refs list` aggregates decision/requirement/phase paths for review (no disk check). `gad refs watch` re-runs verify when `.planning/**/*.xml` changes (debounced); on Windows or if `fs.watch` fails, use `gad refs watch --poll 3000`.
+
+**What GAD infers (and does not):** The CLI does **not** parse TypeScript or run the compiler. It only sees **strings** in planning XML (`<file path>`, `<reference>`) and in `gad refs list` output. **`gad refs verify`** checks those strings against the filesystem; **`gad refs migrate`** does literal find/replace. Skills (e.g. execute-phase) use **`gad snapshot`**, not `gad refs`, for bundled context — but any script or doc that still says `gad refs` means the **list** behavior.
+
+**Conventions to reduce churn:** Prefer stable module or feature names in prose; put canonical file lists in `STATE.xml` `<references>` when one place should stay authoritative. Reserve full paths in `DECISIONS.xml` when a decision truly anchors to specific files.

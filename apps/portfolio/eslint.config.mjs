@@ -21,6 +21,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "test-results/**",
     "playwright-report/**",
+    // Vendored / generated bundles (minified JS trips @typescript-eslint rules)
+    "coverage/**",
+    "public/evals/**",
   ]),
 ]);
 

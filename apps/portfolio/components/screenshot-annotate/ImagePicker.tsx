@@ -1,19 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { normalizeImageFileForTldraw } from '@/lib/screenshot-annotate/normalize-image-file';
 
 function isImageFile(file: File) {
-  return file.type.startsWith('image/');
-}
-
-/** Sync snapshot so async reads (tldraw load) do not hit empty clipboard blobs. */
-function stabilizeImageFile(file: File): File {
-  const type =
-    file.type && file.type.startsWith('image/')
-      ? file.type
-      : 'image/png';
-  const blob = file.slice(0, file.size, type);
-  return new File([blob], file.name || 'pasted.png', { type });
+  return (
+    file.type.startsWith('image/') ||
+    /* Windows clipboard files sometimes omit type; size-only heuristic after normalize */
+    (!file.type && file.size > 0)
+  );
 }
 
 const CLIPBOARD_IMAGE_MIMES = [
@@ -78,17 +73,35 @@ export function ImagePicker({ onChooseImage }: { onChooseImage: (file: File) => 
 
   const onPaste = useCallback(
     (e: ClipboardEvent) => {
-      const fallbackFiles = Array.from(e.clipboardData?.files ?? []).filter((f) =>
-        f.type.startsWith('image/'),
+      const fromFilesList = Array.from(e.clipboardData?.files ?? []).filter(
+        (f) => f.type.startsWith('image/') || (!f.type && f.size > 0),
       );
       const syncFiles = readClipboardImageFilesFromEvent(e);
 
       const take = (file: File) => {
-        acceptFile(stabilizeImageFile(file));
+        const normalized = normalizeImageFileForTldraw(file);
+        if (normalized.size === 0) {
+          setError('Clipboard image was empty. Try again or use Import image…');
+          return;
+        }
+        setError(null);
+        acceptFile(normalized);
       };
 
-      // Match tldraw: Clipboard API first (reliable on Windows/Chrome for screenshots),
-      // then event.files, then DataTransferItem list.
+      // Prefer synchronous DataTransfer data first. On Windows, `navigator.clipboard.read()`
+      // often runs but returns blobs that are empty or fail tldraw's asset pipeline, while
+      // `clipboardData.items` / `files` still hold the screenshot from Snipping Tool.
+      if (fromFilesList.length) {
+        e.preventDefault();
+        take(fromFilesList[0]);
+        return;
+      }
+      if (syncFiles.length) {
+        e.preventDefault();
+        take(syncFiles[0]);
+        return;
+      }
+
       if (navigator.clipboard?.read) {
         e.preventDefault();
         navigator.clipboard
@@ -99,21 +112,15 @@ export function ImagePicker({ onChooseImage }: { onChooseImage: (file: File) => 
               take(fromApi[0]);
               return;
             }
-            if (fallbackFiles.length) take(fallbackFiles[0]);
-            else if (syncFiles.length) take(syncFiles[0]);
+            setError('No image found in clipboard. Copy a screenshot first.');
           })
           .catch(() => {
-            if (fallbackFiles.length) take(fallbackFiles[0]);
-            else if (syncFiles.length) take(syncFiles[0]);
+            setError('Could not read clipboard. Try Import image…');
           });
         return;
       }
 
-      if (fallbackFiles.length || syncFiles.length) {
-        e.preventDefault();
-        if (fallbackFiles.length) take(fallbackFiles[0]);
-        else take(syncFiles[0]);
-      }
+      setError('No image in clipboard.');
     },
     [acceptFile],
   );

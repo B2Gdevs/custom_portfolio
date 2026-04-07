@@ -5,9 +5,11 @@ import { Loader2, Mail, Phone, ScanText, Shield } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { Tldraw, useEditor, type Editor } from '@tldraw/tldraw';
 import 'tldraw/tldraw.css';
+import { normalizeImageFileForTldraw } from '@/lib/screenshot-annotate/normalize-image-file';
 import {
   applyRedactPresetsToEditor,
   applyScreenshotCameraConstraints,
+  getFirstImageShapeId,
 } from '@/lib/screenshot-annotate/tldraw-screenshot-helpers';
 import { errorMessageOrFallback } from '@/lib/unknown-error';
 import type { RedactKind } from '@/lib/screenshot-annotate/redact-patterns';
@@ -130,13 +132,42 @@ function AnnotateChrome({
 }
 
 async function loadImageIntoEditor(editor: Editor, file: File) {
-  try {
-    await editor.putExternalContent({
-      type: 'files',
-      files: [file],
-      point: editor.getViewportPageBounds().center,
-    });
+  const normalized = normalizeImageFileForTldraw(file);
+  if (normalized.size === 0) {
+    console.error('[screenshot-annotate] Refused to load empty image file');
+    return;
+  }
+
+  const pointForInsert = () => {
+    const b = editor.getViewportPageBounds();
+    const c = b.center;
+    if (Number.isFinite(c.x) && Number.isFinite(c.y)) return c;
+    return { x: 0, y: 0 };
+  };
+
+  const placeImage = async () => {
+    await editor.putExternalContent(
+      {
+        type: 'files',
+        files: [normalized],
+        point: pointForInsert(),
+      },
+      { force: true },
+    );
     applyScreenshotCameraConstraints(editor);
+  };
+
+  // Wait for the canvas container to have layout before using viewport bounds / placing assets.
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+  });
+
+  try {
+    await placeImage();
+    if (!getFirstImageShapeId(editor)) {
+      await new Promise((r) => setTimeout(r, 80));
+      await placeImage();
+    }
   } catch (err) {
     console.error('[screenshot-annotate] Failed to load pasted image into editor', err);
   }

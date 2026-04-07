@@ -1,4 +1,7 @@
-import { normalizeOptionalTrimmedString } from '@/lib/coerce-unknown-to-string';
+import {
+  coerceUnknownToString as asString,
+  normalizeOptionalTrimmedString,
+} from '@/lib/coerce-unknown-to-string';
 import { getPayloadClient } from '@/lib/payload';
 import { FALLBACK_SITE_APPS } from '@/lib/site-app-registry';
 import { loadScriptEnv } from './load-script-env';

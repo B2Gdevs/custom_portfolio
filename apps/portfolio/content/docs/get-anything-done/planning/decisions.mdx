@@ -88,7 +88,7 @@ Every eval run directory must contain a TRACE.json alongside RUN.md and SCORE.md
 
 ## gad-14: gad state and gad phases default to session project when a session is active
 
-When no --projectid flag is given, `gad state`, `gad phases`, `gad decisions`, `gad requirements`, `gad errors`, `gad blockers`, and `gad refs` call getActiveSessionProjectId() and scope output to the active session's project. Explicit --projectid overrides. --all bypasses session scope entirely and shows all roots. gad ls always shows all roots unscoped.
+When no --projectid flag is given, `gad state`, `gad phases`, `gad decisions`, `gad requirements`, `gad errors`, `gad blockers`, and `gad refs` (same as `gad refs list`) call getActiveSessionProjectId() and scope output to the active session's project. Explicit --projectid overrides. --all bypasses session scope entirely and shows all roots. gad ls always shows all roots unscoped.
 
 **Impact:** Agents working in a session see only their project by default. Multi-project output via --all or when no session exists. token_reduction improved from 0.874 (v5) to 0.940 (v6).
 
