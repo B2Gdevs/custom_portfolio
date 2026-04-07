@@ -1,0 +1,174 @@
+{
+  "id": "base",
+  "name": "Base Dungeon Pack",
+  "version": "1.0.0",
+  "enemies": [
+    {
+      "id": "rat", "name": "Dungeon Rat", "entityType": "enemy", "archetype": "vermin", "occupation": "warrior",
+      "stats": { "hp": 15, "maxHp": 15, "mana": 0, "maxMana": 0, "attack": 4, "defense": 1, "speed": 6 },
+      "floorRange": [1, 3], "loot": [{ "itemId": "herb", "chance": 0.3 }],
+      "xpReward": 10, "goldReward": 3, "isBoss": false, "description": "A mangy rat the size of a dog."
+    },
+    {
+      "id": "skeleton", "name": "Restless Skeleton", "entityType": "enemy", "archetype": "undead", "occupation": "warrior",
+      "stats": { "hp": 25, "maxHp": 25, "mana": 0, "maxMana": 0, "attack": 6, "defense": 3, "speed": 3 },
+      "floorRange": [1, 5], "loot": [{ "itemId": "bone-shard", "chance": 0.4 }],
+      "xpReward": 20, "goldReward": 8, "isBoss": false, "description": "Bones held together by lingering malice."
+    },
+    {
+      "id": "goblin", "name": "Dungeon Goblin", "entityType": "enemy", "archetype": "humanoid", "occupation": "rogue",
+      "stats": { "hp": 20, "maxHp": 20, "mana": 5, "maxMana": 5, "attack": 5, "defense": 2, "speed": 7 },
+      "floorRange": [1, 6], "loot": [{ "itemId": "rune-stone-a", "chance": 0.15 }],
+      "xpReward": 15, "goldReward": 12, "isBoss": false, "description": "A sneaky goblin clutching a rusty blade."
+    },
+    {
+      "id": "slime", "name": "Acid Slime", "entityType": "enemy", "archetype": "ooze", "occupation": "warrior",
+      "stats": { "hp": 30, "maxHp": 30, "mana": 0, "maxMana": 0, "attack": 7, "defense": 5, "speed": 2 },
+      "floorRange": [2, 6], "loot": [{ "itemId": "mana-potion", "chance": 0.25 }],
+      "xpReward": 25, "goldReward": 10, "isBoss": false, "description": "A corrosive blob of green slime."
+    },
+    {
+      "id": "wraith", "name": "Shadow Wraith", "entityType": "enemy", "archetype": "undead", "occupation": "mage",
+      "stats": { "hp": 35, "maxHp": 35, "mana": 20, "maxMana": 20, "attack": 10, "defense": 2, "speed": 8 },
+      "floorRange": [3, 8], "loot": [{ "itemId": "rune-stone-e", "chance": 0.2 }],
+      "xpReward": 35, "goldReward": 18, "isBoss": false, "description": "A dark shape that drains life."
+    },
+    {
+      "id": "ogre", "name": "Cave Ogre", "entityType": "enemy", "archetype": "giant", "occupation": "warrior",
+      "stats": { "hp": 60, "maxHp": 60, "mana": 0, "maxMana": 0, "attack": 14, "defense": 6, "speed": 3 },
+      "floorRange": [4, 9], "loot": [{ "itemId": "iron-shield", "chance": 0.15 }],
+      "xpReward": 45, "goldReward": 25, "isBoss": false, "description": "A hulking brute with a massive club."
+    },
+    {
+      "id": "dark-mage", "name": "Dark Mage", "entityType": "enemy", "archetype": "humanoid", "occupation": "mage",
+      "stats": { "hp": 40, "maxHp": 40, "mana": 40, "maxMana": 40, "attack": 15, "defense": 4, "speed": 6 },
+      "floorRange": [5, 10], "loot": [{ "itemId": "rune-stone-g", "chance": 0.25 }],
+      "xpReward": 50, "goldReward": 30, "isBoss": false, "description": "A robed figure crackling with dark energy."
+    },
+    {
+      "id": "golem", "name": "Stone Golem", "entityType": "enemy", "archetype": "construct", "occupation": "warrior",
+      "stats": { "hp": 80, "maxHp": 80, "mana": 0, "maxMana": 0, "attack": 12, "defense": 15, "speed": 1 },
+      "floorRange": [6, 11], "loot": [{ "itemId": "rune-stone-d", "chance": 0.3 }],
+      "xpReward": 55, "goldReward": 20, "isBoss": false, "description": "An animated mass of living stone."
+    },
+    {
+      "id": "drake", "name": "Fire Drake", "entityType": "enemy", "archetype": "dragon", "occupation": "warrior",
+      "stats": { "hp": 70, "maxHp": 70, "mana": 15, "maxMana": 15, "attack": 18, "defense": 8, "speed": 7 },
+      "floorRange": [8, 12], "loot": [{ "itemId": "rune-stone-c", "chance": 0.2 }],
+      "xpReward": 65, "goldReward": 40, "isBoss": false, "description": "A young dragon spitting jets of flame."
+    },
+    {
+      "id": "lich", "name": "Undead Lich", "entityType": "enemy", "archetype": "undead", "occupation": "mage",
+      "stats": { "hp": 55, "maxHp": 55, "mana": 60, "maxMana": 60, "attack": 20, "defense": 5, "speed": 5 },
+      "floorRange": [9, 12], "loot": [{ "itemId": "rune-stone-f", "chance": 0.3 }],
+      "xpReward": 75, "goldReward": 45, "isBoss": false, "description": "An ancient sorcerer who cheated death."
+    },
+    {
+      "id": "boss-warden", "name": "The Warden", "entityType": "enemy", "archetype": "guardian", "occupation": "boss",
+      "stats": { "hp": 80, "maxHp": 80, "mana": 20, "maxMana": 20, "attack": 12, "defense": 8, "speed": 4 },
+      "floorRange": [1, 3], "loot": [{ "itemId": "rune-stone-b", "chance": 1.0 }],
+      "xpReward": 100, "goldReward": 50, "isBoss": true, "description": "A towering armored figure guarding the first gate."
+    },
+    {
+      "id": "boss-spider-queen", "name": "Spider Queen", "entityType": "enemy", "archetype": "beast", "occupation": "boss",
+      "stats": { "hp": 120, "maxHp": 120, "mana": 30, "maxMana": 30, "attack": 16, "defense": 10, "speed": 6 },
+      "floorRange": [4, 6], "loot": [{ "itemId": "rune-stone-h", "chance": 1.0 }],
+      "xpReward": 150, "goldReward": 80, "isBoss": true, "description": "A massive arachnid dripping venom."
+    },
+    {
+      "id": "boss-demon", "name": "Pit Demon", "entityType": "enemy", "archetype": "demon", "occupation": "boss",
+      "stats": { "hp": 180, "maxHp": 180, "mana": 50, "maxMana": 50, "attack": 22, "defense": 12, "speed": 5 },
+      "floorRange": [7, 9], "loot": [{ "itemId": "rune-stone-k", "chance": 1.0 }],
+      "xpReward": 200, "goldReward": 120, "isBoss": true, "description": "A horned fiend wreathed in hellfire."
+    },
+    {
+      "id": "boss-dragon", "name": "Elder Dragon", "entityType": "enemy", "archetype": "dragon", "occupation": "boss",
+      "stats": { "hp": 250, "maxHp": 250, "mana": 80, "maxMana": 80, "attack": 28, "defense": 16, "speed": 7 },
+      "floorRange": [10, 12], "loot": [{ "itemId": "rune-stone-z", "chance": 1.0 }],
+      "xpReward": 300, "goldReward": 200, "isBoss": true, "description": "An ancient wyrm of immense power."
+    }
+  ],
+  "items": [
+    { "id": "herb", "name": "Healing Herb", "description": "Restores 15 HP.", "type": "consumable", "effect": { "stat": "hp", "value": 15 } },
+    { "id": "mana-potion", "name": "Mana Potion", "description": "Restores 10 mana.", "type": "consumable", "effect": { "stat": "mana", "value": 10 } },
+    { "id": "greater-herb", "name": "Greater Herb", "description": "Restores 40 HP.", "type": "consumable", "effect": { "stat": "hp", "value": 40 } },
+    { "id": "elixir", "name": "Elixir", "description": "Restores 30 HP and 15 MP.", "type": "consumable", "effect": { "stat": "hp", "value": 30 } },
+    { "id": "bone-shard", "name": "Bone Shard", "description": "A jagged piece of bone.", "type": "key" },
+    { "id": "iron-shield", "name": "Iron Shield", "description": "A sturdy shield. Defense +3.", "type": "equipment", "effect": { "stat": "defense", "value": 3 } },
+    { "id": "rune-stone-a", "name": "Rune Stone: Ignis", "description": "Learn rune A (Ignis).", "type": "rune", "runeGrant": "A" },
+    { "id": "rune-stone-b", "name": "Rune Stone: Aqua", "description": "Learn rune B (Aqua).", "type": "rune", "runeGrant": "B" },
+    { "id": "rune-stone-c", "name": "Rune Stone: Fulgur", "description": "Learn rune C (Fulgur).", "type": "rune", "runeGrant": "C" },
+    { "id": "rune-stone-d", "name": "Rune Stone: Terra", "description": "Learn rune D (Terra).", "type": "rune", "runeGrant": "D" },
+    { "id": "rune-stone-e", "name": "Rune Stone: Umbra", "description": "Learn rune E (Umbra).", "type": "rune", "runeGrant": "E" },
+    { "id": "rune-stone-f", "name": "Rune Stone: Lux", "description": "Learn rune F (Lux).", "type": "rune", "runeGrant": "F" },
+    { "id": "rune-stone-g", "name": "Rune Stone: Ventus", "description": "Learn rune G (Ventus).", "type": "rune", "runeGrant": "G" },
+    { "id": "rune-stone-h", "name": "Rune Stone: Vita", "description": "Learn rune H (Vita).", "type": "rune", "runeGrant": "H" },
+    { "id": "rune-stone-k", "name": "Rune Stone: Nox", "description": "Learn rune K (Nox).", "type": "rune", "runeGrant": "K" },
+    { "id": "rune-stone-z", "name": "Rune Stone: Omega", "description": "Learn rune Z (Omega).", "type": "rune", "runeGrant": "Z" }
+  ],
+  "runes": [
+    { "letter": "A", "name": "Ignis", "affinity": "fire", "power": 10, "description": "The rune of flame." },
+    { "letter": "B", "name": "Aqua", "affinity": "ice", "power": 8, "description": "The rune of water and ice." },
+    { "letter": "C", "name": "Fulgur", "affinity": "lightning", "power": 12, "description": "The rune of lightning." },
+    { "letter": "D", "name": "Terra", "affinity": "earth", "power": 7, "description": "The rune of earth and stone." },
+    { "letter": "E", "name": "Umbra", "affinity": "shadow", "power": 9, "description": "The rune of shadow." },
+    { "letter": "F", "name": "Lux", "affinity": "holy", "power": 11, "description": "The rune of holy light." },
+    { "letter": "G", "name": "Ventus", "affinity": "arcane", "power": 8, "description": "The rune of wind." },
+    { "letter": "H", "name": "Vita", "affinity": "holy", "power": 10, "description": "The rune of life." },
+    { "letter": "I", "name": "Mortis", "affinity": "shadow", "power": 11, "description": "The rune of death." },
+    { "letter": "J", "name": "Ferrum", "affinity": "earth", "power": 9, "description": "The rune of iron." },
+    { "letter": "K", "name": "Nox", "affinity": "shadow", "power": 13, "description": "The rune of night." },
+    { "letter": "L", "name": "Sol", "affinity": "fire", "power": 12, "description": "The rune of the sun." },
+    { "letter": "M", "name": "Luna", "affinity": "ice", "power": 10, "description": "The rune of the moon." },
+    { "letter": "N", "name": "Tempus", "affinity": "arcane", "power": 9, "description": "The rune of time." },
+    { "letter": "O", "name": "Spatium", "affinity": "arcane", "power": 10, "description": "The rune of space." },
+    { "letter": "P", "name": "Robur", "affinity": "earth", "power": 8, "description": "The rune of strength." },
+    { "letter": "Q", "name": "Celer", "affinity": "lightning", "power": 11, "description": "The rune of speed." },
+    { "letter": "R", "name": "Sanguis", "affinity": "shadow", "power": 10, "description": "The rune of blood." },
+    { "letter": "S", "name": "Glacies", "affinity": "ice", "power": 11, "description": "The rune of glaciers." },
+    { "letter": "T", "name": "Tonitrus", "affinity": "lightning", "power": 14, "description": "The rune of thunder." },
+    { "letter": "U", "name": "Sanctus", "affinity": "holy", "power": 12, "description": "The rune of sanctity." },
+    { "letter": "V", "name": "Venenum", "affinity": "shadow", "power": 9, "description": "The rune of venom." },
+    { "letter": "W", "name": "Flamma", "affinity": "fire", "power": 13, "description": "The rune of wildfire." },
+    { "letter": "X", "name": "Nexus", "affinity": "arcane", "power": 15, "description": "The rune of connection." },
+    { "letter": "Y", "name": "Aether", "affinity": "holy", "power": 14, "description": "The rune of the ether." },
+    { "letter": "Z", "name": "Omega", "affinity": "arcane", "power": 20, "description": "The final rune. Absolute power." }
+  ],
+  "floors": [
+    {
+      "id": 1, "name": "The Depths", "startRoomId": "f1-start", "exitRoomId": "f1-exit", "bossId": "boss-warden",
+      "rooms": [
+        { "id": "f1-start", "type": "start", "name": "Entrance Hall", "description": "A dimly lit hall. The air is stale.", "connections": ["f1-r1", "f1-r2"], "discovered": true, "visited": true },
+        { "id": "f1-r1", "type": "combat", "name": "Rat Nest", "description": "Scratching sounds echo from the walls.", "connections": ["f1-start", "f1-r3"], "enemyPool": ["rat"], "discovered": false, "visited": false },
+        { "id": "f1-r2", "type": "combat", "name": "Bone Corridor", "description": "Bones litter the floor.", "connections": ["f1-start", "f1-r3", "f1-forge"], "enemyPool": ["skeleton", "rat"], "discovered": false, "visited": false },
+        { "id": "f1-r3", "type": "combat", "name": "Goblin Den", "description": "A crude camp with stolen goods.", "connections": ["f1-r1", "f1-r2", "f1-r4"], "enemyPool": ["goblin"], "items": ["rune-stone-a"], "discovered": false, "visited": false },
+        { "id": "f1-forge", "type": "forge", "name": "Runic Forge", "description": "Ancient runes glow on the anvil.", "connections": ["f1-r2"], "discovered": false, "visited": false },
+        { "id": "f1-r4", "type": "rest", "name": "Hidden Alcove", "description": "A quiet nook. You can rest here.", "connections": ["f1-r3", "f1-exit"], "discovered": false, "visited": false },
+        { "id": "f1-exit", "type": "exit", "name": "Gate to Floor 2", "description": "A massive iron gate blocks the way up.", "connections": ["f1-r4"], "discovered": false, "visited": false }
+      ]
+    },
+    {
+      "id": 2, "name": "The Catacombs", "startRoomId": "f2-start", "exitRoomId": "f2-exit", "bossId": "boss-warden",
+      "rooms": [
+        { "id": "f2-start", "type": "start", "name": "Catacomb Entry", "description": "Stone coffins line the walls.", "connections": ["f2-r1", "f2-r2"], "discovered": true, "visited": true },
+        { "id": "f2-r1", "type": "combat", "name": "Tomb Chamber", "description": "The dead do not rest here.", "connections": ["f2-start", "f2-r3"], "enemyPool": ["skeleton", "skeleton"], "discovered": false, "visited": false },
+        { "id": "f2-r2", "type": "combat", "name": "Slime Pit", "description": "Green ooze drips from above.", "connections": ["f2-start", "f2-forge"], "enemyPool": ["slime"], "discovered": false, "visited": false },
+        { "id": "f2-r3", "type": "combat", "name": "Crypt", "description": "Whispers fill the darkness.", "connections": ["f2-r1", "f2-r4"], "enemyPool": ["skeleton", "goblin"], "items": ["rune-stone-d"], "discovered": false, "visited": false },
+        { "id": "f2-forge", "type": "forge", "name": "Bone Forge", "description": "A forge built from ancient bones.", "connections": ["f2-r2", "f2-r4"], "discovered": false, "visited": false },
+        { "id": "f2-r4", "type": "rest", "name": "Sealed Chamber", "description": "An oddly peaceful room.", "connections": ["f2-r3", "f2-forge", "f2-exit"], "discovered": false, "visited": false },
+        { "id": "f2-exit", "type": "exit", "name": "Ascending Stairs", "description": "Worn steps spiral upward.", "connections": ["f2-r4"], "discovered": false, "visited": false }
+      ]
+    },
+    {
+      "id": 3, "name": "The Warrens", "startRoomId": "f3-start", "exitRoomId": "f3-exit", "bossId": "boss-warden",
+      "rooms": [
+        { "id": "f3-start", "type": "start", "name": "Narrow Tunnel", "description": "You squeeze through tight passages.", "connections": ["f3-r1", "f3-r2", "f3-r3"], "discovered": true, "visited": true },
+        { "id": "f3-r1", "type": "combat", "name": "Goblin Barracks", "description": "Rough beds and crude weapons.", "connections": ["f3-start", "f3-r4"], "enemyPool": ["goblin", "goblin"], "discovered": false, "visited": false },
+        { "id": "f3-r2", "type": "combat", "name": "Mushroom Cave", "description": "Bioluminescent fungi light the way.", "connections": ["f3-start", "f3-r4"], "enemyPool": ["slime", "rat"], "discovered": false, "visited": false },
+        { "id": "f3-r3", "type": "forge", "name": "Hidden Forge", "description": "Runes pulse with power.", "connections": ["f3-start"], "discovered": false, "visited": false },
+        { "id": "f3-r4", "type": "combat", "name": "Guard Post", "description": "Someone was watching the exit.", "connections": ["f3-r1", "f3-r2", "f3-exit"], "enemyPool": ["goblin", "skeleton"], "items": ["rune-stone-c"], "discovered": false, "visited": false },
+        { "id": "f3-exit", "type": "exit", "name": "Iron Portcullis", "description": "The gate groans as it opens.", "connections": ["f3-r4"], "discovered": false, "visited": false }
+      ]
+    }
+  ]
+}
