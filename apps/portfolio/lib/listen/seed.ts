@@ -1,4 +1,5 @@
 import { ensureOwnerSeed } from '@/lib/auth/seed';
+import { coerceUnknownToString } from '@/lib/coerce-unknown-to-string';
 import { getListenCatalog, type ListenCatalogEntry } from '@/lib/listen-catalog';
 import { getPayloadClient } from '@/lib/payload';
 import { LISTEN_CATALOG_RECORDS_COLLECTION_SLUG } from '@/lib/payload/collections/listenCatalogRecords';
@@ -10,12 +11,6 @@ type SeedListenCatalogResult = {
   tenantId: string;
   total: number;
 };
-
-function normalizeId(value: unknown) {
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number') return String(value);
-  return null;
-}
 
 function normalizeOptionalString(value: unknown) {
   const normalized = typeof value === 'string' ? value.trim() : value == null ? null : String(value);
@@ -74,9 +69,9 @@ function hasChanged(
         .filter((value): value is string => Boolean(value))
     : [];
   const existingTenant =
-    normalizeId(existing.tenant) ??
+    coerceUnknownToString(existing.tenant) ??
     (existing.tenant && typeof existing.tenant === 'object'
-      ? normalizeId((existing.tenant as { id?: unknown }).id)
+      ? coerceUnknownToString((existing.tenant as { id?: unknown }).id)
       : null);
 
   return (
@@ -93,7 +88,7 @@ function hasChanged(
     normalizeOptionalString(existing.artworkUrl) !== normalizeOptionalString(next.artworkUrl) ||
     normalizeDate(existing.date) !== normalizeDate(next.date) ||
     existing.published !== next.published ||
-    existingTenant !== normalizeId(next.tenant) ||
+    existingTenant !== coerceUnknownToString(next.tenant) ||
     existingTags.join('||') !== next.extraTags.map((entry) => entry.tag).join('||')
   );
 }

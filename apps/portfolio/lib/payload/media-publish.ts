@@ -1,3 +1,11 @@
+import {
+  normalizeOptionalTrimmedString,
+} from '@/lib/coerce-unknown-to-string';
+import {
+  parseUnknownFiniteNumber,
+  unknownToBoolean,
+} from '@/lib/coerce-unknown';
+
 type MediaKind = 'image' | 'video' | 'audio' | 'document' | 'other';
 
 type SiteContentScope = 'project' | 'blog' | 'og' | 'home' | 'brand' | 'site';
@@ -25,52 +33,18 @@ export type ListenMediaPublishComparable = {
   fileSizeBytes: number;
 };
 
-function asString(value: unknown) {
-  if (typeof value === 'string') {
-    return value;
-  }
-
-  if (typeof value === 'number') {
-    return String(value);
-  }
-
-  return null;
-}
-
-function asNumber(value: unknown) {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return value;
-  }
-
-  if (typeof value === 'string' && value.trim().length > 0) {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
-  }
-
-  return null;
-}
-
-function asBoolean(value: unknown) {
-  return typeof value === 'boolean' ? value : null;
-}
-
-function normalizeOptionalString(value: unknown) {
-  const normalized = asString(value)?.trim();
-  return normalized && normalized.length > 0 ? normalized : null;
-}
-
 export function normalizeSiteMediaPublishComparable(value: unknown): SiteMediaPublishComparable | null {
   if (!value || typeof value !== 'object') {
     return null;
   }
 
   const record = value as Record<string, unknown>;
-  const title = normalizeOptionalString(record.title);
-  const sourcePath = normalizeOptionalString(record.sourcePath);
-  const contentScope = normalizeOptionalString(record.contentScope);
-  const mediaKind = normalizeOptionalString(record.mediaKind);
-  const checksumSha256 = normalizeOptionalString(record.checksumSha256);
-  const fileSizeBytes = asNumber(record.fileSizeBytes);
+  const title = normalizeOptionalTrimmedString(record.title);
+  const sourcePath = normalizeOptionalTrimmedString(record.sourcePath);
+  const contentScope = normalizeOptionalTrimmedString(record.contentScope);
+  const mediaKind = normalizeOptionalTrimmedString(record.mediaKind);
+  const checksumSha256 = normalizeOptionalTrimmedString(record.checksumSha256);
+  const fileSizeBytes = parseUnknownFiniteNumber(record.fileSizeBytes);
 
   if (!title || !sourcePath || !contentScope || !mediaKind || !checksumSha256 || fileSizeBytes === null) {
     return null;
@@ -80,9 +54,9 @@ export function normalizeSiteMediaPublishComparable(value: unknown): SiteMediaPu
     title,
     sourcePath,
     contentScope: contentScope as SiteContentScope,
-    contentSlug: normalizeOptionalString(record.contentSlug),
+    contentSlug: normalizeOptionalTrimmedString(record.contentSlug),
     mediaKind: mediaKind as MediaKind,
-    isCurrent: asBoolean(record.isCurrent) ?? false,
+    isCurrent: unknownToBoolean(record.isCurrent) ?? false,
     checksumSha256,
     fileSizeBytes,
   };
@@ -94,13 +68,13 @@ export function normalizeListenMediaPublishComparable(value: unknown): ListenMed
   }
 
   const record = value as Record<string, unknown>;
-  const title = normalizeOptionalString(record.title);
-  const listenSlug = normalizeOptionalString(record.listenSlug);
-  const sourcePath = normalizeOptionalString(record.sourcePath);
-  const mediaRole = normalizeOptionalString(record.mediaRole);
-  const mediaKind = normalizeOptionalString(record.mediaKind);
-  const checksumSha256 = normalizeOptionalString(record.checksumSha256);
-  const fileSizeBytes = asNumber(record.fileSizeBytes);
+  const title = normalizeOptionalTrimmedString(record.title);
+  const listenSlug = normalizeOptionalTrimmedString(record.listenSlug);
+  const sourcePath = normalizeOptionalTrimmedString(record.sourcePath);
+  const mediaRole = normalizeOptionalTrimmedString(record.mediaRole);
+  const mediaKind = normalizeOptionalTrimmedString(record.mediaKind);
+  const checksumSha256 = normalizeOptionalTrimmedString(record.checksumSha256);
+  const fileSizeBytes = parseUnknownFiniteNumber(record.fileSizeBytes);
 
   if (!title || !listenSlug || !sourcePath || !mediaRole || !mediaKind || !checksumSha256 || fileSizeBytes === null) {
     return null;
@@ -112,7 +86,7 @@ export function normalizeListenMediaPublishComparable(value: unknown): ListenMed
     sourcePath,
     mediaRole: mediaRole as ListenMediaRole,
     mediaKind: mediaKind as MediaKind,
-    isCurrent: asBoolean(record.isCurrent) ?? false,
+    isCurrent: unknownToBoolean(record.isCurrent) ?? false,
     checksumSha256,
     fileSizeBytes,
   };

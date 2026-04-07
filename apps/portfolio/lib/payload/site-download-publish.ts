@@ -1,3 +1,11 @@
+import {
+  normalizeOptionalTrimmedString,
+} from '@/lib/coerce-unknown-to-string';
+import {
+  parseUnknownFiniteNumber,
+  unknownToBoolean,
+} from '@/lib/coerce-unknown';
+
 type SiteDownloadKind = 'planning-pack' | 'resume' | 'app-bundle' | 'document' | 'archive' | 'other';
 type SiteDownloadScope = 'site' | 'app' | 'project' | 'resume' | 'book';
 
@@ -15,52 +23,18 @@ export type SiteDownloadPublishComparable = {
   isCurrent: boolean;
 };
 
-function asString(value: unknown) {
-  if (typeof value === 'string') {
-    return value;
-  }
-
-  if (typeof value === 'number') {
-    return String(value);
-  }
-
-  return null;
-}
-
-function asNumber(value: unknown) {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return value;
-  }
-
-  if (typeof value === 'string' && value.trim().length > 0) {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
-  }
-
-  return null;
-}
-
-function asBoolean(value: unknown) {
-  return typeof value === 'boolean' ? value : null;
-}
-
-function normalizeOptionalString(value: unknown) {
-  const normalized = asString(value)?.trim();
-  return normalized && normalized.length > 0 ? normalized : null;
-}
-
 export function normalizeSiteDownloadPublishComparable(value: unknown): SiteDownloadPublishComparable | null {
   if (!value || typeof value !== 'object') {
     return null;
   }
 
   const record = value as Record<string, unknown>;
-  const title = normalizeOptionalString(record.title);
-  const downloadSlug = normalizeOptionalString(record.downloadSlug);
-  const downloadKind = normalizeOptionalString(record.downloadKind);
-  const contentScope = normalizeOptionalString(record.contentScope);
-  const checksumSha256 = normalizeOptionalString(record.checksumSha256);
-  const fileSizeBytes = asNumber(record.fileSizeBytes);
+  const title = normalizeOptionalTrimmedString(record.title);
+  const downloadSlug = normalizeOptionalTrimmedString(record.downloadSlug);
+  const downloadKind = normalizeOptionalTrimmedString(record.downloadKind);
+  const contentScope = normalizeOptionalTrimmedString(record.contentScope);
+  const checksumSha256 = normalizeOptionalTrimmedString(record.checksumSha256);
+  const fileSizeBytes = parseUnknownFiniteNumber(record.fileSizeBytes);
 
   if (!title || !downloadSlug || !downloadKind || !contentScope || !checksumSha256 || fileSizeBytes === null) {
     return null;
@@ -71,13 +45,13 @@ export function normalizeSiteDownloadPublishComparable(value: unknown): SiteDown
     downloadSlug,
     downloadKind: downloadKind as SiteDownloadKind,
     contentScope: contentScope as SiteDownloadScope,
-    contentSlug: normalizeOptionalString(record.contentSlug),
-    downloadLabel: normalizeOptionalString(record.downloadLabel),
-    summary: normalizeOptionalString(record.summary),
+    contentSlug: normalizeOptionalTrimmedString(record.contentSlug),
+    downloadLabel: normalizeOptionalTrimmedString(record.downloadLabel),
+    summary: normalizeOptionalTrimmedString(record.summary),
     checksumSha256,
     fileSizeBytes,
-    sourcePath: normalizeOptionalString(record.sourcePath),
-    isCurrent: asBoolean(record.isCurrent) ?? false,
+    sourcePath: normalizeOptionalTrimmedString(record.sourcePath),
+    isCurrent: unknownToBoolean(record.isCurrent) ?? false,
   };
 }
 

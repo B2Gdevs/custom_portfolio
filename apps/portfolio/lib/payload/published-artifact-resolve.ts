@@ -2,6 +2,7 @@ import path from 'node:path';
 import type { Payload } from 'payload';
 import { sanitizeFilename } from 'payload/shared';
 import type { PublishedBookArtifactKind } from '@/lib/book-artifacts';
+import { unknownToStringStrict as asString } from '@/lib/coerce-unknown-to-string';
 import { resolvePortfolioAppPath } from '@/lib/payload/app-root';
 import { PUBLISHED_BOOK_ARTIFACTS_COLLECTION_SLUG } from '@/lib/payload/collections/publishedBookArtifacts';
 
@@ -31,10 +32,6 @@ export function canonicalFromLegacyHyphenFilename(filename: string): string | nu
     return null;
   }
   return `${m[1]}--${m[2]}--${m[3]}.${m[4]}`;
-}
-
-function asString(value: unknown): string | null {
-  return typeof value === 'string' ? value : null;
 }
 
 export function sanitizeArtifactPrefix(prefix: string) {

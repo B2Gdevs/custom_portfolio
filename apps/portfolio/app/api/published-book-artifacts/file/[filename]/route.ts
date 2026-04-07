@@ -3,6 +3,8 @@ import path from 'node:path';
 import { GetObjectCommand, HeadObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { NextResponse } from 'next/server';
 import { getRangeRequestInfo } from 'payload/internal';
+import { unknownToStringStrict as asString } from '@/lib/coerce-unknown-to-string';
+import { isUnknownRecord as isRecord } from '@/lib/is-unknown-record';
 import { getPayloadClient } from '@/lib/payload';
 import { resolvePortfolioAppPath } from '@/lib/payload/app-root';
 import {
@@ -18,14 +20,6 @@ import {
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === 'object';
-}
-
-function asString(value: unknown): string | null {
-  return typeof value === 'string' ? value : null;
-}
 
 function buildS3Client() {
   const opts = getPayloadS3StorageOptions();

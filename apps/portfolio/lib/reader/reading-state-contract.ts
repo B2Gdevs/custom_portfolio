@@ -1,4 +1,6 @@
 import type { PortfolioAnnotation } from '@portfolio/repub-builder/reader';
+import { coerceUnknownToString as asString } from '@/lib/coerce-unknown-to-string';
+import { isUnknownRecord as isRecord } from '@/lib/is-unknown-record';
 
 export const READER_READING_STATE_COLLECTION_SLUG = 'reader-reading-states';
 
@@ -15,19 +17,9 @@ export type ReaderPersistedState = {
 
 export type ReaderPersistedStateInput = Omit<ReaderPersistedState, 'updatedAt'>;
 
-function asString(value: unknown) {
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number') return String(value);
-  return null;
-}
-
 function clampProgress(value: unknown) {
   if (typeof value !== 'number' || !Number.isFinite(value)) return null;
   return Math.min(1, Math.max(0, value));
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === 'object';
 }
 
 function normalizeAnnotation(value: unknown): PortfolioAnnotation | null {

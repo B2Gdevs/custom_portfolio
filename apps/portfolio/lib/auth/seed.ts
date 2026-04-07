@@ -1,3 +1,5 @@
+import { coerceUnknownToString as asString } from '@/lib/coerce-unknown-to-string';
+import { isUnknownRecord } from '@/lib/is-unknown-record';
 import { getPayloadClient } from '@/lib/payload';
 import {
   AUTH_COLLECTION_SLUG,
@@ -13,16 +15,6 @@ type SeedResult = {
   tenantValue: number | string;
   userId: string;
 };
-
-function isObject(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === 'object';
-}
-
-function asString(value: unknown) {
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number') return String(value);
-  return null;
-}
 
 export async function ensureOwnerSeed(): Promise<SeedResult> {
   const payload = await getPayloadClient();
@@ -101,7 +93,7 @@ export async function ensureOwnerSeed(): Promise<SeedResult> {
     const tenantNeedsUpdate =
       typeof tenantValue === 'string'
         ? tenantValue !== tenantId
-        : isObject(tenantValue)
+        : isUnknownRecord(tenantValue)
           ? asString(tenantValue.id) !== tenantId
           : true;
 

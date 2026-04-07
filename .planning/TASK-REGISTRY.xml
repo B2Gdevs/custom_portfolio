@@ -117,6 +117,15 @@
       </commands>
       <depends>01-11</depends>
     </task>
+    <task id="01-13" agent-id="" status="done">
+      <goal>Portfolio unknown-value dedupe: `isUnknownRecord`; `coerce-unknown-to-string` (`coerceUnknownToString`, `unknownToStringStrict`, `normalizeOptionalTrimmedString`, `normalizeOptionalTrimmedStringStrict`); `lib/coerce-unknown.ts` (`unknownToBoolean`, `unknownToFiniteNumber`, `parseUnknownFiniteNumber`); `read-json-stdin` for workers; replace scattered guards/coercions across reader workspace, published-book-artifacts API, seed sync, publish scripts, site-branding, listen seed; unit tests exercised for touched modules.</goal>
+      <keywords>refactor,coercion,type-guard,portfolio,workers,stdin</keywords>
+      <commands>
+        <command>pnpm --filter @portfolio/app exec vitest run tests/unit/lib/book-artifacts.test.ts tests/unit/lib/public-record-seed-sync.test.ts tests/unit/lib/projects.test.ts tests/unit/lib/resumes.test.ts tests/unit/lib/auth-viewer.test.ts tests/unit/lib/published-artifact-resolve.test.ts tests/unit/lib/media-publish.test.ts tests/unit/lib/site-download-assets.test.ts tests/unit/lib/reader-workspace-write.test.ts tests/unit/lib/reader-workspace-repository.test.ts</command>
+        <command>pnpm --filter @portfolio/app exec eslint lib/coerce-unknown.ts lib/coerce-unknown-to-string.ts lib/is-unknown-record.ts lib/read-json-stdin.ts</command>
+      </commands>
+      <depends>01-12</depends>
+    </task>
   </phase>
   <phase id="02">
     <task id="02-01" agent-id="" status="in-progress">

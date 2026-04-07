@@ -1,4 +1,6 @@
 import type { ContentEntry, ContentLink, ContentMeta } from '@/lib/content';
+import { unknownToStringStrict as asString } from '@/lib/coerce-unknown-to-string';
+import { unknownToBoolean, unknownToFiniteNumber } from '@/lib/coerce-unknown';
 import { getAllContentEntries, getContentBySlug } from '@/lib/content';
 import {
   readPublicMediaManifest,
@@ -45,18 +47,6 @@ type ProjectMediaItem = {
   title?: string;
   thumbnail?: string;
 };
-
-function asString(value: unknown) {
-  return typeof value === 'string' ? value : null;
-}
-
-function asNumber(value: unknown) {
-  return typeof value === 'number' && Number.isFinite(value) ? value : null;
-}
-
-function asBoolean(value: unknown) {
-  return typeof value === 'boolean' ? value : null;
-}
 
 function asStringArray(value: unknown, key: string) {
   if (!Array.isArray(value)) {
@@ -167,9 +157,9 @@ function mergeProjectMeta(baseMeta: ContentMeta, record: ProjectRecordDoc | unde
     ...(asString(record.date) ? { date: asString(record.date) ?? baseMeta.date } : {}),
     ...(asString(record.updated) ? { updated: asString(record.updated) ?? baseMeta.updated } : {}),
     ...(asString(record.status) ? { status: asString(record.status) ?? baseMeta.status } : {}),
-    ...(asBoolean(record.featured) !== null ? { featured: asBoolean(record.featured) ?? undefined } : {}),
-    ...(asNumber(record.featuredOrder) !== null
-      ? { featuredOrder: asNumber(record.featuredOrder) ?? undefined }
+    ...(unknownToBoolean(record.featured) !== null ? { featured: unknownToBoolean(record.featured) ?? undefined } : {}),
+    ...(unknownToFiniteNumber(record.featuredOrder) !== null
+      ? { featuredOrder: unknownToFiniteNumber(record.featuredOrder) ?? undefined }
       : {}),
     ...(tags ? { tags } : {}),
     ...(asString(record.featuredImage)

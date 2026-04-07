@@ -1,4 +1,5 @@
 import type { AuthFeatureAccess } from '@/lib/auth/permissions';
+import { coerceUnknownToString as asString } from '@/lib/coerce-unknown-to-string';
 
 export const READER_LIBRARY_COLLECTION_SLUG = 'reader-library-records';
 export const READER_SETTINGS_COLLECTION_SLUG = 'reader-settings';
@@ -52,12 +53,6 @@ export const DEFAULT_READER_WORKSPACE_SETTINGS: ReaderWorkspaceSettings = {
   preferPagedReader: true,
   showProgressBadges: true,
 };
-
-function asString(value: unknown) {
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number') return String(value);
-  return null;
-}
 
 function asBoolean(value: unknown, fallback: boolean) {
   return typeof value === 'boolean' ? value : fallback;

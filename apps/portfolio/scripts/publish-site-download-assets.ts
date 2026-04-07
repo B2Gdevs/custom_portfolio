@@ -5,6 +5,8 @@ import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import JSZip from 'jszip';
 import { loadScriptEnv } from './load-script-env';
+import { coerceUnknownToString as asString } from '@/lib/coerce-unknown-to-string';
+import { isUnknownRecord as isRecord } from '@/lib/is-unknown-record';
 import { getContentBySlug, getContentFiles } from '@/lib/content';
 import { getPayloadClient } from '@/lib/payload';
 import { resolvePortfolioAppRoot } from '@/lib/payload/app-root';
@@ -48,15 +50,6 @@ const REPO_ROOT = path.resolve(APP_ROOT, '..', '..');
 const PLANNING_PACK_ROOT = path.join(APP_ROOT, 'public', 'planning-pack');
 const PROJECTS_CONTENT_ROOT = path.join(APP_ROOT, 'content', 'projects');
 const ALLOWED_PLANNING_PACK_EXTENSIONS = new Set(['.json', '.md', '.txt', '.html', '.zip']);
-function asString(value: unknown) {
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number') return String(value);
-  return null;
-}
-
-function isRecord(value: unknown): value is PayloadDoc {
-  return Boolean(value) && typeof value === 'object';
-}
 
 function sha256File(filePath: string) {
   return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');

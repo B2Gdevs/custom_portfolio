@@ -1,6 +1,7 @@
 import { writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { readJsonFromStdin } from '@/lib/read-json-stdin';
 import { unknownErrorMessageWithStack } from '@/lib/unknown-error';
 import { getReaderWorkspaceBootstrap } from '@/lib/reader/workspace-bootstrap';
 import { maybeAutoLoginForDevelopment } from '@/lib/auth/session';
@@ -11,22 +12,8 @@ type WorkerInput = {
   cookieHeader?: string;
 };
 
-async function readJsonFromStdin(): Promise<WorkerInput> {
-  const chunks: Buffer[] = [];
-
-  for await (const chunk of process.stdin) {
-    chunks.push(Buffer.from(chunk));
-  }
-
-  if (!chunks.length) {
-    return {};
-  }
-
-  return JSON.parse(Buffer.concat(chunks).toString('utf8')) as WorkerInput;
-}
-
 async function main() {
-  const input = await readJsonFromStdin();
+  const input = await readJsonFromStdin<WorkerInput>({});
   let setCookie: string | undefined;
   let cookieHeader = input.cookieHeader ?? '';
 

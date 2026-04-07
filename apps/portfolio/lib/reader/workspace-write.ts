@@ -5,6 +5,7 @@ import {
   canUploadReaderData,
 } from '@/lib/auth/permissions';
 import { getSessionViewer } from '@/lib/auth/session';
+import { isUnknownRecord as isRecord } from '@/lib/is-unknown-record';
 import { getPayloadClient } from '@/lib/payload';
 import {
   getReaderLibraryAssetFileURL,
@@ -22,12 +23,6 @@ import {
   type ReaderLibraryUploadInput,
   type ReaderWorkspaceSettingsInput,
 } from './workspace-write-contract';
-
-type UnknownRecord = Record<string, unknown>;
-
-function isRecord(value: unknown): value is UnknownRecord {
-  return Boolean(value) && typeof value === 'object';
-}
 
 function getUploadedAssetURL(asset: unknown) {
   if (!isRecord(asset)) {

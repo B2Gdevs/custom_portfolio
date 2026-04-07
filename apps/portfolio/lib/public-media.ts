@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { isUnknownRecord } from '@/lib/is-unknown-record';
 import { resolvePortfolioAppRoot } from '@/lib/payload/app-root';
 
 export type PublicMediaManifestScope = 'site' | 'listen';
@@ -33,7 +34,7 @@ function emptyManifest(): PublicMediaManifest {
 }
 
 function isManifestEntry(value: unknown): value is PublicMediaManifestEntry {
-  return Boolean(value) && typeof value === 'object';
+  return isUnknownRecord(value);
 }
 
 function normalizeEntries(

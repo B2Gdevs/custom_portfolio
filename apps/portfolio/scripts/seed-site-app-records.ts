@@ -1,25 +1,9 @@
+import { normalizeOptionalTrimmedString } from '@/lib/coerce-unknown-to-string';
 import { getPayloadClient } from '@/lib/payload';
 import { FALLBACK_SITE_APPS } from '@/lib/site-app-registry';
 import { loadScriptEnv } from './load-script-env';
 
 loadScriptEnv();
-
-function asString(value: unknown) {
-  if (typeof value === 'string') {
-    return value;
-  }
-
-  if (typeof value === 'number') {
-    return String(value);
-  }
-
-  return null;
-}
-
-function normalizeOptionalString(value: unknown) {
-  const normalized = asString(value)?.trim();
-  return normalized && normalized.length > 0 ? normalized : null;
-}
 
 function normalizeAppSeedData(app: {
   id: string;
@@ -56,12 +40,12 @@ function normalizeExistingAppDoc(doc: unknown) {
   }
 
   const record = doc as Record<string, unknown>;
-  const slug = normalizeOptionalString(record.slug);
-  const title = normalizeOptionalString(record.title);
-  const routeHref = normalizeOptionalString(record.routeHref);
-  const description = normalizeOptionalString(record.description);
-  const iconName = normalizeOptionalString(record.iconName);
-  const ctaLabel = normalizeOptionalString(record.ctaLabel);
+  const slug = normalizeOptionalTrimmedString(record.slug);
+  const title = normalizeOptionalTrimmedString(record.title);
+  const routeHref = normalizeOptionalTrimmedString(record.routeHref);
+  const description = normalizeOptionalTrimmedString(record.description);
+  const iconName = normalizeOptionalTrimmedString(record.iconName);
+  const ctaLabel = normalizeOptionalTrimmedString(record.ctaLabel);
 
   if (!slug || !title || !routeHref || !description || !iconName || !ctaLabel) {
     return null;
@@ -74,10 +58,10 @@ function normalizeExistingAppDoc(doc: unknown) {
     description,
     iconName,
     ctaLabel,
-    supportHref: normalizeOptionalString(record.supportHref),
-    supportLabel: normalizeOptionalString(record.supportLabel),
-    supportText: normalizeOptionalString(record.supportText),
-    exampleCode: normalizeOptionalString(record.exampleCode),
+    supportHref: normalizeOptionalTrimmedString(record.supportHref),
+    supportLabel: normalizeOptionalTrimmedString(record.supportLabel),
+    supportText: normalizeOptionalTrimmedString(record.supportText),
+    exampleCode: normalizeOptionalTrimmedString(record.exampleCode),
     featuredOrder: typeof record.featuredOrder === 'number' ? record.featuredOrder : 0,
     published: typeof record.published === 'boolean' ? record.published : true,
   };

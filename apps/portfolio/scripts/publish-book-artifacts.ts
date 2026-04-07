@@ -6,6 +6,8 @@ import { execFileSync } from 'node:child_process';
 import JSZip from 'jszip';
 import { loadScriptEnv } from './load-script-env';
 import type { BookEntry } from '@/lib/books';
+import { coerceUnknownToString as asString } from '@/lib/coerce-unknown-to-string';
+import { isUnknownRecord as isRecord } from '@/lib/is-unknown-record';
 import {
   buildDefaultArtifactVersionTag,
   buildPublishedBookArtifactFilename,
@@ -57,16 +59,6 @@ const ALLOWED_PLANNING_EXTENSIONS = new Set([
   '.yml',
 ]);
 const IGNORED_DIRECTORIES = new Set(['.git', '.next', 'dist', 'node_modules']);
-
-function isRecord(value: unknown): value is PayloadDoc {
-  return Boolean(value) && typeof value === 'object';
-}
-
-function asString(value: unknown) {
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number') return String(value);
-  return null;
-}
 
 function getGitShortCommit() {
   try {

@@ -1,5 +1,7 @@
 import path from 'node:path';
 import type { ContentLink } from '@/lib/content';
+import { coerceUnknownToString as asString } from '@/lib/coerce-unknown-to-string';
+import { unknownToBoolean, unknownToFiniteNumber } from '@/lib/coerce-unknown';
 import { getSiteDownloadAssetFileURL } from '@/lib/payload/collections/siteDownloadAssets';
 import { runSiteDownloadAssetsWorker } from '@/lib/site-download-assets-worker-runner';
 
@@ -63,26 +65,6 @@ export type FindSiteDownloadAssetsInput = {
   downloadSlug?: string;
 };
 
-function asString(value: unknown) {
-  if (typeof value === 'string') {
-    return value;
-  }
-
-  if (typeof value === 'number') {
-    return String(value);
-  }
-
-  return null;
-}
-
-function asNumber(value: unknown) {
-  return typeof value === 'number' && Number.isFinite(value) ? value : null;
-}
-
-function asBoolean(value: unknown) {
-  return typeof value === 'boolean' ? value : null;
-}
-
 function isSiteDownloadAssetKind(value: string): value is SiteDownloadAssetKind {
   return (
     value === 'resume' ||
@@ -111,7 +93,7 @@ function toSiteDownloadAssetRecord(doc: SiteDownloadAssetDoc): SiteDownloadAsset
   const downloadKind = asString(doc.downloadKind);
   const contentScope = asString(doc.contentScope);
   const checksumSha256 = asString(doc.checksumSha256);
-  const fileSizeBytes = asNumber(doc.fileSizeBytes);
+  const fileSizeBytes = unknownToFiniteNumber(doc.fileSizeBytes);
 
   if (
     !id ||
@@ -138,7 +120,7 @@ function toSiteDownloadAssetRecord(doc: SiteDownloadAssetDoc): SiteDownloadAsset
       ? { downloadLabel: asString(doc.downloadLabel) ?? undefined }
       : {}),
     ...(asString(doc.summary) ? { summary: asString(doc.summary) ?? undefined } : {}),
-    isCurrent: asBoolean(doc.isCurrent) ?? false,
+    isCurrent: unknownToBoolean(doc.isCurrent) ?? false,
     checksumSha256,
     fileSizeBytes,
     ...(asString(doc.sourceCommit) ? { sourceCommit: asString(doc.sourceCommit) ?? undefined } : {}),

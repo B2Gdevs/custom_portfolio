@@ -4,6 +4,8 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { loadScriptEnv } from './load-script-env';
+import { coerceUnknownToString as asString } from '@/lib/coerce-unknown-to-string';
+import { isUnknownRecord as isRecord } from '@/lib/is-unknown-record';
 import { getListenCatalog } from '@/lib/listen-catalog';
 import type { PublicMediaManifest } from '@/lib/public-media';
 import { isPublicMediaSourcePath } from '@/lib/public-media';
@@ -54,16 +56,6 @@ const APP_ROOT = resolvePortfolioAppRoot();
 const REPO_ROOT = path.resolve(APP_ROOT, '..', '..');
 const PUBLIC_ROOT = path.join(APP_ROOT, 'public');
 const MEDIA_MANIFEST_PATH = path.join(PUBLIC_ROOT, 'media', 'manifest.json');
-
-function asString(value: unknown) {
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number') return String(value);
-  return null;
-}
-
-function isRecord(value: unknown): value is PayloadDoc {
-  return Boolean(value) && typeof value === 'object';
-}
 
 function ensureParentDir(filePath: string) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });

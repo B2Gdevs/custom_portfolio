@@ -1,3 +1,4 @@
+import { isUnknownRecord as isRecord } from '@/lib/is-unknown-record';
 import { getPayloadClient } from '@/lib/payload';
 import {
   READER_LIBRARY_COLLECTION_SLUG,
@@ -7,8 +8,6 @@ import {
   type ReaderLibraryRecord,
   type ReaderWorkspaceSettings,
 } from './workspace-contract';
-
-type UnknownRecord = Record<string, unknown>;
 
 export type ReaderWorkspaceRepositoryInput = {
   tenantId: string;
@@ -22,10 +21,6 @@ export type ReaderWorkspaceRepositoryResult = {
 
 export interface ReaderWorkspaceRepository {
   getWorkspace(input: ReaderWorkspaceRepositoryInput): Promise<ReaderWorkspaceRepositoryResult>;
-}
-
-function isRecord(value: unknown): value is UnknownRecord {
-  return Boolean(value) && typeof value === 'object';
 }
 
 class PayloadReaderWorkspaceRepository implements ReaderWorkspaceRepository {

@@ -1,5 +1,7 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { unknownToStringStrict as asString } from '@/lib/coerce-unknown-to-string';
+import { unknownToFiniteNumber } from '@/lib/coerce-unknown';
 import { FALLBACK_RESUMES, type ResumeEntry } from '@/lib/resume-fallback';
 import { runResumeRecordsWorker } from '@/lib/resume-records-worker-runner';
 
@@ -17,14 +19,6 @@ const resumeDirectoryCandidates = [
   path.resolve(process.cwd(), 'apps', 'portfolio', 'misc', 'html_resumes'),
   path.resolve(process.cwd(), 'misc', 'html_resumes'),
 ];
-
-function asString(value: unknown) {
-  return typeof value === 'string' ? value : null;
-}
-
-function asNumber(value: unknown) {
-  return typeof value === 'number' && Number.isFinite(value) ? value : null;
-}
 
 function compareResumes(a: ResumeEntry, b: ResumeEntry): number {
   if (a.featuredOrder !== b.featuredOrder) {
@@ -51,7 +45,7 @@ function toResumeEntry(doc: ResumeRecordDoc): ResumeEntry | null {
     title,
     role,
     summary,
-    featuredOrder: asNumber(doc.featuredOrder) ?? 0,
+    featuredOrder: unknownToFiniteNumber(doc.featuredOrder) ?? 0,
   };
 }
 

@@ -1,19 +1,8 @@
+import { coerceUnknownToString as asString } from '@/lib/coerce-unknown-to-string';
 import { unknownErrorMessageWithStack } from '@/lib/unknown-error';
 import { getPayloadClient } from '@/lib/payload';
 import { FALLBACK_SITE_APPS, type SiteAppRecord, type SiteAppRecordDoc } from '@/lib/site-app-registry';
 import { toSiteAppRecord } from '@/lib/site-app-mapper';
-
-function asString(value: unknown) {
-  if (typeof value === 'string') {
-    return value;
-  }
-
-  if (typeof value === 'number') {
-    return String(value);
-  }
-
-  return null;
-}
 
 async function loadSiteApps(): Promise<SiteAppRecord[]> {
   try {

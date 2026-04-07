@@ -1,3 +1,4 @@
+import { readJsonFromStdin } from '@/lib/read-json-stdin';
 import { unknownErrorMessageWithStack } from '@/lib/unknown-error';
 import { maybeAutoLoginForDevelopment } from '@/lib/auth/session';
 import {
@@ -18,16 +19,6 @@ type ReaderStateWorkerInput =
       cookieHeader?: string;
       input: ReaderPersistedStateInput;
     };
-
-async function readJsonFromStdin(): Promise<ReaderStateWorkerInput> {
-  const chunks: Buffer[] = [];
-
-  for await (const chunk of process.stdin) {
-    chunks.push(Buffer.from(chunk));
-  }
-
-  return JSON.parse(Buffer.concat(chunks).toString('utf8')) as ReaderStateWorkerInput;
-}
 
 function createRequest(cookieHeader: string) {
   return new Request('http://localhost/api/reader/state', {
@@ -54,7 +45,7 @@ async function prepareCookieHeader(cookieHeader: string) {
 }
 
 async function main() {
-  const payload = await readJsonFromStdin();
+  const payload = await readJsonFromStdin<ReaderStateWorkerInput>();
   const prepared = await prepareCookieHeader(payload.cookieHeader ?? '');
   const request = createRequest(prepared.cookieHeader);
 

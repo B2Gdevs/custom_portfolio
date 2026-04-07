@@ -1,5 +1,14 @@
 import pg from 'pg';
 import type { ContentEntry } from '@/lib/content';
+import {
+  coerceUnknownToString as asString,
+  normalizeOptionalTrimmedString,
+} from '@/lib/coerce-unknown-to-string';
+import {
+  parseUnknownFiniteNumber,
+  unknownToBoolean,
+} from '@/lib/coerce-unknown';
+import { isUnknownRecord as isRecord } from '@/lib/is-unknown-record';
 import { getPayloadClient } from '@/lib/payload';
 import { getPayloadDatabaseUrl, isPayloadUsingPostgres } from '@/lib/payload/runtime-env';
 
@@ -83,44 +92,6 @@ type ExistingPgResumeRecord = {
   record: SeedResumeRecord;
 };
 
-function asString(value: unknown) {
-  if (typeof value === 'string') {
-    return value;
-  }
-
-  if (typeof value === 'number') {
-    return String(value);
-  }
-
-  return null;
-}
-
-function asNumber(value: unknown) {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return value;
-  }
-
-  if (typeof value === 'string' && value.trim().length > 0) {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
-  }
-
-  return null;
-}
-
-function asBoolean(value: unknown) {
-  return typeof value === 'boolean' ? value : null;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === 'object';
-}
-
-function normalizeOptionalString(value: unknown) {
-  const normalized = asString(value)?.trim();
-  return normalized && normalized.length > 0 ? normalized : null;
-}
-
 function normalizeRequiredString(value: unknown, fallback = '') {
   return asString(value)?.trim() ?? fallback;
 }
@@ -146,10 +117,10 @@ function normalizeStringArray(items: unknown, key?: string) {
   return items
     .map((item) => {
       if (key && isRecord(item)) {
-        return normalizeOptionalString(item[key]);
+        return normalizeOptionalTrimmedString(item[key]);
       }
 
-      return normalizeOptionalString(item);
+      return normalizeOptionalTrimmedString(item);
     })
     .filter((item): item is string => Boolean(item));
 }
@@ -165,8 +136,8 @@ function normalizeLinkArray(items: unknown): SeedLink[] {
         return null;
       }
 
-      const label = normalizeOptionalString(item.label);
-      const href = normalizeOptionalString(item.href);
+      const label = normalizeOptionalTrimmedString(item.label);
+      const href = normalizeOptionalTrimmedString(item.href);
       if (!label || !href) {
         return null;
       }
@@ -174,9 +145,9 @@ function normalizeLinkArray(items: unknown): SeedLink[] {
       return {
         label,
         href,
-        description: normalizeOptionalString(item.description),
-        kind: normalizeOptionalString(item.kind),
-        external: asBoolean(item.external) ?? false,
+        description: normalizeOptionalTrimmedString(item.description),
+        kind: normalizeOptionalTrimmedString(item.kind),
+        external: unknownToBoolean(item.external) ?? false,
       } satisfies SeedLink;
     })
     .filter((item): item is SeedLink => item !== null);
@@ -193,17 +164,17 @@ function normalizeMediaArray(items: unknown): SeedMedia[] {
         return null;
       }
 
-      const type = normalizeOptionalString(item.type);
+      const type = normalizeOptionalTrimmedString(item.type);
       if (!type) {
         return null;
       }
 
       return {
         type,
-        src: normalizeOptionalString(item.src),
-        url: normalizeOptionalString(item.url),
-        title: normalizeOptionalString(item.title),
-        thumbnail: normalizeOptionalString(item.thumbnail),
+        src: normalizeOptionalTrimmedString(item.src),
+        url: normalizeOptionalTrimmedString(item.url),
+        title: normalizeOptionalTrimmedString(item.title),
+        thumbnail: normalizeOptionalTrimmedString(item.thumbnail),
       } satisfies SeedMedia;
     })
     .filter((item): item is SeedMedia => item !== null);
@@ -244,16 +215,16 @@ export function toSeedProjectRecord(
     description: normalizeRequiredString(project.meta.description, ''),
     date: normalizeDate(project.meta.date),
     updated: normalizeDate(project.meta.updated),
-    status: normalizeOptionalString(project.meta.status),
+    status: normalizeOptionalTrimmedString(project.meta.status),
     featured: Boolean(project.meta.featured),
-    featuredOrder: asNumber(project.meta.featuredOrder) ?? 0,
+    featuredOrder: parseUnknownFiniteNumber(project.meta.featuredOrder) ?? 0,
     tags: normalizeStringArray(project.meta.tags),
-    featuredImage: normalizeOptionalString(project.meta.featuredImage),
+    featuredImage: normalizeOptionalTrimmedString(project.meta.featuredImage),
     images: normalizeStringArray(project.meta.images),
-    githubUrl: normalizeOptionalString(project.meta.githubUrl),
-    liveUrl: normalizeOptionalString(project.meta.liveUrl),
-    appUrl: normalizeOptionalString(project.meta.appUrl),
-    appLabel: normalizeOptionalString(project.meta.appLabel),
+    githubUrl: normalizeOptionalTrimmedString(project.meta.githubUrl),
+    liveUrl: normalizeOptionalTrimmedString(project.meta.liveUrl),
+    appUrl: normalizeOptionalTrimmedString(project.meta.appUrl),
+    appLabel: normalizeOptionalTrimmedString(project.meta.appLabel),
     appLinks: normalizeLinkArray(project.meta.appLinks),
     links: normalizeLinkArray(project.meta.links),
     searchKeywords: normalizeStringArray(project.meta.searchKeywords),
@@ -273,7 +244,7 @@ export function toSeedResumeRecord(
     fileName: normalizeRequiredString(resume.fileName),
     role: normalizeRequiredString(resume.role),
     summary: normalizeRequiredString(resume.summary),
-    featuredOrder: asNumber(resume.featuredOrder) ?? 0,
+    featuredOrder: parseUnknownFiniteNumber(resume.featuredOrder) ?? 0,
     downloadAssetIds: sortDownloadIds(downloadAssetIds),
     published: true,
   };
@@ -287,8 +258,8 @@ export function toSeedProjectRecordFromPayloadDoc(
     return null;
   }
 
-  const slug = normalizeOptionalString(doc.slug);
-  const title = normalizeOptionalString(doc.title);
+  const slug = normalizeOptionalTrimmedString(doc.slug);
+  const title = normalizeOptionalTrimmedString(doc.title);
   if (!slug || !title) {
     return null;
   }
@@ -299,22 +270,22 @@ export function toSeedProjectRecordFromPayloadDoc(
     description: normalizeRequiredString(doc.description, ''),
     date: normalizeDate(doc.date),
     updated: normalizeDate(doc.updated),
-    status: normalizeOptionalString(doc.status),
-    featured: asBoolean(doc.featured) ?? false,
-    featuredOrder: asNumber(doc.featuredOrder) ?? 0,
+    status: normalizeOptionalTrimmedString(doc.status),
+    featured: unknownToBoolean(doc.featured) ?? false,
+    featuredOrder: parseUnknownFiniteNumber(doc.featuredOrder) ?? 0,
     tags: normalizeStringArray(doc.tags, 'tag'),
-    featuredImage: normalizeOptionalString(doc.featuredImage),
+    featuredImage: normalizeOptionalTrimmedString(doc.featuredImage),
     images: normalizeStringArray(doc.images, 'image'),
-    githubUrl: normalizeOptionalString(doc.githubUrl),
-    liveUrl: normalizeOptionalString(doc.liveUrl),
-    appUrl: normalizeOptionalString(doc.appUrl),
-    appLabel: normalizeOptionalString(doc.appLabel),
+    githubUrl: normalizeOptionalTrimmedString(doc.githubUrl),
+    liveUrl: normalizeOptionalTrimmedString(doc.liveUrl),
+    appUrl: normalizeOptionalTrimmedString(doc.appUrl),
+    appLabel: normalizeOptionalTrimmedString(doc.appLabel),
     appLinks: normalizeLinkArray(doc.appLinks),
     links: normalizeLinkArray(doc.links),
     searchKeywords: normalizeStringArray(doc.searchKeywords, 'keyword'),
     media: normalizeMediaArray(doc.media),
     downloadAssetIds: includeDownloadAssets ? normalizeRelationshipIds(doc.downloadAssets) : [],
-    published: asBoolean(doc.published) ?? true,
+    published: unknownToBoolean(doc.published) ?? true,
   };
 }
 
@@ -326,11 +297,11 @@ export function toSeedResumeRecordFromPayloadDoc(
     return null;
   }
 
-  const slug = normalizeOptionalString(doc.slug);
-  const title = normalizeOptionalString(doc.title);
-  const fileName = normalizeOptionalString(doc.fileName);
-  const role = normalizeOptionalString(doc.role);
-  const summary = normalizeOptionalString(doc.summary);
+  const slug = normalizeOptionalTrimmedString(doc.slug);
+  const title = normalizeOptionalTrimmedString(doc.title);
+  const fileName = normalizeOptionalTrimmedString(doc.fileName);
+  const role = normalizeOptionalTrimmedString(doc.role);
+  const summary = normalizeOptionalTrimmedString(doc.summary);
 
   if (!slug || !title || !fileName || !role || !summary) {
     return null;
@@ -342,9 +313,9 @@ export function toSeedResumeRecordFromPayloadDoc(
     fileName,
     role,
     summary,
-    featuredOrder: asNumber(doc.featuredOrder) ?? 0,
+    featuredOrder: parseUnknownFiniteNumber(doc.featuredOrder) ?? 0,
     downloadAssetIds: includeDownloadAssets ? normalizeRelationshipIds(doc.downloadAssets) : [],
-    published: asBoolean(doc.published) ?? true,
+    published: unknownToBoolean(doc.published) ?? true,
   };
 }
 
@@ -425,8 +396,8 @@ async function loadScopedAssetIds(client: pg.PoolClient, scope: 'project' | 'res
   const assetIdsBySlug = new Map<string, string[]>();
 
   for (const row of result.rows) {
-    const slug = normalizeOptionalString(row.content_slug);
-    const id = normalizeOptionalString(row.id);
+    const slug = normalizeOptionalTrimmedString(row.content_slug);
+    const id = normalizeOptionalTrimmedString(row.id);
     if (!slug || !id) {
       continue;
     }
@@ -487,9 +458,9 @@ async function loadExistingProjectRecordsPg(client: pg.PoolClient) {
   const byId = new Map<number, SeedProjectRecord>();
 
   for (const row of baseRows.rows) {
-    const slug = normalizeOptionalString(row.slug);
-    const id = asNumber(row.id);
-    const title = normalizeOptionalString(row.title);
+    const slug = normalizeOptionalTrimmedString(row.slug);
+    const id = parseUnknownFiniteNumber(row.id);
+    const title = normalizeOptionalTrimmedString(row.title);
     if (!slug || id === null || !title) {
       continue;
     }
@@ -500,22 +471,22 @@ async function loadExistingProjectRecordsPg(client: pg.PoolClient) {
       description: normalizeRequiredString(row.description, ''),
       date: normalizeDate(row.date),
       updated: normalizeDate(row.updated),
-      status: normalizeOptionalString(row.status),
-      featured: asBoolean(row.featured) ?? false,
-      featuredOrder: asNumber(row.featured_order) ?? 0,
+      status: normalizeOptionalTrimmedString(row.status),
+      featured: unknownToBoolean(row.featured) ?? false,
+      featuredOrder: parseUnknownFiniteNumber(row.featured_order) ?? 0,
       tags: [],
-      featuredImage: normalizeOptionalString(row.featured_image),
+      featuredImage: normalizeOptionalTrimmedString(row.featured_image),
       images: [],
-      githubUrl: normalizeOptionalString(row.github_url),
-      liveUrl: normalizeOptionalString(row.live_url),
-      appUrl: normalizeOptionalString(row.app_url),
-      appLabel: normalizeOptionalString(row.app_label),
+      githubUrl: normalizeOptionalTrimmedString(row.github_url),
+      liveUrl: normalizeOptionalTrimmedString(row.live_url),
+      appUrl: normalizeOptionalTrimmedString(row.app_url),
+      appLabel: normalizeOptionalTrimmedString(row.app_label),
       appLinks: [],
       links: [],
       searchKeywords: [],
       media: [],
       downloadAssetIds: [],
-      published: asBoolean(row.published) ?? true,
+      published: unknownToBoolean(row.published) ?? true,
     };
 
     records.set(slug, { id, record });
@@ -523,78 +494,78 @@ async function loadExistingProjectRecordsPg(client: pg.PoolClient) {
   }
 
   for (const row of tagRows.rows) {
-    const parentId = asNumber(row._parent_id);
-    const tag = normalizeOptionalString(row.tag);
+    const parentId = parseUnknownFiniteNumber(row._parent_id);
+    const tag = normalizeOptionalTrimmedString(row.tag);
     if (parentId === null || !tag) continue;
     byId.get(parentId)?.tags.push(tag);
   }
 
   for (const row of imageRows.rows) {
-    const parentId = asNumber(row._parent_id);
-    const image = normalizeOptionalString(row.image);
+    const parentId = parseUnknownFiniteNumber(row._parent_id);
+    const image = normalizeOptionalTrimmedString(row.image);
     if (parentId === null || !image) continue;
     byId.get(parentId)?.images.push(image);
   }
 
   for (const row of appLinkRows.rows) {
-    const parentId = asNumber(row._parent_id);
+    const parentId = parseUnknownFiniteNumber(row._parent_id);
     if (parentId === null) continue;
 
-    const label = normalizeOptionalString(row.label);
-    const href = normalizeOptionalString(row.href);
+    const label = normalizeOptionalTrimmedString(row.label);
+    const href = normalizeOptionalTrimmedString(row.href);
     if (!label || !href) continue;
 
     byId.get(parentId)?.appLinks.push({
       label,
       href,
-      description: normalizeOptionalString(row.description),
-      kind: normalizeOptionalString(row.kind),
-      external: asBoolean(row.external) ?? false,
+      description: normalizeOptionalTrimmedString(row.description),
+      kind: normalizeOptionalTrimmedString(row.kind),
+      external: unknownToBoolean(row.external) ?? false,
     });
   }
 
   for (const row of linkRows.rows) {
-    const parentId = asNumber(row._parent_id);
+    const parentId = parseUnknownFiniteNumber(row._parent_id);
     if (parentId === null) continue;
 
-    const label = normalizeOptionalString(row.label);
-    const href = normalizeOptionalString(row.href);
+    const label = normalizeOptionalTrimmedString(row.label);
+    const href = normalizeOptionalTrimmedString(row.href);
     if (!label || !href) continue;
 
     byId.get(parentId)?.links.push({
       label,
       href,
-      description: normalizeOptionalString(row.description),
-      kind: normalizeOptionalString(row.kind),
-      external: asBoolean(row.external) ?? false,
+      description: normalizeOptionalTrimmedString(row.description),
+      kind: normalizeOptionalTrimmedString(row.kind),
+      external: unknownToBoolean(row.external) ?? false,
     });
   }
 
   for (const row of keywordRows.rows) {
-    const parentId = asNumber(row._parent_id);
-    const keyword = normalizeOptionalString(row.keyword);
+    const parentId = parseUnknownFiniteNumber(row._parent_id);
+    const keyword = normalizeOptionalTrimmedString(row.keyword);
     if (parentId === null || !keyword) continue;
     byId.get(parentId)?.searchKeywords.push(keyword);
   }
 
   for (const row of mediaRows.rows) {
-    const parentId = asNumber(row._parent_id);
-    const type = normalizeOptionalString(row.type);
+    const parentId = parseUnknownFiniteNumber(row._parent_id);
+    const type = normalizeOptionalTrimmedString(row.type);
     if (parentId === null || !type) continue;
 
     byId.get(parentId)?.media.push({
       type,
-      src: normalizeOptionalString(row.src),
-      url: normalizeOptionalString(row.url),
-      title: normalizeOptionalString(row.title),
-      thumbnail: normalizeOptionalString(row.thumbnail),
+      src: normalizeOptionalTrimmedString(row.src),
+      url: normalizeOptionalTrimmedString(row.url),
+      title: normalizeOptionalTrimmedString(row.title),
+      thumbnail: normalizeOptionalTrimmedString(row.thumbnail),
     });
   }
 
   for (const row of relRows.rows) {
-    const parentId = asNumber(row.parent_id);
-    const path = normalizeOptionalString(row.path);
-    const siteDownloadAssetId = normalizeOptionalString(row.site_download_assets_id);
+    const parentId = parseUnknownFiniteNumber(row.parent_id);
+    const path = normalizeOptionalTrimmedString(row.path);
+    const siteDownloadAssetId = normalizeOptionalTrimmedString(row.site_download_assets_id);
     if (parentId === null || path !== 'downloadAssets' || !siteDownloadAssetId) {
       continue;
     }
@@ -629,12 +600,12 @@ async function loadExistingResumeRecordsPg(client: pg.PoolClient) {
   const byId = new Map<number, SeedResumeRecord>();
 
   for (const row of baseRows.rows) {
-    const slug = normalizeOptionalString(row.slug);
-    const id = asNumber(row.id);
-    const title = normalizeOptionalString(row.title);
-    const fileName = normalizeOptionalString(row.file_name);
-    const role = normalizeOptionalString(row.role);
-    const summary = normalizeOptionalString(row.summary);
+    const slug = normalizeOptionalTrimmedString(row.slug);
+    const id = parseUnknownFiniteNumber(row.id);
+    const title = normalizeOptionalTrimmedString(row.title);
+    const fileName = normalizeOptionalTrimmedString(row.file_name);
+    const role = normalizeOptionalTrimmedString(row.role);
+    const summary = normalizeOptionalTrimmedString(row.summary);
 
     if (!slug || id === null || !title || !fileName || !role || !summary) {
       continue;
@@ -646,9 +617,9 @@ async function loadExistingResumeRecordsPg(client: pg.PoolClient) {
       fileName,
       role,
       summary,
-      featuredOrder: asNumber(row.featured_order) ?? 0,
+      featuredOrder: parseUnknownFiniteNumber(row.featured_order) ?? 0,
       downloadAssetIds: [],
-      published: asBoolean(row.published) ?? true,
+      published: unknownToBoolean(row.published) ?? true,
     };
 
     records.set(slug, { id, record });
@@ -656,9 +627,9 @@ async function loadExistingResumeRecordsPg(client: pg.PoolClient) {
   }
 
   for (const row of relRows.rows) {
-    const parentId = asNumber(row.parent_id);
-    const path = normalizeOptionalString(row.path);
-    const siteDownloadAssetId = normalizeOptionalString(row.site_download_assets_id);
+    const parentId = parseUnknownFiniteNumber(row.parent_id);
+    const path = normalizeOptionalTrimmedString(row.path);
+    const siteDownloadAssetId = normalizeOptionalTrimmedString(row.site_download_assets_id);
     if (parentId === null || path !== 'downloadAssets' || !siteDownloadAssetId) {
       continue;
     }
@@ -870,7 +841,7 @@ async function syncProjectRecordsViaPostgres(projects: ProjectSourceRecord[]): P
         ],
       );
 
-      const parentId = asNumber(result.rows[0]?.id);
+      const parentId = parseUnknownFiniteNumber(result.rows[0]?.id);
       if (parentId === null) {
         throw new Error(`project seed upsert missing id for ${project.slug}`);
       }
@@ -953,7 +924,7 @@ async function syncResumeRecordsViaPostgres(resumes: ResumeSourceRecord[]): Prom
         ],
       );
 
-      const parentId = asNumber(result.rows[0]?.id);
+      const parentId = parseUnknownFiniteNumber(result.rows[0]?.id);
       if (parentId === null) {
         throw new Error(`resume seed upsert missing id for ${resume.slug}`);
       }

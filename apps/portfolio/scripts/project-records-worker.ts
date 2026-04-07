@@ -1,17 +1,6 @@
+import { coerceUnknownToString as asString } from '@/lib/coerce-unknown-to-string';
 import { unknownErrorMessageWithStack } from '@/lib/unknown-error';
 import { getPayloadClient } from '@/lib/payload';
-
-function asString(value: unknown) {
-  if (typeof value === 'string') {
-    return value;
-  }
-
-  if (typeof value === 'number') {
-    return String(value);
-  }
-
-  return null;
-}
 
 async function main() {
   const payload = await getPayloadClient();
