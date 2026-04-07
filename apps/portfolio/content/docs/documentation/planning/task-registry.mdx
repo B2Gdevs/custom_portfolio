@@ -156,13 +156,13 @@ Aligned with [Route conventions](/docs/documentation/route-conventions). **Do no
 | `documentation-site-15-03` | `done` | **Discovery shell:** shared **`DiscoveryIndexLayout`** + **`DiscoveryHeroPanel`** + **`LISTEN_DISCOVERY_PANEL_CLASS`**; **`ContentIndexClient`** + **`ListenIndexClient`** + **`DiscoveryLayoutSkeleton`** | `documentation-site-15-02` optional | `pnpm run lint --workspace=@portfolio/app`; visual spot-check blog/listen |
 | `documentation-site-15-04` | `done` | **`SiteCopilot.tsx` split:** **`SiteCopilotChatPanel`** (thread, composer, devtools shell) + **`site-copilot-chat-utils.ts`**; **`SiteCopilot`** keeps runtime, fetch, logger, launcher | `-` | lint; `tests/unit/components/site/SiteCopilot.test.tsx` |
 
-## Phase `documentation-site-16` (public OpenAPI + Swagger UI + Clerk public API allowlist)
+## Phase `documentation-site-16` (public OpenAPI + interactive docs + Clerk public API allowlist)
 
-**Goal:** ship **`GET /api/openapi`** (public routes only) + **`/docs/api`** (Swagger UI), document auth boundaries, and extend **Clerk** `isPublicRoute` so anonymous **GET/POST** to listed **read/search/unlock** APIs work in production. **Decision:** `DOCUMENTATION-PUBLIC-OPENAPI-SWAGGER`.
+**Goal:** ship **`GET /api/openapi`** (public routes only) + **`/docs/api`** (Redoc / OpenAPI UI), document auth boundaries, and extend **Clerk** `isPublicRoute` so anonymous **GET/POST** to listed **read/search/unlock** APIs work in production. **Decision:** `DOCUMENTATION-PUBLIC-OPENAPI-SWAGGER`.
 
 | Id | Status | Goal | Depends | Verify |
 | --- | --- | --- | --- | --- |
-| `documentation-site-16-01` | `done` | OpenAPI spec module + **`/api/openapi`** route + **`swagger-ui-react`** page **`/docs/api`**; **`middleware`** public API prefixes; **`tests/unit/lib/openapi-public-spec.test.ts`**; [route conventions](/docs/documentation/route-conventions) | `-` | `pnpm run build --workspace=@portfolio/app`; manual **`/docs/api`** + Try-it-out vs **`/api/content/search`** |
+| `documentation-site-16-01` | `done` | OpenAPI spec module + **`/api/openapi`** route + **`/docs/api`** (Redoc, standalone layout); **`middleware`** public API prefixes; **`tests/unit/lib/openapi-public-spec.test.ts`**; [route conventions](/docs/documentation/route-conventions) | `-` | `pnpm run build --workspace=@portfolio/app`; manual **`/docs/api`** vs **`/api/content/search`** |
 
 ## Phase `documentation-site-13` (RAG cost: local embeddings)
 

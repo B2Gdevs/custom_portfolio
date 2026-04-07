@@ -5,8 +5,8 @@ import {
   type ChatModelRunOptions,
   useLocalRuntime,
 } from '@assistant-ui/react';
-import { AnimatePresence } from 'framer-motion';
-import { useCallback, useState } from 'react';
+import { AnimatePresence, motion, useMotionValue } from 'framer-motion';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { SiteCopilotChatPanel } from './SiteCopilotChatPanel';
 import { useSiteCopilot } from './SiteCopilotContext';
 import type { SiteCopilotSourceBundle } from './SiteCopilotSources';
@@ -24,12 +24,36 @@ import type { MediaGenerateResponse } from '@/lib/site-media';
 
 const CHAT_LOGGER = createLogger('chat.ui', { runtime: 'client' });
 
+const LAUNCHER_POSITION_KEY = 'site-copilot-launcher-position';
+/** Ignore the next click on the launcher if the user just finished dragging (avoids opening chat accidentally). */
+const DRAG_CLICK_SUPPRESS_PX = 8;
+
 export function SiteCopilot() {
   const { isOpen, openChat, closeChat, coverImageContext } = useSiteCopilot();
   const [isDevtoolsOpen, setIsDevtoolsOpen] = useState(false);
   const [pendingBundle, setPendingBundle] = useState<SiteCopilotSourceBundle | null>(null);
   const [sourcesByMessageId, setSourcesByMessageId] = useState<Record<string, SiteCopilotSourceBundle>>({});
   const [sourcesLoading, setSourcesLoading] = useState(false);
+
+  const launcherConstraintsRef = useRef<HTMLDivElement>(null);
+  const launcherDragMovedRef = useRef(false);
+  const launcherX = useMotionValue(0);
+  const launcherY = useMotionValue(0);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem(LAUNCHER_POSITION_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as { x?: unknown; y?: unknown };
+      if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
+        launcherX.set(parsed.x);
+        launcherY.set(parsed.y);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [launcherX, launcherY]);
 
   const runChatModel = useCallback(
     async ({ abortSignal, messages = [] }: ChatModelRunOptions) => {
@@ -202,13 +226,53 @@ export function SiteCopilot() {
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
-      <button
-        type="button"
-        onClick={openChat}
-        className="inline-flex items-center gap-2 rounded-full border border-[#d6c8b3] bg-[#f7f0e2]/96 px-4 py-3 font-serif text-sm text-[#2a2119] shadow-[0_18px_44px_rgba(34,22,14,0.16)] transition hover:-translate-y-0.5 hover:bg-[#fbf5ea] dark:border-[#3a332c] dark:bg-[#211d19]/96 dark:text-[#f5ecdf] dark:hover:bg-[#2a2520]"
-      >
-        Open Chat
-      </button>
+      {!isOpen ? (
+        <div ref={launcherConstraintsRef} className="pointer-events-none fixed inset-0 z-[130]">
+          <motion.div
+            className="pointer-events-auto absolute right-6 bottom-6 touch-none"
+            style={{ x: launcherX, y: launcherY }}
+            drag
+            dragConstraints={launcherConstraintsRef}
+            dragElastic={0}
+            dragMomentum={false}
+            onDragStart={() => {
+              launcherDragMovedRef.current = false;
+            }}
+            onDrag={(_, info) => {
+              if (
+                Math.abs(info.offset.x) > DRAG_CLICK_SUPPRESS_PX ||
+                Math.abs(info.offset.y) > DRAG_CLICK_SUPPRESS_PX
+              ) {
+                launcherDragMovedRef.current = true;
+              }
+            }}
+            onDragEnd={() => {
+              try {
+                localStorage.setItem(
+                  LAUNCHER_POSITION_KEY,
+                  JSON.stringify({ x: launcherX.get(), y: launcherY.get() }),
+                );
+              } catch {
+                /* ignore */
+              }
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                if (launcherDragMovedRef.current) {
+                  launcherDragMovedRef.current = false;
+                  return;
+                }
+                openChat();
+              }}
+              className="inline-flex cursor-grab items-center gap-2 rounded-full border border-[#d6c8b3] bg-[#f7f0e2]/96 px-4 py-3 font-serif text-sm text-[#2a2119] shadow-[0_18px_44px_rgba(34,22,14,0.16)] transition hover:-translate-y-0.5 hover:bg-[#fbf5ea] active:cursor-grabbing dark:border-[#3a332c] dark:bg-[#211d19]/96 dark:text-[#f5ecdf] dark:hover:bg-[#2a2520]"
+            >
+              Open Chat
+            </button>
+          </motion.div>
+        </div>
+      ) : null}
 
       <AnimatePresence>
         {isOpen ? (

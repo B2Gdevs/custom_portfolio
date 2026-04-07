@@ -7,10 +7,10 @@ import {
   useAuiState,
 } from '@assistant-ui/react';
 import { DevToolsFrame } from '@assistant-ui/react-devtools';
-import { motion } from 'framer-motion';
+import { motion, useDragControls } from 'framer-motion';
 import { ArrowUp, Plus, Wrench, X } from 'lucide-react';
 import type { Dispatch, SetStateAction } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { SiteCopilotSources, type SiteCopilotSourceBundle } from './SiteCopilotSources';
 
 export interface SiteCopilotChatPanelSourceProps {
@@ -205,33 +205,51 @@ export function SiteCopilotChatPanel({
   ...sourceProps
 }: SiteCopilotChatPanelProps) {
   const coverLabel = appCoverLabelFromContext(coverImageContext);
+  const constraintsRef = useRef<HTMLDivElement>(null);
+  const dragControls = useDragControls();
 
   return (
     <motion.div
+      ref={constraintsRef}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed inset-0 z-50 flex items-end justify-end bg-[rgba(24,17,12,0.28)] p-3 backdrop-blur-[2px] sm:p-6"
+      className="fixed inset-0 z-[200] pointer-events-auto"
     >
+      <div
+        className="absolute inset-0 bg-[rgba(24,17,12,0.28)] backdrop-blur-[2px]"
+        onClick={onClose}
+        aria-hidden
+      />
       <motion.div
         role="dialog"
         aria-modal="true"
         aria-label={CHAT_TITLE}
-        initial={{ opacity: 0, y: 40, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 28, scale: 0.97 }}
-        transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+        drag
+        dragConstraints={constraintsRef}
+        dragControls={dragControls}
+        dragElastic={0}
+        dragListener={false}
+        dragMomentum={false}
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 16 }}
+        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
         className={[
-          'grid h-[min(44rem,calc(100vh-1.5rem))] w-full overflow-hidden rounded-[2rem] border border-[#d9cfbf] bg-[#f4efe6] shadow-[0_28px_90px_rgba(24,18,13,0.24)] dark:border-[#343029] dark:bg-[#26231f]',
+          'absolute bottom-3 right-3 grid h-[min(44rem,calc(100vh-1.5rem))] w-full overflow-hidden rounded-[2rem] border border-[#d9cfbf] bg-[#f4efe6] shadow-[0_28px_90px_rgba(24,18,13,0.24)] dark:border-[#343029] dark:bg-[#26231f] sm:bottom-6 sm:right-6',
           isDevtoolsOpen
             ? 'max-w-[min(84rem,calc(100vw-1.5rem))] grid-cols-1 xl:grid-cols-[minmax(0,1fr)_26rem]'
             : 'max-w-[min(54rem,calc(100vw-1.5rem))] grid-cols-1',
         ].join(' ')}
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex min-h-0 flex-col bg-[radial-gradient(circle_at_top,#fffaf1_0%,#f4efe6_55%,#ece4d7_100%)] dark:bg-[radial-gradient(circle_at_top,#37312a_0%,#26231f_56%,#1e1b17_100%)]">
           <header className="flex items-center justify-between gap-3 border-b border-[#ddd3c5] px-5 py-4 dark:border-[#3b362f]">
-            <div>
+            <div
+              className="min-w-0 flex-1 cursor-grab touch-none select-none active:cursor-grabbing"
+              onPointerDown={(e) => dragControls.start(e)}
+            >
               <p className="text-[0.68rem] uppercase tracking-[0.3em] text-[#8b7b6d] dark:text-[#b2a899]">
                 Assistant UI
               </p>
@@ -244,7 +262,7 @@ export function SiteCopilotChatPanel({
                 </p>
               ) : null}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               {DEVTOOLS_ENABLED ? (
                 <button
                   type="button"

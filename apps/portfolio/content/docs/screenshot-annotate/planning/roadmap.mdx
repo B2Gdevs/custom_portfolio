@@ -2,7 +2,7 @@
 title: Screenshot annotate — roadmap
 description: Phases for the public screenshot annotation app.
 date: "2026-04-02"
-updated: "2026-04-06"
+updated: "2026-04-07"
 order: 2
 repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/roadmap.mdx
 ---
@@ -17,5 +17,5 @@ repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/roadmap.mdx
 | --- | --- |
 | **annotate-01** | Route + **minimal chrome**; **`pick` → `annotate` → `export`** per tldraw example; **pick**-phase clipboard + **annotate**-phase tldraw clipboard APIs; **four tools** (Select, Hand, Rectangle/geo, Text); **PNG** export only; **Payload** `site-app-records` **catalog row only**. |
 | **annotate-02** | Product polish on top of tldraw: stroke width, color pickers, **solid** “hide” preset; z-order / context actions via SDK where possible. |
-| **annotate-03** | Camera / viewport hardening for image lock; hide or simplify tldraw chrome if needed; **Apps hub** skeleton when Payload is slow. |
-| **annotate-04** | **Tesseract.js** OCR spotlight (lazy WASM + worker); composes **above** or beside tldraw canvas — still no server persistence. |
+| **annotate-03** | **Camera / viewport** — **done** for image lock (`TLCameraOptions.constraints`); optional: further tldraw chrome trimming; **Apps hub** skeleton when Payload is slow (still open if needed). |
+| **annotate-04** | **Tesseract.js** OCR spotlight + copy (shipped); optional follow-ups: word-level boxes, extra languages, **`04-04`** redact presets. |

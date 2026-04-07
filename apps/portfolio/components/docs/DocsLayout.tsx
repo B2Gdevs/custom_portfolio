@@ -140,7 +140,7 @@ export default function DocsLayout({ children, docs }: DocsLayoutProps) {
               <>
                 <aside
                   className={cn(
-                    'flex w-[13.5rem] shrink-0 flex-col overflow-hidden border-r border-border',
+                    'flex w-60 shrink-0 flex-col overflow-hidden border-r border-border',
                     'lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:max-h-[calc(100vh-4rem)]'
                   )}
                 >

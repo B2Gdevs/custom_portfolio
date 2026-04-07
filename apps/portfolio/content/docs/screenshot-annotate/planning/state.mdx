@@ -2,14 +2,18 @@
 title: Screenshot annotate — state
 description: Current pointer for screenshot-annotate work.
 date: "2026-04-02"
-updated: "2026-04-06"
+updated: "2026-04-07"
 order: 3
 repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/state.mdx
 ---
 
 # State
 
-**Next action:** **annotate-04** OCR when scheduled (Tesseract + spotlight + copy).
+**Next action:** optional **Apps hub** skeleton when Payload is slow (roadmap annotate-03 remainder) or OCR language packs.
+
+**Shipped (2026-04-07):** **Auto-redact** (`screenshot-annotate-04-04`) — **Redact emails / phones / both** runs word-level Tesseract, places solid rectangles; **camera constraints** (`screenshot-annotate-03-01`) keep pan/zoom on the screenshot.
+
+**Shipped (2026-04-07):** **Text scan** — **Tesseract.js** runs in-browser on **Text scan**; modal spotlight + per-line copy + copy all ([requirements — text scan](/docs/screenshot-annotate/requirements#text-scan--spotlight-snipping-toolstyle--shipped); tasks `screenshot-annotate-04-01`–`03`).
 
 **Shipped (2026-04-06):** **`pick`-phase paste** — **Clipboard API first** (`navigator.clipboard.read()`), then `clipboardData.files`, then `image/*` **DataTransferItem** + **`File` snapshot** before async load — fixes **blank canvas** after paste on Windows/Chrome when the naive `kind === 'file'` path returned nothing or stale blobs ([requirements — Clipboard and paste](/docs/screenshot-annotate/requirements#clipboard-and-paste); task `screenshot-annotate-01-04`).
 

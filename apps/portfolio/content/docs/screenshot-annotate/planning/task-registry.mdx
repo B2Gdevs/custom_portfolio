@@ -2,7 +2,7 @@
 title: Screenshot annotate — task registry
 description: Tasks for the screenshot annotation app.
 date: "2026-04-02"
-updated: "2026-04-06"
+updated: "2026-04-07"
 order: 4
 repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/task-registry.mdx
 ---
@@ -21,7 +21,8 @@ repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/task-registry
 | `screenshot-annotate-02-01` | `done` | Layers + context menu (z-order + delete) — custom **`ScreenshotAnnotateContextMenu`** (no select-tool-only gate) + default reorder/delete | `tests/unit/components/screenshot-annotate-context-menu.test.ts`; `pnpm run build` |
 | `screenshot-annotate-02-02` | `done` | Toolbar: stroke width, colors, text — **`ScreenshotAnnotateStylePanel`** (color, opacity, fill, dash, size, font, text/label align, geo) | `tests/unit/components/screenshot-annotate-style-panel.test.ts`; `pnpm run build` |
 | `screenshot-annotate-01-04` | `done` | **`pick`-phase paste reliability:** Clipboard API → `clipboardData.files` → `image/*` items; **stabilize** `File` before tldraw load — fixes blank editor after paste | manual paste on `/apps/screenshot-annotate`; `pnpm run build` |
-| `screenshot-annotate-04-01` | `planned` | **Tesseract.js** OCR (lazy-load + **Web Worker**) on image; text bounding regions | unit + fixture image |
-| `screenshot-annotate-04-02` | `planned` | **Spotlight UI**: dim full canvas, highlight text regions (Snipping Tool–style) | manual |
-| `screenshot-annotate-04-03` | `planned` | **Copy** selected region text; **copy all text** control | manual |
-| `screenshot-annotate-04-04` | `planned` | Optional **quick redact**-style presets later (email/phone) — after core copy works | — |
+| `screenshot-annotate-04-01` | `done` | **Tesseract.js** OCR (`dynamic import` + worker via library defaults) on the current `File`; **line** bounding boxes | `pnpm run build`; manual on `/apps/screenshot-annotate` |
+| `screenshot-annotate-04-02` | `done` | **Spotlight UI**: dim overlay + clear line regions + stroke; composited in modal above editor | manual |
+| `screenshot-annotate-04-03` | `done` | **Copy** line (click image or list); **Copy all text** (reading order) | manual |
+| `screenshot-annotate-04-04` | `done` | **Auto-redact** presets: word-level OCR → solid **geo** rects for **email** / **phone** heuristics; status hint in chrome | manual; `tests/unit/lib/screenshot-annotate-redact-patterns.test.ts`; `pnpm run build` |
+| `screenshot-annotate-03-01` | `done` | **Camera constraints** after image load: `setCameraOptions` bounds + **contain** + `zoomToFit` so pan/zoom stays on the screenshot | manual |

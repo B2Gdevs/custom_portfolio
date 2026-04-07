@@ -21,7 +21,7 @@ This page is the **planning source of truth** for site URL shape. Implementation
 | **No top-level tool exceptions** | **Deprecated:** **`/dialogue-forge`**, **`/books`** listing/read routes. Use **`/apps/dialogue-forge`** and **`/apps/reader`**; old URLs **redirect** (308). |
 | **Top-level content indices** | **`/blog`**, **`/projects`**, **`/listen`** stay at the site root as **browsable catalogs** (MDX or data-driven listings), not under **`/apps/*`**. **`/listen`** covers music tracks and BandLab presets; planning: [listen route-and-urls](/docs/listen/route-and-urls). |
 | **Static reading assets** | The lightweight books manifest stays under **`/books/manifest.json`** in `public/books/`. Local EPUB build outputs may still appear under **`/books/<slug>/book.epub`** during authoring, but the current shipped artifact can now be a storage-backed file URL surfaced through that manifest instead of a permanently committed binary. |
-| **APIs** | **`/api/*`** only. **Public** routes are summarized in **`/api/openapi`** (OpenAPI JSON) and browsed interactively at **`/docs/api`** (Swagger UI). Admin and owner-only handlers stay off that spec. |
+| **APIs** | **`/api/*`** only. **Public** routes are summarized in **`/api/openapi`** (OpenAPI JSON) and browsed interactively at **`/docs/api`** (Redoc). Admin and owner-only handlers stay off that spec. |
 | **Admin** | **`/admin/*`** remains internal / operator surfaces. |
 | **Redirects** | Keep **permanent redirects** from removed paths; log notable external links in [errors-and-attempts](/docs/documentation/planning/errors-and-attempts) if needed. |
 
@@ -30,7 +30,7 @@ This page is the **planning source of truth** for site URL shape. Implementation
 | Path | Kind | Notes |
 | --- | --- | --- |
 | `/docs`, `/docs/[...slug]` | Content | MDX tree. Section **`docs/dialogue-forge`** is **documentation** only -- not the running editor. |
-| `/docs/api` | Content | **Swagger UI** for the **public** OpenAPI spec (`GET /api/openapi`). |
+| `/docs/api` | Content | **Redoc** (OpenAPI UI) for the **public** spec (`GET /api/openapi`); standalone layout (no docs file tree). |
 | `/apps` | App hub | Gallery for interactive tools. This is the canonical published URL. |
 | `/apps/reader` | App | **Reader shell** -- library/overview + reading workspace + in-shell navigation. Query params **`*book=&at=&cfi=`** until path-based deep links are specced. |
 | `/apps/dialogue-forge` | App | **Only** shipped Dialogue Forge surface. **`/dialogue-forge` -> 308 here.** |

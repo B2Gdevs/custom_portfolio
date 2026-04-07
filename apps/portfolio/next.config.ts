@@ -1,3 +1,4 @@
+import './env-bootstrap';
 import path from 'path';
 import { createRequire } from 'module';
 import createMDX from '@next/mdx';
@@ -7,12 +8,8 @@ import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypePrettyCode from 'rehype-pretty-code';
 import type { NextConfig } from 'next';
-import { applyMonorepoEnvFromRepoRoot } from './lib/monorepo-env';
 
 const portfolioRoot = path.resolve(__dirname);
-
-/** Root `.env` merged early; app-local non-empty values still win over empty root placeholders. */
-applyMonorepoEnvFromRepoRoot({ portfolioRoot, mode: 'fillUndefinedOrEmpty' });
 
 /** Monorepo root (`.planning/` + `vendor/repo-planner`). Required for RepoPlanner API routes + CLI. */
 const monorepoRoot = path.resolve(__dirname, '../..');
@@ -27,6 +24,8 @@ if (process.env.REPOPLANNER_REPORTS_DIR === undefined) {
 const chatIsolatedDist = process.env.PORTFOLIO_DIST_DIR === '.next-chat';
 
 const nextConfig: NextConfig = {
+  /** Remaining static routes; docs MDX are `force-dynamic` so they do not prerender at build. */
+  staticPageGenerationTimeout: 300,
   distDir: process.env.PORTFOLIO_DIST_DIR || '.next',
   /** Lean Node server bundle for terminal chat only; full `pnpm build` stays default `.next`. */
   ...(chatIsolatedDist
@@ -52,7 +51,6 @@ const nextConfig: NextConfig = {
     '@portfolio/repub-builder',
     '@tldraw/tldraw',
     'tldraw',
-    'swagger-ui-react',
   ],
   async redirects() {
     return [

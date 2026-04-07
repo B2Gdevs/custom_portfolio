@@ -6,16 +6,54 @@ function isImageFile(file: File) {
   return file.type.startsWith('image/');
 }
 
-function readClipboardImageFiles(e: ClipboardEvent): File[] {
+/** Sync snapshot so async reads (tldraw load) do not hit empty clipboard blobs. */
+function stabilizeImageFile(file: File): File {
+  const type =
+    file.type && file.type.startsWith('image/')
+      ? file.type
+      : 'image/png';
+  const blob = file.slice(0, file.size, type);
+  return new File([blob], file.name || 'pasted.png', { type });
+}
+
+const CLIPBOARD_IMAGE_MIMES = [
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/gif',
+  'image/svg+xml',
+] as const;
+
+async function filesFromClipboardApi(items: ClipboardItem[]): Promise<File[]> {
+  const out: File[] = [];
+  for (const item of items) {
+    for (const mime of CLIPBOARD_IMAGE_MIMES) {
+      if (!item.types.includes(mime)) continue;
+      const blob = await item.getType(mime);
+      const ext = mime.split('/')[1] ?? 'png';
+      out.push(new File([blob], `paste.${ext}`, { type: mime }));
+      break;
+    }
+  }
+  return out;
+}
+
+/**
+ * Read images from the paste event's DataTransfer (tldraw-style fallbacks).
+ * Prefer matching `item.type` (image/*) + getAsFile — not only `kind === 'file'`.
+ */
+function readClipboardImageFilesFromEvent(e: ClipboardEvent): File[] {
   const items = e.clipboardData?.items;
   if (!items) return [];
   const out: File[] = [];
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-    if (item.kind === 'file') {
-      const f = item.getAsFile();
-      if (f && isImageFile(f)) out.push(f);
-    }
+    if (!item.type.startsWith('image/')) continue;
+    const f = item.getAsFile();
+    if (!f || f.size === 0) continue;
+    const type = f.type.startsWith('image/') ? f.type : item.type;
+    if (!type.startsWith('image/')) continue;
+    out.push(new File([f], f.name || 'paste.png', { type }));
   }
   return out;
 }
@@ -40,10 +78,41 @@ export function ImagePicker({ onChooseImage }: { onChooseImage: (file: File) => 
 
   const onPaste = useCallback(
     (e: ClipboardEvent) => {
-      const files = readClipboardImageFiles(e);
-      if (files.length > 0) {
+      const fallbackFiles = Array.from(e.clipboardData?.files ?? []).filter((f) =>
+        f.type.startsWith('image/'),
+      );
+      const syncFiles = readClipboardImageFilesFromEvent(e);
+
+      const take = (file: File) => {
+        acceptFile(stabilizeImageFile(file));
+      };
+
+      // Match tldraw: Clipboard API first (reliable on Windows/Chrome for screenshots),
+      // then event.files, then DataTransferItem list.
+      if (navigator.clipboard?.read) {
         e.preventDefault();
-        acceptFile(files[0]);
+        navigator.clipboard
+          .read()
+          .then(async (clipboardItems) => {
+            const fromApi = await filesFromClipboardApi(clipboardItems);
+            if (fromApi.length) {
+              take(fromApi[0]);
+              return;
+            }
+            if (fallbackFiles.length) take(fallbackFiles[0]);
+            else if (syncFiles.length) take(syncFiles[0]);
+          })
+          .catch(() => {
+            if (fallbackFiles.length) take(fallbackFiles[0]);
+            else if (syncFiles.length) take(syncFiles[0]);
+          });
+        return;
+      }
+
+      if (fallbackFiles.length || syncFiles.length) {
+        e.preventDefault();
+        if (fallbackFiles.length) take(fallbackFiles[0]);
+        else take(syncFiles[0]);
       }
     },
     [acceptFile],

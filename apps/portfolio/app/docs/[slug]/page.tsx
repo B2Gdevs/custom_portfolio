@@ -8,12 +8,8 @@ import TableOfContents from '@/components/docs/TableOfContents';
 import { format } from 'date-fns';
 import { Clock, Edit } from 'lucide-react';
 
-export async function generateStaticParams() {
-  const docs = getAllContent('docs');
-  return docs.map((doc) => ({
-    slug: doc.slug,
-  }));
-}
+/** No `generateStaticParams` — avoid prerendering hundreds of MDX pages during `next build` (timeouts). */
+export const dynamic = 'force-dynamic';
 
 export default async function DocPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

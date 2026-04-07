@@ -6,12 +6,8 @@ import { mdxOptions } from '@/lib/mdx-options';
 import DocsLayout from '@/components/docs/DocsLayout';
 import TableOfContents from '@/components/docs/TableOfContents';
 
-export async function generateStaticParams() {
-  const docs = getAllContent('docs');
-  return docs.map((doc) => ({
-    slug: doc.slug.split('/'),
-  }));
-}
+/** No `generateStaticParams` — avoid prerendering hundreds of MDX pages during `next build` (timeouts). */
+export const dynamic = 'force-dynamic';
 
 export default async function DocPage({ params }: { params: Promise<{ slug: string[] }> }) {
   const { slug } = await params;

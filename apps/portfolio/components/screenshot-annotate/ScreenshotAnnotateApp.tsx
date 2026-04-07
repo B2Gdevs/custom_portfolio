@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import Link from 'next/link';
+import { AppsToolPageHeader } from '@/components/apps/AppsToolPageHeader';
 import { ImageAnnotationEditor } from './ImageAnnotationEditor';
 import { ImageExport } from './ImageExport';
 import { ImagePicker } from './ImagePicker';
@@ -21,18 +21,7 @@ export default function ScreenshotAnnotateApp() {
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-background">
-      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border/80 px-4 py-3 md:px-6">
-        <div className="min-w-0">
-          <p className="text-xs uppercase tracking-[0.2em] text-text-muted">Apps</p>
-          <h1 className="truncate font-display text-lg text-primary md:text-xl">Screenshot annotate</h1>
-        </div>
-        <Link
-          href="/apps"
-          className="shrink-0 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:border-accent hover:text-primary md:text-sm"
-        >
-          All apps
-        </Link>
-      </header>
+      <AppsToolPageHeader title="Screenshot annotate" />
 
       <div className="min-h-0 flex-1 overflow-hidden">
         {state.phase === 'pick' ? (

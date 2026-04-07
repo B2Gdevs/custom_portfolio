@@ -46,6 +46,7 @@ Monorepo-wide items that are not (yet) a full `.planning` task row. Mirror or cl
 
 | Status | Item |
 | --- | --- |
+| `done` | **Docs MDX `pnpm build` (2026-04-09):** `/docs/[slug]` and `/docs/[...slug]` use **`dynamic = 'force-dynamic'`** (no **`generateStaticParams`**), so the build no longer prerenders hundreds of MDX pages or hits the 60s static-generation timeout per page. |
 | `done` | **`.planning-archive/`** removed (2026-03-28); migration pointers recorded in **[requirements](/docs/documentation/requirements)** (**Planning archive** section) and **`.planning/ROADMAP.xml`** / **`.planning/TASK-REGISTRY.xml`** phase 01 closure. |
 | `done` | **Global auth foundation:** Payload auth baseline, shared entitlement/viewer helpers, host-facing login/logout/session routes, long-lived session policy, dev auto-login, and `pnpm --filter @portfolio/app auth:seed` are now in place. |
 | `done` | EPUB planning supplement (`repub epub --planning`, `epubPlanningDirs`, `pnpm run build:books`); `.planning` task `01-04` + [books task registry](/docs/books/planning/task-registry). |

@@ -96,7 +96,7 @@ export default async function RootLayout({
               {siteShell}
               <div
                 data-testid="site-copilot-shell"
-                className="fixed bottom-6 right-6 z-[130] pointer-events-none [&_*]:pointer-events-auto"
+                className="fixed inset-0 z-[130] pointer-events-none"
               >
                 <SiteCopilot />
               </div>

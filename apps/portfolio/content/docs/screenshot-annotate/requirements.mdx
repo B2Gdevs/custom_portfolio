@@ -2,7 +2,7 @@
 title: Screenshot annotate — requirements
 description: Public, browser-only screenshot annotator built on the tldraw SDK — image intake, canvas, clipboard, and export per official docs and Image annotator example.
 date: "2026-04-02"
-updated: "2026-04-06"
+updated: "2026-04-07"
 order: 1
 repoPath: apps/portfolio/content/docs/screenshot-annotate/requirements.mdx
 ---
@@ -78,16 +78,17 @@ We **standardize on the [tldraw SDK](https://tldraw.dev/)** for canvas, shapes, 
 - **Layers / z-order**: use tldraw’s ordering, selection, and menus ([SDK](https://tldraw.dev/)); extend only via supported hooks / APIs.
 - **Toolbar / side panel**: **four tools only** in v1 ([Screenshot annotate v1 toolbar](/docs/screenshot-annotate/requirements#screenshot-annotate-v1-toolbar)); extra style controls (stroke width, palette) may land in **annotate-02** per task registry.
 
-## Planned feature — text scan / spotlight (Snipping Tool–style)
+## Text scan / spotlight (Snipping Tool–style) — **shipped**
 
-Inspired by **Windows Snipping Tool → Text Actions**: run **OCR** on the pasted screenshot, detect text regions, then:
+**Implementation (annotate-04):** **Text scan** in the editor chrome opens a modal; **[Tesseract.js](https://github.com/naptha/tesseract.js)** loads on demand (`import()`), runs on the current image `File` in the default worker path, and returns **line-level** boxes. **Spotlight**: dimmed overlay with **cleared** line rectangles and strokes. **Per-line copy**: click the image or a row in the list. **Copy all text**: header control; reading order from sorted line geometry. English (`eng`) only for now; extra languages and word-level regions are optional follow-ups.
 
-- **Spotlight**: dim the full image with a dark overlay and **brighten or lift** detected text blocks so readable text pops (same “everything else dark, text regions lit” feel).
-- **Per-region copy**: click a detected region to select it; **copy that section’s text** to the clipboard (not only the whole image).
-- **Copy all text**: optional control (e.g. floating bar) to copy **all** recognized text in reading order.
-- **OCR engine (decided):** **[Tesseract.js](https://github.com/naptha/tesseract.js)** in the browser — **lazy-load** only when the user enables **Text actions** (annotate-04); run recognition in a **Web Worker** to avoid blocking the editor; tune language packs for size vs accuracy. **annotate-01** ships **without** OCR so first paint stays fast.
+Original product intent (unchanged):
 
-This block is **not** required for the first MVP; track tasks in `planning/task-registry.mdx` under **annotate-04** / OCR rows.
+- **Spotlight**: dim the full image with a dark overlay and **lift** detected text blocks so readable text pops.
+- **Per-region copy**: click a detected region to select it; **copy that section’s text** to the clipboard.
+- **Copy all text**: control to copy **all** recognized text in reading order.
+
+Track follow-ups in `planning/task-registry.mdx` (**`screenshot-annotate-04-04`** and optional OCR polish).
 
 ## Performance — fast first paint (annotate-01)
 
