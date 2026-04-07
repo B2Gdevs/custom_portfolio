@@ -1,15 +1,14 @@
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 
+import { unknownErrorMessage } from '@/lib/unknown-error';
+import { resolveTsxCliPath } from '@/lib/tsx-json-worker';
+
 type ListenCatalogWorkerResult = {
   status: number;
   body: unknown;
   setCookie?: string;
 };
-
-function resolveTsxCliPath() {
-  return path.join(process.cwd(), 'node_modules', 'tsx', 'dist', 'cli.mjs');
-}
 
 function resolveWorkerPath() {
   return path.join(process.cwd(), 'scripts', 'listen-catalog-worker.ts');
@@ -48,11 +47,7 @@ export async function runListenCatalogWorker(payload: {
         resolve(JSON.parse(stdout) as ListenCatalogWorkerResult);
       } catch (error) {
         reject(
-          new Error(
-            `listen catalog worker returned invalid JSON: ${
-              error instanceof Error ? error.message : String(error)
-            }`,
-          ),
+          new Error(`listen catalog worker returned invalid JSON: ${unknownErrorMessage(error)}`),
         );
       }
     });

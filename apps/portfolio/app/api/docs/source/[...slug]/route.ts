@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { NextResponse } from 'next/server';
 
+import { jsonApiError } from '@/lib/api/http';
 import { resolveUnderContentDocs } from '@/lib/server/content-docs-path';
 
 export async function GET(
@@ -24,10 +25,10 @@ export async function GET(
   try {
     st = await fs.stat(abs);
   } catch {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    return jsonApiError('Not found', 404);
   }
   if (!st.isFile()) {
-    return NextResponse.json({ error: 'Not a file' }, { status: 400 });
+    return jsonApiError('Not a file', 400);
   }
   const body = await fs.readFile(abs);
   const name = path.basename(abs);

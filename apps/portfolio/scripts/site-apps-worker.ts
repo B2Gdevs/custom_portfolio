@@ -1,3 +1,4 @@
+import { unknownErrorMessageWithStack } from '@/lib/unknown-error';
 import { getPayloadClient } from '@/lib/payload';
 import { FALLBACK_SITE_APPS, type SiteAppRecord, type SiteAppRecordDoc } from '@/lib/site-app-registry';
 import { toSiteAppRecord } from '@/lib/site-app-mapper';
@@ -104,6 +105,6 @@ async function main() {
 }
 
 void main().catch((error) => {
-  process.stderr.write(error instanceof Error ? error.stack || error.message : String(error));
+  process.stderr.write(unknownErrorMessageWithStack(error));
   process.exit(1);
 });

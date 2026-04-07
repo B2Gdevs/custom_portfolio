@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { OcrLine } from '@/lib/screenshot-annotate/ocr-reading-order';
 import { joinLinesAsPlainText, ocrLineKey } from '@/lib/screenshot-annotate/ocr-reading-order';
 import { runTesseractOnFile } from '@/lib/screenshot-annotate/run-tesseract-ocr';
+import { errorMessageOrFallback } from '@/lib/unknown-error';
 
 function pickLineAtCanvasPoint(
   lines: OcrLine[],
@@ -67,7 +68,7 @@ export function ScreenshotOcrModal({
       } catch (e) {
         if (!cancelled) {
           setPhase('error');
-          setErrorMessage(e instanceof Error ? e.message : 'OCR failed.');
+          setErrorMessage(errorMessageOrFallback(e, 'OCR failed.'));
         }
       }
     })();

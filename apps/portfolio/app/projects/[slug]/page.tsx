@@ -3,15 +3,15 @@ import { getAllContent } from '@/lib/content';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { getMDXComponents } from '@/lib/mdx';
 import { mdxOptions } from '@/lib/mdx-options';
-import Link from 'next/link';
 import Image from 'next/image';
 import ProjectMediaSidebar from '@/components/projects/ProjectMediaSidebar';
 import TableOfContents from '@/components/docs/TableOfContents';
+import { ContentBackLink } from '@/components/content/ContentBackLink';
+import { ContentGallerySection } from '@/components/content/ContentGallerySection';
 import { ContentTopLinks } from '@/components/content/ContentTopLinks';
 import { RequiredSectionsNotice } from '@/components/content/RequiredSectionsNotice';
 import { buildContentLinkGroups } from '@/lib/content-view-models';
 import { getProjectBySlug } from '@/lib/projects';
-import { ArrowLeft } from 'lucide-react';
 
 export async function generateStaticParams() {
   const projects = getAllContent('projects');
@@ -73,10 +73,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   return (
     <article className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Link href="/projects" className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline">
-          <ArrowLeft size={16} />
-          <span>Back to Projects</span>
-        </Link>
+        <ContentBackLink href="/projects">Back to Projects</ContentBackLink>
       </div>
 
       {heroImage ? (
@@ -129,27 +126,11 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
             <RequiredSectionsNotice type="projects" missing={project.missingRequiredSections} />
           ) : null}
 
-          {galleryImages.length > 1 ? (
-            <section className="rounded-[2rem] border border-border/70 bg-dark-alt/55 p-6" data-gallery-container>
-              <h2 className="font-serif text-2xl text-primary">Gallery</h2>
-              <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3">
-                {galleryImages.map((img: string, idx: number) => (
-                  <div
-                    key={idx}
-                    data-gallery-image
-                    className="group relative aspect-video cursor-pointer overflow-hidden rounded-2xl border border-border shadow-md transition-shadow hover:shadow-xl"
-                  >
-                    <Image
-                      src={img}
-                      alt={`${project.meta.title} - Image ${idx + 1}`}
-                      fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
-          ) : null}
+          <ContentGallerySection
+            images={galleryImages}
+            altPrefix={project.meta.title}
+            variant="projects"
+          />
 
           <div className="rounded-[2rem] border border-border/70 bg-dark-alt/40 p-6 sm:p-8">
             <div className="prose prose-lg max-w-none">
@@ -158,10 +139,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
           </div>
 
           <div className="border-t border-border/70 pt-8">
-            <Link href="/projects" className="inline-flex items-center gap-2 text-accent font-semibold hover:underline">
-              <ArrowLeft size={16} />
-              <span>Back to Projects</span>
-            </Link>
+            <ContentBackLink href="/projects">Back to Projects</ContentBackLink>
           </div>
         </div>
 

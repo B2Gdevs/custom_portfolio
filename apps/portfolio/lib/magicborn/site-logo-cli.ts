@@ -1,4 +1,5 @@
 import type { Payload } from 'payload';
+import { unknownErrorMessage } from '@/lib/unknown-error';
 import { SITE_MEDIA_ASSET_COLLECTION_SLUG } from '@/lib/payload/collections/siteMediaAssets';
 
 /** Active site logo group: brand scope + stable slug (global-tooling-01-04). */
@@ -89,6 +90,6 @@ export async function setActiveSiteLogo(
 
     return { ok: true };
   } catch (e) {
-    return { ok: false, message: e instanceof Error ? e.message : String(e) };
+    return { ok: false, message: unknownErrorMessage(e) };
   }
 }

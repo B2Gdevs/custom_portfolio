@@ -4,13 +4,13 @@ import { MDXRemote } from 'next-mdx-remote/rsc';
 import { getMDXComponents } from '@/lib/mdx';
 import { mdxOptions } from '@/lib/mdx-options';
 import { format } from 'date-fns';
-import Link from 'next/link';
 import Image from 'next/image';
 import TableOfContents from '@/components/docs/TableOfContents';
+import { ContentBackLink } from '@/components/content/ContentBackLink';
+import { ContentGallerySection } from '@/components/content/ContentGallerySection';
 import { ContentTopLinks } from '@/components/content/ContentTopLinks';
 import { RequiredSectionsNotice } from '@/components/content/RequiredSectionsNotice';
 import { buildContentLinkGroups } from '@/lib/content-view-models';
-import { ArrowLeft } from 'lucide-react';
 
 /** This post inlines Apps + Resources inside the Resources tab; skip duplicate top link strip. */
 const MANUSCRIPT_LOOP_BLOG_SLUG = 'how-we-write-books-with-planning-documents-and-the-manuscript-loop';
@@ -38,10 +38,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   return (
     <article className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Link href="/blog" className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline">
-          <ArrowLeft size={16} />
-          <span>Back to Blog</span>
-        </Link>
+        <ContentBackLink href="/blog">Back to Blog</ContentBackLink>
       </div>
 
       {heroImage ? (
@@ -90,26 +87,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             <RequiredSectionsNotice type="blog" missing={post.missingRequiredSections} />
           ) : null}
 
-          {galleryImages.length > 1 ? (
-            <section className="rounded-[2rem] border border-border/70 bg-dark-alt/55 p-6">
-              <h2 className="font-serif text-2xl text-primary">Gallery</h2>
-              <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-                {galleryImages.map((img: string, idx: number) => (
-                  <div
-                    key={idx}
-                    className="group relative aspect-video overflow-hidden rounded-2xl border border-border shadow-md transition-shadow hover:shadow-xl"
-                  >
-                    <Image
-                      src={img}
-                      alt={`${post.meta.title} - Image ${idx + 1}`}
-                      fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
-          ) : null}
+          <ContentGallerySection
+            images={galleryImages}
+            altPrefix={post.meta.title}
+            variant="blog"
+          />
 
           <div className="rounded-[2rem] border border-border/70 bg-dark-alt/40 p-6 sm:p-8">
             <div className="prose prose-lg max-w-none">
@@ -118,10 +100,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </div>
 
           <div className="border-t border-border/70 pt-8">
-            <Link href="/blog" className="inline-flex items-center gap-2 text-accent font-semibold hover:underline">
-              <ArrowLeft size={16} />
-              <span>Back to Blog</span>
-            </Link>
+            <ContentBackLink href="/blog">Back to Blog</ContentBackLink>
           </div>
         </div>
 

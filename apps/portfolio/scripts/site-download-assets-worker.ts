@@ -1,3 +1,4 @@
+import { unknownErrorMessageWithStack } from '@/lib/unknown-error';
 import { getPayloadClient } from '@/lib/payload';
 import type { Where } from 'payload';
 import {
@@ -73,6 +74,6 @@ async function main() {
 }
 
 void main().catch((error) => {
-  process.stderr.write(error instanceof Error ? error.stack || error.message : String(error));
+  process.stderr.write(unknownErrorMessageWithStack(error));
   process.exit(1);
 });

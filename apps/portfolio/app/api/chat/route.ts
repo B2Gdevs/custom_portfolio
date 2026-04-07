@@ -3,6 +3,7 @@ import { isCopilotToolsAuthorized } from '@/lib/copilot/copilot-tools-auth';
 import { COPILOT_TOOLS_SYSTEM_SUPPLEMENT, runCopilotChatOpenAiLoop } from '@/lib/copilot/openai-chat-tools';
 import { buildRagSystemMessage } from '@/lib/rag/chat-context';
 import { createLogger } from '@/lib/logging';
+import { unknownErrorMessage } from '@/lib/unknown-error';
 import { retrieveRagContext } from '@/lib/rag/retrieve';
 import {
   SITE_CHAT_INSTRUCTIONS,

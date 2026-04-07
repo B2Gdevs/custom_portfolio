@@ -3,6 +3,7 @@ import path from 'path';
 import JSZip from 'jszip';
 import { NextResponse } from 'next/server';
 
+import { jsonApiError } from '@/lib/api/http';
 import { resolveUnderContentDocs } from '@/lib/server/content-docs-path';
 
 /** Section / nested folder keys only (no traversal). */
@@ -12,20 +13,20 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const prefix = searchParams.get('prefix')?.trim() ?? '';
   if (!prefix || !PREFIX_RE.test(prefix)) {
-    return NextResponse.json({ error: 'Invalid prefix' }, { status: 400 });
+    return jsonApiError('Invalid prefix', 400);
   }
   const dirAbs = resolveUnderContentDocs(prefix);
   if (!dirAbs) {
-    return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
+    return jsonApiError('Invalid path', 400);
   }
   const rootDir = dirAbs;
   try {
     const st = await fs.stat(rootDir);
     if (!st.isDirectory()) {
-      return NextResponse.json({ error: 'Not a folder' }, { status: 400 });
+      return jsonApiError('Not a folder', 400);
     }
   } catch {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    return jsonApiError('Not found', 404);
   }
 
   const files: { rel: string; full: string }[] = [];
@@ -46,7 +47,7 @@ export async function GET(req: Request) {
 
   await walk(rootDir);
   if (files.length === 0) {
-    return NextResponse.json({ error: 'No markdown files in folder' }, { status: 404 });
+    return jsonApiError('No markdown files in folder', 404);
   }
 
   const zip = new JSZip();

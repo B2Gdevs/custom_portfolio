@@ -3,6 +3,7 @@ import { isCopilotMutateCollectionAllowed } from '@/lib/copilot/copilot-mutate-a
 import { buildCopilotFormDescriptor } from '@/lib/copilot/form-descriptor';
 import { sanitizeCopilotCreateData } from '@/lib/copilot/sanitize-copilot-create-data';
 import { getPayloadClient } from '@/lib/payload';
+import { unknownErrorMessage } from '@/lib/unknown-error';
 
 export const runtime = 'nodejs';
 
@@ -50,9 +51,6 @@ export async function POST(request: Request) {
     });
     return Response.json({ ok: true, id: doc.id });
   } catch (e) {
-    return Response.json(
-      { error: 'create_failed', message: e instanceof Error ? e.message : String(e) },
-      { status: 502 },
-    );
+    return Response.json({ error: 'create_failed', message: unknownErrorMessage(e) }, { status: 502 });
   }
 }

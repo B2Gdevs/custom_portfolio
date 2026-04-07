@@ -9,6 +9,7 @@ import {
   type PlanningPackManifest,
 } from 'repo-planner/planning-pack';
 import type { ModalShellProps } from '@/lib/modal-types';
+import { errorMessageOrFallback } from '@/lib/unknown-error';
 import { buildPlanningPackGalleryTabs } from '@/lib/planning-pack-modal-data';
 
 const DEFAULT_TAB_ID = 'starter-template';
@@ -63,7 +64,7 @@ export function PlanningPackModal({ onClose }: ModalShellProps) {
           return;
         }
 
-        setLoadError(e instanceof Error ? e.message : 'Failed to load planning pack.');
+        setLoadError(errorMessageOrFallback(e, 'Failed to load planning pack.'));
       })
       .finally(() => {
         if (!cancelled) {

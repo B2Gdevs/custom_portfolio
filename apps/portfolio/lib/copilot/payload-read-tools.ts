@@ -1,5 +1,6 @@
 import type { Payload, Where } from 'payload';
 import { getPayloadClient } from '@/lib/payload';
+import { unknownErrorMessage } from '@/lib/unknown-error';
 import {
   COPILOT_READ_LIMITS,
   COPILOT_READ_COLLECTION_SLUGS,
@@ -155,8 +156,7 @@ export async function copilotPayloadFind(
       },
     };
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return fail('find', collection, 'payload_error', msg);
+    return fail('find', collection, 'payload_error', unknownErrorMessage(e));
   }
 }
 
@@ -202,7 +202,7 @@ export async function copilotPayloadFindById(
       result: { doc },
     };
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
+    const msg = unknownErrorMessage(e);
     if (/not found/i.test(msg) || /NotFound/i.test(msg)) {
       return fail('findByID', collection, 'not_found', `No document "${id}" in "${collection}".`);
     }

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Command, FileText, FolderKanban, Headphones, Search, X } from 'lucide-react';
 import type { ModalShellProps } from '@/lib/modal-types';
 import type { DiscoverySearchHit } from '@/lib/content-discovery';
+import { errorMessageOrFallback } from '@/lib/unknown-error';
 import { HighlightedText } from '@/components/content/HighlightedText';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -82,7 +83,7 @@ export function ContentCommandPaletteModal({ onClose, payload }: ModalShellProps
         if (cause instanceof DOMException && cause.name === 'AbortError') {
           return;
         }
-        setError(cause instanceof Error ? cause.message : 'Search request failed.');
+        setError(errorMessageOrFallback(cause, 'Search request failed.'));
       } finally {
         setLoading(false);
       }

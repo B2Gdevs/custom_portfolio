@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process';
 import { NextResponse } from 'next/server';
+import { unknownErrorMessage } from '@/lib/api/http';
 import { planningCockpitServerWritesEnabled } from '@/lib/repo-planner/cockpit-server-policy';
 import { getCliPath, getProjectRoot, getRepoPlannerChildEnv } from '@/lib/repo-planner/project-root';
 
@@ -139,9 +140,8 @@ export async function POST(request: Request) {
       exitCode: result.code,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { ok: false, error: message, stdout: '', stderr: '' },
+      { ok: false, error: unknownErrorMessage(error), stdout: '', stderr: '' },
       { status: 500 },
     );
   }

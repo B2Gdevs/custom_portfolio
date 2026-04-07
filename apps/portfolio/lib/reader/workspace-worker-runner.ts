@@ -2,6 +2,9 @@ import { readFileSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 
+import { unknownErrorMessage } from '@/lib/unknown-error';
+import { resolveTsxCliPath } from '@/lib/tsx-json-worker';
+
 const RESULT_MARKER_PREFIX = 'READER_WORKSPACE_JSON_PATH=';
 
 type ReaderWorkspaceWorkerResult = {
@@ -9,10 +12,6 @@ type ReaderWorkspaceWorkerResult = {
   body: unknown;
   setCookie?: string;
 };
-
-function resolveTsxCliPath() {
-  return path.join(process.cwd(), 'node_modules', 'tsx', 'dist', 'cli.mjs');
-}
 
 function resolveWorkerPath() {
   return path.join(process.cwd(), 'scripts', 'reader-workspace-worker.ts');
@@ -70,9 +69,7 @@ export async function runReaderWorkspaceWorker(payload: {
       } catch (error) {
         reject(
           new Error(
-            `reader workspace worker returned invalid JSON: ${
-              error instanceof Error ? error.message : String(error)
-            }; stdout (first 800 chars): ${stdout.slice(0, 800)}`,
+            `reader workspace worker returned invalid JSON: ${unknownErrorMessage(error)}; stdout (first 800 chars): ${stdout.slice(0, 800)}`,
           ),
         );
       }

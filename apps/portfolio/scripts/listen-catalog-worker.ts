@@ -1,3 +1,4 @@
+import { unknownErrorMessageWithStack } from '@/lib/unknown-error';
 import { maybeAutoLoginForDevelopment } from '@/lib/auth/session';
 import { getListenCatalogBootstrap } from '@/lib/listen-catalog-bootstrap';
 
@@ -55,6 +56,6 @@ async function main() {
 }
 
 void main().catch((error) => {
-  process.stderr.write(error instanceof Error ? error.stack || error.message : String(error));
+  process.stderr.write(unknownErrorMessageWithStack(error));
   process.exit(1);
 });

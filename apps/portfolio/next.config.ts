@@ -27,22 +27,30 @@ const nextConfig: NextConfig = {
   /** Remaining static routes; docs MDX are `force-dynamic` so they do not prerender at build. */
   staticPageGenerationTimeout: 300,
   distDir: process.env.PORTFOLIO_DIST_DIR || '.next',
+  /**
+   * pnpm hoists deps to the monorepo root; Vercel serverless traces from `apps/portfolio` by default
+   * and can omit `@payloadcms/db-*` / `pg` (externals) → MODULE_NOT_FOUND at runtime. Trace from repo root.
+   */
+  outputFileTracingRoot: monorepoRoot,
   /** Lean Node server bundle for terminal chat only; full `pnpm build` stays default `.next`. */
   ...(chatIsolatedDist
     ? {
         output: 'standalone' as const,
-        outputFileTracingRoot: monorepoRoot,
       }
     : {}),
   /**
    * Payload loads exactly one DB adapter via dynamic `require()`. Next file tracing does not
    * always follow that, so Vercel lambdas can miss `@payloadcms/db-sqlite` and throw MODULE_NOT_FOUND.
-   * Include both adapters in every server trace so either branch resolves at runtime.
+   * Include both adapters + `pg` (postgres adapter) from app and hoisted root `node_modules`.
    */
   outputFileTracingIncludes: {
     '**': [
       './node_modules/@payloadcms/db-sqlite/**/*',
       './node_modules/@payloadcms/db-postgres/**/*',
+      './node_modules/pg/**/*',
+      '../../node_modules/@payloadcms/db-sqlite/**/*',
+      '../../node_modules/@payloadcms/db-postgres/**/*',
+      '../../node_modules/pg/**/*',
     ],
   },
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],

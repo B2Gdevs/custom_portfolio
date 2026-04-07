@@ -2,6 +2,8 @@ import type { ChildProcess } from 'node:child_process';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 
+import { resolveTsxCliPath } from '@/lib/tsx-json-worker';
+
 type AuthWorkerCommand = 'login' | 'session';
 
 export type AuthWorkerResult = {
@@ -17,10 +19,6 @@ function authWorkerTimeoutMs(): number {
   if (!raw) return DEFAULT_AUTH_WORKER_TIMEOUT_MS;
   const n = Number(raw);
   return Number.isFinite(n) && n >= 3000 ? Math.floor(n) : DEFAULT_AUTH_WORKER_TIMEOUT_MS;
-}
-
-function resolveTsxCli() {
-  return path.join(process.cwd(), 'node_modules', 'tsx', 'dist', 'cli.mjs');
 }
 
 function resolveWorkerScript() {
@@ -67,7 +65,7 @@ export async function runAuthWorker(
   const encoded = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
   const child = spawn(
     process.execPath,
-    [resolveTsxCli(), '--tsconfig', 'tsconfig.json', resolveWorkerScript(), command, encoded],
+    [resolveTsxCliPath(), '--tsconfig', 'tsconfig.json', resolveWorkerScript(), command, encoded],
     {
       cwd: process.cwd(),
       env: process.env,

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
+import { errorMessageOrFallback } from '@/lib/unknown-error';
 
 function stripHtmlComments(source: string): string {
   return source.replace(/<!--[\s\S]*?-->/g, '').trim();
@@ -34,7 +35,7 @@ export function Mermaid({ chart }: { chart: string }) {
         }
       } catch (e) {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : 'Failed to render diagram');
+          setError(errorMessageOrFallback(e, 'Failed to render diagram'));
         }
       }
     }

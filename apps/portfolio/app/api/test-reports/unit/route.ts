@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { NextResponse } from 'next/server';
+import { unknownErrorMessage } from '@/lib/api/http';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -77,11 +78,10 @@ export async function GET() {
       suites,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
       {
         error: 'Test report not found or invalid',
-        detail: message,
+        detail: unknownErrorMessage(error),
         hint: 'Run pnpm test:unit from the project app dir (writes test-reports/unit/results.json). Set REPOPLANNER_PROJECT_ROOT for standalone.',
       },
       { status: 404 },

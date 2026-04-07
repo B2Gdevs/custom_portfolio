@@ -1,15 +1,14 @@
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 
+import { unknownErrorMessage } from '@/lib/unknown-error';
+import { resolveTsxCliPath } from '@/lib/tsx-json-worker';
+
 type ReaderStateWorkerResult = {
   status: number;
   body: unknown;
   setCookie?: string;
 };
-
-function resolveTsxCliPath() {
-  return path.join(process.cwd(), 'node_modules', 'tsx', 'dist', 'cli.mjs');
-}
 
 function resolveWorkerPath() {
   return path.join(process.cwd(), 'scripts', 'reader-state-worker.ts');
@@ -46,11 +45,7 @@ export async function runReaderStateWorker(payload: unknown): Promise<ReaderStat
         resolve(JSON.parse(stdout) as ReaderStateWorkerResult);
       } catch (error) {
         reject(
-          new Error(
-            `reader state worker returned invalid JSON: ${
-              error instanceof Error ? error.message : String(error)
-            }`,
-          ),
+          new Error(`reader state worker returned invalid JSON: ${unknownErrorMessage(error)}`),
         );
       }
     });

@@ -1,6 +1,7 @@
 import { writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { unknownErrorMessageWithStack } from '@/lib/unknown-error';
 import { getReaderWorkspaceBootstrap } from '@/lib/reader/workspace-bootstrap';
 import { maybeAutoLoginForDevelopment } from '@/lib/auth/session';
 
@@ -66,6 +67,6 @@ async function main() {
 }
 
 void main().catch((error) => {
-  process.stderr.write(error instanceof Error ? error.stack || error.message : String(error));
+  process.stderr.write(unknownErrorMessageWithStack(error));
   process.exit(1);
 });

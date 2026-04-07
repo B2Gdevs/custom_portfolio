@@ -9,6 +9,7 @@ import {
   applyRedactPresetsToEditor,
   applyScreenshotCameraConstraints,
 } from '@/lib/screenshot-annotate/tldraw-screenshot-helpers';
+import { errorMessageOrFallback } from '@/lib/unknown-error';
 import type { RedactKind } from '@/lib/screenshot-annotate/redact-patterns';
 import { ScreenshotOcrModal } from './ScreenshotOcrModal';
 import { ScreenshotAnnotateContextMenu } from './ScreenshotAnnotateContextMenu';
@@ -49,7 +50,7 @@ function AnnotateChrome({
             : `Added ${added} redact box${added === 1 ? '' : 'es'}. Drag to adjust if needed.`,
         );
       } catch (e) {
-        setHint(e instanceof Error ? e.message : 'Could not run redact.');
+        setHint(errorMessageOrFallback(e, 'Could not run redact.'));
       } finally {
         setRedactBusy(false);
       }

@@ -1,4 +1,5 @@
 import type { Where } from 'payload';
+import { unknownErrorMessage } from '@/lib/unknown-error';
 import type { CopilotFormDescriptor } from '@/lib/copilot/form-descriptor';
 import { buildCopilotFormDescriptor } from '@/lib/copilot/form-descriptor';
 import { COPILOT_FORM_OPENAI_TOOLS } from '@/lib/copilot/payload-form-tools';
@@ -182,7 +183,7 @@ export async function runCopilotChatOpenAiLoop(options: {
       try {
         content = await executeCopilotToolCall(name, argsStr);
       } catch (e) {
-        content = JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) });
+        content = JSON.stringify({ ok: false, error: unknownErrorMessage(e) });
       }
       try {
         const parsed = JSON.parse(content) as { ok?: boolean; descriptor?: CopilotFormDescriptor };

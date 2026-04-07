@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { runAuthWorker } from '@/lib/auth/worker-runner';
+import { unknownErrorMessage } from '@/lib/unknown-error';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
     }
     return response;
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = unknownErrorMessage(err);
     const timedOut = msg.includes('timed out');
     return NextResponse.json(
       {

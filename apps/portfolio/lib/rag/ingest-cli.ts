@@ -19,6 +19,7 @@ import {
 } from './config';
 import ora from 'ora';
 import type { RagIngestSummary } from './types';
+import { unknownErrorMessage } from '@/lib/unknown-error';
 
 export interface RagIngestCli {
   banner(): void;
@@ -117,8 +118,7 @@ export function reportLocalModelError(error: unknown): void {
   const color = shouldUseColor();
   const dim = (s: string) => c(color, pc.dim, s);
   const red = (s: string) => c(color, pc.red, s);
-  const msg = error instanceof Error ? error.message : String(error);
-  console.log(`  ${dim('›')} ${red('✖')} ${msg}`);
+  console.log(`  ${dim('›')} ${red('✖')} ${unknownErrorMessage(error)}`);
 }
 
 function readAppVersion(): string {
@@ -274,7 +274,7 @@ export function createRagIngestCli(enabled: boolean): RagIngestCli {
 
     failure(error) {
       console.log('');
-      const msg = error instanceof Error ? error.message : String(error);
+      const msg = unknownErrorMessage(error);
       console.log(`  ${red('✖')} ${msg}`);
       if (error instanceof Error && error.stack) {
         console.log(dim(error.stack.split('\n').slice(1, 8).join('\n')));

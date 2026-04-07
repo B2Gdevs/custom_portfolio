@@ -8,6 +8,7 @@ import {
   importLocalProviderSnapshot,
 } from '@/lib/payload/provider-bootstrap';
 import { resolvePortfolioAppRoot } from '@/lib/payload/app-root';
+import { unknownErrorMessage } from '@/lib/unknown-error';
 
 function resolvePathArg(value: string | undefined, fallbackName: string) {
   const appRoot = resolvePortfolioAppRoot();
@@ -51,7 +52,7 @@ function runHostedBootstrap() {
         throw error;
       }
 
-      const message = error instanceof Error ? error.message : String(error);
+      const message = unknownErrorMessage(error);
       console.warn(`[provider-bootstrap] optional step failed: ${step.label}`);
       console.warn(`[provider-bootstrap] ${message}`);
     }

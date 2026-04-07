@@ -6,8 +6,8 @@ function getQueryFromRequest(request: Request, body?: { query?: string }) {
   return body?.query ?? url.searchParams.get('q') ?? '';
 }
 
-export async function GET(request: Request) {
-  const query = getQueryFromRequest(request);
+async function handleRagSearch(request: Request, body?: { query?: string }) {
+  const query = getQueryFromRequest(request, body);
   if (!query.trim()) {
     return NextResponse.json({ error: 'missing_query' }, { status: 400 });
   }
@@ -19,16 +19,11 @@ export async function GET(request: Request) {
   });
 }
 
+export async function GET(request: Request) {
+  return handleRagSearch(request);
+}
+
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as { query?: string };
-  const query = getQueryFromRequest(request, body);
-  if (!query.trim()) {
-    return NextResponse.json({ error: 'missing_query' }, { status: 400 });
-  }
-
-  const hits = await retrieveRagContext(query);
-  return NextResponse.json({
-    query,
-    hits,
-  });
+  return handleRagSearch(request, body);
 }

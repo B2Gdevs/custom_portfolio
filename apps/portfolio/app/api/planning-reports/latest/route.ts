@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { NextResponse } from 'next/server';
+import { jsonApiError, unknownErrorMessage } from '@/lib/api/http';
 import { getReportsDir } from '@/lib/repo-planner/project-root';
 
 export const runtime = 'nodejs';
@@ -15,7 +16,6 @@ export async function GET() {
     const markdown = readFileSync(reportPath, 'utf8');
     return NextResponse.json({ markdown });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: message, markdown: '' }, { status: 500 });
+    return jsonApiError(unknownErrorMessage(error), 500, { markdown: '' });
   }
 }

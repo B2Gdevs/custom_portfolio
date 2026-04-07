@@ -2,9 +2,9 @@
 <state>
   <agent-registry />
   <current-phase>05</current-phase>
-  <current-plan>cross-project-observability-01</current-plan>
+  <current-plan>global-data-storage-02</current-plan>
   <status>active</status>
-  <next-action>Execute `05-01`: finish the cross-project observability baseline by adding privacy-aware Vercel Analytics to the portfolio and Grime Time public layouts, land Grime Time request-id tracing plus safe summaries for the contact, instant-quote, schedule, and internal copilot routes, cover the helper and route headers with tests, and verify the planning snapshot after targeted lint/typecheck/build runs. Dependency note: `@vercel/analytics` is already present in `vendor/grime-time-site/package.json`, and `pnpm-lock.yaml` already contains the `apps/portfolio` importer entry from the earlier add attempt, but `apps/portfolio/package.json` still needs to be aligned cleanly.</next-action>
+  <next-action>Primary queue: continue `02-01` (shared data/storage provider contract). Observability: `05-01` is marked done in TASK-REGISTRY; run `gad snapshot --projectid global` after pulls. Latest maintenance: `01-12` landed portfolio `unknown-error` + `tsx-json-worker` dedupe and repub-builder `utils/unknown-error` for reader.</next-action>
   <references>
     <reference>AGENTS.md (repo root)</reference>
     <reference>apps/portfolio/content/docs/global/requirements.mdx</reference>
@@ -38,6 +38,6 @@
     <rule>Optional: register a unique id in STATE.xml before claiming tasks if you use CLI task-update.</rule>
     <generator>node vendor/repo-planner/scripts/loop-cli.mjs new-agent-id</generator>
   </agent-id-policy>
-  <last-updated>2026-04-05T02:40:30.079Z</last-updated>
+  <last-updated>2026-04-07T12:00:00.000Z</last-updated>
   <sink-compiled sink="apps/portfolio/content/docs/global/planning/" at="2026-04-06T20:35:07.037Z" />
 </state>

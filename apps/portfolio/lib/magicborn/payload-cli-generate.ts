@@ -1,4 +1,5 @@
 import type { Payload } from 'payload';
+import { unknownErrorMessage } from '@/lib/unknown-error';
 import { SITE_APP_RECORD_COLLECTION_SLUG } from '@/lib/payload/collections/siteAppRecords';
 import { FALLBACK_SITE_APPS, type SiteAppRecord } from '@/lib/site-app-registry';
 
@@ -70,6 +71,6 @@ export async function upsertSiteAppRecordViaLocalPayload(
     });
     return { ok: true, id: created.id, mode: 'created' };
   } catch (e) {
-    return { ok: false, message: e instanceof Error ? e.message : String(e) };
+    return { ok: false, message: unknownErrorMessage(e) };
   }
 }

@@ -1,3 +1,4 @@
+import { unknownErrorMessageWithStack } from '@/lib/unknown-error';
 import { maybeAutoLoginForDevelopment } from '@/lib/auth/session';
 import { saveReaderWorkspaceSettings, uploadReaderLibraryEpub } from '@/lib/reader/workspace-write';
 import type { ReaderLibraryUploadInput, ReaderWorkspaceSettingsInput } from '@/lib/reader/workspace-write-contract';
@@ -110,6 +111,6 @@ async function main() {
 }
 
 void main().catch((error) => {
-  process.stderr.write(error instanceof Error ? error.stack || error.message : String(error));
+  process.stderr.write(unknownErrorMessageWithStack(error));
   process.exit(1);
 });

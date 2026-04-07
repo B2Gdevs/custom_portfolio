@@ -2,6 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { unknownErrorMessage } from '@/lib/api/http';
 import { planningCockpitServerWritesEnabled } from '@/lib/repo-planner/cockpit-server-policy';
 import { getPlanningDir, getProjectRoot } from '@/lib/repo-planner/project-root';
 
@@ -67,7 +68,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true, applied });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ ok: false, error: message }, { status: 400 });
+    return NextResponse.json({ ok: false, error: unknownErrorMessage(error) }, { status: 400 });
   }
 }
