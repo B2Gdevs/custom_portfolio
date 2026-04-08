@@ -28,9 +28,18 @@ type RawPlanningRoot = {
   discoverDescendants?: unknown;
 };
 
+/** Monorepo-wide root: `path` is implied `.` (see [[planning.sections]] in gad-config.toml). */
+type RawPlanningSection = {
+  id?: unknown;
+  planningDir?: unknown;
+  planning_dir?: unknown;
+  discover?: unknown;
+};
+
 type RawPlanningConfig = {
   planning?: {
     roots?: RawPlanningRoot[];
+    sections?: RawPlanningSection[];
     reportsDir?: unknown;
     sprintSize?: unknown;
     currentProfile?: unknown;
@@ -72,9 +81,42 @@ function normalizePlanningDir(workspaceRoot: string, rawPlanningDir: string | nu
   };
 }
 
+/** GAD config (canonical) or legacy planning-config.toml inside `.planning/`. */
+function resolveGadConfigPath(root: string): string | null {
+  const gad = path.join(root, DEFAULT_PLANNING_DIR_NAME, 'gad-config.toml');
+  const legacy = path.join(root, DEFAULT_PLANNING_DIR_NAME, 'planning-config.toml');
+  if (existsSync(gad)) return gad;
+  if (existsSync(legacy)) return legacy;
+  return null;
+}
+
+function mergePlanningSections(
+  roots: RawPlanningRoot[],
+  sections: RawPlanningSection[] | undefined,
+): RawPlanningRoot[] {
+  const seen = new Set(
+    roots
+      .map((r) => asNonEmptyString(r.id) ?? asNonEmptyString(r.name) ?? '')
+      .filter(Boolean),
+  );
+  const out: RawPlanningRoot[] = [...roots];
+  for (const s of sections ?? []) {
+    const id = asNonEmptyString(s.id) ?? 'global';
+    if (seen.has(id)) continue;
+    seen.add(id);
+    out.push({
+      id,
+      path: '.',
+      planningDir: asNonEmptyString(s.planningDir) ?? asNonEmptyString(s.planning_dir) ?? '.planning',
+      discover: asBoolean(s.discover),
+    });
+  }
+  return out;
+}
+
 function readRepoPlannerConfigInternal(root: string): RawPlanningConfig {
-  const configPath = path.join(root, DEFAULT_PLANNING_DIR_NAME, 'planning-config.toml');
-  if (!existsSync(configPath)) {
+  const configPath = resolveGadConfigPath(root);
+  if (!configPath) {
     return {};
   }
 
@@ -148,7 +190,9 @@ export function getCliPath(): string {
 }
 
 export function getRepoPlannerConfigPath(): string {
-  return path.join(getProjectRoot(), DEFAULT_PLANNING_DIR_NAME, 'planning-config.toml');
+  const root = getProjectRoot();
+  const resolved = resolveGadConfigPath(root);
+  return resolved ?? path.join(root, DEFAULT_PLANNING_DIR_NAME, 'gad-config.toml');
 }
 
 export function readRepoPlannerConfig(): RawPlanningConfig {
@@ -158,7 +202,10 @@ export function readRepoPlannerConfig(): RawPlanningConfig {
 export function resolvePlanningRoots(): ResolvedPlanningRoot[] {
   const projectRoot = getProjectRoot();
   const parsed = readRepoPlannerConfigInternal(projectRoot);
-  const roots = Array.isArray(parsed.planning?.roots) ? parsed.planning?.roots : [];
+  const roots = mergePlanningSections(
+    Array.isArray(parsed.planning?.roots) ? parsed.planning.roots : [],
+    Array.isArray(parsed.planning?.sections) ? parsed.planning.sections : undefined,
+  );
 
   if (!roots.length) {
     const planningDir = path.join(projectRoot, DEFAULT_PLANNING_DIR_NAME);

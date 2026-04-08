@@ -24,9 +24,22 @@ evals/
 ├── planning-migration/       # validates XML planning file migration accuracy
 ├── portfolio-bare/           # portfolio requirements as eval benchmark
 ├── project-migration/        # validates project planning scaffold correctness
+├── reader-workspace/         # EPUB reader UI — agent reimplements from requirements
+├── escape-the-dungeon/       # Kaplay game — agent implements from GAMEPLAY-DESIGN
 ├── DEFINITIONS.md            # shared terms, formulas, fidelity levels
 └── README.md
 ```
+
+## Interactive benchmarks on this site
+
+Some evals produce **runnable UIs**. The **eval harness** (`gad eval run`) still uses a **clean worktree** so an agent’s output is scored in isolation — that run does **not** by itself publish a second public URL. For **visitors and readers of these docs**, the table below is the intended split: **try the working UI here**, **read the scored run** under `vendor/get-anything-done/evals/<project>/vN/`, and **browse source** in Git.
+
+| Benchmark | What `gad eval run` measures | Try it (this deployment) | Source code |
+|-----------|------------------------------|--------------------------|-------------|
+| **reader-workspace** | Whether an agent can re-implement an EPUB3 reader workspace (shelf, navigation, annotations, etc.) from structured requirements **without** peeking at the reference tree | **[Reader (apps)](/apps/reader)** — library shell, **upload an EPUB3** into the personal library, then read. This is the **production reference** wired into the monorepo, not a separate throwaway bundle. | Host: [`apps/portfolio/components/books/ReaderWorkspace.tsx`](https://github.com/B2Gdevs/custom_portfolio/blob/main/apps/portfolio/components/books/ReaderWorkspace.tsx) · package: `@portfolio/repub-builder` under [`vendor/repub-builder/src/reader/`](https://github.com/B2Gdevs/custom_portfolio/tree/main/vendor/repub-builder/src/reader) |
+| **escape-the-dungeon** (Kaplay) | Whether an agent can ship a playable dungeon game from the design doc | **[Escape the Dungeon](/evals/escape-the-dungeon/)** — static build under `public/evals/` (playable in the browser) | Game project: [`evals/escape-the-dungeon/game/`](https://github.com/MagicbornStudios/get-anything-done/tree/main/evals/escape-the-dungeon/game) in **get-anything-done** (TypeScript + Vite + Kaplay); traces/scores in `evals/escape-the-dungeon/vN/` |
+
+If an eval run’s worktree produced a **dist** folder, we occasionally **copy the game’s `dist`** into this repo’s `apps/portfolio/public/evals/escape-the-dungeon/` so the docs site can host a **sandboxed, same-origin** play link — same idea as linking an artifact, without depending on StackBlitz unless we add it later.
 
 ## CLI commands
 

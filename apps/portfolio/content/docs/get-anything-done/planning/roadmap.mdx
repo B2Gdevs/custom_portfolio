@@ -3,7 +3,7 @@ title: "get-anything-done — Roadmap"
 description: "Auto-compiled from vendor/get-anything-done/.planning/ROADMAP.xml"
 generated: "true"
 source: "vendor/get-anything-done/.planning/ROADMAP.xml"
-updated: "2026-04-06T20:35:07.052Z"
+updated: "2026-04-07T20:03:13.952Z"
 ---
 
 # Roadmap
@@ -81,30 +81,54 @@ updated: "2026-04-06T20:35:07.052Z"
 
 ## Phase 13 — Docs commands, skill content, DOCS-MAP rollout
 
-**Status:** active
+**Status:** done
 **Goal:** Add gad docs command. Write real content for write-intent, write-feature-doc, write-tech-doc skills. Roll out DOCS-MAP.xml to all planning roots. Production-harden CLI error paths.
 **Depends:** 12
 
-## Phase 14 — Portfolio eval run with traces
+## Phase 14 — Eval framework: escape-the-dungeon + tracing
 
-**Status:** planned
-**Goal:** Run GAD evals against portfolio implementation using gad:eval-run and gad:eval-report skills. Produce TRACE.json and SCORE.md. Validate the eval framework works end-to-end on a real project, not just portfolio-bare template. Build the portfolio with tracing enabled.
+**Status:** done
+**Goal:** Set up escape-the-dungeon eval project from GAMEPLAY-DESIGN.xml. Create eval-setup skill. Extend TRACE.json for tool_calls/skill_triggers. Define scoring rubric. Run escape-the-dungeon eval via discuss→plan→execute→verify→score flow. Tighten portfolio-bare.
 **Depends:** 13
+
+## Phase 14.5 — Eval findings: enforce the loop, automate tracing, auto-scaffold conventions
+
+**Status:** done
+**Goal:** Fix the 5 structural problems exposed by escape-the-dungeon eval v2: agent bootstrap with GAD context, automatic trace reconstruction from git, checkpoint enforcement for task-level tracking, auto-scaffold CONVENTIONS.md for greenfield projects, eval template AGENTS.md that enforces the loop. Re-run eval to validate fixes.
+**Depends:** 14
 
 ## Phase 15 — GSD→GAD migration: port workflows, delete legacy
 
-**Status:** planned
-**Goal:** Audit get-shit-done/ directory — port reusable workflows/templates/references into GAD equivalents. Update commands that reference get-shit-done/ paths. Rename gsd-* agent files. Delete get-shit-done/ once all references are migrated. The get-shit-done directory inside get-anything-done should not exist when this phase is done.
+**Status:** done
+**Goal:** Move workflows/, templates/, references/ out of get-shit-done/ to top-level GAD directories. Update 42 command @-path references. Delete get-shit-done/ directory (137 files). Also: copy eval game dist to docs site public dir for hosting.
 **Depends:** 14
 
-## Phase 16 — RepoPlanner snapshot parity
+## Phase 16 — Sprint context window + snapshot optimization
 
-**Status:** planned
-**Goal:** Review repo-planner skills and CLI snapshot output. Replicate the planning-snapshot information that rp-* skills pull into gad snapshot. GAD CLI snapshot should be at least as good as RepoPlanner's for context re-hydration. Compare, identify gaps, implement.
+**Status:** done
+**Goal:** Add sprint concept to GAD: configurable sprint size (default 5 phases), gad sprint show/context commands. Optimize gad snapshot to fit sprint context window: collapse done phases to id|title|done, inline only active/planned phases, show only open tasks, include file refs from active tasks and recent git log. Target: snapshot fits in ~3,000 tokens (currently ~9,750). Reference: docs/context-budget.md baseline analysis, RepoPlanner sprint model (scripts/loop-cli.mjs).
 **Depends:** 15
 
-## Phase 17 — Milestone close and v1.1 planning
+## Phase 17 — Reverse-engineer skill + reader-workspace eval
+
+**Status:** done
+**Goal:** Use gad:reverse-engineer to analyze repub-builder reader workspace UI. Produce REQUIREMENTS.xml, DECISIONS.xml, CONVENTIONS.md from the existing codebase. Create reader-workspace eval project. Run eval to validate reverse-engineer → implement cycle.
+**Depends:** 16
+
+## Phase 18 — Eval suite — parallel runs + iteration cycle
+
+**Status:** done
+**Goal:** Run portfolio-bare + escape-the-dungeon + reader-workspace evals in parallel using gad:eval-suite. Compare results, identify patterns, tighten skills. Establish regular eval cadence. Each iteration fixes findings and adds criteria.
+**Depends:** 17
+
+## Phase 19 — Milestone close and v1.1 planning
 
 **Status:** planned
-**Goal:** Formally close gad-v1-cli milestone. Run final eval pass. Define gad-v1.1 milestone scope (domain translators, multi-agent eval, publishing pipeline).
-**Depends:** 16
+**Goal:** Formally close gad-v1-cli milestone. Run final eval pass across all projects. Define gad-v1.1 milestone scope (domain translators, multi-agent eval, publishing pipeline, reverse-engineer refinement).
+**Depends:** 18
+
+## Phase 20 — Real-time tooling, MCP bridge, and tooling evals
+
+**Status:** planned
+**Goal:** Ship `gad watch planning` / `gad dev` (debounced file watch + gad refs verify + structured JSON events). Add optional MCP adapter exposing the same operations for Cursor/agents. Introduce eval_type tooling (and later mcp) with versioned TRACE.json, fixed fixtures, automated harnesses, and regression-friendly metrics. Emit machine-readable scores.json; extend report/diff for tooling runs. Increase metric granularity over time via trace_schema_version + optional metrics.json for histograms. IDE/editor integration is out of scope until explicitly re-opened.
+**Depends:** 19

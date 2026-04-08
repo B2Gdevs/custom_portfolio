@@ -4,7 +4,7 @@ Read **root [`AGENTS.md`](../AGENTS.md) first** — it defines the GAD loop (gad
 
 ## What this folder is
 
-`.planning/` is the root planning section: XML files + `planning-config.toml`. It follows the same loop as docs sections (state → tasks → roadmap → decisions), but files are `.xml` for machines and the GAD CLI.
+`.planning/` is the root planning section: XML files + **`gad-config.toml`** (legacy name `planning-config.toml` still works). It follows the same loop as docs sections (state → tasks → roadmap → decisions), but files are `.xml` for machines and the GAD CLI.
 
 | File | Role |
 | --- | --- |
@@ -15,11 +15,12 @@ Read **root [`AGENTS.md`](../AGENTS.md) first** — it defines the GAD loop (gad
 | `DECISIONS.XML` | Decision atoms |
 | `ERRORS-AND-ATTEMPTS.xml` | Failure / attempt log |
 
-## planning-config.toml
+## gad-config.toml (GAD config)
 
 Registry of all planning roots and docs projects. The GAD CLI reads this to resolve `--projectid` flags.
 
-- `[[planning.roots]]` = repos with `.planning/` dirs, full GAD tracking
+- `[[planning.sections]]` = monorepo-wide root (path implied `.`) — use for the **global** docs section tied to repo-root `.planning/`
+- `[[planning.roots]]` = vendor/subtree repos with a `path`, full GAD tracking
 - `[[docs.projects]]` = domain projects, may not have repo yet, lives in sink
 
 ## GAD CLI

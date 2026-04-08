@@ -39,5 +39,5 @@
     <generator>node vendor/repo-planner/scripts/loop-cli.mjs new-agent-id</generator>
   </agent-id-policy>
   <last-updated>2026-04-08T18:00:00.000Z</last-updated>
-  <sink-compiled sink="apps/portfolio/content/docs/global/planning/" at="2026-04-06T20:35:07.037Z" />
+  <sink-compiled sink="apps/portfolio/content/docs/global/planning/" at="2026-04-07T20:03:13.466Z" />
 </state>

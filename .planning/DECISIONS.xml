@@ -86,7 +86,7 @@
     <impact>All projects register under GAD via planning-config.toml. rp-* skills are deprecated; gad:* skills are canonical. No new framework-specific skill systems are added.</impact>
     <references>
       <file path="vendor/get-anything-done/skills/README.md" />
-      <file path=".planning/planning-config.toml" />
+      <file path=".planning/gad-config.toml" />
     </references>
   </decision>
   <decision id="gad-02">
@@ -121,7 +121,7 @@
     <summary>vendor/repo-planner is registered as a GAD root (id=repo-planner) in planning-config.toml. It has a GAD-format .planning/ directory. Its skills (rp-*) are deprecated stubs pointing to gad:* equivalents. The manuscript skill content migrated to vendor/get-anything-done/skills/manuscript/SKILL.md. The portfolio docs (apps/portfolio/content/docs/repo-planner/planning/) remain as the docs sink.</summary>
     <impact>gad projects list shows both global and repo-planner. gad state, phases, and tasks all work for repo-planner. No new rp-* skills should be created.</impact>
     <references>
-      <file path=".planning/planning-config.toml" />
+      <file path=".planning/gad-config.toml" />
       <file path="vendor/repo-planner/.planning/STATE.md" />
       <file path="vendor/get-anything-done/skills/README.md" />
     </references>
@@ -201,7 +201,7 @@
     <impact>New code uses `gad sink compile` not `gad docs compile`. The docs-compiler.cjs library is shared. `gad sink decompile` is the canonical way to pull docs edits back into planning files.</impact>
     <references>
       <file path="vendor/get-anything-done/bin/gad.cjs" />
-      <file path=".planning/planning-config.toml" />
+      <file path=".planning/gad-config.toml" />
     </references>
   </decision>
   <decision id="gad-12">

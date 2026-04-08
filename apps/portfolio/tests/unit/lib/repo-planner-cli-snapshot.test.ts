@@ -23,7 +23,7 @@ describe('repo-planner CLI snapshot', () => {
     mkdirSync(path.join(tempRoot, '.planning', 'phases', '01-bootstrap'), { recursive: true });
 
     writeFileSync(
-      path.join(tempRoot, '.planning', 'planning-config.toml'),
+      path.join(tempRoot, '.planning', 'gad-config.toml'),
       ['[planning]', 'sprintSize = 5'].join('\n'),
       'utf8',
     );

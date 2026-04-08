@@ -1,0 +1,13 @@
+---
+title: Archived hand-authored planning MDX (global)
+description: Snapshot of the previous sink files before they were regenerated from `/.planning/*.xml` via `gad sink compile --force`. Not the live planning source — canonical machine loop remains repo-root `.planning/*.xml`.
+order: 99
+---
+
+# Archived global planning MDX
+
+The files in this folder are **copies** of the former `planning/*.mdx` top-level planning pages (state, roadmap, decisions, task registry, requirements, errors) **before** those sinks were switched to **generated** output from the monorepo root `.planning/` XML.
+
+- **Source of truth for planning:** `/.planning/*.xml` and `gad` commands (`gad snapshot`, `gad sink compile`, etc.).
+- **Live generated pages:** [`/docs/global/planning/`](/docs/global/planning/state) — `generated: true` in frontmatter.
+- **Why keep this archive:** Preserves long-form editorial tables and narrative that the XML→MDX compiler does not emit, for reference or future migration into docs or XML.

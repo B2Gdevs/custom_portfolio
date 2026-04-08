@@ -1,24 +1,9 @@
 ---
-title: Errors and attempts
-description: Notable failed approaches for Global / repo-wide planning docs IA.
-date: "2026-03-28"
-updated: "2026-04-05"
-order: 5
-repoPath: apps/portfolio/content/docs/global/planning/errors-and-attempts.mdx
-taskPhase: global-site-01
+title: "global — Errors & Attempts"
+description: "Auto-compiled from ./.planning/ERRORS-AND-ATTEMPTS.xml"
+generated: "true"
+source: "./.planning/ERRORS-AND-ATTEMPTS.xml"
+updated: "2026-04-07T20:03:13.469Z"
 ---
 
-# Errors and attempts
-
-| When | Attempt | Outcome |
-| --- | --- | --- |
-| pre-`global-site-01` | Single **Global planning** page mixing registry copy, Mermaid, and pack policy | Hard to mirror the **planning-docs -> state -> task-registry** pattern used in other sections; split for parity. |
-| `2026-03-29` | Wire Payload auth directly into Next `app/api/auth/*` routes for the first foundation slice | Webpack pulled `payload` / `@payloadcms/db-sqlite` / `libsql` artifacts into the route bundle and broke `pnpm run build`. Keep the first slice at collections + seed + dev auto-login, then return to host-facing auth routes as `global-auth-01-03` with a safer server boundary. |
-| `2026-03-30` | Resolve the host auth surface by keeping `tsx` package resolution inside the route bundle | Webpack then chased `tsx` internals (`esbuild` type files) and failed again. The stable fix was a subprocess worker boundary using filesystem paths (`node_modules/tsx/dist/cli.mjs`) so route bundles stay free of Payload and `tsx` package graphs. |
-| `2026-04-02` | **`magicborn claude`:** `spawnSync(claude, { cwd: repo })` only | Claude Code still reported **`--print` / no stdin** from **`~`** on Git Bash — child parent stayed **`node.exe`**. |
-| `2026-04-02` | **`magicborn claude`:** `bash -c 'cd repo && exec claude …'` from Node | Same error for the user — stdio chain from **mintty → node → bash -c** still not equivalent to **interactive bash → claude** in their environment. |
-| `2026-04-02` | **Bare `claude` from `~`** (no magicborn) | Upstream behavior: **non-git home** and/or TTY quirks — not fixable inside **`magicborn`**; use **`pf`** / **`cd` into repo** or see [KICKOFF](/docs/global/planning/plans/mb-cli-windows-operator-forward/KICKOFF). |
-| `2026-04-02` | **Next attempt:** `cmd.exe /s /c "cd /d … && claude …"` from **`magicborn`** on MSYS | Uses Windows **ConPTY** path; **`MAGICBORN_DEBUG_FORWARD=1`** logs which wrapper ran. If this still fails, treat **shell alias** or **Windows Terminal + PowerShell** as the supported operator path until upstream or a native **`magicborn` binary** changes the parent process story. |
-| `2026-04-05` | **Portfolio:** stop **`magicborn claude` / `codex`** forwarding | **Accepted:** **`global-tooling-dec-06`** — operators use **`cdmb`** + shell; **`mb-cli-framework`** spawn helpers remain for **other** CLIs/consumers only. |
-
-_Add rows when something worth avoiding comes up._
+# Errors & Attempts

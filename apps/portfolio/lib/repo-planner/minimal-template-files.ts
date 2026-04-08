@@ -122,7 +122,7 @@ defaultJson = true
   return [
     { path: "REQUIREMENTS.md", content: requirementsMd },
     { path: ".planning/AGENTS.md", content: planningAgentsMd },
-    { path: ".planning/planning-config.toml", content: configToml },
+    { path: ".planning/gad-config.toml", content: configToml },
     { path: ".planning/STATE.xml", content: stateXml },
     { path: ".planning/TASK-REGISTRY.xml", content: taskRegistryXml },
     { path: ".planning/ROADMAP.xml", content: roadmapXml },

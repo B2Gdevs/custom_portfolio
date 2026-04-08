@@ -1,0 +1,47 @@
+---
+title: State
+description: RepoPlanner integration state for the portfolio monorepo.
+date: "2026-03-29"
+updated: "2026-03-30"
+order: 4
+repoPath: apps/portfolio/content/docs/repo-planner/planning/state.mdx
+taskPhase: repo-planner-integration-01
+---
+
+# Repo Planner -- State
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `repo-planner` |
+| `owner` | `monorepo` |
+| `status` | `active` |
+| `updated` | `2026-03-30` |
+
+## Current cycle
+
+| Field | Value |
+| --- | --- |
+| `phase` | `repo-planner-integration-01` through `06` are complete; the section is in maintenance mode until a new integration phase or upstream product phase is queued |
+| `focus` | RepoPlanner now has a read-only preview-upload path for pack JSON / `.planning` zip inspection and a package-import route installer with explicit write-route opt-in. Remaining work is maintenance or future product expansion, not an open integration gate. |
+| `parallel-planning` | Multiple agents may edit the same repo-planner and global planning MDX; merge by task id and phase id, and avoid duplicating the full same task graph across Global vs section planning |
+| `constraint` | `PLANNING_COCKPIT_ALLOW_SERVER_WRITES=1` only when operators want server writes from the browser; no in-site planning LLM |
+
+## Next queue
+
+| Priority | Action |
+| --- | --- |
+| `1` | Maintain the shared workflow snapshot across CLI, Live, and Pack as new workflow fields land |
+| `2` | Keep preview-upload and route-installer docs aligned with the shipped package behavior |
+| `3` | Keep `REQUIREMENTS.xml` stub aligned with [documentation requirements](/docs/documentation/requirements); keep `.planning/*.xml` roadmap-first |
+
+## References
+
+| Id | Path |
+| --- | --- |
+| `submodule` | `vendor/repo-planner` |
+| `cli` | `vendor/repo-planner/scripts/loop-cli.mjs` |
+| `root-scripts` | `package.json` (repository root) |
+| `tool-page` | `apps/portfolio/app/apps/repo-planner/page.tsx` |
+

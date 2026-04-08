@@ -29,7 +29,7 @@ describe('buildLivePlanningBundle', () => {
     });
 
     writeFileSync(
-      path.join(tempRoot, '.planning', 'planning-config.toml'),
+      path.join(tempRoot, '.planning', 'gad-config.toml'),
       [
         '[planning]',
         'sprintSize = 5',

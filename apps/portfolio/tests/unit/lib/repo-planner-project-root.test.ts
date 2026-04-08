@@ -39,12 +39,12 @@ describe('repo planner project-root helpers', () => {
     expect(getReportsDir()).toBe(path.join(tempRoot, '.planning-reports'));
   });
 
-  it('uses planning-config roots and reportsDir as the shared live resolver contract', () => {
+  it('uses gad-config roots and reportsDir as the shared live resolver contract', () => {
     mkdirSync(path.join(tempRoot, '.planning'), { recursive: true });
     mkdirSync(path.join(tempRoot, 'workspace-a', 'planner'), { recursive: true });
     mkdirSync(path.join(tempRoot, 'workspace-b', 'planning'), { recursive: true });
     writeFileSync(
-      path.join(tempRoot, '.planning', 'planning-config.toml'),
+      path.join(tempRoot, '.planning', 'gad-config.toml'),
       [
         '[planning]',
         'reportsDir = "logs/planning"',
@@ -75,5 +75,33 @@ describe('repo planner project-root helpers', () => {
     ]);
     expect(getPlanningDir()).toBe(path.join(tempRoot, 'workspace-a', 'planner'));
     expect(getReportsDir()).toBe(path.join(tempRoot, 'logs', 'planning'));
+  });
+
+  it('merges [[planning.sections]] as monorepo roots (path implied .)', () => {
+    mkdirSync(path.join(tempRoot, '.planning'), { recursive: true });
+    writeFileSync(
+      path.join(tempRoot, '.planning', 'gad-config.toml'),
+      [
+        '[planning]',
+        '',
+        '[[planning.sections]]',
+        'id = "global"',
+        'planningDir = ".planning"',
+        '',
+        '[[planning.roots]]',
+        'id = "vendor-a"',
+        'path = "vendor/a"',
+        'planningDir = ".planning"',
+        'discover = false',
+      ].join('\n'),
+      'utf8',
+    );
+
+    const roots = resolvePlanningRoots();
+
+    expect(roots.map((r) => r.id)).toEqual(['vendor-a', 'global']);
+    const globalRoot = roots.find((r) => r.id === 'global');
+    expect(globalRoot?.workspaceRoot).toBe(tempRoot);
+    expect(globalRoot?.planningDir).toBe(path.join(tempRoot, '.planning'));
   });
 });

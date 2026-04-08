@@ -1,202 +1,41 @@
 ---
-title: Task Registry
-description: Executable tasks for the Global docs section and repo-wide planning IA.
-date: "2026-03-28"
-updated: "2026-04-08"
-order: 3
-repoPath: apps/portfolio/content/docs/global/planning/task-registry.mdx
-taskPhase: global-data-02
+title: "global — Task Registry"
+description: "Auto-compiled from ./.planning/TASK-REGISTRY.xml"
+generated: "true"
+source: "./.planning/TASK-REGISTRY.xml"
+updated: "2026-04-07T20:03:13.469Z"
 ---
 
 # Task Registry
 
-## Phase `global-site-01`
+## Phase 01
 
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-site-01-01` | `done` | **Global** section uses same planning layout as other sections (`planning-docs`, `state`, `task-registry`, `decisions`); [Global planning guide](/docs/global/global-planning) is a **reference** page (graphs, layers, pack policy) | `-` | docs tree shows `global/planning/` + `global-planning.mdx` sibling |
-| `global-site-01-02` | `done` | Cross-link sweep: section `planning-docs` / books / repo-planner point at Global **planning docs** + **global planning guide** where needed | `01-01` | grep + build |
-| `global-site-01-03` | `done` | Cockpit workspace: **This repository** + uploaded packs, `localStorage`, export JSON -- [`/docs/apps/repo-planner`](/docs/apps/repo-planner) | `-` | shell + dynamic `PlanningCockpit` |
+- ✓ **01-01** Migrate narrative from removed .planning-archive/2026-03-29-pre-barebones/ into apps/portfolio/content/docs/documentation/requirements.mdx (Planning archive section) and registries; ROADMAP.xml + TASK-REGISTRY.xml updated; archive folder deleted.
+- ✓ **01-02** Add a shared logging layer for server and client flows, then instrument the assistant-ui chat path so request, retrieval, upstream, and error handling are easy to debug without permanent ad hoc console logs.
+- ✓ **01-03** Implement the blog and projects content-discovery pass after the planning loop: searchable/filterable index pages, command-palette hit flow, strict article/project structure, and matching docs-side records.
+- ✓ **01-04** Books EPUB planning supplement: repeatable `repub epub --planning &lt;dir&gt;`, `runEpub` appendix for md/mdx/xml/toml/txt, `scripts/build-books.cjs` reads `book.json` epubPlanningDirs; Mordred&apos;s Tale bundles `apps/portfolio/content/docs/books/planning`. Section registry: `books-reader-02-02` done; docs in books planning-docs.mdx.
+- ✓ **01-05** Phase 01 CLI baseline: planning --version (repo-planner package.json), repub --version, engines.node &gt;= 22 on root + @portfolio/repub-builder + vendor/repo-planner; --help/subcommands already in loop-cli; Ink TTY + npm publish + pnpm dlx matrix remain documentation-site-07 / repo-planner-integration-01-13.
+- ✓ **01-06** Retrofit the existing blog posts and project writeups to the strict literal section contracts and richer metadata expected by the new discovery shell, then lock that contract with a regression test.
+- ✓ **01-08** Repo Planner phase 04: build-time `builtin-packs.json` from `.planning` + docs MDX; `repo-planner` exports `PlanningPackGallery` (data-in props); portfolio modal shell only; cockpit preloads init + docs packs; root `pnpm planning:embed-packs`; hook into app dev/build. Registry: repo-planner-integration-04 in apps/portfolio/content/docs/repo-planner/planning/task-registry.mdx.
+- ✓ **01-07** Normalize `.planning` and operator-facing planning docs to an ASCII-first punctuation policy so CLI, shell, and XML surfaces stay readable without changing public-facing prose typography.
+- ✓ **01-09** Planning IA reset: move section planning docs into literal `planning/` folders, align root/operator guidance on roadmap/state/task-registry/decisions as the living loop, sweep stale flat links, and verify the planning-pack/build pipeline still resolves the new paths.
+- ✓ **01-10** Standardize the agent loop around a Global-first human entrypoint, kickoff records for vague phases, explicit definition of done, and tests-required-for-done for executable behavior; seed RepoPlanner planning for workflow-aware snapshot, kickoff scaffolding, done gates, and ownership guidance.
+- ✓ **01-11** Establish the shared auth foundation for gated site features: Payload auth-enabled owner user, tenant/org seed, long-lived session policy, local auto-login in development, and entitlement helpers that Books and Listen can consume.
+- ✓ **01-12** Portfolio + vendored repub-builder duplicate-pattern pass: central `lib/unknown-error` + `lib/tsx-json-worker` for timeout JSON stdout workers; stdin workers reuse `resolveTsxCliPath`; RAG ingest CLI + provider-bootstrap use shared unknown-error string; repub-builder `src/utils/unknown-error` + EpubViewer fetch catch alignment.
+- ✓ **01-13** Portfolio unknown-value dedupe: `isUnknownRecord`; `coerce-unknown-to-string` (`coerceUnknownToString`, `unknownToStringStrict`, `normalizeOptionalTrimmedString`, `normalizeOptionalTrimmedStringStrict`); `lib/coerce-unknown.ts` (`unknownToBoolean`, `unknownToFiniteNumber`, `parseUnknownFiniteNumber`); `read-json-stdin` for workers; replace scattered guards/coercions across reader workspace, published-book-artifacts API, seed sync, publish scripts, site-branding, listen seed; unit tests exercised for touched modules.
 
-## Phase `global-site-02`
+## Phase 02
 
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-site-02-01` | `done` | make the Global docs section the human-first planning entrypoint and align root `AGENTS.md` / `.planning/AGENTS.md` with that read order | `global-site-01-01` | `pnpm run build`, `pnpm run lint` |
-| `global-site-02-02` | `done` | define the standard phase loop: kickoff for underdefined phases, explicit definition of done, and tests required for done on executable behavior | `global-site-02-01` | `pnpm run build`, `pnpm run lint` |
-| `global-site-02-03` | `done` | plan the next RepoPlanner feature phase around workflow-aware snapshot, kickoff scaffolding, done gates, and global-vs-section guidance | `global-site-02-02` | `pnpm run build`, `pnpm run lint` |
+- → **02-01** Plan and land the shared data/storage provider abstraction in the Global docs + codebase so Payload/SQLite local workflows and Supabase hosted workflows share one runtime contract, repository-backed runtime access, bootstrap path, and verification story without committing large `.db` files.
 
-## Phase `global-auth-01`
+## Phase 03
 
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-auth-01-01` | `done` | establish Payload auth foundations for the site: auth-enabled users, tenant/org seed, owner seed, long-lived session cookie policy, no public signup, and local auto-login for development | `global-site-02-02` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
-| `global-auth-01-02` | `done` | add shared tenant and entitlement helpers so books/listen/admin features can ask one permission layer whether private or write-capable behavior is allowed | `global-auth-01-01` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
-| `global-auth-01-03` | `done` | expose the auth foundation to the portfolio host: login, logout, me/session checks, and owner-aware gating helpers without opening public signup | `global-auth-01-01` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
+- ✓ **03-01** Extract `@portfolio/repub-builder` into the standalone `MagicbornStudios/repub-builder` repository, vendor it back into this repo as `vendor/repub-builder`, and keep the monorepo consuming it as a working workspace dependency and git-installable package.
+- → **03-02** Classify the large git blobs by artifact type, land the first off-repo publish path for versioned EPUB/planning-pack artifacts, define what moves into storage/database versus what remains repo-resident, document the branch-history cleanup or rebuild required because the current unpushed range already contains large DB/EPUB blobs, restore builtin planning-pack visibility in the portfolio modal, and keep applying the SSR/SEO-safe rendering contract through real migrations for heavy public media and DB-backed public content.
+- ✓ **03-03** Execute the next public-catalog migration after the storage baseline: `site-app-records` plus `site-download-assets` back `/apps`, `project-records` now supply project metadata while repo-authored MDX bodies stay canonical, and `resume-records` now drive the resume gallery while `site-download-assets` keep serving planning-pack and resume artifacts with repo fallbacks where planned.
+- ✓ **03-04** Refresh the public shell around the existing owner-only auth/session contract so the sidebar exposes login/account affordances, avatar, live user/org context, logout, and private/admin entry points only for the seeded owner account.
+- ✓ **03-05** Mount the upstream Payload `(payload)` app route group as the owner-only operational admin surface, adapt it to this app's config/runtime, and use it for CRUD on Payload-backed resources instead of inventing a second owner back office.
 
-## Phase `global-auth-02`
+## Phase 05
 
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-auth-02-01` | `done` | refresh the portfolio shell/sidebar around the existing owner-only auth/session contract: add shadcn-compatible login/account affordances, keep public browsing open, show live user/org context plus avatar/logout in the sidebar footer, and surface private/admin entry points only when the seeded owner session is active | `global-auth-01-03`, `global-data-03-01` | relevant component tests, `pnpm run build`, `pnpm run lint` |
-
-## Phase `global-auth-03` (restricted operators + visitor reader policy)
-
-**Goal:** **Public site stays public**, but **image generation, Copilot editing workflows, and other mutation paths** are limited to **tenant owner and org admins**. **Logged-in non-admin** users (when invites exist) are **read-only** on site content and **short-lived / export-first** in the reader. **Invites + privilege matrix** are **phase-2** design tasks until scheduled.
-
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-auth-03-01` | `done` | gate **`POST /api/media/generate`** behind **session** + **`admin:access`** entitlement; **401** unauthenticated, **403** member without admin | `global-auth-01-03` | `tests/unit/api/media-generate-route.test.ts`; SiteCopilot uses **`credentials: 'include'`** |
-| `global-auth-03-02` | `planned` | **Visitor / non-privileged reader:** annotations and local reader state stay **browser-local** or **session-scoped**, **no durable server sync** unless entitled; UX and copy push **export**; align with [books requirements](/docs/books/requirements) **`BOOKS-REQ-08`** / **`BOOKS-REQ-10`** | `global-auth-03-01` | reader tests or documented UAT |
-| `global-auth-03-03` | `in-progress` | **Invites + org roles:** trusted **`pnpm auth:invite`** operator flow plus **single-use, expiring, tenant-scoped invite links** for consumers; role templates stay **`owner` / `admin` / `member`** with **default-deny entitlements**; product self-signup stays out of scope. Docs: [PLAN](/docs/global/planning/plans/global-auth-03/plan), [INVITES](/docs/global/planning/plans/global-auth-03/invites) | `global-auth-01-01` | run invite script against dev DB; accept/revoke/expiry test cases from [PLAN](/docs/global/planning/plans/global-auth-03/plan) |
-| `global-auth-03-04` | `in-progress` | **Clerk integration for multi-tenant portfolio auth:** Clerk as identity provider, Payload as authorization core. **Implemented:** `@clerk/nextjs` + `svix` deps, `externalIds.clerkId` on users, `externalIds.clerkOrgId` on tenants, `ClerkProviderWrapper`, `middleware.ts`, `/api/webhooks/clerk` (user/org sync), `/api/auth/clerk-session` (lookup by clerkId), `use-clerk-auth.ts` hook, `SidebarAccountSection` with Clerk SignInButton, `scripts/link-clerk-user.ts`. **Also:** `global-auth-03-04a` (lint + types). **Remaining (when operator confirms):** optional owner/org link, `pnpm run build`, manual Clerk sign-in shows owner role + tenant — **deferred 2026-04-08** (not blocking other work). Docs: [CLERK](/docs/global/planning/plans/global-auth-03/clerk) | `global-auth-03-03`, `global-auth-01-01` | `pnpm install && pnpm run build`; `scripts/link-clerk-user.ts`; manual Clerk sign-in shows owner role + tenant |
-| `global-auth-03-04a` | `done` | Clerk + middleware refactor: `middleware` passes `NextFetchEvent` into Clerk’s handler; webhook + `link-clerk-user` use typed Payload `externalIds`; `ClerkProviderWrapper` uses `next/dynamic`; `use-clerk-auth` / `use-auth-session` use `ClerkGlobalWindow` + window sync for Clerk user id; `SidebarAccountSection` typed SignIn; copilot `prefer-const` | `global-auth-01-01` | `pnpm run lint` |
-| `global-auth-03-05` | `planned` | **Provider-agnostic orgs + sync planning:** define first-party organizations, memberships, role templates, entitlement locks, provider mappings, and outbound domain events so the portfolio can adopt hosted identity without making Clerk the authorization source of truth. Includes org/provider sync rules, external-id mapping, and conflict handling for multi-tenant membership changes. Docs: [ORG-SYNC](/docs/global/planning/plans/global-auth-03/org-sync) | `global-auth-03-04`, `global-auth-03-03` | planning notes updated; decision records provider-authority split and event contract |
-
-## Phase `global-tooling-01` (Magicborn CLI - backlog)
-
-**Goal:** unified operator CLI for **generate**, **style/prompt architecture**, and **vendor** workflows - see [kickoff](/docs/global/planning/plans/magicborn-cli/plan). **Operator book RAG** (prompt assembly only) stays **`global-tooling-dec-01`** and is **never** mixed into default site chat RAG (**`global-data-dec-09`**). **`magicborn batch`** is explicitly **out of scope** until **`01-04`** proves single-target flows.
-
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-tooling-01-01` | `done` | scaffold `magicborn` / `pnpm mb` via **`@magicborn/cli`**: `generate` (book, app, planning-pack, listen) delegates to `scripts/magicborn/run.ts`; `vendor add` (dry-run + `--apply`) | `-` | `pnpm magicborn --help`; `pnpm magicborn generate book --print-prompt` prints style+scene; `pnpm magicborn vendor add <url>` prints plan |
-| `global-tooling-01-02` | `done` | CLI **`pnpm magicborn generate <target>`** calls **`lib/magicborn/openai-image-generate`** (same behavior as **`POST /api/media/generate`**) using **`.env`** (`OPENAI_API_KEY`); writes **`.magicborn/runs/<id>/`** (`image.png`, `prompt.txt`, `manifest.json`); **rag-style** terminal UI when **`MAGICBORN_CLI=1`**; flags **`--dry-run`**, **`--print-prompt`**, **`--raw`**, **`--size`**, **`--slot`**, **`--json`**; spend line when OpenAI returns **usage** | `global-tooling-01-01`, `global-auth-03-01` | `tests/unit/lib/magicborn-openai-image-generate.test.ts`; `tests/unit/api/media-generate-route.test.ts`; dry-run without key |
-| `global-tooling-01-03` | `done` | **Asset taxonomy** on **`site-media-assets`** (`taxonomyKind`, `taxonomyRef`, `taxonomyVariant`, `textOnImage`); optional **`catalogMediaAsset`** on **`site-app-records`** + **`project-records`**; hashes/URLs unchanged (existing checksum + upload) | `global-tooling-01-02` | `payload-collection-contract` + fields registered; manual: set relations in admin |
-| `global-tooling-01-04` | `done` | **Site logos:** **`magicborn site logo list`** / **`set-active <id>`** — brand scope + **`contentSlug=site-logo`** in **`site-media-assets`**; toggles **`isCurrent`** across siblings | `global-tooling-01-03` | `lib/magicborn/site-logo-cli.ts` + portfolio `run.ts`; shell/header reads Payload when wired |
-| `global-tooling-01-05` | `done` | **CLI visual language + completion UX docs:** semantic colors (verb / arg / flag / section / log levels), domain ribbons (**`planning-pack`** vs **`book`** vs ...), long-running spinner for OpenAI; bash **`print-completions-horizontally off`** + zsh/fish notes for list-friendly completion; fix bash top-level **`payload`** word | `global-tooling-01-02` | [magicborn-cli PLAN](/docs/global/planning/plans/magicborn-cli/plan) "CLI visual language"; `tests/unit/lib/magicborn-cli-ui.test.ts`; `pnpm exec vitest run` (portfolio) |
-| `global-tooling-01-06` | `done` | **Grouped color `magicborn --help`** (payload / vendor / OpenAI / model / shell / asset sections + dim magenta descriptions); **warnings -> stderr** in portfolio CLI UI; ribbons align with help (**yellow** asset family, **cyan** Payload catalog); **Grime Time** `PageMediaRegistryBridge` effect keyed by entry signature + ref (fix max update depth) | `global-tooling-01-05` | `packages/magicborn-cli` tests + build; `pnpm magicborn --help`; vendor `PageMediaDevtoolsContext` + int test |
-
-## Phase `global-tooling-02` (mb-cli-framework - shared shell)
-
-**Goal:** vendor **[mb-cli-framework](https://github.com/MagicbornStudios/mb-cli-framework)** as `vendor/mb-cli-framework`, share completion / scope / color conventions between **`magicborn`** (this repo) and **`grimetime`** (Grime Time), tab-first DX, **`vendor use` / `vendor clear`**, and a roadmap for Payload/OpenAI/RAG command discovery. Kickoff: [PLAN](/docs/global/planning/plans/mb-cli-framework/PLAN).
-
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-tooling-02-01` | `done` | **Submodule + workspace:** `git submodule add` -> `vendor/mb-cli-framework`; `pnpm-workspace.yaml` entry; minimal package skeleton in submodule (or initial commit upstream) so both repos can `workspace:*` or `file:` depend | `global-tooling-01-01` | `pnpm install`; `git submodule status` |
-| `global-tooling-02-02` | `done` | **Tab completion:** `vendor-suggest` topic + **`(cli)`** suffix / optional ANSI (**`NO_COLOR`**, **`FORCE_COLOR`**, **`MAGICBORN_COMPLETE_ANSI`**); bash completion + fish hints; legend in completion script header | `global-tooling-02-01` | `tests/unit/magicborn-complete-words.test.ts`; `pnpm --filter @magicborn/cli test` |
-| `global-tooling-02-03` | `done` | **Scope:** `magicborn vendor use <id>` / `clear` / `scope` (`.magicborn/vendor-scope.json`); **`MAGICBORN_VENDOR_ROOT`** when forwarding | `global-tooling-02-01` | `pnpm --filter @magicborn/cli test` (`vendor-scope`, `vendor-run`); manual use/clear |
-| `global-tooling-02-04` | `done` | **Port consumers:** `@magicborn/cli` depends on **`@magicborn/mb-cli-framework`**; portfolio **`complete-words`** imports framework + **`getVendorCompletionRows`** | `global-tooling-02-02`, `global-tooling-02-03` | `pnpm --filter @magicborn/cli build`; `pnpm --filter @portfolio/app exec vitest run tests/unit/magicborn-complete-words.test.ts` |
-| `global-tooling-02-05` | `done` | **Discovery spike:** `magicborn payload collections` lists slugs from **`payload.config`** (**`--json`**); completion topic **`payload`** -> **`collections`** | `global-tooling-02-04` | `scripts/magicborn/run.ts` branch; `tests/unit/scripts/magicborn-payload-collections.test.ts` |
-
-## Phase `global-tooling-03` (Ink TUI + vendor v2 + chat + themes)
-
-**Goal:** **Ink**-based terminal shell (layouts, borders, list/detail, forms), optional **[assistant-ui for Ink](https://www.assistant-ui.com/ink)** operator chat shared via **`mb-cli-framework`**, **shadcn-aligned theme tokens** export, **vendor** UX that lists **real vendor packages** (badges for CLI hop) instead of grimetime-only top-level aliases, and **`payload <alias> generate`** (+ guided chat). Kickoff: [ink-tui-vendor-v2](/docs/global/planning/plans/magicborn-cli/ink-tui-vendor-v2).
-
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-tooling-03-01` | `done` | **`mb-cli-framework`:** Ink host entry (`renderPlain` vs `renderInk`), **theme contract** (token map + `NO_COLOR` / `FORCE_COLOR`), lazy dynamic import for TUI | `global-tooling-02-04` | unit tests for theme + plain fallback; grimetime consumer compiles |
-| `global-tooling-03-02` | `done` | **assistant-ui + Ink:** shared `<OperatorChat />` (or equivalent) + tool slot; **magicborn** subcommand e.g. `magicborn chat` or flag `--chat` for guided flows; **CI** path skips Ink | `global-tooling-03-01` | manual: chat opens in TTY; `--json` unchanged |
-| `global-tooling-03-03` | `done` | **Default `magicborn` home:** Ink **dashboard** (sections, rules, list) replacing string-only help; keep **`magicborn --help` plain** for pipes / `NO_COLOR` automation | `global-tooling-03-01` | snapshot or component tests; `MAGICBORN_PLAIN` doc |
-| `global-tooling-03-04` | `done` | **Vendor v2:** remove **top-level** `users`/`org`/`tenant`/`blog` from Commander (shim + deprecation optional); **`vendor <id>`** tree + **badges**; **`use`** spawns vendor CLI with **`cwd` + .env merge**; completion topics updated | `global-tooling-02-03` | `pnpm --filter @magicborn/cli test`; e2e: `vendor grimetime -- --help` |
-| `global-tooling-03-05` | `done` | **`payload app generate`:** alias → `site-app-records`; **`--dry-run`** contract; in-process Payload upsert (**`PAYLOAD_SECRET`** + **`DATABASE_URL`**, same as seed scripts); body from registry **`--slug`**; guided **chat** for missing fields remains future | `global-tooling-02-05`, `global-tooling-03-02` | `tests/unit/lib/payload-cli-generate.test.ts`; `pnpm --filter @magicborn/cli test` |
-| `global-tooling-03-06` | `done` | **Ink home polish:** `/` palette **↑↓** selection + **Enter** apply/run; **`magicborn env`** under shell/meta — shows effective vendor scope + **`vendor/.env`** merge (redacted) matching nested **`magicborn vendor <id> …`** child env; **`--json`** | `global-tooling-03-03`, `global-tooling-02-03` | `pnpm --filter @magicborn/cli test`; manual `magicborn env` + REPL `/` + arrows |
-| `global-tooling-03-07` | `done` | **`magicborn chat` prod path:** merge repo-root **`.env` / `.env.local`** into **`process.env`** before config snapshot + **`pnpm … build`** (same fill rules as **`applyMonorepoEnvFromRepoRoot`** in **`next.config`**); **`chat:build` / `pnpm` spawn** uses **`shell: true` + single command string** on Windows to avoid **`spawn EINVAL`** with **`pnpm.cmd`** + **`stdio: 'inherit'`** | `global-tooling-03-02` | `pnpm --filter @magicborn/cli test` (`monorepo-dotenv`); manual **`magicborn chat`** from Git Bash on Windows |
-
-## Phase `global-tooling-04` (Ink — Claude Code–style chat shell)
-
-**Goal:** **Chat-first** Ink UX shared via **`mb-cli-framework`**: bordered **banner** (product name from config + ASCII **M** + **system** + cwd), **slash** commands in **purple/magenta**, **transcript** with `> /cmd` + **`└`** outcome lines, **bottom panel** only for pickers (**Enter** / **Esc**), **footer** (next action · model · folder), **interrupt-safe** long jobs (RAG/subprocess) without exiting the shell. **Model** + **RAG index / off** flow from TUI into **`/api/chat`** (headers or body). Kickoff: [KICKOFF](/docs/global/planning/plans/magicborn-cli-ink-claude-ux/KICKOFF).
-
-**Phase status:** **`global-tooling-04`** MVP **complete** — **`04-01`**, **`04-02`**, **`04-03`**, **`04-04`**, **`04-05`** done (slash router + session **`chatModel`/`ragMode`**, **`POST` contract**, **`filterRagHitsByMode`**, theme, fetch interrupt, footer/session + **`client`**). **Deferred:** subprocess RAG interrupt line; auto-compact / tokenizer-accurate `%` — see **`global-tooling-05`** / kickoff.
-
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-tooling-04-01` | `done` | **Primitives + theme:** **`CliTheme`** includes **`slash`** + **`footerAccent`**; composable **CliScreenBanner**, **CliFooterSlotRow**, **CliActivityLine**, **CliContextMeter** (no single **`ClaudeStyleShell`**); **`NO_COLOR`** / TTY via **`cli-mode`**; README token map | `global-tooling-03-06` | `tests/cli-theme.test.ts`; `pnpm --filter @magicborn/cli test` |
-| `global-tooling-04-02` | `done` | **Slash router + history:** **`parseSlashChatLine`**, **`handleSlashChatLine`** (`/model`, `/model <id>`, `/rag` cycle, **`/rag off`**, **`/index`**); persist **`chatModel`** + **`ragMode`** in **`.magicborn/cli-session.json`**; **`OperatorChatApp`** + **`MagicbornHome`** show **`└`** replies; **`/model`** lists OpenAI chat-capable models when `OPENAI_API_KEY` set | `global-tooling-04-01` | vitest: `slash-chat-commands`, `cli-session`; manual `magicborn chat` |
-| `global-tooling-04-03` | `done` | **`model?`** + **`ragMode?`** on **`SiteChatApiRequest`**; **`POST /api/chat`** resolves model + RAG (`off` skips retrieval; explicit modes **filter** default index via **`filterRagHitsByMode`** until ingest metadata splits). **Client:** `POST` + **`client`** from CLI | `global-tooling-04-02`, `global-data-dec-09` (RAG boundary) | `chat-route.test.ts` + `retrieve` filter test; manual |
-| `global-tooling-04-04` | `done` | **Interrupt:** chat **`fetch`** uses **`AbortSignal`** (timeout + **`runtime.thread.cancelRun()`** / Ctrl+C while running). **Deferred:** subprocess RAG ingest + transcript “Interrupted · …” | `global-tooling-04-01` | `pnpm --filter @magicborn/cli test`; manual cancel in-flight |
-| `global-tooling-04-05` | `done` | **Footer row 2 (MVP):** **`CliContextMeter`**, rough chars/4 vs 128k, **`.magicborn/cli-session.json`**, **`MAGICBORN_ACCEPT_EDITS_AUTO`**, toggles, **POST `client`**. **Deferred:** auto-compact, tokenizer-accurate %, tool-run counter — see [kickoff](/docs/global/planning/plans/magicborn-cli-ink-claude-ux/KICKOFF), **`global-tooling-05`** | `global-tooling-04-01` | vitest (estimate, session, adapter); manual |
-
-## Phase `global-tooling-05` (Copilot — Payload tools, forms, creative batches)
-
-**Goal:** In chat, **query and discuss** allowlisted **Payload** data via **server-side tools** (accurate, paginated); **schema-driven Ink forms** for create/update; **multi-turn clarification**; **batch media** flows (project style → image \| video → scenes from picker or **book/planning extraction**) reusing **`magicborn` / `.magicborn/`** paths. **Hybrid context:** DB tools for truth; **swappable `ragMode`** for prose (see **`global-tooling-04`**). Kickoff: [KICKOFF](/docs/global/planning/plans/magicborn-copilot-payload-tools/KICKOFF).
-
-**Phase status:** **`global-tooling-05`** **complete** — Copilot reads/tools, forms/create, **`magicborn batch`**, **`magicborn book scenes extract`**. **`global-tooling-06`** (books/scenes in DB + EPUB scan) **complete** — see rows below.
-
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-tooling-05-01` | `done` | **Read tools:** **`lib/copilot/payload-read-tools`** — **`copilotPayloadFind`** / **`copilotPayloadFindById`** (allowlist + depth/limit/page caps + **`COPILOT_READ_OPENAI_TOOLS`** stubs); deny **`users`**, **`tenants`**, RAG, reader-private collections | `global-admin-01-01`, `global-auth-03-01` (session rules) | `tests/unit/lib/copilot/payload-read-tools.test.ts` |
-| `global-tooling-05-02` | `done` | **`POST /api/chat`** with **`enableCopilotTools`**: OpenAI **`tools`** + **`runCopilotChatOpenAiLoop`** (max 4 rounds); **`COPILOT_TOOLS_BEARER`** / **`SITE_CHAT_COPILOT_TOOLS`** gate; CLI **`MAGICBORN_COPILOT_TOOLS`** + **`MAGICBORN_COPILOT_BEARER`** on adapter | `global-tooling-05-01` | `chat-route.test.ts`, `openai-chat-tools.test.ts` |
-| `global-tooling-05-03` | `done` | **Forms:** **`buildCopilotFormDescriptor`** + **`copilot_open_form`** tool; **`copilotForm`** on **`SiteChatApiResponse`**; Ink **`CliCopilotFormPanel`**; **`POST /api/copilot/create`** (same copilot auth, **`confirm: true`**, sanitize) for **`project-records`** / **`site-app-records`** | `global-tooling-04-01`, `global-tooling-05-02` | `openai-chat-tools.test.ts`, `copilot-create-route.test.ts`, `sanitize-copilot-create-data.test.ts`; `mb-cli-framework` build |
-| `global-tooling-05-04` | `done` | **Creative batch (v1):** **`magicborn batch`** — **`--style`** + **`--scenes`** / **`--scenes-file`** + **`--target`** → repeated **`executeOpenAiImageRun`**; per-run **`manifest.json`** includes **`batch`** metadata; **`batch.json`** aggregates runs + taxonomy **`global-tooling-05-04`**; **`--medium image`** only (video deferred) | `global-tooling-01-02`, `global-tooling-05-03` | `magicborn-batch-scene-parse.test.ts`; dry-run **`magicborn batch`**, artifacts under **`.magicborn/batches/`** |
-| `global-tooling-05-05` | `done` | **Scene extraction:** **`lib/magicborn/extract-mdx-scenes`** — **`##`** sections + scene-like filter; **`magicborn book scenes extract`** (`--file` or **`--slug`** / positional → **`content/docs/magicborn/in-world/<slug>/`**); **`--all-headings`**; frontmatter stripped via **gray-matter**; **RAG** deferred (suggestions-only later) | `global-tooling-05-04` | **`magicborn-extract-mdx-scenes.test.ts`** + fixture **`tests/fixtures/magicborn-scene-extract/`** |
-
-## Phase `global-tooling-06` (Books · series · scenes in DB + EPUB illustration scan)
-
-**Goal:** **Payload** models for **series → book → scene** with **media variant** records (image / video / **scene play** prompts + assets); **fast EPUB scanner** for **illustration pending** slots with **reading-order context windows** (prose visible **before** each figure in LTR layout); feed **Copilot** and **`books-publishing-03`**. Kickoff: [KICKOFF](/docs/global/planning/plans/magicborn-books-scenes-epub/KICKOFF).
-
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-tooling-06-01` | `done` | **Schema:** **`book-series`**, **`book-records`**, **`scene-records`** (`scenePlayText`, **`videoPromptStub`**), **`scene-media-variants`**; owner/admin write, public read | `global-admin-01-01` | `payload.config` + contract tests; DB push / migrate locally |
-| `global-tooling-06-02` | `done` | **`scanEpubIllustrationGaps`** (`lib/books/scan-epub-illustration-gaps.ts`): zip + spine XHTML; placeholder figures; **slots** + **contextText** (per-chapter figure boundaries) | `books-reader-01-11` (page shell reality) | `tests/unit/lib/books/scan-epub-illustration-gaps.test.ts` |
-| `global-tooling-06-03` | `done` | **CLI:** **`magicborn books illustrations scan [label] --epub <path> [--json]`** → JSON or human summary | `global-tooling-06-01`, `global-tooling-06-02` | `scripts/magicborn/run.ts` + `@magicborn/cli` forward |
-| `global-tooling-06-04` | `done` | **Scene play** + **video prompt stub** on **`scene-records`**; **`composeScenePlayVideoPromptStub`** + **`validateVideoPromptStub`** (`lib/magicborn/scene-play-video-stub.ts`) | `global-tooling-06-01`, `books-publishing-03-02` | `tests/unit/lib/scene-play-video-stub.test.ts` |
-
-## Phase `global-tooling-07` (Global CLI DX — any cwd)
-
-**Goal:** Run **`magicborn`** from **any directory** (Git Bash in `~`, global link) by honoring **`MAGICBORN_REPO`** / **`MB_CLI_REPO`**; shell **`cd`** aliases for portfolio vs Grime Time. **Claude/Codex** are **not** launched by **`magicborn`** ([decision](/docs/global/planning/decisions) **`global-tooling-dec-06`**). Kickoff: [KICKOFF](/docs/global/planning/plans/mb-cli-global-dx/KICKOFF).
-
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-tooling-07-01` | `done` | **`findRepoRoot`** reads **`MAGICBORN_REPO`** / **`MB_CLI_REPO`** before walking from cwd; clearer error → **`shell-init`** | `-` | `tests/repo-root.test.ts` |
-| `global-tooling-07-02` | `superseded` | ~~Forward **`claude` / `codex`**~~ — replaced by **stderr hint** + exit **2**; run operator CLIs in shell after **`cdmb`** | `global-tooling-07-01` | `tests/operator-external-cli-hint.test.ts`; **`global-tooling-dec-06`** |
-| `global-tooling-07-03` | `done` | **`shell-init`:** **`cdmb`** / **`cdgt`** (when `vendor/grime-time-site` exists) in bash **`--apply`** + printed bash/zsh/fish snippets | `global-tooling-07-01` | manual `source ~/.bashrc`; `pnpm --filter @magicborn/cli test` |
-
-## Phase `global-tooling-09` (Payload DB sandbox · MCP/chat template · CLI extensions)
-
-**Goal:** **`magicborn` / mb-cli-framework** commands and contracts for **local-isolated** DB restores from production-shaped backups, **sandbox env** that blocks outbound integrations, **convention-based** CLI extensions for non-Payload execution paths, and documented **MCP + chat UI** quickstart (skills + Apps SDK UX references). Kickoff: [PAYLOAD-MCP-CHAT-KICKOFF](/docs/global/planning/plans/mb-cli-framework/PAYLOAD-MCP-CHAT-KICKOFF).
-
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-tooling-09-01` | `planned` | **Spec + env contract:** sandbox flag(s), second **`DATABASE_URL`** vs dump restore, integration no-op hooks checklist | `global-data-01-03` (align) | Kickoff + decisions row |
-| `global-tooling-09-02` | `planned` | **`magicborn db …`** (or framework **`mb db …`**) — restore/download entrypoint; docs for one primary backup format | `global-tooling-09-01` | tests + manual restore dry-run |
-| `global-tooling-09-03` | `planned` | **Extension convention** doc + one reference registration path (`.magicborn/cli.toml` or package export) | `global-tooling-02-05` | portfolio books path still works |
-| `global-tooling-09-04` | `planned` | **MCP + Assistant UI** golden-path doc in framework README or global docs; link **Apps SDK** UX/UI + skills commands | `-` | review link rot |
-
-## Phase `global-tooling-08` (mb-cli-framework — Ink kit & Claude-style regions)
-
-**Goal:** Move **reusable Ink layout + primitives** into **`@magicborn/mb-cli-framework`**; **region-based** trees so **activity** / “thinking…” updates do not force full transcript redraw; align with **`global-tooling-04`**. Kickoff: [KICKOFF](/docs/global/planning/plans/mb-cli-framework-ink-refactor/KICKOFF).
-
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-tooling-08-01` | `done` | Export **`TuiVerticalSlot`** + **`defaultTuiLayoutBlueprint`** from framework (`src/ink/tui-layout-contract.ts`) | `-` | `pnpm` build framework; typecheck consumers |
-| `global-tooling-08-02` | `done` | **`CliScreenBanner`**, **`CliFooterSlotRow`**, **`CliActivityLine`** in framework; **magicborn** home uses banner + footer row (`↑ /model` · model · folder) | `global-tooling-08-01`, `global-tooling-04-01` | `pnpm --filter @magicborn/cli test`; manual home TTY |
-| `global-tooling-08-03` | `done` | **Research:** Ink reconciliation + optional `React.memo` / `useMemo` boundaries for transcript rows; documented in **`vendor/mb-cli-framework/docs/INK-RENDERING.md`** + README link | `global-tooling-08-02` | `docs/INK-RENDERING.md` + README pointer |
-| `global-tooling-08-04` | `planned` | **grimetime:** adopt shared layout contract + trim duplicate REPL patterns | `global-tooling-08-02` | grimetime builds |
-
-## Phase `global-admin-01`
-
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-admin-01-01` | `done` | mount Payload's owner-only admin surface with the upstream `templates/blank/src/app/(payload)` route group, adapt it to this app's config/runtime, and use it as the CRUD back office for Payload-backed resources instead of inventing a second owner CRUD stack | `global-auth-02-01` | relevant route/component tests, `pnpm run build`, `pnpm run lint` |
-
-## Phase `global-data-01`
-
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-data-01-01` | `done` | define one shared provider contract for app data and uploaded assets, including env selection rules and phase-1 boundaries for local SQLite/file mode versus hosted Supabase mode | `global-auth-01-03` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
-| `global-data-01-02` | `done` | move shared Listen and Reader runtime access behind provider-owned repositories/bootstrap services so routes and components stop depending on one concrete backend | `global-data-01-01` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
-| `global-data-01-03` | `in-progress` | add the install/sync/bootstrap path for large local data: local SQLite/file export-import rules plus Supabase bootstrap/migration flow for hosted data and uploads | `global-data-01-01`, `global-data-01-02` | `pnpm --filter @portfolio/app test:unit`, `pnpm run build`, `pnpm run lint` |
-| `global-data-01-04` | `done` | **Site RAG scope (phase 1):** do **not** ingest full book manuscript EPUB text into the shared site chat/RAG corpus by default; that boundary stays aligned with **`BOOKS-REQ-04`** and **[books requirements](/docs/books/requirements)**. **Not a goal:** wiring the reader's EPUB pipeline into RAG. **Docs alignment:** record the decision in Global **decisions**; keep **local vs Supabase** backend notes in **`global-data-01-03`** / [Supabase bootstrap](/docs/global/planning/plans/global-data-01/SUPABASE-BOOTSTRAP) / deploy docs as that track finishes | `global-data-01-01` | `global-data-dec-09` in [decisions](/docs/global/planning/decisions), `pnpm run build`, `pnpm run lint` |
-
-## Phase `global-data-02`
-
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-data-02-01` | `done` | extract `@portfolio/repub-builder` into the standalone `MagicbornStudios/repub-builder` repo, vendor it back as `vendor/repub-builder`, and keep the monorepo consuming it as a working workspace package and git-installable library | `global-data-01-01` | `pnpm --filter @portfolio/repub-builder test`, `pnpm --filter @portfolio/app exec vitest run tests/unit/components/books/ReaderWorkspace.test.tsx`, `pnpm run build`, `pnpm run lint`, submodule repo push |
-| `global-data-02-02` | `in-progress` | classify the large git blobs by artifact type, land the first off-repo artifact path (versioned EPUB + planning-pack uploads with manifest-backed remote URLs), and define the branch-history cleanup/rebuild needed because the current unpushed range already contains large DB/EPUB blobs | `global-data-02-01` | storage policy doc + hosted artifact publish checkpoint + `pnpm --filter @portfolio/app exec vitest run tests/unit/lib/book-artifacts.test.ts tests/unit/lib/reader-workspace-state.test.ts tests/unit/lib/payload-collection-contract.test.ts`, `pnpm --filter @portfolio/repub-builder test`, `pnpm run build`, `pnpm run lint` |
-| `global-data-02-03` | `in-progress` | define and start applying the SSR/SEO-safe rendering contract for content that moves into the database/storage layer: classify which surfaces stay repo-first, which become Postgres-backed server-rendered catalogs, and which binaries/media move entirely to storage; land the new public-media collections/publisher, restore builtin-pack visibility in the planning-pack modal, and wire storage-backed URLs back into the portfolio app without rewriting authored content | `global-data-02-02` | docs updated, route/data matrix reviewed, `pnpm --filter @portfolio/app exec vitest run tests/unit/lib/planning-pack-modal-data.test.ts tests/unit/lib/public-media.test.ts tests/unit/lib/payload-runtime-config.test.ts tests/unit/lib/payload-collection-contract.test.ts`, `pnpm run build`, `pnpm run lint` |
-
-## Phase `global-data-03`
-
-| Id | Status | Goal | Depends | Verify |
-| --- | --- | --- | --- | --- |
-| `global-data-03-01` | `done` | add the next public catalog collections and SSR-safe loaders: `site-app-records` plus `site-download-assets`, migrate `/apps` off the hard-coded component array, seed the hosted app registry, and start moving public planning-pack/download metadata away from repo-resident binaries | `global-data-02-03` | targeted loader/component tests, `pnpm run build`, `pnpm run lint` |
-| `global-data-03-02` | `done` | move project metadata, ordering, link groups, and media/download relations into `project-records` while keeping long-form project bodies repo-first until the DB path proves simpler | `global-data-03-01` | targeted loader/component tests, `pnpm run build`, `pnpm run lint` |
-| `global-data-03-03` | `done` | move resumes onto `resume-records` plus `site-download-assets` so gallery metadata and downloadable HTML/PDF artifacts stop depending on local directory scans and repo-resident files | `global-data-03-01` | targeted loader/component tests, `pnpm run build`, `pnpm run lint` |
-
-## Registry rules
-
-| Field | Value |
-| --- | --- |
-| `status-set` | `planned`, `in-progress`, `done`, `blocked` |
-| `verification` | smallest proof that matches the row |
+- ✓ **05-01** Finish the cross-project observability pass: wire privacy-aware Vercel Analytics into the portfolio and Grime Time public layouts, add a small Grime Time observability helper for request ids plus safe route summaries, cover the helper and response-header behavior with tests, and verify with targeted typecheck/lint/test/build commands.

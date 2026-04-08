@@ -3,7 +3,7 @@ title: "get-anything-done — Task Registry"
 description: "Auto-compiled from vendor/get-anything-done/.planning/TASK-REGISTRY.xml"
 generated: "true"
 source: "vendor/get-anything-done/.planning/TASK-REGISTRY.xml"
-updated: "2026-04-06T20:35:07.052Z"
+updated: "2026-04-07T20:03:13.952Z"
 ---
 
 # Task Registry
@@ -46,4 +46,70 @@ updated: "2026-04-06T20:35:07.052Z"
 - ✓ **13-05** Flesh out write-feature-doc SKILL.md: add concrete examples of good feature docs, MDX frontmatter template, sink path resolution logic. Currently steps are correct but thin.
 - ✓ **13-06** Flesh out write-tech-doc SKILL.md: add concrete examples, mermaid diagram patterns, decision-referencing conventions. Currently steps are correct but thin.
 - ✓ **13-07** CLI error hardening: audit all gad.cjs commands for gad-12 compliance (missing-arg UX prints choices + rerun hint). Test edge cases: missing .planning/ dirs, malformed XML, empty files.
-- ○ **13-08** Run gad sink compile to sync the 7 stale files (get-anything-done and grime-time). Verify sink is fully up to date after phase 12 changes.
+- ✓ **13-08** Run gad sink compile to sync the 7 stale files (get-anything-done and grime-time). Verify sink is fully up to date after phase 12 changes.
+
+## Phase 14
+
+- ✓ **14-01** Create a gad eval project "escape-the-dungeon" from GAMEPLAY-DESIGN.xml and STAT-AND-BEHAVIOUR-TAXONOMY.md. Convert these source docs into a GAD REQUIREMENTS.xml in the eval project directory (evals/escape-the-dungeon/). The requirements should be structured for an agent to plan phases and implement from — not a raw XML dump.
+- ✓ **14-02** Create bin/gad-tools.cjs — the GAD equivalent of gsd-tools.cjs. Provides the core commands that workflows depend on: init (phase-op, execute-phase, plan-phase), commit, config-get, config-set, state (load, update, record-session), phase (find, add, complete), roadmap (get-phase, analyze), generate-slug, current-timestamp, scaffold, agent-skills. Reads from XML planning files instead of MD. This replaces all gsd-tools.cjs references in workflows.
+- ✓ **14-03** Define the eval trace format for real implementations: track which gad commands were called, which gad skills were triggered, arguments passed, token counts, time-to-completion. Extend TRACE.json schema beyond the current unit-coverage model to include tool_calls[] and skill_triggers[].
+- ✓ **14-04** Define the eval scoring rubric for real implementations: CLI efficiency (same as v6), skill trigger accuracy (were the right skills triggered at the right time), planning quality (task coverage, state hygiene), and time-to-completion. Human feedback is a separate manual score added after.
+- ✓ **14-05** Run the escape-the-dungeon eval: fresh agent session, agent reads requirements, plans phases, implements using the GAD loop, traces everything. Produce TRACE.json and SCORE.md. This validates the full loop end-to-end on a real project.
+- ✓ **14-06** Run the portfolio-bare eval with updated tracing. Compare against prior runs. Tighten portfolio-bare based on findings from the escape-the-dungeon eval.
+- ✓ **14-07** Review CONTEXT.md: what it is, how discuss-phase produces it, how downstream agents (researcher, planner) consume it. Evaluate whether gad CLI should have a `gad context-doc` command or if gad-tools.cjs scaffold is sufficient. Decide if CONTEXT.md should be a GAD skill output or a planning file type. Update skills and CLI to integrate CONTEXT.md into the loop if valuable.
+
+## Phase 14.5
+
+- ✓ **14.5-01** Create eval template AGENTS.md that enforces the GAD loop. The eval template's .planning/ directory must include an AGENTS.md that tells the agent: (1) run gad snapshot first, (2) plan phases in ROADMAP.xml before coding, (3) update TASK-REGISTRY.xml per task, (4) update STATE.xml after each phase, (5) capture decisions. This file is what the agent reads to know how to work — not a prompt instruction it ignores.
+- ✓ **14.5-02** Update eval-run skill/command to inject snapshot context INTO the agent prompt. Instead of telling the agent "run gad snapshot", the eval-run workflow should run the snapshot itself and include the output in the agent's initial context. The agent starts with context, not instructions to get context.
+- ✓ **14.5-03** Create gad eval trace reconstruct --project &lt;name&gt; command. Parses git log + planning doc state to build TRACE.json after the fact. Detects: which files were created/modified per commit, which planning docs were updated, time between commits (phase duration), task completion count from TASK-REGISTRY.xml diff. This replaces manual log-cmd/log-skill with post-hoc reconstruction.
+- ✓ **14.5-04** Add checkpoint enforcement to execute-phase workflow. Before the agent can start the next task, it must have: (1) updated TASK-REGISTRY.xml for the previous task, (2) updated STATE.xml next-action. The workflow checks these preconditions. If not met, it prompts the agent to update before continuing. Not a hook — a step in the workflow that reads the planning docs and verifies.
+- ✓ **14.5-05** Auto-scaffold CONVENTIONS.md after first implementation phase of greenfield projects. When phase 01 (or first phase with code output) completes in a project with no existing CONVENTIONS.md, run a lightweight codebase scan (file structure, naming patterns, import style, content pack format) and write .planning/CONVENTIONS.md. Integrate with gad:map-codebase skill output.
+- ✓ **14.5-06** Define expected_triggers for implementation evals. The TRACE.json skill_accuracy field needs expected_triggers populated before the eval runs — defining which skills SHOULD fire and when. Create a template expected_triggers list for implementation evals: discuss-phase before planning, plan-phase before execution, execute-phase per phase, verify-work after phases, map-codebase after first implementation.
+- ✓ **14.5-07** Re-run escape-the-dungeon eval with fixes applied (template AGENTS.md, snapshot injection, checkpoint enforcement). Compare v3 TRACE.json against v2. Validate that: gad CLI is actually used, task-level tracking happens, conventions are generated, trace has real data not backfilled.
+
+## Phase 15
+
+- ✓ **15-01** Move get-shit-done/workflows/ → workflows/ at GAD repo top level. All 58 workflow .md files.
+- ✓ **15-02** Move get-shit-done/templates/ → templates/ at GAD repo top level. All 34 template files.
+- ✓ **15-03** Move get-shit-done/references/ → references/ at GAD repo top level. All 15 reference files.
+- ✓ **15-04** Update all 42 command @-path references from get-shit-done/workflows/ → workflows/, get-shit-done/templates/ → templates/, get-shit-done/references/ → references/. Sync to .claude/commands/gad/.
+- ✓ **15-05** Delete get-shit-done/ directory entirely (bin/, lib/, workflows/, templates/, references/). gsd-tools.cjs replaced by gad-tools.cjs. Verify no remaining references.
+- ✓ **15-06** Copy eval v3 game build (dist/) to apps/portfolio/public/evals/escape-the-dungeon/ for docs site hosting. Verify it's servable as static page.
+
+## Phase 16
+
+- ✓ **16-01** Review RepoPlanner sprint model: read scripts/loop-cli.mjs sprint commands (set-size, show, context), understand how sprintSize groups phases, how context sprint filters to sprint-scoped paths and task counts. Document what RP gives that GAD doesn't.
+- ✓ **16-02** Add sprint concept to GAD: configurable sprint size in planning-config.toml (default 5 phases). Add gad sprint show (list sprint boundaries) and gad sprint context (sprint-scoped paths + summary) commands to gad.cjs.
+- ✓ **16-03** Add gad snapshot --sprint mode: collapse done phases to id|title|done (no goal text), inline only active/planned phases within current sprint, show only open tasks (planned/in-progress), omit completed task history. Measure token reduction vs current full dump.
+- ✓ **16-04** Add file refs to snapshot: for each active/in-progress task, include code and doc files touched (from git log scoped to project path). Add recent git log (last 5-10 commits for the project). These give the agent immediate code context without manual file reads.
+- ✓ **16-05** Add file refs to TASK-REGISTRY.xml schema: optional &lt;files&gt; block per task listing paths touched during implementation. Update gad-tools.cjs and any task-completion workflows to prompt for file list on task done.
+- ✓ **16-06** Measure optimized snapshot token count. Target: ~3,000 tokens for get-anything-done (currently ~9,750). Run cli-efficiency eval v7 with sprint-scoped snapshot. Compare composite score vs v6.
+- ✓ **16-07** Update docs/context-budget.md with new snapshot token counts and sprint context window analysis. Update DEFINITIONS.md if sprint changes the information unit model.
+
+## Phase 17
+
+- ✓ **17-01** Run gad:reverse-engineer on vendor/repub-builder/src/reader to produce REQUIREMENTS.xml, DECISIONS.xml, CONVENTIONS.md, ROADMAP.xml for the reader-workspace eval.
+- ✓ **17-02** Create reader-workspace eval project with REQUIREMENTS.md, template/, and AGENTS.md.
+- ✓ **17-03** Run reader-workspace eval v1: fresh agent builds the EPUB reader from reverse-engineered requirements alone. Produce TRACE.json and SCORE.md. Validates the full reverse-engineer → implement cycle.
+- ✓ **17-04** Score reader-workspace v1: requirement coverage (51 criteria), architecture alignment (12 decisions), state hygiene, convention adherence. Compare output against reference implementation quality.
+
+## Phase 18
+
+- ✓ **18-01** Replace the stub in `gad eval run` with a prompt generator: read the eval template (AGENTS.md, REQUIREMENTS.xml, DECISIONS.xml, CONVENTIONS.md, ROADMAP.xml, STATE.xml), construct a full bootstrap prompt, and output it to stdout + eval-output.txt. The user/agent copies this prompt into their AI tool. Agent-agnostic per gad-01.
+- ✓ **18-02** Add `gad eval suite` CLI command: lists all eval projects with templates, generates bootstrap prompts for each, outputs them as separate files in a timestamped suite run directory. Shows a summary table of what will be run.
+- ✓ **18-03** Add `gad eval report` cross-project comparison: reads TRACE.json from latest run of each project, produces a comparison table (phases, tasks, discipline, scores) across all projects. Supports --all flag for all projects or specific --project list.
+- ✓ **18-03b** Add comprehensive logging: GAD CLI call logger (JSONL per day), PostToolUse hook for tool tracing (Bash/Read/Write/Edit/Agent/Skill/Grep/Glob), `gad log show|stats|clear` commands, `gad eval trace from-log` for definitive trace building from actual logs, GAD_LOG_DIR env for eval-scoped logs.
+- ✓ **18-04** Run the full eval suite: portfolio-bare v3, escape-the-dungeon v4, reader-workspace v2. Launch all three in parallel worktree agents. Reconstruct traces and produce cross-project report.
+- ✓ **18-05** Iterate on findings: review eval results, tighten at least one skill based on patterns, update eval-suite SKILL.md with lessons learned, add any new eval criteria discovered.
+
+## Phase 20
+
+- ○ **20-01** Document tooling eval contract: extend TRACE.json with eval_type tooling|mcp, trace_schema_version, nested tooling or mcp metrics blocks, optional metrics.json for granular histograms. Record gad-26–gad-28 in DECISIONS.xml. Add a short section to vendor/get-anything-done/AGENTS.md (or evals/README) describing implementation vs tooling evals and how regressions are compared.
+- ○ **20-02** Implement `gad dev` or `gad watch planning`: debounced watch on .planning/**/*.xml (configurable), invoke existing refs verify logic, print one JSON summary line per run (ok, missing paths, timing) for scripts and terminal/CI consumers. Optional --poll for unreliable FS watchers. No network by default.
+- ○ **20-03** Add evals/tooling-watch-baseline (or equivalent): fixed fixture repo with known good/bad paths, automated Node harness that starts watcher, performs scripted edits, asserts correctness + latency percentiles, writes evals/&lt;project&gt;/vN/TRACE.json with eval_type tooling. Runnable in CI without an LLM.
+- ○ **20-04** Harden implementation eval scoring automation: generate scores.json alongside SCORE.md from score-generator; change gad eval scores to prefer JSON totals over SCORE.md regex. Prepare same pattern for tooling composite (tooling_composite) so weights can evolve without breaking old runs.
+- ○ **20-05** Optional MCP server package: thin adapter over the same core as CLI (verify, snapshot summary, session status). Stdio MCP; document Cursor config. Agents may use it; primary user remains human IDE workflows.
+- ○ **20-06** MCP tooling eval: golden tool invocations, cold-start and per-tool latency, error rate on bad args. Produces eval_type mcp TRACE.json; compare across gad releases.
+- ○ **20-07** IDE integration: document VS Code / Cursor Tasks (background watch), optional problem matcher mapping JSON errors to Problems panel. Update portfolio sink evals.mdx when behavior is stable.
+- ○ **20-08** Extend gad eval report and gad eval diff to include tooling/mcp runs (filter by eval_type, compare tooling.metrics and composite). Ensure suite or follow-up command can run implementation + tooling evals in one report.

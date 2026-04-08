@@ -1,3 +1,9 @@
+# GAD config — canonical multi-root registry for `gad` CLI (sink, workspace, snapshot).
+# Legacy name `planning-config.toml` is still read if this file is absent.
+#
+# [[planning.sections]] — monorepo-wide roots: planning lives at repo root (path ".").
+# [[planning.roots]] — vendor/subtree projects with a relative `path`.
+
 [planning]
 sprintSize = 5
 currentProfile = "human"
@@ -83,11 +89,10 @@ description = "Default human view."
 description = "Agent perspective; defaultJson = true."
 defaultJson = true
 
-[[planning.roots]]
+# Monorepo root: `/.planning/*.xml` → docs sink `global/planning/*.mdx`
+[[planning.sections]]
 id = "global"
-path = "."
 planningDir = ".planning"
-discover = false
 
 [[planning.roots]]
 id = "get-anything-done"

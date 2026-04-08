@@ -1,33 +1,38 @@
 ---
-title: Roadmap
-description: Phase overview for the Global documentation section.
-date: "2026-03-30"
-updated: "2026-03-31"
-order: 1
-repoPath: apps/portfolio/content/docs/global/planning/roadmap.mdx
+title: "global — Roadmap"
+description: "Auto-compiled from ./.planning/ROADMAP.xml"
+generated: "true"
+source: "./.planning/ROADMAP.xml"
+updated: "2026-04-07T20:03:13.469Z"
 ---
 
 # Roadmap
 
-## Registry
+## Phase 01
 
-| Field | Value |
-| --- | --- |
-| `section` | `global` |
-| `status` | `active` |
-| `scope` | repo-wide planning IA, reference docs, and cross-section guidance |
+**Status:** done
+**Goal:** Phase 01 (closed 2026-03-28): `.planning-archive` removed after migration into public docs; monorepo CLI baseline (`pnpm planning -- --version`, `engines.node &gt;= 22`, documented `pnpm dlx` / workspace exec). Ongoing: keep `.planning/*.xml` aligned with section requirements/state/task-registry MDX; agents read root AGENTS.md first.
 
-## Phases
+## Phase 02
 
-| Phase | Status | Focus | Next |
-| --- | --- | --- | --- |
-| `global-site-01` | `done` | establish the Global section as the reference layer for planning grammar, diagrams, and cross-links | maintain only |
-| `global-site-02` | `active` | standardize the agent loop: global-first entrypoint, kickoff records, definition of done, tests-required-for-done, and ownership rules | execute `global-site-02-01`, `02-02`, and `02-03` |
-| `global-auth-01` | `done` | establish the shared auth, tenant, entitlement, and long-lived session foundation for gated site features | maintain only |
-| `global-auth-02` | `done` | refresh the portfolio shell around owner-only login: sidebar account affordances, live identity/org context, avatar, logout, and private-surface entry points using the existing auth/session contract and shadcn-compatible UI primitives | maintain only |
-| `global-auth-03` | `in-progress` | **Restricted operators:** gate media generation and other mutation tools to **owner/org admins**; **visitor reader** local/export policy; **invites** move to a trusted CLI + consumer invite-link acceptance model that can port to Grime Time | [task registry — global-auth-03](/docs/global/planning/task-registry#phase-global-auth-03-restricted-operators--visitor-reader-policy) |
-| `global-tooling-01` | `planned` | unified **Magicborn CLI** for seeds, RAG, books, media, lookups — [kickoff](/docs/global/planning/plans/magicborn-cli/plan) | execute **`global-tooling-01-01`** |
-| `global-admin-01` | `done` | mount the owner-only Payload admin back office with the upstream `(payload)` route group, then trim and customize it for the Payload-backed resources the site actually edits | maintain only |
-| `global-data-01` | `active` | define the shared data/storage provider contract so local SQLite remains first-class while Supabase can host the same app data and uploads | execute `global-data-01-01`, `01-02`, `01-03`, and `01-04` |
-| `global-data-02` | `in-progress` | extract `repub-builder` into its own git-installable package repo, vendor it back as a submodule, and plan the broader large-blob/off-repo data strategy without giving up SSR-friendly content delivery | execute the extraction first, then turn the blob audit into concrete artifact and SEO-safe data phases |
-| `global-data-03` | `done` | move the next public catalog surfaces into SSR-safe Postgres metadata plus storage-backed files: apps, projects, resumes, and shared public downloads | maintain the seeded records and extend the same storage-backed publish path to later public bundles when needed |
+**Status:** active
+**Goal:** Phase 02: define and execute the shared data/storage provider contract so local SQLite plus local files stay first-class, Supabase becomes the first hosted backend for remote data and uploads, and the repo no longer depends on committed `.db` artifacts or Git LFS.
+**Depends:** 01
+
+## Phase 03
+
+**Status:** active
+**Goal:** Phase 03: extract `@portfolio/repub-builder` into its own git-installable repo, vendor it back as a submodule workspace dependency, and turn the large-blob audit into explicit rules for what runtime artifacts move to storage/database while SSR-friendly public content stays deterministic.
+**Depends:** 02
+
+## Phase 04
+
+**Status:** done
+**Goal:** Phase 04 (closed 2026-03-31): move the next public catalog surfaces behind SSR-safe Postgres metadata plus storage-backed files, starting with apps, project metadata, resumes, and public download assets. The owner-only auth shell and mounted Payload admin back office are now in place as the operational layer around those records.
+**Depends:** 03
+
+## Phase 05
+
+**Status:** active
+**Goal:** Phase 05: land a cheap cross-project observability baseline for the public portfolio and Grime Time. Use Vercel Analytics for privacy-aware pageview tracking on public layouts, and add request-id based tracing plus safe request summaries for high-signal Grime Time form and copilot routes without logging raw PII payloads.
+**Depends:** 04

@@ -1,0 +1,115 @@
+---
+title: State
+description: Current cycle and focus for the Global documentation section (repo-wide planning IA).
+date: "2026-03-28"
+updated: "2026-04-08"
+order: 2
+repoPath: apps/portfolio/content/docs/global/planning/state.mdx
+taskPhase: global-data-02
+---
+
+# State
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `section` | `global` |
+| `owner` | `monorepo` |
+| `status` | `active` |
+| `updated` | `2026-04-08` |
+
+## Current cycle
+
+| Field | Value |
+| --- | --- |
+| `phase` | `global-data-03` is complete. `global-data-01` stays the shared provider baseline and `global-data-02` stays the storage-policy foundation while the newly landed owner shell and Payload back office maintain the operational side of those records. |
+| `focus` | the blocked heavy-blob history is cleaned and `main` pushes again. `repub-builder` is extracted, the book-artifact and public-media publishers are live, and the public-catalog migration is now fully landed: `/apps` reads `site-app-records`, `/projects` merges `project-records` metadata over repo-authored MDX bodies, `/resumes` reads `resume-records`, and both the resume routes and planning-pack downloads reuse the shared `site-download-assets` path with repo-local fallbacks where planned. The owner shell refresh is live as well: the sidebar footer reads the shared auth/session API, shows avatar plus user/org context, supports logout, and gates `/admin` through owner-only entitlements. The owner-only Payload back office is mounted too: `/admin` now hands off to the upstream Payload route group, public-write collections allow owner CRUD, and internal reader/RAG collections stay hidden from the first admin pass. Shared Listen and Reader runtime access now follows the same provider-owned repository pattern too: bootstrap/state services call Payload-backed repositories instead of scattering collection and query details across routes and workers. Grime Time is now tracked as a first-class app entry in the site catalog so the portfolio can point at the next product line while auth work closes out. |
+| `constraint` | repo-memory reduction cannot casually break authored-content SSR. Runtime binaries, generated reading artifacts, and private media can move behind storage/database paths, but route metadata, public page content, and indexable SEO surfaces still need a clear render contract |
+
+## Next queue
+
+| Priority | Action |
+| --- | --- |
+| `1` | finish **`global-auth-03-03`** as the last auth foundation slice before the Grime Time delivery shift: trusted CLI invites, browser invite acceptance, and the role-template / revoke path |
+| `1a` | **Portfolio site shell + EPUB (`documentation-site-14`):** narrow sidebar / **`global-error`** / **`mordreds_tale` EPUB 404** — [kickoff](/docs/documentation/planning/plans/documentation-site-14/kickoff). Root **`.planning/TASK-REGISTRY.xml` `02-01`** = provider **contract** close-out (Postgres/Payload already); **`03-02`** = blob/modal policy **finish** — see kickoff table |
+| `1b` | **`global-auth-03-04` in progress** — **`global-auth-03-04a` done**. **Manual Clerk/build confirmation deferred** (operator chose not to confirm now — see **Deferred** below). Invites stay on **`global-auth-03-03`** |
+| `1c` | plan **`global-auth-03-05`**: first-party orgs, memberships, role and entitlement locks, provider mappings, and outbound domain events so hosted identity stays swappable and multi-tenant sync does not become Clerk-only |
+| `2` | continue `global-data-01-03`: finish the install, export-import, and hosted bootstrap flow for large local data plus uploads so the same auth + storage baseline ports cleanly into Grime Time |
+| `3` | extend the `site-download-assets` publisher to the next public bundle classes as `/projects`, `/apps`, and future public exports adopt the same storage-backed path |
+| `4` | **`global-data-01-04` closed:** phase-1 site RAG **does not** include book manuscript EPUB text by default (**`global-data-dec-09`**, **`BOOKS-REQ-04`**). Remaining **local vs hosted** doc alignment rides with **`global-data-01-03`** and Supabase bootstrap notes |
+| `5` | **`global-tooling-01-02`-`01-04`:** Magicborn CLI media path - OpenAI generate from `.env`, temp + manifest under **`.magicborn/`**, taxonomy + Payload wiring for **apps/projects** (and rest per [plan](/docs/global/planning/plans/magicborn-cli/plan)), then **site logos** with **active pointer** via CLI (**`global-tooling-dec-02`**, **`global-tooling-dec-03`**) |
+| `5b` | **`global-tooling-02` + `global-tooling-03` are landed:** shared **[mb-cli-framework](/docs/global/planning/plans/mb-cli-framework/PLAN)** now owns the shared shell, Ink host/theming, vendor v2, chat scaffold, and `payload <alias> generate`; next tooling work is new capability or polish, not backlog catch-up on this wave |
+| `5c` | **`global-tooling-04` (phase done):** slash **`/model`/`/rag`**, **`.magicborn/cli-session.json`** **`chatModel`/`ragMode`**, **`POST /api/chat`** + **`filterRagHitsByMode`** — [kickoff](/docs/global/planning/plans/magicborn-cli-ink-claude-ux/KICKOFF). **Next CLI phase:** **`global-tooling-05`** (Copilot tools + Payload) |
+| `5d` | **`global-tooling-05` done:** Copilot tools/forms, **`magicborn batch`**, **`magicborn book scenes extract`** (MDX **`##`** blocks). **Next:** **`global-tooling-06`** (books/scenes DB + EPUB) — [Copilot kickoff](/docs/global/planning/plans/magicborn-copilot-payload-tools/KICKOFF), [scenes EPUB kickoff](/docs/global/planning/plans/magicborn-books-scenes-epub/KICKOFF) |
+| `5e` | **`global-tooling-06` + `books-publishing-03-05`:** **Series / book / scene** in DB, **scene play** + image/video prompts, **EPUB illustration pending** scan + **LTR context windows**; **`global-tooling-04-05`** context **%** bar, **compact**, **approval vs auto-accept** |
+| `5f` | **`global-tooling-07`:** **`MAGICBORN_REPO` / `MB_CLI_REPO`** for **any-cwd** `magicborn`; [global CLI DX kickoff](/docs/global/planning/plans/mb-cli-global-dx/KICKOFF); **`07-02`** ~~Claude/Codex forward~~ **superseded** — run **`claude`/`codex`** in shell after **`cdmb`** ([decision](/docs/global/planning/decisions) **`global-tooling-dec-06`**); **`07-03`** shell `cd` aliases |
+| `5g` | **`global-tooling-08`:** [Ink refactor kickoff](/docs/global/planning/plans/mb-cli-framework-ink-refactor/KICKOFF) — **`CliScreenBanner`**, **`CliFooterSlotRow`**, **`CliActivityLine`** in framework; **`08-02`** done; **`08-03`** reconciliation notes |
+| `6` | **MCP / ChatGPT Apps:** formal kickoff **[PAYLOAD-MCP-CHAT-KICKOFF](/docs/global/planning/plans/mb-cli-framework/PAYLOAD-MCP-CHAT-KICKOFF)** + phase **`global-tooling-09`** (DB sandbox, extension convention, skills + [Apps SDK UX](https://developers.openai.com/apps-sdk/concepts/ux-principles)); still coordinate with [documentation cross-cutting queue](/docs/documentation/planning/state) |
+| `6b` | **Strategy (2026-04):** portfolio **=** Grime Time attention; pull **visual editing + media** patterns from GT into portfolio via **shared framework/vendor** primitives (**[global-strategy-dec-01](/docs/global/planning/decisions)**). **Process:** vague goals **require** kickoffs; **open questions** below must be **empty or deferred** before starting **auth mutations**, **planning-sync**, or **shared UI extraction** phases (**[global-planning-dec-03](/docs/global/planning/decisions)**, **-05**). |
+
+## Deferred operator confirmations
+
+| Item | Notes |
+| --- | --- |
+| **`global-auth-03-04` verify** | Manual **Clerk sign-in** + **`pnpm run build`** (and optional owner/org link) **not** confirmed by operator right now — **intentionally deferred**; **`global-auth-03-04`** stays **`in-progress`** until someone runs verify and updates the task row. Code hygiene (**`global-auth-03-04a`**) is already **`done`**. |
+
+## Open questions (gating)
+
+_These block kicking off named high-risk tracks until answered or explicitly deferred with a decision row._
+
+| Id | Question | Blocks |
+| --- | --- | --- |
+| `oq-01` | **Shared UI package shape:** default = **extend `mb-cli-framework` first** (**[global-strategy-dec-03](/docs/global/planning/decisions)**). Reopen only if publish size or deps force **`@magicborn/ui-payload`**. | Extracting GT page-composer / media patterns into the monorepo shared layer |
+| `oq-02` | **Planning sync MVP:** first shipped behavior is **read-only compile** (dashboard of all `.planning` + section MDX) vs **two-way merge** with one blessed flag set? | **`global-planning-dec-02`** implementation |
+| `oq-03` | **Payload CLI metadata:** final key name and shape (e.g. `custom.magicborn` on collection config) for “expose this collection to generated operator commands”? | Agent skills + codegen spike (**`global-tooling-dec-07`**) |
+
+| `oq-04` | ~~**GAD CLI binary name**~~ | **Closed** → `global-planning-dec-13`: standalone `gad` |
+| `oq-05` | ~~**GAD CLI distribution**~~ | **Closed** → `global-planning-dec-13`: published as `get-anything-done` |
+| `oq-06` | ~~**Eval run isolation**~~ | **Closed** → `global-planning-dec-14`: git worktrees |
+| `oq-07` | ~~**ArgParser dependency**~~ | **Closed** → `global-planning-dec-12`: `citty` (already in grime-time) |
+| `oq-08` | ~~**rp-manuscript disposition**~~ | **Closed** → `global-planning-dec-15`: separate `gad-manuscript` repo + sub-CLI |
+| `oq-09` | **Sub-CLI discovery:** does `gad` discover sub-CLIs by scanning installed `.gad` packs at startup, or requires explicit registration in root config? | [gad-cli plan](/docs/global/planning/plans/gad-cli/PLAN), [gad-manuscript plan](/docs/global/planning/plans/gad-manuscript/PLAN) |
+| `oq-10` | **gad-manuscript STATE.md template:** replaces or extends the base GAD `STATE.md`? | [gad-manuscript plan](/docs/global/planning/plans/gad-manuscript/PLAN) |
+| `oq-11` | **Mordred's Tale requirements source:** pull from portfolio books requirements MDX or maintain separately in gad-manuscript repo? | [gad-manuscript plan](/docs/global/planning/plans/gad-manuscript/PLAN) |
+
+_Add rows when a phase kickoff surfaces new blockers; remove or mark **deferred** in **decisions** when closed._
+
+## GAD planning track
+
+New phases added 2026-04-03. These run alongside the existing global-tooling / global-auth tracks.
+
+| Phase | Goal | Status |
+| --- | --- | --- |
+| `global-planning-01` | GAD architecture formalization — boundary spec, .gad format, migration plan | planning |
+| `global-planning-02` | `gad` CLI implementation — command surface, mb-cli-framework non-interactive additions | complete |
+| `global-planning-03` | GAD eval framework — drift metrics, benchmark projects, TRACE + SCORE system | complete |
+| `global-planning-04` | RP migration — remove redundant skills, adopt GAD MD schema, become GUI-only | planning |
+| `global-planning-05` | gad-manuscript — sub-CLI + domain pack for book/fiction development (**blocked on global-planning-01 through 04**) | not started |
+
+**Work order gate:** `global-planning-05` (gad-manuscript) does not start until GAD is stable and no longer depends on GSD (`global-planning-01` + `global-planning-02` + `global-planning-03` + mb-cli-framework migration complete).
+
+Plans: [gad-architecture](/docs/global/planning/plans/gad-architecture/PLAN) · [gad-cli](/docs/global/planning/plans/gad-cli/PLAN) · [gad-eval](/docs/global/planning/plans/gad-eval/PLAN) · [rp-migration](/docs/global/planning/plans/rp-migration/KICKOFF) · [gad-manuscript](/docs/global/planning/plans/gad-manuscript/PLAN)
+
+## References
+
+| Id | Path |
+| --- | --- |
+| `docs-global` | `apps/portfolio/content/docs/global/` |
+| `global-data-kickoff` | `apps/portfolio/content/docs/global/planning/plans/global-data-01/PLAN.mdx` |
+| `global-data-supabase-bootstrap` | `apps/portfolio/content/docs/global/planning/plans/global-data-01/SUPABASE-BOOTSTRAP.mdx` |
+| `global-data-catalog-kickoff` | `apps/portfolio/content/docs/global/planning/plans/global-data-03/PLAN.mdx` |
+| `global-auth-shell-kickoff` | `apps/portfolio/content/docs/global/planning/plans/global-auth-02/PLAN.mdx` |
+| `global-admin-kickoff` | `apps/portfolio/content/docs/global/planning/plans/global-admin-01/PLAN.mdx` |
+| `magicborn-cli-plan` | `apps/portfolio/content/docs/global/planning/plans/magicborn-cli/PLAN.mdx` |
+| `mb-cli-framework-plan` | `apps/portfolio/content/docs/global/planning/plans/mb-cli-framework/PLAN.mdx` |
+| `magicborn-cli-ink-claude-ux` | `apps/portfolio/content/docs/global/planning/plans/magicborn-cli-ink-claude-ux/KICKOFF.mdx` |
+| `magicborn-copilot-payload-tools` | `apps/portfolio/content/docs/global/planning/plans/magicborn-copilot-payload-tools/KICKOFF.mdx` |
+| `magicborn-books-scenes-epub` | `apps/portfolio/content/docs/global/planning/plans/magicborn-books-scenes-epub/KICKOFF.mdx` |
+| `mb-cli-global-dx` | `apps/portfolio/content/docs/global/planning/plans/mb-cli-global-dx/KICKOFF.mdx` |
+| `mb-cli-framework-ink-refactor` | `apps/portfolio/content/docs/global/planning/plans/mb-cli-framework-ink-refactor/KICKOFF.mdx` |
+| `docs-lib` | `apps/portfolio/lib/docs.ts` |
+| `payload-config` | `apps/portfolio/payload.config.ts` |
+| `rag-config` | `apps/portfolio/lib/rag/config.ts` |
+| `documentation-site-14-kickoff` | `apps/portfolio/content/docs/documentation/planning/plans/documentation-site-14/KICKOFF.mdx` |
+| `agents-root` | `AGENTS.md` (repo root) |

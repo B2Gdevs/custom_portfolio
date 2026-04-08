@@ -3,7 +3,7 @@ title: "get-anything-done — Decisions"
 description: "Auto-compiled from vendor/get-anything-done/.planning/DECISIONS.xml"
 generated: "true"
 source: "vendor/get-anything-done/.planning/DECISIONS.xml"
-updated: "2026-04-06T20:35:07.052Z"
+updated: "2026-04-07T20:03:13.952Z"
 ---
 
 # Decisions
@@ -88,7 +88,7 @@ Every eval run directory must contain a TRACE.json alongside RUN.md and SCORE.md
 
 ## gad-14: gad state and gad phases default to session project when a session is active
 
-When no --projectid flag is given, `gad state`, `gad phases`, `gad decisions`, `gad requirements`, `gad errors`, `gad blockers`, and `gad refs` (same as `gad refs list`) call getActiveSessionProjectId() and scope output to the active session's project. Explicit --projectid overrides. --all bypasses session scope entirely and shows all roots. gad ls always shows all roots unscoped.
+When no --projectid flag is given, `gad state`, `gad phases`, `gad decisions`, `gad requirements`, `gad errors`, `gad blockers`, and `gad refs` call getActiveSessionProjectId() and scope output to the active session's project. Explicit --projectid overrides. --all bypasses session scope entirely and shows all roots. gad ls always shows all roots unscoped.
 
 **Impact:** Agents working in a session see only their project by default. Multi-project output via --all or when no session exists. token_reduction improved from 0.874 (v5) to 0.940 (v6).
 
@@ -124,6 +124,60 @@ That's it. AGENTS.md files in each project reference this loop but do NOT redefi
 Skills are methodology documents (SKILL.md) — agents read and follow them. They are not CLI commands or executable plugins. The GAD CLI provides context efficiency. Skills provide methodology.
 
 **Impact:** Root AGENTS.md mandatory read order must be simplified. Agents should NOT read 15 files on startup — gad snapshot exists for this. AGENTS.md files across vendor projects reference the GAD loop, they don't each define their own version. No memory files, no shadow task lists — TASK-REGISTRY.xml and STATE.xml are the only task tracking.
+
+## gad-21: Eval agents must be bootstrapped with GAD context — not just prompted
+
+The escape-the-dungeon eval (v2) showed that prompting an agent to "use gad snapshot" and "log traces" doesn't work — the agent ignored the CLI entirely, read requirements, and coded directly. Eval agents need: (1) GAD CLI available and working in the worktree, (2) AGENTS.md in the eval template that enforces the loop, (3) snapshot output injected into the agent's initial prompt (not "run this command"), (4) hooks or structured checkpoints that enforce task-level tracking. The agent must be inside the loop from the start, not asked to enter it.
+
+**Impact:** Eval templates must include an AGENTS.md with the GAD loop. The eval-run skill must inject snapshot context into the agent prompt. The agent's working environment must have gad CLI accessible. Honor-system tracing is insufficient — tracing must be automated or enforced via checkpoints.
+
+## gad-22: Trace logging must be automatic — hooks or checkpoint-based, not manual log-cmd calls
+
+Manual trace logging (gad eval trace log-cmd/log-skill) requires the agent to remember to call them. The v2 eval proved this doesn't happen — the agent backfilled all 8 skill triggers in 15 seconds at the end. Tracing should be: (1) automatic via hooks that detect gad CLI calls and skill invocations, or (2) checkpoint-based where the agent must produce a trace entry to unlock the next phase, or (3) post-hoc by parsing git history and planning doc diffs to reconstruct what happened. Option 3 is the most reliable since it doesn't depend on agent cooperation.
+
+**Impact:** The eval-run workflow should reconstruct traces from git log + planning doc state changes, not rely on the agent to self-report. gad eval trace reconstruct --project &lt;name&gt; should parse git history to build TRACE.json after the fact.
+
+## gad-23: Greenfield eval projects must auto-scaffold CONVENTIONS.md after phase 01
+
+The escape-the-dungeon agent created 13 source files with patterns (scene structure, content pack format, state management) but documented none of them. A follow-up agent would start cold with no conventions. After the first implementation phase, GAD should prompt or auto-generate a CONVENTIONS.md from the code patterns established — file structure, naming, import patterns, content pack format, scene registration pattern.
+
+**Impact:** Add a post-phase-01 checkpoint to eval-run and execute-phase that generates CONVENTIONS.md from the codebase. The gad:map-codebase skill already does this — it should be triggered automatically after the first implementation phase of any greenfield project.
+
+## gad-20: Snapshot includes project-scoped conventions with global fallback
+
+gad snapshot includes a CONVENTIONS section: first checks project-level CONVENTIONS.md in .planning/, then extracts conventions/style sections from the project's AGENTS.md, then falls back to global root AGENTS.md conventions. Conventions grow per-project as code/content/patterns evolve — refactoring introduces new conventions, and the snapshot surfaces them to agents. Eval runs are expected to produce findings that tighten workflows, create new skills, and refine snapshot content.
+
+**Impact:** Every project can have its own CONVENTIONS.md. The snapshot surfaces the right conventions for the project being worked on. After eval runs, review outputs and create/update conventions based on what worked and what didn't.
+
+## gad-25: All GAD CLI calls and agent tool uses are logged to JSONL for eval tracing
+
+Every gad CLI invocation logs to .planning/.gad-log/ (JSONL, one file per day): timestamp, command, args, duration, exit code. A PostToolUse hook (tool-trace.js) logs every agent tool call (Bash, Read, Write, Edit, Agent, Skill, Grep, Glob) to the same directory. During eval runs, GAD_LOG_DIR routes logs to the eval run directory for permanent storage. `gad log show` displays both log types interleaved with filters (--filter cli|tool|gad|skill|agent). `gad eval trace from-log` builds TRACE.json from actual logs (source: call-log) instead of git reconstruction. This is the definitive, numerical, measurable observability layer.
+
+**Impact:** Evals produce real call logs, not reconstructed approximations. Agents that spawn subagents, trigger skills, or call gad CLI commands are all traced. Log data enables: per-tool-call token estimates, skill trigger verification, gad CLI usage patterns, and cross-eval comparison on actual behavior.
+
+## gad-26: Real-time GAD tooling: core first, transports second
+
+The live developer loop (watch planning files, re-run refs verify, surface results quickly) is implemented once as a small core: debounced filesystem watch, call into existing verify code paths, emit structured events (JSON lines or NDJSON) for consumers. CLI (`gad dev` / `gad watch planning`) is the first transport. An MCP server, if added, is a thin adapter over the same core — not a separate implementation. Primary user is humans and local tooling (terminal, scripts, CI); agent use via MCP is optional and must not block shipping the core. IDE/editor-specific integrations (VS Code tasks, problem matchers, extensions) are out of scope until explicitly re-scoped — not required for the core.
+
+**Impact:** New watch/MCP code should live next to existing `gad refs` / verify libraries. No required network service for v1. MCP must not duplicate business logic.
+
+## gad-27: Tooling and MCP evals are automated, fixture-based, and comparable across versions
+
+Evaluating watch/dev and MCP differs from implementation evals (agents building projects). Tooling evals use `eval_type` of `tooling` or `mcp`, a fixed `scenario` id pointing at an in-repo fixture, and an automated harness (Node script or `gad eval tooling run`) that starts the watcher or MCP client, performs scripted actions, and asserts ground truth (missing paths, exit codes) plus latency metrics. No LLM in the loop. Each run writes `TRACE.json` with `trace_schema_version` so new granular fields (p50/p95, event counts, feature_flags) can be added without invalidating old runs. Compare runs with the same scenario id to measure improvement per feature or gad version.
+
+**Impact:** New eval projects under `evals/` for tooling/mcp. CI can run them on every PR touching gad.cjs or verify libs. Feature flags or gad version are recorded in the trace for attribution.
+
+## gad-28: Granular eval metrics: versioned schema, summary in TRACE, detail in optional metrics.json
+
+Automation must not depend on regex-parsing human-oriented `SCORE.md`. Implementation evals gain `scores.json` (or equivalent) alongside `SCORE.md` with stable numeric fields. Tooling evals store a summary composite (`tooling_composite` or nested `scores`) in `TRACE.json` for gates and trends; high-cardinality data (per-invocation latencies, histogram buckets, full event traces) go in `metrics.json` or retained JSONL only when needed. Bump `trace_schema_version` when the summary shape changes. `gad eval report` / `diff` read structured JSON, not markdown, for machine comparisons.
+
+**Impact:** score-generator and eval scores command updated to emit and read JSON. Report tables can aggregate tooling and implementation evals. Raw logs remain optional debug artifacts.
+
+## gad-24: All skills and agents must bootstrap via gad snapshot, not manual file reads
+
+Skills were hardcoding "read STATE.md, ROADMAP.md, DECISIONS.md, REQUIREMENTS.md" as Step 1 — 4+ file reads that the gad snapshot command already provides in one low-token output. Skills must use `gad snapshot --projectid &lt;id&gt;` as their bootstrap step. Individual CLI commands (gad tasks, gad decisions, gad phases) are available for drilling into detail. Skills must also be format-agnostic (XML or MD) per gad-06 — never hardcode .md or .xml extensions when referencing planning files. CLAUDE.md enforces this at the instance level: every fresh session runs gad snapshot first.
+
+**Impact:** All core skills updated: execute-phase, plan-phase, check-todos, quick. CLAUDE.md created as hard startup requirement. Subagent prompts should include the project ID so agents can run gad snapshot. Deprecated GSD compatibility notices removed from all skills (gad-19 already killed GSD).
 
 ## gad-19: GSD is dead — GAD and RepoPlanner only
 
