@@ -162,6 +162,7 @@ export default function ReaderWorkspace({
   return (
     <ReaderWorkspaceBase
       books={combinedBooks}
+      showPlanningStrip={false}
       readerShellNavLinks={READER_SITE_NAV_LINKS}
       readerPersistenceAdapter={readerPersistenceAdapter}
       workspaceAccess={workspaceBootstrap?.access ?? null}
