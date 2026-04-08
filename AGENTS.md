@@ -74,7 +74,7 @@ Auto-compact handles context limits. After compaction, run `gad snapshot --proje
 | `documentation/planning/state.mdx` | **Cross-cutting queue** |
 | `documentation/roadmap.mdx` | **Section / root overview** table |
 | `vendor/repo-planner/` | RepoPlanner **submodule** |
-| `.planning-reports/` | CLI usage / reports (gitignored) |
+| `.planning-reports/` | CLI usage / generated reports (may be committed) |
 | `.planning-archive/` | **Removed** (2026-03-28); migration notes in **`documentation/requirements.mdx`** (**Planning archive** section) |
 | Root `REQUIREMENTS.md` | **Stub only** -- see file header |
 

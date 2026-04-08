@@ -146,7 +146,7 @@ Creates `.planning/` for XML + `planning-config.toml` + `.planning/AGENTS.md`. E
 | `TASK-REGISTRY.xml` | Tasks, verification commands, status |
 | `STATE.xml` | Current pointer: `current-phase`, `next-action`, optional agent registry |
 | [documentation requirements](/docs/documentation/requirements) + [documentation state](/docs/documentation/planning/state) + [documentation roadmap](/docs/documentation/roadmap) | Canonical monorepo narrative and cross-cutting queue |
-| `.planning-reports/` | Local-only CLI usage and generated reports |
+| `.planning-reports/` | CLI usage and generated reports (optional to commit) |
 
 `phases/` exists only after `pnpm planning:init:full`. The default minimal layout has no `.planning/phases/`.
 
@@ -186,7 +186,7 @@ The file tree remains useful because it preserves source-of-truth file boundarie
 | --- | --- | --- |
 | `planning-config.toml`, `STATE.xml`, `TASK-REGISTRY.xml`, `ROADMAP.xml`, `DECISIONS.xml`, `ERRORS-AND-ATTEMPTS.xml`, `REQUIREMENTS.xml`, `AGENTS.md` | `REQUIREMENTS.md` stub only if bootstrap creates it | `.planning/templates/`, `.planning/phases/`, `.planning/README.md`, `.planning/IMPLEMENTATION_PLAN.md`, `.planning/reports/` |
 
-Local-only reports live in `.planning-reports/` (gitignored).
+CLI usage and generated reports default to `.planning-reports/` at the repo root; you can commit this folder when you want history in git.
 
 ## Standalone cockpit
 
