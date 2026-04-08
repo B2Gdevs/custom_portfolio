@@ -202,9 +202,37 @@
         <command>npm exec -- tsc --noEmit</command>
         <command>npm exec -- eslint src/app/(frontend)/layout.tsx src/app/api/lead-forms/contact/route.ts src/app/api/lead-forms/instant-quote/route.ts src/app/api/lead-forms/schedule/route.ts src/app/api/internal/ai/copilot/route.ts src/lib/observability.ts tests/int/lib/observability.int.spec.ts tests/int/lib/ai/copilot-route.int.spec.ts</command>
         <command>npm exec -- vitest run --config ./vitest.config.mts tests/int/lib/observability.int.spec.ts tests/int/lib/ai/copilot-route.int.spec.ts</command>
-        <command>pnpm planning snapshot</command>
+        <command>pnpm gad:snapshot</command>
       </commands>
       <depends>03-03</depends>
+    </task>
+  </phase>
+  <phase id="06">
+    <task id="06-01" agent-id="" status="in-progress">
+      <goal>Root CLI alignment: `pnpm gad` / `pnpm planning` invoke GAD; `pnpm planning:snapshot` uses `gad snapshot --projectid global`; legacy RepoPlanner (`run-legacy-repo-planner-cli.mjs`) only for init, embed-packs, checklist, report-view until GAD replacements exist. Deprecation stderr on legacy. Prune `run-planning-cli.mjs` to shim.</goal>
+      <keywords>gad,cli,repo-planner,deprecation,monorepo</keywords>
+      <commands>
+        <command>pnpm gad -- --help</command>
+        <command>pnpm planning:snapshot</command>
+      </commands>
+      <depends></depends>
+    </task>
+    <task id="06-02" agent-id="" status="planned">
+      <goal>New planning UI package in get-anything-done (official React components for portfolio): planning shell, snapshot viewer, task/state panels — consume GAD JSON or server routes; replace `repo-planner` npm dependency and `/apps/repo-planner` implementation.</goal>
+      <keywords>gad,react,portfolio,cockpit,ui,get-anything-done</keywords>
+      <commands>
+        <command>pnpm run build</command>
+      </commands>
+      <depends>06-01</depends>
+    </task>
+    <task id="06-03" agent-id="" status="planned">
+      <goal>Remove `repo-planner` from apps/portfolio: delete re-exports under `lib/repo-planner`, migrate APIs (`planning-state`, `planning-cli/run`, live-bundle) to GAD-backed parsers or `gad --json`; update docs IA, site apps registry, skills (`rp-*` → `gad-*`). Archive upstream RepoPlanner repository (read-only).</goal>
+      <keywords>repo-planner,removal,gad,migration,archive</keywords>
+      <commands>
+        <command>pnpm run lint</command>
+        <command>pnpm run build</command>
+      </commands>
+      <depends>06-02</depends>
     </task>
   </phase>
 </task-registry>

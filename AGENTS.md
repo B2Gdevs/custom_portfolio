@@ -73,7 +73,8 @@ Auto-compact handles context limits. After compaction, run `gad snapshot --proje
 | `documentation/requirements.mdx` | **Monorepo requirements** narrative |
 | `documentation/planning/state.mdx` | **Cross-cutting queue** |
 | `documentation/roadmap.mdx` | **Section / root overview** table |
-| `vendor/repo-planner/` | RepoPlanner **submodule** |
+| `vendor/get-anything-done/` | **GAD** CLI + evals; official planning **React** UI will ship here (phase 06). |
+| `vendor/repo-planner/` | **Deprecated** submodule — being removed; use GAD only (decision **06-01**, tasks **06-02**–**06-03**). |
 | `.planning-reports/` | CLI usage / generated reports (may be committed) |
 | `.planning-archive/` | **Removed** (2026-03-28); migration notes in **`documentation/requirements.mdx`** (**Planning archive** section) |
 | Root `REQUIREMENTS.md` | **Stub only** -- see file header |

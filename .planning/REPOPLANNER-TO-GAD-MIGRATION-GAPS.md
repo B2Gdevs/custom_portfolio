@@ -4,20 +4,30 @@
 
 **Related:** `apps/portfolio/content/docs/global/planning/plans/rp-migration/KICKOFF.mdx` (schema / GUI direction).
 
+**Tracking:** Root `.planning/` phase **06** + tasks **06-01**–**06-03** + decision **06-01**. Upstream **RepoPlanner** repo: **archive / read-only** (no further product work).
+
+### In progress (2026-04-08)
+
+- `pnpm gad` / `pnpm planning` → **GAD CLI** (`vendor/get-anything-done/bin/gad.cjs`).
+- `pnpm planning:snapshot` / `pnpm gad:snapshot` → `gad snapshot --projectid global`.
+- Legacy RP: `scripts/run-legacy-repo-planner-cli.mjs` (stderr deprecation) for **init**, **embed-packs**, **checklist**, **report-view** only.
+- `scripts/run-planning-cli.mjs` → thin forwarder to legacy (back-compat).
+
 ---
 
 ## 1. Monorepo scripts (root `package.json`)
 
-| Script | Still uses RP | GAD / target |
-|--------|----------------|--------------|
-| `pnpm planning` | `scripts/run-planning-cli.mjs` → `loop-cli.mjs` | Route to `node vendor/get-anything-done/bin/gad.cjs` for read-only commands; **init** / **embed** need GAD equivalents or a thin adapter |
-| `planning:init*` | RP `init` | `gad` workspace/bootstrap story + templates (partially overlaps `gad migrate-schema`, etc.) |
-| `planning:snapshot` | RP snapshot | **`gad snapshot --projectid <id>`** (already canonical for agents) |
-| `planning:embed-packs` | `loop-cli pack embed-build` → `builtin-packs.json` | **`gad pack`** / **`gad sink`** pipeline or port embed-build into GAD |
-| `planning:report-view` / `planning:ui` | RP report viewer | Replace with docs site + `gad` output, or embed UI that consumes GAD JSON |
-| `planning:checklist` | RP | Fold into GAD task templates or docs |
+| Script | Status (phase 06) |
+|--------|-------------------|
+| `pnpm gad` | **GAD** — full CLI |
+| `pnpm planning` | **GAD** (same binary as `gad`) |
+| `pnpm gad:snapshot` / `pnpm planning:snapshot` | **GAD** `snapshot --projectid global` |
+| `planning:init*` | Legacy **`run-legacy-repo-planner-cli.mjs`** until GAD init |
+| `planning:embed-packs` | Legacy embed-build until **`gad pack` / sink** owns it |
+| `planning:report-view` / `planning:ui` | Legacy report viewer until **GAD React UI** (task 06-02) |
+| `planning:checklist` | Legacy until GAD checklist templates |
 
-**Gap:** `scripts/run-planning-cli.mjs` is the single choke point; it must be deleted or reduced to a deprecated shim once replacements exist.
+**Remaining gap:** delete legacy script and `vendor/repo-planner` submodule after **06-02** / **06-03** complete.
 
 ---
 

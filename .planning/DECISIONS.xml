@@ -244,4 +244,14 @@
       <file path="vendor/get-anything-done/bin/gad.cjs" />
     </references>
   </decision>
+  <decision id="06-01">
+    <title>RepoPlanner is deprecated — GAD is the sole planning product</title>
+    <summary>The MagicbornStudios/RepoPlanner repository is frozen/archived; no new features or maintenance. This monorepo migrates to GAD (`vendor/get-anything-done`) for CLI, workflows, and (via phase 06) official React UI embedded in the portfolio. Remaining `loop-cli` calls use `scripts/run-legacy-repo-planner-cli.mjs` with deprecation until init/embed/report paths are ported.</summary>
+    <impact>Agents and docs must prefer `gad` and `.planning` + `gad-config.toml`. Portfolio eventually drops the `repo-planner` package dependency entirely.</impact>
+    <references>
+      <file path=".planning/REPOPLANNER-TO-GAD-MIGRATION-GAPS.md" />
+      <file path="package.json" />
+      <file path="scripts/run-legacy-repo-planner-cli.mjs" />
+    </references>
+  </decision>
 </decisions>

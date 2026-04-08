@@ -4,7 +4,7 @@
   <current-phase>05</current-phase>
   <current-plan>global-data-storage-02</current-plan>
   <status>active</status>
-  <next-action>Primary queue: continue `02-01` (shared data/storage provider contract). Observability: `05-01` is marked done in TASK-REGISTRY; run `gad snapshot --projectid global` after pulls. Latest maintenance: `01-13` landed portfolio unknown coercion helpers (`isUnknownRecord`, `coerce-unknown-to-string`, `coerce-unknown`, `read-json-stdin`) and removed duplicate guards across reader, artifacts, seed sync, publishers, site-branding.</next-action>
+  <next-action>Primary queue: continue `02-01` (shared data/storage provider contract). Parallel: **phase 06** — RepoPlanner deprecation / GAD-only (`06-01` in progress: root `pnpm gad` + legacy shim). Next: `06-02` GAD React UI package in get-anything-done, then `06-03` strip portfolio `repo-planner` imports. Run `pnpm gad:snapshot` or `gad snapshot --projectid global` after pulls. Decision **06-01** records RP archive policy.</next-action>
   <references>
     <reference>AGENTS.md (repo root)</reference>
     <reference>apps/portfolio/content/docs/global/requirements.mdx</reference>
@@ -36,8 +36,7 @@
   <agent-id-policy>
     <format>agent-YYYYMMDD-xxxx</format>
     <rule>Optional: register a unique id in STATE.xml before claiming tasks if you use CLI task-update.</rule>
-    <generator>node vendor/repo-planner/scripts/loop-cli.mjs new-agent-id</generator>
   </agent-id-policy>
-  <last-updated>2026-04-08T18:00:00.000Z</last-updated>
+  <last-updated>2026-04-08T20:30:00.000Z</last-updated>
   <sink-compiled sink="apps/portfolio/content/docs/global/planning/" at="2026-04-07T20:03:13.466Z" />
 </state>

@@ -25,13 +25,18 @@
     <status>active</status>
     <depends>04</depends>
   </phase>
+  <phase id="06">
+    <goal>Phase 06 (active): Deprecate RepoPlanner — portfolio and monorepo adopt GAD-only workflows. Official React UI for planning lives in get-anything-done; replace embedded `repo-planner` package, remove `loop-cli` from root scripts (legacy shim until embed/init ported), archive upstream RepoPlanner repo. See `.planning/REPOPLANNER-TO-GAD-MIGRATION-GAPS.md`.</goal>
+    <status>active</status>
+    <depends>01</depends>
+  </phase>
   <doc-flow>
     <doc name="documentation/requirements.mdx">Monorepo requirements narrative (public docs).</doc>
     <doc name="documentation/planning/state.mdx">Cross-cutting queue + documentation section state.</doc>
     <doc name="documentation/roadmap.mdx">Human-readable section / root overview table.</doc>
     <doc name="REQUIREMENTS.md">Repo-root stub pointer only -- not canonical prose.</doc>
     <doc name=".planning/REQUIREMENTS.xml">Stub for XML-only tools; points at documentation paths.</doc>
-    <doc name=".planning/ROADMAP.xml">Phase timeline for RepoPlanner.</doc>
+    <doc name=".planning/ROADMAP.xml">Phase timeline (GAD monorepo planning).</doc>
     <doc name=".planning/TASK-REGISTRY.xml">Task graph and status.</doc>
     <doc name=".planning/AGENTS.md">Root planning section playbook (XML layer).</doc>
   </doc-flow>
