@@ -6,6 +6,8 @@ Read **root [`AGENTS.md`](../AGENTS.md) first** — it defines the GAD loop (gad
 
 `.planning/` is the root planning section: XML files + **`gad-config.toml`** (legacy name `planning-config.toml` still works). It follows the same loop as docs sections (state → tasks → roadmap → decisions), but files are `.xml` for machines and the GAD CLI.
 
+**RepoPlanner → GAD:** remaining dual-stack gaps (scripts, portfolio cockpit, docs, `rp-*` skills) are listed in **[`REPOPLANNER-TO-GAD-MIGRATION-GAPS.md`](REPOPLANNER-TO-GAD-MIGRATION-GAPS.md)**.
+
 | File | Role |
 | --- | --- |
 | `STATE.xml` | Current phase, `next-action` |
