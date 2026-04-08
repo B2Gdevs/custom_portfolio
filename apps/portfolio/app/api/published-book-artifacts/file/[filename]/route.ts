@@ -17,6 +17,7 @@ import {
   getPayloadS3StorageOptions,
   isPayloadUsingS3Storage,
 } from '@/lib/payload/runtime-config';
+import { disableStaticPublishedBookEpubFallback } from '@/flags';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -38,8 +39,16 @@ function buildS3Client() {
 /**
  * When Payload/S3 cannot serve the artifact, redirect to the EPUB emitted under `public/books/<slug>/book.epub`
  * by `pnpm run build:books` (included in Vercel build). `fetch()` follows this redirect in the reader.
+ * Skipped when the Vercel flag `disable-static-published-book-epub-fallback` is true.
  */
-function redirectToStaticBuiltEpub(request: Request, bookSlug: string) {
+function redirectToStaticBuiltEpub(
+  request: Request,
+  bookSlug: string,
+  allowStaticFallback: boolean,
+) {
+  if (!allowStaticFallback) {
+    return null;
+  }
   const staticPath = getStaticPublicBuiltEpubPath(bookSlug);
   if (!fs.existsSync(staticPath)) {
     return null;
@@ -77,12 +86,18 @@ export async function GET(
 
   const parsedFilename = parsePublishedArtifactFilename(filename);
 
+  const allowStaticFallback = !(await disableStaticPublishedBookEpubFallback());
+
   const payload = await getPayloadClient();
   const doc = await findPublishedBookArtifactForFile(payload, filename);
 
   if (!isRecord(doc)) {
     if (parsedFilename?.artifactKind === 'epub') {
-      const redirect = redirectToStaticBuiltEpub(request, parsedFilename.bookSlug);
+      const redirect = redirectToStaticBuiltEpub(
+        request,
+        parsedFilename.bookSlug,
+        allowStaticFallback,
+      );
       if (redirect) {
         return redirect;
       }
@@ -109,7 +124,7 @@ export async function GET(
     if (!fs.existsSync(filePath)) {
       const bookSlug = asString(doc.bookSlug);
       if (bookSlug) {
-        const redirect = redirectToStaticBuiltEpub(request, bookSlug);
+        const redirect = redirectToStaticBuiltEpub(request, bookSlug, allowStaticFallback);
         if (redirect) {
           return redirect;
         }
@@ -171,7 +186,7 @@ export async function GET(
     console.error('[published-book-artifacts/file] no S3 object for keys', keyCandidates);
     const bookSlug = asString(doc.bookSlug);
     if (bookSlug && asString(doc.artifactKind) === 'epub') {
-      const redirect = redirectToStaticBuiltEpub(request, bookSlug);
+      const redirect = redirectToStaticBuiltEpub(request, bookSlug, allowStaticFallback);
       if (redirect) {
         return redirect;
       }
@@ -237,7 +252,7 @@ export async function GET(
     if (name === 'NoSuchKey' || name === 'NotFound' || code === 404) {
       const bookSlug = asString(doc.bookSlug);
       if (bookSlug && asString(doc.artifactKind) === 'epub') {
-        const redirect = redirectToStaticBuiltEpub(request, bookSlug);
+        const redirect = redirectToStaticBuiltEpub(request, bookSlug, allowStaticFallback);
         if (redirect) {
           return redirect;
         }

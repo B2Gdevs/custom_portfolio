@@ -1,5 +1,6 @@
 /**
- * Aligns `users` with Payload config when Postgres predates fields (`disabled`, `externalIds`).
+ * Aligns `users` with Payload config when Postgres predates fields (`disabled`, `externalIds`,
+ * auth API key columns from `auth.useAPIKey: true`).
  * Safe to run multiple times. Requires Postgres Payload + DATABASE_URL.
  *
  * Pair with: `payload:fix-tenants-external-ids`, `payload:fix-locks-rels` when schema drifts.
@@ -48,9 +49,23 @@ async function main() {
         ALTER COLUMN disabled SET NOT NULL
     `);
 
+    /** Auth API key fields from Payload `apiKeyFields` (see `payload/dist/auth/baseFields/apiKey.js`). */
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS enable_a_p_i_key boolean NOT NULL DEFAULT false
+    `);
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS api_key varchar
+    `);
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS api_key_index varchar
+    `);
+
     await client.query('COMMIT');
     console.log(
-      'OK · users now has disabled + external_ids_clerk_id / external_ids_stripe_customer_id (if they were missing).',
+      'OK · users now has disabled, external_ids_*, and auth API key columns (enable_a_p_i_key, api_key, api_key_index) if they were missing.',
     );
   } catch (e) {
     await client.query('ROLLBACK');

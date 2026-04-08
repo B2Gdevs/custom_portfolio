@@ -135,7 +135,8 @@ export const publicPortfolioOpenApi = {
         tags: ['Artifacts'],
         summary: 'Download published EPUB or planning-pack zip by storage filename',
         description:
-          'Serves bytes from Payload/S3 or falls back to `public/books/<slug>/book.epub` when configured. ' +
+          'Serves bytes from Payload/S3. May redirect to `public/books/<slug>/book.epub` unless the Vercel flag ' +
+          '`disable-static-published-book-epub-fallback` (or env `DISABLE_STATIC_PUBLISHED_BOOK_EPUB_FALLBACK=1`) is on. ' +
           'Filename format: `{bookSlug}--{epub|planning-pack}--{versionTag}.epub|zip`.',
         security: [],
         parameters: [

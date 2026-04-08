@@ -2,6 +2,7 @@ import { getAllContent } from '@/lib/content';
 import { getBooks } from '@/lib/books';
 import { getFeaturedBookShowcase } from '@/lib/featured-book';
 import { getMusicTracks } from '@/lib/listen-runtime';
+import { disableStaticPublishedBookEpubFallback } from '@/flags';
 import CreativeHero from '@/components/home/CreativeHero';
 import FeaturedBookExperience from '@/components/home/FeaturedBookExperience';
 import SoundtrackSection from '@/components/home/SoundtrackSection';
@@ -15,6 +16,7 @@ export default async function Home() {
   const books = getBooks();
   const featuredBook = getFeaturedBookShowcase();
   const tracks = await getMusicTracks();
+  const noStaticEpubFallback = await disableStaticPublishedBookEpubFallback();
 
   if (!featuredBook) {
     return (
@@ -35,7 +37,11 @@ export default async function Home() {
   return (
     <div className="w-full">
       <CreativeHero featuredBook={featuredBook} />
-      <FeaturedBookExperience featuredBook={featuredBook} books={books} />
+      <FeaturedBookExperience
+        featuredBook={featuredBook}
+        books={books}
+        disableStaticPublishedBookEpubFallback={noStaticEpubFallback}
+      />
       <HumanLoopPlanningSection />
       <GetAnythingDoneSection />
       <SoundtrackSection tracks={tracks} />

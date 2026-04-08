@@ -150,10 +150,37 @@ export function preservePublishedBookManifestFields<
   };
 }
 
+/**
+ * Client-safe sync check; keep in sync with the Vercel flag
+ * `disable-static-published-book-epub-fallback` when using
+ * `NEXT_PUBLIC_DISABLE_STATIC_PUBLISHED_BOOK_EPUB_FALLBACK` in the browser.
+ */
+export function isStaticPublishedBookEpubFallbackDisabled(): boolean {
+  const v = process.env.NEXT_PUBLIC_DISABLE_STATIC_PUBLISHED_BOOK_EPUB_FALLBACK;
+  if (typeof v !== 'string' || !v.trim()) {
+    return false;
+  }
+  return ['1', 'true', 'yes', 'on'].includes(v.trim().toLowerCase());
+}
+
+/**
+ * Resolves the EPUB URL for downloads / reader. Prefer manifest `remoteEpubUrl` from publish.
+ * When static fallback is disabled and no remote URL exists, returns `null` (no `/books/.../book.epub`).
+ */
 export function getPublishedBookDownloadUrl(input: {
   slug: string;
   remoteEpubUrl?: string | null;
-}) {
+  /** When set, overrides env-based detection (e.g. from server-evaluated Vercel flag). */
+  disableStaticFallback?: boolean;
+}): string | null {
   const remote = input.remoteEpubUrl?.trim();
-  return remote && remote.length > 0 ? remote : `/books/${input.slug}/book.epub`;
+  if (remote && remote.length > 0) {
+    return remote;
+  }
+  const disabled =
+    input.disableStaticFallback ?? isStaticPublishedBookEpubFallbackDisabled();
+  if (disabled) {
+    return null;
+  }
+  return `/books/${input.slug}/book.epub`;
 }

@@ -5,6 +5,7 @@ import { CodeBlock } from '@/components/docs/CodeBlock';
 import { Mermaid } from '@/components/docs/Mermaid';
 import YouTubeEmbed from '@/components/projects/YouTubeEmbed';
 import BookReaderEmbed from '@/components/books/BookReaderEmbed';
+import { isStaticPublishedBookEpubFallbackDisabled } from '@/lib/book-artifacts';
 import Callout from '@/components/blog/Callout';
 import DocLinkCard from '@/components/blog/DocLinkCard';
 import { CopyMarkdownSample } from '@/components/blog/CopyMarkdownSample';
@@ -172,7 +173,12 @@ function buildMDXComponents(components: MDXComponents): MDXComponents {
       <YouTubeEmbed url={props.url} title={props.title} />
     ),
     BookReaderEmbed: (props: { slug: string; title?: string; checkpoint?: string }) => (
-      <BookReaderEmbed slug={props.slug} title={props.title} checkpoint={props.checkpoint} />
+      <BookReaderEmbed
+        slug={props.slug}
+        title={props.title}
+        checkpoint={props.checkpoint}
+        disableStaticPublishedBookEpubFallback={isStaticPublishedBookEpubFallbackDisabled()}
+      />
     ),
     Callout: (props: { type?: 'info' | 'tip' | 'note' | 'warning'; title?: string; children?: React.ReactNode }) => (
       <Callout type={props.type} title={props.title}>{props.children}</Callout>

@@ -10,6 +10,11 @@ interface BookReaderEmbedProps {
   title?: string;
   /** Frozen checkpoint artifact: `/books/<slug>/checkpoints/<checkpoint>/book.epub` (not overwritten by later builds). */
   checkpoint?: string;
+  /**
+   * When true (e.g. from server-evaluated Vercel flag), do not fall back to static `/books/<slug>/book.epub`
+   * without manifest `remoteEpubUrl`.
+   */
+  disableStaticPublishedBookEpubFallback?: boolean;
   containerClassName?: string;
   viewerClassName?: string;
   showDownloadLink?: boolean;
@@ -19,6 +24,7 @@ export default function BookReaderEmbed({
   slug,
   title: titleProp,
   checkpoint,
+  disableStaticPublishedBookEpubFallback = false,
   containerClassName = 'my-8 overflow-hidden rounded-lg border border-border',
   viewerClassName = 'min-h-[400px]',
   showDownloadLink = true,
@@ -31,7 +37,15 @@ export default function BookReaderEmbed({
   const fallbackEpubPath = checkpoint
     ? `/books/${slug}/checkpoints/${checkpoint}/book.epub`
     : `/books/${slug}/book.epub`;
-  const [epubPath, setEpubPath] = useState(fallbackEpubPath);
+  const [epubPath, setEpubPath] = useState<string | null>(() => {
+    if (checkpoint) {
+      return fallbackEpubPath;
+    }
+    if (disableStaticPublishedBookEpubFallback) {
+      return null;
+    }
+    return fallbackEpubPath;
+  });
   const storageKey = checkpoint ? `${slug}__${checkpoint}` : slug;
 
   useEffect(() => {
@@ -51,7 +65,8 @@ export default function BookReaderEmbed({
             getPublishedBookDownloadUrl({
               slug,
               remoteEpubUrl: book?.remoteEpubUrl ?? null,
-            }),
+              disableStaticFallback: disableStaticPublishedBookEpubFallback,
+            }) ?? null,
           );
         }
       })
@@ -62,12 +77,31 @@ export default function BookReaderEmbed({
     return () => {
       cancelled = true;
     };
-  }, [fallbackEpubPath, slug, titleProp, checkpoint, suffix]);
+  }, [
+    fallbackEpubPath,
+    slug,
+    titleProp,
+    checkpoint,
+    suffix,
+    disableStaticPublishedBookEpubFallback,
+  ]);
 
   if (loading) {
     return (
       <div className={`${containerClassName} bg-dark-alt p-8 text-center text-text-muted`}>
         Loading reader...
+      </div>
+    );
+  }
+
+  if (!epubPath) {
+    return (
+      <div className={`${containerClassName} bg-dark-alt p-8 text-center text-text-muted`}>
+        <p className="text-sm leading-7">
+          No EPUB URL for this embed. Publish artifacts so <code className="text-primary">manifest.json</code>{' '}
+          includes <code className="text-primary">remoteEpubUrl</code>, or disable static fallback only when that
+          URL is set.
+        </p>
       </div>
     );
   }

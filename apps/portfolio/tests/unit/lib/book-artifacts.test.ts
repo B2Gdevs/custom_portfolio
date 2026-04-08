@@ -120,5 +120,12 @@ describe('book artifacts helpers', () => {
         slug: 'magicborn_rune_path',
       }),
     ).toBe('/books/magicborn_rune_path/book.epub');
+
+    expect(
+      getPublishedBookDownloadUrl({
+        slug: 'magicborn_rune_path',
+        disableStaticFallback: true,
+      }),
+    ).toBe(null);
   });
 });

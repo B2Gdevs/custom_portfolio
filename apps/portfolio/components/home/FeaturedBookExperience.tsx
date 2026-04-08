@@ -10,9 +10,12 @@ import type { FeaturedBookShowcase } from '@/lib/featured-book';
 export default function FeaturedBookExperience({
   featuredBook,
   books,
+  disableStaticPublishedBookEpubFallback = false,
 }: {
   featuredBook: FeaturedBookShowcase;
   books: BookEntry[];
+  /** From Vercel flag + env; keeps download URLs off static `/books/.../book.epub` when true. */
+  disableStaticPublishedBookEpubFallback?: boolean;
 }) {
   const readerBooks = useMemo(() => {
     const featured = books.find((book) => book.slug === featuredBook.slug);
@@ -25,8 +28,18 @@ export default function FeaturedBookExperience({
     ? `/apps/reader?book=${encodeURIComponent(selectedBook.slug)}`
     : '/apps/reader';
   const downloadHref = selectedBook?.hasEpub
-    ? getPublishedBookDownloadUrl(selectedBook)
+    ? getPublishedBookDownloadUrl({
+        ...selectedBook,
+        disableStaticFallback: disableStaticPublishedBookEpubFallback,
+      })
     : null;
+
+  const heroDownloadUrl = getPublishedBookDownloadUrl({
+    ...(books.find((book) => book.slug === featuredBook.slug) ?? {
+      slug: featuredBook.slug,
+    }),
+    disableStaticFallback: disableStaticPublishedBookEpubFallback,
+  });
 
   return (
     <section
@@ -67,20 +80,16 @@ export default function FeaturedBookExperience({
             >
               Go to the reader
             </Link>
-            <a
-              href={
-                getPublishedBookDownloadUrl(
-                  books.find((book) => book.slug === featuredBook.slug) ?? {
-                    slug: featuredBook.slug,
-                  },
-                )
-              }
-              download={`${featuredBook.slug}.epub`}
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-dark px-5 py-3 text-sm font-medium text-primary transition-colors hover:border-accent hover:text-accent"
-            >
-              <Download size={16} />
-              Download EPUB
-            </a>
+            {heroDownloadUrl ? (
+              <a
+                href={heroDownloadUrl}
+                download={`${featuredBook.slug}.epub`}
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-dark px-5 py-3 text-sm font-medium text-primary transition-colors hover:border-accent hover:text-accent"
+              >
+                <Download size={16} />
+                Download EPUB
+              </a>
+            ) : null}
           </div>
         </div>
 
