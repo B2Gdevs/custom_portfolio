@@ -28,6 +28,21 @@ Run `gad snapshot --projectid <id>` immediately to re-hydrate. Never stop work, 
 
 Subagents working on GAD-tracked projects should run `gad snapshot --projectid <id>` at the start of their work to get context. Pass the project ID in the agent prompt.
 
+# Eval preservation contract (decision gad-38)
+
+**Every implementation eval run MUST preserve its outputs to canonical paths.** After an
+agent completes an eval, BEFORE the worktree is removed:
+
+```sh
+gad eval preserve <project> v<N> --from <worktree-path>
+```
+
+This copies code/planning to `evals/<project>/v<N>/run/` and build to
+`apps/portfolio/public/evals/<project>/v<N>/`. Without this step, the agent's work is
+lost. `tests/eval-preservation.test.cjs` will fail the build if you skip it.
+
+Verify with `gad eval verify`. See `gad:eval-run` skill for the full procedure.
+
 # GAD CLI quick reference
 
 | Command | Use when |
@@ -38,11 +53,13 @@ Subagents working on GAD-tracked projects should run `gad snapshot --projectid <
 | `gad phases --projectid <id>` | Roadmap overview |
 | `gad decisions --projectid <id>` | Decision log |
 | `gad eval list` | List eval projects |
-| `gad eval run <name>` | Run an eval |
+| `gad eval run <name>` | Generate eval prompt |
+| `gad eval preserve <project> <version> --from <worktree>` | **MANDATORY** after eval agent completes |
+| `gad eval verify` | Audit all eval runs for preserved artifacts |
+| `gad eval open <project> [version]` | Serve eval build in browser |
+| `gad eval review <project> <version> --score X` | Submit human review score |
+| `gad eval report` | Cross-project eval comparison |
 | `gad sprint show --projectid <id>` | Current sprint window |
 | `gad verify --projectid <id>` | Verify phase completion |
 | `gad log show` | Recent CLI + tool call log |
-| `gad log show --filter gad` | Only GAD CLI calls |
-| `gad log stats` | CLI usage statistics |
 | `gad eval suite` | Generate prompts for all evals |
-| `gad eval report` | Cross-project eval comparison |
