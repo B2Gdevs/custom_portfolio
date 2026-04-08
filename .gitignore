@@ -129,7 +129,6 @@ apps/portfolio/public/books/**/*.repub
 
 # RepoPlanner CLI telemetry + generated reports (local only; do not commit)
 .planning-reports/
-.planning/reports/
 
 # GAD CLI call logs (local telemetry — not committed, but eval logs are copied into eval runs)
 **/.gad-log/
