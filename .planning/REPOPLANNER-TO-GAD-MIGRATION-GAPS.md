@@ -6,6 +6,19 @@
 
 **Tracking:** Root `.planning/` phase **06** + tasks **06-01**–**06-03** + decision **06-01**. Upstream **RepoPlanner** repo: **archive / read-only** (no further product work).
 
+### Upstream RepoPlanner Git layout (separate repo)
+
+**Do not** add monorepo-specific or GAD-specific documentation *inside* the RepoPlanner repository. Historical and policy notes for *this* monorepo stay here (this file, root `skills/README.md`, GAD under `vendor/get-anything-done/`).
+
+| Branch | Contents |
+|--------|----------|
+| **`main`** | Submodule pin: commit **immediately before** `rp-*` skills were added **to the RepoPlanner repo** (`f0e7a3c^` → `c34024f` at time of reset). This is the **original framework** (CLI + cockpit + templates) — plausible base for a future **GAD-lite** revisit. |
+| **`development`** | The former default line: skills inside RepoPlanner, later `.planning` churn, etc. Preserved for archaeology; **not** what the submodule tracks. |
+
+**Publish (upstream maintainer):** from the RepoPlanner clone, `git push origin development` (tip before reset), then `git push origin main --force-with-lease` after resetting `main` to the pre-skills commit. Coordinate with anyone who still had `main` checked out.
+
+**Submodule consequence:** at this pin, **`vendor/repo-planner/.planning/`** holds **templates only** (no living `STATE.xml` / `ROADMAP.xml` in the submodule). Portfolio **docs sink** MDX that `source:` those paths may need to be repointed to root `.planning/` or frozen — treat as part of **06-03**.
+
 ### In progress (2026-04-08)
 
 - `pnpm gad` / `pnpm planning` → **GAD CLI** (`vendor/get-anything-done/bin/gad.cjs`).
@@ -24,10 +37,10 @@
 | `pnpm gad:snapshot` / `pnpm planning:snapshot` | **GAD** `snapshot --projectid global` |
 | `planning:init*` | Legacy **`run-legacy-repo-planner-cli.mjs`** until GAD init |
 | `planning:embed-packs` | Legacy embed-build until **`gad pack` / sink** owns it |
-| `planning:report-view` / `planning:ui` | Legacy report viewer until **GAD React UI** (task 06-02) |
+| `planning:report-view` / `planning:ui` | Legacy report viewer — **no committed `gad-ui` package** (06-02 closed: placeholder README only) |
 | `planning:checklist` | Legacy until GAD checklist templates |
 
-**Remaining gap:** delete legacy script and `vendor/repo-planner` submodule after **06-02** / **06-03** complete.
+**Remaining gap:** delete legacy script and `vendor/repo-planner` submodule after **06-03** completes (portfolio imports removed). **`gad-ui` is not a prerequisite** — task 06-02 is closed without a React package.
 
 ---
 
@@ -55,10 +68,10 @@ Heavy **`repo-planner`** npm dependency (`file:../../vendor/repo-planner`):
 
 ## 4. Skills (duplicate RP vs GAD)
 
-- **Monorepo:** many **`skills/rp-*`** and **`.claude/skills/rp-*`** (plan-phase, execute-phase, map-codebase, etc.).
+- **Monorepo:** **`skills/rp-*`** and **`.claude/skills/rp-*`** are **thin stubs** pointing at **`vendor/get-anything-done/skills/*/SKILL.md`** (see root **`skills/README.md`**). Bodies are not duplicated.
 - **`.codex/skills/gad-*`** mirrors several workflows.
 
-**Gap:** Deprecate **`rp-*`** skill entries (pointer to **`gad-*`**), then remove duplicate SKILL.md bodies once agents are migrated. No net-new `rp-*` work.
+**Remaining gap:** optional cleanup of old per-skill **`README.md`** under `rp-*` folders if they still reference external RepoPlanner install URLs; canonical install story is GAD skills + `pnpm gad`.
 
 ---
 

@@ -118,11 +118,11 @@
   </decision>
   <decision id="gad-05">
     <title>repo-planner is officially a GAD project; rp-* skills are deprecated</title>
-    <summary>vendor/repo-planner is registered as a GAD root (id=repo-planner) in planning-config.toml. It has a GAD-format .planning/ directory. Its skills (rp-*) are deprecated stubs pointing to gad:* equivalents. The manuscript skill content migrated to vendor/get-anything-done/skills/manuscript/SKILL.md. The portfolio docs (apps/portfolio/content/docs/repo-planner/planning/) remain as the docs sink.</summary>
-    <impact>gad projects list shows both global and repo-planner. gad state, phases, and tasks all work for repo-planner. No new rp-* skills should be created.</impact>
+    <summary>vendor/repo-planner may remain registered as a GAD root (id=repo-planner) in planning-config.toml for CLI wiring. The submodule tracks upstream RepoPlanner main at the pre-skills framework pin (no rp-* directories inside RepoPlanner; skills experiment preserved on upstream branch development only). Monorepo skills/rp-* are thin stubs to vendor/get-anything-done/skills/. Manuscript and other methodology live under get-anything-done. Portfolio repo-planner docs sink may need repointing after the submodule pin (see REPOPLANNER-TO-GAD-MIGRATION-GAPS.md).</summary>
+    <impact>gad snapshot can still list repo-planner if configured; primary agent methodology is GAD skills. No new rp-* bodies in this monorepo beyond stubs.</impact>
     <references>
       <file path=".planning/gad-config.toml" />
-      <file path="vendor/repo-planner/.planning/STATE.md" />
+      <file path=".planning/REPOPLANNER-TO-GAD-MIGRATION-GAPS.md" />
       <file path="vendor/get-anything-done/skills/README.md" />
     </references>
   </decision>

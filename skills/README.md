@@ -1,79 +1,54 @@
-# RepoPlanner Skills
+# Planning skills (GAD)
 
-Six agent skills that give Claude the full RepoPlanner planning loop — from project init through autonomous phase execution. Together they enable a "plan once, execute without interruption" workflow.
+**Canonical methodology** lives in **`vendor/get-anything-done/skills/`** — see that directory’s [README](https://github.com/MagicbornStudios/get-anything-done/blob/main/skills/README.md) for the skill catalog and **`rp-*` → `gad:*` migration map**.
 
-## The loop
+This **`skills/`** tree keeps **short `rp-*` stubs** so older prompts and bookmarks still resolve, but each stub only points at the GAD skill file. **Do not extend the `rp-*` copies** — edit **`vendor/get-anything-done/skills/<name>/SKILL.md`** instead.
+
+## The loop (GAD names)
 
 ```
-rp-new-project → rp-plan-phase → rp-execute-phase → rp-verify-work
-      ↑                ↑                                     |
- rp-milestone    rp-add-todo                          rp-check-todos
-                 rp-quick                                    |
-                 rp-debug ←──── (when things break) ────────┘
+gad:new-project → gad:plan-phase → gad:execute-phase → gad:verify-phase
+       ↑                ↑                                      |
+ gad:milestone     gad:add-todo                         gad:check-todos
+                  gad:quick                                     |
+                  gad:debug ←──── (when things break) ─────────┘
 ```
 
-`rp-check-todos` is the re-entry point after any context reset. `rp-session` is the bridge when pausing mid-phase.
+`gad:check-todos` is the re-entry point after any context reset. `gad:session` bridges pausing mid-phase.
 
 ## Universal install (local agents)
 
-Copies skills into **`.agents/skills/`** and other tool directories Cursor / Codex / Claude / … pick up:
+To copy **GAD** skills into **`.agents/skills/`** (or use your agent’s loader), prefer copying from **`vendor/get-anything-done/skills/*/SKILL.md`**, or use the upstream repo’s install instructions for [get-anything-done](https://github.com/MagicbornStudios/get-anything-done).
+
+Repo-root **`.agents/`** may be **gitignored** — the **`skills/`** copy in this monorepo stays the **tracked** reference for deprecated **`rp-*` aliases** and reviews.
+
+## Deprecated `rp-*` folders here
+
+Each `rp-*/SKILL.md` is a **pointer** to the matching file under `vendor/get-anything-done/skills/`. Legacy names:
+
+| Stub folder | Canonical GAD skill |
+|-------------|---------------------|
+| `rp-new-project` | `gad:new-project` |
+| `rp-plan-phase` | `gad:plan-phase` |
+| `rp-execute-phase` | `gad:execute-phase` |
+| `rp-verify-work` | `gad:verify-phase` |
+| `rp-check-todos` | `gad:check-todos` |
+| `rp-debug` | `gad:debug` |
+| `rp-map-codebase` | `gad:map-codebase` |
+| `rp-session` | `gad:session` (plus `gad session` CLI) |
+| `rp-milestone` | `gad:milestone` |
+| `rp-add-todo` | `gad:add-todo` |
+| `rp-quick` | `gad:quick` |
+| `rp-manuscript` | `gad:manuscript` |
+
+## CLI
 
 ```bash
-npx skills add https://github.com/MagicbornStudios/RepoPlanner --skill '*' --agent '*' -y --copy
+pnpm gad snapshot --projectid global
+# or
+node vendor/get-anything-done/bin/gad.cjs snapshot --projectid <id>
 ```
 
-Repo-root **`.agents/`** is **gitignored**—run this after clone on each machine. The **`skills/`** copy in this monorepo stays the **tracked** reference for reviews and docs.
+## RepoPlanner (upstream, frozen)
 
-## Install all 13 (per-skill URLs)
-
-```bash
-npx skills add MagicbornStudios/RepoPlanner/skills/repo-planner
-npx skills add MagicbornStudios/RepoPlanner/skills/rp-new-project
-npx skills add MagicbornStudios/RepoPlanner/skills/rp-plan-phase
-npx skills add MagicbornStudios/RepoPlanner/skills/rp-execute-phase
-npx skills add MagicbornStudios/RepoPlanner/skills/rp-verify-work
-npx skills add MagicbornStudios/RepoPlanner/skills/rp-check-todos
-npx skills add MagicbornStudios/RepoPlanner/skills/rp-debug
-npx skills add MagicbornStudios/RepoPlanner/skills/rp-map-codebase
-npx skills add MagicbornStudios/RepoPlanner/skills/rp-session
-npx skills add MagicbornStudios/RepoPlanner/skills/rp-milestone
-npx skills add MagicbornStudios/RepoPlanner/skills/rp-add-todo
-npx skills add MagicbornStudios/RepoPlanner/skills/rp-quick
-npx skills add MagicbornStudios/RepoPlanner/skills/rp-manuscript
-```
-
-## Skills
-
-| Skill | When to use |
-|-------|-------------|
-| `repo-planner` | **Install first.** Core methodology, planning root discovery, 3 file formats, monorepo layers |
-| `rp-new-project` | Initialize a new project — requirements, roadmap, state |
-| `rp-plan-phase` | Plan a phase — kickoff contract + task list before execution |
-| `rp-execute-phase` | Execute a phase atomically, task by task, with commits |
-| `rp-verify-work` | Verify a phase hit its goals before closing |
-| `rp-check-todos` | Find the best next action — re-entry after any context reset |
-| `rp-debug` | Systematic debugging — hypothesis tracking, persistent session |
-| `rp-map-codebase` | Analyze existing code — produces STACK, ARCH, CONVENTIONS, CONCERNS |
-| `rp-session` | Pause/resume mid-phase — bridges context resets in the autonomous loop |
-| `rp-milestone` | Audit milestone completeness, close it (archive + tag), start the next |
-| `rp-add-todo` | Capture an idea mid-session without losing flow |
-| `rp-quick` | Fast-path for ad-hoc tasks that don't belong in the roadmap |
-| `rp-manuscript` | Fiction/creative writing adaptation — manuscript loop, beat sheets, canon locks, chapter done checklist |
-
-## Autonomous execution
-
-With a fully planned project, an autonomous agent can loop without interruption:
-
-1. `rp-map-codebase` once for brownfield repos
-2. `rp-new-project` to define requirements and roadmap
-3. For each phase: `rp-plan-phase` → `rp-execute-phase` → `rp-verify-work`
-4. `rp-check-todos` at any re-entry point
-5. `rp-session` to bridge context resets mid-phase
-6. `rp-debug` when anything breaks
-7. `rp-milestone` when all phases are done and the cycle closes
-
-The planning docs are the shared memory. Even after a full context reset, any skill can re-orient from the files alone.
-
-## About RepoPlanner
-
-[RepoPlanner](https://github.com/MagicbornStudios/RepoPlanner) is an open-source planning system: XML planning templates, a `repo-planner` CLI, and an embeddable Next.js cockpit.
+The **`repo-planner`** git submodule tracks **upstream `main`**: the **pre-skills** framework (cockpit + CLI). The skills experiment (`rp-*` inside RepoPlanner) lives on upstream branch **`development`** only. This monorepo does **not** document RepoPlanner inside the submodule — see **`.planning/REPOPLANNER-TO-GAD-MIGRATION-GAPS.md`**. **No** committed **`gad-ui`** package; see `vendor/get-anything-done/packages/gad-ui/README.md`.

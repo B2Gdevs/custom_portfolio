@@ -208,7 +208,7 @@
     </task>
   </phase>
   <phase id="06">
-    <task id="06-01" agent-id="" status="in-progress">
+    <task id="06-01" agent-id="" status="done">
       <goal>Root CLI alignment: `pnpm gad` / `pnpm planning` invoke GAD; `pnpm planning:snapshot` uses `gad snapshot --projectid global`; legacy RepoPlanner (`run-legacy-repo-planner-cli.mjs`) only for init, embed-packs, checklist, report-view until GAD replacements exist. Deprecation stderr on legacy. Prune `run-planning-cli.mjs` to shim.</goal>
       <keywords>gad,cli,repo-planner,deprecation,monorepo</keywords>
       <commands>
@@ -217,22 +217,22 @@
       </commands>
       <depends></depends>
     </task>
-    <task id="06-02" agent-id="" status="planned">
-      <goal>New planning UI package in get-anything-done (official React components for portfolio): planning shell, snapshot viewer, task/state panels — consume GAD JSON or server routes; replace `repo-planner` npm dependency and `/apps/repo-planner` implementation.</goal>
-      <keywords>gad,react,portfolio,cockpit,ui,get-anything-done</keywords>
+    <task id="06-02" agent-id="" status="done">
+      <goal>CLOSED — no shipped `packages/gad-ui` npm package: indefinite deferral. Placeholder README in `vendor/get-anything-done/packages/gad-ui/README.md` documents non-commitment and points to archival RepoPlanner/portfolio UI for reference only. (A future GAD-lite / UI is research-only.)</goal>
+      <keywords>gad,react,portfolio,cockpit,ui,get-anything-done,deferred</keywords>
       <commands>
         <command>pnpm run build</command>
       </commands>
       <depends>06-01</depends>
     </task>
-    <task id="06-03" agent-id="" status="planned">
-      <goal>Remove `repo-planner` from apps/portfolio: delete re-exports under `lib/repo-planner`, migrate APIs (`planning-state`, `planning-cli/run`, live-bundle) to GAD-backed parsers or `gad --json`; update docs IA, site apps registry, skills (`rp-*` → `gad-*`). Archive upstream RepoPlanner repository (read-only).</goal>
-      <keywords>repo-planner,removal,gad,migration,archive</keywords>
+    <task id="06-03" agent-id="" status="in-progress">
+      <goal>RepoPlanner → GAD migration: `skills/rp-*` and `.claude/skills/rp-*` are thin stubs to `vendor/get-anything-done/skills/`; policy and history in `.planning/REPOPLANNER-TO-GAD-MIGRATION-GAPS.md` (upstream RepoPlanner: `main` = pre-skills framework; `development` = skills-era line). **Remaining:** remove `repo-planner` from apps/portfolio (re-exports, planning-state APIs, live-bundle), migrate to GAD-backed flows; update docs IA and site registry; archive upstream RepoPlanner read-only when imports are gone.</goal>
+      <keywords>repo-planner,removal,gad,migration,archive,skills</keywords>
       <commands>
         <command>pnpm run lint</command>
         <command>pnpm run build</command>
       </commands>
-      <depends>06-02</depends>
+      <depends>06-01</depends>
     </task>
   </phase>
 </task-registry>
