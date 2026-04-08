@@ -1,13 +1,13 @@
-import { flag } from '@vercel/flags/next';
+import { flag } from 'flags/next';
 
 /**
  * When **true**: `/api/published-book-artifacts/file/*` does not redirect to
  * `public/books/<slug>/book.epub`; delivery is Payload/S3 (and manifest `remoteEpubUrl`) only.
  *
- * **Vercel:** set `FLAGS_SECRET` (32 bytes, base64url) for Toolbar overrides — see
- * [@vercel/flags README](https://www.npmjs.com/package/@vercel/flags). Toggle in the Vercel Flags UI
- * or set env `DISABLE_STATIC_PUBLISHED_BOOK_EPUB_FALLBACK=1` (and optionally
- * `NEXT_PUBLIC_DISABLE_STATIC_PUBLISHED_BOOK_EPUB_FALLBACK=1` so client components match).
+ * **Vercel:** same key in the dashboard (`disable-static-published-book-epub-fallback`). On Vercel,
+ * set `FLAGS` / `FLAGS_SECRET` from the project (see [Vercel Flags quickstart](https://vercel.com/docs/flags/vercel-flags/quickstart)).
+ * Env fallbacks for CI/local: `DISABLE_STATIC_PUBLISHED_BOOK_EPUB_FALLBACK=1`,
+ * `NEXT_PUBLIC_DISABLE_STATIC_PUBLISHED_BOOK_EPUB_FALLBACK=1`.
  */
 export const disableStaticPublishedBookEpubFallback = flag<boolean>({
   key: 'disable-static-published-book-epub-fallback',

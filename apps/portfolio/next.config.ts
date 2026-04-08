@@ -23,6 +23,16 @@ if (process.env.REPOPLANNER_REPORTS_DIR === undefined) {
 
 const chatIsolatedDist = process.env.PORTFOLIO_DIST_DIR === '.next-chat';
 
+/** Bundled into serverless routes that initialize Payload (dynamic `require` of DB adapters). */
+const payloadAdapterTraceIncludes = [
+  './node_modules/@payloadcms/db-sqlite/**/*',
+  './node_modules/@payloadcms/db-postgres/**/*',
+  './node_modules/pg/**/*',
+  '../../node_modules/@payloadcms/db-sqlite/**/*',
+  '../../node_modules/@payloadcms/db-postgres/**/*',
+  '../../node_modules/pg/**/*',
+] as const;
+
 const nextConfig: NextConfig = {
   /** Remaining static routes; docs MDX are `force-dynamic` so they do not prerender at build. */
   staticPageGenerationTimeout: 300,
@@ -43,15 +53,13 @@ const nextConfig: NextConfig = {
    * always follow that, so Vercel lambdas can miss `@payloadcms/db-sqlite` and throw MODULE_NOT_FOUND.
    * Include both adapters + `pg` (postgres adapter) from app and hoisted root `node_modules`.
    */
+  /**
+   * Keys must match real route paths; a bare `**` key does not apply reliably on Vercel.
+   * Payload uses dynamic `require()` for DB adapters — ensure these packages are traced.
+   */
   outputFileTracingIncludes: {
-    '**': [
-      './node_modules/@payloadcms/db-sqlite/**/*',
-      './node_modules/@payloadcms/db-postgres/**/*',
-      './node_modules/pg/**/*',
-      '../../node_modules/@payloadcms/db-sqlite/**/*',
-      '../../node_modules/@payloadcms/db-postgres/**/*',
-      '../../node_modules/pg/**/*',
-    ],
+    '/api/**/*': [...payloadAdapterTraceIncludes],
+    '/admin/**/*': [...payloadAdapterTraceIncludes],
   },
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   transpilePackages: [
