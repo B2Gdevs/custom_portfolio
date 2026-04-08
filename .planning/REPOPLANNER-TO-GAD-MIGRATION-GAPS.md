@@ -12,12 +12,10 @@
 
 | Branch | Contents |
 |--------|----------|
-| **`main`** | Submodule pin: **`c34024f`** (pre–`rp-*` skills in the RepoPlanner repo). **Original framework** (CLI + cockpit + templates). What this monorepo vendors for the npm package. |
-| **`development`** | Newer line (skills / planning churn) plus **`apps/landing`** — static Next.js explainer + Vercel deploy. **Not** what `vendor/repo-planner` tracks. |
+| **`main`** | **Real RepoPlanner:** pre–`rp-*` skills snapshot **plus** **`apps/landing`** (static Next.js explainer, archive + GAD handoff). Submodule pin for this monorepo. **Vercel:** branch **`main`**, root **`apps/landing`**, Node 22+. |
+| **`gad-planner`** | **Orphan** line: experiments after skills + GAD-era planning churn — **not** the product baseline. |
 
-**Vercel (landing only):** GitHub **Production branch = `development`**, **Root Directory = `apps/landing`**, Node 22+. See upstream `apps/landing/README.md`.
-
-**Publish (upstream):** `main` and `development` are both on GitHub; `main` was reset with `--force-with-lease` to `c34024f` so it stays the slim framework line.
+**Publish (upstream):** `development` was renamed to **`gad-planner`**; **`main`** is fast-forwarded with landing + lockfile refresh only (no merge of the skills line).
 
 **Submodule consequence:** at this pin, **`vendor/repo-planner/.planning/`** holds **templates only** (no living `STATE.xml` / `ROADMAP.xml` in the submodule). Portfolio **docs sink** MDX that `source:` those paths may need to be repointed to root `.planning/` or frozen — treat as part of **06-03**.
 

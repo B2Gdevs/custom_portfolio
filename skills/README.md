@@ -51,4 +51,4 @@ node vendor/get-anything-done/bin/gad.cjs snapshot --projectid <id>
 
 ## RepoPlanner (upstream, frozen)
 
-The **`repo-planner`** git submodule tracks **upstream `main`**: the **pre-skills** framework (cockpit + CLI). The skills experiment (`rp-*` inside RepoPlanner) lives on upstream branch **`development`** only. This monorepo does **not** document RepoPlanner inside the submodule — see **`.planning/REPOPLANNER-TO-GAD-MIGRATION-GAPS.md`**. **No** committed **`gad-ui`** package; see `vendor/get-anything-done/packages/gad-ui/README.md`.
+The **`repo-planner`** git submodule tracks **upstream `main`**: **pre-skills** framework (cockpit + CLI) **plus** the static **`apps/landing`** explainer. Orphan experiments after skills live on upstream **`gad-planner`** only. This monorepo does **not** document RepoPlanner inside the submodule — see **`.planning/REPOPLANNER-TO-GAD-MIGRATION-GAPS.md`**. **No** committed **`gad-ui`** package; see `vendor/get-anything-done/packages/gad-ui/README.md`.
