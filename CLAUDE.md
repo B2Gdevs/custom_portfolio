@@ -43,6 +43,36 @@ lost. `tests/eval-preservation.test.cjs` will fail the build if you skip it.
 
 Verify with `gad eval verify`. See `gad:eval-run` skill for the full procedure.
 
+# Eval experimental design (decision gad-39, gad-40)
+
+Eval projects are categorized by **mode** (greenfield vs brownfield) and **workflow**
+(gad, bare, emergent). Shown in `gad eval list`.
+
+| Mode | Start state |
+|---|---|
+| **greenfield** | Nothing — agent builds from scratch |
+| **brownfield** | Inherits a baseline codebase from a previous run (specified in gad.json) |
+
+| Workflow | Description |
+|---|---|
+| **gad** | Full GAD framework — .planning/ XML, AGENTS.md loop, skill triggers |
+| **bare** | No framework — agent creates own workflow in `game/.planning/` |
+| **emergent** | No framework but inherits skills from previous runs, evolves them |
+
+All workflow artifacts (workflow, decisions, skills, notes) MUST live under
+`game/.planning/` regardless of workflow. Source code stays in `src/`, assets in `public/`.
+
+## Worktree management
+
+```sh
+gad worktree list [--agent-only]     # show all worktrees with status
+gad worktree show <id>               # details on one worktree
+gad worktree clean <id>              # remove a specific worktree
+gad worktree prune --older-than 3d   # prune old agent worktrees
+```
+
+Use these to manage `.claude/worktrees/agent-*` directories created by eval agents.
+
 # GAD CLI quick reference
 
 | Command | Use when |
