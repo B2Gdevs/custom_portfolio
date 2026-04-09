@@ -2,7 +2,7 @@ import { parseArgs } from 'node:util';
 import { getAllContentEntries } from '@/lib/content';
 import { createMagicbornCli } from '@/lib/magicborn/magicborn-cli-ui';
 import { SITE_APP_SEED_RECORDS } from '@/lib/site-app-registry';
-import { runSiteAppsWorker } from '@/lib/site-apps-worker-runner';
+import { loadSiteAppsFromPayload } from '@/lib/site-apps-load';
 
 export async function runAppList(flagArgs: string[]): Promise<void> {
   const { values } = parseArgs({
@@ -17,28 +17,13 @@ export async function runAppList(flagArgs: string[]): Promise<void> {
   let detail: string | undefined;
 
   try {
-    const result = await runSiteAppsWorker();
-    const body = result.body as {
-      ok?: boolean;
-      apps?: Array<{ id?: string; title?: string; href?: string }>;
-      loadError?: string | null;
-    };
-
-    if (body?.ok === true && Array.isArray(body.apps)) {
-      const mapped = body.apps
-        .filter(
-          (a): a is { id: string; title: string; href: string } =>
-            typeof a?.id === 'string' && typeof a?.title === 'string' && typeof a?.href === 'string',
-        )
-        .map((a) => ({ id: a.id, title: a.title, href: a.href }));
-      rows = mapped;
-      source = mapped.length > 0 ? 'payload' : 'cms_empty';
-    } else {
+    const { apps, loadError } = await loadSiteAppsFromPayload();
+    if (loadError) {
       source = 'cms_error';
-      detail =
-        typeof body?.loadError === 'string' && body.loadError.trim()
-          ? body.loadError.trim()
-          : 'Worker returned ok=false or missing apps array.';
+      detail = loadError.trim() || 'Payload catalog load failed.';
+    } else {
+      rows = apps.map((a) => ({ id: a.id, title: a.title, href: a.href }));
+      source = rows.length > 0 ? 'payload' : 'cms_empty';
     }
   } catch (e) {
     source = 'cms_error';

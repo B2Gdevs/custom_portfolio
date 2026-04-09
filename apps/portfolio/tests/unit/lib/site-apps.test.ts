@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getSiteApps } from '@/lib/site-apps';
-import { runSiteAppsWorker } from '@/lib/site-apps-worker-runner';
+import { loadSiteAppsFromPayload } from '@/lib/site-apps-load';
 
-vi.mock('@/lib/site-apps-worker-runner', () => ({
-  runSiteAppsWorker: vi.fn(),
+vi.mock('@/lib/site-apps-load', () => ({
+  loadSiteAppsFromPayload: vi.fn(),
 }));
 
 describe('site app records bootstrap', () => {
@@ -11,23 +11,10 @@ describe('site app records bootstrap', () => {
     vi.resetAllMocks();
   });
 
-  it('returns loadError when the worker throws', async () => {
-    vi.mocked(runSiteAppsWorker).mockRejectedValue(new Error('payload offline'));
-
-    await expect(getSiteApps()).resolves.toEqual({
+  it('returns loadError when the loader reports a failure', async () => {
+    vi.mocked(loadSiteAppsFromPayload).mockResolvedValue({
       apps: [],
-      loadError: 'payload offline',
-    });
-  });
-
-  it('returns loadError when the worker body is not ok', async () => {
-    vi.mocked(runSiteAppsWorker).mockResolvedValue({
-      status: 200,
-      body: {
-        ok: false,
-        apps: [],
-        loadError: 'connect ECONNREFUSED',
-      },
+      loadError: 'connect ECONNREFUSED',
     });
 
     await expect(getSiteApps()).resolves.toEqual({
@@ -36,14 +23,10 @@ describe('site app records bootstrap', () => {
     });
   });
 
-  it('returns empty apps when CMS has no published rows (ok, empty array)', async () => {
-    vi.mocked(runSiteAppsWorker).mockResolvedValue({
-      status: 200,
-      body: {
-        ok: true,
-        apps: [],
-        loadError: null,
-      },
+  it('returns empty apps when CMS has no published rows', async () => {
+    vi.mocked(loadSiteAppsFromPayload).mockResolvedValue({
+      apps: [],
+      loadError: null,
     });
 
     await expect(getSiteApps()).resolves.toEqual({
@@ -53,34 +36,30 @@ describe('site app records bootstrap', () => {
   });
 
   it('uses site-app-record rows when they exist', async () => {
-    vi.mocked(runSiteAppsWorker).mockResolvedValue({
-      status: 200,
-      body: {
-        ok: true,
-        apps: [
-          {
-            id: 'get-anything-done',
-            title: 'Get Anything Done (GAD)',
-            href: 'https://get-anything-done.vercel.app/',
-            description: 'Live from Payload.',
-            iconName: 'terminal',
-            cta: 'Open GAD on Vercel',
-            supportHref: '/docs/get-anything-done/planning/state',
-            supportLabel: 'Planning state on this site',
-            supportText: 'Read-only by default.',
-            downloads: [
-              {
-                href: '/api/site-download-assets/file/get-anything-done.zip',
-                label: 'Download GAD bundle',
-                kind: 'download',
-                external: false,
-              },
-            ],
-            featuredOrder: 20,
-          },
-        ],
-        loadError: null,
-      },
+    vi.mocked(loadSiteAppsFromPayload).mockResolvedValue({
+      apps: [
+        {
+          id: 'get-anything-done',
+          title: 'Get Anything Done (GAD)',
+          href: 'https://get-anything-done.vercel.app/',
+          description: 'Live from Payload.',
+          iconName: 'terminal',
+          cta: 'Open GAD on Vercel',
+          supportHref: '/docs/get-anything-done/planning/state',
+          supportLabel: 'Planning state on this site',
+          supportText: 'Read-only by default.',
+          downloads: [
+            {
+              href: '/api/site-download-assets/file/get-anything-done.zip',
+              label: 'Download GAD bundle',
+              kind: 'download',
+              external: false,
+            },
+          ],
+          featuredOrder: 20,
+        },
+      ],
+      loadError: null,
     });
 
     await expect(getSiteApps()).resolves.toEqual({
@@ -98,5 +77,11 @@ describe('site app records bootstrap', () => {
       ],
       loadError: null,
     });
+  });
+
+  it('propagates if the loader throws (unexpected)', async () => {
+    vi.mocked(loadSiteAppsFromPayload).mockRejectedValue(new Error('payload offline'));
+
+    await expect(getSiteApps()).rejects.toThrow('payload offline');
   });
 });

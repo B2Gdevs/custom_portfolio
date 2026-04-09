@@ -112,7 +112,7 @@
       <goal>Portfolio + vendored repub-builder duplicate-pattern pass: central `lib/unknown-error` + `lib/tsx-json-worker` for timeout JSON stdout workers; stdin workers reuse `resolveTsxCliPath`; RAG ingest CLI + provider-bootstrap use shared unknown-error string; repub-builder `src/utils/unknown-error` + EpubViewer fetch catch alignment.</goal>
       <keywords>refactor,dedupe,tsx-worker,unknown-error,repub-builder,portfolio</keywords>
       <commands>
-        <command>pnpm --filter @portfolio/app exec eslint lib/unknown-error.ts lib/tsx-json-worker.ts lib/site-apps-worker-runner.ts lib/project-records-worker-runner.ts lib/resume-records-worker-runner.ts lib/site-download-assets-worker-runner.ts lib/listen/catalog-worker-runner.ts lib/reader/reading-state-worker-runner.ts lib/reader/workspace-write-worker-runner.ts lib/reader/workspace-worker-runner.ts lib/rag/ingest-cli.ts scripts/provider-bootstrap.ts lib/api/http.ts</command>
+        <command>pnpm --filter @portfolio/app exec eslint lib/unknown-error.ts lib/tsx-json-worker.ts lib/site-apps-load.ts lib/project-records-worker-runner.ts lib/resume-records-worker-runner.ts lib/site-download-assets-worker-runner.ts lib/listen/catalog-worker-runner.ts lib/reader/reading-state-worker-runner.ts lib/reader/workspace-write-worker-runner.ts lib/reader/workspace-worker-runner.ts lib/rag/ingest-cli.ts scripts/provider-bootstrap.ts lib/api/http.ts</command>
         <command>pnpm --filter @portfolio/repub-builder test</command>
       </commands>
       <depends>01-11</depends>

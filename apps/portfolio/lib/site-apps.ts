@@ -1,8 +1,7 @@
-import { errorMessageOrFallback } from '@/lib/unknown-error';
-import { type SiteAppRecord } from '@/lib/site-app-registry';
-import { runSiteAppsWorker } from '@/lib/site-apps-worker-runner';
+import { loadSiteAppsFromPayload } from '@/lib/site-apps-load';
+import type { SiteAppRecord } from '@/lib/site-app-registry';
 
-export type { SiteAppRecord };
+export type { SiteAppRecord } from '@/lib/site-app-registry';
 
 export type SiteAppsCatalogResult = {
   apps: SiteAppRecord[];
@@ -14,36 +13,9 @@ export type SiteAppsCatalogResult = {
 };
 
 /**
- * Published `site-app-records` from Payload only. No file-based catalog fallback.
+ * Published `site-app-records` from Payload only (in-process — no tsx subprocess).
  * Seed defaults: `SITE_APP_SEED_RECORDS` + `pnpm site:seed:apps`.
  */
 export async function getSiteApps(): Promise<SiteAppsCatalogResult> {
-  try {
-    const result = await runSiteAppsWorker();
-    const body = result.body as
-      | {
-          ok?: boolean;
-          apps?: SiteAppRecord[];
-          loadError?: string | null;
-        }
-      | undefined;
-
-    if (body?.ok === true && Array.isArray(body.apps)) {
-      return {
-        apps: [...body.apps].sort((a, b) => a.featuredOrder - b.featuredOrder),
-        loadError: null,
-      };
-    }
-
-    const err =
-      typeof body?.loadError === 'string' && body.loadError.trim()
-        ? body.loadError.trim()
-        : 'Site apps worker returned an unexpected response.';
-    return { apps: [], loadError: err };
-  } catch (error) {
-    return {
-      apps: [],
-      loadError: errorMessageOrFallback(error, 'Site apps worker failed to run.'),
-    };
-  }
+  return loadSiteAppsFromPayload();
 }
