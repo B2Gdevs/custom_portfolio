@@ -2,7 +2,7 @@
 title: Planning Docs
 description: Index for RepoPlanner in this monorepo -- CLI, submodule, embed policy, and planning loop files.
 date: "2026-03-29"
-updated: "2026-03-30"
+updated: "2026-04-09"
 order: 1
 repoPath: apps/portfolio/content/docs/repo-planner/planning/planning-docs.mdx
 ---
@@ -27,6 +27,12 @@ repoPath: apps/portfolio/content/docs/repo-planner/planning/planning-docs.mdx
 For **RepoPlanner-section** work, read [requirements](/docs/repo-planner/requirements), [roadmap](/docs/repo-planner/planning/roadmap), [state](/docs/repo-planner/planning/state), [task registry](/docs/repo-planner/planning/task-registry), and [decisions](/docs/repo-planner/planning/decisions) first. Open this page when you need the local playbook, the code map, or the embed policy summary.
 
 Repo-wide loop: **[Global -- Planning docs](/docs/global/planning/planning-docs)**; diagrams and id grammar: **[Global planning guide](/docs/global/global-planning)**. **Monorepo requirements** (including CLI decisions): **[Documentation -- Requirements](/docs/documentation/requirements)**. **Cross-section overview:** **[Documentation -- Roadmap](/docs/documentation/roadmap)**.
+
+## Deprecation and upstream (MagicbornStudios/RepoPlanner)
+
+**Product stance:** RepoPlanner is **deprecated** in favor of **GAD** (`gad` CLI, root `.planning/`, `gad-config.toml`). See **[Global decision 06-01](/docs/global/planning/decisions)** and `.planning/REPOPLANNER-TO-GAD-MIGRATION-GAPS.md` (monorepo root). Phase **06** task **06-03** tracks removing the `repo-planner` package from this portfolio; this docs section stays for **host contracts** and migration history until that work finishes.
+
+**Upstream reference site:** `RepoPlanner`’s **`apps/landing`** deploys to Vercel (static Next.js: marketing copy, cockpit demo, built-in `builtin-packs.json`). It is **not** ongoing product work. **Narrow exception:** **build-only** fixes are allowed so `npm run build` stays green — **direct** `npm` dependencies for transitive peers the embed pulls in, plus **root** `react` / `react-dom` on the package so TypeScript resolves `react` from `components/**` during `next build` (see task **06-04** in root `.planning/TASK-REGISTRY.xml`). When in doubt, **GAD** and **portfolio** docs are canonical; upstream is a **read-only** reference.
 
 ## Workflow stance
 

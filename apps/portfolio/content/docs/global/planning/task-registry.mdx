@@ -3,7 +3,7 @@ title: "global — Task Registry"
 description: "Auto-compiled from ./.planning/TASK-REGISTRY.xml"
 generated: "true"
 source: "./.planning/TASK-REGISTRY.xml"
-updated: "2026-04-07T20:03:13.469Z"
+updated: "2026-04-09T01:12:21.183Z"
 ---
 
 # Task Registry
@@ -39,3 +39,10 @@ updated: "2026-04-07T20:03:13.469Z"
 ## Phase 05
 
 - ✓ **05-01** Finish the cross-project observability pass: wire privacy-aware Vercel Analytics into the portfolio and Grime Time public layouts, add a small Grime Time observability helper for request ids plus safe route summaries, cover the helper and response-header behavior with tests, and verify with targeted typecheck/lint/test/build commands.
+
+## Phase 06
+
+- ✓ **06-01** Root CLI alignment: `pnpm gad` / `pnpm planning` invoke GAD; `pnpm planning:snapshot` uses `gad snapshot --projectid global`; legacy RepoPlanner (`run-legacy-repo-planner-cli.mjs`) only for init, embed-packs, checklist, report-view until GAD replacements exist. Deprecation stderr on legacy. Prune `run-planning-cli.mjs` to shim.
+- ✓ **06-02** CLOSED — no shipped `packages/gad-ui` npm package: indefinite deferral. Placeholder README in `vendor/get-anything-done/packages/gad-ui/README.md` documents non-commitment and points to archival RepoPlanner/portfolio UI for reference only. (A future GAD-lite / UI is research-only.)
+- → **06-03** RepoPlanner → GAD migration: `skills/rp-*` and `.claude/skills/rp-*` are thin stubs to `vendor/get-anything-done/skills/`; policy and history in `.planning/REPOPLANNER-TO-GAD-MIGRATION-GAPS.md` (upstream RepoPlanner: `main` = pre-skills framework; `development` = skills-era line). **Remaining:** remove `repo-planner` from apps/portfolio (re-exports, planning-state APIs, live-bundle), migrate to GAD-backed flows; update docs IA and site registry; archive upstream RepoPlanner read-only when imports are gone.
+- ✓ **06-04** Upstream RepoPlanner `apps/landing` Vercel: keep `npm run build` green — declare direct dependencies for embed-transitive peers (`fast-xml-parser`, `diff`, `@assistant-ui/*`, etc.); add root `react` + `react-dom` so `tsc` resolves `react` from `components/` when Next typechecks the linked package. Document in portfolio repo-planner section + decision **06-01** exception.

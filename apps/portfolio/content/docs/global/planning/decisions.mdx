@@ -3,7 +3,7 @@ title: "global — Decisions"
 description: "Auto-compiled from ./.planning/DECISIONS.xml"
 generated: "true"
 source: "./.planning/DECISIONS.xml"
-updated: "2026-04-07T20:03:13.469Z"
+updated: "2026-04-09T01:12:21.183Z"
 ---
 
 # Decisions
@@ -82,9 +82,9 @@ Every working session that produces new decisions, requirements, or guidance mus
 
 ## gad-05: repo-planner is officially a GAD project; rp-* skills are deprecated
 
-vendor/repo-planner is registered as a GAD root (id=repo-planner) in planning-config.toml. It has a GAD-format .planning/ directory. Its skills (rp-*) are deprecated stubs pointing to gad:* equivalents. The manuscript skill content migrated to vendor/get-anything-done/skills/manuscript/SKILL.md. The portfolio docs (apps/portfolio/content/docs/repo-planner/planning/) remain as the docs sink.
+vendor/repo-planner may remain registered as a GAD root (id=repo-planner) in planning-config.toml for CLI wiring. The submodule tracks upstream RepoPlanner main at the pre-skills framework pin (no rp-* directories inside RepoPlanner; skills experiment preserved on upstream branch development only). Monorepo skills/rp-* are thin stubs to vendor/get-anything-done/skills/. Manuscript and other methodology live under get-anything-done. Portfolio repo-planner docs sink may need repointing after the submodule pin (see REPOPLANNER-TO-GAD-MIGRATION-GAPS.md).
 
-**Impact:** gad projects list shows both global and repo-planner. gad state, phases, and tasks all work for repo-planner. No new rp-* skills should be created.
+**Impact:** gad snapshot can still list repo-planner if configured; primary agent methodology is GAD skills. No new rp-* bodies in this monorepo beyond stubs.
 
 ## 03-07: Phase-one owner account UI reads avatar data from the shared user record and session payload
 
@@ -163,3 +163,9 @@ When no --projectid flag is given, `gad state` and `gad phases` call `getActiveS
 The portfolio-bare eval is not an automated harness. It is a real agent session in a template directory (evals/portfolio-bare/template/) that contains only planning docs and requirements — no app code. The agent opens the template in Claude Code or Codex, runs `gad session new [--fresh]` to declare context mode, plans phases from requirements, executes tasks, and writes a trace at the end. context_mode (fresh|loaded) is stored in the session JSON and stamped on each task in TASK-REGISTRY.xml. context_delta emerges from comparing runs across context modes over time. The user is responsible for declaring the correct context mode. Skills: `gad:eval-run` (running the eval), `gad:eval-report` (comparing runs).
 
 **Impact:** No API keys, no execSync harness. The eval IS real agent work. The report (`gad eval trace report --project portfolio-bare`) shows which tasks are context-dependent vs requirements-derivable. A task that only appears in loaded runs is one the agent misses when starting cold — that is the most actionable finding.
+
+## 06-01: RepoPlanner is deprecated — GAD is the sole planning product
+
+The MagicbornStudios/RepoPlanner repository is frozen/archived; no new features. This monorepo migrates to GAD (`vendor/get-anything-done`) for CLI, workflows, and (via phase 06) official React UI embedded in the portfolio. Remaining `loop-cli` calls use `scripts/run-legacy-repo-planner-cli.mjs` with deprecation until init/embed/report paths are ported. **Exception (narrow):** upstream `apps/landing` (Vercel reference site) may receive **build-only** fixes: direct npm dependencies for transitive peers the embed pulls in, and root `react`/`react-dom` so TypeScript can resolve `react` from package source paths during `next build` — no product features or roadmap work.
+
+**Impact:** Agents and docs must prefer `gad` and `.planning` + `gad-config.toml`. Portfolio eventually drops the `repo-planner` package dependency entirely. Track landing build hygiene under phase 06 task **06-04** and [repo-planner planning docs](/docs/repo-planner/planning/planning-docs).

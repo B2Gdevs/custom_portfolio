@@ -234,5 +234,13 @@
       </commands>
       <depends>06-01</depends>
     </task>
+    <task id="06-04" agent-id="" status="done">
+      <goal>Upstream RepoPlanner `apps/landing` Vercel: keep `npm run build` green — declare direct dependencies for embed-transitive peers (`fast-xml-parser`, `diff`, `@assistant-ui/*`, etc.); add root `react` + `react-dom` so `tsc` resolves `react` from `components/` when Next typechecks the linked package. Document in portfolio repo-planner section + decision **06-01** exception.</goal>
+      <keywords>repo-planner,vercel,landing,typescript,deprecation,build</keywords>
+      <commands>
+        <command>cd vendor/repo-planner/apps/landing &amp;&amp; npm run build</command>
+      </commands>
+      <depends>06-01</depends>
+    </task>
   </phase>
 </task-registry>

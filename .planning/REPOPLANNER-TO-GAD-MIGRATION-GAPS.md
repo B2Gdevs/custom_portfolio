@@ -26,6 +26,10 @@
 - Legacy RP: `scripts/run-legacy-repo-planner-cli.mjs` (stderr deprecation) for **init**, **embed-packs**, **checklist**, **report-view** only.
 - `scripts/run-planning-cli.mjs` → thin forwarder to legacy (back-compat).
 
+### Upstream `apps/landing` (Vercel) — build-only band (2026-04-09)
+
+Decision **06-01** allows **narrow** maintenance so the public reference site keeps deploying: `apps/landing/package.json` lists **direct** dependencies for anything webpack/`tsc` resolves from the linked package (`fast-xml-parser`, `diff`, `@assistant-ui/react`, `@assistant-ui/react-ui`, …). The **repo-planner** root `package.json` also declares **`react` + `react-dom`** so TypeScript can resolve `react` from `components/**` paths during `next build` (npm does not hoist `node_modules` into a parent of those paths on Vercel). No features or roadmap work — task **06-04** (done) + [repo-planner planning docs](/docs/repo-planner/planning/planning-docs).
+
 ---
 
 ## 1. Monorepo scripts (root `package.json`)

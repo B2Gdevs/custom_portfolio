@@ -4,7 +4,7 @@
   <current-phase>05</current-phase>
   <current-plan>global-data-storage-02</current-plan>
   <status>active</status>
-  <next-action>Primary queue: continue `02-01` (shared data/storage provider contract). Parallel: **phase 06** — `06-01`/`06-02` done (GAD CLI + gad-ui placeholder README); `06-03` in progress: portfolio still imports `repo-planner` until APIs/docs migration finishes; legacy `loop-cli` remains for init/embed/report/checklist until GAD ports. Run `pnpm gad:snapshot` or `gad snapshot --projectid global` after pulls. Decision **06-01** records RP archive policy.</next-action>
+  <next-action>Primary queue: continue `02-01` (shared data/storage provider contract). Parallel: **phase 06** — `06-01`/`06-02`/`06-04` done (GAD CLI, gad-ui placeholder, upstream landing build band); `06-03` in progress: portfolio still imports `repo-planner` until APIs/docs migration finishes; legacy `loop-cli` remains for init/embed/report/checklist until GAD ports. Run `pnpm gad:snapshot` or `gad snapshot --projectid global` after pulls. Decision **06-01** records RP deprecation + narrow Vercel landing exception.</next-action>
   <references>
     <reference>AGENTS.md (repo root)</reference>
     <reference>apps/portfolio/content/docs/global/requirements.mdx</reference>
@@ -37,6 +37,6 @@
     <format>agent-YYYYMMDD-xxxx</format>
     <rule>Optional: register a unique id in STATE.xml before claiming tasks if you use CLI task-update.</rule>
   </agent-id-policy>
-  <last-updated>2026-04-08T20:30:00.000Z</last-updated>
-  <sink-compiled sink="apps/portfolio/content/docs/global/planning/" at="2026-04-07T20:03:13.466Z" />
+  <last-updated>2026-04-09T12:00:00.000Z</last-updated>
+  <sink-compiled sink="apps/portfolio/content/docs/global/planning/" at="2026-04-09T01:12:21.179Z" />
 </state>

@@ -3,7 +3,7 @@ title: "global — Planning State"
 description: "Auto-compiled from ./.planning/STATE.xml"
 generated: "true"
 source: "./.planning/STATE.xml"
-updated: "2026-04-07T20:03:13.469Z"
+updated: "2026-04-09T01:12:21.183Z"
 ---
 
 # Planning State
@@ -13,8 +13,8 @@ updated: "2026-04-07T20:03:13.469Z"
 - **Phase:** 05
 - **Plan:** global-data-storage-02
 - **Status:** active
-- **Updated:** 2026-04-08T18:00:00.000Z
+- **Updated:** 2026-04-09T12:00:00.000Z
 
 ## Next action
 
-Primary queue: continue `02-01` (shared data/storage provider contract). Observability: `05-01` is marked done in TASK-REGISTRY; run `gad snapshot --projectid global` after pulls. Latest maintenance: `01-13` landed portfolio unknown coercion helpers (`isUnknownRecord`, `coerce-unknown-to-string`, `coerce-unknown`, `read-json-stdin`) and removed duplicate guards across reader, artifacts, seed sync, publishers, site-branding.
+Primary queue: continue `02-01` (shared data/storage provider contract). Parallel: **phase 06** — `06-01`/`06-02`/`06-04` done (GAD CLI, gad-ui placeholder, upstream landing build band); `06-03` in progress: portfolio still imports `repo-planner` until APIs/docs migration finishes; legacy `loop-cli` remains for init/embed/report/checklist until GAD ports. Run `pnpm gad:snapshot` or `gad snapshot --projectid global` after pulls. Decision **06-01** records RP deprecation + narrow Vercel landing exception.
