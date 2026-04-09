@@ -3,7 +3,7 @@ title: "global — Decisions"
 description: "Auto-compiled from ./.planning/DECISIONS.xml"
 generated: "true"
 source: "./.planning/DECISIONS.xml"
-updated: "2026-04-09T01:12:21.183Z"
+updated: "2026-04-09T01:29:02.673Z"
 ---
 
 # Decisions
@@ -166,6 +166,6 @@ The portfolio-bare eval is not an automated harness. It is a real agent session 
 
 ## 06-01: RepoPlanner is deprecated — GAD is the sole planning product
 
-The MagicbornStudios/RepoPlanner repository is frozen/archived; no new features. This monorepo migrates to GAD (`vendor/get-anything-done`) for CLI, workflows, and (via phase 06) official React UI embedded in the portfolio. Remaining `loop-cli` calls use `scripts/run-legacy-repo-planner-cli.mjs` with deprecation until init/embed/report paths are ported. **Exception (narrow):** upstream `apps/landing` (Vercel reference site) may receive **build-only** fixes: direct npm dependencies for transitive peers the embed pulls in, and root `react`/`react-dom` so TypeScript can resolve `react` from package source paths during `next build` — no product features or roadmap work.
+The MagicbornStudios/RepoPlanner repository is frozen/archived; no new features. This monorepo migrates to GAD (`vendor/get-anything-done`) for CLI, workflows, and (via phase 06) official React UI embedded in the portfolio. Remaining `loop-cli` calls use `scripts/run-legacy-repo-planner-cli.mjs` with deprecation until init/embed/report paths are ported. **Exception (narrow):** upstream `apps/landing` (Vercel reference site) may receive **build-only** fixes: direct npm deps for transitive peers the embed pulls in, plus `postinstall`/`prebuild` script `link-landing-deps-to-repo-root.mjs` that symlinks landing `node_modules` into repo-root `node_modules` so TypeScript (resolving from `components/**`) finds `react`, `next`, `@types/*`, etc. when npm hoists to `apps/landing` only — no product features or roadmap work.
 
 **Impact:** Agents and docs must prefer `gad` and `.planning` + `gad-config.toml`. Portfolio eventually drops the `repo-planner` package dependency entirely. Track landing build hygiene under phase 06 task **06-04** and [repo-planner planning docs](/docs/repo-planner/planning/planning-docs).

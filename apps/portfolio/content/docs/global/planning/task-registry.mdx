@@ -3,7 +3,7 @@ title: "global — Task Registry"
 description: "Auto-compiled from ./.planning/TASK-REGISTRY.xml"
 generated: "true"
 source: "./.planning/TASK-REGISTRY.xml"
-updated: "2026-04-09T01:12:21.183Z"
+updated: "2026-04-09T01:29:02.673Z"
 ---
 
 # Task Registry
@@ -45,4 +45,4 @@ updated: "2026-04-09T01:12:21.183Z"
 - ✓ **06-01** Root CLI alignment: `pnpm gad` / `pnpm planning` invoke GAD; `pnpm planning:snapshot` uses `gad snapshot --projectid global`; legacy RepoPlanner (`run-legacy-repo-planner-cli.mjs`) only for init, embed-packs, checklist, report-view until GAD replacements exist. Deprecation stderr on legacy. Prune `run-planning-cli.mjs` to shim.
 - ✓ **06-02** CLOSED — no shipped `packages/gad-ui` npm package: indefinite deferral. Placeholder README in `vendor/get-anything-done/packages/gad-ui/README.md` documents non-commitment and points to archival RepoPlanner/portfolio UI for reference only. (A future GAD-lite / UI is research-only.)
 - → **06-03** RepoPlanner → GAD migration: `skills/rp-*` and `.claude/skills/rp-*` are thin stubs to `vendor/get-anything-done/skills/`; policy and history in `.planning/REPOPLANNER-TO-GAD-MIGRATION-GAPS.md` (upstream RepoPlanner: `main` = pre-skills framework; `development` = skills-era line). **Remaining:** remove `repo-planner` from apps/portfolio (re-exports, planning-state APIs, live-bundle), migrate to GAD-backed flows; update docs IA and site registry; archive upstream RepoPlanner read-only when imports are gone.
-- ✓ **06-04** Upstream RepoPlanner `apps/landing` Vercel: keep `npm run build` green — declare direct dependencies for embed-transitive peers (`fast-xml-parser`, `diff`, `@assistant-ui/*`, etc.); add root `react` + `react-dom` so `tsc` resolves `react` from `components/` when Next typechecks the linked package. Document in portfolio repo-planner section + decision **06-01** exception.
+- ✓ **06-04** Upstream RepoPlanner `apps/landing` Vercel: keep `npm run build` green — direct deps for embed-transitive peers; `scripts/link-landing-deps-to-repo-root.mjs` on postinstall+prebuild symlinks landing `node_modules` packages into repo-root `node_modules` so `tsc` resolves `react`/`next`/`@types` from `components/**` (hoisting alone is insufficient). Document in REPOPLANNER-TO-GAD-MIGRATION-GAPS + decision **06-01**.

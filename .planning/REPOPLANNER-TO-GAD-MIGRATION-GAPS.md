@@ -28,7 +28,7 @@
 
 ### Upstream `apps/landing` (Vercel) — build-only band (2026-04-09)
 
-Decision **06-01** allows **narrow** maintenance so the public reference site keeps deploying: `apps/landing/package.json` lists **direct** dependencies for anything webpack/`tsc` resolves from the linked package (`fast-xml-parser`, `diff`, `@assistant-ui/react`, `@assistant-ui/react-ui`, …). The **repo-planner** root `package.json` also declares **`react` + `react-dom`** so TypeScript can resolve `react` from `components/**` paths during `next build` (npm does not hoist `node_modules` into a parent of those paths on Vercel). No features or roadmap work — task **06-04** (done) + [repo-planner planning docs](/docs/repo-planner/planning/planning-docs).
+Decision **06-01** allows **narrow** maintenance so the public reference site keeps deploying: `apps/landing/package.json` lists **direct** dependencies for anything webpack resolves from the linked package (`fast-xml-parser`, `diff`, `@assistant-ui/react`, `@assistant-ui/react-ui`, …). **TypeScript** typechecks sources under `repo-planner/components/**`; module resolution walks **up** from those paths and does **not** reach `apps/landing/node_modules` when npm hoists there. **`postinstall` + `prebuild`** run `scripts/link-landing-deps-to-repo-root.mjs`, which symlinks each landing dependency (and devDependency except `repo-planner`) into `<RepoPlanner>/node_modules/` (gitignored) so `tsc` can resolve `react`, `next`, `@types/*`, etc. No features or roadmap work — task **06-04** + [repo-planner planning docs](/docs/repo-planner/planning/planning-docs).
 
 ---
 
