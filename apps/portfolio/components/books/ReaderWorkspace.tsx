@@ -3,12 +3,10 @@
 import {
   ReaderWorkspace as ReaderWorkspaceBase,
   type ReaderPersistenceAdapter,
-  type ReaderPlanningCockpitPayload,
   type ReaderWorkspaceUploadInput,
 } from '@portfolio/repub-builder/reader';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { RepoPlannerCockpitClient } from '@/components/repo-planner/RepoPlannerCockpitClient';
 import {
   fetchReaderPersistedState,
   fetchReaderWorkspaceBootstrap,
@@ -21,11 +19,6 @@ import {
   resolveInitialReaderBook,
 } from '@/lib/reader/workspace-library';
 import type { ReaderWorkspaceBootstrap } from '@/lib/reader/workspace-contract';
-import {
-  magicbornRunePathRepoPlannerModalPayload,
-  mordredsLegacyRepoPlannerModalPayload,
-  mordredsTaleRepoPlannerModalPayload,
-} from '@/lib/repo-planner/reader-book-modal-payloads';
 import type { BookEntry } from '@/lib/books';
 import { primaryNavItems } from '@/components/layout/nav-config';
 import type { ReaderShellNavLink } from '@portfolio/repub-builder/reader';
@@ -33,15 +26,6 @@ import type { ReaderShellNavLink } from '@portfolio/repub-builder/reader';
 const READER_SITE_NAV_LINKS: ReaderShellNavLink[] = primaryNavItems
   .filter((item) => item.href !== '/apps/reader')
   .map((item) => ({ href: item.href, label: item.label }));
-
-const READER_BOOK_PLANNING_PAYLOADS: Record<
-  string,
-  () => ReaderPlanningCockpitPayload
-> = {
-  mordreds_tale: mordredsTaleRepoPlannerModalPayload,
-  mordreds_legacy: mordredsLegacyRepoPlannerModalPayload,
-  magicborn_rune_path: magicbornRunePathRepoPlannerModalPayload,
-};
 
 export default function ReaderWorkspace({
   books,
@@ -162,7 +146,6 @@ export default function ReaderWorkspace({
   return (
     <ReaderWorkspaceBase
       books={combinedBooks}
-      showPlanningStrip={false}
       readerShellNavLinks={READER_SITE_NAV_LINKS}
       readerPersistenceAdapter={readerPersistenceAdapter}
       workspaceAccess={workspaceBootstrap?.access ?? null}
@@ -172,22 +155,6 @@ export default function ReaderWorkspace({
       onUploadImportedBook={handleUploadImportedBook}
       initialBook={resolvedInitialBook}
       ReaderLink={Link}
-      getPlanningStripConfig={(bookSlug) => {
-        if (!bookSlug) return null;
-        const factory = READER_BOOK_PLANNING_PAYLOADS[bookSlug];
-        return factory ? { cockpitPayload: factory() } : null;
-      }}
-      renderPlanningCockpit={(payload, _onClose, epubPlanning) => (
-        <RepoPlannerCockpitClient
-          hostContext={payload}
-          loadSiteBuiltinPacks={false}
-          readerPlanningInjection={
-            epubPlanning && epubPlanning.bookSlug === payload.readingTargetId
-              ? epubPlanning
-              : null
-          }
-        />
-      )}
       initialAt={rest.initialAt}
       initialCfi={rest.initialCfi}
     />

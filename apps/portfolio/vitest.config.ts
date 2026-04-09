@@ -8,7 +8,6 @@ export default defineConfig({
         __dirname,
         '../../packages/magicborn-cli/src/vendor-registry.ts',
       ),
-      '@/vendor/repo-planner': path.resolve(__dirname, '../../vendor/repo-planner'),
       '@': path.resolve(__dirname, '.'),
       '@payload-config': path.resolve(__dirname, './payload.config.ts'),
     },

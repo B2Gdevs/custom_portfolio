@@ -1,4 +1,4 @@
-import type { BuiltinEmbedPacksPayload, PlanningPackManifest } from 'repo-planner/planning-pack';
+import type { BuiltinEmbedPacksPayload, PlanningPackManifest } from '@/lib/planning-pack-types';
 import { buildPlanningPackGalleryTabs } from '@/lib/planning-pack-modal-data';
 
 describe('planning pack modal data', () => {
@@ -49,7 +49,7 @@ describe('planning pack modal data', () => {
         },
         {
           id: 'rp-builtin-docs',
-          label: 'Repo Planner docs',
+          label: 'Extra docs pack',
           files: [
             {
               path: 'docs/getting-started.md',
@@ -69,7 +69,7 @@ describe('planning pack modal data', () => {
     expect(tabs).toHaveLength(2);
     expect(tabs[0]).toMatchObject({
       id: 'starter-template',
-      label: 'Starter template',
+      label: 'GAD starter template',
       mode: 'sections',
     });
     expect(tabs[0]?.items).toHaveLength(1);
@@ -82,7 +82,7 @@ describe('planning pack modal data', () => {
     });
     expect(tabs[1]).toMatchObject({
       id: 'site-planning-packs',
-      label: 'This site',
+      label: 'Site Markdown exports',
       mode: 'collapsible-sections',
     });
     expect(tabs[1]?.items).toEqual(manifest.site);

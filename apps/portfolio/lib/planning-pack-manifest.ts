@@ -1,4 +1,1 @@
-export type {
-  PlanningPackItem,
-  PlanningPackManifest,
-} from 'repo-planner/planning-pack';
+export type { PlanningPackItem, PlanningPackManifest } from './planning-pack-types';

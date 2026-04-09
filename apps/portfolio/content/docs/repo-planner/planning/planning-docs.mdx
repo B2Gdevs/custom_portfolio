@@ -34,27 +34,15 @@ Repo-wide loop: **[Global -- Planning docs](/docs/global/planning/planning-docs)
 
 **Upstream reference site:** `RepoPlanner`’s **`apps/landing`** deploys to Vercel (static Next.js: marketing copy, cockpit demo, built-in `builtin-packs.json`). It is **not** ongoing product work. **Narrow exception:** **build-only** fixes so `npm run build` stays green — **direct** `npm` dependencies for transitive peers the embed pulls in, and **`link-landing-deps-to-repo-root.mjs`** (`postinstall` + `prebuild`) symlinks landing `node_modules` into the repo root so TypeScript can resolve `react`, `next`, and `@types/*` when typechecking `components/**` (npm hoists to `apps/landing` only; see task **06-04** in root `.planning/TASK-REGISTRY.xml`). When in doubt, **GAD** and **portfolio** docs are canonical; upstream is a **read-only** reference.
 
-### GAD-native cockpit rebuild (migration sketch — discuss before build)
+### Shipped stance: downloads + CLI, not an in-app cockpit
 
-**Direction:** The interactive surfaces we ship today under **`apps/portfolio`** (e.g. **`RepoPlannerCockpitClient`**, workspace shell, pack/live wiring from **`repo-planner/host`**) should be **reimplemented inside `vendor/get-anything-done`** and **imported from that submodule**, not from **`vendor/repo-planner`**. The GAD repo owns package layout, naming, and release cadence; the portfolio stays the host app (routes, env, policy).
+**Current direction (2026-04):** The portfolio **does not** mount **`RepoPlannerCockpitClient`** or other **`repo-planner/host`** workspace UI. Visitors get **Planning pack** downloads (starter template + site Markdown exports) and **GAD** docs; operators use **`gad`** and the filesystem.
 
-**Docs:** Human-facing **`/docs`** for global and related sections already use **GAD-shaped** planning (MDX sink, `gad snapshot`, root `.planning/`). This migration is **not** “teach the docs GAD” — it is **replace** remaining RepoPlanner-branded embed behavior and copy with **GAD-first** UI and contracts, authored in the **get-anything-done** tree.
+**Optional later:** If a **new** operator UI is justified, it should be designed **GAD-first** (likely under **`vendor/get-anything-done`**), not a revival of the old RepoPlanner cockpit embed. That is **research / out of scope** for closing **06-03** (remove `repo-planner` dependency from APIs and build).
 
-**Open — need a design session:**
+**Removal criteria for the package:** When **`repo-planner`** drops from **`apps/portfolio/package.json`** and **`transpilePackages`** — see root **`.planning/REPOPLANNER-TO-GAD-MIGRATION-GAPS.md`** and task **06-03**.
 
-- **Scope:** Which surfaces move first (read-only snapshot view vs full cockpit vs pack gallery only)? What stays legacy until **`gad`** subprocess or JSON APIs exist server-side?
-- **Package boundary:** New workspace package under GAD (e.g. `packages/gad-ui` or `site/` subset) vs minimal `src/` export; how versioning aligns with GAD releases.
-- **Data contract:** Single JSON shape from **`gad snapshot --json`** (or equivalent) vs incremental adapters; how Live mode and Pack mode stay explicit (**`REPOPLAN-MODES-01`** intent preserved).
-- **Removal criteria:** When **`repo-planner`** can drop from **`apps/portfolio/package.json`** and **`transpilePackages`**.
-
-**Confirming “done” (draft checklist — refine with the group):**
-
-- [ ] Portfolio **`/apps/repo-planner`** (or successor route) imports **only** from **`vendor/get-anything-done`** for the planning UI shell; no **`repo-planner/host`** for that path.
-- [ ] **`pnpm run build`** / **`pnpm run lint`** green; critical **`repo-planner`** unit tests replaced or re-targeted to GAD adapters.
-- [ ] Operator flows documented: snapshot, pack upload/preview if retained, read-only POST policy unchanged unless explicitly decided.
-- [ ] IA and registry entries match **GAD** naming where the surface is GAD-backed; historical RepoPlanner pages archived or redirected per [Documentation migration gaps](/docs/documentation/planning/state) and root **`.planning/REPOPLANNER-TO-GAD-MIGRATION-GAPS.md`**.
-
-**Tracking:** Root phase **06**, task **`06-03`**; this section is the portfolio-side narrative. Decision **06-02** deferred a shipped **`gad-ui`** npm package — this track may introduce a **new** concrete package or app-internal export; that choice is part of the discussion above.
+**Tracking:** Root phase **06**, task **`06-03`**. Decision **06-02** closed without a shipped **`gad-ui`** npm package.
 
 ## Workflow stance
 
@@ -72,9 +60,10 @@ Repo-wide loop: **[Global -- Planning docs](/docs/global/planning/planning-docs)
 | Surface | Default behavior |
 | --- | --- |
 | **GET** planning APIs | Read committed planning files through the shared config/root resolver (`planning-config.toml` roots; repo-root **`.planning/`** fallback only when config does not declare roots). Live bundle JSON is built directly from XML / planning files rather than CLI spawn per poll |
-| **`POST /api/planning-edits/apply`**, **`POST /api/planning-cli/run`** | **403** unless **`PLANNING_COCKPIT_ALLOW_SERVER_WRITES=1`** |
+| **`POST /api/planning-edits/apply`** | **403** unless **`PLANNING_COCKPIT_ALLOW_SERVER_WRITES=1`** |
+| **`POST /api/planning-cli/run`** | **501** — removed; use **`gad`** locally (submodule **`vendor/repo-planner`** is not invoked by the app) |
 | **Planning chat / in-site LLM** | **Out of scope** -- **`POST /api/ai/planning-chat`** returns **501** unless you wire a backend |
-| **Workspace chrome** (project switcher, pack upload, export, init downloads) | Owned by the **`repo-planner`** package and imported; portfolio mounts the shell and supplies routes/env (**`REPOPLAN-SHELL-01`**). Live and Pack now share the same vendored **`PlanningCockpit`** body through the shared data-source contract rather than keeping a host-only fallback pane. |
+| **Workspace chrome** (Planning pack modal, downloads, file tree) | Portfolio-owned (`components/modals/planning-pack/`, `components/planning/`). No vendored cockpit host. |
 
 ## Workflow support shipped
 
@@ -92,11 +81,11 @@ Repo-wide loop: **[Global -- Planning docs](/docs/global/planning/planning-docs)
 
 | Piece | Location |
 | --- | --- |
-| Route | `apps/portfolio/app/apps/repo-planner/page.tsx` |
-| Client | `apps/portfolio/components/repo-planner/RepoPlannerCockpitClient.tsx` — workspace UI from **`repo-planner/host`** (`PlanningCockpitDashboard`, `RepoPlannerWorkspaceShell` in `vendor/repo-planner/`) |
-| Package | `apps/portfolio/package.json` → `"repo-planner": "file:../../vendor/repo-planner"` |
-| Transpile | `next.config.ts` → `transpilePackages: ['repo-planner']` |
-| Env for child CLI | `REPOPLANNER_PROJECT_ROOT`, **`REPOPLANNER_REPORTS_DIR`** (see [Decisions](/docs/repo-planner/planning/decisions) **`REPOPLAN-REPORTS-01`**) via `next.config.ts` / **`getRepoPlannerChildEnv()`** |
+| Route | `apps/portfolio/app/apps/repo-planner/page.tsx` — **redirect** to GAD planning state (no embedded cockpit) |
+| Planning downloads | `components/modals/planning-pack/`, `components/planning/PlanningPackFileTree.tsx`, `lib/planning-pack-*` |
+| Parsers / workflow (live bundle) | **`apps/portfolio/lib/planning-parse/*.mjs`** — forked from archived **`vendor/repo-planner`**; app does **not** import the submodule |
+| Transpile | `next.config.ts` → **`transpilePackages`** does not include **`repo-planner`** |
+| Env defaults | `REPOPLANNER_PROJECT_ROOT`, **`REPOPLANNER_REPORTS_DIR`** (see [Decisions](/docs/repo-planner/planning/decisions) **`REPOPLAN-REPORTS-01`**) via `next.config.ts` |
 | API routes | `apps/portfolio/app/api/planning-*` + **`lib/repo-planner/`** (hand-maintained; **`REPOPLAN-ROUTES-01`**) |
 
 ### Operator alternatives

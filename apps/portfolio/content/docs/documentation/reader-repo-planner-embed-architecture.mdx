@@ -1,18 +1,20 @@
 ---
-title: Reader shell + Repo Planner embed architecture
-description: Plan for repub-builder reader shell with its own modal store, shared cockpit UI, and portfolio docs context-menu entry.
+title: Reader shell + planning artifacts (GAD era)
+description: repub-builder reader as host-owned shell; planning is files, EPUB supplements, and site downloads — no in-reader Repo Planner cockpit.
 date: "2026-03-29"
-updated: "2026-03-31"
+updated: "2026-04-09"
 order: 9
 repoPath: apps/portfolio/content/docs/documentation/reader-repo-planner-embed-architecture.mdx
 taskPhase: documentation-site-08
 ---
 
-# Reader shell + Repo Planner embed architecture
+# Reader shell + planning artifacts (GAD era)
 
-**Intent:** Treat **`@portfolio/repub-builder`** (reader **shell** + EPUB runtime) and **`repo-planner`** (Planning **cockpit** UI) as **libraries structured for reuse**. **v1:** the **only** consumer of the reader runtime is **`apps/portfolio`** (**`BOOKS-READER-V1-PORTFOLIO-HOST-ONLY`**); third-party embed docs and API stability can follow once the shell ships. The **portfolio** remains the **host** that wires env, routes, and **second entry points** (e.g. docs file-tree context menu) into the **same** cockpit experience the reader uses.
+**Supersedes:** Earlier drafts described a **shared Repo Planner cockpit** inside the reader (`renderPlanningCockpit`, `RepoPlannerCockpitClient`). That path is **removed** from the portfolio app (2026-04). **GAD** is the planning loop (**`gad`**, `.planning/` files, compiled docs); the site **Planning pack** modal handles **downloads / ZIPs** for visitors.
 
-This page complements [Route conventions](/docs/documentation/route-conventions), [Repo Planner -- Planning docs](/docs/repo-planner/planning/planning-docs), and [books task registry](/docs/books/planning/task-registry) phase **`books-reader-03`**.
+**Intent:** **`@portfolio/repub-builder`** owns the **reader shell** + EPUB runtime. The portfolio host wires **nav**, **persistence**, and optional **`renderReaderModal`** — it does **not** pass a planning cockpit today. **v1 consumer** remains **`apps/portfolio`** only (**`BOOKS-READER-V1-PORTFOLIO-HOST-ONLY`**).
+
+This page complements [Route conventions](/docs/documentation/route-conventions), [Repo Planner planning docs](/docs/repo-planner/planning/planning-docs) (archive / migration), and [books task registry](/docs/books/planning/task-registry).
 
 ## Reader workspace -- locked product choices
 
@@ -28,7 +30,7 @@ Aligned with [books -- decisions](/docs/books/planning/decisions): **`BOOKS-READ
 | **Theme** | **Bundled** in package; **ember/ink** reader chrome (**persisted**) |
 | **Routing** | **Query params** for v1; path-based reader URLs **later** |
 | **shadcn** | **Allowed** inside **repub-builder** for dashboard primitives; peer vs bundle in RFC (**`books-reader-03-01`**) |
-| **Planning strip** | **`ReaderPlanningStrip`** lives **inside** the **repub-builder** reader workspace (same package as **`ReaderWorkspace`**). It uses **`readerModalStore`** + **`ReaderModalRoot`** to open the shared cockpit body -- **no** portfolio **`renderPlanningStrip`** wrapper and **no** global **`useModalStore`** on the strip (**`BOOKS-READER-PLANNING-STRIP-PACKAGE-READER-MODAL-STORE`**) |
+| **In-reader modal** | **`ReaderModalRoot`** + optional host **`renderReaderModal`** — portfolio **omits** both for planning; no planning strip or cockpit in the default reader |
 
 ## Book-scoped planning packs vs site built-in packs
 
@@ -37,13 +39,13 @@ Aligned with [books -- decisions](/docs/books/planning/decisions): **`BOOKS-READ
 | Source | Role |
 | --- | --- |
 | **Per-book EPUB / repub artifact** | **Canonical** planning material for **that title** when the user is reading a **repo-built** book. Produced at build time from the manuscript folder plus **`epubPlanningDirs`** in `book.json` (or CLI **`repub epub <book-folder> --planning <dir>`** repeated per tree). Content is already **inside the EPUB** as **planning supplement** appendix XHTML (not TOC entries) — see [books planning-docs](/docs/books/planning/planning-docs). |
-| **Site `public/planning-embed/builtin-packs.json`** | Loaded **only** outside the reader planning modal: **`/apps/repo-planner`** and the **global** `RepoPlannerModal` (**`loadSiteBuiltinPacks`** default **`true`**). **Reader workspace** passes **`loadSiteBuiltinPacks={false}`** — **no** site built-in packs in that cockpit; only **book workspace** packs (**`books-reader-04`**) belong there. |
+| **Site `public/planning-embed/builtin-packs.json`** | Consumed by the **Planning pack** site modal and embed builders — **not** by an in-reader cockpit. |
 
-**Shipped (`books-reader-04`):** **`EpubViewer`** reports loaded bytes to **`ReaderWorkspace`**; **`ReaderModalRoot`** passes them into **`renderPlanningCockpit`**. **`RepoPlannerCockpitClient`** runs **`extractPlanningPackFromEpub`** (manifest at **`META-INF/portfolio-planning-pack.json`**, else **`OEBPS/plan-*.xhtml`** fallback) and prefers that pack (**id** `book-<slug>-planning`). **`public/planning-embed/book-packs/<slug>.json`** remains an **optional fallback** (regenerate with **`pnpm planning:embed-book-pack`** only when needed — not part of default **`dev`/`build`**). Spec: [books — EPUB planning pack manifest](/docs/books/planning/plans/books-reader-04-epub-planning-pack).
+**Artifacts (`books-reader-04`):** Built books can still embed planning supplements in the EPUB (manifest **`META-INF/portfolio-planning-pack.json`**, **`OEBPS/plan-*.xhtml`** fallback). **`@portfolio/repub-builder/planning-pack`** exposes **`extractPlanningPackFromEpub`** for **hosts that choose** to wire downloads or a custom modal; the **portfolio reader does not** mount **`RepoPlannerCockpitClient`**. Optional **`public/planning-embed/book-packs/<slug>.json`** — **`pnpm planning:embed-book-pack`**. Spec: [books — EPUB planning pack manifest](/docs/books/planning/plans/books-reader-04-epub-planning-pack).
 
 ## Repub file (formal reading artifact) -- target
 
-Today the CLI already distinguishes **RichEPub** (`.repub` via **`repub build`**) from **EPUB3** (via **`repub epub`**). The **direction** is to treat the **portfolio reading unit** for a built title as a **repub reading bundle** (working name **repub file**): at minimum **EPUB3** plus a declared set of **embedded planning supplements** and **author annotations** merged at build time. The **reader workspace** should **discover** that bundle when loading **`/books/<slug>/book.epub`** (or a future **`.repub`** drop-in) and feed **cockpit + annotations** from the same artifact — not from unrelated site docs URLs.
+Today the CLI already distinguishes **RichEPub** (`.repub` via **`repub build`**) from **EPUB3** (via **`repub epub`**). The **direction** is to treat the **portfolio reading unit** for a built title as a **repub reading bundle** (working name **repub file**): at minimum **EPUB3** plus **embedded planning supplements** and **author annotations** merged at build time. The reader **loads** that artifact; any **planning UI** is optional host responsibility (downloads / future modal), not a bundled Repo Planner cockpit.
 
 Manifest: **`META-INF/portfolio-planning-pack.json`** (see spec link above). Optional sidecar JSON is still a documented optimization only.
 
@@ -51,48 +53,36 @@ Manifest: **`META-INF/portfolio-planning-pack.json`** (see spec link above). Opt
 
 ```mermaid
 flowchart TB
-  RP[repo-planner package]
   RB[repub-builder package]
   RS[Reader shell]
-  RMS[readerModalStore]
-  RCM[Shared cockpit modal body]
-  GMS[Global modalStore]
-  MR[ModalRoot]
-  DOCS[Docs context menu]
+  RMS[readerModalStore optional]
+  RMR[ReaderModalRoot optional]
+  PP[Planning pack modal site shell]
+  GAD[GAD docs + gad CLI]
   RB --> RS
   RS --> RMS
-  RS --> RCM
-  RP --> RCM
-  GMS --> MR
-  MR --> RCM
-  DOCS --> GMS
-  RMS --> RCM
+  RS --> RMR
+  PP --> GAD
 ```
 
 | Layer | Owns | Does not own |
 | --- | --- | --- |
-| **`repo-planner`** (upstream / npm) | `PlanningCockpit`, workspace chrome, assumptions about host `cn` + shadcn aliases (documented in INSTALL) | Portfolio modal store, Next `app/` routes, book-specific payloads |
-| **`@portfolio/repub-builder`** | EPUB viewer, annotations, **`ReaderWorkspace`**, **`ReaderPlanningStrip`** on **`readerModalStore`**, **top toolbar** + **inset** (shelf search, filters, DnD EPUB, or **`EpubViewer`**), **`ReaderModalRoot`**. **Site shell:** host **`SidebarProvider` / `SidebarInset`** + **`SidebarTrigger`** in the reader toolbar | Global **`useModalStore`** / **`ModalRoot`** -- **not** used by the strip; host passes **`renderPlanningCockpit`** into **`ReaderWorkspace`** |
-| **`@portfolio/app`** | **Global** `ModalRoot`, **registry** of modal ids, **docs** context actions, `transpilePackages`, env for `REPOPLANNER_PROJECT_ROOT`, API route mounting | Duplicated cockpit **business** UI -- should import **one** composed `RepoPlannerCockpitModal` (or body) from **repub-builder** or a thin **`@portfolio/planning-embed`** facade if we split later |
+| **`@portfolio/repub-builder`** | EPUB viewer, annotations, **`ReaderWorkspace`**, toolbar + inset (shelf / **`EpubViewer`**), optional **`ReaderModalRoot`** + **`renderReaderModal`** | Repo Planner cockpit; global site **`ModalRoot`** |
+| **`@portfolio/app`** | Reader host wrapper, **Planning pack** modal, GAD doc routes, `transpilePackages` / APIs until **06-03** | In-reader interactive planning cockpit (removed) |
+| **Upstream `repo-planner`** | Reference package + parsers still imported by APIs/tests during migration | Product surface on this site |
 
-## Target: one cockpit modal **body**, two **open** paths
+## Planning entry (portfolio)
 
-| Entry | Mechanism | Payload example |
-| --- | --- | --- |
-| **Reader planning strip** | **`ReaderPlanningStrip`** in **`@portfolio/repub-builder/reader`** calls **`readerModalStore.openPlanningCockpit({ ... })`**; **`ReaderModalRoot`** renders **`renderPlanningCockpit`** from the host (e.g. **`RepoPlannerCockpitClient`**) | Payload (neutral): `readingTargetId`, optional `surfaceLabel`, `quickLinks` — legacy `bookSlug` still accepted; see **`reader-book-modal-payloads`**. Cockpit **prefers** planning extracted from the **loaded EPUB**; **`/planning-embed/book-packs/<slug>.json`** is **fallback** for legacy EPUBs or failed extraction |
-| **Portfolio layout** | `useModalStore.openModal(REPO_PLANNER_MODAL_ID, payload)` -- **same** modal **body component** imported from repub-builder (or shared export) | Same payload shape; registry wrapper only supplies `onClose` + portal z-index |
-| **Docs file tree** (context menu on planning folder) | **Host** `openModal(REPO_PLANNER_MODAL_ID, { ... })` | **New:** e.g. `planningFolderPrefix: 'books/planning'` or `initialPackFromArchive: '/api/docs/archive*prefix=...'` -- *needs product decision* |
+| Entry | Mechanism |
+| --- | --- |
+| **Legacy app URL** | **[`/apps/repo-planner`](/apps/repo-planner)** → **redirect** to [GAD planning state](/docs/get-anything-done/planning/state). |
+| **Downloads** | **Planning pack** control in the site shell (starter template + site Markdown exports). |
+| **Reader workspace** | No planning modal in the default portfolio host; optional **`renderReaderModal`** remains available for **other** consumers of **`@portfolio/repub-builder`**. |
+| **Global `ModalRoot`** | No Repo Planner cockpit modal. |
 
-**Rule:** Implement **`RepoPlannerCockpitModalBody`** (name TBD) **once** -- heavy `RepoPlannerCockpitClient` + dashboard + optional book context. **Two hosts** render that body: **`RepoPlannerModal`** (portfolio **`ModalRoot`** registry) and **`ReaderModalRoot`** (subscribes to **`readerModalStore`** only). The **planning strip** is **not** a portfolio injectable slot -- it **ships with** the reader workspace and **only** talks to **`readerModalStore`**.
+## Historical note
 
-## Migration sequence (suggested)
-
-1. **Extract modal body** -- Pull inner content of today's `RepoPlannerModal` (everything below the header, or including a configurable header) into an exportable module. **Dependency direction:** that module imports `repo-planner` / `PlanningCockpitDashboard` as today, not `@/app`.
-2. **Add `readerModalStore`** in **repub-builder** (or under `src/reader/modal-store.ts`) -- same API shape as needed: `openRepoPlanner`, `close`, optional `activeId` union for future reader-only modals.
-3. **Reader shell** mounts **`ReaderModalRoot`** (small) next to workspace -- only subscribes to **`readerModalStore`**; does not replace site-wide **`ModalRoot`**.
-4. **Move `ReaderPlanningStrip`** into **repub-builder** with the workspace; replace **`useModalStore`** calls with **`readerModalStore`** (task **`books-reader-03-07`**).
-5. **Portfolio** `modal-registry` registers **`RepoPlannerModal`** that re-exports or wraps the **same body**; strip duplicate layout code from `components/modals/repo-planner/RepoPlannerModal.tsx` to a one-liner re-export if possible.
-6. **Docs** -- extend file-tree context menu with "Open in planning cockpit" -> build payload from `folderArchivePrefix` / section path; document payload contract here and in [Repo Planner planning docs](/docs/repo-planner/planning/planning-docs).
+Earlier milestones described a **shared cockpit modal** (`RepoPlannerModal`, `ReaderPlanningStrip`, `renderPlanningCockpit`). The portfolio **closed** that approach in favor of **GAD + Planning pack downloads**. **`readerModalStore` / `ReaderModalRoot`** remain in **repub-builder** for **non-planning** or third-party hosts if needed.
 
 ## Publishability checklist (both major projects)
 
@@ -111,14 +101,7 @@ flowchart TB
 | Cockpit embed + publish | [repo-planner -- `repo-planner-integration-02`](/docs/repo-planner/planning/task-registry) |
 | Host wiring + docs context menu | [documentation -- `documentation-site-08`](/docs/documentation/planning/task-registry) |
 
-## Open questions (need your answers)
+## Follow-ups (optional)
 
-1. **Store boundaries** -- **Reader planning strip:** **`readerModalStore`** only (**locked** -- **`BOOKS-READER-PLANNING-STRIP-PACKAGE-READER-MODAL-STORE`**). **Open:** whether **two** stores forever (**global** site + **reader-scoped**) for *other* modals vs one **shared** store package (heavier coupling)*
-2. **Docs folder -> cockpit** -- Should opening from a **planning** folder **preload** an uploaded "pack" from that subtree (ZIP via `/api/docs/archive`), **seed** `localStorage` workspace, or only **deep-link** to a future tab that lists "open pack from prefix"* This drives payload shape and API use.
-3. **Package split** -- If **repub-builder** must not depend on **repo-planner** (optional reader without planning), should the shared modal body live in a tiny **`@portfolio/planning-cockpit-embed`** used by both, or is **repub-builder -> peerDep `repo-planner`** acceptable*
-4. **Branding / npm scope** -- Confirm publish names: e.g. **`@magicborn/repo-planner`** and **`@magicborn/repub-builder`** vs current `@portfolio/*` private packages.
-5. **Modal stacking** -- If both reader and global modals could open (edge case), should reader modals use a **lower z-index** band than site `ModalRoot`, or is **exclusive** focus (close reader modal when opening site modal) enough*
-
----
-
-When these are decided, update [decisions](/docs/documentation/planning/decisions) with ids **`DOCUMENTATION-READER-COCKPIT-EMBED-*`** and mirror consequences under [books/decisions](/docs/books/planning/decisions) if the reader shell owns the behavior.
+- **Docs → downloads:** Whether the docs file tree should link **“Download this section’s planning export”** (ZIP / manifest) instead of any cockpit deep-link — product decision; **Planning pack** modal already covers site-wide exports.
+- **Publishability** table above remains useful for **`repub-builder`** consumers; **`repo-planner`** row is **migration-only** until **06-03** removes the dependency.

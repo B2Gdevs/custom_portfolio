@@ -6,8 +6,9 @@ import {
   parseStateXmlString,
   parseTaskRegistryXmlString,
   planningXmlParser,
-} from 'repo-planner/lib/planning-parse-core.mjs';
-import { buildPlanningWorkflowSnapshot } from 'repo-planner/lib/planning-workflow.mjs';
+} from '@/lib/planning-parse/planning-parse-core.mjs';
+import { buildPlanningWorkflowSnapshot } from '@/lib/planning-parse/planning-workflow.mjs';
+import type { PlanningWorkflowSnapshot } from '@/lib/planning-parse/planning-workflow.mjs.d.ts';
 import { getProjectRoot, getPrimaryPlanningRoot, readRepoPlannerConfig, resolvePlanningRoots } from '@/lib/repo-planner/project-root';
 
 const AGENT_LOOP_BUNDLE_FORMAT = 'planning-agent-context/1.0';
@@ -57,7 +58,7 @@ export type LivePlanningBundle = {
     agent: { id: string; name: string; phase: string; plan: string; status: string };
     tasks: Array<{ id: string; status: string; goal: string; phase: string; phaseTitle: string }>;
   }>;
-  workflow: import('repo-planner/lib/planning-workflow.mjs').PlanningWorkflowSnapshot;
+  workflow: PlanningWorkflowSnapshot;
 };
 
 function readIfExists(filePath: string): string | null {
@@ -347,6 +348,7 @@ export function buildLivePlanningBundle(): LivePlanningBundle {
       policy: {
         kickoffHoursThreshold: 6,
       },
-    }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vendor `.mjs` default import loses `.d.ts` parameter shape in Next/tsc; runtime shape matches `planning-workflow.mjs.d.ts`.
+    } as any),
   };
 }

@@ -57,8 +57,8 @@ This page is the **planning source of truth** for site URL shape. Implementation
 
 | Decision | Detail |
 | --- | --- |
-| **Coupling** | **`ReaderWorkspace`** and **`EpubViewer`** ship together from **`@portfolio/repub-builder/reader`** so hosts never embed the viewer without the surrounding workspace state (library, tabs, uploads, planning strip). |
-| **Host contract** | Portfolio passes **`ReaderLink`**, optional **`readerToolbarStart`**, **`getPlanningStripConfig`**, **`renderPlanningCockpit`**, and manifest-derived **`books`**. Built-in books now prefer `remoteEpubUrl` from the manifest when present and fall back to **`/books/<slug>/book.epub`** only for local-only authoring flows. |
+| **Coupling** | **`ReaderWorkspace`** and **`EpubViewer`** ship together from **`@portfolio/repub-builder/reader`** so hosts never embed the viewer without the surrounding workspace state (library, tabs, uploads). |
+| **Host contract** | Portfolio passes **`ReaderLink`**, optional **`readerToolbarStart`**, optional **`readerShellNavLinks`**, and manifest-derived **`books`**. No planning cockpit or strip in the default host (2026-04). Built-in books prefer `remoteEpubUrl` from the manifest when present and fall back to **`/books/<slug>/book.epub`** for local-only authoring. |
 | **Styling** | Reader chrome is **bundled Tailwind classes** in the package (**`BOOKS-READER-THEME-BUNDLED-PARITY`**); the host does not fork shelf card markup for theme — optional **`ember` / `ink`** toggle is internal to **`ReaderWorkspace`**. |
 | **shadcn** | Host-only primitives that depend on app shell context (**`SidebarTrigger`**) stay injected by the host; the package may mirror small reader-facing shadcn-style primitives locally as long as they use the same token language and do not import app-local UI files directly. |
 | **Portfolio app** | Imports the **stable public API** from that package; **`apps/portfolio`** remains the demo host, not the only consumer long term. |

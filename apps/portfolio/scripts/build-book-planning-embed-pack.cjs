@@ -10,7 +10,7 @@ const { pathToFileURL } = require("url");
 
 const SCRIPT_DIR = __dirname;
 const PORTFOLIO_ROOT = path.join(SCRIPT_DIR, "..");
-const LIB = path.join(PORTFOLIO_ROOT, "..", "..", "vendor", "repo-planner", "scripts", "lib", "embed-builtin-packs-build.mjs");
+const LIB = path.join(SCRIPT_DIR, "lib", "embed-builtin-packs-build.mjs");
 
 const BOOKS_PLANNING_DIR = path.join(PORTFOLIO_ROOT, "content", "docs", "books", "planning");
 const OUT_DIR = path.join(PORTFOLIO_ROOT, "public", "planning-embed", "book-packs");

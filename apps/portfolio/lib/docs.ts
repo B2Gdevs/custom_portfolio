@@ -72,8 +72,9 @@ const DOC_SECTION_META: Record<string, DocSectionMeta> = {
     order: 8,
   },
   'repo-planner': {
-    label: 'Repo Planner',
-    description: 'Vendored RepoPlanner CLI, submodule, local cockpit policy, and integration tasks.',
+    label: 'Repo Planner (archive)',
+    description:
+      'Legacy integration notes; planning loop and CLI work live under get-anything-done (GAD) and `/docs/get-anything-done/`.',
     order: 9,
   },
 };

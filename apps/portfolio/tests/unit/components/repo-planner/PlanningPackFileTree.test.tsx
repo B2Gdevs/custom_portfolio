@@ -2,7 +2,8 @@
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PlanningPackFileTree, type PlanningPackGalleryTab } from 'repo-planner/planning-pack';
+import { PlanningPackFileTree } from '@/components/planning/PlanningPackFileTree';
+import type { PlanningPackGalleryTab } from '@/lib/planning-pack-types';
 
 describe('PlanningPackFileTree', () => {
   beforeEach(() => {
@@ -25,7 +26,7 @@ describe('PlanningPackFileTree', () => {
       {
         id: 'starter-template',
         label: 'Starter template',
-        description: 'RepoPlanner init pack for starting a planning tree.',
+        description: 'GAD-shaped starter files for a new `.planning` tree.',
         mode: 'sections',
         items: [
           {
@@ -59,7 +60,7 @@ describe('PlanningPackFileTree', () => {
       />,
     );
 
-    expect(screen.getByText('RepoPlanner init pack for starting a planning tree.')).toBeInTheDocument();
+    expect(screen.getByText('GAD-shaped starter files for a new `.planning` tree.')).toBeInTheDocument();
     expect(screen.getByText('Init pack (.planning)')).toBeInTheDocument();
     expect(screen.getByText('.planning')).toBeInTheDocument();
     expect(

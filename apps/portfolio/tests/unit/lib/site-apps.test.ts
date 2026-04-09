@@ -33,19 +33,19 @@ describe('site app records bootstrap', () => {
         ok: true,
         apps: [
           {
-            id: 'repo-planner',
-            title: 'Repo Planner',
-            href: '/apps/repo-planner',
+            id: 'get-anything-done',
+            title: 'get-anything-done (GAD)',
+            href: '/docs/get-anything-done/planning/state',
             description: 'Live from Payload.',
             iconName: 'terminal',
-            cta: 'Open Repo Planner',
-            supportHref: '/docs/repo-planner/planning/planning-docs',
-            supportLabel: 'Repo Planner docs',
+            cta: 'Open GAD planning state',
+            supportHref: '/docs/get-anything-done/planning/roadmap',
+            supportLabel: 'GAD roadmap',
             supportText: 'Read-only by default.',
             downloads: [
               {
-                href: '/api/site-download-assets/file/repo-planner.zip',
-                label: 'Download repo planner bundle',
+                href: '/api/site-download-assets/file/get-anything-done.zip',
+                label: 'Download GAD bundle',
                 kind: 'download',
                 external: false,
               },
@@ -58,12 +58,12 @@ describe('site app records bootstrap', () => {
 
     await expect(getSiteApps()).resolves.toEqual([
       expect.objectContaining({
-        id: 'repo-planner',
+        id: 'get-anything-done',
         description: 'Live from Payload.',
         downloads: [
           expect.objectContaining({
-            href: '/api/site-download-assets/file/repo-planner.zip',
-            label: 'Download repo planner bundle',
+            href: '/api/site-download-assets/file/get-anything-done.zip',
+            label: 'Download GAD bundle',
           }),
         ],
       }),

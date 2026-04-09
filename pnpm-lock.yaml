@@ -116,6 +116,9 @@ importers:
       drizzle-orm:
         specifier: ^0.45.1
         version: 0.45.1(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(better-sqlite3@12.6.2)(gel@2.2.0)(pg@8.16.3)
+      fast-xml-parser:
+        specifier: ^5.5.9
+        version: 5.5.9
       flags:
         specifier: ^4.0.6
         version: 4.0.6(@opentelemetry/api@1.9.0)(next@16.0.8(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-macros@3.1.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -209,9 +212,6 @@ importers:
       remark-gfm:
         specifier: ^4.0.1
         version: 4.0.1
-      repo-planner:
-        specifier: file:../../vendor/repo-planner
-        version: file:vendor/repo-planner(181b5789dd52b5129fd46d30ce971ae7)
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
@@ -9325,30 +9325,6 @@ packages:
 
   remark@15.0.1:
     resolution: {integrity: sha512-Eht5w30ruCXgFmxVUSlNWQ9iiimq07URKeFS3hNc8cUWy1llX4KDWfyEDZRycMc+znsN9Ux5/tJ/BFdgdOwA3A==}
-
-  repo-planner@file:vendor/repo-planner:
-    resolution: {directory: vendor/repo-planner, type: directory}
-    engines: {node: '>=22.0.0'}
-    hasBin: true
-    peerDependencies:
-      '@assistant-ui/react': '*'
-      '@assistant-ui/react-ui': '*'
-      '@base-ui/react': '>=1'
-      lucide-react: '*'
-      motion: '*'
-      next: 16.0.8
-      react: '>=18'
-      react-dom: '>=18'
-      react-markdown: '*'
-      recharts: '*'
-      zod: '*'
-    peerDependenciesMeta:
-      '@assistant-ui/react':
-        optional: true
-      '@assistant-ui/react-ui':
-        optional: true
-      motion:
-        optional: true
 
   require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
@@ -20871,23 +20847,6 @@ snapshots:
       unified: 11.0.5
     transitivePeerDependencies:
       - supports-color
-
-  repo-planner@file:vendor/repo-planner(181b5789dd52b5129fd46d30ce971ae7):
-    dependencies:
-      '@base-ui/react': 1.3.0(@types/react@19.2.14)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      fast-xml-parser: 5.5.9
-      jszip: 3.10.1
-      lucide-react: 0.559.0(react@19.2.1)
-      next: 16.0.8(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-macros@3.1.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4)
-      react: 19.2.1
-      react-dom: 19.2.1(react@19.2.1)
-      react-markdown: 10.1.0(@types/react@19.2.14)(react@19.2.1)
-      recharts: 3.8.1(@types/react@19.2.14)(react-dom@19.2.1(react@19.2.1))(react-is@18.3.1)(react@19.2.1)(redux@5.0.1)
-      zod: 4.3.6
-    optionalDependencies:
-      '@assistant-ui/react': 0.12.21(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(immer@11.1.4)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(use-sync-external-store@1.6.0(react@19.2.1))
-      '@assistant-ui/react-ui': 0.2.1(@assistant-ui/react-markdown@0.12.7(@assistant-ui/react@0.12.21(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(immer@11.1.4)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(use-sync-external-store@1.6.0(react@19.2.1)))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(@assistant-ui/react@0.12.21(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(immer@11.1.4)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(use-sync-external-store@1.6.0(react@19.2.1)))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(immer@11.1.4)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(use-sync-external-store@1.6.0(react@19.2.1))
-      motion: 12.38.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
 
   require-directory@2.1.1: {}
 

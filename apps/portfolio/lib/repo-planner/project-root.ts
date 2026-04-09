@@ -179,16 +179,6 @@ export function getProjectRoot(): string {
   return path.resolve(process.cwd(), raw);
 }
 
-export function getCliPath(): string {
-  const root = getProjectRoot();
-  const explicit = process.env.REPOPLANNER_CLI_PATH;
-  if (explicit) {
-    return path.resolve(root, explicit);
-  }
-
-  return path.join(root, 'vendor', 'repo-planner', 'scripts', 'loop-cli.mjs');
-}
-
 export function getRepoPlannerConfigPath(): string {
   const root = getProjectRoot();
   const resolved = resolveGadConfigPath(root);
@@ -311,12 +301,3 @@ export function getReportsDir(): string {
   return path.join(root, DEFAULT_REPORTS_DIR);
 }
 
-/** Env for `spawn` of `loop-cli.mjs` — pins project root and keeps reports external to `.planning/`. */
-export function getRepoPlannerChildEnv(): NodeJS.ProcessEnv {
-  const root = getProjectRoot();
-  return {
-    ...process.env,
-    REPOPLANNER_PROJECT_ROOT: root,
-    REPOPLANNER_REPORTS_DIR: getReportsDir(),
-  };
-}

@@ -22,11 +22,7 @@
       "@magicborn/cli/vendor-registry": [
         "../../packages/magicborn-cli/src/vendor-registry.ts"
       ],
-      "@/vendor/repo-planner/*": ["../../vendor/repo-planner/*"],
-      "@/components/ui/*": [
-        "./components/ui/*",
-        "../../vendor/repo-planner/components/ui/*"
-      ],
+      "@/components/ui/*": ["./components/ui/*"],
       "@/hooks/*": ["./hooks/*"],
       "@/*": ["./*"],
       "@payload-config": ["./payload.config.ts"],

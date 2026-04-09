@@ -4,7 +4,7 @@ import { ArrowRight, Github } from 'lucide-react';
 const YOUTUBE_ID = 'MppKHh_MfFc';
 const MB_GSD_FORK = 'https://github.com/MagicbornStudios/get-shit-done';
 const GSD_UPSTREAM = 'https://github.com/gsd-build/get-shit-done';
-const REPO_PLANNER = 'https://github.com/MagicbornStudios/RepoPlanner';
+const GAD_REPO = 'https://github.com/MagicbornStudios/get-anything-done';
 
 export default function HumanLoopPlanningSection() {
   return (
@@ -33,14 +33,14 @@ export default function HumanLoopPlanningSection() {
             </a>{' '}
             approach to context and spec-driven work—we do not ship the full GSD stack, but we track the ecosystem and fold in what fits{' '}
             <a
-              href={REPO_PLANNER}
+              href={GAD_REPO}
               className="text-accent underline-offset-4 hover:underline"
               rel="noopener noreferrer"
               target="_blank"
             >
-              RepoPlanner
+              get-anything-done (GAD)
             </a>
-            , our planning loop, CLI, and docs-site tooling.
+            : skills, `gad` CLI, and planning files compiled into these docs.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -63,10 +63,10 @@ export default function HumanLoopPlanningSection() {
               gsd-build / upstream
             </a>
             <Link
-              href="/apps/repo-planner"
+              href="/docs/get-anything-done/planning/state"
               className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-dark-elevated px-5 py-3 text-sm font-medium text-primary transition-colors hover:border-accent hover:text-accent"
             >
-              Repo Planner app
+              GAD planning state
               <ArrowRight size={16} aria-hidden />
             </Link>
           </div>

@@ -225,8 +225,8 @@
       </commands>
       <depends>06-01</depends>
     </task>
-    <task id="06-03" agent-id="" status="in-progress">
-      <goal>RepoPlanner → GAD migration: `skills/rp-*` and `.claude/skills/rp-*` are thin stubs to `vendor/get-anything-done/skills/`; policy and history in `.planning/REPOPLANNER-TO-GAD-MIGRATION-GAPS.md` (upstream RepoPlanner: `main` = pre-skills framework; `development` = skills-era line). **Remaining:** remove `repo-planner` from apps/portfolio (re-exports, planning-state APIs, live-bundle), migrate to GAD-backed flows; update docs IA and site registry; archive upstream RepoPlanner read-only when imports are gone. **UI track (planned):** rebuild portfolio planning cockpit/embed components in `vendor/get-anything-done` and import from submodule; `/docs` already GAD-shaped — replace RP-framed embeds. Discuss package boundary, phased scope, data contract, and verification checklist before implementation — see `REPOPLANNER-TO-GAD-MIGRATION-GAPS.md` §2a and `/docs/repo-planner/planning/planning-docs` (GAD-native cockpit rebuild).</goal>
+    <task id="06-03" agent-id="" status="done">
+      <goal>DONE (2026-04-08): Portfolio decoupled from `vendor/repo-planner` imports — `lib/planning-parse/*.mjs` + `scripts/lib/embed-builtin-packs-build.mjs` forked in-app; removed re-export shims and vendor-only unit tests; `planning-cli/run` returns 501; vitest/tsconfig dropped `@/vendor/repo-planner`. Submodule remains archived in-tree for history, `install-routes` dry-run test, and root legacy `loop-cli` until GAD ports init/embed. Optional follow-up: call `gad snapshot --json` for live bundle; GAD-native operator UI remains research (§2a).</goal>
       <keywords>repo-planner,removal,gad,migration,archive,skills,gad-ui,embed</keywords>
       <commands>
         <command>pnpm run lint</command>

@@ -6,7 +6,7 @@ export type MinimalTemplateFile = {
 export function getMinimalPlanningTemplateFiles(): MinimalTemplateFile[] {
   const requirementsMd = `# Requirements (monorepo)
 
-This is the repo-root requirements stub for a minimal RepoPlanner bootstrap.
+This is the repo-root requirements stub for a minimal **GAD-shaped** \`.planning/\` bootstrap (XML + loop files).
 
 - Keep narrative requirements at the repository root.
 - Keep machine-readable planning files under \`.planning/\`.

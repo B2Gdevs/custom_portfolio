@@ -50,29 +50,29 @@ Decision **06-01** allows **narrow** maintenance so the public reference site ke
 
 ## 2. Portfolio app (`apps/portfolio`)
 
-Heavy **`repo-planner`** npm dependency (`file:../../vendor/repo-planner`):
+**`repo-planner` npm package:** **removed** from `apps/portfolio/package.json` (2026-04). The **submodule** `vendor/repo-planner` stays **archived in-tree** (history, optional manual use, `install-routes.mjs` dry-run in tests) — the **app does not import** it.
 
-- **Embedded cockpit:** `RepoPlannerCockpitClient`, `PlanningCockpit`, pack modal, `/apps/repo-planner` — React bundle from RP package.
-- **APIs:** `planning-state`, `planning-cli/run` (spawns `loop-cli`), `planning-metrics`, `planning-reports/latest`, `planning-templates/minimal` — wired through `@/lib/repo-planner/*` (re-exports of `vendor/repo-planner/lib/*`).
-- **Live bundle:** `buildLivePlanningBundle` uses RP **`planning-parse-core`** + **`planning-workflow.mjs`** for the agent-loop JSON shape.
+- **Planning UI (portfolio):** **Removed** `RepoPlannerCockpitClient`. Visitor-facing planning is **Planning pack** modal + **GAD** docs. **`/apps/repo-planner`** redirects to GAD planning state. **No** `transpilePackages: ['repo-planner']`.
+- **APIs:** `planning-state`, `planning-metrics`, `planning-reports/latest`, `planning-templates/minimal` — `@/lib/repo-planner/*` + in-app **`lib/planning-parse/*.mjs`** (forked from upstream). **`POST /api/planning-cli/run`** returns **501** (use **`gad`** locally).
+- **Live bundle:** `buildLivePlanningBundle` uses **`apps/portfolio/lib/planning-parse/planning-parse-core.mjs`** + **`planning-workflow.mjs`**.
 
-**Gap:** Replace live-bundle and cockpit data path with **GAD-backed** parsers + a single JSON contract (or call `gad` with `--json` from server where appropriate). Large UI effort if we keep a visual cockpit.
+**Optional later:** Swap live-bundle to **`gad snapshot --json`** (or similar) so XML parsing is not duplicated in the app. **No** requirement to ship a visual cockpit in the portfolio.
 
-### 2a. GAD-owned React components (planned — discuss + define “done”)
+### 2a. Optional GAD-owned UI (research — not blocking 06-03)
 
-**Intent:** Rebuild the portfolio’s planning **UI** (today imported from `repo-planner/host` — see [Repo Planner planning docs](/docs/repo-planner/planning/planning-docs), section **GAD-native cockpit rebuild**) **inside `vendor/get-anything-done`**, then **`apps/portfolio`** imports from that submodule only. **`/docs`** planning content is already GAD-oriented; this work **replaces** embeds and host glue still tied to the RepoPlanner package, in **GAD’s** repo layout and conventions.
+**Default product:** Planning **downloads** (**Planning pack** modal) + **`gad` CLI** + docs — already true after removing **`RepoPlannerCockpitClient`**.
 
-**Discuss before implementation:** package boundary (`packages/*` vs `site/`), phased rollout (read-only vs parity with current cockpit), server contract (`gad` JSON vs in-process parsers), and branding/IA updates.
+**If** a future operator UI is justified, it would be authored **GAD-first** (e.g. under **`vendor/get-anything-done`**). See [Repo Planner planning docs](/docs/repo-planner/planning/planning-docs) section **Shipped stance: downloads + CLI**.
 
-**Success (draft — refine with checklist in planning-docs):** no `repo-planner` import for the shipped planning UI route(s); build/lint green; tests and operator docs updated; removal of `transpilePackages: ['repo-planner']` when the dependency is gone.
+**Success for 06-03:** no **`repo-planner`** npm dependency; no cockpit UI; no **`@/vendor/repo-planner`** imports in **`apps/portfolio`**. Submodule may remain archived until root legacy scripts drop **`loop-cli`** entirely.
 
 ---
 
 ## 3. Documentation & IA
 
 - Entire **`/docs/repo-planner`** tree (getting-started, decisions, archived hand-authored planning).
-- Blog and **HumanLoopPlanningSection** still link **RepoPlanner on GitHub** and `/apps/repo-planner`.
-- **`lib/docs.ts`** and **site apps** registry describe “RepoPlanner” as a first-class product.
+- Some **blog** / archived rows may still mention Repo Planner; **HumanLoopPlanningSection** and **site apps** fallback now point at **GAD** where updated.
+- **`lib/docs.ts`** **`repo-planner`** section is labeled archive.
 
 **Gap:** Rename IA to **GAD** where accurate, redirect old URLs, archive RP-specific tutorials into a historical section.
 
@@ -97,17 +97,17 @@ Contains **`scripts/loop-cli.mjs`** (large), **`lib/planning-parse-core`**, **`p
 
 ## 6. Tests
 
-Many **`apps/portfolio/tests/unit/lib/repo-planner-*.test.ts`** and vitest alias **`@/vendor/repo-planner`**.
+Remaining **`repo-planner-*.test.ts`** files cover **`live-bundle`**, **`project-root`**, **`install-routes`** (vendor script dry-run), **minimal template** — no vitest alias to **`vendor/repo-planner`**.
 
-**Gap:** Replace with GAD integration tests (`gad snapshot`, `gad refs verify`) and slim adapters.
+**Gap (optional):** Add GAD integration tests (`gad snapshot`, `gad refs verify`) alongside these unit tests.
 
 ---
 
 ## 7. Misc references
 
 - **`next.config.ts`** / **`REPOPLANNER_PROJECT_ROOT`** — env contract for RP child processes.
-- **Reader / books:** `RepoPlannerCockpitClient`, builtin packs — product naming still says “Repo Planner” in places.
-- **Vitest / path aliases** pointing at `vendor/repo-planner`.
+- **Reader / books:** Host does **not** pass `renderReaderModal` / planning cockpit; EPUB planning supplements remain an **artifact** story (download / embedded pack), not a live UI. Naming cleanup still open in books copy where it says “Repo Planner.”
+- ~~**Vitest / path aliases** pointing at `vendor/repo-planner`.~~ **Removed** from `apps/portfolio` vitest config (2026-04).
 
 ---
 
@@ -116,7 +116,7 @@ Many **`apps/portfolio/tests/unit/lib/repo-planner-*.test.ts`** and vitest alias
 1. **CLI:** Add GAD equivalents for **embed-pack** and **minimal init** (or document one-time manual steps), then switch root `planning:*` scripts off `loop-cli`.
 2. **Agents:** Prefer **`gad snapshot`** everywhere; mark `pnpm planning:snapshot` deprecated.
 3. **Portfolio APIs:** Swap `buildLivePlanningBundle` inputs to GAD-owned parsers or `gad --json` subprocess (cache carefully).
-4. **UI:** Rebuild cockpit/embed React in **`get-anything-done`**; portfolio imports from submodule (see §2a and [planning-docs](/docs/repo-planner/planning/planning-docs) — **GAD-native cockpit rebuild**). Optionally rename route to “Planning” + GAD branding; define verification checklist before coding.
+4. **UI:** **Default product stance:** no rich cockpit — **files + zips** (`PlanningPackModal`, `gad`, docs sink). If a future operator UI ships, it should live under **GAD** (see §2a); portfolio stays a thin host. §2a “cockpit rebuild” is **optional / research**, not required for **06-03** closure.
 5. **Docs & skills:** Deprecate RP naming; **`rp-*` → `gad-*`** skill migration.
 6. **Vendor:** Shrink **`repo-planner`** to a compatibility layer or remove submodule when imports hit zero.
 

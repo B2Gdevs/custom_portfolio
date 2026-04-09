@@ -1,5 +1,6 @@
-import { RepoPlannerAppPage } from '@/components/apps/RepoPlannerAppPage';
+import { redirect } from 'next/navigation';
 
-export default function AppsRepoPlannerPage() {
-  return <RepoPlannerAppPage />;
+/** Legacy URL: planning loop is GAD; send visitors to compiled planning state. */
+export default function RepoPlannerLegacyRedirectPage() {
+  redirect('/docs/get-anything-done/planning/state');
 }

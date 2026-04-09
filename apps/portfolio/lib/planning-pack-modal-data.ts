@@ -4,10 +4,11 @@ import type {
   PlanningPackGalleryTab,
   PlanningPackItem,
   PlanningPackManifest,
-} from 'repo-planner/planning-pack';
+} from '@/lib/planning-pack-types';
 
 const STARTER_TEMPLATE_TAB_ID = 'starter-template';
 const SITE_PACKS_TAB_ID = 'site-planning-packs';
+/** Legacy id in `builtin-packs.json` (GAD-shaped starter .planning scaffold). */
 const INIT_PACK_ID = 'rp-builtin-init';
 
 function slugify(value: string) {
@@ -88,9 +89,9 @@ export function buildPlanningPackGalleryTabs(input: {
   return [
     {
       id: STARTER_TEMPLATE_TAB_ID,
-      label: 'Starter Planning Pack',
+      label: 'GAD starter template',
       icon: '📦',
-      description: '',
+      description: 'Embedded `.planning`-shaped starter files for get-anything-done.',
       items: starterItems,
       mode: 'sections',
       emptyMessage:
@@ -98,12 +99,12 @@ export function buildPlanningPackGalleryTabs(input: {
     },
     {
       id: SITE_PACKS_TAB_ID,
-      label: 'Site Planning Packs',
+      label: 'Site Markdown exports',
       icon: '📦',
-      description: '',
+      description: 'Build-time exports from section planning MDX (`/planning-pack/site/` + manifest).',
       items: siteItems,
       mode: 'collapsible-sections',
-      emptyMessage: 'This site has no published planning packs yet.',
+      emptyMessage: 'This site has no published planning pack exports yet.',
     },
   ];
 }

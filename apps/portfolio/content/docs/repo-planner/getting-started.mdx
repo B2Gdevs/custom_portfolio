@@ -90,7 +90,7 @@ When another app embeds RepoPlanner, the required contract should be explicit:
 | `Tailwind` | include vendored or installed RepoPlanner source in content scanning |
 | `CSS` | import `repo-planner/planning.css` once |
 | `Imports` | use package subpaths such as `repo-planner`, `repo-planner/host`, `repo-planner/planning-pack`, and `repo-planner/cockpit-host-context` |
-| `Utilities` | RepoPlanner ships its own `cn` helper and package-local primitives; hosts should not rely on `@/vendor/repo-planner` or app-local utility aliases for package internals |
+| `Utilities` | RepoPlanner ships its own `cn` helper and package-local primitives; hosts should not alias into package internals from the app tree |
 | `Host APIs` | provide state / metrics / latest-report routes and point them at the configured planning root |
 
 The vendored upstream docs for this live in [INSTALL.md](https://github.com/MagicbornStudios/RepoPlanner/blob/main/INSTALL.md).
@@ -195,22 +195,20 @@ CLI usage and generated reports default to `.planning-reports/` at the repo root
 3. Point it at this repository with `REPOPLANNER_PROJECT_ROOT=/absolute/path/to/custom_portfolio`.
 4. Edit in the cockpit, export, and commit from git.
 
-## Embedded cockpit on this site
+## Planning surfaces on this site (GAD-first)
 
-[`/apps/repo-planner`](/apps/repo-planner) mounts the vendored UI with read-only server defaults: GET routes may read committed `.planning/`; `POST /api/planning-edits/apply` and `POST /api/planning-cli/run` return `403` unless `PLANNING_COCKPIT_ALLOW_SERVER_WRITES=1`. No portfolio-hosted planning LLM. Treat **Pack** and **Live** as explicit, distinct modes so labels and empty states stay honest.
+**Product stance:** Planning is **files** — Markdown/XML in `.planning/`, **`gad` CLI**, compiled **docs**, and the site **Planning pack** control (modal) for **downloads and ZIPs**. We do **not** ship an in-app interactive cockpit that parses and edits live planning JSON for visitors.
 
-| Piece | Location |
+| Piece | Location / behavior |
 | --- | --- |
-| Route | `apps/portfolio/app/apps/repo-planner/page.tsx` |
-| Client | `apps/portfolio/components/repo-planner/RepoPlannerCockpitClient.tsx` |
-| Package | `apps/portfolio/package.json` -> `"repo-planner": "file:../../vendor/repo-planner"` |
-| Transpile + env | `next.config.ts` -> `transpilePackages`, `REPOPLANNER_PROJECT_ROOT`, `REPOPLANNER_REPORTS_DIR` |
-| APIs | `app/api/planning-*` + `lib/repo-planner/` |
+| **Legacy route** | [`/apps/repo-planner`](/apps/repo-planner) → **redirect** to [`/docs/get-anything-done/planning/state`](/docs/get-anything-done/planning/state) |
+| **Downloads UI** | **Planning pack** modal — `components/modals/planning-pack/`, `lib/planning-pack-*` (no `repo-planner` barrel for this path) |
+| **Vendor submodule** | `vendor/repo-planner` — **archived** in-tree only (history, optional manual CLI); **not** imported by `@portfolio/app` |
+| **Parse + workflow in app** | `apps/portfolio/lib/planning-parse/` (copied from upstream when archived) |
+| **Transpile + env** | `next.config.ts` → `REPOPLANNER_PROJECT_ROOT`, `REPOPLANNER_REPORTS_DIR` defaults |
+| **APIs** | `app/api/planning-*` + `lib/repo-planner/` — migration in progress; see [Global planning](/docs/global/planning/task-registry) **06-03** |
 
-Pack mode now supports two upload behaviors:
-
-- `Import` creates an editable local pack persisted in browser storage.
-- `Preview upload` opens a read-only ephemeral pack JSON or `.planning` zip with no production write path and no saved browser workspace mutation.
+Standalone **RepoPlanner** upstream remains a **reference** for anyone who wants the full vendored workspace UI locally; this portfolio no longer mounts that client.
 
 ## Further reading
 

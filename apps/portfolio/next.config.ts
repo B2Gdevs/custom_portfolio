@@ -11,7 +11,7 @@ import type { NextConfig } from 'next';
 
 const portfolioRoot = path.resolve(__dirname);
 
-/** Monorepo root (`.planning/` + `vendor/repo-planner`). Required for RepoPlanner API routes + CLI. */
+/** Monorepo root (`.planning/`). Required for planning API routes + `REPOPLANNER_*` env defaults. */
 const monorepoRoot = path.resolve(__dirname, '../..');
 if (process.env.REPOPLANNER_PROJECT_ROOT === undefined) {
   process.env.REPOPLANNER_PROJECT_ROOT = monorepoRoot;
@@ -62,12 +62,7 @@ const nextConfig: NextConfig = {
     '/admin/**/*': [...payloadAdapterTraceIncludes],
   },
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-  transpilePackages: [
-    'repo-planner',
-    '@portfolio/repub-builder',
-    '@tldraw/tldraw',
-    'tldraw',
-  ],
+  transpilePackages: ['@portfolio/repub-builder', '@tldraw/tldraw', 'tldraw'],
   async redirects() {
     return [
       { source: '/docs/tools', destination: '/apps', permanent: false },

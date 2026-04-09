@@ -25,10 +25,10 @@ describe('payload-cli-generate', () => {
   });
 
   it('builds body from fallback registry', () => {
-    const body = siteAppRecordFromFallback('repo-planner');
+    const body = siteAppRecordFromFallback('get-anything-done');
     expect(body).toMatchObject({
-      slug: 'repo-planner',
-      title: 'Repo Planner',
+      slug: 'get-anything-done',
+      title: 'get-anything-done (GAD)',
       published: true,
     });
   });

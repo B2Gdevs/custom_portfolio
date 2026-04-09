@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
-import {
-  type BuiltinEmbedPacksPayload,
-  PlanningPackFileTree,
-  type PlanningPackGalleryTab,
-  type PlanningPackManifest,
-} from 'repo-planner/planning-pack';
+import { PlanningPackFileTree } from '@/components/planning/PlanningPackFileTree';
+import type {
+  BuiltinEmbedPacksPayload,
+  PlanningPackGalleryTab,
+  PlanningPackManifest,
+} from '@/lib/planning-pack-types';
 import type { ModalShellProps } from '@/lib/modal-types';
 import { errorMessageOrFallback } from '@/lib/unknown-error';
 import { buildPlanningPackGalleryTabs } from '@/lib/planning-pack-modal-data';
@@ -95,19 +95,24 @@ export function PlanningPackModal({ onClose }: ModalShellProps) {
       >
         <header className="flex items-start justify-between gap-4 border-b border-border/80 px-5 py-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-text-muted">Planning packs</p>
-            <h2 className="font-display text-2xl text-primary">Example planning packs</h2>
+            <p className="text-xs uppercase tracking-[0.2em] text-text-muted">Planning pack</p>
+            <h2 className="font-display text-2xl text-primary">GAD exports & starter template</h2>
             <p className="mt-1 max-w-lg text-sm text-text-muted">
-              RepoPlanner starter files and exported site packs. See{' '}
+              Browse and download a GAD-shaped starter scaffold plus this site&apos;s Markdown exports. Live planning
+              state lives under{' '}
+              <a href="/docs/get-anything-done/planning/state" className="text-accent hover:underline">
+                get-anything-done — planning state
+              </a>
+              . Upstream methodology:{' '}
               <a
-                href="https://github.com/MagicbornStudios/RepoPlanner"
+                href="https://github.com/MagicbornStudios/get-anything-done"
                 target="_blank"
                 rel="noreferrer"
                 className="text-accent hover:underline"
               >
-                RepoPlanner on GitHub
-              </a>{' '}
-              for the upstream project.
+                get-anything-done on GitHub
+              </a>
+              .
             </p>
           </div>
           <button
