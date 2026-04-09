@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { X } from 'lucide-react';
 import { PlanningPackFileTree } from '@/components/planning/PlanningPackFileTree';
 import type {
@@ -100,9 +101,9 @@ export function PlanningPackModal({ onClose }: ModalShellProps) {
             <p className="mt-1 max-w-lg text-sm text-text-muted">
               Browse and download a GAD-shaped starter scaffold plus this site&apos;s Markdown exports. Live planning
               state lives under{' '}
-              <a href="/docs/get-anything-done/planning/state" className="text-accent hover:underline">
+              <Link href="/docs/get-anything-done/planning/state" className="text-accent hover:underline">
                 get-anything-done — planning state
-              </a>
+              </Link>
               . Upstream methodology:{' '}
               <a
                 href="https://github.com/MagicbornStudios/get-anything-done"
