@@ -1,10 +1,10 @@
 import { coerceUnknownToString as asString } from '@/lib/coerce-unknown-to-string';
-import { unknownErrorMessageWithStack } from '@/lib/unknown-error';
+import { unknownErrorMessage, unknownErrorMessageWithStack } from '@/lib/unknown-error';
 import { getPayloadClient } from '@/lib/payload';
-import { FALLBACK_SITE_APPS, type SiteAppRecord, type SiteAppRecordDoc } from '@/lib/site-app-registry';
+import { type SiteAppRecord, type SiteAppRecordDoc } from '@/lib/site-app-registry';
 import { toSiteAppRecord } from '@/lib/site-app-mapper';
 
-async function loadSiteApps(): Promise<SiteAppRecord[]> {
+async function loadSiteApps(): Promise<{ apps: SiteAppRecord[]; loadError: string | null }> {
   try {
     const payload = await getPayloadClient();
     const [result, assetResult] = await Promise.all([
@@ -69,25 +69,25 @@ async function loadSiteApps(): Promise<SiteAppRecord[]> {
       )
       .filter((entry): entry is SiteAppRecord => entry !== null);
 
-    if (docs.length > 0) {
-      return docs.sort((a, b) => a.featuredOrder - b.featuredOrder);
-    }
-  } catch {
-    // Fall back to the file-authored registry when Payload is unavailable.
+    return {
+      apps: docs.sort((a, b) => a.featuredOrder - b.featuredOrder),
+      loadError: null,
+    };
+  } catch (error) {
+    return { apps: [], loadError: unknownErrorMessage(error) };
   }
-
-  return [...FALLBACK_SITE_APPS].sort((a, b) => a.featuredOrder - b.featuredOrder);
 }
 
 async function main() {
-  const apps = await loadSiteApps();
+  const { apps, loadError } = await loadSiteApps();
 
   process.stdout.write(
     JSON.stringify({
       status: 200,
       body: {
-        ok: true,
+        ok: loadError === null,
         apps,
+        loadError,
       },
     }),
   );

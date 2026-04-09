@@ -1,7 +1,7 @@
 import type { AppsHubAppCardIconName } from '@/components/apps/AppsHubAppCard';
 
-export type { SiteAppRecord } from './site-app-fallback';
-export { FALLBACK_SITE_APPS } from './site-app-fallback';
+export type { SiteAppRecord } from './site-app-seed';
+export { SITE_APP_SEED_RECORDS } from './site-app-seed';
 
 export type SiteAppRecordDoc = {
   slug?: string | null;

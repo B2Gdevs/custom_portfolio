@@ -19,7 +19,7 @@ repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/state.mdx
 
 **Shipped (annotate-02):** **Context menu** works while **geo/text** tools are active (removed upstream select-tool-only gate); **Reorder** submenu + **Delete** unchanged from tldraw defaults. **Style panel** scoped to stroke, fill, color, opacity, dash, size, fonts, text alignment, and geo variant — no arrow/line-only rows.
 
-**Shipped (annotate-01):** Route **`/apps/screenshot-annotate`** — `ImagePicker` → **tldraw** `Tldraw` with custom **DefaultToolbar** (four tools) → **Export PNG** / preview screen; **`FALLBACK_SITE_APPS`** + seed; immersive shell via **`isImmersiveAppsRoute`** (no site footer).
+**Shipped (annotate-01):** Route **`/apps/screenshot-annotate`** — `ImagePicker` → **tldraw** `Tldraw` with custom **DefaultToolbar** (four tools) → **Export PNG** / preview screen; **`SITE_APP_SEED_RECORDS`** + `pnpm site:seed:apps` for Payload catalog rows; **`/apps`** lists **CMS** rows only (no file fallback); immersive shell via **`isImmersiveAppsRoute`** (no site footer).
 
 **Resolved (product):**
 

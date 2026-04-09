@@ -430,7 +430,7 @@ payloadAppCmd
   .description(
     'Upsert site-app-records via local Payload (PAYLOAD_SECRET + DATABASE_URL, like seed scripts); --dry-run prints contract',
   )
-  .option('--slug <id>', 'Registry app id (see FALLBACK_SITE_APPS / site catalog)')
+  .option('--slug <id>', 'Seed app id (see SITE_APP_SEED_RECORDS / site catalog)')
   .option('--dry-run', 'Print JSON contract + resolved body', false)
   .option('--json', 'JSON on stdout for execute path', false)
   .action((opts: { dryRun?: boolean; slug?: string; json?: boolean }) => {

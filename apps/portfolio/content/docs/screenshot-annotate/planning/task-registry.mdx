@@ -16,7 +16,7 @@ repoPath: apps/portfolio/content/docs/screenshot-annotate/planning/task-registry
 | Id | Status | Goal | Verify |
 | --- | --- | --- | --- |
 | `screenshot-annotate-01-01` | `done` | App route + **`pick`/`annotate`/`export`** using tldraw pattern; **pick**-phase paste/drop/file; **four-tool** editor (**Select**, **Hand**, **Rectangle/geo**, **Text**); **PNG** export only (all **client-side**) | `/apps/screenshot-annotate`; `pnpm run build` |
-| `screenshot-annotate-01-02` | `done` | **`site-app-records`** entry (**metadata** for `/apps` only) + docs discoverable | **`FALLBACK_SITE_APPS`** + `pnpm run site:seed:apps`; `/apps` lists card |
+| `screenshot-annotate-01-02` | `done` | **`site-app-records`** entry (**metadata** for `/apps` only) + docs discoverable | **`SITE_APP_SEED_RECORDS`** + `pnpm run site:seed:apps`; `/apps` lists **published Payload** rows only |
 | `screenshot-annotate-01-03` | `done` | **Minimal chrome** editor frame (exit to `/apps`, no full site footer in tool surface) | **`isImmersiveAppsRoute`** + immersive layout matches reader |
 | `screenshot-annotate-02-01` | `done` | Layers + context menu (z-order + delete) — custom **`ScreenshotAnnotateContextMenu`** (no select-tool-only gate) + default reorder/delete | `tests/unit/components/screenshot-annotate-context-menu.test.ts`; `pnpm run build` |
 | `screenshot-annotate-02-02` | `done` | Toolbar: stroke width, colors, text — **`ScreenshotAnnotateStylePanel`** (color, opacity, fill, dash, size, font, text/label align, geo) | `tests/unit/components/screenshot-annotate-style-panel.test.ts`; `pnpm run build` |

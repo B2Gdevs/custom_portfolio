@@ -2,7 +2,7 @@ import type { Payload } from 'payload';
 import { describe, expect, it, vi } from 'vitest';
 import {
   PAYLOAD_CLI_GENERATE_ALIASES,
-  siteAppRecordFromFallback,
+  siteAppRecordFromSeed,
   upsertSiteAppRecordViaLocalPayload,
 } from '@/lib/magicborn/payload-cli-generate';
 import { SITE_APP_RECORD_COLLECTION_SLUG } from '@/lib/payload/collections/siteAppRecords';
@@ -24,8 +24,8 @@ describe('payload-cli-generate', () => {
     expect(PAYLOAD_CLI_GENERATE_ALIASES.app.collection).toBe(SITE_APP_RECORD_COLLECTION_SLUG);
   });
 
-  it('builds body from fallback registry', () => {
-    const body = siteAppRecordFromFallback('get-anything-done');
+  it('builds body from seed registry', () => {
+    const body = siteAppRecordFromSeed('get-anything-done');
     expect(body).toMatchObject({
       slug: 'get-anything-done',
       title: 'Get Anything Done (GAD)',

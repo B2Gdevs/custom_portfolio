@@ -3,7 +3,7 @@ import {
   normalizeOptionalTrimmedString,
 } from '@/lib/coerce-unknown-to-string';
 import { getPayloadClient } from '@/lib/payload';
-import { FALLBACK_SITE_APPS } from '@/lib/site-app-registry';
+import { SITE_APP_SEED_RECORDS } from '@/lib/site-app-registry';
 import { loadScriptEnv } from './load-script-env';
 
 loadScriptEnv();
@@ -96,7 +96,7 @@ async function main() {
       .filter((entry): entry is [string, { id: string; record: NonNullable<ReturnType<typeof normalizeExistingAppDoc>> }] => entry !== null),
   );
 
-  for (const app of FALLBACK_SITE_APPS) {
+  for (const app of SITE_APP_SEED_RECORDS) {
     const fields = normalizeAppSeedData(app);
     const existing = existingBySlug.get(app.id);
 

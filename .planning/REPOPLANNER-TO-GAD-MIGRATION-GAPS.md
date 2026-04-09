@@ -55,6 +55,7 @@ Decision **06-01** allows **narrow** maintenance so the public reference site ke
 - **Planning UI (portfolio):** **Removed** `RepoPlannerCockpitClient`. Visitor-facing planning is **Planning pack** modal + **GAD** docs. **`/apps/repo-planner`** redirects to GAD planning state. **No** `transpilePackages: ['repo-planner']`.
 - **APIs:** `planning-state`, `planning-metrics`, `planning-reports/latest`, `planning-templates/minimal` — `@/lib/repo-planner/*` + in-app **`lib/planning-parse/*.mjs`** (forked from upstream). **`POST /api/planning-cli/run`** returns **501** (use **`gad`** locally).
 - **Live bundle:** `buildLivePlanningBundle` uses **`apps/portfolio/lib/planning-parse/planning-parse-core.mjs`** + **`planning-workflow.mjs`**.
+- **`/apps` hub:** Renders **published `site-app-records` only**. **`lib/site-app-seed.ts`** (`SITE_APP_SEED_RECORDS`) is **seed + skeleton card count** — no runtime file fallback (empty or error UI when CMS unavailable).
 
 **Optional later:** Swap live-bundle to **`gad snapshot --json`** (or similar) so XML parsing is not duplicated in the app. **No** requirement to ship a visual cockpit in the portfolio.
 
@@ -71,7 +72,7 @@ Decision **06-01** allows **narrow** maintenance so the public reference site ke
 ## 3. Documentation & IA
 
 - Entire **`/docs/repo-planner`** tree (getting-started, decisions, archived hand-authored planning).
-- Some **blog** / archived rows may still mention Repo Planner; **HumanLoopPlanningSection** and **site apps** fallback now point at **GAD** where updated.
+- Some **blog** / archived rows may still mention Repo Planner; **HumanLoopPlanningSection** and **site app seed rows** link **GAD** / Vercel where updated.
 - **`lib/docs.ts`** **`repo-planner`** section is labeled archive.
 
 **Gap:** Rename IA to **GAD** where accurate, redirect old URLs, archive RP-specific tutorials into a historical section.

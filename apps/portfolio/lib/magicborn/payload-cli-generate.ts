@@ -1,7 +1,7 @@
 import type { Payload } from 'payload';
 import { unknownErrorMessage } from '@/lib/unknown-error';
 import { SITE_APP_RECORD_COLLECTION_SLUG } from '@/lib/payload/collections/siteAppRecords';
-import { FALLBACK_SITE_APPS, type SiteAppRecord } from '@/lib/site-app-registry';
+import { SITE_APP_SEED_RECORDS, type SiteAppRecord } from '@/lib/site-app-registry';
 
 /** CLI alias → Payload collection (global-tooling-03-05). */
 export const PAYLOAD_CLI_GENERATE_ALIASES = {
@@ -13,8 +13,8 @@ export const PAYLOAD_CLI_GENERATE_ALIASES = {
 
 export type PayloadCliGenerateAlias = keyof typeof PAYLOAD_CLI_GENERATE_ALIASES;
 
-export function siteAppRecordFromFallback(slug: string): Record<string, unknown> | null {
-  const app = FALLBACK_SITE_APPS.find((a) => a.id === slug);
+export function siteAppRecordFromSeed(slug: string): Record<string, unknown> | null {
+  const app = SITE_APP_SEED_RECORDS.find((a) => a.id === slug);
   if (!app) {
     return null;
   }

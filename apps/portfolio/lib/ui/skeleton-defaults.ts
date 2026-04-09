@@ -5,12 +5,12 @@
  *
  * | Surface | Source of truth |
  * | --- | --- |
- * | Apps hub | `FALLBACK_SITE_APPS.length` in `lib/site-app-fallback.ts` |
+ * | Apps hub | `SITE_APP_SEED_RECORDS.length` in `lib/site-app-seed.ts` (loading placeholders only) |
  * | Projects / blog index | `CONTENT_PROJECT_MDX_COUNT` / `CONTENT_BLOG_MDX_COUNT` ↔ `content/{projects,blog}/*.mdx` |
  * | Listen | `getListenCatalog().length` in `lib/listen-catalog.ts` |
  * | Resumes | `FALLBACK_RESUME_COUNT` in `lib/resume-fallback.ts` |
  */
-import { FALLBACK_SITE_APPS } from '@/lib/site-app-registry';
+import { SITE_APP_SEED_RECORDS } from '@/lib/site-app-registry';
 import { getListenCatalog } from '@/lib/listen-catalog';
 import { FALLBACK_RESUME_COUNT } from '@/lib/resume-fallback';
 
@@ -27,7 +27,7 @@ export const SKELETON_DOCS_NAV_LINE_COUNT = 18;
 export const SKELETON_DEFAULTS_LAST_REVIEWED = '2026-04-08';
 
 /** Derived — apps hub grid matches public app registry cardinality. */
-export const SKELETON_APPS_HUB_CARD_COUNT = FALLBACK_SITE_APPS.length;
+export const SKELETON_APPS_HUB_CARD_COUNT = SITE_APP_SEED_RECORDS.length;
 
 /** Derived — listen index rows match static catalog length. */
 export const SKELETON_LISTEN_ROW_COUNT = getListenCatalog().length;

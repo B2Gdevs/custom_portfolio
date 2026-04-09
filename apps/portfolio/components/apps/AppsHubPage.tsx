@@ -6,21 +6,43 @@ import type { SiteAppRecord } from '@/lib/site-app-registry';
 
 type AppsHubPageProps = {
   apps: SiteAppRecord[];
+  loadError: string | null;
 };
+
+function isAbsoluteHttp(href: string) {
+  return /^https?:\/\//i.test(href);
+}
 
 function renderAppNote(app: SiteAppRecord) {
   const fragments: ReactNode[] = [];
 
   if (app.supportHref && app.supportLabel) {
-    fragments.push(
-      <span key="support">
-        Notes live in{' '}
-        <Link href={app.supportHref} className="text-accent underline">
-          {app.supportLabel}
-        </Link>
-        .
-      </span>,
-    );
+    if (isAbsoluteHttp(app.supportHref)) {
+      fragments.push(
+        <span key="support">
+          Notes live in{' '}
+          <a
+            href={app.supportHref}
+            className="text-accent underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {app.supportLabel}
+          </a>
+          .
+        </span>,
+      );
+    } else {
+      fragments.push(
+        <span key="support">
+          Notes live in{' '}
+          <Link href={app.supportHref} className="text-accent underline">
+            {app.supportLabel}
+          </Link>
+          .
+        </span>,
+      );
+    }
   }
 
   if (app.supportText) {
@@ -61,7 +83,7 @@ function renderAppNote(app: SiteAppRecord) {
   }, []);
 }
 
-export function AppsHubPage({ apps }: AppsHubPageProps) {
+export function AppsHubPage({ apps, loadError }: AppsHubPageProps) {
   return (
     <div className="section-shell pb-16">
       <header className="story-card max-w-5xl p-8 md:p-10">
@@ -76,13 +98,41 @@ export function AppsHubPage({ apps }: AppsHubPageProps) {
         </p>
       </header>
 
-      <ul className="mt-10 grid gap-6 lg:grid-cols-2">
-        {apps.map((app) => (
-          <li key={app.id}>
-            <AppsHubAppCard {...app} note={renderAppNote(app)} />
-          </li>
-        ))}
-      </ul>
+      {loadError ? (
+        <div
+          className="story-card mt-8 max-w-5xl border-amber-500/40 bg-amber-500/10 p-6 text-sm text-primary md:p-8"
+          role="alert"
+        >
+          <p className="font-semibold text-amber-200">Apps catalog could not be loaded from the CMS</p>
+          <p className="mt-2 text-text-muted">{loadError}</p>
+          <p className="mt-3 text-text-muted">
+            Fix <code className="text-text-muted">DATABASE_URL</code> / Payload access, then run{' '}
+            <code className="text-text-muted">pnpm site:seed:apps</code> to publish rows from the seed file (
+            <code className="text-text-muted">lib/site-app-seed.ts</code>).
+          </p>
+        </div>
+      ) : null}
+
+      {!loadError && apps.length === 0 ? (
+        <div className="story-card mt-8 max-w-5xl border border-border/80 p-6 text-sm text-text-muted md:p-8">
+          <p className="font-medium text-primary">No published apps yet</p>
+          <p className="mt-2">
+            There are no published <code className="text-text-muted">site-app-records</code> rows. Seed the catalog
+            with <code className="text-text-muted">pnpm site:seed:apps</code> (uses{' '}
+            <code className="text-text-muted">SITE_APP_SEED_RECORDS</code>), or add entries in Payload admin.
+          </p>
+        </div>
+      ) : null}
+
+      {apps.length > 0 ? (
+        <ul className="mt-10 grid gap-6 lg:grid-cols-2">
+          {apps.map((app) => (
+            <li key={app.id}>
+              <AppsHubAppCard {...app} note={renderAppNote(app)} />
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </div>
   );
 }

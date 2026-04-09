@@ -14,7 +14,7 @@ import {
 import { getAllContentEntries } from '@/lib/content';
 import { getBooks } from '@/lib/books';
 import { getListenCatalog } from '@/lib/listen-catalog';
-import { FALLBACK_SITE_APPS } from '@/lib/site-app-registry';
+import { SITE_APP_SEED_RECORDS } from '@/lib/site-app-registry';
 import { MAGICBORN_SCENE_SEEDS } from '@/lib/magicborn-prompts/scene-seeds';
 
 const TOP_LEVEL = [
@@ -135,7 +135,7 @@ export function getCompleteLines(topic: string): string[] {
     case 'book-slugs':
       return getBooks().map((b) => b.slug);
     case 'app-ids':
-      return FALLBACK_SITE_APPS.map((a) => a.id);
+      return SITE_APP_SEED_RECORDS.map((a) => a.id);
     case 'project-slugs':
       return getAllContentEntries('projects').map((e) => e.slug);
     case 'listen-slugs':

@@ -2,11 +2,11 @@ import { parseArgs } from 'node:util';
 import { createMagicbornCli } from '@/lib/magicborn/magicborn-cli-ui';
 import {
   PAYLOAD_CLI_GENERATE_ALIASES,
-  siteAppRecordFromFallback,
+  siteAppRecordFromSeed,
   upsertSiteAppRecordViaLocalPayload,
 } from '@/lib/magicborn/payload-cli-generate';
 import { getPayloadClient } from '@/lib/payload';
-import { FALLBACK_SITE_APPS } from '@/lib/site-app-registry';
+import { SITE_APP_SEED_RECORDS } from '@/lib/site-app-registry';
 import { exitJsonError } from '../cli-json';
 
 /** Payload discovery smoke: list collection slugs from this app's config (global-tooling-02-05). */
@@ -68,11 +68,11 @@ export async function runPayloadAppGenerate(flagArgs: string[]): Promise<void> {
     },
     flags: ['--slug <id>', '--dry-run', '--json'],
     bodySource:
-      'When --slug matches a built-in registry id, fields are taken from FALLBACK_SITE_APPS; extend with explicit flags later.',
+      'When --slug matches a seed id, fields are taken from SITE_APP_SEED_RECORDS; extend with explicit flags later.',
   };
 
   if (dry) {
-    const body = slug ? siteAppRecordFromFallback(slug) : null;
+    const body = slug ? siteAppRecordFromSeed(slug) : null;
     console.log(
       JSON.stringify(
         {
@@ -95,9 +95,9 @@ export async function runPayloadAppGenerate(flagArgs: string[]): Promise<void> {
     exitJsonError(wantJson, msg, { error: 'missing_slug' });
   }
 
-  const body = siteAppRecordFromFallback(slug);
+  const body = siteAppRecordFromSeed(slug);
   if (!body) {
-    const msg = `Unknown app slug "${slug}". Known registry ids: ${FALLBACK_SITE_APPS.map((a) => a.id).join(', ')}`;
+    const msg = `Unknown app slug "${slug}". Known seed ids: ${SITE_APP_SEED_RECORDS.map((a) => a.id).join(', ')}`;
     exitJsonError(wantJson, msg, { error: 'unknown_slug' });
   }
 

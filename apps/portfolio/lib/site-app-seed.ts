@@ -1,6 +1,11 @@
 /**
- * Static apps-hub rows when Payload-backed records are unavailable.
- * No server-only imports — safe for client bundles (loading skeleton counts, etc.).
+ * **Seed-only** definitions for Payload `site-app-records` (`pnpm site:seed:apps`).
+ * The `/apps` page does **not** render this list at runtime — it reads published CMS rows only.
+ *
+ * Other portfolio areas that still use file/runtime fallbacks (audit separately):
+ * - `lib/resumes.ts` + `lib/resume-fallback.ts`
+ * - `lib/listen-catalog-repository.ts`, `lib/listen-runtime.ts`, `lib/listen-catalog-bootstrap.ts`
+ * - `lib/book-artifacts.ts` / EPUB static path when remote artifact missing (see flags)
  */
 import type { AppsHubAppCardIconName } from '@/components/apps/AppsHubAppCard';
 import type { ContentLink } from '@/lib/content';
@@ -21,7 +26,7 @@ export type SiteAppRecord = {
   featuredOrder: number;
 };
 
-export const FALLBACK_SITE_APPS: SiteAppRecord[] = [
+export const SITE_APP_SEED_RECORDS: SiteAppRecord[] = [
   {
     id: 'screenshot-annotate',
     title: 'Screenshot annotate',

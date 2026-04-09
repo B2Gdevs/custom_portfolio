@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { FALLBACK_SITE_APPS, getSiteApps } from '@/lib/site-apps';
+import { getSiteApps } from '@/lib/site-apps';
 import { runSiteAppsWorker } from '@/lib/site-apps-worker-runner';
 
 vi.mock('@/lib/site-apps-worker-runner', () => ({
@@ -11,29 +11,45 @@ describe('site app records bootstrap', () => {
     vi.resetAllMocks();
   });
 
-  it('falls back to the file-authored app registry when Payload is unavailable', async () => {
+  it('returns loadError when the worker throws', async () => {
     vi.mocked(runSiteAppsWorker).mockRejectedValue(new Error('payload offline'));
 
-    await expect(getSiteApps()).resolves.toEqual(FALLBACK_SITE_APPS);
-    expect(FALLBACK_SITE_APPS).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: 'grime-time',
-          href: 'https://grimetime.app',
-          cta: 'Visit Grime Time',
-        }),
-        expect.objectContaining({
-          id: 'get-anything-done',
-          href: 'https://get-anything-done.vercel.app/',
-          cta: 'Open GAD on Vercel',
-        }),
-        expect.objectContaining({
-          id: 'repo-planner',
-          href: 'https://repo-planner.vercel.app/',
-          cta: 'Open Repo Planner on Vercel',
-        }),
-      ]),
-    );
+    await expect(getSiteApps()).resolves.toEqual({
+      apps: [],
+      loadError: 'payload offline',
+    });
+  });
+
+  it('returns loadError when the worker body is not ok', async () => {
+    vi.mocked(runSiteAppsWorker).mockResolvedValue({
+      status: 200,
+      body: {
+        ok: false,
+        apps: [],
+        loadError: 'connect ECONNREFUSED',
+      },
+    });
+
+    await expect(getSiteApps()).resolves.toEqual({
+      apps: [],
+      loadError: 'connect ECONNREFUSED',
+    });
+  });
+
+  it('returns empty apps when CMS has no published rows (ok, empty array)', async () => {
+    vi.mocked(runSiteAppsWorker).mockResolvedValue({
+      status: 200,
+      body: {
+        ok: true,
+        apps: [],
+        loadError: null,
+      },
+    });
+
+    await expect(getSiteApps()).resolves.toEqual({
+      apps: [],
+      loadError: null,
+    });
   });
 
   it('uses site-app-record rows when they exist', async () => {
@@ -63,20 +79,24 @@ describe('site app records bootstrap', () => {
             featuredOrder: 20,
           },
         ],
+        loadError: null,
       },
     });
 
-    await expect(getSiteApps()).resolves.toEqual([
-      expect.objectContaining({
-        id: 'get-anything-done',
-        description: 'Live from Payload.',
-        downloads: [
-          expect.objectContaining({
-            href: '/api/site-download-assets/file/get-anything-done.zip',
-            label: 'Download GAD bundle',
-          }),
-        ],
-      }),
-    ]);
+    await expect(getSiteApps()).resolves.toEqual({
+      apps: [
+        expect.objectContaining({
+          id: 'get-anything-done',
+          description: 'Live from Payload.',
+          downloads: [
+            expect.objectContaining({
+              href: '/api/site-download-assets/file/get-anything-done.zip',
+              label: 'Download GAD bundle',
+            }),
+          ],
+        }),
+      ],
+      loadError: null,
+    });
   });
 });
