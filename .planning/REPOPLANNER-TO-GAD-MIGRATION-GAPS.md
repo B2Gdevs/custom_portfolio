@@ -58,6 +58,14 @@ Heavy **`repo-planner`** npm dependency (`file:../../vendor/repo-planner`):
 
 **Gap:** Replace live-bundle and cockpit data path with **GAD-backed** parsers + a single JSON contract (or call `gad` with `--json` from server where appropriate). Large UI effort if we keep a visual cockpit.
 
+### 2a. GAD-owned React components (planned — discuss + define “done”)
+
+**Intent:** Rebuild the portfolio’s planning **UI** (today imported from `repo-planner/host` — see [Repo Planner planning docs](/docs/repo-planner/planning/planning-docs), section **GAD-native cockpit rebuild**) **inside `vendor/get-anything-done`**, then **`apps/portfolio`** imports from that submodule only. **`/docs`** planning content is already GAD-oriented; this work **replaces** embeds and host glue still tied to the RepoPlanner package, in **GAD’s** repo layout and conventions.
+
+**Discuss before implementation:** package boundary (`packages/*` vs `site/`), phased rollout (read-only vs parity with current cockpit), server contract (`gad` JSON vs in-process parsers), and branding/IA updates.
+
+**Success (draft — refine with checklist in planning-docs):** no `repo-planner` import for the shipped planning UI route(s); build/lint green; tests and operator docs updated; removal of `transpilePackages: ['repo-planner']` when the dependency is gone.
+
 ---
 
 ## 3. Documentation & IA
@@ -108,7 +116,7 @@ Many **`apps/portfolio/tests/unit/lib/repo-planner-*.test.ts`** and vitest alias
 1. **CLI:** Add GAD equivalents for **embed-pack** and **minimal init** (or document one-time manual steps), then switch root `planning:*` scripts off `loop-cli`.
 2. **Agents:** Prefer **`gad snapshot`** everywhere; mark `pnpm planning:snapshot` deprecated.
 3. **Portfolio APIs:** Swap `buildLivePlanningBundle` inputs to GAD-owned parsers or `gad --json` subprocess (cache carefully).
-4. **UI:** Either rename cockpit to “Planning” + GAD branding or replace with lighter read-only views fed by GAD.
+4. **UI:** Rebuild cockpit/embed React in **`get-anything-done`**; portfolio imports from submodule (see §2a and [planning-docs](/docs/repo-planner/planning/planning-docs) — **GAD-native cockpit rebuild**). Optionally rename route to “Planning” + GAD branding; define verification checklist before coding.
 5. **Docs & skills:** Deprecate RP naming; **`rp-*` → `gad-*`** skill migration.
 6. **Vendor:** Shrink **`repo-planner`** to a compatibility layer or remove submodule when imports hit zero.
 
