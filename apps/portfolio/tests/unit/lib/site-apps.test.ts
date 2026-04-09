@@ -22,6 +22,16 @@ describe('site app records bootstrap', () => {
           href: 'https://grimetime.app',
           cta: 'Visit Grime Time',
         }),
+        expect.objectContaining({
+          id: 'get-anything-done',
+          href: 'https://get-anything-done.vercel.app/',
+          cta: 'Open GAD on Vercel',
+        }),
+        expect.objectContaining({
+          id: 'repo-planner',
+          href: 'https://repo-planner.vercel.app/',
+          cta: 'Open Repo Planner on Vercel',
+        }),
       ]),
     );
   });
@@ -34,13 +44,13 @@ describe('site app records bootstrap', () => {
         apps: [
           {
             id: 'get-anything-done',
-            title: 'get-anything-done (GAD)',
-            href: '/docs/get-anything-done/planning/state',
+            title: 'Get Anything Done (GAD)',
+            href: 'https://get-anything-done.vercel.app/',
             description: 'Live from Payload.',
             iconName: 'terminal',
-            cta: 'Open GAD planning state',
-            supportHref: '/docs/get-anything-done/planning/roadmap',
-            supportLabel: 'GAD roadmap',
+            cta: 'Open GAD on Vercel',
+            supportHref: '/docs/get-anything-done/planning/state',
+            supportLabel: 'Planning state on this site',
             supportText: 'Read-only by default.',
             downloads: [
               {

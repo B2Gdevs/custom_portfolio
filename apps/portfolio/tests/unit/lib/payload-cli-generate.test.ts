@@ -28,7 +28,7 @@ describe('payload-cli-generate', () => {
     const body = siteAppRecordFromFallback('get-anything-done');
     expect(body).toMatchObject({
       slug: 'get-anything-done',
-      title: 'get-anything-done (GAD)',
+      title: 'Get Anything Done (GAD)',
       published: true,
     });
   });

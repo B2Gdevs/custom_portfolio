@@ -25,6 +25,13 @@ type AppsHubAppCardProps = {
   note: ReactNode;
 };
 
+const ctaClassName =
+  'inline-flex w-fit items-center rounded-full border border-border px-4 py-2 text-sm font-medium text-primary transition-colors hover:border-accent hover:text-accent';
+
+function isAbsoluteHttpUrl(href: string) {
+  return /^https?:\/\//i.test(href);
+}
+
 export function AppsHubAppCard({
   id,
   title,
@@ -62,12 +69,15 @@ export function AppsHubAppCard({
         </div>
       </div>
       <div className="mb-4 flex-1 text-xs leading-relaxed text-text-muted/90">{note}</div>
-      <Link
-        href={href}
-        className="inline-flex w-fit items-center rounded-full border border-border px-4 py-2 text-sm font-medium text-primary transition-colors hover:border-accent hover:text-accent"
-      >
-        {cta}
-      </Link>
+      {isAbsoluteHttpUrl(href) ? (
+        <a href={href} className={ctaClassName} target="_blank" rel="noopener noreferrer">
+          {cta}
+        </a>
+      ) : (
+        <Link href={href} className={ctaClassName}>
+          {cta}
+        </Link>
+      )}
     </article>
   );
 }
