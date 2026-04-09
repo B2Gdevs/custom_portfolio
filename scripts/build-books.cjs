@@ -4,6 +4,10 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const { loadRepoRootEnv } = require('./load-repo-root-env.cjs');
+
+/** Monorepo root (this file lives in `scripts/`). Root `.env` is not auto-loaded by Node. */
+loadRepoRootEnv(path.join(__dirname, '..'));
 
 const ROOT = process.cwd();
 const BOOK_BUILD_CACHE_PATH = path.join(ROOT, '.tmp', 'book-build-cache.json');

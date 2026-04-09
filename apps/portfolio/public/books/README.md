@@ -4,7 +4,7 @@ Do **not** edit these files by hand.
 
 | Output | Source |
 | --- | --- |
-| **`manifest.json`** | Written by `scripts/build-books.cjs` when you run **`pnpm run build:books`** from the **repo root**, or automatically when **`pnpm dev`** runs the books watcher. The Next.js app reads this for the books index, homepage, and any published remote artifact URLs. |
+| **`manifest.json`** | Written by `scripts/build-books.cjs` when you run **`pnpm run build:books`** from the **repo root**, or when you run **`pnpm books:watch`** (repo root) / **`pnpm books:watch`** inside **`apps/portfolio`** — a standalone **`repub watch`** that rebuilds on `books/**` changes. **`pnpm dev`** for the app no longer runs that watcher. The Next.js app reads this for the books index, homepage, and any published remote artifact URLs. |
 | **`{slug}/book.epub`** | Built from **`books/{slug}/`** (markdown/MDX under `chapters/`). These local EPUBs are working artifacts only and are now gitignored so published versions can live in storage instead of normal commits. |
 
 **Incremental builds:** `scripts/build-books.cjs` stores input fingerprints in **`.tmp/book-build-cache.json`** (gitignored). When nothing under a book’s inputs changed, it skips EPUB generation (no `epub-gen` image download / zip). Set **`BOOKS_FORCE_REBUILD=1`** for a full rebuild (e.g. after upgrading `repub-builder`).

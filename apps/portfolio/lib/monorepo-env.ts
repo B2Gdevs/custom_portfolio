@@ -2,6 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 
+/** Parser duplicated in `scripts/load-repo-root-env.cjs` (plain Node, no TS). Keep in sync. */
 export function parseEnvFile(filePath: string): Record<string, string> {
   const out: Record<string, string> = {};
   if (!fs.existsSync(filePath)) return out;
@@ -28,7 +29,8 @@ export function parseEnvFile(filePath: string): Record<string, string> {
 
 /**
  * Merge repo-root `.env` / `.env.local` into `process.env` so Next.js (and workers) see the same
- * keys as a single `apps/portfolio/.env` would.
+ * keys as a single `apps/portfolio/.env` would. Repo-root CJS scripts use `scripts/load-repo-root-env.cjs`
+ * for the same files (same parser + fill rules).
  *
  * - `fillUndefined`: only set when the key is missing (app wins).
  * - `fillUndefinedOrEmpty`: also fill when the value is `''` (root overrides empty placeholders).

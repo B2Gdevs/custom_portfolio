@@ -50,7 +50,7 @@ Reference tasks by id in conversation (`books-ai-01-04`, `12-03`).
 
 ## App (`apps/portfolio`)
 
-- Dev: `pnpm dev` -- Next + debounced **books** watcher (`public/books/`, see `public/books/README.md`).
+- Dev: `pnpm dev` -- Next only. Rebuild **`public/books/`** with `pnpm build:books` or **`pnpm books:watch`** (separate terminal; uses `repub watch`, see `public/books/README.md`).
 - Build / typecheck / lint: as above.
 
 ## Verification gates

@@ -15,6 +15,7 @@
   "scripts": {
     "postinstall": "node scripts/magicborn-postinstall.cjs",
     "setup": "./scripts/setup-git-hooks.sh",
+    "env:sync-portfolio": "node scripts/sync-portfolio-env.cjs",
     "dev": "npm run dev --workspace=@portfolio/app",
     "dev:chat-api": "pnpm --filter @portfolio/app exec next dev --webpack -- --port 3010",
     "chat:build": "node scripts/portfolio-chat-dist.mjs build",
@@ -52,6 +53,7 @@
     "package:org:setup": "./scripts/setup-org-secrets.sh",
     "package:org:update": "./scripts/update-org-npm-token.sh",
     "build:books": "pnpm --filter @portfolio/repub-builder run build && node scripts/build-books.cjs",
+    "books:watch": "node vendor/repub-builder/dist/cli.js watch books --debounce 600 --cwd . -- node scripts/build-books.cjs",
     "publish:book-artifacts": "pnpm --filter @portfolio/app exec tsx --tsconfig tsconfig.json scripts/publish-book-artifacts.ts",
     "publish:public-media": "pnpm --filter @portfolio/app exec tsx --tsconfig tsconfig.json scripts/publish-public-media.ts",
     "seed:site-apps": "pnpm --filter @portfolio/app exec tsx --tsconfig tsconfig.json scripts/seed-site-app-records.ts",
