@@ -3,7 +3,7 @@ title: "grime-time — Decisions"
 description: "Auto-compiled from vendor/grime-time-site/.planning/DECISIONS.xml"
 generated: "true"
 source: "vendor/grime-time-site/.planning/DECISIONS.xml"
-updated: "2026-04-07T20:06:41.166Z"
+updated: "2026-04-10T16:13:24.004Z"
 ---
 
 # Decisions
@@ -238,9 +238,9 @@ The `/contact` page should prioritize immediate action clarity: high-contrast vi
 
 ## D-ux-006: Ops information architecture splits dense modules into dedicated routes
 
-The ops experience should use a conventional app shell with a clear split: `/ops` is the KPI-first dashboard, and `/ops/workspace` is the primary live-work surface for queues, billing follow-up, today board, scorecard, milestones, and assets. Legacy `/ops/*` section routes remain only as compatibility redirects into workspace tabs.
+The ops experience should use a conventional app shell with a clear split: `/portal/ops/dashboard` is the KPI-first staff landing page, and `/portal/ops/workspace` is the primary live-work surface for queues, billing follow-up, today board, scorecard, milestones, and assets. Legacy `/ops/*` section routes remain only as compatibility redirects into the canonical `/portal/ops/*` tree.
 
-**Impact:** Reduces overflow and overlap issues, removes duplicated billing and launcher panels, keeps sidebar navigation simpler, and avoids full-page route churn when staff switch between live work sections. It also requires the shared tab/query helpers to remain stable so redirects and deep links stay predictable.
+**Impact:** Reduces overflow and overlap issues, makes the staff portal contract explicit in the URL, removes duplicated billing and launcher panels, keeps sidebar navigation simpler, and avoids full-page route churn when staff switch between live work sections. It also requires the shared tab/query helpers to remain stable so redirects and deep links stay predictable.
 
 ## D-ux-007: Ops KPI cards are compact, number-first, with tooltip-based metric disclosure
 
@@ -535,3 +535,63 @@ The marketing shell should not rely on browser-page scrolling during desktop aut
 The earlier shell-owned right-rail composer decision no longer matches the authoring reality. On the public site, chat stays the primary floating surface, impersonation and operator actions live in a tools view inside that same copilot shell, and the page composer opens from that workflow as a right-side sheet above the live page instead of mounting as a second layout column.
 
 **Impact:** This removes the blank shell column and the live-page squeeze, keeps chat first while avoiding a second floating admin surface, and makes the composer explicitly temporary instead of a persistent shell rail. Frontend signed-in affordances should also stay on Clerk-hosted components such as `UserButton` rather than diverging into separate custom logout menus.
+
+## D-content-026: Composer removes shared sections and centers on page-local blocks plus explicit app or dynamic blocks
+
+The shared-section abstraction adds more mental overhead than value for Grime Time's current authoring model. The page composer should treat a page as an ordered list of page-local blocks, where each block owns its own schema and media relationships. Integrated experiences such as contact and estimator flows stay as code-owned app blocks, and any future first-party database-backed sections should arrive as explicit dynamic blocks instead of linked shared-copy sources.
+
+**Impact:** This removes the separate shared-section library and source-edit workflow, keeps copy and media editing attached to the page being authored, and makes the block taxonomy easier to reason about: page-local content blocks, app blocks, and later dynamic data blocks. It also sharpens the current priority: reliable block media replacement and page-local copy editing matter more than global linked-content propagation.
+
+## D-auth-008: Portal dashboards use explicit `/customer/dashboard` and `/portal/ops/dashboard` routes
+
+Grime Time should stop overloading `/dashboard` and `/ops` as both the public contract and the implementation detail. The canonical customer landing route is `/customer/dashboard`, and the canonical staff landing route is `/portal/ops/dashboard`. The old `/dashboard` and `/ops` paths remain compatibility redirects so deployed links, emails, and bookmarks keep working while the app moves over.
+
+**Impact:** This makes route ownership clearer for auth redirects, onboarding, and future subpages under each area. It also removes ambiguity when building invite and welcome flows, because “customer dashboard” and “staff portal dashboard” become explicit destinations rather than inferred meanings attached to generic root paths.
+
+## D-auth-009: Staff administration lives in `/portal/ops/users` and `/portal/ops/customers`, with staff as a filtered user slice
+
+The ops admin area should not grow separate top-level pages for staff, users, and customers when the underlying entities overlap. `/portal/ops/users` is the identity and membership management surface, including staff invites, role templates, and entitlement controls. `/portal/ops/customers` is the first-party customer and account-management surface. “Staff” is treated as a filtered subset or view within users, not a third standalone page.
+
+**Impact:** This keeps the ops IA compact, aligns with the first-party authorization model, and avoids hard-coding Clerk or Stripe concepts as the main admin information architecture. It also keeps future provider swaps easier because Grime Time's own user and customer surfaces stay the primary operational contract.
+
+## D-content-027: Inbound email attachments feed first-party media ingestion instead of becoming a Resend-owned media model
+
+Inbound media-by-email should use Resend only as the transport and webhook adapter. The app receives `email.received`, fetches attachment binaries, validates them, writes first-party ingestion records, and creates normal Grime Time media records. Sender metadata, audit logs, and replay behavior belong to Grime Time, not to provider-specific inbox state.
+
+**Impact:** This keeps media ingestion compatible with future provider swaps, gives the ops team a real audit trail for attachment failures or replays, and lets the composer or media library treat email uploads as normal first-party media after ingestion instead of as a separate external bucket.
+
+## D-auth-012: Ops welcome dismissal state stays first-party in Payload preferences
+
+The first-run welcome gate for invited staff on `/portal/ops/dashboard` should not depend on Clerk user metadata or provider-specific flags. Grime Time stores the dismissed state as a first-party `payload-preferences` record keyed to the local Payload user, and the ops dashboard reads that state server-side before rendering the modal.
+
+**Impact:** This keeps onboarding state portable across identity providers, avoids coupling staff UX to Clerk metadata shape, and lets the app preserve one-time ops onboarding behavior even when the same staff identity is rebound, mirrored, or reconciled later. It also keeps the welcome contract close to the app-owned user record that already backs impersonation and portal authorization.
+
+## D-auth-013: Clerk-primary customer migration backfills first-party account and rebinding state before creating new billing identities
+
+When Clerk is the primary customer auth path, Grime Time should treat a signed-in customer as migrated only after the Clerk-backed session is tied back to first-party account state. Customer-session resolution now backfills the matching account by first-party account email, portal CTA generation reissues claim or invite access for Supabase-only users that have not rebound to Clerk yet, and Stripe customer creation should reuse first-party billing document customer ids before creating a new Stripe customer.
+
+**Impact:** This reduces duplicate customer records during the auth migration, keeps billing portal access working for first-time Clerk sessions that match an existing account, and avoids suppressing rebinding emails just because a legacy Supabase id still exists on the user. It also keeps Stripe migration logic grounded in app-owned invoices and service plans instead of assuming the account record was already perfectly backfilled.
+
+## D-auth-014: Clerk webhook changes reconcile into first-party auth records before emitting app-owned events
+
+Inbound Clerk user, organization, and organizationMembership webhooks should land on a dedicated signed route, reconcile Grime Time&apos;s first-party `users`, `organizations`, and `organization-memberships` records, and then emit app-owned auth domain events. Clerk remains the identity transport, but webhook payloads do not directly become the business-authorization surface.
+
+**Impact:** This keeps provider sync reversible, gives external subscribers a first-party event contract instead of a Clerk-only dependency, and ensures role or membership changes continue to flow through app-owned reconciliation logic before downstream systems react.
+
+## D-content-028: Inbound email media stages into admin-only ingestion records before promotion into the shared media library
+
+Phase 19 should not write provider-delivered attachments straight into public-facing `media` records. The app first persists an admin-only `inbound-media-ingestions` record with sender metadata, idempotency keys, attachment audit JSON, replay state, and payload snapshot fields. Provider adapters like Resend can then promote accepted attachments into normal `media` records as a second step.
+
+**Impact:** This keeps the first-party ingestion contract provider-agnostic, gives ops a durable audit trail before promotion, and keeps future replay or approval logic separate from the public media library. It also reduces schema and migration churn for the contract phase by storing attachment audit state as JSON until the later promotion workflow is wired.
+
+## D-devtools-001: Block iteration uses a dedicated lab (MCP App Studio + optional staff Next route)
+
+WIP Payload layout blocks should be developed in a first-party **block lab** rather than on live pages: a sibling **MCP App Studio** app under `tools/grime-block-lab` (see [MCP App Studio](https://www.assistant-ui.com/mcp-app-studio)) for host-accurate widget preview, mock tool responses, and export; optionally a **staff-only Next route** with fixture-driven renders for fast local iteration. Sharing code with `src/blocks` proceeds via thin preview wrappers or extracted presentational modules so server-only imports never enter the MCP export bundle.
+
+**Impact:** Reduces risk of shipping half-built blocks through the CMS; gives a structured place to test tool/keyword triggers for block selection; keeps public sitemap and visitor experience clean.
+
+## D-process-029: Declare intentional composer UI removals before autonomous regression passes
+
+When a human changes page-composer UX by removing surfaces (e.g. inline block media slots, upload/generate on the media tab, or canvas lane selection for service grid), those choices must be written into planning before or at the start of a long agent loop—task updates, a short `STATE.xml` next-action note, or `.planning/notes/`—so agents do not interpret failing tests as accidental regressions and spend cycles restoring the old contract.
+
+**Impact:** Reduces thrash between &quot;rigorous tests&quot; and author intent. Open design question (not decided here): whether to narrow or split tests when the product direction intentionally diverges from the hybrid slot surface, versus always extending tests to match the new model—either way requires an explicit human signal so automation does not default to the last encoded behavior.

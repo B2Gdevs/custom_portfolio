@@ -3,7 +3,7 @@ title: "grime-time — Errors & Attempts"
 description: "Auto-compiled from vendor/grime-time-site/.planning/ERRORS-AND-ATTEMPTS.xml"
 generated: "true"
 source: "vendor/grime-time-site/.planning/ERRORS-AND-ATTEMPTS.xml"
-updated: "2026-04-07T20:06:41.166Z"
+updated: "2026-04-10T16:13:24.004Z"
 ---
 
 # Errors & Attempts
@@ -701,4 +701,127 @@ cmd /c npm.cmd exec eslint src/components/admin-impersonation/PageComposerDrawer
 ```
 ```
 cmd /c npm.cmd exec -- vitest run tests/int/components/admin-impersonation/page-composer-shell.int.spec.tsx --testTimeout=20000
+```
+
+## 18-06-a1 — phase 18 — task 18-06 — resolved
+
+**Layout-tab reorder still targeted stale draft slots and could push the hero to the bottom of the saved page**
+
+
+**Symptom:** After the layout-tab refresh shipped, moving blocks in the composer could still leave the live canvas and draft editor out of sync: selected blocks could jump, hero editing could target the wrong draft slot, the visible Layout tab could trip a client-side failure while sorting, and operators reported the hero winding up at the bottom after reorder attempts.
+
+**Cause:** The reorder path still mixed transient array indexes into multiple surfaces. Drawer sorting and canvas move actions could reorder by index while live block editors still resolved relation paths like `layout.${blockIndex}` from the original render order. Motion-wrapped sortable rows and automatic canvas scroll-on-select made the bug read like a focus jump instead of the underlying identity mismatch.
+
+**Fix:** Refactor page-composer reorder and live editing around stable section identity: move up/down and drag sorting now use section identity end to end, new and duplicated layout blocks receive `_uuid` identities, live hero/service/media blocks resolve their current draft index from the active section identity, hero normalization keeps the hero block pinned to the first slot during layout normalization/save, and the canvas shell no longer auto-scrolls on selection. Split the canvas wrapper's stable render index from its live action index so reorder actions still hit the correct draft slot without losing stable DOM anchors.
+
+**Verification:**
+```
+cmd /c npm.cmd exec vitest run tests/int/components/page-composer/page-composer-layout-tab.int.spec.tsx tests/int/components/page-composer/page-composer-canvas.int.spec.tsx tests/int/components/page-composer/page-composer-shell.int.spec.tsx
+```
+```
+cmd /c npm.cmd exec eslint src/blocks/Hero/Component.tsx src/blocks/MediaBlock/Component.tsx src/blocks/RenderBlocks.tsx src/blocks/ServiceGrid/Component.tsx src/components/page-composer/PageComposerContext.tsx src/components/page-composer/PageComposerDrawer.tsx src/components/page-composer/useResolvedComposerBlockIndex.ts src/components/page-composer/canvas/CanvasSectionActionRail.tsx src/components/page-composer/canvas/CanvasSectionChrome.tsx src/components/page-composer/canvas/CanvasSectionShell.tsx src/components/page-composer/drawer/PageComposerDrawerSortableSectionRow.tsx src/components/page-composer/drawer/PageComposerDrawerStructureTab.tsx src/lib/pages/pageComposer.ts src/lib/pages/pageComposerBlockIdentity.ts src/lib/pages/pageComposerBlockRegistry.ts src/lib/pages/pageLayoutBlocks.ts tests/int/components/page-composer/page-composer-canvas.int.spec.tsx
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 18-06-a2 — phase 18 — task 18-06 — resolved
+
+**Media-tab verification drifted after the page-local refactor because slot-focused controls were no longer mounted and browser specs assumed the wrong contract**
+
+
+**Symptom:** The rebuilt production-browser pass no longer failed on reorder, but the page-composer media flow still broke during verification. The Media tab showed the global library, yet the browser spec could not find the old slot-selection button, swap success text, or focused-copilot trigger reliably. The full Playwright file also ran the focused media copilot spec in environments where the feature flag intentionally hid that control.
+
+**Cause:** The simplified page-local media tab still received `selectedMediaSlot`, `mediaSlots`, and slot-targeted actions from the drawer state, but only the library surface remained mounted. Existing slot-focused components for selected-slot details, preview, and upload/generate swap actions had been left unused, so the product surface and browser coverage drifted apart. On top of that, the focused-copilot test only checked `AI_OPS_ASSISTANT_ENABLED` instead of the narrower `NEXT_PUBLIC_COPILOT_MEDIA_GENERATION_ENABLED` gate used by the UI.
+
+**Fix:** Refactor the Media tab into a hybrid surface: keep the global library, but mount the selected-block slot list plus selected-slot details, preview, and upload/generate card whenever block-local media slots exist. Give slot buttons stable accessible labels, update the shell integration coverage to assert the restored slot surface, change the Playwright media flow to target the stable slot/button labels and request-side effects instead of missing toast text, and gate the focused-copilot browser spec on both the shared assistant flag and the focused-media-generation flag. Capture the pattern in `.planning/skills/page-composer-media-slot-surface.md`.
+
+**Verification:**
+```
+cmd /c npm.cmd exec eslint src/components/page-composer/PageComposerDrawer.tsx src/components/page-composer/drawer/PageComposerDrawerChrome.tsx src/components/page-composer/drawer/PageComposerDrawerMediaTab.tsx src/components/page-composer/drawer/PageComposerDrawerMediaSlotList.tsx tests/e2e/page-composer.e2e.spec.ts tests/int/components/page-composer/page-composer-shell.int.spec.tsx
+```
+```
+cmd /c npm.cmd exec vitest run tests/int/components/page-composer/page-composer-layout-tab.int.spec.tsx tests/int/components/page-composer/page-composer-shell.int.spec.tsx tests/int/components/page-composer/page-composer-canvas.int.spec.tsx
+```
+```
+cmd /c npm.cmd run build
+```
+```
+powershell -NoProfile -Command "$env:PLAYWRIGHT_BASE_URL='http://localhost:3101'; npm.cmd exec -- playwright test tests/e2e/page-composer.e2e.spec.ts --config=playwright.local.config.ts --reporter=line"
+```
+
+## 12-03-a1 — phase 12 — task 12-03 — resolved
+
+**Phase-12 closeout was blocked by overly narrow inference in mutable page-composer test fixtures**
+
+
+**Symptom:** After the Clerk webhook slice shipped, `npm.cmd exec -- tsc --noEmit` still failed during phase-12 closeout in `tests/int/blocks/service-grid-inline-editing.int.spec.tsx` and `tests/int/components/admin-impersonation/inline-page-media-editor.int.spec.tsx`, which made the provider-sync verification look incomplete even though the feature work itself was green.
+
+**Cause:** Both specs relied on mutable mock fixtures without explicit contract types. TypeScript inferred the initial literals too narrowly, so later valid assignments for service-grid interactivity, media rows, draft-page blocks, and media-registry mutations collapsed to invalid or `never` targets.
+
+**Fix:** Type the mutable fixtures against the real composer and Payload contracts used by the editor surfaces, then rerun the affected specs and the full project typecheck before closing phase `12`.
+
+**Verification:**
+```
+cmd /c npm.cmd exec -- vitest run tests/int/blocks/service-grid-inline-editing.int.spec.tsx tests/int/components/admin-impersonation/inline-page-media-editor.int.spec.tsx --config ./vitest.config.mts
+```
+```
+cmd /c npm.cmd exec -- tsc --noEmit
+```
+
+## 12-03-a2 — phase 12 — task 12-03 — resolved
+
+**The reported `Collecting build traces ...` stall was a perceived hang, not a reproducible phase-12 build blocker**
+
+
+**Symptom:** Phase-12 closeout carried forward an unresolved note that local `npm.cmd run build` had stalled at `Collecting build traces ...` after cache cleanup, so build verification for the provider-sync slice was being treated as incomplete.
+
+**Cause:** No reproducible deadlock was found in the current repository state. The strongest supported explanation is that Next.js trace collection is silent and materially long on this project, while prior local stale `next dev` or `next start` process noise had already created build-status confusion in earlier sessions.
+
+**Fix:** Re-run production builds in the current workspace, let the trace phase complete, inspect `.next/trace-build`, and downgrade the issue from a code blocker to an operational note: if it resurfaces, first clear stale Next processes and check the trace artifact before classifying the build as hung.
+
+**Verification:**
+```
+cmd /c npm.cmd run build
+```
+
+## 19-01-a1 — phase 19 — task 19-01 — resolved
+
+**`payload migrate:create` drifted into unrelated enum rename prompts instead of generating a bounded phase-19 migration**
+
+
+**Symptom:** While adding the inbound-media-ingestion contract, `npm.cmd run payload -- migrate:create add_inbound_media_ingestions --skipEmpty` opened interactive enum rename questions like `enum_pages_blocks_hero_block_links_link_type`, even though the phase only added one new collection and no hero-link schema changes.
+
+**Cause:** The local Payload schema snapshot had enough unrelated historic drift that the migration generator tried to reconcile old enum differences at the same time as the new collection. That made the generator output unsafe for a narrow `19-01` change because one wrong interactive answer could pull unrelated schema churn into the migration.
+
+**Fix:** Simplify the ingestion record to a single collection with JSON audit fields instead of nested relationship tables, hand-write `src/migrations/20260410_023500_add_inbound_media_ingestions.ts`, update `src/migrations/index.ts` manually, and verify the migration by applying it locally plus rerunning `tsc` and `next build`. Capture the pattern in `.planning/skills/payload-manual-migration-when-generator-drifts.md`.
+
+**Verification:**
+```
+cmd /c npm.cmd run generate:types
+```
+```
+cmd /c npm.cmd exec -- tsc --noEmit
+```
+```
+cmd /c npm.cmd run payload -- migrate
+```
+```
+cmd /c npm.cmd run build
+```
+
+## 19-02-a2 — phase 19 — task 19-02 — open
+
+**Agent session reversed intentional composer subtractions after treating them as regressions**
+
+
+**Symptom:** During a Codex-driven pass on phase `19-02`, most effort went to restoring prior behavior: current-block media slots plus upload/generate (hybrid media tab) and canvas interactive lane selection for the service grid, favoring a popup-modal style flow. The author had intentionally removed or simplified some of that UX; additions from the same period were largely preserved, but subtractions were effectively undone.
+
+**Cause:** Integration tests, browser specs, and prior planning (including attempt `18-06-a2` and skill `page-composer-media-slot-surface.md`) encode the hybrid slot surface and stable labels as the contract. That contract was not reconciled with undocumented human-authored UI removals, so the agent correctly &quot;fixed&quot; failing tests by restoring the old surface. Separately, service-grid drag-and-drop still only behaves on the first service lane, not subsequent lanes.
+
+**Fix:** Record author intent explicitly before long agent loops (see decision `D-process-029`). For drag-drop, treat multi-lane behavior as an open product bug under `19-02` / follow-on tasks and add coverage once the interaction model is settled.
+
+**Verification:**
+```
+cmd /c echo Narrative handoff: .planning/notes/2026-04-10-composer-authoring-vs-agents.md
 ```

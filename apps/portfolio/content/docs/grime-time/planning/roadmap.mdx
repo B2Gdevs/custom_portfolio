@@ -3,7 +3,7 @@ title: "grime-time — Roadmap"
 description: "Auto-compiled from vendor/grime-time-site/.planning/ROADMAP.xml"
 generated: "true"
 source: "vendor/grime-time-site/.planning/ROADMAP.xml"
-updated: "2026-04-07T20:06:41.166Z"
+updated: "2026-04-10T16:13:24.004Z"
 ---
 
 # Roadmap
@@ -67,16 +67,16 @@ updated: "2026-04-07T20:06:41.166Z"
 **Goal:** Evaluate later-lifecycle lead-capture channels such as Google Business Profile messaging and only enable them when response-time coverage, inbox routing, and follow-up ownership are strong enough to protect conversion and local-search reputation.
 **Depends:** 07
 
-## Phase 11 — Field-agent messaging, notifications, and subscriptions
+## Phase 11 — Clerk auth completion and portal onboarding
 
 **Status:** complete
-**Goal:** Ship employee quote-notification email first, then add a shared Grime Time tool surface for field-agent messaging and an OpenClaw plugin path, while keeping Stripe as the default infrastructure for recurring services and subscriptions.
+**Goal:** Finish the Clerk-primary identity migration by locking public account creation down to invite and claim flows, moving the customer and ops portals onto explicit dashboard routes, and completing the first-run staff onboarding path into the app-owned ops experience without reviving Supabase-first entry points.
 **Depends:** 07,08
 
-## Phase 12 — Organizations, RBAC, and provider sync
+## Phase 12 — Staff admin, users, customers, and provider sync
 
 **Status:** complete
-**Goal:** Define a first-party organization and membership model, keep Clerk as the identity provider rather than the business-authorization source of truth, support role and entitlement changes from Grime Time admin, and sync org/user changes safely to external providers and downstream apps.
+**Goal:** Build the first-party staff administration layer on top of the new organization model: `/portal/ops/users` and `/portal/ops/customers`, role-template and entitlement controls, invite management, and adapter-based sync so Clerk remains an identity provider instead of the long-term business-authorization source of truth.
 **Depends:** 04,07,11
 
 ## Phase 13 — Visual page composer and copilot authoring
@@ -109,8 +109,20 @@ updated: "2026-04-07T20:06:41.166Z"
 **Goal:** Bring the full block system to life with linked-or-detached reusable blocks, pre-wired dynamic blocks, constrained container slots, and a real Custom HTML block with explicit safety rules.
 **Depends:** 15,16
 
-## Phase 18 — Shared sections and constrained reuse authoring
+## Phase 18 — Page-local blocks and dynamic block editing
+
+**Status:** complete
+**Goal:** Simplify the composer around page-local blocks, code-owned app blocks, and future dynamic data blocks; remove shared-section authoring, and finish the page-local copy and media editing model so each page owns its content while still pulling approved media and system data from first-party sources.
+**Depends:** 15,16,17
+
+## Phase 19 — Inbound media intake and composer media ops
 
 **Status:** in-progress
-**Goal:** Turn reusable authoring into a CMS-managed shared-section system with explicit source editing, promote/detach/replace flows, lightweight version restore, and a constrained shallow layout contract that avoids a freeform builder.
-**Depends:** 15,16,17
+**Goal:** Finish the next media-operations lane by making composer replacement flows reliable in the new page-local media tab and adding a first-party inbound email attachment ingestion path that turns Resend-delivered attachments into Grime Time media records with auditability and replay-safe processing.
+**Depends:** 11,12,18
+
+## Phase 20 — Block lab: staff playground and MCP App Studio shell
+
+**Status:** planned
+**Goal:** Give builders an isolated place to iterate Payload layout blocks with mock data before blocks appear in composer or public pages: an optional staff-gated Next route plus a sibling MCP App Studio package under `tools/grime-block-lab` for host previews, tool mocks, and keyword or tool-trigger experiments, with a documented path to share code with `src/blocks` without pulling server-only imports into the widget bundle.
+**Depends:** 15,18
