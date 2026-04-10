@@ -25,6 +25,7 @@ pnpm run build:portfolio-v2
 
 ## Vercel
 
-- **Install:** `pnpm install` from the monorepo root.
-- **Build:** `pnpm --filter @portfolio/v2 run build` (or set the app root to `apps/portfolio-v2` and use the equivalent).
+- **Root Directory:** `apps/portfolio-v2` (this folder).
+- **Framework:** Next.js (auto-detected). **`vercel.json`** sets `installCommand` + `buildCommand` so the monorepo installs from the repo root and **`pnpm run build`** always runs (avoids deploys that skip `next build` and miss `.next`).
+- Leave **Output Directory** empty (Vercel handles Next.js output).
 - Copy environment variables from your main portfolio project (Payload, DB, S3, Clerk, `PAYLOAD_SECRET`, flags).

@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "installCommand": "cd ../.. && git submodule update --init --recursive && pnpm install",
+  "buildCommand": "pnpm run build"
+}
