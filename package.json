@@ -18,6 +18,8 @@
     "env:sync-portfolio": "node scripts/sync-portfolio-env.cjs",
     "dev": "npm run dev --workspace=@portfolio/app",
     "dev:chat-api": "pnpm --filter @portfolio/app exec next dev --webpack -- --port 3010",
+    "dev:portfolio-v2": "pnpm --filter @portfolio/v2 dev",
+    "build:portfolio-v2": "pnpm --filter @portfolio/v2 build",
     "chat:build": "node scripts/portfolio-chat-dist.mjs build",
     "chat:start": "node scripts/portfolio-chat-dist.mjs start",
     "build": "pnpm --filter @portfolio/repub-builder run build && npm run build --workspace=@portfolio/app",
