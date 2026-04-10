@@ -28,4 +28,6 @@ pnpm run build:portfolio-v2
 - **Root Directory:** `apps/portfolio-v2` (this folder).
 - **Framework:** Next.js (auto-detected). **`vercel.json`** sets `installCommand` + `buildCommand` so the monorepo installs from the repo root and **`pnpm run build`** always runs (avoids deploys that skip `next build` and miss `.next`).
 - Leave **Output Directory** empty (Vercel handles Next.js output).
+- **`next.config.ts`:** When `VERCEL=1`, file tracing uses **this app directory only** and omits `../../node_modules` NFT globs so the deploy package does not include pnpm symlink trees (fixes “invalid deployment package … symlinked directories”). Local builds still trace from the monorepo root like `apps/portfolio`.
+- If an old error persists after fixing config, redeploy with **Clear build cache** once.
 - Copy environment variables from your main portfolio project (Payload, DB, S3, Clerk, `PAYLOAD_SECRET`, flags).

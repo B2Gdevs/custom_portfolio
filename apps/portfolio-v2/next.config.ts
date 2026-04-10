@@ -5,8 +5,18 @@ import type { NextConfig } from 'next';
 
 const appRoot = path.resolve(__dirname);
 const monorepoRoot = path.resolve(__dirname, '../..');
+const isVercel = process.env.VERCEL === '1';
 
-const payloadAdapterTraceIncludes = [
+/**
+ * Local builds trace from the monorepo root so NFT can follow hoisted deps under
+ * `../../node_modules` (matches `apps/portfolio`). Vercel rejects serverless output that
+ * includes symlinked trees from tracing outside the app — use app root only, and **omit**
+ * `../../node_modules` includes there (pnpm still links deps under `apps/portfolio-v2/node_modules`).
+ */
+const outputFileTracingRoot = isVercel ? appRoot : monorepoRoot;
+
+/** NFT includes for local / non-Vercel (monorepo root tracing). */
+const payloadAdapterTraceIncludesFull = [
   './node_modules/@payloadcms/db-sqlite/**/*',
   './node_modules/@payloadcms/db-postgres/**/*',
   './node_modules/pg/**/*',
@@ -15,7 +25,7 @@ const payloadAdapterTraceIncludes = [
   '../../node_modules/pg/**/*',
 ] as const;
 
-const payloadS3TraceIncludes = [
+const payloadS3TraceIncludesFull = [
   './node_modules/@aws-sdk/client-s3/**/*',
   './node_modules/@aws-sdk/s3-request-presigner/**/*',
   './node_modules/@payloadcms/storage-s3/**/*',
@@ -26,11 +36,27 @@ const payloadS3TraceIncludes = [
   '../../node_modules/@smithy/**/*',
 ] as const;
 
-const payloadServerTraceIncludes = [...payloadAdapterTraceIncludes, ...payloadS3TraceIncludes];
+/** Vercel: only `./node_modules` globs — no parent `../../` paths into the pnpm store. */
+const payloadAdapterTraceIncludesVercel = [
+  './node_modules/@payloadcms/db-sqlite/**/*',
+  './node_modules/@payloadcms/db-postgres/**/*',
+  './node_modules/pg/**/*',
+] as const;
+
+const payloadS3TraceIncludesVercel = [
+  './node_modules/@aws-sdk/client-s3/**/*',
+  './node_modules/@aws-sdk/s3-request-presigner/**/*',
+  './node_modules/@payloadcms/storage-s3/**/*',
+  './node_modules/@smithy/**/*',
+] as const;
+
+const payloadServerTraceIncludes = isVercel
+  ? [...payloadAdapterTraceIncludesVercel, ...payloadS3TraceIncludesVercel]
+  : [...payloadAdapterTraceIncludesFull, ...payloadS3TraceIncludesFull];
 
 const nextConfig: NextConfig = {
   staticPageGenerationTimeout: 300,
-  outputFileTracingRoot: monorepoRoot,
+  outputFileTracingRoot,
   outputFileTracingIncludes: {
     '/**': [...payloadServerTraceIncludes],
   },
