@@ -72,16 +72,12 @@ const nextConfig: NextConfig = {
    * Include both adapters + `pg` (postgres adapter) from app and hoisted root `node_modules`.
    */
   /**
-   * Keys must match real route paths; a bare `**` key does not apply reliably on Vercel.
-   * Payload uses dynamic `require()` for DB adapters — ensure these packages are traced.
-   * App Router pages that call `getPayloadClient()` need the same includes as `/api` (see `/apps`).
+   * Picomatch keys: `/blog/**/*` does **not** match the `/blog` index route; nested `/api/...`
+   * entries must match too. A single `/**` applies these files to every non-static server trace
+   * (see `collect-build-traces` picomatch + `normalizeAppPath`).
    */
   outputFileTracingIncludes: {
-    '/api/**/*': [...payloadServerTraceIncludes],
-    '/admin/**/*': [...payloadServerTraceIncludes],
-    '/apps/**/*': [...payloadServerTraceIncludes],
-    '/projects/**/*': [...payloadServerTraceIncludes],
-    '/resumes/**/*': [...payloadServerTraceIncludes],
+    '/**': [...payloadServerTraceIncludes],
   },
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   transpilePackages: ['@portfolio/repub-builder', '@tldraw/tldraw', 'tldraw'],

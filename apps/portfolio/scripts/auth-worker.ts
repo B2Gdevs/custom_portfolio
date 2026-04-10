@@ -1,9 +1,4 @@
-import { getViewerFeatureAccess } from '@/lib/auth/permissions';
-import {
-  getSessionViewer,
-  loginWithCredentials,
-  maybeAutoLoginForDevelopment,
-} from '@/lib/auth/session';
+import { runLoginCommand, runSessionCommand } from '@/lib/auth/auth-commands';
 import { loadScriptEnv } from './load-script-env';
 
 loadScriptEnv();
@@ -22,37 +17,13 @@ async function handleSession(payload: Record<string, unknown>) {
   const request = new Request('http://localhost/api/auth/session', {
     headers: cookieHeader ? { cookie: cookieHeader } : undefined,
   });
-
-  const autoLoginResponse = await maybeAutoLoginForDevelopment(request);
-  if (autoLoginResponse) {
-    return {
-      status: autoLoginResponse.status,
-      body: await autoLoginResponse.json(),
-      setCookie: autoLoginResponse.headers.get('set-cookie'),
-    };
-  }
-
-  const viewer = await getSessionViewer(request);
-  return {
-    status: 200,
-    body: {
-      ok: true,
-      session: getViewerFeatureAccess(viewer),
-    },
-    setCookie: null,
-  };
+  return runSessionCommand(request);
 }
 
 async function handleLogin(payload: Record<string, unknown>) {
   const email = typeof payload.email === 'string' ? payload.email.trim() : '';
   const password = typeof payload.password === 'string' ? payload.password : '';
-  const response = await loginWithCredentials({ email, password });
-
-  return {
-    status: response.status,
-    body: await response.json(),
-    setCookie: response.headers.get('set-cookie'),
-  };
+  return runLoginCommand(email, password);
 }
 
 async function main() {
