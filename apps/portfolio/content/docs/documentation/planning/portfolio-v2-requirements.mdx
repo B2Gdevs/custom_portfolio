@@ -1,0 +1,138 @@
+---
+title: Portfolio v2 — requirements draft
+description: Greenfield rebuild of @portfolio/app — intent, scope, carryover, and verification pattern (GAD-style).
+date: "2026-04-10"
+updated: "2026-04-10"
+order: 98
+repoPath: apps/portfolio/content/docs/documentation/planning/portfolio-v2-requirements.mdx
+---
+
+# Portfolio v2 — requirements (draft)
+
+Living capture for a **full rebuild** of the public portfolio app (today: `apps/portfolio`). Method: same discipline as GAD greenfield work — **stable requirement ids**, **explicit non-goals**, **definition of done per phase**, and **automated gates** where behavior is executable.
+
+**Canonical monorepo narrative today:** [documentation requirements](/docs/documentation/requirements) (product boundaries, auth, data contract, shared surfaces). **Global planning rules:** [global requirements](/docs/global/requirements).
+
+---
+
+## Registry
+
+| Field | Value |
+| --- | --- |
+| `initiative` | `portfolio-v2` |
+| `status` | `draft` |
+| `owner` | `monorepo` |
+| `replaces` | `apps/portfolio` (incremental cutover or fresh app slug TBD) |
+
+---
+
+## 1. Intent
+
+| Id | Statement |
+| --- | --- |
+| `P2-INT-01` | Ship a **maintainable** public site + gated product surfaces without the accumulated complexity of the current Next + Payload + monorepo hoist + tracing workarounds. |
+| `P2-INT-02` | Preserve **reader-facing quality** (house copy registers, coherent IA, accessible UI) per root [AGENTS.md](/AGENTS.md) content rules. |
+| `P2-INT-03` | Keep **one permission and persistence story** (owner/tenant, entitlements, provider-neutral storage) aligned with **GLOBAL-REQ-09** / **GLOBAL-REQ-10** and documentation [DOC-REQ-16](/docs/documentation/requirements). |
+| `P2-INT-04` | Prefer **boring deploys**: predictable serverless bundles, minimal “only on Vercel” failures, explicit env contract. |
+
+---
+
+## 2. Non-goals (default until promoted)
+
+| Id | Non-goal |
+| --- | --- |
+| `P2-NG-01` | Pixel-perfect parity with every legacy route on day one. |
+| `P2-NG-02` | Re-implement all internal tools (planning pack modal, RepoPlanner cockpit, magicborn CLI UI) inside v2 unless listed in **must carry**. |
+| `P2-NG-03` | Public self-signup / multi-tenant SaaS (v1 stays **no public signup**, per existing policy). |
+
+---
+
+## 3. Audiences & outcomes
+
+| Audience | Outcome |
+| --- | --- |
+| Visitor | Fast, clear navigation; docs, blog, projects, listen, apps catalog, books/reader entrypoints work without auth where public. |
+| Owner | Admin/auth flows, seeding, uploads, gated features; safe operator paths documented. |
+| Agent / CI | `install` / `build` / `lint` / targeted `test` gates; planning ids and repo paths stay traceable. |
+
+---
+
+## 4. Functional domains (decide carry / defer / drop)
+
+Use this table in kickoff; turn each **carry** row into phased tasks with DoD.
+
+| Domain | Current anchor (reference) | Decision |
+| --- | --- | --- |
+| Marketing / home | `app/page.tsx`, mega-menu | `TBD` |
+| Docs / MDX | `app/docs/**`, content tree | `TBD` — keep MDX + search? |
+| Blog / projects | content-backed discovery | `TBD` — static vs CMS |
+| Listen | catalog + gating | `TBD` |
+| Apps grid | site apps + Payload | `TBD` |
+| Books / reader | EPUB, workspace, APIs | `TBD` — highest coupling |
+| Auth | Clerk + Payload users, cookies | `TBD` — simplify stack? |
+| Admin | Payload admin | `TBD` |
+| AI / RAG / chat | APIs + sources | `TBD` |
+| Planning embeds / packs | modal, public JSON | `TBD` |
+
+---
+
+## 5. Technical requirements (candidates)
+
+| Id | Requirement | Notes |
+| --- | --- | --- |
+| `P2-TEC-01` | **Deploy target** is Vercel (or document if changing). | Drives runtime, env, tracing. |
+| `P2-TEC-02` | **Data layer** is explicit: Postgres + ORM/CMS vs “static + API only” vs split (public static / private API). | Affects build-time vs request-time data. |
+| `P2-TEC-03` | **No dev-only tools in production routes** (e.g. subprocess `tsx`). | Lesson from auth/session. |
+| `P2-TEC-04` | **File tracing / bundle** policy is documented for every server entry that loads DB or S3 clients. | Or: single deploy root like Grime Time to reduce hoist issues. |
+| `P2-TEC-05` | **Monorepo**: stay in `custom_portfolio` with `apps/portfolio-v2` **or** extract repo — decision recorded in **DECISIONS** when chosen. | Impacts `pnpm`, CI, submodules. |
+| `P2-TEC-06` | **Node** LTS alignment with root `engines` (today ≥ 22). | |
+| `P2-TEC-07` | **Secrets**: only env / Vercel; no committed credentials. | |
+
+---
+
+## 6. Verification & “eval” pattern (GAD-like)
+
+Mirror **gad-27 / gad-28** spirit: comparable runs, scored or pass/fail artifacts.
+
+| Id | Gate |
+| --- | --- |
+| `P2-VFY-01` | CI: `pnpm install`, `build`, `lint` for the v2 workspace. |
+| `P2-VFY-02` | **Smoke routes**: list of URLs (public + one authenticated path) that must return non-5xx after deploy. |
+| `P2-VFY-03` | **Data contracts**: any Payload/collection or API schema change has a migration or seed step documented. |
+| `P2-VFY-04` | **Optional eval harness**: fixture project(s) that implement a minimal clone of v2 constraints (like game evals for GAD) — only if you want regression compares across refactors. |
+
+---
+
+## 7. Migration / cutover
+
+| Id | Requirement |
+| --- | --- |
+| `P2-MIG-01` | Choose **big-bang** vs **parallel app** (`/v2` or separate hostname) vs **strangler** by route; record decision before wide execution. |
+| `P2-MIG-02` | List **redirects** from legacy slugs if URLs change. |
+| `P2-MIG-03` | **Content migration** plan for MDX, media, and Payload rows (books, listen, site apps). |
+
+---
+
+## 8. Open questions (fill before phase plans)
+
+1. **Payload**: keep, slim, or replace for v2?
+2. **Books/reader**: same repo package boundaries (`repub-builder`, `public/books`) or isolate?
+3. **Auth**: Clerk + Payload only, or reduce to one identity store?
+4. **SEO / rendering**: static generation where possible vs force-dynamic for CMS?
+5. **Internationalization** / accessibility targets beyond current baseline?
+
+---
+
+## 9. Next planning steps (when you promote from draft)
+
+1. Run **`gad write-intent`** (or product kickoff) and pin **one paragraph product intent** + **success metrics**.
+2. Add a **roadmap phase** (e.g. `portfolio-v2-01`) in [documentation roadmap](/docs/documentation/planning/roadmap) or root `.planning/ROADMAP.xml` — pick one system of record.
+3. Produce **KICKOFF.mdx** / **PLAN.mdx** for phase 01 with tasks and DoD (tests named per task).
+
+---
+
+## References
+
+- [Documentation requirements](/docs/documentation/requirements) — monorepo product scope
+- [Global requirements](/docs/global/requirements) — planning IA, auth/storage policy
+- [GAD AGENTS.md](https://github.com/MagicbornStudios/get-anything-done/blob/main/AGENTS.md) (vendor copy: `vendor/get-anything-done/AGENTS.md`) — loop, decisions, eval mindset
