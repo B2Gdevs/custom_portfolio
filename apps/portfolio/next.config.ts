@@ -33,6 +33,24 @@ const payloadAdapterTraceIncludes = [
   '../../node_modules/pg/**/*',
 ] as const;
 
+/**
+ * Same class of issue as DB adapters: `serverExternalPackages` + webpack externals keep these out of
+ * the webpack graph, so Vercel NFT can omit them for `/api/published-book-artifacts/*` unless
+ * explicitly included. `@smithy/*` is required by AWS SDK v3 at runtime.
+ */
+const payloadS3TraceIncludes = [
+  './node_modules/@aws-sdk/client-s3/**/*',
+  './node_modules/@aws-sdk/s3-request-presigner/**/*',
+  './node_modules/@payloadcms/storage-s3/**/*',
+  './node_modules/@smithy/**/*',
+  '../../node_modules/@aws-sdk/client-s3/**/*',
+  '../../node_modules/@aws-sdk/s3-request-presigner/**/*',
+  '../../node_modules/@payloadcms/storage-s3/**/*',
+  '../../node_modules/@smithy/**/*',
+] as const;
+
+const payloadServerTraceIncludes = [...payloadAdapterTraceIncludes, ...payloadS3TraceIncludes];
+
 const nextConfig: NextConfig = {
   /** Remaining static routes; docs MDX are `force-dynamic` so they do not prerender at build. */
   staticPageGenerationTimeout: 300,
@@ -56,10 +74,14 @@ const nextConfig: NextConfig = {
   /**
    * Keys must match real route paths; a bare `**` key does not apply reliably on Vercel.
    * Payload uses dynamic `require()` for DB adapters — ensure these packages are traced.
+   * App Router pages that call `getPayloadClient()` need the same includes as `/api` (see `/apps`).
    */
   outputFileTracingIncludes: {
-    '/api/**/*': [...payloadAdapterTraceIncludes],
-    '/admin/**/*': [...payloadAdapterTraceIncludes],
+    '/api/**/*': [...payloadServerTraceIncludes],
+    '/admin/**/*': [...payloadServerTraceIncludes],
+    '/apps/**/*': [...payloadServerTraceIncludes],
+    '/projects/**/*': [...payloadServerTraceIncludes],
+    '/resumes/**/*': [...payloadServerTraceIncludes],
   },
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   transpilePackages: ['@portfolio/repub-builder', '@tldraw/tldraw', 'tldraw'],
