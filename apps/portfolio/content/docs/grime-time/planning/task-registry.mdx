@@ -3,7 +3,7 @@ title: "grime-time — Task Registry"
 description: "Auto-compiled from vendor/grime-time-site/.planning/TASK-REGISTRY.xml"
 generated: "true"
 source: "vendor/grime-time-site/.planning/TASK-REGISTRY.xml"
-updated: "2026-04-10T16:13:24.004Z"
+updated: "2026-04-10T18:21:34.460Z"
 ---
 
 # Task Registry
@@ -134,10 +134,11 @@ updated: "2026-04-10T16:13:24.004Z"
 
 ## Phase 20
 
-- ○ **20-01** Scaffold `tools/grime-block-lab` with MCP App Studio (`npx mcp-app-studio grime-block-lab` from `tools/`), wire npm scripts for dev and production export, and document the interactive CLI + links to assistant-ui MCP App Studio docs.
-- ○ **20-02** Introduce a typed block fixture registry (`blockType` → mock props) and render one pilot block inside the lab using fixtures only; document how to share code with `src/blocks` without importing server-only Next/Payload paths into the MCP bundle.
-- ○ **20-03** Add MCP tools to list blocks, set the active preview block, and apply fixture variants or custom JSON; validate in App Studio mock tooling and capture host capability expectations.
+- ✓ **20-01** Scaffold `tools/grime-block-lab` with MCP App Studio (`npx mcp-app-studio grime-block-lab` from `tools/`), wire npm scripts for dev and production export, and document the interactive CLI + links to assistant-ui MCP App Studio docs.
+- ✓ **20-02** Introduce a typed block fixture registry (`blockType` → mock props) and render one pilot block inside the lab using fixtures only; document how to share code with `src/blocks` without importing server-only Next/Payload paths into the MCP bundle.
+- ✓ **20-03** Add MCP tools to list blocks, set the active preview block, and apply fixture variants or custom JSON; validate in App Studio mock tooling and capture host capability expectations.
 - ○ **20-04** Optional complement: staff-gated Next.js route that mirrors the fixture registry for local browser iteration (`noindex`, not in sitemap, no public links).
+- ✓ **20-05** Add a Payload-backed live catalog tab to the block lab: expose a dev-only Grime Time route that lists composer-aware page blocks from the local database, proxy it through the studio, and allow supported blocks to load into the preview as the new base input for debugging.
 
 ## Phase 13
 

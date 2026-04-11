@@ -3,7 +3,7 @@ title: "global — Planning State"
 description: "Auto-compiled from ./.planning/STATE.xml"
 generated: "true"
 source: "./.planning/STATE.xml"
-updated: "2026-04-09T02:21:04.772Z"
+updated: "2026-04-10T18:21:34.526Z"
 ---
 
 # Planning State
@@ -13,8 +13,8 @@ updated: "2026-04-09T02:21:04.772Z"
 - **Phase:** 05
 - **Plan:** global-data-storage-02
 - **Status:** active
-- **Updated:** 2026-04-09T18:30:00.000Z
+- **Updated:** 2026-04-08T06:25:00.000Z
 
 ## Next action
 
-Primary queue: continue `02-01` (shared data/storage provider contract). Parallel: **phase 06** — `06-01`/`06-02`/`06-04` done (GAD CLI, gad-ui placeholder, upstream landing build band); **2026-04-09:** Vercel ESLint `@next/next/no-html-link-for-pages` on `/cockpit` back link — fixed upstream (`next/link` in `cockpit-demo.tsx`, commit `c133b72`); monorepo submodule pinned to `c133b72`. `06-03` in progress: portfolio still imports `repo-planner` until APIs/docs migration finishes; legacy `loop-cli` remains for init/embed/report/checklist until GAD ports. Run `pnpm gad:snapshot` or `gad snapshot --projectid global` after pulls. Decision **06-01** records RP deprecation + narrow Vercel landing exception.
+Primary queue: continue `02-01` (shared data/storage provider contract). Parallel: **phase 06** — `06-01`–`06-04` done; **`06-03` done (2026-04-08):** `@portfolio/app` no longer imports `vendor/repo-planner` (parsers/workflow in `apps/portfolio/lib/planning-parse/`; embed builder in `apps/portfolio/scripts/lib/`; `POST /api/planning-cli/run` → 501). Submodule stays archived for history + root legacy `loop-cli` scripts until those port to GAD. Run `gad snapshot --projectid global` after pulls. Decision **06-01** records RP deprecation + narrow Vercel landing exception.

@@ -3,14 +3,40 @@ title: "repo-planner — Task Registry"
 description: "Auto-compiled from vendor/repo-planner/.planning/TASK-REGISTRY.xml"
 generated: "true"
 source: "vendor/repo-planner/.planning/TASK-REGISTRY.xml"
-updated: "2026-04-07T20:03:13.733Z"
+updated: "2026-04-10T18:21:34.436Z"
 ---
 
 # Task Registry
 
+## Phase 01
+
+- ✓ **01-01** Align monorepo scripts and docs with repo-planner CLI entrypoints.
+- ✓ **01-02** Define embed boundaries: read-only by default, no casual server writes to git.
+
+## Phase 02
+
+- ✓ **02-01** Stabilize repo-planner/host exports for PlanningCockpitDashboard and workspace shell.
+
+## Phase 03
+
+- ✓ **03-01** Implement Pack vs Live mode split with explicit labels and separate data sources.
+
+## Phase 04
+
+- ✓ **04-01** Generate static builtin-packs.json from committed planning files for demo and docs.
+
+## Phase 05
+
+- ✓ **05-01** Wire snapshot scoring and workflow cards to shared planning-workflow engine.
+
+## Phase 06
+
+- ✓ **06-01** Structured inspector views for task-registry, roadmap rows, and decisions with host policy badges.
+
 ## Phase 07
 
-- ○ **07-01** Migrate rp-* skills from vendor/repo-planner/skills/ to vendor/get-anything-done/skills/ with gad: naming prefix.
-- ○ **07-02** Create deprecation stubs in vendor/repo-planner/skills/ pointing to new gad: skill locations.
-- ○ **07-03** Remove legacy session.md pattern; repo-planner now uses gad session commands.
-- ✓ **07-04** Update AGENTS.md to reference XML planning files and gad: commands exclusively.
+- ✓ **07-01** Maintain .planning/*.xml at RepoPlanner repo root as canonical source for landing builtin pack.
+- ✓ **07-02** CockpitFromPack: parse ROADMAP, STATE, TASK-REGISTRY with fast-xml-parser; read-only list UI matching mock chrome.
+- ✓ **07-03** Document on landing: planning-pack JSON shape, parsing pipeline, and difference from semantic embeddings.
+- ○ **07-04** Migrate rp-* skill stubs to gad:* in get-anything-done; keep RepoPlanner as format reference.
+- ○ **07-05** Port host-heavy cockpit features to GAD-owned package for consumers that standardize on gad CLI.

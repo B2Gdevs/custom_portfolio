@@ -3,7 +3,25 @@ title: "repo-planner — Decisions"
 description: "Auto-compiled from vendor/repo-planner/.planning/DECISIONS.xml"
 generated: "true"
 source: "vendor/repo-planner/.planning/DECISIONS.xml"
-updated: "2026-04-07T20:03:13.733Z"
+updated: "2026-04-10T18:21:34.436Z"
 ---
 
 # Decisions
+
+## RP-LANDING-01: Reference site cockpit is read-only parsed XML
+
+The RepoPlanner apps/landing /cockpit route loads builtin-packs.json, then parses ROADMAP.xml, STATE.xml, and TASK-REGISTRY.xml with fast-xml-parser. List rows reflect committed task status attributes — not hand-written mock rows.
+
+**Impact:** Operators see how a host app can treat planning files as data without a database.
+
+## RP-LANDING-02: Canonical demo planning tree lives in repository .planning/
+
+The same XML under RepoPlanner/.planning is bundled into public/planning-embed/builtin-packs.json at build time and mirrored into the downloadable init bundle under public/init/planning for parity.
+
+**Impact:** One source of truth for docs, demo, and planning init samples.
+
+## RP-PARSE-01: Client parsing uses fast-xml-parser, not embeddings
+
+“Fast” in this stack refers to fast-xml-parser (attribute-aware XML to JS objects). Semantic search or vector embeddings are a separate concern and are not required for the cockpit list views.
+
+**Impact:** Avoid confusing XML parsing with embedding pipelines when reading architecture notes.

@@ -3,48 +3,48 @@ title: "repo-planner — Roadmap"
 description: "Auto-compiled from vendor/repo-planner/.planning/ROADMAP.xml"
 generated: "true"
 source: "vendor/repo-planner/.planning/ROADMAP.xml"
-updated: "2026-04-07T20:03:13.733Z"
+updated: "2026-04-10T18:21:34.436Z"
 ---
 
 # Roadmap
 
 ## Phase 01 — Portfolio integration baseline
 
-**Status:** complete
-**Goal:** Monorepo alignment, CLI docs, embed boundaries, preview uploads, route-installer cleanup.
+**Status:** done
+**Goal:** Monorepo alignment, CLI docs, embed boundaries, preview uploads, route-installer cleanup for a host app that embeds RepoPlanner.
 
 ## Phase 02 — Package host contract
 
-**Status:** complete
-**Goal:** Cleaner package-level host contract for other apps to import.
+**Status:** done
+**Goal:** Cleaner package-level host contract so other Next.js or Vite apps can import repo-planner/host with stable props.
 **Depends:** 01
 
 ## Phase 03 — Live cockpit
 
-**Status:** complete
-**Goal:** Real cockpit body, Pack vs Live modes, shared bundle plumbing, dashboard chrome.
+**Status:** done
+**Goal:** Real cockpit body, Pack vs Live modes, shared bundle plumbing, dashboard chrome — one data contract for file tree and inspector.
 **Depends:** 02
 
 ## Phase 04 — Built-in planning-pack generation
 
-**Status:** complete
-**Goal:** Builtin-packs.json from package-owned gallery components.
+**Status:** done
+**Goal:** Ship builtin-packs.json (or equivalent) from repo-owned planning files so static sites can demo without a backend.
 **Depends:** 03
 
 ## Phase 05 — Workflow loop
 
-**Status:** complete
-**Goal:** Sprint-aware snapshot scoring, kickoff scaffolding, done gates, ownership guidance.
+**Status:** done
+**Goal:** Sprint-aware snapshot scoring, kickoff scaffolding, done gates, ownership guidance — same engine for CLI and UI.
 **Depends:** 04
 
 ## Phase 06 — Structured cockpit views
 
-**Status:** complete
-**Goal:** Form-based editing, badges, icons, autosave, immutable ids, host policy controls.
+**Status:** done
+**Goal:** Form-based editing where schema is known, badges, autosave in pack mode, immutable ids, host policy flags.
 **Depends:** 05
 
-## Phase 07 — GAD migration
+## Phase 07 — GAD migration and reference site
 
 **Status:** active
-**Goal:** Replace rp-* skills with gad: equivalents, init project under GAD framework, remove legacy session.md pattern.
+**Goal:** Skills and CLI narrative move toward Get Anything Done; this repository stays a file-format and UI reference; landing site documents parsing, packs, and read-only cockpit behavior.
 **Depends:** 06

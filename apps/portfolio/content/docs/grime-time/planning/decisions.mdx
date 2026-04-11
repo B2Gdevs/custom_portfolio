@@ -3,7 +3,7 @@ title: "grime-time — Decisions"
 description: "Auto-compiled from vendor/grime-time-site/.planning/DECISIONS.xml"
 generated: "true"
 source: "vendor/grime-time-site/.planning/DECISIONS.xml"
-updated: "2026-04-10T16:13:24.004Z"
+updated: "2026-04-10T18:21:34.460Z"
 ---
 
 # Decisions
@@ -584,11 +584,17 @@ Phase 19 should not write provider-delivered attachments straight into public-fa
 
 **Impact:** This keeps the first-party ingestion contract provider-agnostic, gives ops a durable audit trail before promotion, and keeps future replay or approval logic separate from the public media library. It also reduces schema and migration churn for the contract phase by storing attachment audit state as JSON until the later promotion workflow is wired.
 
-## D-devtools-001: Block iteration uses a dedicated lab (MCP App Studio + optional staff Next route)
+## D-devtools-004: Block iteration uses a dedicated lab (MCP App Studio + optional staff Next route)
 
-WIP Payload layout blocks should be developed in a first-party **block lab** rather than on live pages: a sibling **MCP App Studio** app under `tools/grime-block-lab` (see [MCP App Studio](https://www.assistant-ui.com/mcp-app-studio)) for host-accurate widget preview, mock tool responses, and export; optionally a **staff-only Next route** with fixture-driven renders for fast local iteration. Sharing code with `src/blocks` proceeds via thin preview wrappers or extracted presentational modules so server-only imports never enter the MCP export bundle.
+WIP Payload layout blocks should be developed in a first-party block lab rather than on live pages: a sibling MCP App Studio app under `tools/grime-block-lab` for host-accurate widget preview, seeded mock tool responses, and export; optionally a staff-only Next route with fixture-driven renders if the studio shell stops being enough. The current lab stays no-server and treats `toolInput` as the editable base fixture while `widgetState` holds tool-driven overlays so block review remains fast and reversible.
 
-**Impact:** Reduces risk of shipping half-built blocks through the CMS; gives a structured place to test tool/keyword triggers for block selection; keeps public sitemap and visitor experience clean.
+**Impact:** Reduces risk of shipping half-built blocks through the CMS; gives a structured place to test preview-control tools and media-heavy block states; keeps public sitemap and visitor experience clean; and creates a stable contract for sharing code with `src/blocks` through thin preview wrappers or extracted presentational modules instead of importing server-only paths into the MCP bundle.
+
+## D-devtools-005: Live studio data flows through a Grime Time dev route and lab proxy, not direct Payload boot inside the lab bundle
+
+The block lab should stay a focused MCP App Studio package, even when it needs live Payload-backed data. For local debugging, Grime Time exposes a dev-only internal block-lab route from the main app, and the studio package proxies that route through its own API before rendering a `Live` tab. This keeps the actual Payload config, auth assumptions, and Postgres adapter ownership inside the main app while still letting the lab refresh live page blocks on demand.
+
+**Impact:** Preserves the lab as a lightweight review shell, avoids duplicating Payload boot logic or database wiring inside `tools/grime-block-lab`, and keeps the live-data contract aligned with page-composer metadata such as page paths, block indices, block variants, and media-slot summaries. The lab can now help debug composer issues like `19-02` with real page blocks while remaining mock-first when the main app is not running.
 
 ## D-process-029: Declare intentional composer UI removals before autonomous regression passes
 

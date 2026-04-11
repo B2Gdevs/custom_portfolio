@@ -38,5 +38,5 @@
     <rule>Optional: register a unique id in STATE.xml before claiming tasks if you use CLI task-update.</rule>
   </agent-id-policy>
   <last-updated>2026-04-08T06:25:00.000Z</last-updated>
-  <sink-compiled sink="apps/portfolio/content/docs/global/planning/" at="2026-04-09T02:21:04.769Z" />
+  <sink-compiled sink="apps/portfolio/content/docs/global/planning/" at="2026-04-10T18:21:34.524Z" />
 </state>
